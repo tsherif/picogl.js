@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="nanoGL.js"></script>
+</head>
+<body>
+    <canvas id="gl-canvas"></canvas>
+    <script type="text/javascript">
+        var canvas = document.getElementById("gl-canvas");
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        var app = new NanoGL(canvas);
+
+        var vsSource =  "attribute vec4 position;" +
+                        "void main() {" +
+                        " gl_Position = position;" +
+                        "}";
+        var fsSource =  "precision highp float;" +
+                        "uniform vec3 color;" +
+                        "void main() {" +
+                        " gl_FragColor = vec4(color, 1.0);" +
+                        "}";
+        var program = app.createProgram(vsSource, fsSource);
+        program.enableAttribute("position");
+        program.enableUniform("color", NanoGL.UNIFORM_TYPES.VEC3);
+
+        var positions = app.createArrayBuffer(app.gl.FLOAT, 3, new Float32Array([
+            -0.5, -0.5, 0.0,
+             0.5, -0.5, 0.0,
+             0.0,  0.5, 0.0,
+        ]));
+
+        var drawCall = app.createDrawCall(program);
+        drawCall.setAttribute("position", positions);
+        drawCall.setUniform("color", new Float32Array([0.0, 1.0, 1.0]));
+
+        app.drawCalls.push(drawCall);
+
+        app.draw();
+    </script>
+</body>
+</html>
