@@ -1,11 +1,31 @@
-function NanoGL(canvas) {
+var NanoGL = {};
+
+(function() {
+    var canvas = document.createElement("canvas");
+    var gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+    NanoGL.FLOAT = gl.FLOAT;
+    NanoGL.INT = gl.INT;
+    NanoGL.SHORT = gl.SHORT;
+    NanoGL.BYTE = gl.BYTE;
+    NanoGL.UNSIGNED_INT = gl.UNSIGNED_INT;
+    NanoGL.UNSIGNED_SHORT = gl.UNSIGNED_SHORT;
+    NanoGL.UNSIGNED_BYTE = gl.UNSIGNED_BYTE;
+})();
+
+NanoGL.DUMMY_OBJECT = {};
+
+NanoGL.createApp = function(canvas) {
+    return new NanoGL.App(canvas);
+};
+
+NanoGL.App = function App(canvas) {
     "use strict";
 
     this.canvas = canvas;
     this.gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
     this.drawCalls = [];
 
-    this.currentProgram = null;
+    this.currentState = {};
 
     // TODO (Tarek): expose these via API
     this.gl.clearColor(0, 0, 0, 1.0);
@@ -15,32 +35,30 @@ function NanoGL(canvas) {
     this.gl.viewport(0, 0, canvas.width, canvas.height);
 }
 
-NanoGL.dummyObject = {};
-
-NanoGL.prototype.createProgram = function(vsSource, fsSource) {
-    return new Program(this.gl, vsSource, fsSource);
+NanoGL.App.prototype.createProgram = function(vsSource, fsSource) {
+    return new NanoGL.Program(this.gl, vsSource, fsSource);
 };
 
-NanoGL.prototype.createArrayBuffer = function(type, itemSize, data) {
-    return new ArrayBuffer(this.gl, type, itemSize, data);
+NanoGL.App.prototype.createArrayBuffer = function(type, itemSize, data) {
+    return new NanoGL.ArrayBuffer(this.gl, type, itemSize, data);
 };
 
-NanoGL.prototype.createTexture = function(image, options) {
-    return new Texture(this.gl, image, options);
+NanoGL.App.prototype.createTexture = function(image, options) {
+    return new NanoGL.Texture(this.gl, image, options);
 };
 
-NanoGL.prototype.createDrawCall = function(program) {
-    return new DrawCall(this.gl, program);
+NanoGL.App.prototype.createDrawCall = function(program) {
+    return new NanoGL.DrawCall(this.gl, program);
 };
 
-NanoGL.prototype.draw = function() {
+NanoGL.App.prototype.draw = function() {
     this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
     for (var i = 0, len = this.drawCalls.length; i < len; i++) {
-        this.drawCalls[i].draw(this);
+        this.drawCalls[i].draw(this.currentState);
     }
 };
 
-function DrawCall(gl, program) {
+NanoGL.DrawCall = function DrawCall(gl, program) {
     this.gl = gl;
     this.program = program || null;
     this.uniforms = {};
@@ -48,28 +66,28 @@ function DrawCall(gl, program) {
     this.textures = {};
 }
 
-DrawCall.prototype.setProgram = function(program) {
+NanoGL.DrawCall.prototype.setProgram = function(program) {
     this.program = program;
     this.uniforms = {};
     this.attributes = {};
     this.textures = {};
 };
 
-DrawCall.prototype.setUniform = function(name, value) {
+NanoGL.DrawCall.prototype.setUniform = function(name, value) {
     this.uniforms[name] = value;
 };
 
-DrawCall.prototype.setAttribute = function(name, buffer) {
+NanoGL.DrawCall.prototype.setAttribute = function(name, buffer) {
     this.attributes[name] = buffer;
 };
 
-DrawCall.prototype.setTexture = function(name, unit, texture) {
+NanoGL.DrawCall.prototype.setTexture = function(name, unit, texture) {
     var textureUnit = this.gl["TEXTURE" + unit];
     this.uniforms[name] = unit;
     this.textures[textureUnit] = texture;
 };
 
-DrawCall.prototype.draw = function(app) {
+NanoGL.DrawCall.prototype.draw = function(state) {
     var uniforms = this.uniforms;
     var attributes = this.attributes;
     var textures = this.textures;
@@ -96,7 +114,7 @@ DrawCall.prototype.draw = function(app) {
     this.gl.drawArrays(this.gl.TRIANGLES, 0, numItems);
 };
 
-function Program(gl, vsSource, fsSource) {
+NanoGL.Program = function Program(gl, vsSource, fsSource) {
     var vshader = gl.createShader(gl.VERTEX_SHADER);
     gl.shaderSource(vshader, vsSource);
     gl.compileShader(vshader);
@@ -126,60 +144,60 @@ function Program(gl, vsSource, fsSource) {
     this.attributes = {};
 }
 
-Program.prototype.bind = function() {
+NanoGL.Program.prototype.bind = function() {
     this.gl.useProgram(this.program);
 };
 
-Program.prototype.enableUniform = function(name, Type) {
+NanoGL.Program.prototype.enableUniform = function(name, Type) {
     var handle = this.gl.getUniformLocation(this.program, name);
     this.uniforms[name] = new Type(this.gl, handle);
 };
 
-Program.prototype.setUniform = function(name, value) {
+NanoGL.Program.prototype.setUniform = function(name, value) {
     this.uniforms[name].set(value);
 };
 
-Program.prototype.enableAttribute = function(name) {
+NanoGL.Program.prototype.enableAttribute = function(name) {
     this.attributes[name] = this.gl.getAttribLocation(this.program, name);
 };
 
-Program.prototype.bindAttribute = function(name, buffer) {
+NanoGL.Program.prototype.bindAttribute = function(name, buffer) {
     buffer.bind(this.attributes[name]);
 };
 
-function FloatUniform(gl, handle) {
+NanoGL.FloatUniform = function FloatUniform(gl, handle) {
     this.gl = gl;
     this.handle = handle;
     this.value = 0;
 }
 
-FloatUniform.prototype.set = function(value) {
+NanoGL.FloatUniform.prototype.set = function(value) {
     if (this.value !== value) {
         this.gl.uniform1f(this.handle, value);
         this.value = value;
     }
 }
 
-function IntUniform(gl, handle) {
+NanoGL.IntUniform = function IntUniform(gl, handle) {
     this.gl = gl;
     this.handle = handle;
     this.value = 0;
 }
 
-IntUniform.prototype.set = function(value) {
+NanoGL.IntUniform.prototype.set = function(value) {
     if (this.value !== value) {
         this.gl.uniform1i(this.handle, value);
         this.value = value;
     }
 }
 
-function Vec3Uniform(gl, handle) {
+NanoGL.Vec3Uniform = function Vec3Uniform(gl, handle) {
     this.gl = gl;
     this.handle = handle;
     this.value = new Float32Array(3);
 }
 
-Vec3Uniform.prototype.set = function(value) {
+NanoGL.Vec3Uniform.prototype.set = function(value) {
     if (this.value[0] !== value[0] ||
         this.value[1] !== value[1] ||
         this.value[2] !== value[2]) {
@@ -188,13 +206,13 @@ Vec3Uniform.prototype.set = function(value) {
     }
 }
 
-function Mat4Uniform(gl, handle) {
+NanoGL.Mat4Uniform = function Mat4Uniform(gl, handle) {
     this.gl = gl;
     this.handle = handle;
     this.value = new Float32Array(16);
 }
 
-Mat4Uniform.prototype.set = function(value) {
+NanoGL.Mat4Uniform.prototype.set = function(value) {
     if (this.value[0] !== value[0] ||
         this.value[1] !== value[1] ||
         this.value[2] !== value[2] ||
@@ -216,14 +234,12 @@ Mat4Uniform.prototype.set = function(value) {
     }
 }
 
-NanoGL.UNIFORM_TYPES = {
-    VEC3: Vec3Uniform,
-    MAT4: Mat4Uniform,
-    INT: IntUniform,
-    FLOAT: FloatUniform
-};
+NanoGL.VEC3_UNIFORM = NanoGL.Vec3Uniform;
+NanoGL.MAT4_UNIFORM =  NanoGL.Mat4Uniform;
+NanoGL.INT_UNIFORM =  NanoGL.IntUniform;
+NanoGL.FLOAT_UNIFORM =  NanoGL.FloatUniform;
 
-function ArrayBuffer(gl, type, itemSize, data) {
+NanoGL.ArrayBuffer = function ArrayBuffer(gl, type, itemSize, data) {
     this.gl = gl;
     this.buffer = gl.createBuffer();
     this.type = type;
@@ -235,17 +251,17 @@ function ArrayBuffer(gl, type, itemSize, data) {
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
 }
 
-ArrayBuffer.prototype.bind = function(attribute) {
+NanoGL.ArrayBuffer.prototype.bind = function(attribute) {
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffer);
     this.gl.vertexAttribPointer(attribute, this.itemSize, this.type, false, 0, 0);
     this.gl.enableVertexAttribArray(attribute);
 };
 
-function Texture(gl, image, options) {
+NanoGL.Texture = function Texture(gl, image, options) {
     this.gl = gl;
     this.texture = gl.createTexture();
 
-    options = options || NanoGL.dummyObject;
+    options = options || NanoGL.DUMMY_OBJECT;
 
     var flipY = options.flipY !== undefined ? options.flipY : true;
     var minFilter = options.minFilter || gl.LINEAR_MIPMAP_NEAREST;
@@ -275,7 +291,7 @@ function Texture(gl, image, options) {
 
 }
 
-Texture.prototype.bind = function(unit) {
+NanoGL.Texture.prototype.bind = function(unit) {
     this.gl.activeTexture(unit);
     this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
 }

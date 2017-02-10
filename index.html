@@ -10,7 +10,7 @@
         var canvas = document.getElementById("gl-canvas");
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
-        var app = new NanoGL(canvas);
+        var app = NanoGL.createApp(canvas);
 
         var vsSource =  "attribute vec4 position;" +
                         "attribute vec2 uv;" +
@@ -36,21 +36,21 @@
         var program = app.createProgram(vsSource, fsSource);
         program.enableAttribute("position");
         program.enableAttribute("uv");
-        program.enableUniform("offset", NanoGL.UNIFORM_TYPES.VEC3);
-        program.enableUniform("tex", NanoGL.UNIFORM_TYPES.INT);
+        program.enableUniform("offset", NanoGL.VEC3_UNIFORM);
+        program.enableUniform("tex", NanoGL.INT_UNIFORM);
 
         var program2 = app.createProgram(vsSource, fsSource2);
         program2.enableAttribute("position");
-        program2.enableUniform("offset", NanoGL.UNIFORM_TYPES.VEC3);
-        program2.enableUniform("color", NanoGL.UNIFORM_TYPES.VEC3);
+        program2.enableUniform("offset", NanoGL.VEC3_UNIFORM);
+        program2.enableUniform("color", NanoGL.VEC3_UNIFORM);
 
-        var positions = app.createArrayBuffer(app.gl.FLOAT, 3, new Float32Array([
+        var positions = app.createArrayBuffer(NanoGL.FLOAT, 3, new Float32Array([
             -0.3, 0.1, 0.0,
              0.3, 0.1, 0.0,
              0.0, 0.5, 0.0,
         ]));
 
-        var uv = app.createArrayBuffer(app.gl.FLOAT, 2, new Float32Array([
+        var uv = app.createArrayBuffer(NanoGL.FLOAT, 2, new Float32Array([
             0.0, 0.0,
             1.0, 0.0,
             0.5, 1.0,
