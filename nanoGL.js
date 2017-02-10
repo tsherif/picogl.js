@@ -5,6 +5,8 @@ function NanoGL(canvas) {
     this.gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
     this.drawCalls = [];
 
+    this.currentProgram = null;
+
     // TODO (Tarek): expose these via API
     this.gl.clearColor(0, 0, 0, 1.0);
     this.gl.enable(this.gl.CULL_FACE);
@@ -12,6 +14,8 @@ function NanoGL(canvas) {
     this.gl.depthFunc(this.gl.LEQUAL);
     this.gl.viewport(0, 0, canvas.width, canvas.height);
 }
+
+NanoGL.dummyObject = {};
 
 NanoGL.prototype.createProgram = function(vsSource, fsSource) {
     return new Program(this.gl, vsSource, fsSource);
@@ -21,6 +25,10 @@ NanoGL.prototype.createArrayBuffer = function(type, itemSize, data) {
     return new ArrayBuffer(this.gl, type, itemSize, data);
 };
 
+NanoGL.prototype.createTexture = function(image, options) {
+    return new Texture(this.gl, image, options);
+};
+
 NanoGL.prototype.createDrawCall = function(program) {
     return new DrawCall(this.gl, program);
 };
@@ -28,54 +36,64 @@ NanoGL.prototype.createDrawCall = function(program) {
 NanoGL.prototype.draw = function() {
     this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
     for (var i = 0, len = this.drawCalls.length; i < len; i++) {
-        this.drawCalls[i].draw();
+        this.drawCalls[i].draw(this);
     }
 };
 
 function DrawCall(gl, program) {
     this.gl = gl;
     this.program = program || null;
-    this.uniformNames = [];
-    this.uniformValues = [];
-    this.attributeNames = [];
-    this.attributeBuffers = [];
+    this.uniforms = {};
+    this.attributes = {};
+    this.textures = {};
 }
 
 DrawCall.prototype.setProgram = function(program) {
     this.program = program;
-    this.uniformNames.length = 0;
-    this.uniformValues.length = 0;
-    this.attributeNames.length = 0;
-    this.attributeBuffers.length = 0;
+    this.uniforms = {};
+    this.attributes = {};
+    this.textures = {};
 };
 
 DrawCall.prototype.setUniform = function(name, value) {
-    this.uniformNames.push(name);
-    this.uniformValues.push(value);
+    this.uniforms[name] = value;
 };
 
 DrawCall.prototype.setAttribute = function(name, buffer) {
-    this.attributeNames.push(name);
-    this.attributeBuffers.push(buffer);
+    this.attributes[name] = buffer;
 };
 
-DrawCall.prototype.draw = function() {
-    var uNames = this.uniformNames;
-    var uValues = this.uniformValues;
-    var aNames = this.attributeNames;
-    var aBuffers = this.attributeBuffers;
+DrawCall.prototype.setTexture = function(name, unit, texture) {
+    var textureUnit = this.gl["TEXTURE" + unit];
+    this.uniforms[name] = unit;
+    this.textures[textureUnit] = texture;
+};
 
-    this.program.bind();
+DrawCall.prototype.draw = function(app) {
+    var uniforms = this.uniforms;
+    var attributes = this.attributes;
+    var textures = this.textures;
+    var numItems = 0;
 
-    for (var i = 0, len = uNames.length; i < len; i++) {
-        this.program.setUniform(uNames[i], uValues[i]);
+    if (app.currentProgram !== this.program) {
+        this.program.bind();
+        app.currentProgram = this.program;
     }
 
-    for (var i = 0, len = aNames.length; i < len; i++) {
-        this.program.bindAttribute(aNames[i], aBuffers[i]);
+    for (var uName in uniforms) {
+        this.program.setUniform(uName, uniforms[uName]);
     }
 
-    this.gl.drawArrays(this.gl.TRIANGLES, 0, aBuffers[0].numItems);
+    for (var aName in attributes) {
+        this.program.bindAttribute(aName, attributes[aName]);
+        numItems = attributes[aName].numItems;
+    }
+
+    for (var unit in textures) {
+        textures[unit].bind(unit);
+    }
+
+    this.gl.drawArrays(this.gl.TRIANGLES, 0, numItems);
 };
 
 function Program(gl, vsSource, fsSource) {
@@ -129,6 +147,32 @@ Program.prototype.bindAttribute = function(name, buffer) {
     buffer.bind(this.attributes[name]);
 };
 
+function FloatUniform(gl, handle) {
+    this.gl = gl;
+    this.handle = handle;
+    this.value = 0;
+}
+
+FloatUniform.prototype.set = function(value) {
+    if (this.value !== value) {
+        this.gl.uniform1f(this.handle, value);
+        this.value = value;
+    }
+}
+
+function IntUniform(gl, handle) {
+    this.gl = gl;
+    this.handle = handle;
+    this.value = 0;
+}
+
+IntUniform.prototype.set = function(value) {
+    if (this.value !== value) {
+        this.gl.uniform1i(this.handle, value);
+        this.value = value;
+    }
+}
+
 function Vec3Uniform(gl, handle) {
     this.gl = gl;
     this.handle = handle;
@@ -174,15 +218,18 @@ Mat4Uniform.prototype.set = function(value) {
 
 NanoGL.UNIFORM_TYPES = {
     VEC3: Vec3Uniform,
-    MAT4: Mat4Uniform
+    MAT4: Mat4Uniform,
+    INT: IntUniform,
+    FLOAT: FloatUniform
 };
 
 function ArrayBuffer(gl, type, itemSize, data) {
     this.gl = gl;
+    this.buffer = gl.createBuffer();
     this.type = type;
     this.itemSize = itemSize;
     this.numItems = data.length / itemSize;
-    this.buffer = gl.createBuffer();
+
     gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
     gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
@@ -193,3 +240,42 @@ ArrayBuffer.prototype.bind = function(attribute) {
     this.gl.vertexAttribPointer(attribute, this.itemSize, this.type, false, 0, 0);
     this.gl.enableVertexAttribArray(attribute);
 };
+
+function Texture(gl, image, options) {
+    this.gl = gl;
+    this.texture = gl.createTexture();
+
+    options = options || NanoGL.dummyObject;
+
+    var flipY = options.flipY !== undefined ? options.flipY : true;
+    var minFilter = options.minFilter || gl.LINEAR_MIPMAP_NEAREST;
+    var magFilter = options.magFilter || gl.LINEAR;
+    var wrapS = options.wrapS || gl.REPEAT;
+    var wrapT = options.wrapT || gl.REPEAT;
+    var generateMipmaps = options.generateMipmaps !== false && 
+                        (minFilter === gl.LINEAR_MIPMAP_NEAREST || minFilter === gl.LINEAR_MIPMAP_LINEAR);
+
+    var internalFormat = options.internalFormat || gl.RGBA;
+    var type = options.type || gl.UNSIGNED_BYTE;
+
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, this.texture);
+    
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, magFilter);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, minFilter);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, wrapS);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, wrapT);
+
+    gl.texImage2D(gl.TEXTURE_2D, 0, internalFormat, internalFormat, type, image);
+
+    if (generateMipmaps) {
+        gl.generateMipmap(gl.TEXTURE_2D);
+    }
+
+}
+
+Texture.prototype.bind = function(unit) {
+    this.gl.activeTexture(unit);
+    this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
+}

@@ -13,31 +13,96 @@
         var app = new NanoGL(canvas);
 
         var vsSource =  "attribute vec4 position;" +
+                        "attribute vec2 uv;" +
+                        "uniform vec3 offset;" +
+                        "varying vec2 vUV;" +
                         "void main() {" +
+                        " vUV = uv;" +
                         " gl_Position = position;" +
+                        " gl_Position.xyz += offset;" +
                         "}";
         var fsSource =  "precision highp float;" +
+                        "uniform sampler2D tex;" +
+                        "varying vec2 vUV;" +
+                        "void main() {" +
+                        " gl_FragColor = vec4(texture2D(tex, vUV).rgb, 1.0);" +
+                        "}";
+
+        var fsSource2 =  "precision highp float;" +
                         "uniform vec3 color;" +
                         "void main() {" +
                         " gl_FragColor = vec4(color, 1.0);" +
                         "}";
         var program = app.createProgram(vsSource, fsSource);
         program.enableAttribute("position");
-        program.enableUniform("color", NanoGL.UNIFORM_TYPES.VEC3);
+        program.enableAttribute("uv");
+        program.enableUniform("offset", NanoGL.UNIFORM_TYPES.VEC3);
+        program.enableUniform("tex", NanoGL.UNIFORM_TYPES.INT);
+
+        var program2 = app.createProgram(vsSource, fsSource2);
+        program2.enableAttribute("position");
+        program2.enableUniform("offset", NanoGL.UNIFORM_TYPES.VEC3);
+        program2.enableUniform("color", NanoGL.UNIFORM_TYPES.VEC3);
 
         var positions = app.createArrayBuffer(app.gl.FLOAT, 3, new Float32Array([
-            -0.5, -0.5, 0.0,
-             0.5, -0.5, 0.0,
-             0.0,  0.5, 0.0,
+            -0.3, 0.1, 0.0,
+             0.3, 0.1, 0.0,
+             0.0, 0.5, 0.0,
         ]));
 
-        var drawCall = app.createDrawCall(program);
-        drawCall.setAttribute("position", positions);
-        drawCall.setUniform("color", new Float32Array([0.0, 1.0, 1.0]));
+        var uv = app.createArrayBuffer(app.gl.FLOAT, 2, new Float32Array([
+            0.0, 0.0,
+            1.0, 0.0,
+            0.5, 1.0,
+        ]));
 
-        app.drawCalls.push(drawCall);
+        var image = new Image();
 
-        app.draw();
+        image.onload = function() {
+            var texture = app.createTexture(image);
+            var color = new Float32Array([1.0, 0.0, 1.0]);
+
+            var offset = new Float32Array([0.0, 0.0, 0.0]);
+            var offset2 = new Float32Array([0.0, -0.5, 0.0])
+            var inc = 0.01;
+            var inc2 = -0.01;
+
+            var drawCall = app.createDrawCall(program);
+            drawCall.setAttribute("position", positions);
+            drawCall.setAttribute("uv", uv);
+            drawCall.setTexture("tex", 0, texture);
+
+            app.drawCalls.push(drawCall);
+
+            var drawCall2 = app.createDrawCall(program2);
+            drawCall2.setAttribute("position", positions);
+            drawCall2.setUniform("color", color);
+
+            app.drawCalls.push(drawCall2);
+
+            function draw() {
+                drawCall.setUniform("offset", offset);
+                drawCall2.setUniform("offset", offset2);              
+                app.draw();
+
+                offset[0] += inc;
+                if (offset[0] > 0.5 || offset[0] < -0.5) {
+                    inc *= -1;
+                }
+
+                offset2[0] += inc2;
+                if (offset2[0] > 0.5 || offset2[0] < -0.5) {
+                    inc2 *= -1;
+                }
+
+                requestAnimationFrame(draw);
+            }
+
+            requestAnimationFrame(draw);
+            
+        }
+
+        image.src = "khronos_webgl.png";
     </script>
 </body>
 </html>
