@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="gl-matrix.js"></script>
+    <script src="nanoGL.js"></script>
+</head>
+<body>
+    <canvas id="gl-canvas"></canvas>
+    <script id="shadow-vs" type="x-vertex-shader">
+      attribute vec4 aPosition;
+      uniform mat4 uMVP;
+      void main() {
+        gl_Position = uMVP * aPosition;
+      }
+    </script>
+    <script id="shadow-fs" type="x-fragment-shader">
+        precision highp float;
+
+        void main() {
+            const vec4 bitShift = vec4(1.0, 256.0, 256.0 * 256.0, 256.0 * 256.0 * 256.0);
+            const vec4 bitMask = vec4(1.0 / 256.0, 1.0 / 256.0, 1.0 / 256.0,  0.0);
+            vec4 rgbaDepth = fract(gl_FragCoord.z * bitShift);
+            rgbaDepth -= rgbaDepth.gbaa * bitMask;
+
+            gl_FragColor = rgbaDepth;
+        }
+    </script> 
+    <script id="main-vs" type="x-vertex-shader">
+        attribute vec4 aPosition;
+        attribute vec3 aNormal;
+        attribute vec2 aTexCoord;
+        uniform mat4 uModelMatrix;
+        uniform mat4 uMVP;
+        uniform mat4 uMVPFromLight;
+        varying vec3 vPosition;
+        varying vec3 vNormal;
+        varying vec2 vTexCoord;
+        varying vec4 vPositionFromLight;
+        varying vec3 vModelPosition;
+
+        void main() {
+            gl_Position = uMVP * aPosition;
+
+            vModelPosition = vec3(aPosition);
+            vPosition = vec3(uModelMatrix * aPosition);
+            vNormal = vec3(uModelMatrix * vec4(aNormal, 0.0));
+            vTexCoord = aTexCoord;
+
+            vPositionFromLight = uMVPFromLight * aPosition;
+        }
+    </script>
+    <script id="main-fs" type="x-fragment-shader">
+        precision highp float;
+        uniform vec3 uLightPosition;
+        uniform vec3 uEyePosition;
+        uniform sampler2D uShadowMap;
+        uniform sampler2D uTextureMap;
+
+        varying vec3 vPosition;
+        varying vec3 vNormal;
+        varying vec2 vTexCoord;
+        varying vec4 vPositionFromLight;
+        varying vec3 vModelPosition;
+
+        float unpackDepth(const in vec4 rgbaDepth) {
+            const vec4 bitShift = vec4(1.0, 1.0 / 256.0, 1.0 / (256.0 * 256.0), 1.0 / (256.0 * 256.0 * 256.0));
+
+            return dot(rgbaDepth, bitShift);
+        }
+
+        void main() {
+            vec3 shadowCoord = (vPositionFromLight.xyz / vPositionFromLight.w) / 2.0 + 0.5;
+            vec4 rgbaDepth = texture2D(uShadowMap, shadowCoord.xy);
+            float depth = unpackDepth(rgbaDepth);
+
+            vec4 baseColor = texture2D(uTextureMap, vTexCoord);
+
+            vec3 normal = normalize(vNormal);
+            vec3 eyeDirection = normalize(uEyePosition - vPosition);
+            vec3 lightDirection = normalize(uLightPosition - vPosition);
+            vec3 reflectionDirection = reflect(-lightDirection, normal);
+            float nDotL = max(dot(lightDirection, normal), 0.0);
+            float diffuse = nDotL;
+            float ambient = 0.1;
+            float specular = pow(max(dot(reflectionDirection, eyeDirection), 0.0), 20.0);
+            float visibility = shadowCoord.z > depth + 0.02 ? 1.0 - 0.4 * nDotL : 1.0;
+
+            gl_FragColor = vec4(visibility * (ambient + diffuse + specular) * baseColor.rgb, baseColor.a);
+        }
+    </script> 
+    <script type="text/javascript">
+        var canvas = document.getElementById("gl-canvas");
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        var app = NanoGL.createApp(canvas);
+        app.setClearColor(0.0, 0.0, 0.0, 1.0);
+
+        var vsSource =  document.getElementById("main-vs").text;
+        var fsSource =  document.getElementById("main-fs").text;
+
+        var mainProgram = app.createProgram(vsSource, fsSource);
+        mainProgram.enableAttribute("aPosition");
+        mainProgram.enableAttribute("aNormal");
+        mainProgram.enableAttribute("aTexCoord");
+        mainProgram.enableUniform("uMVP", NanoGL.MAT4_UNIFORM);
+        mainProgram.enableUniform("uMVPFromLight", NanoGL.MAT4_UNIFORM);
+        mainProgram.enableUniform("uModelMatrix", NanoGL.MAT4_UNIFORM);
+        mainProgram.enableUniform("uTextureMap", NanoGL.INT_UNIFORM);
+        mainProgram.enableUniform("uShadowMap", NanoGL.INT_UNIFORM);
+        mainProgram.enableUniform("uEyePosition", NanoGL.VEC3_UNIFORM);
+        mainProgram.enableUniform("uLightPosition", NanoGL.VEC3_UNIFORM);
+
+        var shadowVsSource =  document.getElementById("shadow-vs").text;
+        var shadowFsSource =  document.getElementById("shadow-fs").text;
+
+        var shadowProgram = app.createProgram(shadowVsSource, shadowFsSource);
+        shadowProgram.enableAttribute("aPosition");
+        shadowProgram.enableUniform("uMVP", NanoGL.MAT4_UNIFORM);
+
+        var shadowBuffer = app.createFramebuffer(canvas.width, canvas.height);
+
+        var box = createBox({dimensions: [1.0, 1.0, 1.0]})
+
+        var positions = app.createArrayBuffer(NanoGL.FLOAT, 3, new Float32Array(box.positions));
+        var uv = app.createArrayBuffer(NanoGL.FLOAT, 2, new Float32Array(box.texture_coords));
+        var normals = app.createArrayBuffer(NanoGL.FLOAT, 3, new Float32Array(box.normals));
+
+        // Camera stuff
+        var projMatrix = mat4.create();
+        mat4.perspective(projMatrix, Math.PI / 2, canvas.width / canvas.height, 0.1, 2.0);
+
+        var viewMatrix = mat4.create();
+        var eyePosition = vec3.fromValues(1, 1, 1);
+        mat4.lookAt(viewMatrix, eyePosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
+
+        var viewProjMatrix = mat4.create();
+        mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
+
+        // Light
+        var lightPosition = vec3.fromValues(1, 1, 0.5);        
+        var lightViewMatrix = mat4.create();
+        var lightViewProjMatrix = mat4.create();
+        mat4.lookAt(lightViewMatrix, lightPosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
+        mat4.multiply(lightViewProjMatrix, projMatrix, lightViewMatrix);
+
+        // Object 1 xform
+        var mvpMatrix = mat4.create();
+        var lightMvpMatrix = mat4.create();
+        var modelMatrix = mat4.create();
+        var rotateXMatrix = mat4.create();
+        var rotateYMatrix = mat4.create();
+
+        // Object 2 xform
+        var mvpMatrix2 = mat4.create();
+        var lightMvpMatrix2 = mat4.create();
+        var modelMatrix2 = mat4.create();
+        var scaleMatrix = mat4.create();
+        var translateMatrix = mat4.create();
+
+        mat4.fromScaling(scaleMatrix, vec3.fromValues(0.1, 0.1, 0.1));
+        mat4.fromTranslation(translateMatrix, vec3.fromValues(0.8, 0.8, 0.4));
+
+        var angleX = 0;
+        var angleY = 0;
+
+        var image = new Image();
+
+        image.onload = function() {
+            var texture = app.createTexture(image);
+
+            var drawCall = app.createDrawCall(mainProgram);
+            drawCall.setAttribute("aPosition", positions);
+            drawCall.setAttribute("aTexCoord", uv);
+            drawCall.setAttribute("aNormal", normals);
+
+            drawCall.setTexture("uTextureMap", 0, texture);
+            drawCall.setTexture("uShadowMap", 1, shadowBuffer.texture);
+            drawCall.setUniform("uLightPosition", lightPosition);
+            drawCall.setUniform("uEyePosition", eyePosition);
+
+            var drawCall2 = app.createDrawCall(mainProgram);
+            drawCall2.setAttribute("aPosition", positions);
+            drawCall2.setAttribute("aTexCoord", uv);
+            drawCall2.setAttribute("aNormal", normals);
+
+            drawCall2.setTexture("uTextureMap", 0, texture);
+            drawCall2.setTexture("uShadowMap", 1, shadowBuffer.texture);
+            drawCall2.setUniform("uLightPosition", lightPosition);
+            drawCall2.setUniform("uEyePosition", eyePosition);
+
+            var mainDrawCalls = [drawCall, drawCall2];
+
+            var shadowDrawCall = app.createDrawCall(shadowProgram);
+            shadowDrawCall.setAttribute("aPosition", positions);
+
+            var shadowDrawCall2 = app.createDrawCall(shadowProgram);
+            shadowDrawCall2.setAttribute("aPosition", positions);
+
+            var shadowDrawCalls = [shadowDrawCall, shadowDrawCall2];
+
+            function draw() {
+                angleX += 0.01;
+                angleY += 0.02;
+
+                mat4.fromXRotation(rotateXMatrix, angleX);
+                mat4.fromYRotation(rotateYMatrix, angleY);
+                mat4.multiply(modelMatrix, rotateXMatrix, rotateYMatrix);
+                mat4.multiply(mvpMatrix, viewProjMatrix, modelMatrix);
+                mat4.multiply(lightMvpMatrix, lightViewProjMatrix, modelMatrix);
+
+                
+                mat4.multiply(modelMatrix2, scaleMatrix, modelMatrix);
+                mat4.multiply(modelMatrix2, translateMatrix, modelMatrix2);
+                mat4.multiply(mvpMatrix2, viewProjMatrix, modelMatrix2);
+                mat4.multiply(lightMvpMatrix2, lightViewProjMatrix, modelMatrix2);
+
+                shadowBuffer.bind();
+                
+                app.drawCalls = shadowDrawCalls;        
+                shadowDrawCall.setUniform("uMVP", lightMvpMatrix);
+                shadowDrawCall2.setUniform("uMVP", lightMvpMatrix2);
+                app.draw();
+                
+                shadowBuffer.unbind();
+
+                
+                app.drawCalls = mainDrawCalls;
+                drawCall.setUniform("uMVP", mvpMatrix);
+                drawCall.setUniform("uModelMatrix", modelMatrix);
+                drawCall.setUniform("uMVPFromLight", lightMvpMatrix);
+
+
+                drawCall2.setUniform("uMVP", mvpMatrix2);
+                drawCall2.setUniform("uModelMatrix", modelMatrix2);
+                drawCall2.setUniform("uMVPFromLight", lightMvpMatrix2);
+                app.draw();
+
+                requestAnimationFrame(draw);
+            }
+
+            requestAnimationFrame(draw);
+            
+        }
+
+        image.src = "khronos_webgl.png";
+
+        function createBox(options) {
+              options = options || {};
+
+              var dimensions = options.dimensions || [1, 1, 1];
+              var position = options.position || [-dimensions[0] / 2, -dimensions[1] / 2, -dimensions[2] / 2];
+              var x = position[0];
+              var y = position[1];
+              var z = position[2];
+              var width = dimensions[0];
+              var height = dimensions[1];
+              var depth = dimensions[2];
+
+              var fbl = {x: x,         y: y,          z: z + depth};
+              var fbr = {x: x + width, y: y,          z: z + depth};
+              var ftl = {x: x,         y: y + height, z: z + depth};
+              var ftr = {x: x + width, y: y + height, z: z + depth};
+              var bbl = {x: x,         y: y,          z: z };
+              var bbr = {x: x + width, y: y,          z: z };
+              var btl = {x: x,         y: y + height, z: z };
+              var btr = {x: x + width, y: y + height, z: z };
+
+              var positions = new Float32Array([
+                //front
+                fbl.x, fbl.y, fbl.z,
+                fbr.x, fbr.y, fbr.z,
+                ftl.x, ftl.y, ftl.z,
+                ftl.x, ftl.y, ftl.z,
+                fbr.x, fbr.y, fbr.z,
+                ftr.x, ftr.y, ftr.z,
+
+                //right
+                fbr.x, fbr.y, fbr.z,
+                bbr.x, bbr.y, bbr.z,
+                ftr.x, ftr.y, ftr.z,
+                ftr.x, ftr.y, ftr.z,
+                bbr.x, bbr.y, bbr.z,
+                btr.x, btr.y, btr.z,
+
+                //back
+                fbr.x, bbr.y, bbr.z,
+                bbl.x, bbl.y, bbl.z,
+                btr.x, btr.y, btr.z,
+                btr.x, btr.y, btr.z,
+                bbl.x, bbl.y, bbl.z,
+                btl.x, btl.y, btl.z,
+
+                //left
+                bbl.x, bbl.y, bbl.z,
+                fbl.x, fbl.y, fbl.z,
+                btl.x, btl.y, btl.z,
+                btl.x, btl.y, btl.z,
+                fbl.x, fbl.y, fbl.z,
+                ftl.x, ftl.y, ftl.z,
+
+                //top
+                ftl.x, ftl.y, ftl.z,
+                ftr.x, ftr.y, ftr.z,
+                btl.x, btl.y, btl.z,
+                btl.x, btl.y, btl.z,
+                ftr.x, ftr.y, ftr.z,
+                btr.x, btr.y, btr.z,
+
+                //bottom
+                bbl.x, bbl.y, bbl.z,
+                bbr.x, bbr.y, bbr.z,
+                fbl.x, fbl.y, fbl.z,
+                fbl.x, fbl.y, fbl.z,
+                bbr.x, bbr.y, bbr.z,
+                fbr.x, fbr.y, fbr.z,
+              ]);
+
+              var texture_coords = new Float32Array([
+                //front
+                0, 0,
+                1, 0,
+                0, 1,
+                0, 1,
+                1, 0,
+                1, 1,
+
+                //right
+                0, 0,
+                1, 0,
+                0, 1,
+                0, 1,
+                1, 0,
+                1, 1,
+
+                //back
+                0, 0,
+                1, 0,
+                0, 1,
+                0, 1,
+                1, 0,
+                1, 1,
+
+                //left
+                0, 0,
+                1, 0,
+                0, 1,
+                0, 1,
+                1, 0,
+                1, 1,
+
+                //top
+                0, 0,
+                1, 0,
+                0, 1,
+                0, 1,
+                1, 0,
+                1, 1,
+
+                //bottom
+                0, 0,
+                1, 0,
+                0, 1,
+                0, 1,
+                1, 0,
+                1, 1
+              ]);
+
+              var normals = new Float32Array(positions.length);
+              var i, count;
+              var ni;
+
+              for (i = 0, count = positions.length / 3; i < count; i++) {
+                ni = i * 3;        
+
+                normals[ni] = parseInt(i / 6, 10) === 1 ? 1 : 
+                             parseInt(i / 6, 10) === 3 ? -1 : 0; 
+
+                normals[ni+1] = parseInt(i / 6, 10) === 4 ? 1 : 
+                               parseInt(i / 6, 10) === 5 ? -1 : 0; 
+
+                normals[ni+2] = parseInt(i / 6, 10) === 0 ? 1 : 
+                               parseInt(i / 6, 10) === 2 ? -1 : 0; 
+
+              }
+
+              return {
+                positions: positions,
+                normals: normals,
+                texture_coords: texture_coords
+              };
+
+            }
+    </script>
+</body>
+</html>

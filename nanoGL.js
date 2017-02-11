@@ -25,7 +25,7 @@ NanoGL.App = function App(canvas) {
     this.gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
     this.drawCalls = [];
 
-    this.currentState = {};
+    this.program = null;
 
     // TODO (Tarek): expose these via API
     this.gl.enable(this.gl.CULL_FACE);
@@ -334,6 +334,10 @@ NanoGL.Framebuffer = function Framebuffer(gl, width, height) {
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer);
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.texture.texture, 0);
     gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthBuffer);
+
+    if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE) {
+        console.log("Frame buffer error: " + gl.checkFramebufferStatus(gl.FRAMEBUFFER).toString());
+    }
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 }
