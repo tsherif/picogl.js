@@ -66,6 +66,8 @@
         program.enableUniform("eyePosition", NanoGL.VEC3_UNIFORM);
         program.enableUniform("lightPosition", NanoGL.VEC3_UNIFORM);
 
+        var rttBuffer = app.createFramebuffer(canvas.width, canvas.height);
+
         var box = createBox({dimensions: [1.0, 1.0, 1.0]})
 
         var positions = app.createArrayBuffer(NanoGL.FLOAT, 3, new Float32Array(box.positions));
@@ -105,8 +107,6 @@
             drawCall.setUniform("eyePosition", eyePosition);
             drawCall.setUniform("lightPosition", lightPosition);
 
-            drawCall.setTexture("tex", 0, texture);
-
             app.drawCalls.push(drawCall);
 
             function draw() {
@@ -119,6 +119,14 @@
 
                 drawCall.setUniform("uModel", modelMatrix);
 
+                rttBuffer.bind();
+                app.setClearColor(0.4, 0.4, 0.4, 1.0);
+                drawCall.setTexture("tex", 0, texture);
+                app.draw();
+
+                rttBuffer.unbind();
+                app.setClearColor(0.0, 0.0, 0.0, 1.0);
+                drawCall.setTexture("tex", 0, rttBuffer.texture);
                 app.draw();
 
                 requestAnimationFrame(draw);

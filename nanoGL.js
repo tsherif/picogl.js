@@ -28,12 +28,15 @@ NanoGL.App = function App(canvas) {
     this.currentState = {};
 
     // TODO (Tarek): expose these via API
-    this.gl.clearColor(0, 0, 0, 1.0);
     this.gl.enable(this.gl.CULL_FACE);
     this.gl.enable(this.gl.DEPTH_TEST);
     this.gl.depthFunc(this.gl.LEQUAL);
     this.gl.viewport(0, 0, canvas.width, canvas.height);
 }
+
+NanoGL.App.prototype.setClearColor = function(r, g, b, a) {
+    this.gl.clearColor(r, g, b, a);
+};
 
 NanoGL.App.prototype.createProgram = function(vsSource, fsSource) {
     return new NanoGL.Program(this.gl, vsSource, fsSource);
@@ -45,6 +48,10 @@ NanoGL.App.prototype.createArrayBuffer = function(type, itemSize, data) {
 
 NanoGL.App.prototype.createTexture = function(image, options) {
     return new NanoGL.Texture(this.gl, image, options);
+};
+
+NanoGL.App.prototype.createFramebuffer = function(width, height) {
+    return new NanoGL.Framebuffer(this.gl, width, height);
 };
 
 NanoGL.App.prototype.createDrawCall = function(program) {
@@ -263,6 +270,9 @@ NanoGL.Texture = function Texture(gl, image, options) {
 
     options = options || NanoGL.DUMMY_OBJECT;
 
+    var array = options.array || false;;
+    var width = options.width || 0;
+    var height = options.height || 0;
     var flipY = options.flipY !== undefined ? options.flipY : true;
     var minFilter = options.minFilter || gl.LINEAR_MIPMAP_NEAREST;
     var magFilter = options.magFilter || gl.LINEAR;
@@ -283,7 +293,11 @@ NanoGL.Texture = function Texture(gl, image, options) {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, wrapS);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, wrapT);
 
-    gl.texImage2D(gl.TEXTURE_2D, 0, internalFormat, internalFormat, type, image);
+    if (array) {
+        gl.texImage2D(gl.TEXTURE_2D, 0, internalFormat, width, height, 0, internalFormat, type, null);
+    } else {
+        gl.texImage2D(gl.TEXTURE_2D, 0, internalFormat, internalFormat, type, image);
+    }
 
     if (generateMipmaps) {
         gl.generateMipmap(gl.TEXTURE_2D);
@@ -295,3 +309,39 @@ NanoGL.Texture.prototype.bind = function(unit) {
     this.gl.activeTexture(unit);
     this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
 }
+
+NanoGL.Framebuffer = function Framebuffer(gl, width, height) {
+    this.gl = gl;
+    this.framebuffer = gl.createFramebuffer();
+    this.width = width;
+    this.height = height;
+
+    this.texture = new NanoGL.Texture(gl, null, {
+        array: true,
+        width: width,
+        height: height,
+        minFilter: gl.NEAREST,
+        magFilter: gl.NEAREST,
+        wrapS: gl.CLAMP_TO_EDGE,
+        wrapT: gl.CLAMP_TO_EDGE,
+        generateMipmaps: false
+    });
+
+    var depthBuffer = gl.createRenderbuffer();
+    gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffer);
+    gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, width, height);
+
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.texture.texture, 0);
+    gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthBuffer);
+
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+}
+
+NanoGL.Framebuffer.prototype.bind = function() {
+    this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.framebuffer);
+};
+
+NanoGL.Framebuffer.prototype.unbind = function() {
+    this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
+};
