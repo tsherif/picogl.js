@@ -32,6 +32,8 @@ NanoGL.App = function App(canvas) {
     this.gl.enable(this.gl.DEPTH_TEST);
     this.gl.depthFunc(this.gl.LEQUAL);
     this.gl.viewport(0, 0, canvas.width, canvas.height);
+
+    this.gl.getExtension("WEBGL_depth_texture");
 }
 
 NanoGL.App.prototype.setClearColor = function(r, g, b, a) {
@@ -316,7 +318,7 @@ NanoGL.Framebuffer = function Framebuffer(gl, width, height) {
     this.width = width;
     this.height = height;
 
-    this.texture = new NanoGL.Texture(gl, null, {
+    this.colorTexture = new NanoGL.Texture(gl, null, {
         array: true,
         width: width,
         height: height,
@@ -327,13 +329,22 @@ NanoGL.Framebuffer = function Framebuffer(gl, width, height) {
         generateMipmaps: false
     });
 
-    var depthBuffer = gl.createRenderbuffer();
-    gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffer);
-    gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, width, height);
+    this.depthTexture = new NanoGL.Texture(gl, null, {
+        array: true,
+        internalFormat: this.gl.DEPTH_COMPONENT,
+        type: this.gl.UNSIGNED_INT,
+        width: width,
+        height: height,
+        minFilter: gl.NEAREST,
+        magFilter: gl.NEAREST,
+        wrapS: gl.CLAMP_TO_EDGE,
+        wrapT: gl.CLAMP_TO_EDGE,
+        generateMipmaps: false
+    });
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer);
-    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.texture.texture, 0);
-    gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthBuffer);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.colorTexture.texture, 0);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, this.depthTexture.texture, 0);
 
     if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE) {
         console.log("Frame buffer error: " + gl.checkFramebufferStatus(gl.FRAMEBUFFER).toString());

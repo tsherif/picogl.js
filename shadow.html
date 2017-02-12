@@ -18,12 +18,7 @@
         precision highp float;
 
         void main() {
-            const vec4 bitShift = vec4(1.0, 256.0, 256.0 * 256.0, 256.0 * 256.0 * 256.0);
-            const vec4 bitMask = vec4(1.0 / 256.0, 1.0 / 256.0, 1.0 / 256.0,  0.0);
-            vec4 rgbaDepth = fract(gl_FragCoord.z * bitShift);
-            rgbaDepth -= rgbaDepth.gbaa * bitMask;
-
-            gl_FragColor = rgbaDepth;
+        
         }
     </script> 
     <script id="main-vs" type="x-vertex-shader">
@@ -63,16 +58,10 @@
         varying vec4 vPositionFromLight;
         varying vec3 vModelPosition;
 
-        float unpackDepth(const in vec4 rgbaDepth) {
-            const vec4 bitShift = vec4(1.0, 1.0 / 256.0, 1.0 / (256.0 * 256.0), 1.0 / (256.0 * 256.0 * 256.0));
-
-            return dot(rgbaDepth, bitShift);
-        }
-
         void main() {
             vec3 shadowCoord = (vPositionFromLight.xyz / vPositionFromLight.w) / 2.0 + 0.5;
             vec4 rgbaDepth = texture2D(uShadowMap, shadowCoord.xy);
-            float depth = unpackDepth(rgbaDepth);
+            float depth = rgbaDepth.r;
 
             vec4 baseColor = texture2D(uTextureMap, vTexCoord);
 
@@ -175,7 +164,7 @@
             drawCall.setAttribute("aNormal", normals);
 
             drawCall.setTexture("uTextureMap", 0, texture);
-            drawCall.setTexture("uShadowMap", 1, shadowBuffer.texture);
+            drawCall.setTexture("uShadowMap", 1, shadowBuffer.depthTexture);
             drawCall.setUniform("uLightPosition", lightPosition);
             drawCall.setUniform("uEyePosition", eyePosition);
 
@@ -185,7 +174,7 @@
             drawCall2.setAttribute("aNormal", normals);
 
             drawCall2.setTexture("uTextureMap", 0, texture);
-            drawCall2.setTexture("uShadowMap", 1, shadowBuffer.texture);
+            drawCall2.setTexture("uShadowMap", 1, shadowBuffer.depthTexture);
             drawCall2.setUniform("uLightPosition", lightPosition);
             drawCall2.setUniform("uEyePosition", eyePosition);
 
