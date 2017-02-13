@@ -31,7 +31,7 @@
     var zeros = [0, 0, 0];
     var ones = [1, 1, 1];
 
-    NanoGL.utils = {
+    window.utils = {
         xformMatrix: function xformMatrix(xform, translate, rotate, scale) {
             translate = translate || zeros;
             rotate = rotate || zeros;

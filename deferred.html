@@ -25,26 +25,10 @@
 <head>
     <script src="gl-matrix.js"></script>
     <script src="nanoGL.js"></script>
-    <script src="nanoGL.utils.js"></script>
+    <script src="utils.js"></script>
 </head>
 <body>
     <canvas id="gl-canvas"></canvas>
-    <script id="quad-vs" type="x-vertex-shader">
-      attribute vec4 aPosition;
-      varying vec2 uv;
-      void main() {
-        uv = aPosition.xy * 0.5 + 0.5;
-        gl_Position = aPosition;
-      }
-    </script>
-    <script id="quad-fs" type="x-fragment-shader">
-        precision highp float;
-        uniform sampler2D uTextureMap;
-        varying vec2 uv;
-        void main() {
-            gl_FragColor = vec4(texture2D(uTextureMap, uv).rgb, 1.0);
-        }
-    </script> 
     <script id="geo-vs" type="x-vertex-shader">
       attribute vec4 aPosition;
       attribute vec3 aNormal;
@@ -150,31 +134,15 @@
 
         var gBuffer = app.createFramebuffer(canvas.width, canvas.height, 3);
 
-        var debugVsSource =  document.getElementById("quad-vs").text;
-        var debugFsSource =  document.getElementById("quad-fs").text;
-
-        var debugProgram = app.createProgram(debugVsSource, debugFsSource);
-        debugProgram.enableAttribute("aPosition");
-        debugProgram.enableUniform("uTextureMap", NanoGL.INT_UNIFORM);
-
-        var box = NanoGL.utils.createBox();
+        var box = utils.createBox();
 
         var positions = app.createArrayBuffer(NanoGL.FLOAT, 3, new Float32Array(box.positions));
         var uv = app.createArrayBuffer(NanoGL.FLOAT, 2, new Float32Array(box.texture_coords));
         var normals = app.createArrayBuffer(NanoGL.FLOAT, 3, new Float32Array(box.normals));
 
 
-        var sphere = NanoGL.utils.createSphere();
+        var sphere = utils.createSphere();
         var lightPositions = app.createArrayBuffer(NanoGL.FLOAT, 3, new Float32Array(sphere.positions));
-
-        var debugQuad = app.createArrayBuffer(NanoGL.FLOAT, 2, new Float32Array([
-            -1,  1,
-            -1, -1,
-             1, -1,
-            -1,  1,
-             1, -1,
-             1,  1
-        ]));
 
         var resolution = vec2.fromValues(canvas.width, canvas.height);
 
@@ -189,156 +157,111 @@
         var viewProjMatrix = mat4.create();
         mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
 
-        // Object 1 xform
-        var mvpMatrix = mat4.create();
-        var modelMatrix = mat4.create();
-        var rotateXMatrix = mat4.create();
-        var rotateYMatrix = mat4.create();
-
-        // Object 2 xform
-        var mvpMatrix2 = mat4.create();
-        var modelMatrix2 = mat4.create();
-        var scaleMatrix = mat4.create();
-        var translateMatrix = mat4.create();
-
-        var box2Scale = [0.1, 0.1, 0.1];
-        var box2Position = [0.8, 0.8, 0.4];
-
-        var angleX = 0;
-        var angleY = 0;
 
         var image = new Image();
 
         image.onload = function() {
             var texture = app.createTexture(image);
 
-            var drawCall = app.createDrawCall(geoProgram);
-            drawCall.setAttribute("aPosition", positions);
-            drawCall.setAttribute("aNormal", normals);
-            drawCall.setAttribute("aUV", uv);
 
-            var drawCall2 = app.createDrawCall(geoProgram);
-            drawCall2.setAttribute("aPosition", positions);
-            drawCall2.setAttribute("aNormal", normals);
-            drawCall2.setAttribute("aUV", uv);
+            var boxes = [
+                {
+                    scale: [1, 1, 1],
+                    rotate: [0, 0, 0],
+                    translate: [0, 0, 0],
+                    modelMatrix: mat4.create(),
+                    mvpMatrix: mat4.create(),
+                    drawCall: null
+                },
+                {
+                    scale: [0.1, 0.1, 0.1],
+                    rotate: [0, 0, Math.PI / 3],
+                    translate: [0.8, 0.8, 0.4],
+                    modelMatrix: mat4.create(),
+                    mvpMatrix: mat4.create(),
+                    drawCall: null
+                }
+            ];
 
-            var geoDrawCalls = [drawCall, drawCall2];
+            var geoDrawCalls = new Array(boxes.length);
 
-            var lightPosition = vec3.fromValues(0, 1, 0.5);
-            var lightColor = vec3.fromValues(0.8, 0.0, 0.0);
-            var lightMatrix = mat4.create();
-            NanoGL.utils.xformMatrix(lightMatrix, lightPosition);
-            mat4.multiply(lightMatrix, viewProjMatrix, lightMatrix);
+            for (var i = 0, len = boxes.length; i < len; ++i) {
+                geoDrawCalls[i] = app.createDrawCall(geoProgram);
+                geoDrawCalls[i].setAttribute("aPosition", positions);
+                geoDrawCalls[i].setAttribute("aNormal", normals);
+                geoDrawCalls[i].setAttribute("aUV", uv);
 
-            var lightDrawCall = app.createDrawCall(mainProgram);
+                boxes[i].drawCall = geoDrawCalls[i];
+            }
 
-            lightDrawCall.setAttribute("aPosition", lightPositions);
-            lightDrawCall.setUniform("uMVP", lightMatrix);
-            lightDrawCall.setTexture("uTextureMap", 0, texture);
-            lightDrawCall.setTexture("uPositionBuffer", 1, gBuffer.colorTextures[0]);
-            lightDrawCall.setTexture("uNormalBuffer", 2, gBuffer.colorTextures[1]);
-            lightDrawCall.setTexture("uUVBuffer", 3, gBuffer.colorTextures[2]);
-            lightDrawCall.setUniform("uEyePosition", eyePosition);
-            lightDrawCall.setUniform("uLightPosition", lightPosition);
-            lightDrawCall.setUniform("uLightColor", lightColor);
-            lightDrawCall.setUniform("uResolution", resolution);
 
-            var lightPosition2 = vec3.fromValues(1, 1, 0.5);
-            var lightColor2 = vec3.fromValues(0.0, 0.0, 0.8);
-            var lightMatrix2 = mat4.create();
-            NanoGL.utils.xformMatrix(lightMatrix2, lightPosition2);
-            mat4.multiply(lightMatrix2, viewProjMatrix, lightMatrix2);
+            var lights = [
+                {
+                    position: vec3.fromValues(0, 1, 0.5),
+                    color:    vec3.fromValues(0.8, 0.0, 0.0)
+                },
+                {
+                    position: vec3.fromValues(1, 1, 0.5),
+                    color:    vec3.fromValues(0.0, 0.0, 0.8)
+                },
+                {
+                    position: vec3.fromValues(1, 0, 0.5),
+                    color:    vec3.fromValues(0.0, 0.8, 0.0)
+                },
+                {
+                    position: vec3.fromValues(0.5, 0, 1),
+                    color:    vec3.fromValues(0.0, 0.8, 0.8)
+                }
+            ];
+                
+            var lightMatrix;
+            var lightDrawCalls = new Array(lights.length);
 
-            var lightDrawCall2 = app.createDrawCall(mainProgram);
+            for (var i = 0, len = lights.length; i < len; ++i) {
+                lightMatrix = mat4.create();
+                utils.xformMatrix(lightMatrix, lights[i].position);
+                mat4.multiply(lightMatrix, viewProjMatrix, lightMatrix);
 
-            lightDrawCall2.setAttribute("aPosition", lightPositions);
-            lightDrawCall2.setUniform("uMVP", lightMatrix2);
-            lightDrawCall2.setTexture("uTextureMap", 0, texture);
-            lightDrawCall2.setTexture("uPositionBuffer", 1, gBuffer.colorTextures[0]);
-            lightDrawCall2.setTexture("uNormalBuffer", 2, gBuffer.colorTextures[1]);
-            lightDrawCall2.setTexture("uUVBuffer", 3, gBuffer.colorTextures[2]);
-            lightDrawCall2.setUniform("uEyePosition", eyePosition);
-            lightDrawCall2.setUniform("uLightPosition", lightPosition2);
-            lightDrawCall2.setUniform("uLightColor", lightColor2);
-            lightDrawCall2.setUniform("uResolution", resolution);
+                lightDrawCalls[i] = app.createDrawCall(mainProgram);
 
-            var lightPosition3 = vec3.fromValues(1, 0, 0.5);
-            var lightColor3 = vec3.fromValues(0.0, 0.8, 0.0);
-            var lightMatrix3 = mat4.create();
-            NanoGL.utils.xformMatrix(lightMatrix3, lightPosition3);
-            mat4.multiply(lightMatrix3, viewProjMatrix, lightMatrix3);
-
-            var lightDrawCall3 = app.createDrawCall(mainProgram);
-
-            lightDrawCall3.setAttribute("aPosition", lightPositions);
-            lightDrawCall3.setUniform("uMVP", lightMatrix3);
-            lightDrawCall3.setTexture("uTextureMap", 0, texture);
-            lightDrawCall3.setTexture("uPositionBuffer", 1, gBuffer.colorTextures[0]);
-            lightDrawCall3.setTexture("uNormalBuffer", 2, gBuffer.colorTextures[1]);
-            lightDrawCall3.setTexture("uUVBuffer", 3, gBuffer.colorTextures[2]);
-            lightDrawCall3.setUniform("uEyePosition", eyePosition);
-            lightDrawCall3.setUniform("uLightPosition", lightPosition3);
-            lightDrawCall3.setUniform("uLightColor", lightColor3);
-            lightDrawCall3.setUniform("uResolution", resolution);
-
-            var lightPosition4 = vec3.fromValues(0.5, 0, 1);
-            var lightColor4 = vec3.fromValues(0.0, 0.8, 0.8);
-            var lightMatrix4 = mat4.create();
-            NanoGL.utils.xformMatrix(lightMatrix4, lightPosition4);
-            mat4.multiply(lightMatrix4, viewProjMatrix, lightMatrix4);
-
-            var lightDrawCall4 = app.createDrawCall(mainProgram);
-
-            lightDrawCall4.setAttribute("aPosition", lightPositions);
-            lightDrawCall4.setUniform("uMVP", lightMatrix4);
-            lightDrawCall4.setTexture("uTextureMap", 0, texture);
-            lightDrawCall4.setTexture("uPositionBuffer", 1, gBuffer.colorTextures[0]);
-            lightDrawCall4.setTexture("uNormalBuffer", 2, gBuffer.colorTextures[1]);
-            lightDrawCall4.setTexture("uUVBuffer", 3, gBuffer.colorTextures[2]);
-            lightDrawCall4.setUniform("uEyePosition", eyePosition);
-            lightDrawCall4.setUniform("uLightPosition", lightPosition4);
-            lightDrawCall4.setUniform("uLightColor", lightColor4);
-            lightDrawCall4.setUniform("uResolution", resolution);
-
-            var lightDrawCalls = [lightDrawCall, lightDrawCall2, lightDrawCall3, lightDrawCall4];
-
-            // var debugDrawCall = app.createDrawCall(debugProgram);
-            // debugDrawCall.setAttribute("aPosition", debugQuad);
-            // debugDrawCall.setTexture("uTextureMap", 0, gBuffer.colorTextures[0]);
-
-            // var debugDrawCalls = [debugDrawCall];
+                lightDrawCalls[i].setAttribute("aPosition", lightPositions);
+                lightDrawCalls[i].setUniform("uMVP", lightMatrix);
+                lightDrawCalls[i].setTexture("uTextureMap", 0, texture);
+                lightDrawCalls[i].setTexture("uPositionBuffer", 1, gBuffer.colorTextures[0]);
+                lightDrawCalls[i].setTexture("uNormalBuffer", 2, gBuffer.colorTextures[1]);
+                lightDrawCalls[i].setTexture("uUVBuffer", 3, gBuffer.colorTextures[2]);
+                lightDrawCalls[i].setUniform("uEyePosition", eyePosition);
+                lightDrawCalls[i].setUniform("uLightPosition", lights[i].position);
+                lightDrawCalls[i].setUniform("uLightColor", lights[i].color);
+                lightDrawCalls[i].setUniform("uResolution", resolution);
+            }
 
             function draw() {
-                angleX += 0.01;
-                angleY += 0.02;
 
-                mat4.fromXRotation(rotateXMatrix, angleX);
-                mat4.fromYRotation(rotateYMatrix, angleY);
-                
-                NanoGL.utils.xformMatrix(modelMatrix, null, [angleX, angleY, 0]);
-                mat4.multiply(mvpMatrix, viewProjMatrix, modelMatrix);
-
-                NanoGL.utils.xformMatrix(modelMatrix2, box2Position, [angleX, angleY, 0], box2Scale);
-                mat4.multiply(mvpMatrix2, viewProjMatrix, modelMatrix2);
-
-                app.depthTest();
+                // Draw to gBuffer
                 gBuffer.bind();
+                app.depthTest();
                 app.drawCalls = geoDrawCalls;
-                drawCall.setUniform("uMVP", mvpMatrix);
-                drawCall.setUniform("uModelMatrix", modelMatrix);
 
-                drawCall2.setUniform("uMVP", mvpMatrix2);
-                drawCall2.setUniform("uModelMatrix", modelMatrix2);
-                app.draw();
+                for (var i = 0, len = boxes.length; i < len; ++i) {
+                    boxes[i].rotate[0] += 0.01;
+                    boxes[i].rotate[1] += 0.02;
+
+                    utils.xformMatrix(boxes[i].modelMatrix, boxes[i].translate, boxes[i].rotate, boxes[i].scale);
+                    mat4.multiply(boxes[i].mvpMatrix, viewProjMatrix, boxes[i].modelMatrix);
                 
+                    boxes[i].drawCall.setUniform("uMVP", boxes[i].mvpMatrix);
+                    boxes[i].drawCall.setUniform("uModelMatrix", boxes[i].modelMatrix);
+                }
+
+                app.draw();
                 gBuffer.unbind();
 
+                // Draw lights
                 app.blend();
                 app.drawCalls = lightDrawCalls;
-                // app.drawCalls = debugDrawCalls;
                 app.draw();                
                 
-
                 requestAnimationFrame(draw);
             }
 
