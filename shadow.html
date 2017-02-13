@@ -107,7 +107,7 @@
         shadowProgram.enableAttribute("aPosition");
         shadowProgram.enableUniform("uMVP", NanoGL.MAT4_UNIFORM);
 
-        var shadowBuffer = app.createFramebuffer(canvas.width, canvas.height);
+        var shadowBuffer = app.createFramebuffer(canvas.width, canvas.height, 0);
 
         var box = createBox({dimensions: [1.0, 1.0, 1.0]})
 

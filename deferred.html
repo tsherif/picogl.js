@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="gl-matrix.js"></script>
+    <script src="nanoGL.js"></script>
+    <script src="nanoGL.utils.js"></script>
+</head>
+<body>
+    <canvas id="gl-canvas"></canvas>
+    <script id="quad-vs" type="x-vertex-shader">
+      attribute vec4 aPosition;
+      varying vec2 uv;
+      void main() {
+        uv = aPosition.xy * 0.5 + 0.5;
+        gl_Position = aPosition;
+      }
+    </script>
+    <script id="quad-fs" type="x-fragment-shader">
+        precision highp float;
+        uniform sampler2D uTextureMap;
+        varying vec2 uv;
+        void main() {
+            gl_FragColor = vec4(texture2D(uTextureMap, uv).rgb, 1.0);
+        }
+    </script> 
+    <script id="geo-vs" type="x-vertex-shader">
+      attribute vec4 aPosition;
+      attribute vec3 aNormal;
+      attribute vec4 aUV;
+      varying vec4 vPosition;
+      varying vec4 vNormal;
+      varying vec4 vUV;
+      uniform mat4 uMVP;
+      uniform mat4 uModelMatrix;
+      void main() {
+        vPosition = uModelMatrix * aPosition;
+        vNormal = uModelMatrix * vec4(aNormal, 0.0);
+        vUV = aUV;
+        gl_Position = uMVP * aPosition;
+      }
+    </script>
+    <script id="geo-fs" type="x-fragment-shader">
+        #extension GL_EXT_draw_buffers : require
+        precision highp float;
+        varying vec4 vPosition;
+        varying vec4 vNormal;
+        varying vec4 vUV;
+        void main() {
+            gl_FragData[0] = vPosition;
+            gl_FragData[1] = vec4(normalize(vNormal.xyz), 0.0);
+            gl_FragData[2] = vUV;
+        }
+    </script> 
+    <script id="main-vs" type="x-vertex-shader">
+        attribute vec4 aPosition;
+        uniform mat4 uMVP;
+
+        void main() {
+            gl_Position = uMVP * aPosition;
+        }
+    </script>
+    <script id="main-fs" type="x-fragment-shader">
+        precision highp float;
+        uniform vec2 uResolution;
+        uniform vec3 uLightPosition;
+        uniform vec3 uEyePosition;
+        uniform vec3 uLightColor;
+        uniform sampler2D uPositionBuffer;
+        uniform sampler2D uNormalBuffer;
+        uniform sampler2D uUVBuffer;
+        uniform sampler2D uTextureMap;
+
+        void main() {
+            vec2 bufferUV = gl_FragCoord.xy / uResolution;
+            vec3 position = texture2D(uPositionBuffer, bufferUV).xyz;
+            vec3 normal = normalize(texture2D(uNormalBuffer, bufferUV).xyz);
+            vec2 uv = texture2D(uUVBuffer, bufferUV).xy;
+
+            vec4 baseColor = texture2D(uTextureMap, uv);
+
+
+            vec3 eyeDirection = normalize(uEyePosition - position);
+            vec3 lightVec = uLightPosition - position;
+            float attenuation = 1.0 - length(lightVec);
+            vec3 lightDirection = normalize(lightVec);
+            vec3 reflectionDirection = reflect(-lightDirection, normal);
+            float nDotL = max(dot(lightDirection, normal), 0.0);
+            vec3 diffuse = nDotL * uLightColor;
+            float ambient = 0.1;
+            vec3 specular = pow(max(dot(reflectionDirection, eyeDirection), 0.0), 20.0) * uLightColor;
+
+            gl_FragColor = vec4(attenuation * (ambient + diffuse + specular) * baseColor.rgb, baseColor.a);
+        }
+    </script> 
+    <script type="text/javascript">
+        var canvas = document.getElementById("gl-canvas");
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        var app = NanoGL.createApp(canvas);
+        app.setClearColor(0.0, 0.0, 0.0, 1.0);
+        app.depthFunc(NanoGL.LEQUAL);
+        app.blendFunc(NanoGL.ONE, NanoGL.ONE);
+
+        var vsSource =  document.getElementById("main-vs").text;
+        var fsSource =  document.getElementById("main-fs").text;
+
+        var mainProgram = app.createProgram(vsSource, fsSource);
+        mainProgram.enableAttribute("aPosition");
+        mainProgram.enableUniform("uMVP", NanoGL.MAT4_UNIFORM);
+        mainProgram.enableUniform("uTextureMap", NanoGL.INT_UNIFORM);
+        mainProgram.enableUniform("uPositionBuffer", NanoGL.INT_UNIFORM);
+        mainProgram.enableUniform("uNormalBuffer", NanoGL.INT_UNIFORM);
+        mainProgram.enableUniform("uUVBuffer", NanoGL.INT_UNIFORM);
+        mainProgram.enableUniform("uEyePosition", NanoGL.VEC3_UNIFORM);
+        mainProgram.enableUniform("uLightPosition", NanoGL.VEC3_UNIFORM);
+        mainProgram.enableUniform("uLightColor", NanoGL.VEC3_UNIFORM);
+        mainProgram.enableUniform("uResolution", NanoGL.VEC2_UNIFORM);
+
+        var geoVsSource =  document.getElementById("geo-vs").text;
+        var geoFsSource =  document.getElementById("geo-fs").text;
+
+        var geoProgram = app.createProgram(geoVsSource, geoFsSource);
+        geoProgram.enableAttribute("aPosition");
+        geoProgram.enableAttribute("aNormal");
+        geoProgram.enableAttribute("aUV");
+        geoProgram.enableUniform("uModelMatrix", NanoGL.MAT4_UNIFORM);
+        geoProgram.enableUniform("uMVP", NanoGL.MAT4_UNIFORM);
+
+        var gBuffer = app.createFramebuffer(canvas.width, canvas.height, 3);
+
+        var debugVsSource =  document.getElementById("quad-vs").text;
+        var debugFsSource =  document.getElementById("quad-fs").text;
+
+        var debugProgram = app.createProgram(debugVsSource, debugFsSource);
+        debugProgram.enableAttribute("aPosition");
+        debugProgram.enableUniform("uTextureMap", NanoGL.INT_UNIFORM);
+
+        var box = NanoGL.utils.createBox();
+
+        var positions = app.createArrayBuffer(NanoGL.FLOAT, 3, new Float32Array(box.positions));
+        var uv = app.createArrayBuffer(NanoGL.FLOAT, 2, new Float32Array(box.texture_coords));
+        var normals = app.createArrayBuffer(NanoGL.FLOAT, 3, new Float32Array(box.normals));
+
+
+        var sphere = NanoGL.utils.createSphere();
+        var lightPositions = app.createArrayBuffer(NanoGL.FLOAT, 3, new Float32Array(sphere.positions));
+
+        var debugQuad = app.createArrayBuffer(NanoGL.FLOAT, 2, new Float32Array([
+            -1,  1,
+            -1, -1,
+             1, -1,
+            -1,  1,
+             1, -1,
+             1,  1
+        ]));
+
+        var resolution = vec2.fromValues(canvas.width, canvas.height);
+
+        // Camera stuff
+        var projMatrix = mat4.create();
+        mat4.perspective(projMatrix, Math.PI / 2, canvas.width / canvas.height, 0.1, 10.0);
+
+        var viewMatrix = mat4.create();
+        var eyePosition = vec3.fromValues(1, 1, 1);
+        mat4.lookAt(viewMatrix, eyePosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
+
+        var viewProjMatrix = mat4.create();
+        mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
+
+        // Object 1 xform
+        var mvpMatrix = mat4.create();
+        var modelMatrix = mat4.create();
+        var rotateXMatrix = mat4.create();
+        var rotateYMatrix = mat4.create();
+
+        // Object 2 xform
+        var mvpMatrix2 = mat4.create();
+        var modelMatrix2 = mat4.create();
+        var scaleMatrix = mat4.create();
+        var translateMatrix = mat4.create();
+
+        var box2Scale = [0.1, 0.1, 0.1];
+        var box2Position = [0.8, 0.8, 0.4];
+
+        var angleX = 0;
+        var angleY = 0;
+
+        var image = new Image();
+
+        image.onload = function() {
+            var texture = app.createTexture(image);
+
+            var drawCall = app.createDrawCall(geoProgram);
+            drawCall.setAttribute("aPosition", positions);
+            drawCall.setAttribute("aNormal", normals);
+            drawCall.setAttribute("aUV", uv);
+
+            var drawCall2 = app.createDrawCall(geoProgram);
+            drawCall2.setAttribute("aPosition", positions);
+            drawCall2.setAttribute("aNormal", normals);
+            drawCall2.setAttribute("aUV", uv);
+
+            var geoDrawCalls = [drawCall, drawCall2];
+
+            var lightPosition = vec3.fromValues(0, 1, 0.5);
+            var lightColor = vec3.fromValues(0.8, 0.0, 0.0);
+            var lightMatrix = mat4.create();
+            NanoGL.utils.xformMatrix(lightMatrix, lightPosition);
+            mat4.multiply(lightMatrix, viewProjMatrix, lightMatrix);
+
+            var lightDrawCall = app.createDrawCall(mainProgram);
+
+            lightDrawCall.setAttribute("aPosition", lightPositions);
+            lightDrawCall.setUniform("uMVP", lightMatrix);
+            lightDrawCall.setTexture("uTextureMap", 0, texture);
+            lightDrawCall.setTexture("uPositionBuffer", 1, gBuffer.colorTextures[0]);
+            lightDrawCall.setTexture("uNormalBuffer", 2, gBuffer.colorTextures[1]);
+            lightDrawCall.setTexture("uUVBuffer", 3, gBuffer.colorTextures[2]);
+            lightDrawCall.setUniform("uEyePosition", eyePosition);
+            lightDrawCall.setUniform("uLightPosition", lightPosition);
+            lightDrawCall.setUniform("uLightColor", lightColor);
+            lightDrawCall.setUniform("uResolution", resolution);
+
+            var lightPosition2 = vec3.fromValues(1, 1, 0.5);
+            var lightColor2 = vec3.fromValues(0.0, 0.0, 0.8);
+            var lightMatrix2 = mat4.create();
+            NanoGL.utils.xformMatrix(lightMatrix2, lightPosition2);
+            mat4.multiply(lightMatrix2, viewProjMatrix, lightMatrix2);
+
+            var lightDrawCall2 = app.createDrawCall(mainProgram);
+
+            lightDrawCall2.setAttribute("aPosition", lightPositions);
+            lightDrawCall2.setUniform("uMVP", lightMatrix2);
+            lightDrawCall2.setTexture("uTextureMap", 0, texture);
+            lightDrawCall2.setTexture("uPositionBuffer", 1, gBuffer.colorTextures[0]);
+            lightDrawCall2.setTexture("uNormalBuffer", 2, gBuffer.colorTextures[1]);
+            lightDrawCall2.setTexture("uUVBuffer", 3, gBuffer.colorTextures[2]);
+            lightDrawCall2.setUniform("uEyePosition", eyePosition);
+            lightDrawCall2.setUniform("uLightPosition", lightPosition2);
+            lightDrawCall2.setUniform("uLightColor", lightColor2);
+            lightDrawCall2.setUniform("uResolution", resolution);
+
+            var lightPosition3 = vec3.fromValues(1, 0, 0.5);
+            var lightColor3 = vec3.fromValues(0.0, 0.8, 0.0);
+            var lightMatrix3 = mat4.create();
+            NanoGL.utils.xformMatrix(lightMatrix3, lightPosition3);
+            mat4.multiply(lightMatrix3, viewProjMatrix, lightMatrix3);
+
+            var lightDrawCall3 = app.createDrawCall(mainProgram);
+
+            lightDrawCall3.setAttribute("aPosition", lightPositions);
+            lightDrawCall3.setUniform("uMVP", lightMatrix3);
+            lightDrawCall3.setTexture("uTextureMap", 0, texture);
+            lightDrawCall3.setTexture("uPositionBuffer", 1, gBuffer.colorTextures[0]);
+            lightDrawCall3.setTexture("uNormalBuffer", 2, gBuffer.colorTextures[1]);
+            lightDrawCall3.setTexture("uUVBuffer", 3, gBuffer.colorTextures[2]);
+            lightDrawCall3.setUniform("uEyePosition", eyePosition);
+            lightDrawCall3.setUniform("uLightPosition", lightPosition3);
+            lightDrawCall3.setUniform("uLightColor", lightColor3);
+            lightDrawCall3.setUniform("uResolution", resolution);
+
+            var lightPosition4 = vec3.fromValues(0.5, 0, 1);
+            var lightColor4 = vec3.fromValues(0.0, 0.8, 0.8);
+            var lightMatrix4 = mat4.create();
+            NanoGL.utils.xformMatrix(lightMatrix4, lightPosition4);
+            mat4.multiply(lightMatrix4, viewProjMatrix, lightMatrix4);
+
+            var lightDrawCall4 = app.createDrawCall(mainProgram);
+
+            lightDrawCall4.setAttribute("aPosition", lightPositions);
+            lightDrawCall4.setUniform("uMVP", lightMatrix4);
+            lightDrawCall4.setTexture("uTextureMap", 0, texture);
+            lightDrawCall4.setTexture("uPositionBuffer", 1, gBuffer.colorTextures[0]);
+            lightDrawCall4.setTexture("uNormalBuffer", 2, gBuffer.colorTextures[1]);
+            lightDrawCall4.setTexture("uUVBuffer", 3, gBuffer.colorTextures[2]);
+            lightDrawCall4.setUniform("uEyePosition", eyePosition);
+            lightDrawCall4.setUniform("uLightPosition", lightPosition4);
+            lightDrawCall4.setUniform("uLightColor", lightColor4);
+            lightDrawCall4.setUniform("uResolution", resolution);
+
+            var lightDrawCalls = [lightDrawCall, lightDrawCall2, lightDrawCall3, lightDrawCall4];
+
+            // var debugDrawCall = app.createDrawCall(debugProgram);
+            // debugDrawCall.setAttribute("aPosition", debugQuad);
+            // debugDrawCall.setTexture("uTextureMap", 0, gBuffer.colorTextures[0]);
+
+            // var debugDrawCalls = [debugDrawCall];
+
+            function draw() {
+                angleX += 0.01;
+                angleY += 0.02;
+
+                mat4.fromXRotation(rotateXMatrix, angleX);
+                mat4.fromYRotation(rotateYMatrix, angleY);
+                
+                NanoGL.utils.xformMatrix(modelMatrix, null, [angleX, angleY, 0]);
+                mat4.multiply(mvpMatrix, viewProjMatrix, modelMatrix);
+
+                NanoGL.utils.xformMatrix(modelMatrix2, box2Position, [angleX, angleY, 0], box2Scale);
+                mat4.multiply(mvpMatrix2, viewProjMatrix, modelMatrix2);
+
+                app.depthTest();
+                gBuffer.bind();
+                app.drawCalls = geoDrawCalls;
+                drawCall.setUniform("uMVP", mvpMatrix);
+                drawCall.setUniform("uModelMatrix", modelMatrix);
+
+                drawCall2.setUniform("uMVP", mvpMatrix2);
+                drawCall2.setUniform("uModelMatrix", modelMatrix2);
+                app.draw();
+                
+                gBuffer.unbind();
+
+                app.blend();
+                app.drawCalls = lightDrawCalls;
+                // app.drawCalls = debugDrawCalls;
+                app.draw();                
+                
+
+                requestAnimationFrame(draw);
+            }
+
+            requestAnimationFrame(draw);
+            
+        }
+
+        image.src = "khronos_webgl.png";
+
+    </script>
+</body>
+</html>

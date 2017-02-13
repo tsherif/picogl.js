@@ -10,6 +10,29 @@ var NanoGL = {};
     NanoGL.UNSIGNED_INT = gl.UNSIGNED_INT;
     NanoGL.UNSIGNED_SHORT = gl.UNSIGNED_SHORT;
     NanoGL.UNSIGNED_BYTE = gl.UNSIGNED_BYTE;
+    NanoGL.NEVER = gl.NEVER;
+    NanoGL.LESS = gl.LESS;
+    NanoGL.EQUAL = gl.EQUAL;
+    NanoGL.LEQUAL = gl.LEQUAL;
+    NanoGL.GREATER = gl.GREATER;
+    NanoGL.NOTEQUAL = gl.NOTEQUAL;
+    NanoGL.GEQUAL = gl.GEQUAL;
+    NanoGL.ALWAYS = gl.ALWAYS;
+    NanoGL.ZERO = gl.ZERO;
+    NanoGL.ONE = gl.ONE;
+    NanoGL.SRC_COLOR = gl.SRC_COLOR;
+    NanoGL.ONE_MINUS_SRC_COLOR = gl.ONE_MINUS_SRC_COLOR;
+    NanoGL.DST_COLOR = gl.DST_COLOR;
+    NanoGL.ONE_MINUS_DST_COLOR = gl.ONE_MINUS_DST_COLOR;
+    NanoGL.SRC_ALPHA = gl.SRC_ALPHA;
+    NanoGL.ONE_MINUS_SRC_ALPHA = gl.ONE_MINUS_SRC_ALPHA;
+    NanoGL.DST_ALPHA = gl.DST_ALPHA;
+    NanoGL.ONE_MINUS_DST_ALPHA = gl.ONE_MINUS_DST_ALPHA;
+    NanoGL.CONSTANT_COLOR = gl.CONSTANT_COLOR;
+    NanoGL.ONE_MINUS_CONSTANT_COLOR = gl.ONE_MINUS_CONSTANT_COLOR;
+    NanoGL.CONSTANT_ALPHA = gl.CONSTANT_ALPHA;
+    NanoGL.ONE_MINUS_CONSTANT_ALPHA = gl.ONE_MINUS_CONSTANT_ALPHA;
+    NanoGL.SRC_ALPHA_SATURATE = gl.SRC_ALPHA_SATURATE;
 })();
 
 NanoGL.DUMMY_OBJECT = {};
@@ -27,17 +50,45 @@ NanoGL.App = function App(canvas) {
 
     this.program = null;
 
-    // TODO (Tarek): expose these via API
-    this.gl.enable(this.gl.CULL_FACE);
-    this.gl.enable(this.gl.DEPTH_TEST);
-    this.gl.depthFunc(this.gl.LEQUAL);
+    
     this.gl.viewport(0, 0, canvas.width, canvas.height);
 
     this.gl.getExtension("WEBGL_depth_texture");
+    
+    this.drawBuffers = this.gl.getExtension("WEBGL_draw_buffers");
+    this.maxDrawBuffers = this.gl.getParameter(this.drawBuffers.MAX_DRAW_BUFFERS_WEBGL);
 }
 
 NanoGL.App.prototype.setClearColor = function(r, g, b, a) {
     this.gl.clearColor(r, g, b, a);
+};
+
+NanoGL.App.prototype.depthTest = function() {
+    this.gl.enable(this.gl.DEPTH_TEST);
+    this.gl.enable(this.gl.DEPTH_MASK);
+    this.gl.disable(this.gl.BLEND);
+};
+
+NanoGL.App.prototype.depthFunc = function(func) {
+    this.gl.depthFunc(func);
+};
+
+NanoGL.App.prototype.blend = function() {
+    this.gl.enable(this.gl.BLEND);
+    this.gl.disable(this.gl.DEPTH_TEST);
+    this.gl.disable(this.gl.DEPTH_MASK);
+};
+
+NanoGL.App.prototype.blendFunc = function(src, dest) {
+    this.gl.blendFunc(src, dest);
+};
+
+NanoGL.App.prototype.cullFace = function(enable) {
+    if (enable) {
+        this.gl.enable(this.gl.CULL_FACE);
+    } else {
+        this.gl.disable(this.gl.CULL_FACE);
+    } 
 };
 
 NanoGL.App.prototype.createProgram = function(vsSource, fsSource) {
@@ -52,8 +103,8 @@ NanoGL.App.prototype.createTexture = function(image, options) {
     return new NanoGL.Texture(this.gl, image, options);
 };
 
-NanoGL.App.prototype.createFramebuffer = function(width, height) {
-    return new NanoGL.Framebuffer(this.gl, width, height);
+NanoGL.App.prototype.createFramebuffer = function(width, height, numColorTextures) {
+    return new NanoGL.Framebuffer(this.gl, this.drawBuffers, width, height, numColorTextures);
 };
 
 NanoGL.App.prototype.createDrawCall = function(program) {
@@ -128,14 +179,22 @@ NanoGL.Program = function Program(gl, vsSource, fsSource) {
     gl.shaderSource(vshader, vsSource);
     gl.compileShader(vshader);
     if (!gl.getShaderParameter(vshader, gl.COMPILE_STATUS)) {
-      console.error(gl.getShaderInfoLog(vshader));
+        console.error(gl.getShaderInfoLog(vshader));
+        var lines = vsSource.split("\n");
+        for (var i = 0; i < lines.length; ++i) {
+            console.error(i + ":", lines[i]);
+        }
     }
 
     var fshader = gl.createShader(gl.FRAGMENT_SHADER);
     gl.shaderSource(fshader, fsSource);
     gl.compileShader(fshader);
     if (!gl.getShaderParameter(fshader, gl.COMPILE_STATUS)) {
-      console.error(gl.getShaderInfoLog(fshader));
+        console.error(gl.getShaderInfoLog(fshader));
+        var lines = fsSource.split("\n");
+        for (var i = 0; i < lines.length; ++i) {
+            console.error(i + ":", lines[i]);
+        }
     }
 
     var program = gl.createProgram();
@@ -200,6 +259,20 @@ NanoGL.IntUniform.prototype.set = function(value) {
     }
 }
 
+NanoGL.Vec2Uniform = function Vec2Uniform(gl, handle) {
+    this.gl = gl;
+    this.handle = handle;
+    this.value = new Float32Array(2);
+}
+
+NanoGL.Vec2Uniform.prototype.set = function(value) {
+    if (this.value[0] !== value[0] ||
+        this.value[1] !== value[1]) {
+        this.gl.uniform2fv(this.handle, value);
+        this.value.set(value);
+    }
+}
+
 NanoGL.Vec3Uniform = function Vec3Uniform(gl, handle) {
     this.gl = gl;
     this.handle = handle;
@@ -243,6 +316,7 @@ NanoGL.Mat4Uniform.prototype.set = function(value) {
     }
 }
 
+NanoGL.VEC2_UNIFORM = NanoGL.Vec2Uniform;
 NanoGL.VEC3_UNIFORM = NanoGL.Vec3Uniform;
 NanoGL.MAT4_UNIFORM =  NanoGL.Mat4Uniform;
 NanoGL.INT_UNIFORM =  NanoGL.IntUniform;
@@ -312,22 +386,27 @@ NanoGL.Texture.prototype.bind = function(unit) {
     this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
 }
 
-NanoGL.Framebuffer = function Framebuffer(gl, width, height) {
+NanoGL.Framebuffer = function Framebuffer(gl, drawBuffers, width, height, numColorTargets) {
     this.gl = gl;
+    this.drawBuffers = drawBuffers;
     this.framebuffer = gl.createFramebuffer();
     this.width = width;
     this.height = height;
+    this.numColorTargets = numColorTargets !== undefined ? numColorTargets : 1;
+    this.colorTextures = new Array(this.numColorTargets);
 
-    this.colorTexture = new NanoGL.Texture(gl, null, {
-        array: true,
-        width: width,
-        height: height,
-        minFilter: gl.NEAREST,
-        magFilter: gl.NEAREST,
-        wrapS: gl.CLAMP_TO_EDGE,
-        wrapT: gl.CLAMP_TO_EDGE,
-        generateMipmaps: false
-    });
+    for (var i = 0; i < this.numColorTargets; ++i) {
+        this.colorTextures[i] = new NanoGL.Texture(gl, null, {
+            array: true,
+            width: width,
+            height: height,
+            minFilter: gl.NEAREST,
+            magFilter: gl.NEAREST,
+            wrapS: gl.CLAMP_TO_EDGE,
+            wrapT: gl.CLAMP_TO_EDGE,
+            generateMipmaps: false
+        });
+    }
 
     this.depthTexture = new NanoGL.Texture(gl, null, {
         array: true,
@@ -342,13 +421,20 @@ NanoGL.Framebuffer = function Framebuffer(gl, width, height) {
         generateMipmaps: false
     });
 
+    this.colorAttachments = new Array(this.numColorTargets);
+
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer);
-    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.colorTexture.texture, 0);
+    for (var i = 0; i < this.numColorTargets; ++i) {
+        this.colorAttachments[i] = this.drawBuffers["COLOR_ATTACHMENT" + i + "_WEBGL"];
+        gl.framebufferTexture2D(gl.FRAMEBUFFER, this.colorAttachments[i], gl.TEXTURE_2D, this.colorTextures[i].texture, 0);
+    }
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, this.depthTexture.texture, 0);
 
     if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE) {
         console.log("Frame buffer error: " + gl.checkFramebufferStatus(gl.FRAMEBUFFER).toString());
     }
+
+    this.drawBuffers.drawBuffersWEBGL(this.colorAttachments);
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 }
