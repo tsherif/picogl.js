@@ -147,14 +147,8 @@
         this.uniforms = {};
         this.attributes = {};
         this.textures = {};
+        this.indices = null;
     }
-
-    NanoGL.DrawCall.prototype.setProgram = function(program) {
-        this.program = program;
-        this.uniforms = {};
-        this.attributes = {};
-        this.textures = {};
-    };
 
     NanoGL.DrawCall.prototype.setUniform = function(name, value) {
         this.uniforms[name] = value;
@@ -249,7 +243,9 @@
     };
 
     NanoGL.Program.prototype.enableAttribute = function(name) {
-        this.attributes[name] = this.gl.getAttribLocation(this.program, name);
+        var attributeLocation = this.gl.getAttribLocation(this.program, name);
+        this.attributes[name] = attributeLocation;
+        this.gl.enableVertexAttribArray(attributeLocation); 
     };
 
     NanoGL.Program.prototype.bindAttribute = function(name, buffer) {
@@ -345,12 +341,13 @@
     NanoGL.INT_UNIFORM =  NanoGL.IntUniform;
     NanoGL.FLOAT_UNIFORM =  NanoGL.FloatUniform;
 
-    NanoGL.ArrayBuffer = function ArrayBuffer(gl, type, itemSize, data) {
+    NanoGL.ArrayBuffer = function ArrayBuffer(gl, type, itemSize, data, binding) {
         this.gl = gl;
         this.buffer = gl.createBuffer();
         this.type = type;
         this.itemSize = itemSize;
         this.numItems = data.length / itemSize;
+        this.binding = binding || gl.ARRAY_BUFFER;
 
         gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
         gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
@@ -360,7 +357,6 @@
     NanoGL.ArrayBuffer.prototype.bind = function(attribute) {
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffer);
         this.gl.vertexAttribPointer(attribute, this.itemSize, this.type, false, 0, 0);
-        this.gl.enableVertexAttribArray(attribute);
     };
 
     NanoGL.Texture = function Texture(gl, image, options) {
