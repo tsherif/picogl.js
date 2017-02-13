@@ -72,7 +72,9 @@
         var canvas = document.getElementById("gl-canvas");
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
+        
         var app = NanoGL.createApp(canvas);
+        app.depthTest();
 
         var vsSource =  document.getElementById("vertex-draw").text;
         var fsSource =  document.getElementById("fragment-draw").text;
@@ -111,9 +113,6 @@
         var rotateXMatrix = mat4.create();
         var rotateYMatrix = mat4.create();
 
-        var angleX = 0;
-        var angleY = 0;
-
         var image = new Image();
 
         image.onload = function() {
@@ -123,12 +122,14 @@
             drawCall.setAttribute("position", positions);
             drawCall.setAttribute("uv", uv);
             drawCall.setAttribute("normal", normals);
-
             drawCall.setUniform("uViewProj", viewProjMatrix);
             drawCall.setUniform("eyePosition", eyePosition);
             drawCall.setUniform("lightPosition", lightPosition);
 
             app.drawCalls.push(drawCall);
+
+            var angleX = 0;
+            var angleY = 0;
 
             function draw() {
                 angleX += 0.01;
@@ -140,14 +141,16 @@
 
                 drawCall.setUniform("uModel", modelMatrix);
 
+                // Render to offscreen texture
                 rttBuffer.bind();
-                app.setClearColor(0.4, 0.4, 0.4, 1.0);
+                app.clearColor(0.4, 0.4, 0.4, 1.0);
                 drawCall.setTexture("tex", 0, texture);
                 app.draw();
-
                 rttBuffer.unbind();
-                app.setClearColor(0.0, 0.0, 0.0, 1.0);
-                drawCall.setTexture("tex", 0, rttBuffer.texture);
+                
+                // Render to screen
+                app.clearColor(0.0, 0.0, 0.0, 1.0);
+                drawCall.setTexture("tex", 0, rttBuffer.colorTextures[0]);
                 app.draw();
 
                 requestAnimationFrame(draw);

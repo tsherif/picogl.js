@@ -31,7 +31,9 @@
         var canvas = document.getElementById("gl-canvas");
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
+        
         var app = NanoGL.createApp(canvas);
+        app.clearColor(0.0, 0.0, 0.0, 1.0);
 
         var vsSource =  "attribute vec4 position;" +
                         "attribute vec2 uv;" +

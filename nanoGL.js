@@ -73,7 +73,6 @@
         this.drawCalls = [];
 
         this.program = null;
-
         
         this.gl.viewport(0, 0, canvas.width, canvas.height);
 
@@ -83,7 +82,7 @@
         this.maxDrawBuffers = this.gl.getParameter(this.drawBuffers.MAX_DRAW_BUFFERS_WEBGL);
     }
 
-    NanoGL.App.prototype.setClearColor = function(r, g, b, a) {
+    NanoGL.App.prototype.clearColor = function(r, g, b, a) {
         this.gl.clearColor(r, g, b, a);
     };
 
@@ -107,12 +106,12 @@
         this.gl.blendFunc(src, dest);
     };
 
-    NanoGL.App.prototype.cullFace = function(enable) {
-        if (enable) {
-            this.gl.enable(this.gl.CULL_FACE);
-        } else {
-            this.gl.disable(this.gl.CULL_FACE);
-        } 
+    NanoGL.App.prototype.cullBackfaces = function() {
+        this.gl.enable(this.gl.CULL_FACE);
+    };
+
+    NanoGL.App.prototype.drawBackfaces = function() {
+        this.gl.disable(this.gl.CULL_FACE);
     };
 
     NanoGL.App.prototype.createProgram = function(vsSource, fsSource) {

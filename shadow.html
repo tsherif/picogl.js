@@ -25,6 +25,7 @@
 <head>
     <script src="gl-matrix.js"></script>
     <script src="nanoGL.js"></script>
+    <script src="utils.js"></script>
 </head>
 <body>
     <canvas id="gl-canvas"></canvas>
@@ -104,8 +105,21 @@
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         var app = NanoGL.createApp(canvas);
-        app.setClearColor(0.0, 0.0, 0.0, 1.0);
+        app.clearColor(0.0, 0.0, 0.0, 1.0);
+        app.depthTest();
+        app.cullBackfaces();
 
+        // Set up shadow program
+        var shadowVsSource =  document.getElementById("shadow-vs").text;
+        var shadowFsSource =  document.getElementById("shadow-fs").text;
+
+        var shadowProgram = app.createProgram(shadowVsSource, shadowFsSource);
+        shadowProgram.enableAttribute("aPosition");
+        shadowProgram.enableUniform("uMVP", NanoGL.MAT4_UNIFORM);
+
+        var shadowBuffer = app.createFramebuffer(canvas.width, canvas.height, 0);
+
+        // Set up main program
         var vsSource =  document.getElementById("main-vs").text;
         var fsSource =  document.getElementById("main-fs").text;
 
@@ -120,15 +134,6 @@
         mainProgram.enableUniform("uShadowMap", NanoGL.INT_UNIFORM);
         mainProgram.enableUniform("uEyePosition", NanoGL.VEC3_UNIFORM);
         mainProgram.enableUniform("uLightPosition", NanoGL.VEC3_UNIFORM);
-
-        var shadowVsSource =  document.getElementById("shadow-vs").text;
-        var shadowFsSource =  document.getElementById("shadow-fs").text;
-
-        var shadowProgram = app.createProgram(shadowVsSource, shadowFsSource);
-        shadowProgram.enableAttribute("aPosition");
-        shadowProgram.enableUniform("uMVP", NanoGL.MAT4_UNIFORM);
-
-        var shadowBuffer = app.createFramebuffer(canvas.width, canvas.height, 0);
 
         var box = createBox({dimensions: [1.0, 1.0, 1.0]})
 
@@ -154,96 +159,81 @@
         mat4.lookAt(lightViewMatrix, lightPosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
         mat4.multiply(lightViewProjMatrix, projMatrix, lightViewMatrix);
 
-        // Object 1 xform
-        var mvpMatrix = mat4.create();
-        var lightMvpMatrix = mat4.create();
-        var modelMatrix = mat4.create();
-        var rotateXMatrix = mat4.create();
-        var rotateYMatrix = mat4.create();
-
-        // Object 2 xform
-        var mvpMatrix2 = mat4.create();
-        var lightMvpMatrix2 = mat4.create();
-        var modelMatrix2 = mat4.create();
-        var scaleMatrix = mat4.create();
-        var translateMatrix = mat4.create();
-
-        mat4.fromScaling(scaleMatrix, vec3.fromValues(0.1, 0.1, 0.1));
-        mat4.fromTranslation(translateMatrix, vec3.fromValues(0.8, 0.8, 0.4));
-
-        var angleX = 0;
-        var angleY = 0;
 
         var image = new Image();
 
         image.onload = function() {
+
             var texture = app.createTexture(image);
 
-            var drawCall = app.createDrawCall(mainProgram);
-            drawCall.setAttribute("aPosition", positions);
-            drawCall.setAttribute("aTexCoord", uv);
-            drawCall.setAttribute("aNormal", normals);
+            var boxes = [
+                {
+                    translate: [0, 0, 0],
+                    rotate: [0, 0, 0],
+                    scale: [1, 1, 1],
+                    mvpMatrix: mat4.create(),
+                    modelMatrix: mat4.create(),
+                    lightMvpMatrix: mat4.create(),
+                    mainDrawCall: null,
+                    shadowDrawCall: null
+                },
+                {
+                    translate: [0.8, 0.8, 0.4],
+                    rotate: [0, 0, Math.PI / 6],
+                    scale: [0.1, 0.1, 0.1],
+                    mvpMatrix: mat4.create(),
+                    modelMatrix: mat4.create(),
+                    lightMvpMatrix: mat4.create(),
+                    mainDrawCall: null,
+                    shadowDrawCall: null
+                }
+            ];
 
-            drawCall.setTexture("uTextureMap", 0, texture);
-            drawCall.setTexture("uShadowMap", 1, shadowBuffer.depthTexture);
-            drawCall.setUniform("uLightPosition", lightPosition);
-            drawCall.setUniform("uEyePosition", eyePosition);
+            var shadowDrawCalls = new Array(boxes.length);
+            var mainDrawCalls = new Array(boxes.length);
 
-            var drawCall2 = app.createDrawCall(mainProgram);
-            drawCall2.setAttribute("aPosition", positions);
-            drawCall2.setAttribute("aTexCoord", uv);
-            drawCall2.setAttribute("aNormal", normals);
+            for (var i = 0, len = boxes.length; i < len; ++i) {
+                shadowDrawCalls[i] = app.createDrawCall(shadowProgram);
+                shadowDrawCalls[i].setAttribute("aPosition", positions);
 
-            drawCall2.setTexture("uTextureMap", 0, texture);
-            drawCall2.setTexture("uShadowMap", 1, shadowBuffer.depthTexture);
-            drawCall2.setUniform("uLightPosition", lightPosition);
-            drawCall2.setUniform("uEyePosition", eyePosition);
+                mainDrawCalls[i] = app.createDrawCall(mainProgram);
+                mainDrawCalls[i].setAttribute("aPosition", positions);
+                mainDrawCalls[i].setAttribute("aTexCoord", uv);
+                mainDrawCalls[i].setAttribute("aNormal", normals)
+                mainDrawCalls[i].setTexture("uTextureMap", 0, texture);
+                mainDrawCalls[i].setTexture("uShadowMap", 1, shadowBuffer.depthTexture);
+                mainDrawCalls[i].setUniform("uLightPosition", lightPosition);
+                mainDrawCalls[i].setUniform("uEyePosition", eyePosition);
 
-            var mainDrawCalls = [drawCall, drawCall2];
+                boxes[i].mainDrawCall = mainDrawCalls[i];
+                boxes[i].shadowDrawCall = shadowDrawCalls[i];
+            }
 
-            var shadowDrawCall = app.createDrawCall(shadowProgram);
-            shadowDrawCall.setAttribute("aPosition", positions);
-
-            var shadowDrawCall2 = app.createDrawCall(shadowProgram);
-            shadowDrawCall2.setAttribute("aPosition", positions);
-
-            var shadowDrawCalls = [shadowDrawCall, shadowDrawCall2];
 
             function draw() {
-                angleX += 0.01;
-                angleY += 0.02;
 
-                mat4.fromXRotation(rotateXMatrix, angleX);
-                mat4.fromYRotation(rotateYMatrix, angleY);
-                mat4.multiply(modelMatrix, rotateXMatrix, rotateYMatrix);
-                mat4.multiply(mvpMatrix, viewProjMatrix, modelMatrix);
-                mat4.multiply(lightMvpMatrix, lightViewProjMatrix, modelMatrix);
+                for (var i = 0, len = boxes.length; i < len; ++i) {
+                    boxes[i].rotate[0] += 0.01;
+                    boxes[i].rotate[1] += 0.02;
 
-                
-                mat4.multiply(modelMatrix2, scaleMatrix, modelMatrix);
-                mat4.multiply(modelMatrix2, translateMatrix, modelMatrix2);
-                mat4.multiply(mvpMatrix2, viewProjMatrix, modelMatrix2);
-                mat4.multiply(lightMvpMatrix2, lightViewProjMatrix, modelMatrix2);
+                    utils.xformMatrix(boxes[i].modelMatrix, boxes[i].translate, boxes[i].rotate, boxes[i].scale);
+                    mat4.multiply(boxes[i].mvpMatrix, viewProjMatrix, boxes[i].modelMatrix);
+                    mat4.multiply(boxes[i].lightMvpMatrix, lightViewProjMatrix, boxes[i].modelMatrix);
+                    
+                    boxes[i].mainDrawCall.setUniform("uMVP", boxes[i].mvpMatrix);
+                    boxes[i].mainDrawCall.setUniform("uModelMatrix", boxes[i].modelMatrix);
+                    boxes[i].mainDrawCall.setUniform("uMVPFromLight", boxes[i].lightMvpMatrix);
+                    boxes[i].shadowDrawCall.setUniform("uMVP", boxes[i].lightMvpMatrix);
+                }
 
+                // Draw to shadow buffer
                 shadowBuffer.bind();
-                
                 app.drawCalls = shadowDrawCalls;        
-                shadowDrawCall.setUniform("uMVP", lightMvpMatrix);
-                shadowDrawCall2.setUniform("uMVP", lightMvpMatrix2);
-                app.draw();
-                
+                app.draw();                
                 shadowBuffer.unbind();
 
-                
+                // Main draw
                 app.drawCalls = mainDrawCalls;
-                drawCall.setUniform("uMVP", mvpMatrix);
-                drawCall.setUniform("uModelMatrix", modelMatrix);
-                drawCall.setUniform("uMVPFromLight", lightMvpMatrix);
-
-
-                drawCall2.setUniform("uMVP", mvpMatrix2);
-                drawCall2.setUniform("uModelMatrix", modelMatrix2);
-                drawCall2.setUniform("uMVPFromLight", lightMvpMatrix2);
                 app.draw();
 
                 requestAnimationFrame(draw);
