@@ -56,16 +56,9 @@
                         "void main() {" +
                         " gl_FragColor = vec4(color, 1.0);" +
                         "}";
+                        
         var program = app.createProgram(vsSource, fsSource);
-        program.enableAttribute("position");
-        program.enableAttribute("uv");
-        program.enableUniform("offset", NanoGL.VEC3_UNIFORM);
-        program.enableUniform("tex", NanoGL.INT_UNIFORM);
-
         var program2 = app.createProgram(vsSource, fsSource2);
-        program2.enableAttribute("position");
-        program2.enableUniform("offset", NanoGL.VEC3_UNIFORM);
-        program2.enableUniform("color", NanoGL.VEC3_UNIFORM);
 
         var positions = app.createArrayBuffer(NanoGL.FLOAT, 3, new Float32Array([
             -0.3, 0.1, 0.0,

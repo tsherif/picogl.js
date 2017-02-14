@@ -102,49 +102,32 @@
         var canvas = document.getElementById("gl-canvas");
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
+        var resolution = vec2.fromValues(canvas.width, canvas.height);
+
         var app = NanoGL.createApp(canvas);
         app.clearColor(0.0, 0.0, 0.0, 1.0);
         app.depthFunc(NanoGL.LEQUAL);
         app.blendFunc(NanoGL.ONE, NanoGL.ONE);
 
-        var vsSource =  document.getElementById("main-vs").text;
-        var fsSource =  document.getElementById("main-fs").text;
-
-        var mainProgram = app.createProgram(vsSource, fsSource);
-        mainProgram.enableAttribute("aPosition");
-        mainProgram.enableUniform("uMVP", NanoGL.MAT4_UNIFORM);
-        mainProgram.enableUniform("uTextureMap", NanoGL.INT_UNIFORM);
-        mainProgram.enableUniform("uPositionBuffer", NanoGL.INT_UNIFORM);
-        mainProgram.enableUniform("uNormalBuffer", NanoGL.INT_UNIFORM);
-        mainProgram.enableUniform("uUVBuffer", NanoGL.INT_UNIFORM);
-        mainProgram.enableUniform("uEyePosition", NanoGL.VEC3_UNIFORM);
-        mainProgram.enableUniform("uLightPosition", NanoGL.VEC3_UNIFORM);
-        mainProgram.enableUniform("uLightColor", NanoGL.VEC3_UNIFORM);
-        mainProgram.enableUniform("uResolution", NanoGL.VEC2_UNIFORM);
-
+        // Set up gbuffer program
         var geoVsSource =  document.getElementById("geo-vs").text;
         var geoFsSource =  document.getElementById("geo-fs").text;
-
         var geoProgram = app.createProgram(geoVsSource, geoFsSource);
-        geoProgram.enableAttribute("aPosition");
-        geoProgram.enableAttribute("aNormal");
-        geoProgram.enableAttribute("aUV");
-        geoProgram.enableUniform("uModelMatrix", NanoGL.MAT4_UNIFORM);
-        geoProgram.enableUniform("uMVP", NanoGL.MAT4_UNIFORM);
-
         var gBuffer = app.createFramebuffer(canvas.width, canvas.height, 3);
 
-        var box = utils.createBox();
+        // Set up main program
+        var vsSource =  document.getElementById("main-vs").text;
+        var fsSource =  document.getElementById("main-fs").text;
+        var mainProgram = app.createProgram(vsSource, fsSource);
 
+        // Geometry
+        var box = utils.createBox();
         var positions = app.createArrayBuffer(NanoGL.FLOAT, 3, new Float32Array(box.positions));
         var uv = app.createArrayBuffer(NanoGL.FLOAT, 2, new Float32Array(box.texture_coords));
         var normals = app.createArrayBuffer(NanoGL.FLOAT, 3, new Float32Array(box.normals));
 
-
         var sphere = utils.createSphere();
         var lightPositions = app.createArrayBuffer(NanoGL.FLOAT, 3, new Float32Array(sphere.positions));
-
-        var resolution = vec2.fromValues(canvas.width, canvas.height);
 
         // Camera stuff
         var projMatrix = mat4.create();

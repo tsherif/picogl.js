@@ -79,19 +79,9 @@
 
         var vsSource =  document.getElementById("vertex-draw").text;
         var fsSource =  document.getElementById("fragment-draw").text;
-
         var program = app.createProgram(vsSource, fsSource);
-        program.enableAttribute("position");
-        program.enableAttribute("uv");
-        program.enableAttribute("normal");
-        program.enableUniform("uViewProj", NanoGL.MAT4_UNIFORM);
-        program.enableUniform("uModel", NanoGL.MAT4_UNIFORM);
-        program.enableUniform("tex", NanoGL.INT_UNIFORM);
-        program.enableUniform("eyePosition", NanoGL.VEC3_UNIFORM);
-        program.enableUniform("lightPosition", NanoGL.VEC3_UNIFORM);
 
         var box = createBox({dimensions: [1.0, 1.0, 1.0]})
-
         var positions = app.createArrayBuffer(NanoGL.FLOAT, 3, new Float32Array(box.positions));
         var uv = app.createArrayBuffer(NanoGL.FLOAT, 2, new Float32Array(box.texture_coords));
         var normals = app.createArrayBuffer(NanoGL.FLOAT, 3, new Float32Array(box.normals));

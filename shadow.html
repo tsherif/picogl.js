@@ -112,31 +112,16 @@
         // Set up shadow program
         var shadowVsSource =  document.getElementById("shadow-vs").text;
         var shadowFsSource =  document.getElementById("shadow-fs").text;
-
         var shadowProgram = app.createProgram(shadowVsSource, shadowFsSource);
-        shadowProgram.enableAttribute("aPosition");
-        shadowProgram.enableUniform("uMVP", NanoGL.MAT4_UNIFORM);
-
         var shadowBuffer = app.createFramebuffer(canvas.width, canvas.height, 0);
 
         // Set up main program
         var vsSource =  document.getElementById("main-vs").text;
         var fsSource =  document.getElementById("main-fs").text;
-
         var mainProgram = app.createProgram(vsSource, fsSource);
-        mainProgram.enableAttribute("aPosition");
-        mainProgram.enableAttribute("aNormal");
-        mainProgram.enableAttribute("aTexCoord");
-        mainProgram.enableUniform("uMVP", NanoGL.MAT4_UNIFORM);
-        mainProgram.enableUniform("uMVPFromLight", NanoGL.MAT4_UNIFORM);
-        mainProgram.enableUniform("uModelMatrix", NanoGL.MAT4_UNIFORM);
-        mainProgram.enableUniform("uTextureMap", NanoGL.INT_UNIFORM);
-        mainProgram.enableUniform("uShadowMap", NanoGL.INT_UNIFORM);
-        mainProgram.enableUniform("uEyePosition", NanoGL.VEC3_UNIFORM);
-        mainProgram.enableUniform("uLightPosition", NanoGL.VEC3_UNIFORM);
 
+        // Geometry
         var box = createBox({dimensions: [1.0, 1.0, 1.0]})
-
         var positions = app.createArrayBuffer(NanoGL.FLOAT, 3, new Float32Array(box.positions));
         var uv = app.createArrayBuffer(NanoGL.FLOAT, 2, new Float32Array(box.texture_coords));
         var normals = app.createArrayBuffer(NanoGL.FLOAT, 3, new Float32Array(box.normals));

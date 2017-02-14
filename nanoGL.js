@@ -257,31 +257,56 @@
 
         this.gl = gl;
         this.program = program;
-        this.uniforms = {};
         this.attributes = {};
+        this.uniforms = {};
+
+        var numAttributes = gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES);
+        var numUniforms = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
+
+        for (var i = 0; i < numAttributes; ++i) {
+            var attributeInfo = gl.getActiveAttrib(program, i);
+            var attributeHandle = this.gl.getAttribLocation(this.program, attributeInfo.name);
+            this.attributes[attributeInfo.name] = attributeHandle;
+            this.gl.enableVertexAttribArray(attributeHandle); 
+        }
+
+        for (var i = 0; i < numUniforms; ++i) {
+            var uniformInfo = gl.getActiveUniform(program, i);
+            var uniformHandle = gl.getUniformLocation(this.program, uniformInfo.name);
+            var UniformClass = null;
+            switch (uniformInfo.type) {
+                case gl.INT: 
+                case gl.SAMPLER_2D: 
+                    UniformClass = NanoGL.IntUniform;
+                    break;
+                case gl.FLOAT: 
+                    UniformClass = NanoGL.FloatUniform;
+                    break;
+                case gl.FLOAT_VEC2: 
+                    UniformClass = NanoGL.Vec2Uniform;
+                    break;
+                case gl.FLOAT_VEC3: 
+                    UniformClass = NanoGL.Vec3Uniform;
+                    break;
+                case gl.FLOAT_MAT4: 
+                    UniformClass = NanoGL.Mat4Uniform;
+                    break;
+            }
+
+            this.uniforms[uniformInfo.name] = new UniformClass(gl, uniformHandle);
+        }
     }
 
     NanoGL.Program.prototype.bind = function() {
         this.gl.useProgram(this.program);
     };
 
-    NanoGL.Program.prototype.enableUniform = function(name, Type) {
-        var handle = this.gl.getUniformLocation(this.program, name);
-        this.uniforms[name] = new Type(this.gl, handle);
+    NanoGL.Program.prototype.bindAttribute = function(name, buffer) {
+        buffer.bind(this.attributes[name]);
     };
 
     NanoGL.Program.prototype.setUniform = function(name, value) {
         this.uniforms[name].set(value);
-    };
-
-    NanoGL.Program.prototype.enableAttribute = function(name) {
-        var attributeLocation = this.gl.getAttribLocation(this.program, name);
-        this.attributes[name] = attributeLocation;
-        this.gl.enableVertexAttribArray(attributeLocation); 
-    };
-
-    NanoGL.Program.prototype.bindAttribute = function(name, buffer) {
-        buffer.bind(this.attributes[name]);
     };
 
     NanoGL.FloatUniform = function FloatUniform(gl, handle) {
@@ -366,12 +391,6 @@
             this.value.set(value);
         }
     }
-
-    NanoGL.VEC2_UNIFORM = NanoGL.Vec2Uniform;
-    NanoGL.VEC3_UNIFORM = NanoGL.Vec3Uniform;
-    NanoGL.MAT4_UNIFORM =  NanoGL.Mat4Uniform;
-    NanoGL.INT_UNIFORM =  NanoGL.IntUniform;
-    NanoGL.FLOAT_UNIFORM =  NanoGL.FloatUniform;
 
     NanoGL.ArrayBuffer = function ArrayBuffer(gl, type, itemSize, data, indexArray) {
         this.gl = gl;
