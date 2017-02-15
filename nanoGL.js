@@ -77,6 +77,7 @@
     })();
 
     NanoGL.DUMMY_OBJECT = {};
+    NanoGL.tmpColor = new Uint8Array(4);
 
     NanoGL.createApp = function(canvas) {
         return new NanoGL.App(canvas);
@@ -127,6 +128,11 @@
 
     NanoGL.App.prototype.drawBackfaces = function() {
         this.gl.disable(this.gl.CULL_FACE);
+    };
+
+    NanoGL.App.prototype.readPixel = function(x, y, outVec4) {
+        this.gl.readPixels(x, y, 1, 1, this.gl.RGBA, this.gl.UNSIGNED_BYTE, NanoGL.tmpColor);
+        outVec4.set(NanoGL.tmpColor);
     };
 
     NanoGL.App.prototype.createProgram = function(vsSource, fsSource) {
@@ -231,7 +237,7 @@
             console.error(gl.getShaderInfoLog(vshader));
             var lines = vsSource.split("\n");
             for (var i = 0; i < lines.length; ++i) {
-                console.error(i + ":", lines[i]);
+                console.error((i + 1) + ":", lines[i]);
             }
         }
 
@@ -242,7 +248,7 @@
             console.error(gl.getShaderInfoLog(fshader));
             var lines = fsSource.split("\n");
             for (var i = 0; i < lines.length; ++i) {
-                console.error(i + ":", lines[i]);
+                console.error((i + 1) + ":", lines[i]);
             }
         }
 
@@ -267,7 +273,6 @@
             var attributeInfo = gl.getActiveAttrib(program, i);
             var attributeHandle = this.gl.getAttribLocation(this.program, attributeInfo.name);
             this.attributes[attributeInfo.name] = attributeHandle;
-            this.gl.enableVertexAttribArray(attributeHandle); 
         }
 
         for (var i = 0; i < numUniforms; ++i) {
@@ -411,6 +416,7 @@
 
         if (!this.indexArray) {
             this.gl.vertexAttribPointer(attribute, this.itemSize, this.type, false, 0, 0);
+            this.gl.enableVertexAttribArray(attribute); 
         }
     };
 

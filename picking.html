@@ -28,32 +28,32 @@
     <script src="utils.js"></script>
 </head>
 <body>
-    <canvas id="gl-canvas"></canvas>
-    <script id="shadow-vs" type="x-vertex-shader">
-      attribute vec4 aPosition;
-      uniform mat4 uMVP;
-      void main() {
-        gl_Position = uMVP * aPosition;
-      }
-    </script>
-    <script id="shadow-fs" type="x-fragment-shader">
-        precision highp float;
+    <canvas id="gl-canvas"></canvas> 
+    <script id="picking-vs" type="x-vertex-shader">
+        attribute vec4 aPosition;
+        uniform mat4 uMVP;
 
         void main() {
-        
+            gl_Position = uMVP * aPosition;
         }
-    </script> 
+    </script>
+    <script id="picking-fs" type="x-fragment-shader">
+        precision highp float;
+        uniform vec3 uPickColor;
+
+        void main() {
+            gl_FragColor = vec4(uPickColor, 1.0);
+        }
+    </script>
     <script id="main-vs" type="x-vertex-shader">
         attribute vec4 aPosition;
         attribute vec3 aNormal;
         attribute vec2 aTexCoord;
         uniform mat4 uModelMatrix;
         uniform mat4 uMVP;
-        uniform mat4 uMVPFromLight;
         varying vec3 vPosition;
         varying vec3 vNormal;
         varying vec2 vTexCoord;
-        varying vec4 vPositionFromLight;
         varying vec3 vModelPosition;
 
         void main() {
@@ -63,28 +63,21 @@
             vPosition = vec3(uModelMatrix * aPosition);
             vNormal = vec3(uModelMatrix * vec4(aNormal, 0.0));
             vTexCoord = aTexCoord;
-
-            vPositionFromLight = uMVPFromLight * aPosition;
         }
     </script>
     <script id="main-fs" type="x-fragment-shader">
         precision highp float;
         uniform vec3 uLightPosition;
         uniform vec3 uEyePosition;
-        uniform sampler2D uShadowMap;
         uniform sampler2D uTextureMap;
+        uniform vec3 uHighlightColor;
 
         varying vec3 vPosition;
         varying vec3 vNormal;
         varying vec2 vTexCoord;
-        varying vec4 vPositionFromLight;
         varying vec3 vModelPosition;
 
         void main() {
-            vec3 shadowCoord = (vPositionFromLight.xyz / vPositionFromLight.w) / 2.0 + 0.5;
-            vec4 rgbaDepth = texture2D(uShadowMap, shadowCoord.xy);
-            float depth = rgbaDepth.r;
-
             vec4 baseColor = texture2D(uTextureMap, vTexCoord);
 
             vec3 normal = normalize(vNormal);
@@ -95,11 +88,10 @@
             float diffuse = nDotL;
             float ambient = 0.1;
             float specular = pow(max(dot(reflectionDirection, eyeDirection), 0.0), 20.0);
-            float visibility = shadowCoord.z > depth + 0.02 ? 1.0 - 0.4 * nDotL : 1.0;
 
-            gl_FragColor = vec4(visibility * (ambient + diffuse + specular) * baseColor.rgb, baseColor.a);
+            gl_FragColor = vec4(uHighlightColor * (ambient + diffuse + specular) * baseColor.rgb, baseColor.a);
         }
-    </script> 
+    </script>
     <script type="text/javascript">
         var canvas = document.getElementById("gl-canvas");
         canvas.width = window.innerWidth;
@@ -110,15 +102,15 @@
         app.depthTest();
         app.cullBackfaces();
 
-        // Set up shadow program
-        var shadowVsSource =  document.getElementById("shadow-vs").text;
-        var shadowFsSource =  document.getElementById("shadow-fs").text;
-        var shadowProgram = app.createProgram(shadowVsSource, shadowFsSource);
-        var shadowBuffer = app.createFramebuffer(canvas.width, canvas.height, 0);
+        // Set up picking program
+        var pickingVsSource = document.getElementById("picking-vs").text;
+        var pickingFsSource = document.getElementById("picking-fs").text;
+        var pickingProgram = app.createProgram(pickingVsSource, pickingFsSource);
+        var pickingBuffer = app.createFramebuffer(canvas.width, canvas.height, 1);
 
         // Set up main program
-        var vsSource =  document.getElementById("main-vs").text;
-        var fsSource =  document.getElementById("main-fs").text;
+        var vsSource = document.getElementById("main-vs").text;
+        var fsSource = document.getElementById("main-fs").text;
         var mainProgram = app.createProgram(vsSource, fsSource);
 
         // Geometry
@@ -139,12 +131,12 @@
         mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
 
         // Light
-        var lightPosition = vec3.fromValues(1, 1, 0.5);        
-        var lightViewMatrix = mat4.create();
-        var lightViewProjMatrix = mat4.create();
-        mat4.lookAt(lightViewMatrix, lightPosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
-        mat4.multiply(lightViewProjMatrix, projMatrix, lightViewMatrix);
+        var lightPosition = vec3.fromValues(1, 1, 0.5);  
 
+
+        // Highlight
+        var highlightColor = vec3.fromValues(1.5, 1.5, 0.5);
+        var unhighlightColor = vec3.fromValues(1.0, 1.0, 1.0);
 
         var image = new Image();
 
@@ -159,9 +151,9 @@
                     scale: [1, 1, 1],
                     mvpMatrix: mat4.create(),
                     modelMatrix: mat4.create(),
-                    lightMvpMatrix: mat4.create(),
+                    pickColor: vec3.fromValues(1.0, 0.0, 0.0),
                     mainDrawCall: null,
-                    shadowDrawCall: null
+                    pickingDrawCall: null
                 },
                 {
                     translate: [0.8, 0.8, 0.4],
@@ -169,32 +161,42 @@
                     scale: [0.1, 0.1, 0.1],
                     mvpMatrix: mat4.create(),
                     modelMatrix: mat4.create(),
-                    lightMvpMatrix: mat4.create(),
+                    pickColor: vec3.fromValues(0.0, 1.0, 0.0),
                     mainDrawCall: null,
-                    shadowDrawCall: null
+                    pickingDrawCall: null
                 }
             ];
 
-            var shadowDrawCalls = new Array(boxes.length);
+            var pickingDrawCalls = new Array(boxes.length);
             var mainDrawCalls = new Array(boxes.length);
 
             for (var i = 0, len = boxes.length; i < len; ++i) {
-                shadowDrawCalls[i] = app.createDrawCall(shadowProgram);
-                shadowDrawCalls[i].setAttribute("aPosition", positions);
+                pickingDrawCalls[i] = app.createDrawCall(pickingProgram);
+                pickingDrawCalls[i].setAttribute("aPosition", positions);
 
                 mainDrawCalls[i] = app.createDrawCall(mainProgram);
                 mainDrawCalls[i].setAttribute("aPosition", positions);
                 mainDrawCalls[i].setAttribute("aTexCoord", uv);
                 mainDrawCalls[i].setAttribute("aNormal", normals)
                 mainDrawCalls[i].setTexture("uTextureMap", 0, texture);
-                mainDrawCalls[i].setTexture("uShadowMap", 1, shadowBuffer.depthTexture);
                 mainDrawCalls[i].setUniform("uLightPosition", lightPosition);
                 mainDrawCalls[i].setUniform("uEyePosition", eyePosition);
+                mainDrawCalls[i].setUniform("uHighlightColor", unhighlightColor);
 
                 boxes[i].mainDrawCall = mainDrawCalls[i];
-                boxes[i].shadowDrawCall = shadowDrawCalls[i];
+                boxes[i].pickingDrawCall = pickingDrawCalls[i];
             }
 
+            var mouseX = 0;
+            var mouseY = 0;
+            var picked = false;
+            var pickedColor = vec4.create();
+
+            window.addEventListener("mouseup", function(event) {
+                mouseX = event.clientX;
+                mouseY = event.clientY;
+                picked = true;
+            });
 
             function draw() {
 
@@ -204,19 +206,34 @@
 
                     utils.xformMatrix(boxes[i].modelMatrix, boxes[i].translate, boxes[i].rotate, boxes[i].scale);
                     mat4.multiply(boxes[i].mvpMatrix, viewProjMatrix, boxes[i].modelMatrix);
-                    mat4.multiply(boxes[i].lightMvpMatrix, lightViewProjMatrix, boxes[i].modelMatrix);
                     
+                    boxes[i].pickingDrawCall.setUniform("uMVP", boxes[i].mvpMatrix);
+                    boxes[i].pickingDrawCall.setUniform("uPickColor", boxes[i].pickColor);
                     boxes[i].mainDrawCall.setUniform("uMVP", boxes[i].mvpMatrix);
                     boxes[i].mainDrawCall.setUniform("uModelMatrix", boxes[i].modelMatrix);
-                    boxes[i].mainDrawCall.setUniform("uMVPFromLight", boxes[i].lightMvpMatrix);
-                    boxes[i].shadowDrawCall.setUniform("uMVP", boxes[i].lightMvpMatrix);
                 }
 
-                // Draw to shadow buffer
-                shadowBuffer.bind();
-                app.drawCalls = shadowDrawCalls;        
-                app.draw();                
-                shadowBuffer.unbind();
+                // Draw to picking buffer
+                if (picked) {
+                    pickingBuffer.bind();
+                    app.drawCalls = pickingDrawCalls;        
+                    app.draw();
+                    app.readPixel(mouseX, canvas.height - mouseY, pickedColor);
+                    
+                    boxes[0].mainDrawCall.setUniform("uHighlightColor", unhighlightColor);
+                    boxes[1].mainDrawCall.setUniform("uHighlightColor", unhighlightColor);
+                    
+                    if (pickedColor[0] === 255) {
+                        boxes[0].mainDrawCall.setUniform("uHighlightColor", highlightColor);
+                    }
+
+                    if (pickedColor[1] === 255) {
+                        boxes[1].mainDrawCall.setUniform("uHighlightColor", highlightColor);
+                    }
+
+                    pickingBuffer.unbind();
+                    picked = false;
+                }
 
                 // Main draw
                 app.drawCalls = mainDrawCalls;
