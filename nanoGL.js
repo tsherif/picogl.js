@@ -102,6 +102,10 @@
         this.gl.clearColor(r, g, b, a);
     };
 
+    NanoGL.App.prototype.depthRange = function(near, far) {
+        this.gl.depthRange(near, far);
+    };
+
     NanoGL.App.prototype.depthTest = function() {
         this.gl.enable(this.gl.DEPTH_TEST);
         this.gl.depthMask(true);

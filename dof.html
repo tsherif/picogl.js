@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<!--
+  The MIT License (MIT)
+
+  Copyright (c) 2017 Tarek Sherif
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy of
+  this software and associated documentation files (the "Software"), to deal in
+  the Software without restriction, including without limitation the rights to
+  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+  the Software, and to permit persons to whom the Software is furnished to do so,
+  subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+  FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+  COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+  IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+<html>
+<head>
+    <script src="gl-matrix.js"></script>
+    <script src="nanoGL.js"></script>
+    <script src="utils.js"></script>
+</head>
+<body>
+    <canvas id="gl-canvas"></canvas>
+    <script type="x-shader/vs" id="vertex-boxes">
+        attribute vec4 aPosition;
+        attribute vec2 aUV;
+        attribute vec3 aNormal;
+        uniform mat4 uMVP;
+        uniform mat4 uModel;
+        varying vec3 vPosition;
+        varying vec2 vUV;
+        varying vec3 vNormal;
+        void main() {
+            vec4 worldPosition = uModel * aPosition;
+            vPosition = worldPosition.xyz;
+            vUV = aUV;
+            vNormal = (uModel * vec4(aNormal, 0.0)).xyz;
+            gl_Position = uMVP * aPosition;
+        }
+    </script>
+    <script type="x-shader/fs" id="fragment-boxes">
+        precision highp float;
+
+        uniform vec3 uEyePosition;
+        uniform vec3 uLightPosition;
+        uniform sampler2D uTexture;
+        
+        varying vec3 vPosition;
+        varying vec2 vUV;
+        varying vec3 vNormal;
+        void main() {
+            vec3 color = texture2D(uTexture, vUV).rgb;
+
+            vec3 normal = normalize(vNormal);
+            vec3 eyeVec = normalize(uEyePosition - vPosition);
+            vec3 incidentVec = normalize(vPosition - uLightPosition);
+            vec3 lightVec = -incidentVec;
+            float diffuse = max(dot(lightVec, normal), 0.0);
+            float highlight = pow(max(dot(eyeVec, reflect(incidentVec, normal)), 0.0), 100.0);
+            float ambient = 0.1;
+            gl_FragColor = vec4(color * (diffuse + highlight + ambient), 1.0);
+        }
+    </script>
+    <script type="x-shader/vs" id="vertex-quad">
+        attribute vec4 aPosition;
+        varying vec2 vUV;
+        void main() {
+            vUV = aPosition.xy * 0.5 + 0.5;
+            gl_Position = aPosition;
+        }
+    </script>
+    <script type="x-shader/fs" id="fragment-blur">
+        precision highp float;
+
+        #define MAX_BLUR 20.0
+
+        varying vec2 vUV;
+
+        uniform float uFocusDistance;
+        uniform float uBlurCoefficient;
+        uniform float uPPM;
+        uniform sampler2D uTexture;
+        uniform sampler2D uDepth;
+        uniform vec2 uTexelOffset;
+        uniform vec2 uDepthRange;
+        void main() {
+            float depth = texture2D(uDepth, vUV).r * (uDepthRange.y - uDepthRange.x) + uDepthRange.x;
+            float deltaDepth = abs(uFocusDistance - depth);
+            float xdd = depth < uFocusDistance ? abs(uFocusDistance - deltaDepth) : abs(uFocusDistance + deltaDepth);
+            float blurRadius = min(floor(uBlurCoefficient * (deltaDepth / xdd) * uPPM), MAX_BLUR);
+            
+            vec4 color = vec4(0.0);
+            if (blurRadius > 1.0) {
+                float halfBlur = blurRadius * 0.5;
+
+                float count = 0.0;
+
+                for (float i = 0.0; i <= MAX_BLUR; ++i) {
+                    if (i > blurRadius) {
+                        break;
+                    }
+
+                    color += texture2D(uTexture, vUV + ((i - halfBlur) * uTexelOffset));
+                    ++count;
+                }
+
+                color /= count;
+            } else {
+                color = texture2D(uTexture, vUV);
+            }
+
+            gl_FragColor = color;
+        }
+    </script>
+    <script type="x-shader/fs" id="fragment-debug">
+        precision highp float;
+
+        varying vec2 vUV;
+        uniform sampler2D uTexture;
+        void main() {
+            gl_FragColor = texture2D(uTexture, vUV);
+        }
+    </script>
+    <script type="text/javascript">
+        var NEAR = 0.1;
+        var FAR = 10.0;
+        var FOCAL_LENGTH = 6;
+        var FOCUS_DISTANCE = 9.4;
+        var MAGNIFICATION = FOCAL_LENGTH / Math.abs(FOCUS_DISTANCE - FOCAL_LENGTH);
+        var FSTOP = 2.8;
+        var BLUR_COEFFICIENT = FOCAL_LENGTH * MAGNIFICATION / FSTOP;
+
+        var canvas = document.getElementById("gl-canvas");
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        var PPM = Math.sqrt(canvas.width * canvas.width + canvas.height * canvas.height) / 35;   
+
+        var screenTexelSize = vec2.fromValues(1.0 / canvas.width, 1.0 / canvas.height);
+        
+        var app = NanoGL.createApp(canvas);
+        app.depthTest();
+        app.clearColor(0.0, 0.0, 0.0, 1.0);
+
+        var depthRange = vec2.fromValues(NEAR, FAR);
+
+        var boxVsSource =  document.getElementById("vertex-boxes").text;
+        var boxFsSource =  document.getElementById("fragment-boxes").text;
+        var boxProgram = app.createProgram(boxVsSource, boxFsSource);
+
+        var quadVsSource =  document.getElementById("vertex-quad").text;
+
+        var blurFsSource = document.getElementById("fragment-blur").text;
+        var hBlurProgram = app.createProgram(quadVsSource, blurFsSource);
+        var blurProgram = app.createProgram(quadVsSource, blurFsSource);
+
+        var debugFsSource =  document.getElementById("fragment-debug").text;
+        var debugProgram = app.createProgram(quadVsSource, debugFsSource);
+
+        var boxBuffer = app.createFramebuffer(canvas.width, canvas.height);
+        var hblurBuffer = app.createFramebuffer(canvas.width, canvas.height);
+        var blurBuffer = app.createFramebuffer(canvas.width, canvas.height);
+        var dofBuffer = app.createFramebuffer(canvas.width, canvas.height);
+
+        // Geometry
+        var box = utils.createBox({dimensions: [1.0, 1.0, 1.0]})
+        var positions = app.createArrayBuffer(NanoGL.FLOAT, 3, new Float32Array(box.positions));
+        var uv = app.createArrayBuffer(NanoGL.FLOAT, 2, new Float32Array(box.texture_coords));
+        var normals = app.createArrayBuffer(NanoGL.FLOAT, 3, new Float32Array(box.normals));
+
+        var quadPositions = app.createArrayBuffer(NanoGL.FLOAT, 2, new Float32Array([
+            -1, 1,
+            -1, -1,
+            1, -1,
+            -1, 1,
+            1, -1,
+            1, 1,
+        ]));
+
+        // Camera stuff
+        var projMatrix = mat4.create();
+        mat4.perspective(projMatrix, Math.PI / 2, canvas.width / canvas.height, NEAR, FAR);
+
+        var viewMatrix = mat4.create();
+        var eyePosition = vec3.fromValues(1, 1, 1);
+        mat4.lookAt(viewMatrix, eyePosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
+
+        var viewProjMatrix = mat4.create();
+        mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
+
+        var lightPosition = vec3.fromValues(1, 1, 0.5);
+
+        var modelMatrix = mat4.create();
+        var rotateXMatrix = mat4.create();
+        var rotateYMatrix = mat4.create();
+
+        var image = new Image();
+
+        image.onload = function() {
+            var texture = app.createTexture(image);
+
+            var NUM_ROWS = 5;
+            var BOXES_PER_ROW = 20;
+            var NUM_BOXES = BOXES_PER_ROW * NUM_ROWS;
+            var boxes = new Array(NUM_BOXES);
+            var drawCalls = new Array(NUM_BOXES);
+
+            var boxI = 0;
+            for (var j = 0; j < NUM_ROWS; ++j) {
+                var rowOffset = (j - Math.floor(NUM_ROWS / 2));
+                for (var i = 0; i < BOXES_PER_ROW; ++i) {
+                    boxes[boxI] = {
+                        scale: [0.9, 0.9, 0.9],
+                        rotate: [-boxI / Math.PI, 0, boxI / Math.PI],
+                        translate: [-i + 2 - rowOffset, 0, -i + 2 + rowOffset],
+                        modelMatrix: mat4.create(),
+                        mvpMatrix: mat4.create(),
+                        drawCall: app.createDrawCall(boxProgram)
+                    }
+
+                    boxes[boxI].drawCall.setAttribute("aPosition", positions);
+                    boxes[boxI].drawCall.setAttribute("aNormal", normals);
+                    boxes[boxI].drawCall.setAttribute("aUV", uv);
+                    boxes[boxI].drawCall.setUniform("uEyePosition", eyePosition);
+                    boxes[boxI].drawCall.setUniform("uLightPosition", lightPosition);
+                    boxes[boxI].drawCall.setTexture("uTexture", 0, texture);
+
+                    drawCalls[boxI] = boxes[boxI].drawCall;
+                    ++boxI;
+                }
+            }
+
+            var hTexelOffset = vec2.fromValues(screenTexelSize[0], 0.0);
+            var vTexelOffset = vec2.fromValues(0.0, screenTexelSize[1]);
+
+            var hBlurDrawCall = app.createDrawCall(hBlurProgram);
+            hBlurDrawCall.setAttribute("aPosition", quadPositions);
+            hBlurDrawCall.setUniform("uFocusDistance", FOCUS_DISTANCE);
+            hBlurDrawCall.setUniform("uBlurCoefficient", BLUR_COEFFICIENT);
+            hBlurDrawCall.setUniform("uPPM", PPM);
+            hBlurDrawCall.setUniform("uTexelOffset", hTexelOffset);
+            hBlurDrawCall.setUniform("uDepthRange", depthRange);
+            hBlurDrawCall.setTexture("uTexture", 0, boxBuffer.colorTextures[0]);
+            hBlurDrawCall.setTexture("uDepth", 1, boxBuffer.depthTexture);
+
+            var hBlurDrawCalls = [hBlurDrawCall];
+
+            var blurDrawCall = app.createDrawCall(blurProgram);
+            blurDrawCall.setAttribute("aPosition", quadPositions);
+            blurDrawCall.setUniform("uFocusDistance", FOCUS_DISTANCE);
+            blurDrawCall.setUniform("uBlurCoefficient", BLUR_COEFFICIENT);
+            blurDrawCall.setUniform("uPPM", PPM);
+            blurDrawCall.setUniform("uTexelOffset", vTexelOffset);
+            blurDrawCall.setUniform("uDepthRange", depthRange);
+            blurDrawCall.setTexture("uTexture", 0, hblurBuffer.colorTextures[0]);
+            blurDrawCall.setTexture("uDepth", 1, boxBuffer.depthTexture);
+
+            var blurDrawCalls = [blurDrawCall];
+
+            var debugDrawCall = app.createDrawCall(debugProgram);
+            debugDrawCall.setAttribute("aPosition", quadPositions);
+            // debugDrawCall.setTexture("uTexture", 0, boxBuffer.colorTextures[0]);
+            debugDrawCall.setTexture("uTexture", 0, boxBuffer.depthTexture);
+
+            var debugDrawCalls = [debugDrawCall];
+
+            function draw() {
+
+                for (var i = 0, len = boxes.length; i < len; ++i) {
+                    boxes[i].rotate[0] += 0.01;
+                    boxes[i].rotate[1] += 0.02;
+
+                    utils.xformMatrix(boxes[i].modelMatrix, boxes[i].translate, boxes[i].rotate, boxes[i].scale);
+                    mat4.multiply(boxes[i].mvpMatrix, viewProjMatrix, boxes[i].modelMatrix);
+                
+                    boxes[i].drawCall.setUniform("uMVP", boxes[i].mvpMatrix);
+                    boxes[i].drawCall.setUniform("uModel", boxes[i].modelMatrix);
+                }
+
+                boxBuffer.bind();
+                app.drawCalls = drawCalls;
+                app.draw();
+                boxBuffer.unbind();
+                
+                hblurBuffer.bind();
+                app.drawCalls = hBlurDrawCalls;
+                app.draw();
+                hblurBuffer.unbind();
+
+                app.drawCalls = blurDrawCalls;
+                app.draw();
+
+                requestAnimationFrame(draw);
+            }
+
+            requestAnimationFrame(draw);
+            
+        }
+
+        image.src = "khronos_webgl.png";
+
+    </script>
+</body>
+</html>
