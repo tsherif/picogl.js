@@ -93,6 +93,7 @@
         this.gl.viewport(0, 0, canvas.width, canvas.height);
 
         this.gl.getExtension("WEBGL_depth_texture");
+        this.gl.getExtension("OES_texture_float");
         
         this.drawBuffers = this.gl.getExtension("WEBGL_draw_buffers");
         this.maxDrawBuffers = this.gl.getParameter(this.drawBuffers.MAX_DRAW_BUFFERS_WEBGL);
@@ -482,6 +483,7 @@
         for (var i = 0; i < this.numColorTargets; ++i) {
             this.colorTextures[i] = new NanoGL.Texture(gl, null, {
                 array: true,
+                type: gl.FLOAT,
                 width: width,
                 height: height,
                 minFilter: gl.NEAREST,
