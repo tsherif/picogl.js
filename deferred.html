@@ -113,7 +113,7 @@
         var geoVsSource =  document.getElementById("geo-vs").text;
         var geoFsSource =  document.getElementById("geo-fs").text;
         var geoProgram = app.createProgram(geoVsSource, geoFsSource);
-        var gBuffer = app.createFramebuffer(canvas.width, canvas.height, 3);
+        var gBuffer = app.createFramebuffer(canvas.width, canvas.height, 3, NanoGL.FLOAT);
 
         // Set up main program
         var vsSource =  document.getElementById("main-vs").text;

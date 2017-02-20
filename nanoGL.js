@@ -156,8 +156,8 @@
         return new NanoGL.Texture(this.gl, image, options);
     };
 
-    NanoGL.App.prototype.createFramebuffer = function(width, height, numColorTextures) {
-        return new NanoGL.Framebuffer(this.gl, this.drawBuffers, width, height, numColorTextures);
+    NanoGL.App.prototype.createFramebuffer = function(width, height, numColorTextures, colorTargetType) {
+        return new NanoGL.Framebuffer(this.gl, this.drawBuffers, width, height, numColorTextures, colorTargetType);
     };
 
     NanoGL.App.prototype.createDrawCall = function(program, primitive) {
@@ -471,7 +471,7 @@
         this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
     }
 
-    NanoGL.Framebuffer = function Framebuffer(gl, drawBuffers, width, height, numColorTargets) {
+    NanoGL.Framebuffer = function Framebuffer(gl, drawBuffers, width, height, numColorTargets, colorTargetType) {
         this.gl = gl;
         this.drawBuffers = drawBuffers;
         this.framebuffer = gl.createFramebuffer();
@@ -483,7 +483,7 @@
         for (var i = 0; i < this.numColorTargets; ++i) {
             this.colorTextures[i] = new NanoGL.Texture(gl, null, {
                 array: true,
-                type: gl.FLOAT,
+                type: colorTargetType || gl.UNSIGNED_BYTE,
                 width: width,
                 height: height,
                 minFilter: gl.NEAREST,
