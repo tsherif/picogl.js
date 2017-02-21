@@ -38,6 +38,31 @@
         NanoGL.UNSIGNED_INT = gl.UNSIGNED_INT;
         NanoGL.UNSIGNED_SHORT = gl.UNSIGNED_SHORT;
         NanoGL.UNSIGNED_BYTE = gl.UNSIGNED_BYTE;
+
+        // Texture internal formats
+        NanoGL.RGB = gl.RGB;
+        NanoGL.RGBA = gl.RGBA;
+        NanoGL.DEPTH_COMPONENT = gl.DEPTH_COMPONENT;
+
+        // Texture filtering
+        NanoGL.LINEAR = gl.LINEAR;
+        NanoGL.NEAREST = gl.NEAREST;
+        NanoGL.NEAREST_MIPMAP_NEAREST = gl.NEAREST_MIPMAP_NEAREST;
+        NanoGL.NEAREST_MIPMAP_LINEAR = gl.NEAREST_MIPMAP_LINEAR;
+        NanoGL.LINEAR_MIPMAP_NEAREST = gl.LINEAR_MIPMAP_NEAREST;
+        NanoGL.LINEAR_MIPMAP_LINEAR = gl.LINEAR_MIPMAP_LINEAR;
+        NanoGL.REPEAT = gl.REPEAT;
+        NanoGL.MIRRORED_REPEAT = gl.MIRRORED_REPEAT;
+        NanoGL.CLAMP_TO_EDGE = gl.CLAMP_TO_EDGE;
+
+        // Data types
+        NanoGL.FLOAT = gl.FLOAT;
+        NanoGL.INT = gl.INT;
+        NanoGL.SHORT = gl.SHORT;
+        NanoGL.BYTE = gl.BYTE;
+        NanoGL.UNSIGNED_INT = gl.UNSIGNED_INT;
+        NanoGL.UNSIGNED_SHORT = gl.UNSIGNED_SHORT;
+        NanoGL.UNSIGNED_BYTE = gl.UNSIGNED_BYTE;
         
         // Depth functions
         NanoGL.NEVER = gl.NEVER;
@@ -94,6 +119,7 @@
 
         this.gl.getExtension("WEBGL_depth_texture");
         this.gl.getExtension("OES_texture_float");
+        this.gl.getExtension("OES_texture_float_linear");
         
         this.drawBuffers = this.gl.getExtension("WEBGL_draw_buffers");
         this.maxDrawBuffers = this.gl.getParameter(this.drawBuffers.MAX_DRAW_BUFFERS_WEBGL);
@@ -455,7 +481,7 @@
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, wrapT);
 
         if (array) {
-            gl.texImage2D(gl.TEXTURE_2D, 0, internalFormat, width, height, 0, internalFormat, type, null);
+            gl.texImage2D(gl.TEXTURE_2D, 0, internalFormat, width, height, 0, internalFormat, type, image);
         } else {
             gl.texImage2D(gl.TEXTURE_2D, 0, internalFormat, internalFormat, type, image);
         }
