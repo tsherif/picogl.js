@@ -177,7 +177,7 @@
             gl_FragColor = vec4(clamp(color.rgb - texture2D(uOcclusionBuffer, vScreenUV).r, 0.0, 1.0), color.a);
         }
     </script>
-    <script id="debug-fs" type="x-shader/fs">
+    <script id="texture-fs" type="x-shader/fs">
         precision highp float;
 
         varying vec2 vScreenUV;
@@ -226,9 +226,9 @@
         var aoBlendFsSource =  document.getElementById("aoblend-fs").text;
         var aoBlendProgram = app.createProgram(aoBlendVsSource, aoBlendFsSource);
 
-        var debugVsSource =  document.getElementById("quad-vs").text;
-        var debugFsSource =  document.getElementById("debug-fs").text;
-        var debugProgram = app.createProgram(debugVsSource, debugFsSource);
+        var textureVsSource =  document.getElementById("quad-vs").text;
+        var textureFsSource =  document.getElementById("texture-fs").text;
+        var textureProgram = app.createProgram(textureVsSource, textureFsSource);
 
         // Geometry
         var sphere = utils.createSphere({radius: 0.5});
@@ -250,7 +250,7 @@
         mat4.perspective(projMatrix, Math.PI / 2, canvas.width / canvas.height, NEAR, FAR);
 
         var viewMatrix = mat4.create();
-        var eyePosition = vec3.fromValues(0, 1, 2);
+        var eyePosition = vec3.fromValues(0, 0.8, 2);
         mat4.lookAt(viewMatrix, eyePosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
 
 
@@ -331,11 +331,11 @@
 
             var aoBlendDrawCalls = [aoBlendDrawCall];
 
-            var debugDrawCall = app.createDrawCall(debugProgram);
-            debugDrawCall.setAttribute("aPosition", quadPositions);
-            debugDrawCall.setTexture("uTexture", 0, drawBuffer.colorTextures[0]);
+            var colorBufferDrawCall = app.createDrawCall(textureProgram);
+            colorBufferDrawCall.setAttribute("aPosition", quadPositions);
+            colorBufferDrawCall.setTexture("uTexture", 0, drawBuffer.colorTextures[0]);
 
-            var debugDrawCalls = [debugDrawCall];
+            var colorBufferDrawCalls = [colorBufferDrawCall];
 
             var rotationMatrix = mat4.create();
 
@@ -367,7 +367,7 @@
                     app.drawCalls = aoBlendDrawCalls;
                     app.draw();
                 } else {
-                    app.drawCalls = debugDrawCalls;
+                    app.drawCalls = colorBufferDrawCalls;
                     app.draw();  
                 }
                                 
