@@ -26,8 +26,19 @@
     <script src="gl-matrix.js"></script>
     <script src="nanoGL.js"></script>
     <script src="utils.js"></script>
+    <style>
+        #ssao-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: white;
+        }
+    </style>
 </head>
 <body>
+    <div id="ssao-controls">
+        Enable SSAO: <input id="ssao-toggle" type="checkbox" checked>
+    </div>
     <canvas id="gl-canvas"></canvas>
     <script id="draw-vs" type="x-shader/vs">
       
@@ -112,13 +123,6 @@
         uniform sampler2D uNormalBuffer;
         uniform sampler2D uNoiseBuffer;
 
-        vec2 noisyVec(vec2 uv) {
-            return vec2(
-                    sin(uv.x * 5.0) + cos(uv.y * 7.0),
-                    sin(uv.y * 7.0) - cos(uv.x * 5.0)
-                );
-        }
-
         float getOcclusion(vec3 position, vec3 normal, vec2 uv) {
             vec3 occluderPosition = texture2D(uPositionBuffer, uv).xyz;
             vec3 positionVec = occluderPosition - position;
@@ -133,7 +137,6 @@
             vec3 position = texture2D(uPositionBuffer, vScreenUV).xyz;
             vec3 normal = texture2D(uNormalBuffer, vScreenUV).xyz;
             vec2 rand = normalize(texture2D(uNoiseBuffer, vScreenUV).xy);
-            // vec2 rand = normalize(noisyVec(vScreenUV));
             float depth = (length(position) - uDepthRange.x) / (uDepthRange.y - uDepthRange.x);
 
             float kernelRadius = uSampleRadius * (1.0 - depth);
@@ -161,7 +164,6 @@
             occlusion = clamp(occlusion / 16.0, 0.0, 1.0);
 
             gl_FragColor.r = occlusion;
-            gl_FragColor.a = 1.0;
         }
     </script>
     <script id="aoblend-fs" type="x-shader/fs">
@@ -185,6 +187,12 @@
         }
     </script>
     <script type="text/javascript">
+        var ssaoEnabled = true;
+
+        document.getElementById("ssao-toggle").addEventListener("change", function() {
+            ssaoEnabled = this.checked;
+        });
+
         var NEAR = 0.1;
         var FAR = 10.0;
 
@@ -223,10 +231,10 @@
         var debugProgram = app.createProgram(debugVsSource, debugFsSource);
 
         // Geometry
-        var box = utils.createBox();
-        var positions = app.createArrayBuffer(NanoGL.FLOAT, 3, new Float32Array(box.positions));
-        var uv = app.createArrayBuffer(NanoGL.FLOAT, 2, new Float32Array(box.texture_coords));
-        var normals = app.createArrayBuffer(NanoGL.FLOAT, 3, new Float32Array(box.normals));
+        var sphere = utils.createSphere({radius: 0.5});
+        var positions = app.createArrayBuffer(NanoGL.FLOAT, 3, new Float32Array(sphere.positions));
+        var uv = app.createArrayBuffer(NanoGL.FLOAT, 2, new Float32Array(sphere.texture_coords));
+        var normals = app.createArrayBuffer(NanoGL.FLOAT, 3, new Float32Array(sphere.normals));
 
         var quadPositions = app.createArrayBuffer(NanoGL.FLOAT, 2, new Float32Array([
             -1, 1,
@@ -242,12 +250,12 @@
         mat4.perspective(projMatrix, Math.PI / 2, canvas.width / canvas.height, NEAR, FAR);
 
         var viewMatrix = mat4.create();
-        var eyePosition = vec3.fromValues(1, 1, 1);
+        var eyePosition = vec3.fromValues(0, 1, 2);
         mat4.lookAt(viewMatrix, eyePosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
 
 
         // Light
-        var lightPosition = vec3.fromValues(1, 1, 1); 
+        var lightPosition = vec3.fromValues(0.5, 1, 2); 
 
         var image = new Image();
 
@@ -271,38 +279,36 @@
                 height: noiseTextureDim
             });
 
-            var NUM_BOXES = 20;
-            var boxes = new Array(NUM_BOXES);
-            var boxDrawCalls = new Array(NUM_BOXES);
+            var NUM_SPHERES = 32;
+            var NUM_PER_ROW = 8;
+            var RADIUS = 0.8;
+            var spheres = new Array(NUM_SPHERES);
+            var sphereDrawCalls = new Array(NUM_SPHERES);
 
-            for (var i = 0; i < NUM_BOXES; ++i) {
-                boxes[i] = {
-                    scale: [0.5, 0.5, 0.5],
-                    rotate: [
-                        (Math.random() * 2.0 - 1.0) * Math.PI,
-                        (Math.random() * 2.0 - 1.0) * Math.PI,
-                        (Math.random() * 2.0 - 1.0) * Math.PI
-                    ],
-                    translate: [
-                        (Math.random() * 2.0 - 1.0) * 0.7,
-                        (Math.random() * 2.0 - 1.0) * 0.7,
-                        (Math.random() * 2.0 - 1.0) * 0.7
-                    ],
+            for (var i = 0; i < NUM_SPHERES; ++i) {
+                var angle = 2 * Math.PI * (i % NUM_PER_ROW) / NUM_PER_ROW;
+                var x = Math.sin(angle) * RADIUS;
+                var y = Math.floor(i / NUM_PER_ROW) / (NUM_PER_ROW / 4) - 0.75;
+                var z = Math.cos(angle) * RADIUS;
+                spheres[i] = {
+                    scale: [0.8, 0.8, 0.8],
+                    rotate: [0, 0, 0], // Will be used for global rotation
+                    translate: [x, y, z],
                     modelMatrix: mat4.create(),
                     mvpMatrix: mat4.create(),
                     drawCall: app.createDrawCall(drawProgram)
-                }
+                };
 
-                boxes[i].drawCall.setAttribute("aPosition", positions);
-                boxes[i].drawCall.setAttribute("aNormal", normals);
-                boxes[i].drawCall.setAttribute("aUV", uv);
-                boxes[i].drawCall.setUniform("uProjection", projMatrix);
-                boxes[i].drawCall.setUniform("uViewMatrix", viewMatrix);
-                boxes[i].drawCall.setUniform("uEyePosition", eyePosition);
-                boxes[i].drawCall.setUniform("uLightPosition", lightPosition);
-                boxes[i].drawCall.setTexture("uTexture", 0, texture);
+                spheres[i].drawCall.setAttribute("aPosition", positions);
+                spheres[i].drawCall.setAttribute("aNormal", normals);
+                spheres[i].drawCall.setAttribute("aUV", uv);
+                spheres[i].drawCall.setUniform("uProjection", projMatrix);
+                spheres[i].drawCall.setUniform("uViewMatrix", viewMatrix);
+                spheres[i].drawCall.setUniform("uEyePosition", eyePosition);
+                spheres[i].drawCall.setUniform("uLightPosition", lightPosition);
+                spheres[i].drawCall.setTexture("uTexture", 0, texture);
 
-                boxDrawCalls[i] = boxes[i].drawCall;
+                sphereDrawCalls[i] = spheres[i].drawCall;
             }
 
             var ssaoDrawCall = app.createDrawCall(ssaoProgram);
@@ -327,38 +333,44 @@
 
             var debugDrawCall = app.createDrawCall(debugProgram);
             debugDrawCall.setAttribute("aPosition", quadPositions);
-            debugDrawCall.setTexture("uTexture", 0, drawBuffer.colorTextures[2]);
-            // debugDrawCall.setTexture("uTexture", 0, boxBuffer.depthTexture);
+            debugDrawCall.setTexture("uTexture", 0, drawBuffer.colorTextures[0]);
 
             var debugDrawCalls = [debugDrawCall];
+
+            var rotationMatrix = mat4.create();
 
             function draw() {
 
                 // Draw to drawBuffer
                 drawBuffer.bind();
-                app.drawCalls = boxDrawCalls;
+                app.drawCalls = sphereDrawCalls;
 
-                for (var i = 0, len = boxes.length; i < len; ++i) {
+                for (var i = 0, len = spheres.length; i < len; ++i) {
+                    spheres[i].rotate[1] += 0.002;
 
-                    utils.xformMatrix(boxes[i].modelMatrix, boxes[i].translate, boxes[i].rotate, boxes[i].scale);
-                
-                    boxes[i].drawCall.setUniform("uModelMatrix", boxes[i].modelMatrix);
+                    utils.xformMatrix(spheres[i].modelMatrix, spheres[i].translate, null, spheres[i].scale);
+                    mat4.fromYRotation(rotationMatrix, spheres[i].rotate[1]);
+                    mat4.multiply(spheres[i].modelMatrix, rotationMatrix, spheres[i].modelMatrix)
+
+                    spheres[i].drawCall.setUniform("uModelMatrix", spheres[i].modelMatrix);
                 }
 
                 app.draw();
                 drawBuffer.unbind();
 
-                ssaoBuffer.bind();
-                app.drawCalls = ssaoDrawCalls;
-                app.draw();
-                ssaoBuffer.unbind(); 
+                if (ssaoEnabled) {
+                    ssaoBuffer.bind();
+                    app.drawCalls = ssaoDrawCalls;
+                    app.draw();
+                    ssaoBuffer.unbind(); 
 
-                app.drawCalls = aoBlendDrawCalls;
-                app.draw();
-
-                // app.drawCalls = debugDrawCalls;
-                // app.draw();                  
-                
+                    app.drawCalls = aoBlendDrawCalls;
+                    app.draw();
+                } else {
+                    app.drawCalls = debugDrawCalls;
+                    app.draw();  
+                }
+                                
                 requestAnimationFrame(draw);
             }
 
