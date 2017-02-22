@@ -132,8 +132,8 @@
         void main() {
             vec3 position = texture2D(uPositionBuffer, vScreenUV).xyz;
             vec3 normal = texture2D(uNormalBuffer, vScreenUV).xyz;
-            // vec2 rand = normalize(texture2D(uNoiseBuffer, vScreenUV).xy);
-            vec2 rand = normalize(noisyVec(vScreenUV));
+            vec2 rand = normalize(texture2D(uNoiseBuffer, vScreenUV).xy);
+            // vec2 rand = normalize(noisyVec(vScreenUV));
             float depth = (length(position) - uDepthRange.x) / (uDepthRange.y - uDepthRange.x);
 
             float kernelRadius = uSampleRadius * (1.0 - depth);
@@ -146,7 +146,7 @@
 
             float occlusion = 0.0;
             for (int i = 0; i < 4; ++i) {
-                vec2 k1 = reflect(kernel[0], rand);
+                vec2 k1 = reflect(kernel[i], rand);
                 vec2 k2 = vec2(k1.x * SIN45 - k1.y * SIN45, k1.x * SIN45 + k1.y * SIN45);
 
                 k1 *= uTexelOffset * kernelRadius;
@@ -258,17 +258,8 @@
 
             for (var i = 0; i < numNoisePixels; ++i) {
                 var index = i * 3;
-                var x = i % noiseTextureDim;
-                var y = Math.round(i / noiseTextureDim);
-                var iAngle = i / (Math.PI * 20.0);
-                var xAngle = x / (Math.PI * 20.0);
-                var yAngle = y / (Math.PI * 20.0);
-                noiseTextureData[index]     =   Math.sin(iAngle) + Math.cos(xAngle) + Math.sin(yAngle);
-                // noiseTextureData[index]     += (Math.sin(2.0 * iAngle) + Math.cos(2.0 * xAngle) + Math.sin(2.0 * yAngle)) / 2;
-                // noiseTextureData[index]     += (Math.sin(4.0 * iAngle) + Math.cos(4.0 * xAngle) + Math.sin(4.0 * yAngle)) / 4;
-                noiseTextureData[index + 1]     =   Math.cos(iAngle) +       Math.sin(xAngle) + Math.cos(yAngle);
-                // noiseTextureData[index + 1]     += (Math.cos(2.0 * iAngle) + Math.sin(2.0 * xAngle) + Math.cos(2.0 * yAngle)) / 2;
-                // noiseTextureData[index + 1]     += (Math.cos(4.0 * iAngle) + Math.sin(4.0 * xAngle) + Math.cos(4.0 * yAngle)) / 4;
+                noiseTextureData[index]     = Math.random() * 2.0 - 1.0;
+                noiseTextureData[index + 1] = Math.random() * 2.0 - 1.0;
             }
 
             var texture = app.createTexture(image);
@@ -318,12 +309,12 @@
             ssaoDrawCall.setAttribute("aPosition", quadPositions);
             ssaoDrawCall.setUniform("uSampleRadius", 8.0);
             ssaoDrawCall.setUniform("uBias", 0.01);
-            ssaoDrawCall.setUniform("uAttenuation", vec2.fromValues(1, 0));
+            ssaoDrawCall.setUniform("uAttenuation", vec2.fromValues(1, 1));
             ssaoDrawCall.setUniform("uTexelOffset", screenTexelSize);
             ssaoDrawCall.setUniform("uDepthRange", depthRange);
             ssaoDrawCall.setTexture("uPositionBuffer", 0, drawBuffer.colorTextures[1]);
             ssaoDrawCall.setTexture("uNormalBuffer", 1, drawBuffer.colorTextures[2]);
-            // ssaoDrawCall.setTexture("uNoiseBuffer", 2, noiseTexture);
+            ssaoDrawCall.setTexture("uNoiseBuffer", 2, noiseTexture);
 
             var ssaoDrawCalls = [ssaoDrawCall];
 
