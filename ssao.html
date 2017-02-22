@@ -114,8 +114,8 @@
 
         vec2 noisyVec(vec2 uv) {
             return vec2(
-                    fract(sin(uv.x * 13.0) + cos(uv.y * 7.0)),
-                    fract(sin(uv.y * 17.0) - cos(uv.x * 13.0))
+                    sin(uv.x * 5.0) + cos(uv.y * 7.0),
+                    sin(uv.y * 7.0) - cos(uv.x * 5.0)
                 );
         }
 
@@ -336,7 +336,7 @@
 
             var debugDrawCall = app.createDrawCall(debugProgram);
             debugDrawCall.setAttribute("aPosition", quadPositions);
-            debugDrawCall.setTexture("uTexture", 0, noiseTexture);
+            debugDrawCall.setTexture("uTexture", 0, drawBuffer.colorTextures[2]);
             // debugDrawCall.setTexture("uTexture", 0, boxBuffer.depthTexture);
 
             var debugDrawCalls = [debugDrawCall];
@@ -363,7 +363,10 @@
                 ssaoBuffer.unbind(); 
 
                 app.drawCalls = aoBlendDrawCalls;
-                app.draw();                
+                app.draw();
+
+                // app.drawCalls = debugDrawCalls;
+                // app.draw();                  
                 
                 requestAnimationFrame(draw);
             }
