@@ -110,7 +110,7 @@
 
     NanoGL.App = function App(canvas) {
         this.canvas = canvas;
-        this.gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+        this.gl = canvas.getContext("webgl", {alpha: false}) || canvas.getContext("experimental-webgl");
         this.drawCalls = [];
 
         this.program = null;
@@ -145,7 +145,6 @@
 
     NanoGL.App.prototype.blend = function() {
         this.gl.enable(this.gl.BLEND);
-        this.gl.disable(this.gl.DEPTH_TEST);
         this.gl.depthMask(false);
     };
 
@@ -324,6 +323,9 @@
                 case gl.FLOAT_VEC3: 
                     UniformClass = NanoGL.Vec3Uniform;
                     break;
+                case gl.FLOAT_VEC4: 
+                    UniformClass = NanoGL.Vec4Uniform;
+                    break;
                 case gl.FLOAT_MAT4: 
                     UniformClass = NanoGL.Mat4Uniform;
                     break;
@@ -396,6 +398,22 @@
             this.value[1] !== value[1] ||
             this.value[2] !== value[2]) {
             this.gl.uniform3fv(this.handle, value);
+            this.value.set(value);
+        }
+    }
+
+    NanoGL.Vec4Uniform = function Vec4Uniform(gl, handle) {
+        this.gl = gl;
+        this.handle = handle;
+        this.value = new Float32Array(4);
+    }
+
+    NanoGL.Vec4Uniform.prototype.set = function(value) {
+        if (this.value[0] !== value[0] ||
+            this.value[1] !== value[1] ||
+            this.value[2] !== value[2] ||
+            this.value[3] !== value[3]) {
+            this.gl.uniform4fv(this.handle, value);
             this.value.set(value);
         }
     }
