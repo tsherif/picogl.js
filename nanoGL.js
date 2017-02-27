@@ -27,90 +27,32 @@
     var NanoGL = window.NanoGL = {};
 
     (function() {
+        // Absorb all GL enums for convenience
         var canvas = document.createElement("canvas");
         var gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
         
-        // Data types
-        NanoGL.FLOAT = gl.FLOAT;
-        NanoGL.INT = gl.INT;
-        NanoGL.SHORT = gl.SHORT;
-        NanoGL.BYTE = gl.BYTE;
-        NanoGL.UNSIGNED_INT = gl.UNSIGNED_INT;
-        NanoGL.UNSIGNED_SHORT = gl.UNSIGNED_SHORT;
-        NanoGL.UNSIGNED_BYTE = gl.UNSIGNED_BYTE;
+        if (!gl) {
+            return;
+        }
 
-        // Texture internal formats
-        NanoGL.RGB = gl.RGB;
-        NanoGL.RGBA = gl.RGBA;
-        NanoGL.DEPTH_COMPONENT = gl.DEPTH_COMPONENT;
+        for (var enumName in gl) {
+            if (enumName.match(/^[A-Z_]+$/) && typeof(gl[enumName]) === "number") {
+                NanoGL[enumName] = gl[enumName];
+            }
+        }
 
-        // Texture filtering
-        NanoGL.LINEAR = gl.LINEAR;
-        NanoGL.NEAREST = gl.NEAREST;
-        NanoGL.NEAREST_MIPMAP_NEAREST = gl.NEAREST_MIPMAP_NEAREST;
-        NanoGL.NEAREST_MIPMAP_LINEAR = gl.NEAREST_MIPMAP_LINEAR;
-        NanoGL.LINEAR_MIPMAP_NEAREST = gl.LINEAR_MIPMAP_NEAREST;
-        NanoGL.LINEAR_MIPMAP_LINEAR = gl.LINEAR_MIPMAP_LINEAR;
-        NanoGL.REPEAT = gl.REPEAT;
-        NanoGL.MIRRORED_REPEAT = gl.MIRRORED_REPEAT;
-        NanoGL.CLAMP_TO_EDGE = gl.CLAMP_TO_EDGE;
-
-        // Data types
-        NanoGL.FLOAT = gl.FLOAT;
-        NanoGL.INT = gl.INT;
-        NanoGL.SHORT = gl.SHORT;
-        NanoGL.BYTE = gl.BYTE;
-        NanoGL.UNSIGNED_INT = gl.UNSIGNED_INT;
-        NanoGL.UNSIGNED_SHORT = gl.UNSIGNED_SHORT;
-        NanoGL.UNSIGNED_BYTE = gl.UNSIGNED_BYTE;
-        
-        // Depth functions
-        NanoGL.NEVER = gl.NEVER;
-        NanoGL.LESS = gl.LESS;
-        NanoGL.EQUAL = gl.EQUAL;
-        NanoGL.LEQUAL = gl.LEQUAL;
-        NanoGL.GREATER = gl.GREATER;
-        NanoGL.NOTEQUAL = gl.NOTEQUAL;
-        NanoGL.GEQUAL = gl.GEQUAL;
-        NanoGL.ALWAYS = gl.ALWAYS;
-        
-        // Blend functions
-        NanoGL.ZERO = gl.ZERO;
-        NanoGL.ONE = gl.ONE;
-        NanoGL.SRC_COLOR = gl.SRC_COLOR;
-        NanoGL.ONE_MINUS_SRC_COLOR = gl.ONE_MINUS_SRC_COLOR;
-        NanoGL.DST_COLOR = gl.DST_COLOR;
-        NanoGL.ONE_MINUS_DST_COLOR = gl.ONE_MINUS_DST_COLOR;
-        NanoGL.SRC_ALPHA = gl.SRC_ALPHA;
-        NanoGL.ONE_MINUS_SRC_ALPHA = gl.ONE_MINUS_SRC_ALPHA;
-        NanoGL.DST_ALPHA = gl.DST_ALPHA;
-        NanoGL.ONE_MINUS_DST_ALPHA = gl.ONE_MINUS_DST_ALPHA;
-        NanoGL.CONSTANT_COLOR = gl.CONSTANT_COLOR;
-        NanoGL.ONE_MINUS_CONSTANT_COLOR = gl.ONE_MINUS_CONSTANT_COLOR;
-        NanoGL.CONSTANT_ALPHA = gl.CONSTANT_ALPHA;
-        NanoGL.ONE_MINUS_CONSTANT_ALPHA = gl.ONE_MINUS_CONSTANT_ALPHA;
-        NanoGL.SRC_ALPHA_SATURATE = gl.SRC_ALPHA_SATURATE;
-
-        // Drawing primitives
-        NanoGL.POINTS = gl.POINTS;
-        NanoGL.LINE_STRIP = gl.LINE_STRIP;
-        NanoGL.LINE_LOOP = gl.LINE_LOOP;
-        NanoGL.LINES = gl.LINES;
-        NanoGL.TRIANGLE_STRIP = gl.TRIANGLE_STRIP;
-        NanoGL.TRIANGLE_FAN = gl.TRIANGLE_FAN;
-        NanoGL.TRIANGLES = gl.TRIANGLES;
     })();
 
     NanoGL.DUMMY_OBJECT = {};
     NanoGL.tmpColor = new Uint8Array(4);
 
-    NanoGL.createApp = function(canvas) {
-        return new NanoGL.App(canvas);
+    NanoGL.createApp = function(canvas, contextAttributes) {
+        return new NanoGL.App(canvas, contextAttributes);
     };
 
-    NanoGL.App = function App(canvas) {
+    NanoGL.App = function App(canvas, contextAttributes) {
         this.canvas = canvas;
-        this.gl = canvas.getContext("webgl", {alpha: false}) || canvas.getContext("experimental-webgl");
+        this.gl = canvas.getContext("webgl", contextAttributes) || canvas.getContext("experimental-webgl", contextAttributes);
         this.drawCalls = [];
 
         this.program = null;
@@ -135,7 +77,25 @@
 
     NanoGL.App.prototype.depthTest = function() {
         this.gl.enable(this.gl.DEPTH_TEST);
+    };
+
+    NanoGL.App.prototype.noDepthTest = function() {
+        this.gl.disable(this.gl.DEPTH_TEST);
+    };
+
+    NanoGL.App.prototype.depthMask = function() {
         this.gl.depthMask(true);
+    };
+
+    NanoGL.App.prototype.noDepthMask = function() {
+        this.gl.depthMask(false);
+    };
+
+    NanoGL.App.prototype.blend = function() {
+        this.gl.enable(this.gl.BLEND);
+    };
+
+    NanoGL.App.prototype.noBlend = function() {
         this.gl.disable(this.gl.BLEND);
     };
 
@@ -143,13 +103,12 @@
         this.gl.depthFunc(func);
     };
 
-    NanoGL.App.prototype.blend = function() {
-        this.gl.enable(this.gl.BLEND);
-        this.gl.depthMask(false);
-    };
-
     NanoGL.App.prototype.blendFunc = function(src, dest) {
         this.gl.blendFunc(src, dest);
+    };
+
+    NanoGL.App.prototype.blendFuncSeparate = function(csrc, cdest, asrc, adest) {
+        this.gl.blendFuncSeparate(csrc, cdest, asrc, adest);
     };
 
     NanoGL.App.prototype.cullBackfaces = function() {

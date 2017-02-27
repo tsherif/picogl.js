@@ -27,7 +27,11 @@
     <script src="nanoGL.js"></script>
     <script src="utils.js"></script>
     <style>
-        #ssao-controls {
+        #gl-canvas {
+            background-color: black;
+        }
+
+        #color-hud {
             position: absolute;
             top: 20px;
             right: 20px;
@@ -36,9 +40,8 @@
     </style>
 </head>
 <body>
-    <!-- <div style="position: absolute;top:0;left:0;background-color: black;width:100%;height:100%;z-index: -10"></div> -->
+    <div id="color-hud">Color value: <div id="color-display"></div></div>
     <canvas id="gl-canvas"></canvas>
-    <div id="display" style="position:absolute;top: 20px; right:20px; color: white"></div>
     <script id="draw-vs" type="x-shader/vs">
       
       attribute vec4 aPosition;
@@ -123,7 +126,6 @@
             float r = accum.a;
             accum.a = texture2D(uAccumulateAlpha, vScreenUV).r;
             gl_FragColor = vec4(accum.rgb / clamp(accum.a, 0.001, 50000.0), r);
-            // if (vScreenUV.x >= 0.0) gl_FragColor = vec4(r, 0.0, 0.0, r);
         }
     </script>
     <script id="texture-fs" type="x-shader/fs">
@@ -146,14 +148,14 @@
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
-        var display = document.getElementById("display");
+        var colorDisplay = document.getElementById("color-display");
 
         var screenTexelSize = vec2.fromValues(1.0 / canvas.width, 1.0 / canvas.height);
 
         var app = NanoGL.createApp(canvas);
         app.clearColor(0.0, 0.0, 0.0, 1.0);
         app.blend();
-        app.blendFunc(NanoGL.SRC_ALPHA, NanoGL.ONE_MINUS_SRC_ALPHA);
+        app.noDepthMask();
 
         canvas.addEventListener("mousemove", function(event) {
             pick = true;
@@ -229,21 +231,25 @@
 
             var NUM_SPHERES = 32;
             var NUM_PER_ROW = 8;
+            var RADIUS = 0.6;
             var spheres = new Array(NUM_SPHERES);
             var sphereDrawCalls = new Array(NUM_SPHERES);
 
             for (var i = 0; i < NUM_SPHERES; ++i) {
-                var radius = Math.random();
-                var scale = Math.random() + 0.2;
                 var angle = 2 * Math.PI * (i % NUM_PER_ROW) / NUM_PER_ROW;
-                var x = Math.sin(angle) * radius;
+                var x = Math.sin(angle) * RADIUS;
                 var y = Math.floor(i / NUM_PER_ROW) / (NUM_PER_ROW / 4) - 0.75;
-                var z = Math.cos(angle) * radius;
+                var z = Math.cos(angle) * RADIUS;
                 spheres[i] = {
-                    scale: [scale, scale, scale],
+                    scale: [0.8, 0.8, 0.8],
                     rotate: [0, 0, 0], // Will be used for global rotation
                     translate: [x, y, z],
-                    color: vec4.fromValues(Math.random(), Math.random(), Math.random(), 0.5),
+                    color: vec4.fromValues(
+                        Math.sqrt(Math.random()),
+                        Math.sqrt(Math.random()),
+                        Math.sqrt(Math.random()),
+                        0.5
+                    ),
                     modelMatrix: mat4.create(),
                     mvpMatrix: mat4.create(),
                     drawCall: app.createDrawCall(drawProgram)
@@ -261,46 +267,6 @@
 
                 sphereDrawCalls[i] = spheres[i].drawCall;
             }
-
-
-            // var spheres = [
-            //     {
-            //         scale: [2, 2, 2],
-            //         rotate: [0, Math.PI / 4, 0], // Will be used for global rotation
-            //         translate: [0, 0, 1],
-            //         color: vec4.fromValues(1, 0, 0, 0.5),
-            //         modelMatrix: mat4.create(),
-            //         mvpMatrix: mat4.create(),
-            //         drawCall: app.createDrawCall(drawProgram)
-            //     },
-            //     {
-            //         scale: [2, 2, 2],
-            //         rotate: [0, Math.PI / 4, 0], // Will be used for global rotation
-            //         translate: [0, 0, -1],
-            //         color: vec4.fromValues(0, 0, 1, 0.5),
-            //         modelMatrix: mat4.create(),
-            //         mvpMatrix: mat4.create(),
-            //         drawCall: app.createDrawCall(drawProgram)
-            //     }
-            // ];
-
-            // var sphereDrawCalls = new Array(spheres.length);
-
-            // for (var i = 0; i < spheres.length; ++i) {
-
-            //     spheres[i].drawCall.setAttribute("aPosition", positions);
-            //     spheres[i].drawCall.setAttribute("aNormal", normals);
-            //     spheres[i].drawCall.setAttribute("aUV", uv);
-            //     spheres[i].drawCall.setUniform("uProjection", projMatrix);
-            //     spheres[i].drawCall.setUniform("uViewMatrix", viewMatrix);
-            //     spheres[i].drawCall.setUniform("uEyePosition", eyePosition);
-            //     spheres[i].drawCall.setUniform("uLightPosition", lightPosition);
-            //     spheres[i].drawCall.setUniform("uColor", spheres[i].color);
-            //     spheres[i].drawCall.setTexture("uTexture", 0, texture);
-
-            //     sphereDrawCalls[i] = spheres[i].drawCall;
-            // }
-
 
             var accumDrawCall = app.createDrawCall(accumProgram);
             accumDrawCall.setAttribute("aPosition", quadPositions);
@@ -335,7 +301,7 @@
                 // Draw to drawBuffer
                 drawBuffer.bind();
                 app.drawCalls = sphereDrawCalls;
-                app.gl.blendFuncSeparate(NanoGL.ONE, NanoGL.ONE, NanoGL.ZERO, NanoGL.ONE_MINUS_SRC_ALPHA);
+                app.blendFuncSeparate(NanoGL.ONE, NanoGL.ONE, NanoGL.ZERO, NanoGL.ONE_MINUS_SRC_ALPHA);
                 app.draw();
                 drawBuffer.unbind();
 
@@ -345,18 +311,8 @@
 
                 if (pick) {
                     app.readPixel(pickX, pickY, pickColor);
-                    display.innerText = pickColor[0] + ", " + pickColor[1] + ", " + pickColor[2] + ", " + pickColor[3];
-                }
-
-                // drawBuffer.bind();
-                // app.drawCalls = sphereDrawCalls;
-                // app.gl.blendFunc(NanoGL.SRC_ALPHA, NanoGL.ONE_MINUS_SRC_ALPHA);
-                // app.draw();
-                // drawBuffer.unbind();
-
-                // app.blendFunc(NanoGL.ONE_MINUS_SRC_ALPHA, NanoGL.SRC_ALPHA);
-                // app.drawCalls = accumDrawCalls;
-                // app.draw();  
+                    colorDisplay.innerText = pickColor[0] + ", " + pickColor[1] + ", " + pickColor[2] + ", " + pickColor[3];
+                } 
                                 
                 requestAnimationFrame(draw);
             }

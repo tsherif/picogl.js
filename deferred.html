@@ -106,6 +106,7 @@
 
         var app = NanoGL.createApp(canvas);
         app.clearColor(0.0, 0.0, 0.0, 1.0);
+        app.depthTest();
         app.depthFunc(NanoGL.LEQUAL);
         app.blendFunc(NanoGL.ONE, NanoGL.ONE);
 
@@ -223,7 +224,8 @@
 
                 // Draw to gBuffer
                 gBuffer.bind();
-                app.depthTest();
+                app.depthMask();
+                app.noBlend();
                 app.drawCalls = geoDrawCalls;
 
                 for (var i = 0, len = boxes.length; i < len; ++i) {
@@ -242,6 +244,7 @@
 
                 // Draw lights
                 app.blend();
+                app.noDepthMask();
                 app.drawCalls = lightDrawCalls;
                 app.draw();                
                 

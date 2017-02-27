@@ -32,7 +32,7 @@
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         
-        var app = NanoGL.createApp(canvas);
+        var app = NanoGL.createApp(canvas, {alpha: false, antialias: false});
         app.clearColor(0.0, 0.0, 0.0, 1.0);
 
         var vsSource =  "attribute vec4 position;" +
