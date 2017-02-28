@@ -27,9 +27,9 @@
     <script src="nanoGL.js"></script>
     <script src="utils.js"></script>
     <style>
-        #gl-canvas {
+     /*   #gl-canvas {
             background-color: black;
-        }
+        }*/
 
         #color-hud {
             position: absolute;
@@ -123,9 +123,9 @@
         uniform sampler2D uAccumulateAlpha;
         void main() {
             vec4 accum = texture2D(uAccumulate, vScreenUV);
-            float r = accum.a;
+            float a = 1.0 - accum.a;
             accum.a = texture2D(uAccumulateAlpha, vScreenUV).r;
-            gl_FragColor = vec4(accum.rgb / clamp(accum.a, 0.001, 50000.0), r);
+            gl_FragColor = vec4(a * accum.rgb / clamp(accum.a, 0.001, 50000.0), a);
         }
     </script>
     <script id="texture-fs" type="x-shader/fs">
@@ -305,7 +305,7 @@
                 app.draw();
                 drawBuffer.unbind();
 
-                app.blendFunc(NanoGL.ONE_MINUS_SRC_ALPHA, NanoGL.SRC_ALPHA);
+                app.blendFunc(NanoGL.ONE, NanoGL.ONE_MINUS_SRC_ALPHA);
                 app.drawCalls = accumDrawCalls;
                 app.draw();
 
