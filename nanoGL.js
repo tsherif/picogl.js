@@ -55,7 +55,9 @@
         this.gl = canvas.getContext("webgl", contextAttributes) || canvas.getContext("experimental-webgl", contextAttributes);
         this.drawCalls = [];
 
-        this.program = null;
+        this.currentState = {
+            program: null
+        };
         
         this.gl.viewport(0, 0, canvas.width, canvas.height);
 
@@ -193,9 +195,9 @@
         var attributes = this.attributes;
         var textures = this.textures;
 
-        if (app.currentProgram !== this.program) {
+        if (state.program !== this.program) {
             this.program.bind();
-            app.currentProgram = this.program;
+            state.program = this.program;
         }
 
         for (var uName in uniforms) {
