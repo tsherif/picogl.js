@@ -23,11 +23,12 @@
 -->
 <html>
 <head>
-    <script src="gl-matrix.js"></script>
-    <script src="nanoGL.js"></script>
-    <script src="utils.js"></script>
+    <script src="../gl-matrix.js"></script>
+    <script src="../nanoGL.js"></script>
+    <script src="../utils.js"></script>
     <style>
-        #ssao-controls {
+
+        #color-hud {
             position: absolute;
             top: 20px;
             right: 20px;
@@ -36,9 +37,7 @@
     </style>
 </head>
 <body>
-    <div id="ssao-controls">
-        Enable SSAO: <input id="ssao-toggle" type="checkbox" checked>
-    </div>
+    <div id="color-hud">Color value: <div id="color-display"></div></div>
     <canvas id="gl-canvas"></canvas>
     <script id="draw-vs" type="x-shader/vs">
       
@@ -71,20 +70,23 @@
 
         uniform vec3 uLightPosition;
         uniform vec3 uEyePosition;
+        uniform vec4 uColor;
         uniform sampler2D uTexture;
 
         varying vec4 vPosition;
         varying vec4 vNormal;
         varying vec2 vUV;
-        varying vec4 vViewPosition;
-        varying vec4 vViewNormal;
         
+        float weight(float z, float a) {
+            return clamp(pow(min(1.0, a * 10.0) + 0.01, 3.0) * 1e8 * pow(1.0 - z * 0.9, 3.0), 1e-2, 3e3);
+        }
+
         void main() {
             vec3 position = vPosition.xyz;
             vec3 normal = normalize(vNormal.xyz);
             vec2 uv = vUV;
 
-            vec4 baseColor = texture2D(uTexture, uv);
+            vec4 baseColor = uColor * texture2D(uTexture, uv);
             vec3 eyeDirection = normalize(uEyePosition - position);
             vec3 lightVec = uLightPosition - position;
             vec3 lightDirection = normalize(lightVec);
@@ -94,9 +96,12 @@
             float ambient = 0.2;
             float specular = pow(max(dot(reflectionDirection, eyeDirection), 0.0), 20.0);
 
-            gl_FragData[0] = vec4((ambient + diffuse + specular) * baseColor.rgb, baseColor.a);
-            gl_FragData[1] = vViewPosition;
-            gl_FragData[2] = normalize(vViewNormal);
+            vec4 color = vec4((ambient + diffuse + specular) * baseColor.rgb, uColor.a);
+            color.rgb *= color.a;
+            float w = weight(gl_FragCoord.z, color.a);
+            gl_FragData[0] = vec4(color.rgb * w, color.a);
+            gl_FragData[1].r = color.a * w;
+            gl_FragData[2] = color; // FOR DEBUG
         }
     </script> 
     <script id="quad-vs" type="x-shader/vs">
@@ -107,74 +112,17 @@
             gl_Position = aPosition;
         }
     </script>
-    <script id="ssao-fs" type="x-shader/fs">
-        precision highp float;
-
-        #define SIN45 0.707107
-
-        varying vec2 vScreenUV;
-
-        uniform float uSampleRadius;
-        uniform float uBias;
-        uniform vec2 uAttenuation;
-        uniform vec2 uTexelOffset;
-        uniform vec2 uDepthRange;
-        uniform sampler2D uPositionBuffer;
-        uniform sampler2D uNormalBuffer;
-        uniform sampler2D uNoiseBuffer;
-
-        float getOcclusion(vec3 position, vec3 normal, vec2 uv) {
-            vec3 occluderPosition = texture2D(uPositionBuffer, uv).xyz;
-            vec3 positionVec = occluderPosition - position;
-            float intensity = max(dot(normal, normalize(positionVec)) - uBias, 0.0);
-        
-            float attenuation = 1.0 / (uAttenuation.x + uAttenuation.y * length(positionVec));
-
-            return intensity * attenuation;
-        }
-
-        void main() {
-            vec3 position = texture2D(uPositionBuffer, vScreenUV).xyz;
-            vec3 normal = texture2D(uNormalBuffer, vScreenUV).xyz;
-            vec2 rand = normalize(texture2D(uNoiseBuffer, vScreenUV).xy);
-            float depth = (length(position) - uDepthRange.x) / (uDepthRange.y - uDepthRange.x);
-
-            float kernelRadius = uSampleRadius * (1.0 - depth);
-
-            vec2 kernel[4];
-            kernel[0] = vec2(0.0, 1.0);
-            kernel[1] = vec2(1.0, 0.0);
-            kernel[2] = vec2(0.0, -1.0);
-            kernel[3] = vec2(-1.0, 0.0);
-
-            float occlusion = 0.0;
-            for (int i = 0; i < 4; ++i) {
-                vec2 k1 = reflect(kernel[i], rand);
-                vec2 k2 = vec2(k1.x * SIN45 - k1.y * SIN45, k1.x * SIN45 + k1.y * SIN45);
-
-                k1 *= uTexelOffset * kernelRadius;
-                k2 *= uTexelOffset * kernelRadius;
-
-                occlusion += getOcclusion(position, normal, vScreenUV + k1);
-                occlusion += getOcclusion(position, normal, vScreenUV + k2 * 0.75);
-                occlusion += getOcclusion(position, normal, vScreenUV + k1 * 0.5);
-                occlusion += getOcclusion(position, normal, vScreenUV + k2 * 0.25);
-            }
-
-            occlusion = clamp(occlusion / 16.0, 0.0, 1.0);
-
-            gl_FragColor.r = occlusion;
-        }
-    </script>
-    <script id="aoblend-fs" type="x-shader/fs">
+    <script id="accumulate-fs" type="x-shader/fs">
         precision highp float;
 
         varying vec2 vScreenUV;
-        uniform sampler2D uColorBuffer;
-        uniform sampler2D uOcclusionBuffer;
+        uniform sampler2D uAccumulate;
+        uniform sampler2D uAccumulateAlpha;
         void main() {
-            vec4 color = texture2D(uColorBuffer, vScreenUV);
-            gl_FragColor = vec4(clamp(color.rgb - texture2D(uOcclusionBuffer, vScreenUV).r, 0.0, 1.0), color.a);
+            vec4 accum = texture2D(uAccumulate, vScreenUV);
+            float a = 1.0 - accum.a;
+            accum.a = texture2D(uAccumulateAlpha, vScreenUV).r;
+            gl_FragColor = vec4(a * accum.rgb / clamp(accum.a, 0.001, 50000.0), a);
         }
     </script>
     <script id="texture-fs" type="x-shader/fs">
@@ -187,47 +135,46 @@
         }
     </script>
     <script type="text/javascript">
-        var ssaoEnabled = true;
-
-        document.getElementById("ssao-toggle").addEventListener("change", function() {
-            ssaoEnabled = this.checked;
-        });
-
         var NEAR = 0.1;
         var FAR = 10.0;
+        var pick = false;
+        var pickX = 0;
+        var pickY = 0;
 
         var canvas = document.getElementById("gl-canvas");
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
+        var colorDisplay = document.getElementById("color-display");
+
         var screenTexelSize = vec2.fromValues(1.0 / canvas.width, 1.0 / canvas.height);
 
         var app = NanoGL.createApp(canvas);
         app.clearColor(0.0, 0.0, 0.0, 1.0);
-        app.depthTest();
-        app.depthFunc(NanoGL.LEQUAL);
+        app.blend();
+        app.noDepthMask();
+
+        canvas.addEventListener("mousemove", function(event) {
+            pick = true;
+            pickX = event.clientX;
+            pickY = canvas.height - event.clientY;
+        });
 
         var depthRange = vec2.fromValues(NEAR, FAR);
 
         // Set up draw program
-        var drawVsSource =  document.getElementById("draw-vs").text;
-        var drawFsSource =  document.getElementById("draw-fs").text;
+        var drawVsSource = document.getElementById("draw-vs").text;
+        var drawFsSource = document.getElementById("draw-fs").text;
         var drawProgram = app.createProgram(drawVsSource, drawFsSource);
         var drawBuffer = app.createFramebuffer(canvas.width, canvas.height, 3, NanoGL.FLOAT);
 
-        // Set up ssao program
-        var ssaoVsSource =  document.getElementById("quad-vs").text;
-        var ssaoFsSource =  document.getElementById("ssao-fs").text;
-        var ssaoProgram = app.createProgram(ssaoVsSource, ssaoFsSource);
-        var ssaoBuffer = app.createFramebuffer(canvas.width, canvas.height, 1, NanoGL.FLOAT);
 
-        // Set up ao blend program
-        var aoBlendVsSource =  document.getElementById("quad-vs").text;
-        var aoBlendFsSource =  document.getElementById("aoblend-fs").text;
-        var aoBlendProgram = app.createProgram(aoBlendVsSource, aoBlendFsSource);
+        var accumVsSource = document.getElementById("quad-vs").text;
+        var accumFsSource = document.getElementById("accumulate-fs").text;
+        var accumProgram = app.createProgram(accumVsSource, accumFsSource);
 
-        var textureVsSource =  document.getElementById("quad-vs").text;
-        var textureFsSource =  document.getElementById("texture-fs").text;
+        var textureVsSource = document.getElementById("quad-vs").text;
+        var textureFsSource = document.getElementById("texture-fs").text;
         var textureProgram = app.createProgram(textureVsSource, textureFsSource);
 
         // Geometry
@@ -281,7 +228,7 @@
 
             var NUM_SPHERES = 32;
             var NUM_PER_ROW = 8;
-            var RADIUS = 0.8;
+            var RADIUS = 0.6;
             var spheres = new Array(NUM_SPHERES);
             var sphereDrawCalls = new Array(NUM_SPHERES);
 
@@ -294,6 +241,12 @@
                     scale: [0.8, 0.8, 0.8],
                     rotate: [0, 0, 0], // Will be used for global rotation
                     translate: [x, y, z],
+                    color: vec4.fromValues(
+                        Math.sqrt(Math.random()),
+                        Math.sqrt(Math.random()),
+                        Math.sqrt(Math.random()),
+                        0.5
+                    ),
                     modelMatrix: mat4.create(),
                     mvpMatrix: mat4.create(),
                     drawCall: app.createDrawCall(drawProgram)
@@ -306,44 +259,31 @@
                 spheres[i].drawCall.setUniform("uViewMatrix", viewMatrix);
                 spheres[i].drawCall.setUniform("uEyePosition", eyePosition);
                 spheres[i].drawCall.setUniform("uLightPosition", lightPosition);
+                spheres[i].drawCall.setUniform("uColor", spheres[i].color);
                 spheres[i].drawCall.setTexture("uTexture", 0, texture);
 
                 sphereDrawCalls[i] = spheres[i].drawCall;
             }
 
-            var ssaoDrawCall = app.createDrawCall(ssaoProgram);
-            ssaoDrawCall.setAttribute("aPosition", quadPositions);
-            ssaoDrawCall.setUniform("uSampleRadius", 8.0);
-            ssaoDrawCall.setUniform("uBias", 0.01);
-            ssaoDrawCall.setUniform("uAttenuation", vec2.fromValues(1, 1));
-            ssaoDrawCall.setUniform("uTexelOffset", screenTexelSize);
-            ssaoDrawCall.setUniform("uDepthRange", depthRange);
-            ssaoDrawCall.setTexture("uPositionBuffer", 0, drawBuffer.colorTextures[1]);
-            ssaoDrawCall.setTexture("uNormalBuffer", 1, drawBuffer.colorTextures[2]);
-            ssaoDrawCall.setTexture("uNoiseBuffer", 2, noiseTexture);
+            var accumDrawCall = app.createDrawCall(accumProgram);
+            accumDrawCall.setAttribute("aPosition", quadPositions);
+            accumDrawCall.setTexture("uAccumulate", 0, drawBuffer.colorTextures[0]);
+            accumDrawCall.setTexture("uAccumulateAlpha", 1, drawBuffer.colorTextures[1]);
 
-            var ssaoDrawCalls = [ssaoDrawCall];
+            var accumDrawCalls = [accumDrawCall];
 
-            var aoBlendDrawCall = app.createDrawCall(aoBlendProgram);
-            aoBlendDrawCall.setAttribute("aPosition", quadPositions);
-            aoBlendDrawCall.setTexture("uColorBuffer", 0, drawBuffer.colorTextures[0]);
-            aoBlendDrawCall.setTexture("uOcclusionBuffer", 1, ssaoBuffer.colorTextures[0]);
 
-            var aoBlendDrawCalls = [aoBlendDrawCall];
+            var debugDrawCall = app.createDrawCall(textureProgram);
+            debugDrawCall.setAttribute("aPosition", quadPositions);
+            debugDrawCall.setTexture("uTexture", 0, drawBuffer.colorTextures[2]);
 
-            var colorBufferDrawCall = app.createDrawCall(textureProgram);
-            colorBufferDrawCall.setAttribute("aPosition", quadPositions);
-            colorBufferDrawCall.setTexture("uTexture", 0, drawBuffer.colorTextures[0]);
-
-            var colorBufferDrawCalls = [colorBufferDrawCall];
+            var debugDrawCalls = [debugDrawCall];
 
             var rotationMatrix = mat4.create();
 
-            function draw() {
+            var pickColor = new Uint8Array(4);
 
-                // Draw to drawBuffer
-                drawBuffer.bind();
-                app.drawCalls = sphereDrawCalls;
+            function draw() {
 
                 for (var i = 0, len = spheres.length; i < len; ++i) {
                     spheres[i].rotate[1] += 0.002;
@@ -355,21 +295,21 @@
                     spheres[i].drawCall.setUniform("uModelMatrix", spheres[i].modelMatrix);
                 }
 
+                // Draw to drawBuffer
+                drawBuffer.bind();
+                app.drawCalls = sphereDrawCalls;
+                app.blendFuncSeparate(NanoGL.ONE, NanoGL.ONE, NanoGL.ZERO, NanoGL.ONE_MINUS_SRC_ALPHA);
                 app.draw();
                 drawBuffer.unbind();
 
-                if (ssaoEnabled) {
-                    ssaoBuffer.bind();
-                    app.drawCalls = ssaoDrawCalls;
-                    app.draw();
-                    ssaoBuffer.unbind(); 
+                app.blendFunc(NanoGL.ONE, NanoGL.ONE_MINUS_SRC_ALPHA);
+                app.drawCalls = accumDrawCalls;
+                app.draw();
 
-                    app.drawCalls = aoBlendDrawCalls;
-                    app.draw();
-                } else {
-                    app.drawCalls = colorBufferDrawCalls;
-                    app.draw();  
-                }
+                if (pick) {
+                    app.readPixel(pickX, pickY, pickColor);
+                    colorDisplay.innerText = pickColor[0] + ", " + pickColor[1] + ", " + pickColor[2] + ", " + pickColor[3];
+                } 
                                 
                 requestAnimationFrame(draw);
             }
@@ -378,7 +318,7 @@
             
         }
 
-        image.src = "khronos_webgl.png";
+        image.src = "img/khronos_webgl.png";
 
     </script>
 </body>
