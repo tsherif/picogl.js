@@ -21,6 +21,11 @@
   IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
   CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -->
+<!-- 
+    Based on "Weighted Blended Order-Independent Transparency"
+    By Morgan McGuire and Louis Bavoil 
+    http://jcgt.org/published/0002/02/09/
+-->
 <html>
 <head>
     <script src="../gl-matrix.js"></script>
@@ -125,15 +130,6 @@
             gl_FragColor = vec4(a * accum.rgb / clamp(accum.a, 0.001, 50000.0), a);
         }
     </script>
-    <script id="texture-fs" type="x-shader/fs">
-        precision highp float;
-
-        varying vec2 vScreenUV;
-        uniform sampler2D uTexture;
-        void main() {
-            gl_FragColor = texture2D(uTexture, vScreenUV);
-        }
-    </script>
     <script type="text/javascript">
         var NEAR = 0.1;
         var FAR = 10.0;
@@ -172,10 +168,6 @@
         var accumVsSource = document.getElementById("quad-vs").text;
         var accumFsSource = document.getElementById("accumulate-fs").text;
         var accumProgram = app.createProgram(accumVsSource, accumFsSource);
-
-        var textureVsSource = document.getElementById("quad-vs").text;
-        var textureFsSource = document.getElementById("texture-fs").text;
-        var textureProgram = app.createProgram(textureVsSource, textureFsSource);
 
         // Geometry
         var sphere = utils.createSphere({radius: 0.5});
@@ -271,13 +263,6 @@
             accumDrawCall.setTexture("uAccumulateAlpha", 1, drawBuffer.colorTextures[1]);
 
             var accumDrawCalls = [accumDrawCall];
-
-
-            var debugDrawCall = app.createDrawCall(textureProgram);
-            debugDrawCall.setAttribute("aPosition", quadPositions);
-            debugDrawCall.setTexture("uTexture", 0, drawBuffer.colorTextures[2]);
-
-            var debugDrawCalls = [debugDrawCall];
 
             var rotationMatrix = mat4.create();
 
