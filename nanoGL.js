@@ -142,6 +142,10 @@
         return new NanoGL.Texture(this.gl, image, options);
     };
 
+    NanoGL.App.prototype.createCubemap = function(options) {
+        return new NanoGL.Cubemap(this.gl, options);
+    };
+
     NanoGL.App.prototype.createFramebuffer = function(width, height, numColorTextures, colorTargetType) {
         return new NanoGL.Framebuffer(this.gl, this.drawBuffers, width, height, numColorTextures, colorTargetType);
     };
@@ -273,6 +277,9 @@
             switch (uniformInfo.type) {
                 case gl.INT: 
                 case gl.SAMPLER_2D: 
+                    UniformClass = NanoGL.IntUniform;
+                    break;
+                case gl.SAMPLER_CUBE: 
                     UniformClass = NanoGL.IntUniform;
                     break;
                 case gl.FLOAT: 
@@ -474,6 +481,68 @@
     NanoGL.Texture.prototype.bind = function(unit) {
         this.gl.activeTexture(unit);
         this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
+    }
+
+    NanoGL.Cubemap = function Texture(gl, options) {
+        this.gl = gl;
+        this.texture = gl.createTexture();
+
+        options = options || NanoGL.DUMMY_OBJECT;
+        var negX = options.negX;
+        var posX = options.posX;
+        var negY = options.negY;
+        var posY = options.posY;
+        var negZ = options.negZ;
+        var posZ = options.posZ;
+        
+        var array = options.array || false;;
+        var width = options.width || 0;
+        var height = options.height || 0;
+        var flipY = options.flipY !== undefined ? options.flipY : false;
+        var minFilter = options.minFilter || gl.LINEAR_MIPMAP_NEAREST;
+        var magFilter = options.magFilter || gl.LINEAR;
+        var wrapS = options.wrapS || gl.REPEAT;
+        var wrapT = options.wrapT || gl.REPEAT;
+        var generateMipmaps = options.generateMipmaps !== false && 
+                            (minFilter === gl.LINEAR_MIPMAP_NEAREST || minFilter === gl.LINEAR_MIPMAP_LINEAR);
+
+        var internalFormat = options.internalFormat || gl.RGBA;
+        var type = options.type || gl.UNSIGNED_BYTE;
+
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.texture);
+        
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY);
+        gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, magFilter);
+        gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, minFilter);
+        gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, wrapS);
+        gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, wrapT);
+
+        if (array) {
+            gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_X, 0, internalFormat, width, height, 0, internalFormat, type, negX);
+            gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X, 0, internalFormat, width, height, 0, internalFormat, type, posX);
+            gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, internalFormat, width, height, 0, internalFormat, type, negY);
+            gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Y, 0, internalFormat, width, height, 0, internalFormat, type, posY);
+            gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, internalFormat, width, height, 0, internalFormat, type, negZ);
+            gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Z, 0, internalFormat, width, height, 0, internalFormat, type, posZ);
+        } else {
+            gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_X, 0, internalFormat, internalFormat, type, negX);
+            gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X, 0, internalFormat, internalFormat, type, posX);
+            gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, internalFormat, internalFormat, type, negY);
+            gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Y, 0, internalFormat, internalFormat, type, posY);
+            gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, internalFormat, internalFormat, type, negZ);
+            gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Z, 0, internalFormat, internalFormat, type, posZ);
+        }
+
+        if (generateMipmaps) {
+            gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
+        }
+
+    }
+
+    NanoGL.Cubemap.prototype.bind = function(unit) {
+        this.gl.activeTexture(unit);
+        this.gl.bindTexture(this.gl.TEXTURE_CUBE_MAP, this.texture);
     }
 
     NanoGL.Framebuffer = function Framebuffer(gl, drawBuffers, width, height, numColorTargets, colorTargetType) {

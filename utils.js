@@ -49,6 +49,37 @@
             mat4.multiply(xform, translateMat, xform);
         },
 
+        loadCubemapImages: function loadCubeMapImages(urls, ok) {
+          var numImages = 6;
+          
+          var negX = new Image();
+          var posX = new Image();
+          var negY = new Image();
+          var posY = new Image();
+          var negZ = new Image();
+          var posZ = new Image();
+
+          function onload() {
+            if (--numImages === 0) {
+              ok(negX, posX, negY, posY, negZ, posZ);
+            }
+          }
+
+          negX.onload = onload;
+          posX.onload = onload;
+          negY.onload = onload;
+          posY.onload = onload;
+          negZ.onload = onload;
+          posZ.onload = onload;
+
+          negX.src = urls.negX;
+          posX.src = urls.posX;
+          negY.src = urls.negY;
+          posY.src = urls.posY;
+          negZ.src = urls.negZ;
+          posZ.src = urls.posZ;
+        },
+
         createBox: function createBox(options) {
           options = options || {};
 
