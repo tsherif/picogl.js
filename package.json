@@ -1,0 +1,21 @@
+{
+  "name": "nanogl.js",
+  "version": "0.0.1",
+  "description": "A minimal WebGL utility library",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tsherif/nanogl.js"
+  },
+  "author": {
+    "name": "Tarek Sherif",
+    "email": "tsherif@gmail.com",
+    "url": "http://tareksherif.net/"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "grunt": "^1.0.1",
+    "grunt-contrib-concat": "^1.0.1",
+    "grunt-contrib-jshint": "^1.1.0",
+    "grunt-contrib-uglify": "^2.2.0"
+  }
+}
