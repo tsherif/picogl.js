@@ -87,24 +87,24 @@
             var inc = 0.01;
             var inc2 = -0.01;
 
-            var drawCall = app.createDrawCall(program);
-            drawCall.setAttribute("position", positions);
-            drawCall.setAttribute("uv", uv);
-            drawCall.setIndices(indices);
-            drawCall.setTexture("tex", 0, texture);
+            var drawCall = app.createDrawCall(program)
+            .attribute("position", positions)
+            .attribute("uv", uv)
+            .indices(indices)
+            .texture("tex", 0, texture);
 
             app.drawCalls.push(drawCall);
 
-            var drawCall2 = app.createDrawCall(program2);
-            drawCall2.setAttribute("position", positions);
-            drawCall2.setIndices(indices);
-            drawCall2.setUniform("color", color);
+            var drawCall2 = app.createDrawCall(program2)
+            .attribute("position", positions)
+            .indices(indices)
+            .uniform("color", color);
 
             app.drawCalls.push(drawCall2);
 
             function draw() {
-                drawCall.setUniform("offset", offset);
-                drawCall2.setUniform("offset", offset2);              
+                drawCall.uniform("offset", offset);
+                drawCall2.uniform("offset", offset2);              
                 app.draw();
 
                 offset[0] += inc;

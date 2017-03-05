@@ -205,10 +205,10 @@
 
         var screenTexelSize = vec2.fromValues(1.0 / canvas.width, 1.0 / canvas.height);
 
-        var app = NanoGL.createApp(canvas);
-        app.clearColor(0.0, 0.0, 0.0, 1.0);
-        app.depthTest();
-        app.depthFunc(NanoGL.LEQUAL);
+        var app = NanoGL.createApp(canvas)
+        .clearColor(0.0, 0.0, 0.0, 1.0)
+        .depthTest()
+        .depthFunc(NanoGL.LEQUAL);
 
         var depthRange = vec2.fromValues(NEAR, FAR);
 
@@ -302,41 +302,41 @@
                     drawCall: app.createDrawCall(drawProgram)
                 };
 
-                spheres[i].drawCall.setAttribute("aPosition", positions);
-                spheres[i].drawCall.setAttribute("aNormal", normals);
-                spheres[i].drawCall.setAttribute("aUV", uv);
-                spheres[i].drawCall.setUniform("uProjection", projMatrix);
-                spheres[i].drawCall.setUniform("uViewMatrix", viewMatrix);
-                spheres[i].drawCall.setUniform("uEyePosition", eyePosition);
-                spheres[i].drawCall.setUniform("uLightPosition", lightPosition);
-                spheres[i].drawCall.setTexture("uTexture", 0, texture);
+                spheres[i].drawCall.attribute("aPosition", positions)
+                .attribute("aNormal", normals)
+                .attribute("aUV", uv)
+                .uniform("uProjection", projMatrix)
+                .uniform("uViewMatrix", viewMatrix)
+                .uniform("uEyePosition", eyePosition)
+                .uniform("uLightPosition", lightPosition)
+                .texture("uTexture", 0, texture);
 
                 sphereDrawCalls[i] = spheres[i].drawCall;
             }
 
-            var ssaoDrawCall = app.createDrawCall(ssaoProgram);
-            ssaoDrawCall.setAttribute("aPosition", quadPositions);
-            ssaoDrawCall.setUniform("uSampleRadius", 8.0);
-            ssaoDrawCall.setUniform("uBias", 0.01);
-            ssaoDrawCall.setUniform("uAttenuation", vec2.fromValues(1, 1));
-            ssaoDrawCall.setUniform("uTexelOffset", screenTexelSize);
-            ssaoDrawCall.setUniform("uDepthRange", depthRange);
-            ssaoDrawCall.setTexture("uPositionBuffer", 0, drawBuffer.colorTextures[1]);
-            ssaoDrawCall.setTexture("uNormalBuffer", 1, drawBuffer.colorTextures[2]);
-            ssaoDrawCall.setTexture("uNoiseBuffer", 2, noiseTexture);
+            var ssaoDrawCall = app.createDrawCall(ssaoProgram)
+            .attribute("aPosition", quadPositions)
+            .uniform("uSampleRadius", 8.0)
+            .uniform("uBias", 0.01)
+            .uniform("uAttenuation", vec2.fromValues(1, 1))
+            .uniform("uTexelOffset", screenTexelSize)
+            .uniform("uDepthRange", depthRange)
+            .texture("uPositionBuffer", 0, drawBuffer.colorTextures[1])
+            .texture("uNormalBuffer", 1, drawBuffer.colorTextures[2])
+            .texture("uNoiseBuffer", 2, noiseTexture);
 
             var ssaoDrawCalls = [ssaoDrawCall];
 
-            var aoBlendDrawCall = app.createDrawCall(aoBlendProgram);
-            aoBlendDrawCall.setAttribute("aPosition", quadPositions);
-            aoBlendDrawCall.setTexture("uColorBuffer", 0, drawBuffer.colorTextures[0]);
-            aoBlendDrawCall.setTexture("uOcclusionBuffer", 1, ssaoBuffer.colorTextures[0]);
+            var aoBlendDrawCall = app.createDrawCall(aoBlendProgram)
+            .attribute("aPosition", quadPositions)
+            .texture("uColorBuffer", 0, drawBuffer.colorTextures[0])
+            .texture("uOcclusionBuffer", 1, ssaoBuffer.colorTextures[0]);
 
             var aoBlendDrawCalls = [aoBlendDrawCall];
 
-            var colorBufferDrawCall = app.createDrawCall(textureProgram);
-            colorBufferDrawCall.setAttribute("aPosition", quadPositions);
-            colorBufferDrawCall.setTexture("uTexture", 0, drawBuffer.colorTextures[0]);
+            var colorBufferDrawCall = app.createDrawCall(textureProgram)
+            .attribute("aPosition", quadPositions)
+            .texture("uTexture", 0, drawBuffer.colorTextures[0]);
 
             var colorBufferDrawCalls = [colorBufferDrawCall];
 
@@ -355,7 +355,7 @@
                     mat4.fromYRotation(rotationMatrix, spheres[i].rotate[1]);
                     mat4.multiply(spheres[i].modelMatrix, rotationMatrix, spheres[i].modelMatrix)
 
-                    spheres[i].drawCall.setUniform("uModelMatrix", spheres[i].modelMatrix);
+                    spheres[i].drawCall.uniform("uModelMatrix", spheres[i].modelMatrix);
                 }
 
                 app.draw();

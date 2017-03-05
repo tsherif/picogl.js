@@ -152,9 +152,9 @@
 
         var screenTexelSize = vec2.fromValues(1.0 / canvas.width, 1.0 / canvas.height);
         
-        var app = NanoGL.createApp(canvas);
-        app.depthTest();
-        app.clearColor(0.0, 0.0, 0.0, 1.0);
+        var app = NanoGL.createApp(canvas)
+        .depthTest()
+        .clearColor(0.0, 0.0, 0.0, 1.0);
 
         var depthRange = vec2.fromValues(NEAR, FAR);
 
@@ -231,12 +231,12 @@
                         drawCall: app.createDrawCall(boxProgram)
                     }
 
-                    boxes[boxI].drawCall.setAttribute("aPosition", positions);
-                    boxes[boxI].drawCall.setAttribute("aNormal", normals);
-                    boxes[boxI].drawCall.setAttribute("aUV", uv);
-                    boxes[boxI].drawCall.setUniform("uEyePosition", eyePosition);
-                    boxes[boxI].drawCall.setUniform("uLightPosition", lightPosition);
-                    boxes[boxI].drawCall.setTexture("uTexture", 0, texture);
+                    boxes[boxI].drawCall.attribute("aPosition", positions)
+                    .attribute("aNormal", normals)
+                    .attribute("aUV", uv)
+                    .uniform("uEyePosition", eyePosition)
+                    .uniform("uLightPosition", lightPosition)
+                    .texture("uTexture", 0, texture);
 
                     boxDrawCalls[boxI] = boxes[boxI].drawCall;
                     ++boxI;
@@ -246,36 +246,29 @@
             var hTexelOffset = vec2.fromValues(screenTexelSize[0], 0.0);
             var vTexelOffset = vec2.fromValues(0.0, screenTexelSize[1]);
 
-            var hBlurDrawCall = app.createDrawCall(blurProgram);
-            hBlurDrawCall.setAttribute("aPosition", quadPositions);
-            hBlurDrawCall.setUniform("uFocusDistance", FOCUS_DISTANCE);
-            hBlurDrawCall.setUniform("uBlurCoefficient", BLUR_COEFFICIENT);
-            hBlurDrawCall.setUniform("uPPM", PPM);
-            hBlurDrawCall.setUniform("uTexelOffset", hTexelOffset);
-            hBlurDrawCall.setUniform("uDepthRange", depthRange);
-            hBlurDrawCall.setTexture("uTexture", 0, boxBuffer.colorTextures[0]);
-            hBlurDrawCall.setTexture("uDepth", 1, boxBuffer.depthTexture);
+            var hBlurDrawCall = app.createDrawCall(blurProgram)
+            .attribute("aPosition", quadPositions)
+            .uniform("uFocusDistance", FOCUS_DISTANCE)
+            .uniform("uBlurCoefficient", BLUR_COEFFICIENT)
+            .uniform("uPPM", PPM)
+            .uniform("uTexelOffset", hTexelOffset)
+            .uniform("uDepthRange", depthRange)
+            .texture("uTexture", 0, boxBuffer.colorTextures[0])
+            .texture("uDepth", 1, boxBuffer.depthTexture);
 
             var hBlurDrawCalls = [hBlurDrawCall];
 
-            var finalDrawCall = app.createDrawCall(blurProgram);
-            finalDrawCall.setAttribute("aPosition", quadPositions);
-            finalDrawCall.setUniform("uFocusDistance", FOCUS_DISTANCE);
-            finalDrawCall.setUniform("uBlurCoefficient", BLUR_COEFFICIENT);
-            finalDrawCall.setUniform("uPPM", PPM);
-            finalDrawCall.setUniform("uTexelOffset", vTexelOffset);
-            finalDrawCall.setUniform("uDepthRange", depthRange);
-            finalDrawCall.setTexture("uTexture", 0, hblurBuffer.colorTextures[0]);
-            finalDrawCall.setTexture("uDepth", 1, boxBuffer.depthTexture);
+            var finalDrawCall = app.createDrawCall(blurProgram)
+            .attribute("aPosition", quadPositions)
+            .uniform("uFocusDistance", FOCUS_DISTANCE)
+            .uniform("uBlurCoefficient", BLUR_COEFFICIENT)
+            .uniform("uPPM", PPM)
+            .uniform("uTexelOffset", vTexelOffset)
+            .uniform("uDepthRange", depthRange)
+            .texture("uTexture", 0, hblurBuffer.colorTextures[0])
+            .texture("uDepth", 1, boxBuffer.depthTexture);
 
             var finalDrawCalls = [finalDrawCall];
-
-            var debugDrawCall = app.createDrawCall(debugProgram);
-            debugDrawCall.setAttribute("aPosition", quadPositions);
-            // debugDrawCall.setTexture("uTexture", 0, boxBuffer.colorTextures[0]);
-            debugDrawCall.setTexture("uTexture", 0, boxBuffer.depthTexture);
-
-            var debugDrawCalls = [debugDrawCall];
 
             function draw() {
 
@@ -286,8 +279,8 @@
                     utils.xformMatrix(boxes[i].modelMatrix, boxes[i].translate, boxes[i].rotate, boxes[i].scale);
                     mat4.multiply(boxes[i].mvpMatrix, viewProjMatrix, boxes[i].modelMatrix);
                 
-                    boxes[i].drawCall.setUniform("uMVP", boxes[i].mvpMatrix);
-                    boxes[i].drawCall.setUniform("uModel", boxes[i].modelMatrix);
+                    boxes[i].drawCall.uniform("uMVP", boxes[i].mvpMatrix);
+                    boxes[i].drawCall.uniform("uModel", boxes[i].modelMatrix);
                 }
 
                 boxBuffer.bind();

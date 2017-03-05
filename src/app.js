@@ -45,59 +45,86 @@
 
     NanoGL.App.prototype.clearColor = function(r, g, b, a) {
         this.gl.clearColor(r, g, b, a);
+
+        return this;
     };
 
     NanoGL.App.prototype.depthRange = function(near, far) {
         this.gl.depthRange(near, far);
+
+        return this;
     };
 
     NanoGL.App.prototype.depthTest = function() {
         this.gl.enable(this.gl.DEPTH_TEST);
+
+        return this;
     };
 
     NanoGL.App.prototype.noDepthTest = function() {
         this.gl.disable(this.gl.DEPTH_TEST);
+
+        return this;
     };
 
     NanoGL.App.prototype.depthMask = function() {
         this.gl.depthMask(true);
+
+        return this;
     };
 
     NanoGL.App.prototype.noDepthMask = function() {
         this.gl.depthMask(false);
+
+        return this;
     };
 
     NanoGL.App.prototype.blend = function() {
         this.gl.enable(this.gl.BLEND);
+
+        return this;
     };
 
     NanoGL.App.prototype.noBlend = function() {
         this.gl.disable(this.gl.BLEND);
+
+        return this;
     };
 
     NanoGL.App.prototype.depthFunc = function(func) {
         this.gl.depthFunc(func);
+
+        return this;
     };
 
     NanoGL.App.prototype.blendFunc = function(src, dest) {
         this.gl.blendFunc(src, dest);
+
+        return this;
     };
 
     NanoGL.App.prototype.blendFuncSeparate = function(csrc, cdest, asrc, adest) {
         this.gl.blendFuncSeparate(csrc, cdest, asrc, adest);
+
+        return this;
     };
 
     NanoGL.App.prototype.cullBackfaces = function() {
         this.gl.enable(this.gl.CULL_FACE);
+
+        return this;
     };
 
     NanoGL.App.prototype.drawBackfaces = function() {
         this.gl.disable(this.gl.CULL_FACE);
+
+        return this;
     };
 
     NanoGL.App.prototype.readPixel = function(x, y, outVec4) {
-        this.gl.readPixels(x, y, 1, 1, this.gl.RGBA, this.gl.UNSIGNED_BYTE, NanoGL.tmpColor);
-        outVec4.set(NanoGL.tmpColor);
+        this.gl.readPixels(x, y, 1, 1, this.gl.RGBA, this.gl.UNSIGNED_BYTE, outVec4);
+
+        return this;
     };
 
     NanoGL.App.prototype.createProgram = function(vsSource, fsSource) {
@@ -133,6 +160,8 @@
         for (var i = 0, len = this.drawCalls.length; i < len; i++) {
             this.drawCalls[i].draw(this.currentState);
         }
+
+        return this;
     };
 
 })();

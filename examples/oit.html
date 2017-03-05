@@ -145,10 +145,10 @@
 
         var screenTexelSize = vec2.fromValues(1.0 / canvas.width, 1.0 / canvas.height);
 
-        var app = NanoGL.createApp(canvas);
-        app.clearColor(0.0, 0.0, 0.0, 1.0);
-        app.blend();
-        app.noDepthMask();
+        var app = NanoGL.createApp(canvas)
+        .clearColor(0.0, 0.0, 0.0, 1.0)
+        .blend()
+        .noDepthMask();
 
         canvas.addEventListener("mousemove", function(event) {
             pick = true;
@@ -244,23 +244,23 @@
                     drawCall: app.createDrawCall(drawProgram)
                 };
 
-                spheres[i].drawCall.setAttribute("aPosition", positions);
-                spheres[i].drawCall.setAttribute("aNormal", normals);
-                spheres[i].drawCall.setAttribute("aUV", uv);
-                spheres[i].drawCall.setUniform("uProjection", projMatrix);
-                spheres[i].drawCall.setUniform("uViewMatrix", viewMatrix);
-                spheres[i].drawCall.setUniform("uEyePosition", eyePosition);
-                spheres[i].drawCall.setUniform("uLightPosition", lightPosition);
-                spheres[i].drawCall.setUniform("uColor", spheres[i].color);
-                spheres[i].drawCall.setTexture("uTexture", 0, texture);
+                spheres[i].drawCall.attribute("aPosition", positions)
+                .attribute("aNormal", normals)
+                .attribute("aUV", uv)
+                .uniform("uProjection", projMatrix)
+                .uniform("uViewMatrix", viewMatrix)
+                .uniform("uEyePosition", eyePosition)
+                .uniform("uLightPosition", lightPosition)
+                .uniform("uColor", spheres[i].color)
+                .texture("uTexture", 0, texture);
 
                 sphereDrawCalls[i] = spheres[i].drawCall;
             }
 
-            var accumDrawCall = app.createDrawCall(accumProgram);
-            accumDrawCall.setAttribute("aPosition", quadPositions);
-            accumDrawCall.setTexture("uAccumulate", 0, drawBuffer.colorTextures[0]);
-            accumDrawCall.setTexture("uAccumulateAlpha", 1, drawBuffer.colorTextures[1]);
+            var accumDrawCall = app.createDrawCall(accumProgram)
+            .attribute("aPosition", quadPositions)
+            .texture("uAccumulate", 0, drawBuffer.colorTextures[0])
+            .texture("uAccumulateAlpha", 1, drawBuffer.colorTextures[1]);
 
             var accumDrawCalls = [accumDrawCall];
 
@@ -277,19 +277,17 @@
                     mat4.fromYRotation(rotationMatrix, spheres[i].rotate[1]);
                     mat4.multiply(spheres[i].modelMatrix, rotationMatrix, spheres[i].modelMatrix)
 
-                    spheres[i].drawCall.setUniform("uModelMatrix", spheres[i].modelMatrix);
+                    spheres[i].drawCall.uniform("uModelMatrix", spheres[i].modelMatrix);
                 }
 
                 // Draw to drawBuffer
                 drawBuffer.bind();
                 app.drawCalls = sphereDrawCalls;
-                app.blendFuncSeparate(NanoGL.ONE, NanoGL.ONE, NanoGL.ZERO, NanoGL.ONE_MINUS_SRC_ALPHA);
-                app.draw();
+                app.blendFuncSeparate(NanoGL.ONE, NanoGL.ONE, NanoGL.ZERO, NanoGL.ONE_MINUS_SRC_ALPHA).draw();
                 drawBuffer.unbind();
 
-                app.blendFunc(NanoGL.ONE, NanoGL.ONE_MINUS_SRC_ALPHA);
                 app.drawCalls = accumDrawCalls;
-                app.draw();
+                app.blendFunc(NanoGL.ONE, NanoGL.ONE_MINUS_SRC_ALPHA).draw();
 
                 if (pick) {
                     app.readPixel(pickX, pickY, pickColor);

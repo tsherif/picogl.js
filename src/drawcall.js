@@ -31,30 +31,38 @@
         this.attributes = {};
         this.textures = {};
         this.numItems = 0;
-        this.indices = null;
+        this.indexArray = null;
         this.primitive = primitive !== undefined ? primitive : NanoGL.TRIANGLES;
     };
 
-    NanoGL.DrawCall.prototype.setUniform = function(name, value) {
+    NanoGL.DrawCall.prototype.uniform = function(name, value) {
         this.uniforms[name] = value;
+
+        return this;
     };
 
-    NanoGL.DrawCall.prototype.setAttribute = function(name, buffer) {
+    NanoGL.DrawCall.prototype.attribute = function(name, buffer) {
         this.attributes[name] = buffer;
         if (this.numItems === 0) {
             this.numItems = buffer.numItems;
         }
+
+        return this;
     };
 
-    NanoGL.DrawCall.prototype.setIndices = function(buffer) {
-        this.indices = buffer;
+    NanoGL.DrawCall.prototype.indices = function(buffer) {
+        this.indexArray = buffer;
         this.numItems = buffer.numItems;
+        
+        return this;
     };
 
-    NanoGL.DrawCall.prototype.setTexture = function(name, unit, texture) {
+    NanoGL.DrawCall.prototype.texture = function(name, unit, texture) {
         var textureUnit = this.gl["TEXTURE" + unit];
         this.uniforms[name] = unit;
         this.textures[textureUnit] = texture;
+        
+        return this;
     };
 
     NanoGL.DrawCall.prototype.draw = function(state) {
@@ -79,9 +87,9 @@
             textures[unit].bind(unit);
         }
 
-        if (this.indices) {
-            this.indices.bind();
-            this.gl.drawElements(this.primitive, this.numItems * 3, this.indices.type, 0);
+        if (this.indexArray) {
+            this.indexArray.bind();
+            this.gl.drawElements(this.primitive, this.numItems * 3, this.indexArray.type, 0);
         } else {
             this.gl.drawArrays(this.primitive, 0, this.numItems);
         }

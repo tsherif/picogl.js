@@ -94,10 +94,10 @@
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         
-        var app = NanoGL.createApp(canvas);
-        app.clearColor(0.0, 0.0, 0.0, 1.0);
-        app.depthTest();
-        app.cullBackfaces();
+        var app = NanoGL.createApp(canvas)
+        .clearColor(0.0, 0.0, 0.0, 1.0)
+        .depthTest()
+        .cullBackfaces();
 
         // Set up picking program
         var pickingVsSource = document.getElementById("picking-vs").text;
@@ -169,16 +169,16 @@
 
             for (var i = 0, len = boxes.length; i < len; ++i) {
                 pickingDrawCalls[i] = app.createDrawCall(pickingProgram);
-                pickingDrawCalls[i].setAttribute("aPosition", positions);
+                pickingDrawCalls[i].attribute("aPosition", positions);
 
-                mainDrawCalls[i] = app.createDrawCall(mainProgram);
-                mainDrawCalls[i].setAttribute("aPosition", positions);
-                mainDrawCalls[i].setAttribute("aTexCoord", uv);
-                mainDrawCalls[i].setAttribute("aNormal", normals)
-                mainDrawCalls[i].setTexture("uTextureMap", 0, texture);
-                mainDrawCalls[i].setUniform("uLightPosition", lightPosition);
-                mainDrawCalls[i].setUniform("uEyePosition", eyePosition);
-                mainDrawCalls[i].setUniform("uHighlightColor", unhighlightColor);
+                mainDrawCalls[i] = app.createDrawCall(mainProgram)
+                .attribute("aPosition", positions)
+                .attribute("aTexCoord", uv)
+                .attribute("aNormal", normals)
+                .uniform("uLightPosition", lightPosition)
+                .uniform("uEyePosition", eyePosition)
+                .uniform("uHighlightColor", unhighlightColor)
+                .texture("uTextureMap", 0, texture);
 
                 boxes[i].mainDrawCall = mainDrawCalls[i];
                 boxes[i].pickingDrawCall = pickingDrawCalls[i];
@@ -187,7 +187,7 @@
             var mouseX = 0;
             var mouseY = 0;
             var picked = false;
-            var pickedColor = vec4.create();
+            var pickedColor = new Uint8Array(4);
 
             window.addEventListener("mouseup", function(event) {
                 mouseX = event.clientX;
@@ -204,28 +204,28 @@
                     utils.xformMatrix(boxes[i].modelMatrix, boxes[i].translate, boxes[i].rotate, boxes[i].scale);
                     mat4.multiply(boxes[i].mvpMatrix, viewProjMatrix, boxes[i].modelMatrix);
                     
-                    boxes[i].pickingDrawCall.setUniform("uMVP", boxes[i].mvpMatrix);
-                    boxes[i].pickingDrawCall.setUniform("uPickColor", boxes[i].pickColor);
-                    boxes[i].mainDrawCall.setUniform("uMVP", boxes[i].mvpMatrix);
-                    boxes[i].mainDrawCall.setUniform("uModelMatrix", boxes[i].modelMatrix);
+                    boxes[i].pickingDrawCall.uniform("uMVP", boxes[i].mvpMatrix)
+                    .uniform("uPickColor", boxes[i].pickColor);
+                    
+                    boxes[i].mainDrawCall.uniform("uMVP", boxes[i].mvpMatrix)
+                    .uniform("uModelMatrix", boxes[i].modelMatrix);
                 }
 
                 // Draw to picking buffer
                 if (picked) {
                     pickingBuffer.bind();
                     app.drawCalls = pickingDrawCalls;        
-                    app.draw();
-                    app.readPixel(mouseX, canvas.height - mouseY, pickedColor);
+                    app.draw().readPixel(mouseX, canvas.height - mouseY, pickedColor);
                     
-                    boxes[0].mainDrawCall.setUniform("uHighlightColor", unhighlightColor);
-                    boxes[1].mainDrawCall.setUniform("uHighlightColor", unhighlightColor);
+                    boxes[0].mainDrawCall.uniform("uHighlightColor", unhighlightColor);
+                    boxes[1].mainDrawCall.uniform("uHighlightColor", unhighlightColor);
                     
                     if (pickedColor[0] === 255) {
-                        boxes[0].mainDrawCall.setUniform("uHighlightColor", highlightColor);
+                        boxes[0].mainDrawCall.uniform("uHighlightColor", highlightColor);
                     }
 
                     if (pickedColor[1] === 255) {
-                        boxes[1].mainDrawCall.setUniform("uHighlightColor", highlightColor);
+                        boxes[1].mainDrawCall.uniform("uHighlightColor", highlightColor);
                     }
 
                     pickingBuffer.unbind();

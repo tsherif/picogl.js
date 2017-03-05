@@ -105,10 +105,10 @@
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         
-        var app = NanoGL.createApp(canvas);
-        app.clearColor(0.0, 0.0, 0.0, 1.0);
-        app.depthTest();
-        app.cullBackfaces();
+        var app = NanoGL.createApp(canvas)
+        .clearColor(0.0, 0.0, 0.0, 1.0)
+        .depthTest()
+        .cullBackfaces();
 
         // Set up shadow program
         var shadowVsSource =  document.getElementById("shadow-vs").text;
@@ -180,16 +180,16 @@
 
             for (var i = 0, len = boxes.length; i < len; ++i) {
                 shadowDrawCalls[i] = app.createDrawCall(shadowProgram);
-                shadowDrawCalls[i].setAttribute("aPosition", positions);
+                shadowDrawCalls[i].attribute("aPosition", positions);
 
-                mainDrawCalls[i] = app.createDrawCall(mainProgram);
-                mainDrawCalls[i].setAttribute("aPosition", positions);
-                mainDrawCalls[i].setAttribute("aTexCoord", uv);
-                mainDrawCalls[i].setAttribute("aNormal", normals)
-                mainDrawCalls[i].setTexture("uTextureMap", 0, texture);
-                mainDrawCalls[i].setTexture("uShadowMap", 1, shadowBuffer.depthTexture);
-                mainDrawCalls[i].setUniform("uLightPosition", lightPosition);
-                mainDrawCalls[i].setUniform("uEyePosition", eyePosition);
+                mainDrawCalls[i] = app.createDrawCall(mainProgram)
+                .attribute("aPosition", positions)
+                .attribute("aTexCoord", uv)
+                .attribute("aNormal", normals)
+                .uniform("uLightPosition", lightPosition)
+                .uniform("uEyePosition", eyePosition)
+                .texture("uTextureMap", 0, texture)
+                .texture("uShadowMap", 1, shadowBuffer.depthTexture);
 
                 boxes[i].mainDrawCall = mainDrawCalls[i];
                 boxes[i].shadowDrawCall = shadowDrawCalls[i];
@@ -206,10 +206,10 @@
                     mat4.multiply(boxes[i].mvpMatrix, viewProjMatrix, boxes[i].modelMatrix);
                     mat4.multiply(boxes[i].lightMvpMatrix, lightViewProjMatrix, boxes[i].modelMatrix);
                     
-                    boxes[i].mainDrawCall.setUniform("uMVP", boxes[i].mvpMatrix);
-                    boxes[i].mainDrawCall.setUniform("uModelMatrix", boxes[i].modelMatrix);
-                    boxes[i].mainDrawCall.setUniform("uMVPFromLight", boxes[i].lightMvpMatrix);
-                    boxes[i].shadowDrawCall.setUniform("uMVP", boxes[i].lightMvpMatrix);
+                    boxes[i].mainDrawCall.uniform("uMVP", boxes[i].mvpMatrix)
+                    .uniform("uModelMatrix", boxes[i].modelMatrix)
+                    .uniform("uMVPFromLight", boxes[i].lightMvpMatrix);
+                    boxes[i].shadowDrawCall.uniform("uMVP", boxes[i].lightMvpMatrix);
                 }
 
                 // Draw to shadow buffer

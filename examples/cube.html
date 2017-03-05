@@ -74,9 +74,9 @@
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         
-        var app = NanoGL.createApp(canvas);
-        app.clearColor(0.0, 0.0, 0.0, 1.0);
-        app.depthTest();
+        var app = NanoGL.createApp(canvas)
+        .clearColor(0.0, 0.0, 0.0, 1.0)
+        .depthTest();
 
         var vsSource =  document.getElementById("vertex-draw").text;
         var fsSource =  document.getElementById("fragment-draw").text;
@@ -111,16 +111,14 @@
         image.onload = function() {
             var texture = app.createTexture(image);
 
-            var drawCall = app.createDrawCall(program);
-            drawCall.setAttribute("position", positions);
-            drawCall.setAttribute("uv", uv);
-            drawCall.setAttribute("normal", normals);
-
-            drawCall.setUniform("uViewProj", viewProjMatrix);
-            drawCall.setUniform("eyePosition", eyePosition);
-            drawCall.setUniform("lightPosition", lightPosition);
-
-            drawCall.setTexture("tex", 0, texture);
+            var drawCall = app.createDrawCall(program)
+            .attribute("position", positions)
+            .attribute("uv", uv)
+            .attribute("normal", normals)
+            .uniform("uViewProj", viewProjMatrix)
+            .uniform("eyePosition", eyePosition)
+            .uniform("lightPosition", lightPosition)
+            .texture("tex", 0, texture);
 
             app.drawCalls.push(drawCall);
 
@@ -132,7 +130,7 @@
                 mat4.fromYRotation(rotateYMatrix, angleY);
                 mat4.multiply(modelMatrix, rotateXMatrix, rotateYMatrix);
 
-                drawCall.setUniform("uModel", modelMatrix);
+                drawCall.uniform("uModel", modelMatrix);
 
                 app.draw();
 

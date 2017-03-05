@@ -104,11 +104,11 @@
         canvas.height = window.innerHeight;
         var resolution = vec2.fromValues(canvas.width, canvas.height);
 
-        var app = NanoGL.createApp(canvas);
-        app.clearColor(0.0, 0.0, 0.0, 1.0);
-        app.depthTest();
-        app.depthFunc(NanoGL.LEQUAL);
-        app.blendFunc(NanoGL.ONE, NanoGL.ONE);
+        var app = NanoGL.createApp(canvas)
+        .clearColor(0.0, 0.0, 0.0, 1.0)
+        .depthTest()
+        .depthFunc(NanoGL.LEQUAL)
+        .blendFunc(NanoGL.ONE, NanoGL.ONE);
 
         // Set up gbuffer program
         var geoVsSource =  document.getElementById("geo-vs").text;
@@ -170,10 +170,10 @@
             var geoDrawCalls = new Array(boxes.length);
 
             for (var i = 0, len = boxes.length; i < len; ++i) {
-                geoDrawCalls[i] = app.createDrawCall(geoProgram);
-                geoDrawCalls[i].setAttribute("aPosition", positions);
-                geoDrawCalls[i].setAttribute("aNormal", normals);
-                geoDrawCalls[i].setAttribute("aUV", uv);
+                geoDrawCalls[i] = app.createDrawCall(geoProgram)
+                .attribute("aPosition", positions)
+                .attribute("aNormal", normals)
+                .attribute("aUV", uv);
 
                 boxes[i].drawCall = geoDrawCalls[i];
             }
@@ -206,26 +206,23 @@
                 utils.xformMatrix(lightMatrix, lights[i].position);
                 mat4.multiply(lightMatrix, viewProjMatrix, lightMatrix);
 
-                lightDrawCalls[i] = app.createDrawCall(mainProgram);
-
-                lightDrawCalls[i].setAttribute("aPosition", lightPositions);
-                lightDrawCalls[i].setUniform("uMVP", lightMatrix);
-                lightDrawCalls[i].setTexture("uTextureMap", 0, texture);
-                lightDrawCalls[i].setTexture("uPositionBuffer", 1, gBuffer.colorTextures[0]);
-                lightDrawCalls[i].setTexture("uNormalBuffer", 2, gBuffer.colorTextures[1]);
-                lightDrawCalls[i].setTexture("uUVBuffer", 3, gBuffer.colorTextures[2]);
-                lightDrawCalls[i].setUniform("uEyePosition", eyePosition);
-                lightDrawCalls[i].setUniform("uLightPosition", lights[i].position);
-                lightDrawCalls[i].setUniform("uLightColor", lights[i].color);
-                lightDrawCalls[i].setUniform("uResolution", resolution);
+                lightDrawCalls[i] = app.createDrawCall(mainProgram)
+                .attribute("aPosition", lightPositions)
+                .uniform("uMVP", lightMatrix)
+                .uniform("uEyePosition", eyePosition)
+                .uniform("uLightPosition", lights[i].position)
+                .uniform("uLightColor", lights[i].color)
+                .uniform("uResolution", resolution)
+                .texture("uTextureMap", 0, texture)
+                .texture("uPositionBuffer", 1, gBuffer.colorTextures[0])
+                .texture("uNormalBuffer", 2, gBuffer.colorTextures[1])
+                .texture("uUVBuffer", 3, gBuffer.colorTextures[2]);
             }
 
             function draw() {
 
                 // Draw to gBuffer
                 gBuffer.bind();
-                app.depthMask();
-                app.noBlend();
                 app.drawCalls = geoDrawCalls;
 
                 for (var i = 0, len = boxes.length; i < len; ++i) {
@@ -235,18 +232,16 @@
                     utils.xformMatrix(boxes[i].modelMatrix, boxes[i].translate, boxes[i].rotate, boxes[i].scale);
                     mat4.multiply(boxes[i].mvpMatrix, viewProjMatrix, boxes[i].modelMatrix);
                 
-                    boxes[i].drawCall.setUniform("uMVP", boxes[i].mvpMatrix);
-                    boxes[i].drawCall.setUniform("uModelMatrix", boxes[i].modelMatrix);
+                    boxes[i].drawCall.uniform("uMVP", boxes[i].mvpMatrix)
+                    .uniform("uModelMatrix", boxes[i].modelMatrix);
                 }
 
-                app.draw();
+                app.depthMask().noBlend().draw();
                 gBuffer.unbind();
 
                 // Draw lights
-                app.blend();
-                app.noDepthMask();
                 app.drawCalls = lightDrawCalls;
-                app.draw();                
+                app.blend().noDepthMask().draw();                
                 
                 requestAnimationFrame(draw);
             }
