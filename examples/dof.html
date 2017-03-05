@@ -283,18 +283,21 @@
                     boxes[i].drawCall.uniform("uModel", boxes[i].modelMatrix);
                 }
 
-                boxBuffer.bind();
-                app.drawCalls = boxDrawCalls;
-                app.draw();
-                boxBuffer.unbind();
-                
-                hblurBuffer.bind();
-                app.drawCalls = hBlurDrawCalls;
-                app.draw();
-                hblurBuffer.unbind();
-
-                app.drawCalls = finalDrawCalls;
-                app.draw();
+                // Color and depth
+                app.framebuffer(boxBuffer)
+                .drawCalls(boxDrawCalls)
+                .clear()
+                .draw()
+                // Horizontal blur
+                .framebuffer(hblurBuffer)
+                .drawCalls(hBlurDrawCalls)
+                .clear()
+                .draw()
+                // Vertical blur
+                .defaultFramebuffer()
+                .drawCalls(finalDrawCalls)
+                .clear()
+                .draw();
 
                 requestAnimationFrame(draw);
             }

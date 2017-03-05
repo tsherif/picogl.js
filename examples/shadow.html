@@ -213,14 +213,13 @@
                 }
 
                 // Draw to shadow buffer
-                shadowBuffer.bind();
-                app.drawCalls(shadowDrawCalls)        
+                app.framebuffer(shadowBuffer) 
+                .drawCalls(shadowDrawCalls)        
                 .clear()
-                .draw();                
-                shadowBuffer.unbind();
-
-                // Main draw
-                app.drawCalls(mainDrawCalls)
+                .draw()
+                // Draw to screen                
+                .defaultFramebuffer()   
+                .drawCalls(mainDrawCalls)
                 .clear()
                 .draw();
 

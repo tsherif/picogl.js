@@ -81,10 +81,6 @@
 
     NanoGL.Framebuffer.prototype.bind = function() {
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.framebuffer);
-    };
-
-    NanoGL.Framebuffer.prototype.unbind = function() {
-        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
     };    
 
 })();

@@ -81,7 +81,7 @@
     NanoGL.App = function App(canvas, contextAttributes) {
         this.canvas = canvas;
         this.gl = canvas.getContext("webgl", contextAttributes) || canvas.getContext("experimental-webgl", contextAttributes);
-        this.currentDrawCalls = [];
+        this.currentDrawCalls = null;
 
         this.currentState = {
             program: null
@@ -113,6 +113,18 @@
 
     NanoGL.App.prototype.drawCalls = function(drawCallList) {
         this.currentDrawCalls = drawCallList;
+
+        return this;
+    };
+
+    NanoGL.App.prototype.framebuffer = function(framebuffer) {
+        framebuffer.bind();
+
+        return this;
+    };
+
+    NanoGL.App.prototype.defaultFramebuffer = function() {
+        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
 
         return this;
     };
@@ -782,10 +794,6 @@
 
     NanoGL.Framebuffer.prototype.bind = function() {
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.framebuffer);
-    };
-
-    NanoGL.Framebuffer.prototype.unbind = function() {
-        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
     };    
 
 })();

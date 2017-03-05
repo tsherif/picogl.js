@@ -221,10 +221,6 @@
 
             function draw() {
 
-                // Draw to gBuffer
-                gBuffer.bind();
-                app.drawCalls = geoDrawCalls;
-
                 for (var i = 0, len = boxes.length; i < len; ++i) {
                     boxes[i].rotate[0] += 0.01;
                     boxes[i].rotate[1] += 0.02;
@@ -236,12 +232,21 @@
                     .uniform("uModelMatrix", boxes[i].modelMatrix);
                 }
 
-                app.depthMask().noBlend().draw();
-                gBuffer.unbind();
+                // Draw to gBuffer
+                app.framebuffer(gBuffer)
+                .drawCalls(geoDrawCalls)
+                .depthMask()
+                .noBlend()
+                .clear()
+                .draw()
 
                 // Draw lights
-                app.drawCalls = lightDrawCalls;
-                app.blend().noDepthMask().draw();                
+                .defaultFramebuffer()
+                .drawCalls(lightDrawCalls)
+                .blend()
+                .noDepthMask()
+                .clear()
+                .draw();                
                 
                 requestAnimationFrame(draw);
             }
