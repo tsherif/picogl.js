@@ -80,8 +80,6 @@
             switch (uniformInfo.type) {
                 case gl.INT: 
                 case gl.SAMPLER_2D: 
-                    UniformClass = NanoGL.IntUniform;
-                    break;
                 case gl.SAMPLER_CUBE: 
                     UniformClass = NanoGL.IntUniform;
                     break;
@@ -104,10 +102,6 @@
 
             this.uniforms[uniformInfo.name] = new UniformClass(gl, uniformHandle);
         }
-    };
-
-    NanoGL.Program.prototype.bind = function() {
-        this.gl.useProgram(this.program);
     };
 
     NanoGL.Program.prototype.bindAttribute = function(name, buffer) {

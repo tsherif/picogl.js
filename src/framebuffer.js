@@ -77,10 +77,6 @@
         this.drawBuffers.drawBuffersWEBGL(this.colorAttachments);
 
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-    };
-
-    NanoGL.Framebuffer.prototype.bind = function() {
-        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.framebuffer);
-    };    
+    }; 
 
 })();

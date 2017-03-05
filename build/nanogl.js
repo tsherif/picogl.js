@@ -118,7 +118,7 @@
     };
 
     NanoGL.App.prototype.framebuffer = function(framebuffer) {
-        framebuffer.bind();
+        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, framebuffer.framebuffer);
 
         return this;
     };
@@ -332,8 +332,6 @@
             switch (uniformInfo.type) {
                 case gl.INT: 
                 case gl.SAMPLER_2D: 
-                    UniformClass = NanoGL.IntUniform;
-                    break;
                 case gl.SAMPLER_CUBE: 
                     UniformClass = NanoGL.IntUniform;
                     break;
@@ -356,10 +354,6 @@
 
             this.uniforms[uniformInfo.name] = new UniformClass(gl, uniformHandle);
         }
-    };
-
-    NanoGL.Program.prototype.bind = function() {
-        this.gl.useProgram(this.program);
     };
 
     NanoGL.Program.prototype.bindAttribute = function(name, buffer) {
@@ -790,11 +784,7 @@
         this.drawBuffers.drawBuffersWEBGL(this.colorAttachments);
 
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-    };
-
-    NanoGL.Framebuffer.prototype.bind = function() {
-        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.framebuffer);
-    };    
+    }; 
 
 })();
 ;///////////////////////////////////////////////////////////////////////////////////
@@ -870,7 +860,7 @@
         var textures = this.textures;
 
         if (state.program !== this.program) {
-            this.program.bind();
+            this.gl.useProgram(this.program.program);
             state.program = this.program;
         }
 

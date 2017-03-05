@@ -71,7 +71,7 @@
         var textures = this.textures;
 
         if (state.program !== this.program) {
-            this.program.bind();
+            this.gl.useProgram(this.program.program);
             state.program = this.program;
         }
 
