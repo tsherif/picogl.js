@@ -90,4 +90,4 @@ NanoGL.js makes it fairly easy to set up multi-pass rendering algorithms. It als
     .draw();
 ```
 
-Note that NanoGL.js is **not** a scene graph library. There are no objects, hierarchies, transforms, materials, etc. It has been designed only to make management of GPU state more convenient. Its conceptual model maps fairly directly to the constructs one deals with when writing directly with WebGL. The only higher-level construct being the **draw call**, which sets of related lower-level constructs. 
+Note that NanoGL.js is **not** a scene graph library. There are no objects, hierarchies, transforms, materials, etc. It has been designed only to make management of GPU state more convenient. Its conceptual model maps fairly directly to the constructs one deals with when writing directly with WebGL. The only higher-level construct is the **draw call**, which manages sets of related lower-level constructs. 
