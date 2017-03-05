@@ -188,7 +188,7 @@
         this.linearFloatTexturesEnabled = !!this.gl.getExtension("OES_texture_float_linear");
         
         if (!this.linearFloatTexturesEnabled) {
-            console.warn("Extension OES_texture_float_linear unavailable. Cannot enable float textures linear filtering.");
+            console.warn("Extension OES_texture_float_linear unavailable. Cannot enable float texture linear filtering.");
         }
         
         return this;
