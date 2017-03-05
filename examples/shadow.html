@@ -214,13 +214,15 @@
 
                 // Draw to shadow buffer
                 shadowBuffer.bind();
-                app.drawCalls = shadowDrawCalls;        
-                app.draw();                
+                app.drawCalls(shadowDrawCalls)        
+                .clear()
+                .draw();                
                 shadowBuffer.unbind();
 
                 // Main draw
-                app.drawCalls = mainDrawCalls;
-                app.draw();
+                app.drawCalls(mainDrawCalls)
+                .clear()
+                .draw();
 
                 requestAnimationFrame(draw);
             }

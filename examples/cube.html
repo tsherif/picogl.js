@@ -120,7 +120,7 @@
             .uniform("lightPosition", lightPosition)
             .texture("tex", 0, texture);
 
-            app.drawCalls.push(drawCall);
+            app.drawCalls([drawCall]);
 
             function draw() {
                 angleX += 0.01;
@@ -132,7 +132,7 @@
 
                 drawCall.uniform("uModel", modelMatrix);
 
-                app.draw();
+                app.clear().draw();
 
                 requestAnimationFrame(draw);
             }

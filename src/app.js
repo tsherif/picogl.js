@@ -27,11 +27,13 @@
     NanoGL.App = function App(canvas, contextAttributes) {
         this.canvas = canvas;
         this.gl = canvas.getContext("webgl", contextAttributes) || canvas.getContext("experimental-webgl", contextAttributes);
-        this.drawCalls = [];
+        this.currentDrawCalls;
 
         this.currentState = {
             program: null
         };
+
+        this.clearBits = this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT;
         
         this.gl.viewport(0, 0, canvas.width, canvas.height);
 
@@ -41,6 +43,24 @@
         
         this.drawBuffers = this.gl.getExtension("WEBGL_draw_buffers");
         this.maxDrawBuffers = this.gl.getParameter(this.drawBuffers.MAX_DRAW_BUFFERS_WEBGL);
+    };
+
+    NanoGL.App.prototype.clearMask = function(mask) {
+        this.clearBits = mask;
+
+        return this;
+    };
+
+    NanoGL.App.prototype.clear = function() {
+        this.gl.clear(this.clearBits);
+
+        return this;
+    };
+
+    NanoGL.App.prototype.drawCalls = function(drawCallList) {
+        this.currentDrawCalls = drawCallList;
+
+        return this;
     };
 
     NanoGL.App.prototype.clearColor = function(r, g, b, a) {
@@ -156,9 +176,8 @@
     };
 
     NanoGL.App.prototype.draw = function() {
-        this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
-        for (var i = 0, len = this.drawCalls.length; i < len; i++) {
-            this.drawCalls[i].draw(this.currentState);
+        for (var i = 0, len = this.currentDrawCalls.length; i < len; i++) {
+            this.currentDrawCalls[i].draw(this.currentState);
         }
 
         return this;

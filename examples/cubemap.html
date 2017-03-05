@@ -162,8 +162,6 @@
               .uniform("uEyePosition", eyePosition)
               .texture("cubemap", 0, cubemap);
 
-              app.drawCalls.push(skyboxDrawcall);
-
               var drawCall = app.createDrawCall(program)
               .attribute("position", positions)
               .attribute("uv", uv)
@@ -173,7 +171,7 @@
               .texture("tex", 0, texture)
               .texture("cubemap", 1, cubemap);
 
-              app.drawCalls.push(drawCall);
+              app.drawCalls([skyboxDrawcall, drawCall]);
 
               function draw() {
                   angleX += 0.01;
@@ -185,7 +183,7 @@
 
                   drawCall.uniform("uModel", modelMatrix);
 
-                  app.draw();
+                  app.clear().draw();
 
                   requestAnimationFrame(draw);
               }

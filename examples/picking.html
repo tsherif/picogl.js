@@ -214,8 +214,10 @@
                 // Draw to picking buffer
                 if (picked) {
                     pickingBuffer.bind();
-                    app.drawCalls = pickingDrawCalls;        
-                    app.draw().readPixel(mouseX, canvas.height - mouseY, pickedColor);
+                    app.drawCalls(pickingDrawCalls)        
+                    .clear()
+                    .draw()
+                    .readPixel(mouseX, canvas.height - mouseY, pickedColor);
                     
                     boxes[0].mainDrawCall.uniform("uHighlightColor", unhighlightColor);
                     boxes[1].mainDrawCall.uniform("uHighlightColor", unhighlightColor);
@@ -233,8 +235,9 @@
                 }
 
                 // Main draw
-                app.drawCalls = mainDrawCalls;
-                app.draw();
+                app.drawCalls(mainDrawCalls)
+                .clear()
+                .draw();
 
                 requestAnimationFrame(draw);
             }

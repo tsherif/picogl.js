@@ -32,8 +32,8 @@
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         
-        var app = NanoGL.createApp(canvas, {alpha: false, antialias: false});
-        app.clearColor(0.0, 0.0, 0.0, 1.0);
+        var app = NanoGL.createApp(canvas)
+        .clearColor(0.0, 0.0, 0.0, 1.0);
 
         var vsSource =  "attribute vec4 position;" +
                         "attribute vec2 uv;" +
@@ -93,19 +93,17 @@
             .indices(indices)
             .texture("tex", 0, texture);
 
-            app.drawCalls.push(drawCall);
-
             var drawCall2 = app.createDrawCall(program2)
             .attribute("position", positions)
             .indices(indices)
             .uniform("color", color);
-
-            app.drawCalls.push(drawCall2);
+            
+            app.drawCalls([drawCall, drawCall2]);
 
             function draw() {
                 drawCall.uniform("offset", offset);
                 drawCall2.uniform("offset", offset2);              
-                app.draw();
+                app.clear().draw();
 
                 offset[0] += inc;
                 if (offset[0] > 0.5 || offset[0] < -0.5) {

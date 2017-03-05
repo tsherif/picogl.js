@@ -346,7 +346,7 @@
 
                 // Draw to drawBuffer
                 drawBuffer.bind();
-                app.drawCalls = sphereDrawCalls;
+                ;
 
                 for (var i = 0, len = spheres.length; i < len; ++i) {
                     spheres[i].rotate[1] += 0.002;
@@ -358,20 +358,17 @@
                     spheres[i].drawCall.uniform("uModelMatrix", spheres[i].modelMatrix);
                 }
 
-                app.draw();
+                app.drawCalls(sphereDrawCalls).clear().draw();
                 drawBuffer.unbind();
 
                 if (ssaoEnabled) {
                     ssaoBuffer.bind();
-                    app.drawCalls = ssaoDrawCalls;
-                    app.draw();
+                    app.drawCalls(ssaoDrawCalls).clear().draw();
                     ssaoBuffer.unbind(); 
 
-                    app.drawCalls = aoBlendDrawCalls;
-                    app.draw();
+                    app.drawCalls(aoBlendDrawCalls).clear().draw();
                 } else {
-                    app.drawCalls = colorBufferDrawCalls;
-                    app.draw();  
+                    app.drawCalls(colorBufferDrawCalls).clear().draw();
                 }
                                 
                 requestAnimationFrame(draw);

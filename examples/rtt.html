@@ -118,7 +118,7 @@
             .uniform("eyePosition", eyePosition)
             .uniform("lightPosition", lightPosition);
 
-            app.drawCalls.push(drawCall);
+            app.drawCalls([drawCall]);
 
             var angleX = 0;
             var angleY = 0;
@@ -136,12 +136,12 @@
                 // Render to offscreen texture
                 rttBuffer.bind();
                 drawCall.texture("tex", 0, texture);
-                app.clearColor(0.4, 0.4, 0.4, 1.0).draw();
+                app.clearColor(0.4, 0.4, 0.4, 1.0).clear().draw();
                 rttBuffer.unbind();
                 
                 // Render to screen
                 drawCall.texture("tex", 0, rttBuffer.colorTextures[0]);
-                app.clearColor(0.0, 0.0, 0.0, 1.0).draw();
+                app.clearColor(0.0, 0.0, 0.0, 1.0).clear().draw();
 
                 requestAnimationFrame(draw);
             }

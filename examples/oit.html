@@ -282,12 +282,16 @@
 
                 // Draw to drawBuffer
                 drawBuffer.bind();
-                app.drawCalls = sphereDrawCalls;
-                app.blendFuncSeparate(NanoGL.ONE, NanoGL.ONE, NanoGL.ZERO, NanoGL.ONE_MINUS_SRC_ALPHA).draw();
+                app.drawCalls(sphereDrawCalls)
+                .blendFuncSeparate(NanoGL.ONE, NanoGL.ONE, NanoGL.ZERO, NanoGL.ONE_MINUS_SRC_ALPHA)
+                .clear()
+                .draw();
                 drawBuffer.unbind();
 
-                app.drawCalls = accumDrawCalls;
-                app.blendFunc(NanoGL.ONE, NanoGL.ONE_MINUS_SRC_ALPHA).draw();
+                app.drawCalls(accumDrawCalls)
+                .blendFunc(NanoGL.ONE, NanoGL.ONE_MINUS_SRC_ALPHA)
+                .clear()
+                .draw();
 
                 if (pick) {
                     app.readPixel(pickX, pickY, pickColor);
