@@ -178,7 +178,7 @@
                 .uniform("uLightPosition", lightPosition)
                 .uniform("uEyePosition", eyePosition)
                 .uniform("uHighlightColor", unhighlightColor)
-                .texture("uTextureMap", 0, texture);
+                .texture("uTextureMap", texture);
 
                 boxes[i].mainDrawCall = mainDrawCalls[i];
                 boxes[i].pickingDrawCall = pickingDrawCalls[i];

@@ -160,7 +160,7 @@
               .attribute("position", positions)
               .uniform("uViewProj", skyboxViewProjMatrix)
               .uniform("uEyePosition", eyePosition)
-              .texture("cubemap", 0, cubemap);
+              .texture("cubemap", cubemap);
 
               var drawCall = app.createDrawCall(program)
               .attribute("position", positions)
@@ -168,8 +168,8 @@
               .attribute("normal", normals)
               .uniform("uViewProj", viewProjMatrix)
               .uniform("uEyePosition", eyePosition)
-              .texture("tex", 0, texture)
-              .texture("cubemap", 1, cubemap);
+              .texture("tex", texture)
+              .texture("cubemap", cubemap);
 
               app.drawCalls([skyboxDrawcall, drawCall]);
 

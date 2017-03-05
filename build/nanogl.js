@@ -883,6 +883,7 @@
         this.numItems = 0;
         this.indexArray = null;
         this.primitive = primitive !== undefined ? primitive : NanoGL.TRIANGLES;
+        this.currentTextureUnit = 0;
     };
 
     NanoGL.DrawCall.prototype.uniform = function(name, value) {
@@ -907,9 +908,15 @@
         return this;
     };
 
-    NanoGL.DrawCall.prototype.texture = function(name, unit, texture) {
+    NanoGL.DrawCall.prototype.texture = function(name, texture) {
+        var unit = this.uniforms[name];
+        if (unit === undefined) {
+            unit = this.currentTextureUnit++;
+            this.uniforms[name] = unit;
+        }
+        
         var textureUnit = this.gl["TEXTURE" + unit];
-        this.uniforms[name] = unit;
+        
         this.textures[textureUnit] = texture;
         
         return this;

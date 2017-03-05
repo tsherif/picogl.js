@@ -134,11 +134,11 @@
                 drawCall.uniform("uModel", modelMatrix);
 
                 // Render to offscreen texture
-                drawCall.texture("tex", 0, texture);
+                drawCall.texture("tex", texture);
                 app.framebuffer(rttBuffer).clearColor(0.4, 0.4, 0.4, 1.0).clear().draw();
                 
                 // Render to screen
-                drawCall.texture("tex", 0, rttBuffer.colorTextures[0]);
+                drawCall.texture("tex", rttBuffer.colorTextures[0]);
                 app.defaultFramebuffer().clearColor(0.0, 0.0, 0.0, 1.0).clear().draw();
 
                 requestAnimationFrame(draw);

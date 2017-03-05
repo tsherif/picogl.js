@@ -255,15 +255,15 @@
                 .uniform("uEyePosition", eyePosition)
                 .uniform("uLightPosition", lightPosition)
                 .uniform("uColor", spheres[i].color)
-                .texture("uTexture", 0, texture);
+                .texture("uTexture", texture);
 
                 sphereDrawCalls[i] = spheres[i].drawCall;
             }
 
             var accumDrawCall = app.createDrawCall(accumProgram)
             .attribute("aPosition", quadPositions)
-            .texture("uAccumulate", 0, drawBuffer.colorTextures[0])
-            .texture("uAccumulateAlpha", 1, drawBuffer.colorTextures[1]);
+            .texture("uAccumulate", drawBuffer.colorTextures[0])
+            .texture("uAccumulateAlpha", drawBuffer.colorTextures[1]);
 
             var accumDrawCalls = [accumDrawCall];
 

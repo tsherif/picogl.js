@@ -215,10 +215,10 @@
                 .uniform("uLightPosition", lights[i].position)
                 .uniform("uLightColor", lights[i].color)
                 .uniform("uResolution", resolution)
-                .texture("uTextureMap", 0, texture)
-                .texture("uPositionBuffer", 1, gBuffer.colorTextures[0])
-                .texture("uNormalBuffer", 2, gBuffer.colorTextures[1])
-                .texture("uUVBuffer", 3, gBuffer.colorTextures[2]);
+                .texture("uTextureMap", texture)
+                .texture("uPositionBuffer", gBuffer.colorTextures[0])
+                .texture("uNormalBuffer", gBuffer.colorTextures[1])
+                .texture("uUVBuffer", gBuffer.colorTextures[2]);
             }
 
             function draw() {

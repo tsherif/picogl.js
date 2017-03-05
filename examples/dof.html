@@ -238,7 +238,7 @@
                     .attribute("aUV", uv)
                     .uniform("uEyePosition", eyePosition)
                     .uniform("uLightPosition", lightPosition)
-                    .texture("uTexture", 0, texture);
+                    .texture("uTexture", texture);
 
                     boxDrawCalls[boxI] = boxes[boxI].drawCall;
                     ++boxI;
@@ -255,8 +255,8 @@
             .uniform("uPPM", PPM)
             .uniform("uTexelOffset", hTexelOffset)
             .uniform("uDepthRange", depthRange)
-            .texture("uTexture", 0, boxBuffer.colorTextures[0])
-            .texture("uDepth", 1, boxBuffer.depthTexture);
+            .texture("uTexture", boxBuffer.colorTextures[0])
+            .texture("uDepth", boxBuffer.depthTexture);
 
             var hBlurDrawCalls = [hBlurDrawCall];
 
@@ -267,8 +267,8 @@
             .uniform("uPPM", PPM)
             .uniform("uTexelOffset", vTexelOffset)
             .uniform("uDepthRange", depthRange)
-            .texture("uTexture", 0, hblurBuffer.colorTextures[0])
-            .texture("uDepth", 1, boxBuffer.depthTexture);
+            .texture("uTexture", hblurBuffer.colorTextures[0])
+            .texture("uDepth", boxBuffer.depthTexture);
 
             var finalDrawCalls = [finalDrawCall];
 

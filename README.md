@@ -63,14 +63,14 @@ NanoGL.js makes it fairly easy to set up multi-pass rendering algorithms. It als
     .attribute("aPosition", quadPositions)
     // ...etc.
     // Bind geo targets from colorGeoBuffer
-    .texture("uPositionBuffer", 0, colorGeoBuffer.colorTextures[1])
-    .texture("uNormalBuffer", 1, colorGeoBuffer.colorTextures[2]);
+    .texture("uPositionBuffer", colorGeoBuffer.colorTextures[1])
+    .texture("uNormalBuffer", colorGeoBuffer.colorTextures[2]);
 
     var aoBlendDrawCall = app.createDrawCall(aoBlendProgram)
     .attribute("aPosition", quadPositions)
     // Bind color targets from first two passes
-    .texture("uColorBuffer", 0, colorGeoBuffer.colorTextures[0])
-    .texture("uOcclusionBuffer", 1, ssaoBuffer.colorTextures[0]);
+    .texture("uColorBuffer", colorGeoBuffer.colorTextures[0])
+    .texture("uOcclusionBuffer", ssaoBuffer.colorTextures[0]);
 
     // DRAW
     // Color/geo pass
