@@ -219,13 +219,13 @@
         var drawVsSource =  document.getElementById("draw-vs").text;
         var drawFsSource =  document.getElementById("draw-fs").text;
         var drawProgram = app.createProgram(drawVsSource, drawFsSource);
-        var drawBuffer = app.createFramebuffer(canvas.width, canvas.height, 3, NanoGL.FLOAT);
+        var drawBuffer = app.createFramebuffer(3, NanoGL.FLOAT);
 
         // Set up ssao program
         var ssaoVsSource =  document.getElementById("quad-vs").text;
         var ssaoFsSource =  document.getElementById("ssao-fs").text;
         var ssaoProgram = app.createProgram(ssaoVsSource, ssaoFsSource);
-        var ssaoBuffer = app.createFramebuffer(canvas.width, canvas.height, 1, NanoGL.FLOAT);
+        var ssaoBuffer = app.createFramebuffer(1, NanoGL.FLOAT);
 
         // Set up ao blend program
         var aoBlendVsSource =  document.getElementById("quad-vs").text;

@@ -80,7 +80,7 @@
         var vsSource =  document.getElementById("vertex-draw").text;
         var fsSource =  document.getElementById("fragment-draw").text;
         var program = app.createProgram(vsSource, fsSource);
-        var rttBuffer = app.createFramebuffer(canvas.width, canvas.height);
+        var rttBuffer = app.createFramebuffer();
 
         // Geometry
         var box = utils.createBox({dimensions: [1.0, 1.0, 1.0]})

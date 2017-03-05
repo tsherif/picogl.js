@@ -172,10 +172,10 @@
         var debugFsSource =  document.getElementById("fragment-debug").text;
         var debugProgram = app.createProgram(quadVsSource, debugFsSource);
 
-        var boxBuffer = app.createFramebuffer(canvas.width, canvas.height);
-        var hblurBuffer = app.createFramebuffer(canvas.width, canvas.height);
-        var blurBuffer = app.createFramebuffer(canvas.width, canvas.height);
-        var dofBuffer = app.createFramebuffer(canvas.width, canvas.height);
+        var boxBuffer = app.createFramebuffer();
+        var hblurBuffer = app.createFramebuffer();
+        var blurBuffer = app.createFramebuffer();
+        var dofBuffer = app.createFramebuffer();
 
         // Geometry
         var box = utils.createBox({dimensions: [1.0, 1.0, 1.0]})

@@ -242,7 +242,7 @@
         this.linearFloatTexturesEnabled = !!this.gl.getExtension("OES_texture_float_linear");
         
         if (!this.linearFloatTexturesEnabled) {
-            console.warn("Extension OES_texture_float_linear unavailable. Cannot enable float textures linear filtering.");
+            console.warn("Extension OES_texture_float_linear unavailable. Cannot enable float texture linear filtering.");
         }
         
         return this;
@@ -274,8 +274,8 @@
         return new NanoGL.Cubemap(this.gl, options);
     };
 
-    NanoGL.App.prototype.createFramebuffer = function(width, height, numColorTextures, colorTargetType) {
-        return new NanoGL.Framebuffer(this.gl, this.drawBuffersExtension, width, height, numColorTextures, colorTargetType, this.depthTexturesEnabled);
+    NanoGL.App.prototype.createFramebuffer = function(numColorTextures, colorTargetType) {
+        return new NanoGL.Framebuffer(this.gl, this.drawBuffersExtension, this.canvas.width, this.canvas.height, numColorTextures, colorTargetType, this.depthTexturesEnabled);
     };
 
     NanoGL.App.prototype.createDrawCall = function(program, primitive) {

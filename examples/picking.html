@@ -103,7 +103,7 @@
         var pickingVsSource = document.getElementById("picking-vs").text;
         var pickingFsSource = document.getElementById("picking-fs").text;
         var pickingProgram = app.createProgram(pickingVsSource, pickingFsSource);
-        var pickingBuffer = app.createFramebuffer(canvas.width, canvas.height, 1);
+        var pickingBuffer = app.createFramebuffer();
 
         // Set up main program
         var vsSource = document.getElementById("main-vs").text;

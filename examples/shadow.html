@@ -115,7 +115,7 @@
         var shadowVsSource =  document.getElementById("shadow-vs").text;
         var shadowFsSource =  document.getElementById("shadow-fs").text;
         var shadowProgram = app.createProgram(shadowVsSource, shadowFsSource);
-        var shadowBuffer = app.createFramebuffer(canvas.width, canvas.height, 0);
+        var shadowBuffer = app.createFramebuffer(0);
 
         // Set up main program
         var vsSource =  document.getElementById("main-vs").text;
