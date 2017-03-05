@@ -41,11 +41,11 @@ NanoGL.js makes it fairly easy to set up multi-pass rendering algorithms. It als
     // Set up program and framebuffer to gather color and geometry data
     var colorGeoProgram = app.createProgram(colorGeoVsSource, colorGeoFsSource);
     // Framebuffer with 3 float targets: color, positions, normals
-    var colorGeoBuffer = app.createFramebuffer(canvas.width, canvas.height, 3, NanoGL.FLOAT);
+    var colorGeoBuffer = app.createFramebuffer(3, NanoGL.FLOAT);
 
     // Set up ssao program
     var ssaoProgram = app.createProgram(ssaoVsSource, ssaoFsSource);
-    var ssaoBuffer = app.createFramebuffer(canvas.width, canvas.height, 1, NanoGL.FLOAT);
+    var ssaoBuffer = app.createFramebuffer(1, NanoGL.FLOAT);
 
     // Set up ao blend program
     var aoBlendProgram = app.createProgram(aoBlendVsSource, aoBlendFsSource);
