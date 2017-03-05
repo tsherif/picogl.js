@@ -24,16 +24,26 @@
 (function() {
     "use strict";
 
-    NanoGL.Framebuffer = function Framebuffer(gl, drawBuffers, width, height, numColorTargets, colorTargetType) {
+    NanoGL.Framebuffer = function Framebuffer(gl, drawBuffers, width, height, numColorTargets, colorTargetType, depthTexturesEnabled) {
         this.gl = gl;
         this.drawBuffers = drawBuffers;
         this.framebuffer = gl.createFramebuffer();
         this.width = width;
         this.height = height;
         this.numColorTargets = numColorTargets !== undefined ? numColorTargets : 1;
+
+        if (!drawBuffers) {
+            this.numColorTargets = 1;
+        }
+
         this.colorTextures = new Array(this.numColorTargets);
+        this.colorAttachments = new Array(this.numColorTargets);
+        this.depthTexture = null;
+
         var i;
 
+        gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer);
+        
         for (i = 0; i < this.numColorTargets; ++i) {
             this.colorTextures[i] = new NanoGL.Texture(gl, null, {
                 array: true,
@@ -46,35 +56,45 @@
                 wrapT: gl.CLAMP_TO_EDGE,
                 generateMipmaps: false
             });
-        }
 
-        this.depthTexture = new NanoGL.Texture(gl, null, {
-            array: true,
-            internalFormat: this.gl.DEPTH_COMPONENT,
-            type: this.gl.UNSIGNED_INT,
-            width: width,
-            height: height,
-            minFilter: gl.NEAREST,
-            magFilter: gl.NEAREST,
-            wrapS: gl.CLAMP_TO_EDGE,
-            wrapT: gl.CLAMP_TO_EDGE,
-            generateMipmaps: false
-        });
-
-        this.colorAttachments = new Array(this.numColorTargets);
-
-        gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer);
-        for (i = 0; i < this.numColorTargets; ++i) {
-            this.colorAttachments[i] = this.drawBuffers["COLOR_ATTACHMENT" + i + "_WEBGL"];
+            if (this.drawBuffers) {
+                this.colorAttachments[i] = this.drawBuffers["COLOR_ATTACHMENT" + i + "_WEBGL"];
+            } else {
+                this.colorAttachments[i] = gl["COLOR_ATTACHMENT" + i];
+            }
+            
             gl.framebufferTexture2D(gl.FRAMEBUFFER, this.colorAttachments[i], gl.TEXTURE_2D, this.colorTextures[i].texture, 0);
         }
-        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, this.depthTexture.texture, 0);
+
+        if (depthTexturesEnabled) {
+            this.depthTexture = new NanoGL.Texture(gl, null, {
+                array: true,
+                internalFormat: this.gl.DEPTH_COMPONENT,
+                type: this.gl.UNSIGNED_INT,
+                width: width,
+                height: height,
+                minFilter: gl.NEAREST,
+                magFilter: gl.NEAREST,
+                wrapS: gl.CLAMP_TO_EDGE,
+                wrapT: gl.CLAMP_TO_EDGE,
+                generateMipmaps: false
+            });
+
+            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, this.depthTexture.texture, 0);
+        } else {
+            var depthBuffer = gl.createRenderbuffer();
+            gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffer);
+            gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, width, height);
+            gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthBuffer);
+        }
 
         if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE) {
             console.log("Frame buffer error: " + gl.checkFramebufferStatus(gl.FRAMEBUFFER).toString());
         }
 
-        this.drawBuffers.drawBuffersWEBGL(this.colorAttachments);
+        if (this.drawBuffers) {
+            this.drawBuffers.drawBuffersWEBGL(this.colorAttachments);
+        } 
 
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     }; 

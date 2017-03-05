@@ -208,7 +208,10 @@
         var app = NanoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0)
         .depthTest()
-        .depthFunc(NanoGL.LEQUAL);
+        .depthFunc(NanoGL.LEQUAL)
+        .drawBuffers()
+        .floatTextures()
+        .linearFloatTextures();
 
         var depthRange = vec2.fromValues(NEAR, FAR);
 

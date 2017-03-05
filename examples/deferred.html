@@ -108,7 +108,9 @@
         .clearColor(0.0, 0.0, 0.0, 1.0)
         .depthTest()
         .depthFunc(NanoGL.LEQUAL)
-        .blendFunc(NanoGL.ONE, NanoGL.ONE);
+        .blendFunc(NanoGL.ONE, NanoGL.ONE)
+        .drawBuffers()
+        .floatTextures();
 
         // Set up gbuffer program
         var geoVsSource =  document.getElementById("geo-vs").text;

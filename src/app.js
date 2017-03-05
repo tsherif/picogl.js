@@ -36,13 +36,12 @@
         this.clearBits = this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT;
         
         this.gl.viewport(0, 0, canvas.width, canvas.height);
-
-        this.gl.getExtension("WEBGL_depth_texture");
-        this.gl.getExtension("OES_texture_float");
-        this.gl.getExtension("OES_texture_float_linear");
         
-        this.drawBuffers = this.gl.getExtension("WEBGL_draw_buffers");
-        this.maxDrawBuffers = this.gl.getParameter(this.drawBuffers.MAX_DRAW_BUFFERS_WEBGL);
+        this.drawBuffersExtension = null;
+        this.maxDrawBuffers = 1;
+        this.depthTexturesEnabled = false;
+        this.floatTexturesEnabled = false;
+        this.linearFloatTexturesEnabled = false;
     };
 
     NanoGL.App.prototype.clearMask = function(mask) {
@@ -153,6 +152,48 @@
         return this;
     };
 
+    NanoGL.App.prototype.drawBuffers = function() {
+        this.drawBuffersExtension = this.gl.getExtension("WEBGL_draw_buffers");
+        
+        if (this.drawBuffersExtension) {
+            this.maxDrawBuffers = this.gl.getParameter(this.drawBuffersExtension.MAX_DRAW_BUFFERS_WEBGL);
+        } else {
+            console.warn("Extension WEBGL_draw_buffers unavailable. Cannot enable draw buffers.");
+        }
+        
+        return this;
+    };
+
+    NanoGL.App.prototype.depthTextures = function() {
+        this.depthTexturesEnabled = !!this.gl.getExtension("WEBGL_depth_texture");
+        
+        if (!this.depthTexturesEnabled) {
+            console.warn("Extension WEBGL_depth_texture unavailable. Cannot enable depth textures.");
+        }
+        
+        return this;
+    };
+
+    NanoGL.App.prototype.floatTextures = function() {
+        this.floatTexturesEnabled = !!this.gl.getExtension("OES_texture_float");
+        
+        if (!this.floatTexturesEnabled) {
+            console.warn("Extension OES_texture_float unavailable. Cannot enable float textures.");
+        }
+        
+        return this;
+    };
+
+    NanoGL.App.prototype.linearFloatTextures = function() {
+        this.linearFloatTexturesEnabled = !!this.gl.getExtension("OES_texture_float_linear");
+        
+        if (!this.linearFloatTexturesEnabled) {
+            console.warn("Extension OES_texture_float_linear unavailable. Cannot enable float textures linear filtering.");
+        }
+        
+        return this;
+    };
+
     NanoGL.App.prototype.readPixel = function(x, y, outVec4) {
         this.gl.readPixels(x, y, 1, 1, this.gl.RGBA, this.gl.UNSIGNED_BYTE, outVec4);
 
@@ -180,7 +221,7 @@
     };
 
     NanoGL.App.prototype.createFramebuffer = function(width, height, numColorTextures, colorTargetType) {
-        return new NanoGL.Framebuffer(this.gl, this.drawBuffers, width, height, numColorTextures, colorTargetType);
+        return new NanoGL.Framebuffer(this.gl, this.drawBuffersExtension, width, height, numColorTextures, colorTargetType, this.depthTexturesEnabled);
     };
 
     NanoGL.App.prototype.createDrawCall = function(program, primitive) {

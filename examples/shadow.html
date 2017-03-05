@@ -108,7 +108,8 @@
         var app = NanoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0)
         .depthTest()
-        .cullBackfaces();
+        .cullBackfaces()
+        .depthTextures();
 
         // Set up shadow program
         var shadowVsSource =  document.getElementById("shadow-vs").text;

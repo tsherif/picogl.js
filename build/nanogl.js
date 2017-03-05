@@ -90,13 +90,12 @@
         this.clearBits = this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT;
         
         this.gl.viewport(0, 0, canvas.width, canvas.height);
-
-        this.gl.getExtension("WEBGL_depth_texture");
-        this.gl.getExtension("OES_texture_float");
-        this.gl.getExtension("OES_texture_float_linear");
         
-        this.drawBuffers = this.gl.getExtension("WEBGL_draw_buffers");
-        this.maxDrawBuffers = this.gl.getParameter(this.drawBuffers.MAX_DRAW_BUFFERS_WEBGL);
+        this.drawBuffersExtension = null;
+        this.maxDrawBuffers = 1;
+        this.depthTexturesEnabled = false;
+        this.floatTexturesEnabled = false;
+        this.linearFloatTexturesEnabled = false;
     };
 
     NanoGL.App.prototype.clearMask = function(mask) {
@@ -207,6 +206,48 @@
         return this;
     };
 
+    NanoGL.App.prototype.drawBuffers = function() {
+        this.drawBuffersExtension = this.gl.getExtension("WEBGL_draw_buffers");
+        
+        if (this.drawBuffersExtension) {
+            this.maxDrawBuffers = this.gl.getParameter(this.drawBuffersExtension.MAX_DRAW_BUFFERS_WEBGL);
+        } else {
+            console.warn("Extension WEBGL_draw_buffers unavailable. Cannot enable draw buffers.");
+        }
+        
+        return this;
+    };
+
+    NanoGL.App.prototype.depthTextures = function() {
+        this.depthTexturesEnabled = !!this.gl.getExtension("WEBGL_depth_texture");
+        
+        if (!this.depthTexturesEnabled) {
+            console.warn("Extension WEBGL_depth_texture unavailable. Cannot enable depth textures.");
+        }
+        
+        return this;
+    };
+
+    NanoGL.App.prototype.floatTextures = function() {
+        this.floatTexturesEnabled = !!this.gl.getExtension("OES_texture_float");
+        
+        if (!this.floatTexturesEnabled) {
+            console.warn("Extension OES_texture_float unavailable. Cannot enable float textures.");
+        }
+        
+        return this;
+    };
+
+    NanoGL.App.prototype.linearFloatTextures = function() {
+        this.linearFloatTexturesEnabled = !!this.gl.getExtension("OES_texture_float_linear");
+        
+        if (!this.linearFloatTexturesEnabled) {
+            console.warn("Extension OES_texture_float_linear unavailable. Cannot enable float textures linear filtering.");
+        }
+        
+        return this;
+    };
+
     NanoGL.App.prototype.readPixel = function(x, y, outVec4) {
         this.gl.readPixels(x, y, 1, 1, this.gl.RGBA, this.gl.UNSIGNED_BYTE, outVec4);
 
@@ -234,7 +275,7 @@
     };
 
     NanoGL.App.prototype.createFramebuffer = function(width, height, numColorTextures, colorTargetType) {
-        return new NanoGL.Framebuffer(this.gl, this.drawBuffers, width, height, numColorTextures, colorTargetType);
+        return new NanoGL.Framebuffer(this.gl, this.drawBuffersExtension, width, height, numColorTextures, colorTargetType, this.depthTexturesEnabled);
     };
 
     NanoGL.App.prototype.createDrawCall = function(program, primitive) {
@@ -731,16 +772,26 @@
 (function() {
     "use strict";
 
-    NanoGL.Framebuffer = function Framebuffer(gl, drawBuffers, width, height, numColorTargets, colorTargetType) {
+    NanoGL.Framebuffer = function Framebuffer(gl, drawBuffers, width, height, numColorTargets, colorTargetType, depthTexturesEnabled) {
         this.gl = gl;
         this.drawBuffers = drawBuffers;
         this.framebuffer = gl.createFramebuffer();
         this.width = width;
         this.height = height;
         this.numColorTargets = numColorTargets !== undefined ? numColorTargets : 1;
+
+        if (!drawBuffers) {
+            this.numColorTargets = 1;
+        }
+
         this.colorTextures = new Array(this.numColorTargets);
+        this.colorAttachments = new Array(this.numColorTargets);
+        this.depthTexture = null;
+
         var i;
 
+        gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer);
+        
         for (i = 0; i < this.numColorTargets; ++i) {
             this.colorTextures[i] = new NanoGL.Texture(gl, null, {
                 array: true,
@@ -753,35 +804,45 @@
                 wrapT: gl.CLAMP_TO_EDGE,
                 generateMipmaps: false
             });
-        }
 
-        this.depthTexture = new NanoGL.Texture(gl, null, {
-            array: true,
-            internalFormat: this.gl.DEPTH_COMPONENT,
-            type: this.gl.UNSIGNED_INT,
-            width: width,
-            height: height,
-            minFilter: gl.NEAREST,
-            magFilter: gl.NEAREST,
-            wrapS: gl.CLAMP_TO_EDGE,
-            wrapT: gl.CLAMP_TO_EDGE,
-            generateMipmaps: false
-        });
-
-        this.colorAttachments = new Array(this.numColorTargets);
-
-        gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer);
-        for (i = 0; i < this.numColorTargets; ++i) {
-            this.colorAttachments[i] = this.drawBuffers["COLOR_ATTACHMENT" + i + "_WEBGL"];
+            if (this.drawBuffers) {
+                this.colorAttachments[i] = this.drawBuffers["COLOR_ATTACHMENT" + i + "_WEBGL"];
+            } else {
+                this.colorAttachments[i] = gl["COLOR_ATTACHMENT" + i];
+            }
+            
             gl.framebufferTexture2D(gl.FRAMEBUFFER, this.colorAttachments[i], gl.TEXTURE_2D, this.colorTextures[i].texture, 0);
         }
-        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, this.depthTexture.texture, 0);
+
+        if (depthTexturesEnabled) {
+            this.depthTexture = new NanoGL.Texture(gl, null, {
+                array: true,
+                internalFormat: this.gl.DEPTH_COMPONENT,
+                type: this.gl.UNSIGNED_INT,
+                width: width,
+                height: height,
+                minFilter: gl.NEAREST,
+                magFilter: gl.NEAREST,
+                wrapS: gl.CLAMP_TO_EDGE,
+                wrapT: gl.CLAMP_TO_EDGE,
+                generateMipmaps: false
+            });
+
+            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, this.depthTexture.texture, 0);
+        } else {
+            var depthBuffer = gl.createRenderbuffer();
+            gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffer);
+            gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, width, height);
+            gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthBuffer);
+        }
 
         if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE) {
             console.log("Frame buffer error: " + gl.checkFramebufferStatus(gl.FRAMEBUFFER).toString());
         }
 
-        this.drawBuffers.drawBuffersWEBGL(this.colorAttachments);
+        if (this.drawBuffers) {
+            this.drawBuffers.drawBuffersWEBGL(this.colorAttachments);
+        } 
 
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     }; 

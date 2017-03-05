@@ -148,7 +148,10 @@
         var app = NanoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0)
         .blend()
-        .noDepthMask();
+        .noDepthMask()
+        .drawBuffers()
+        .floatTextures()
+        .linearFloatTextures();
 
         canvas.addEventListener("mousemove", function(event) {
             pick = true;
