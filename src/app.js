@@ -386,18 +386,59 @@
         return this;
     };
 
+    /**
+        Create a program.
+
+        @method
+        @param {string} vsSource Vertex shader source code.
+        @param {string} fsSource Fragment shader source code.
+    */
     NanoGL.App.prototype.createProgram = function(vsSource, fsSource) {
         return new NanoGL.Program(this.gl, vsSource, fsSource);
     };
 
+    /**
+        Create an array buffer.
+
+        @method
+        @param {GLEnum} type The data type stored in the array buffer.
+        @param {number} itemSize Number of elements per vertex.
+        @param {ArrayBufferView} data Array buffer data.
+    */
     NanoGL.App.prototype.createArrayBuffer = function(type, itemSize, data) {
         return new NanoGL.ArrayBuffer(this.gl, type, itemSize, data);
     };
 
+    /**
+        Create an index array buffer.
+
+        @method
+        @param {GLEnum} type The data type stored in the index array buffer.
+        @param {number} itemSize Number of elements per primitive.
+        @param {ArrayBufferView} data Index array buffer data.
+    */
     NanoGL.App.prototype.createIndexBuffer = function(type, itemSize, data) {
         return new NanoGL.ArrayBuffer(this.gl, type, itemSize, data, true);
     };
 
+    /**
+        Create a texture.
+
+        @method
+        @param {ImageElement|ArrayBufferView} image The image data. Can be any format that would be 
+        @param {Object} [options] Texture options.
+        @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
+        @param {GLEnum} [options.internalFormat=RGBA] Texture data format.
+        @param {boolean} [options.array=false] Whether the texture is being passed as an ArrayBufferView.
+        @param {number} [options.width] Width of the texture (only valid when passing array texture data).
+        @param {number} [options.height] Height of the texture (only valid when passing array texture data).
+        @param {boolean} [options.flipY=true] Whether th y-axis be flipped when reading the texture.
+        @param {GLEnum} [options.minFilter=LINEAR_MIPMAP_NEAREST] Minification filter.
+        @param {GLEnum} [options.magFilter=LINEAR] Magnification filter.
+        @param {GLEnum} [options.wrapS=REPEAT] Horizontal wrap mode.
+        @param {GLEnum} [options.wrapT=REPEAT] Vertical wrap mode.
+        @param {boolean} [options.generateMipmaps] Should mip maps be generated.
+    */
     NanoGL.App.prototype.createTexture = function(image, options) {
         return new NanoGL.Texture(this.gl, image, options);
     };
