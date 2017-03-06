@@ -227,10 +227,14 @@
                 mat4.perspective(projMatrix, Math.PI / 2, app.canvas.width / app.canvas.height, 0.1, 10.0);
                 mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
 
+                resolution[0] = app.width;
+                resolution[1] = app.height;
+
                 for (var i = 0, len = lights.length; i < len; ++i) {
                     lightMatrix = mat4.create();
                     utils.xformMatrix(lightMatrix, lights[i].position);
                     mat4.multiply(lightMatrix, viewProjMatrix, lightMatrix);
+
 
                     lightDrawCalls[i].uniform("uMVP", lightMatrix);
                 }

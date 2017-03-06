@@ -263,6 +263,14 @@
         // Light
         var lightPosition = vec3.fromValues(0.5, 1, 2); 
 
+        window.onresize = function() {
+            app.resize(window.innerWidth, window.innerHeight);
+            drawBuffer.resize();
+            ssaoBuffer.resize();
+
+            mat4.perspective(projMatrix, Math.PI / 2, app.width / app.height, 0.1, 10.0);
+        };
+
         var image = new Image();
 
         image.onload = function() {
@@ -312,7 +320,7 @@
                 .uniform("uViewMatrix", viewMatrix)
                 .uniform("uEyePosition", eyePosition)
                 .uniform("uLightPosition", lightPosition)
-                .texture("uTexture", 0, texture);
+                .texture("uTexture", texture);
 
                 sphereDrawCalls[i] = spheres[i].drawCall;
             }
@@ -324,22 +332,22 @@
             .uniform("uAttenuation", vec2.fromValues(1, 1))
             .uniform("uTexelOffset", screenTexelSize)
             .uniform("uDepthRange", depthRange)
-            .texture("uPositionBuffer", 0, drawBuffer.colorTextures[1])
-            .texture("uNormalBuffer", 1, drawBuffer.colorTextures[2])
-            .texture("uNoiseBuffer", 2, noiseTexture);
+            .texture("uPositionBuffer", drawBuffer.colorTextures[1])
+            .texture("uNormalBuffer", drawBuffer.colorTextures[2])
+            .texture("uNoiseBuffer", noiseTexture);
 
             var ssaoDrawCalls = [ssaoDrawCall];
 
             var aoBlendDrawCall = app.createDrawCall(aoBlendProgram)
             .attribute("aPosition", quadPositions)
-            .texture("uColorBuffer", 0, drawBuffer.colorTextures[0])
-            .texture("uOcclusionBuffer", 1, ssaoBuffer.colorTextures[0]);
+            .texture("uColorBuffer", drawBuffer.colorTextures[0])
+            .texture("uOcclusionBuffer", ssaoBuffer.colorTextures[0]);
 
             var aoBlendDrawCalls = [aoBlendDrawCall];
 
             var colorBufferDrawCall = app.createDrawCall(textureProgram)
             .attribute("aPosition", quadPositions)
-            .texture("uTexture", 0, drawBuffer.colorTextures[0]);
+            .texture("uTexture", drawBuffer.colorTextures[0]);
 
             var colorBufferDrawCalls = [colorBufferDrawCall];
 

@@ -135,6 +135,14 @@
         var highlightColor = vec3.fromValues(1.5, 1.5, 0.5);
         var unhighlightColor = vec3.fromValues(1.0, 1.0, 1.0);
 
+        window.onresize = function() {
+            app.resize(window.innerWidth, window.innerHeight);
+            pickingBuffer.resize();
+
+            mat4.perspective(projMatrix, Math.PI / 2, app.width / app.height, 0.1, 10.0);
+            mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
+        };
+
         var image = new Image();
 
         image.onload = function() {

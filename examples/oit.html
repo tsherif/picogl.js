@@ -199,6 +199,14 @@
         // Light
         var lightPosition = vec3.fromValues(0.5, 1, 2); 
 
+
+        window.onresize = function() {
+            app.resize(window.innerWidth, window.innerHeight);
+            drawBuffer.resize();
+
+            mat4.perspective(projMatrix, Math.PI / 2, app.width / app.height, 0.1, 10.0);
+        };
+
         var image = new Image();
 
         image.onload = function() {

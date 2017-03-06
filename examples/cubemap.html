@@ -128,6 +128,14 @@
         var skyboxViewProjMatrix = mat4.create();
         mat4.multiply(skyboxViewProjMatrix, projMatrix, skyboxViewMatrix);
 
+        window.onresize = function() {
+            app.resize(window.innerWidth, window.innerHeight);
+
+            mat4.perspective(projMatrix, Math.PI / 2, app.width / app.height, 0.1, 10.0);
+            mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
+            mat4.multiply(skyboxViewProjMatrix, projMatrix, skyboxViewMatrix);
+        }
+
         var modelMatrix = mat4.create();
         var rotateXMatrix = mat4.create();
         var rotateYMatrix = mat4.create();

@@ -105,6 +105,14 @@
         var rotateXMatrix = mat4.create();
         var rotateYMatrix = mat4.create();
 
+        window.onresize = function() {
+            app.resize(window.innerWidth, window.innerHeight);
+            rttBuffer.resize();
+
+            mat4.perspective(projMatrix, Math.PI / 2, app.width / app.height, 0.1, 10.0);
+            mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
+        };
+
         var image = new Image();
 
         image.onload = function() {

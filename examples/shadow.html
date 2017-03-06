@@ -146,6 +146,13 @@
         mat4.lookAt(lightViewMatrix, lightPosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
         mat4.multiply(lightViewProjMatrix, projMatrix, lightViewMatrix);
 
+        window.onresize = function() {
+            app.resize(window.innerWidth, window.innerHeight);
+            shadowBuffer.resize();
+
+            mat4.perspective(projMatrix, Math.PI / 2, app.width / app.height, 0.1, 10.0);
+            mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
+        };
 
         var image = new Image();
 
@@ -189,8 +196,8 @@
                 .attribute("aNormal", normals)
                 .uniform("uLightPosition", lightPosition)
                 .uniform("uEyePosition", eyePosition)
-                .texture("uTextureMap", 0, texture)
-                .texture("uShadowMap", 1, shadowBuffer.depthTexture);
+                .texture("uTextureMap", texture)
+                .texture("uShadowMap", shadowBuffer.depthTexture);
 
                 boxes[i].mainDrawCall = mainDrawCalls[i];
                 boxes[i].shadowDrawCall = shadowDrawCalls[i];

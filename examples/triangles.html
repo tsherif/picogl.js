@@ -91,7 +91,7 @@
             .attribute("position", positions)
             .attribute("uv", uv)
             .indices(indices)
-            .texture("tex", 0, texture);
+            .texture("tex", texture);
 
             var drawCall2 = app.createDrawCall(program2)
             .attribute("position", positions)
@@ -99,6 +99,10 @@
             .uniform("color", color);
             
             app.drawCalls([drawCall, drawCall2]);
+
+            window.onresize = function() {
+                app.resize(window.innerWidth, window.innerHeight);
+            };
 
             function draw() {
                 drawCall.uniform("offset", offset);

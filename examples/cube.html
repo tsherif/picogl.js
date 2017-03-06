@@ -106,6 +106,13 @@
         var angleX = 0;
         var angleY = 0;
 
+        window.onresize = function() {
+            app.resize(window.innerWidth, window.innerHeight);
+
+            mat4.perspective(projMatrix, Math.PI / 2, app.width / app.height, 0.1, 10.0);
+            mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
+        }
+
         var image = new Image();
 
         image.onload = function() {

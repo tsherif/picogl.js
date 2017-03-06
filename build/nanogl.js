@@ -110,6 +110,8 @@
     NanoGL.App = function App(canvas, contextAttributes) {
         this.canvas = canvas;
         this.gl = canvas.getContext("webgl", contextAttributes) || canvas.getContext("experimental-webgl", contextAttributes);
+        this.width = this.gl.drawingBufferWidth;
+        this.height = this.gl.drawingBufferHeight;
         this.currentDrawCalls = null;
 
         this.currentState = {
@@ -118,7 +120,7 @@
 
         this.clearBits = this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT;
         
-        this.gl.viewport(0, 0, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight);    
+        this.gl.viewport(0, 0, this.width, this.height);    
         
         this.drawBuffersExtension = null;
         
@@ -444,7 +446,10 @@
     NanoGL.App.prototype.resize = function(width, height) {
         this.canvas.width = width;
         this.canvas.height = height;
-        this.gl.viewport(0, 0, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight);    
+
+        this.width = this.gl.drawingBufferWidth;
+        this.height = this.gl.drawingBufferHeight;
+        this.gl.viewport(0, 0, this.width, this.height);    
 
         return this;
     };
