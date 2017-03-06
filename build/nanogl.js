@@ -24,6 +24,13 @@
 (function() {
     "use strict";
 
+    /**
+        
+        Global NanoGL module. For convenience, all WebGL enums are stored
+        as properties of NanoGL (e.g. NanoGL.FLOAT, NanoGL.ONE_MINUS_SRC_ALPHA).
+        
+        @namespace NanoGL
+    */
     var NanoGL = window.NanoGL = {};
 
     (function() {
@@ -44,8 +51,15 @@
     })();
 
     NanoGL.DUMMY_OBJECT = {};
-    NanoGL.tmpColor = new Uint8Array(4);
 
+    /**
+        Create a NanoGL app. The app is the primary entry point to NanoGL. It stores
+        the canvas, the WebGL context and all WebGL state.
+
+        @function NanoGL.createApp
+        @param {DOMElement} canvas The canvas on which to create the WebGL context.
+        @param {Object} [contextAttributes] Context attributes to pass when calling getContext().
+    */
     NanoGL.createApp = function(canvas, contextAttributes) {
         return new NanoGL.App(canvas, contextAttributes);
     };
@@ -78,6 +92,21 @@
 (function() {
     "use strict";
 
+    /**
+        Primary entry point to NanoGL. An app will store all parts of the WebGL
+        state and manage draw calls.
+
+        @class
+        @param {DOMElement} canvas The canvas on which to create the WebGL context.
+        @param {Object} [contextAttributes] Context attributes to pass when calling getContext().
+        @prop {DOMElement} canvas The canvas on which this app drawing.
+        @prop {WebGLRenderingContext} gl The WebGL context.
+        @prop {number} maxDrawBuffers The maximum number of available draw buffers.
+        @prop {boolean} drawBuffersEnabled Whether the WEBGL_draw_buffers extension is enabled.
+        @prop {boolean} depthTexturesEnabled Whether the WEBGL_depth_texture extension is enabled.
+        @prop {boolean} floatTexturesEnabled Whether the OES_texture_float extension is enabled.
+        @prop {boolean} linearFloatTexturesEnabled Whether the OES_texture_float_linear extension is enabled.
+    */
     NanoGL.App = function App(canvas, contextAttributes) {
         this.canvas = canvas;
         this.gl = canvas.getContext("webgl", contextAttributes) || canvas.getContext("experimental-webgl", contextAttributes);
@@ -89,128 +118,249 @@
 
         this.clearBits = this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT;
         
-        this.gl.viewport(0, 0, canvas.width, canvas.height);
+        this.gl.viewport(0, 0, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight);    
         
         this.drawBuffersExtension = null;
+        
         this.maxDrawBuffers = 1;
+        this.drawBuffersEnabled = false;
         this.depthTexturesEnabled = false;
         this.floatTexturesEnabled = false;
         this.linearFloatTexturesEnabled = false;
     };
 
+    /**
+        Set the clear mask bits to use when calling clear().
+        E.g. app.clearMask(NanoGL.COLOR_BUFFER_BIT).
+
+        @method
+        @param {GLEnum} mask
+    */
     NanoGL.App.prototype.clearMask = function(mask) {
         this.clearBits = mask;
 
         return this;
     };
 
-    NanoGL.App.prototype.clear = function() {
-        this.gl.clear(this.clearBits);
+    /**
+        Set the clear color.
 
-        return this;
-    };
-
-    NanoGL.App.prototype.drawCalls = function(drawCallList) {
-        this.currentDrawCalls = drawCallList;
-
-        return this;
-    };
-
-    NanoGL.App.prototype.framebuffer = function(framebuffer) {
-        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, framebuffer.framebuffer);
-
-        return this;
-    };
-
-    NanoGL.App.prototype.defaultFramebuffer = function() {
-        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
-
-        return this;
-    };
-
+        @method
+        @param {number} r Red channel.
+        @param {number} g Green channel.
+        @param {number} b Blue channel.
+        @param {number} a Alpha channel.
+    */
     NanoGL.App.prototype.clearColor = function(r, g, b, a) {
         this.gl.clearColor(r, g, b, a);
 
         return this;
     };
 
+    /**
+        Clear the canvas
+
+        @method
+    */
+    NanoGL.App.prototype.clear = function() {
+        this.gl.clear(this.clearBits);
+
+        return this;
+    };
+
+    /**
+        Set the list of draw calls to use when calling draw().
+
+        @method
+        @param {Array} drawCallList Array of DrawCall objects.
+        @see DrawCall
+    */
+    NanoGL.App.prototype.drawCalls = function(drawCallList) {
+        this.currentDrawCalls = drawCallList;
+
+        return this;
+    };
+
+    /**
+        Bind a framebuffer to the WebGL context.
+
+        @method
+        @param {Framebuffer} framebuffer The Framebuffer object to bind.
+        @see Framebuffer
+    */
+    NanoGL.App.prototype.framebuffer = function(framebuffer) {
+        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, framebuffer.framebuffer);
+
+        return this;
+    };
+
+    /**
+        Switch back to the default framebuffer (i.e. draw to the screen).
+
+        @method
+    */
+    NanoGL.App.prototype.defaultFramebuffer = function() {
+        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
+
+        return this;
+    };
+
+    /**
+        Set the depth range.
+
+        @method
+        @param {number} near Minimum depth value. 
+        @param {number} far Maximum depth value.
+    */
     NanoGL.App.prototype.depthRange = function(near, far) {
         this.gl.depthRange(near, far);
 
         return this;
     };
 
+    /**
+        Enable depth testing.
+
+        @method
+    */
     NanoGL.App.prototype.depthTest = function() {
         this.gl.enable(this.gl.DEPTH_TEST);
 
         return this;
     };
 
+    /**
+        Disable depth testing.
+
+        @method
+    */
     NanoGL.App.prototype.noDepthTest = function() {
         this.gl.disable(this.gl.DEPTH_TEST);
 
         return this;
     };
 
+    /**
+        Enable writing to the z buffer.
+
+        @method
+    */
     NanoGL.App.prototype.depthMask = function() {
         this.gl.depthMask(true);
 
         return this;
     };
 
+    /**
+        Disable writing to the z buffer.
+
+        @method
+    */
     NanoGL.App.prototype.noDepthMask = function() {
         this.gl.depthMask(false);
 
         return this;
     };
 
+    /**
+        Enable blending.
+
+        @method
+    */
     NanoGL.App.prototype.blend = function() {
         this.gl.enable(this.gl.BLEND);
 
         return this;
     };
 
+    /**
+        Disable blending
+
+        @method
+    */
     NanoGL.App.prototype.noBlend = function() {
         this.gl.disable(this.gl.BLEND);
 
         return this;
     };
 
+    /**
+        Set the depth test function. E.g. app.depthFunc(NanoGL.LEQUAL).
+
+        @method
+        @param {GLEnum} func The depth testing function to use.
+    */
     NanoGL.App.prototype.depthFunc = function(func) {
         this.gl.depthFunc(func);
 
         return this;
     };
 
+    /**
+        Set the blend function. E.g. app.blendFunc(NanoGL.ONE, NanoGL.ONE_MINUS_SRC_ALPHA).
+
+        @method
+        @param {GLEnum} src The source blending weight.
+        @param {GLEnum} dest The destination blending weight.
+    */
     NanoGL.App.prototype.blendFunc = function(src, dest) {
         this.gl.blendFunc(src, dest);
 
         return this;
     };
 
+    /**
+        Set the blend function, with separate weighting for color and alpha channels. 
+        E.g. app.blendFuncSeparate(NanoGL.ONE, NanoGL.ONE_MINUS_SRC_ALPHA, NanoGL.ONE, NanoGL.ONE).
+
+        @method
+        @param {GLEnum} csrc The source blending weight for the RGB channels.
+        @param {GLEnum} cdest The destination blending weight for the RGB channels.
+        @param {GLEnum} asrc The source blending weight for the alpha channel.
+        @param {GLEnum} adest The destination blending weight for the alpha channel.
+    */
     NanoGL.App.prototype.blendFuncSeparate = function(csrc, cdest, asrc, adest) {
         this.gl.blendFuncSeparate(csrc, cdest, asrc, adest);
 
         return this;
     };
 
+    /**
+        Enable backface culling.
+
+        @method
+    */
     NanoGL.App.prototype.cullBackfaces = function() {
         this.gl.enable(this.gl.CULL_FACE);
 
         return this;
     };
 
+    /**
+        Disable backface culling.
+
+        @method
+    */
     NanoGL.App.prototype.drawBackfaces = function() {
         this.gl.disable(this.gl.CULL_FACE);
 
         return this;
     };
 
+    /**
+        Enable the WEBGL_draw_buffers extension. Allows multiple render targets
+        to be drawn in a single draw call, which will be stored in the colorTextures
+        array of a Framebuffer object.
+
+        @method
+        @see Framebuffer
+    */
     NanoGL.App.prototype.drawBuffers = function() {
         this.drawBuffersExtension = this.gl.getExtension("WEBGL_draw_buffers");
         
         if (this.drawBuffersExtension) {
             this.maxDrawBuffers = this.gl.getParameter(this.drawBuffersExtension.MAX_DRAW_BUFFERS_WEBGL);
+            this.drawBuffersEnabled = true;
         } else {
             console.warn("Extension WEBGL_draw_buffers unavailable. Cannot enable draw buffers.");
         }
@@ -218,6 +368,14 @@
         return this;
     };
 
+    /**
+        Enable the WEBGL_depth_texture extension. Allows for writing depth values
+        to a texture, which will be stored in the depthTexture property of a Framebuffer
+        object.
+
+        @method
+        @see Framebuffer
+    */
     NanoGL.App.prototype.depthTextures = function() {
         this.depthTexturesEnabled = !!this.gl.getExtension("WEBGL_depth_texture");
         
@@ -228,6 +386,13 @@
         return this;
     };
 
+    /**
+        Enable the OES_texture_float extension. Allows for creating float textures as
+        render targets on FrameBuffer objects. E.g. app.createFramebuffer(1, NanoGL.FLOAT).
+
+        @method
+        @see Framebuffer
+    */
     NanoGL.App.prototype.floatTextures = function() {
         this.floatTexturesEnabled = !!this.gl.getExtension("OES_texture_float");
         
@@ -238,6 +403,12 @@
         return this;
     };
 
+    /**
+        Enable the OES_texture_float_linear extension. Allows for linear blending on float textures.
+
+        @method
+        @see Framebuffer
+    */
     NanoGL.App.prototype.linearFloatTextures = function() {
         this.linearFloatTexturesEnabled = !!this.gl.getExtension("OES_texture_float_linear");
         
@@ -248,8 +419,32 @@
         return this;
     };
 
-    NanoGL.App.prototype.readPixel = function(x, y, outVec4) {
-        this.gl.readPixels(x, y, 1, 1, this.gl.RGBA, this.gl.UNSIGNED_BYTE, outVec4);
+    /**
+        Read a pixel's color value from the canvas. Note that the RGBA values will be encoded 
+        as 0-255.
+
+        @method
+        @param {number} x The x coordinate of the pixel.
+        @param {number} y The y coordinate of the pixel.
+        @param {Uint8Array} outColor 4-element Uint8Array to store the pixel's color.
+    */
+    NanoGL.App.prototype.readPixel = function(x, y, outColor) {
+        this.gl.readPixels(x, y, 1, 1, this.gl.RGBA, this.gl.UNSIGNED_BYTE, outColor);
+
+        return this;
+    };
+
+    /**
+        Resize the drawing surface.
+
+        @method
+        @param {number} width The new canvas width.
+        @param {number} height The new canvas height.
+    */
+    NanoGL.App.prototype.resize = function(width, height) {
+        this.canvas.width = width;
+        this.canvas.height = height;
+        this.gl.viewport(0, 0, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight);    
 
         return this;
     };
@@ -275,7 +470,7 @@
     };
 
     NanoGL.App.prototype.createFramebuffer = function(numColorTextures, colorTargetType) {
-        return new NanoGL.Framebuffer(this.gl, this.drawBuffersExtension, this.canvas.width, this.canvas.height, numColorTextures, colorTargetType, this.depthTexturesEnabled);
+        return new NanoGL.Framebuffer(this.gl, this.drawBuffersExtension, numColorTextures, colorTargetType, this.depthTexturesEnabled);
     };
 
     NanoGL.App.prototype.createDrawCall = function(program, primitive) {
@@ -627,8 +822,8 @@
         var generateMipmaps = options.generateMipmaps !== false && 
                             (minFilter === gl.LINEAR_MIPMAP_NEAREST || minFilter === gl.LINEAR_MIPMAP_LINEAR);
 
-        var internalFormat = options.internalFormat || gl.RGBA;
-        var type = options.type || gl.UNSIGNED_BYTE;
+        this.internalFormat = options.internalFormat || gl.RGBA;
+        this.type = options.type || gl.UNSIGNED_BYTE;
 
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, this.texture);
@@ -640,9 +835,9 @@
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, wrapT);
 
         if (array) {
-            gl.texImage2D(gl.TEXTURE_2D, 0, internalFormat, width, height, 0, internalFormat, type, image);
+            gl.texImage2D(gl.TEXTURE_2D, 0, this.internalFormat, width, height, 0, this.internalFormat, this.type, image);
         } else {
-            gl.texImage2D(gl.TEXTURE_2D, 0, internalFormat, internalFormat, type, image);
+            gl.texImage2D(gl.TEXTURE_2D, 0, this.internalFormat, this.internalFormat, this.type, image);
         }
 
         if (generateMipmaps) {
@@ -650,6 +845,17 @@
         }
 
     };
+
+    NanoGL.Texture.prototype.image = function(image, width, height) {
+        this.gl.activeTexture(this.gl.TEXTURE0);
+        this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
+
+        if (width && height) {
+            this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.internalFormat, width, height, 0, this.internalFormat, this.type, image);
+        } else {
+            this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.internalFormat, this.internalFormat, this.type, image);
+        }
+    };  
 
     NanoGL.Texture.prototype.bind = function(unit) {
         this.gl.activeTexture(unit);
@@ -772,12 +978,12 @@
 (function() {
     "use strict";
 
-    NanoGL.Framebuffer = function Framebuffer(gl, drawBuffers, width, height, numColorTargets, colorTargetType, depthTexturesEnabled) {
+    NanoGL.Framebuffer = function Framebuffer(gl, drawBuffers, numColorTargets, colorTargetType, depthTexturesEnabled) {
         this.gl = gl;
         this.drawBuffers = drawBuffers;
         this.framebuffer = gl.createFramebuffer();
-        this.width = width;
-        this.height = height;
+        this.width = gl.drawingBufferWidth;
+        this.height = gl.drawingBufferHeight;
         this.numColorTargets = numColorTargets !== undefined ? numColorTargets : 1;
 
         if (!drawBuffers) {
@@ -787,17 +993,16 @@
         this.colorTextures = new Array(this.numColorTargets);
         this.colorAttachments = new Array(this.numColorTargets);
         this.depthTexture = null;
-
-        var i;
+        this.depthBuffer =  null;
 
         gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer);
         
-        for (i = 0; i < this.numColorTargets; ++i) {
+        for (var i = 0; i < this.numColorTargets; ++i) {
             this.colorTextures[i] = new NanoGL.Texture(gl, null, {
                 array: true,
                 type: colorTargetType || gl.UNSIGNED_BYTE,
-                width: width,
-                height: height,
+                width: this.width,
+                height: this.height,
                 minFilter: gl.NEAREST,
                 magFilter: gl.NEAREST,
                 wrapS: gl.CLAMP_TO_EDGE,
@@ -808,7 +1013,7 @@
             if (this.drawBuffers) {
                 this.colorAttachments[i] = this.drawBuffers["COLOR_ATTACHMENT" + i + "_WEBGL"];
             } else {
-                this.colorAttachments[i] = gl["COLOR_ATTACHMENT" + i];
+                this.colorAttachments[i] = gl.COLOR_ATTACHMENT0;
             }
             
             gl.framebufferTexture2D(gl.FRAMEBUFFER, this.colorAttachments[i], gl.TEXTURE_2D, this.colorTextures[i].texture, 0);
@@ -819,8 +1024,8 @@
                 array: true,
                 internalFormat: this.gl.DEPTH_COMPONENT,
                 type: this.gl.UNSIGNED_INT,
-                width: width,
-                height: height,
+                width: this.width,
+                height: this.height,
                 minFilter: gl.NEAREST,
                 magFilter: gl.NEAREST,
                 wrapS: gl.CLAMP_TO_EDGE,
@@ -830,10 +1035,11 @@
 
             gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, this.depthTexture.texture, 0);
         } else {
-            var depthBuffer = gl.createRenderbuffer();
-            gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffer);
-            gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, width, height);
-            gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthBuffer);
+            this.depthBuffer = gl.createRenderbuffer();
+            gl.bindRenderbuffer(gl.RENDERBUFFER, this.depthBuffer);
+            gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, this.width, this.height);
+            gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, this.depthBuffer);
+            gl.bindRenderbuffer(gl.RENDERBUFFER, null);
         }
 
         if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE) {
@@ -846,6 +1052,30 @@
 
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     }; 
+
+    NanoGL.Framebuffer.prototype.resize = function() {
+
+        this.width = this.gl.drawingBufferWidth;
+        this.height = this.gl.drawingBufferHeight;
+
+        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.framebuffer);
+
+        for (var i = 0; i < this.numColorTargets; ++i) {
+            this.colorTextures[i].image(null, this.width, this.height);
+            // this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.colorAttachments[i], this.gl.TEXTURE_2D, this.colorTextures[i].texture, 0);
+        }
+
+        if (this.depthTexture) {
+            this.depthTexture.image(null, this.width, this.height);
+            // this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.gl.DEPTH_ATTACHMENT, this.gl.TEXTURE_2D, this.depthTexture.texture, 0);
+        } else {
+            this.gl.bindRenderbuffer(this.gl.RENDERBUFFER, this.depthBuffer);
+            this.gl.renderbufferStorage(this.gl.RENDERBUFFER, this.gl.DEPTH_COMPONENT16, this.width, this.height);
+            this.gl.bindRenderbuffer(this.gl.RENDERBUFFER, null);
+        }
+
+        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
+    };
 
 })();
 ;///////////////////////////////////////////////////////////////////////////////////
@@ -915,8 +1145,7 @@
             this.uniforms[name] = unit;
         }
         
-        var textureUnit = this.gl["TEXTURE" + unit];
-        
+        var textureUnit = this.gl["TEXTURE" + unit];   
         this.textures[textureUnit] = texture;
         
         return this;

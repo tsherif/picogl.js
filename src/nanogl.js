@@ -24,6 +24,13 @@
 (function() {
     "use strict";
 
+    /**
+        
+        Global NanoGL module. For convenience, all WebGL enums are stored
+        as properties of NanoGL (e.g. NanoGL.FLOAT, NanoGL.ONE_MINUS_SRC_ALPHA).
+        
+        @namespace NanoGL
+    */
     var NanoGL = window.NanoGL = {};
 
     (function() {
@@ -44,8 +51,15 @@
     })();
 
     NanoGL.DUMMY_OBJECT = {};
-    NanoGL.tmpColor = new Uint8Array(4);
 
+    /**
+        Create a NanoGL app. The app is the primary entry point to NanoGL. It stores
+        the canvas, the WebGL context and all WebGL state.
+
+        @function NanoGL.createApp
+        @param {DOMElement} canvas The canvas on which to create the WebGL context.
+        @param {Object} [contextAttributes] Context attributes to pass when calling getContext().
+    */
     NanoGL.createApp = function(canvas, contextAttributes) {
         return new NanoGL.App(canvas, contextAttributes);
     };

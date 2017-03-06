@@ -175,7 +175,6 @@
         var boxBuffer = app.createFramebuffer();
         var hblurBuffer = app.createFramebuffer();
         var blurBuffer = app.createFramebuffer();
-        var dofBuffer = app.createFramebuffer();
 
         // Geometry
         var box = utils.createBox({dimensions: [1.0, 1.0, 1.0]})
@@ -208,6 +207,16 @@
         var modelMatrix = mat4.create();
         var rotateXMatrix = mat4.create();
         var rotateYMatrix = mat4.create();
+
+        window.onresize = function() {
+            app.resize(window.innerWidth, window.innerHeight);
+            boxBuffer.resize();
+            hblurBuffer.resize();
+            blurBuffer.resize();
+
+            mat4.perspective(projMatrix, Math.PI / 2, app.canvas.width / app.canvas.height, 0.1, 10.0);
+            mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
+        };
 
         var image = new Image();
 

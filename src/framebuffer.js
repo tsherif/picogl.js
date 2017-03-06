@@ -24,12 +24,12 @@
 (function() {
     "use strict";
 
-    NanoGL.Framebuffer = function Framebuffer(gl, drawBuffers, width, height, numColorTargets, colorTargetType, depthTexturesEnabled) {
+    NanoGL.Framebuffer = function Framebuffer(gl, drawBuffers, numColorTargets, colorTargetType, depthTexturesEnabled) {
         this.gl = gl;
         this.drawBuffers = drawBuffers;
         this.framebuffer = gl.createFramebuffer();
-        this.width = width;
-        this.height = height;
+        this.width = gl.drawingBufferWidth;
+        this.height = gl.drawingBufferHeight;
         this.numColorTargets = numColorTargets !== undefined ? numColorTargets : 1;
 
         if (!drawBuffers) {
@@ -39,17 +39,16 @@
         this.colorTextures = new Array(this.numColorTargets);
         this.colorAttachments = new Array(this.numColorTargets);
         this.depthTexture = null;
-
-        var i;
+        this.depthBuffer =  null;
 
         gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer);
         
-        for (i = 0; i < this.numColorTargets; ++i) {
+        for (var i = 0; i < this.numColorTargets; ++i) {
             this.colorTextures[i] = new NanoGL.Texture(gl, null, {
                 array: true,
                 type: colorTargetType || gl.UNSIGNED_BYTE,
-                width: width,
-                height: height,
+                width: this.width,
+                height: this.height,
                 minFilter: gl.NEAREST,
                 magFilter: gl.NEAREST,
                 wrapS: gl.CLAMP_TO_EDGE,
@@ -60,7 +59,7 @@
             if (this.drawBuffers) {
                 this.colorAttachments[i] = this.drawBuffers["COLOR_ATTACHMENT" + i + "_WEBGL"];
             } else {
-                this.colorAttachments[i] = gl["COLOR_ATTACHMENT" + i];
+                this.colorAttachments[i] = gl.COLOR_ATTACHMENT0;
             }
             
             gl.framebufferTexture2D(gl.FRAMEBUFFER, this.colorAttachments[i], gl.TEXTURE_2D, this.colorTextures[i].texture, 0);
@@ -71,8 +70,8 @@
                 array: true,
                 internalFormat: this.gl.DEPTH_COMPONENT,
                 type: this.gl.UNSIGNED_INT,
-                width: width,
-                height: height,
+                width: this.width,
+                height: this.height,
                 minFilter: gl.NEAREST,
                 magFilter: gl.NEAREST,
                 wrapS: gl.CLAMP_TO_EDGE,
@@ -82,10 +81,11 @@
 
             gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, this.depthTexture.texture, 0);
         } else {
-            var depthBuffer = gl.createRenderbuffer();
-            gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffer);
-            gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, width, height);
-            gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthBuffer);
+            this.depthBuffer = gl.createRenderbuffer();
+            gl.bindRenderbuffer(gl.RENDERBUFFER, this.depthBuffer);
+            gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, this.width, this.height);
+            gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, this.depthBuffer);
+            gl.bindRenderbuffer(gl.RENDERBUFFER, null);
         }
 
         if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE) {
@@ -98,5 +98,29 @@
 
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     }; 
+
+    NanoGL.Framebuffer.prototype.resize = function() {
+
+        this.width = this.gl.drawingBufferWidth;
+        this.height = this.gl.drawingBufferHeight;
+
+        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.framebuffer);
+
+        for (var i = 0; i < this.numColorTargets; ++i) {
+            this.colorTextures[i].image(null, this.width, this.height);
+            // this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.colorAttachments[i], this.gl.TEXTURE_2D, this.colorTextures[i].texture, 0);
+        }
+
+        if (this.depthTexture) {
+            this.depthTexture.image(null, this.width, this.height);
+            // this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.gl.DEPTH_ATTACHMENT, this.gl.TEXTURE_2D, this.depthTexture.texture, 0);
+        } else {
+            this.gl.bindRenderbuffer(this.gl.RENDERBUFFER, this.depthBuffer);
+            this.gl.renderbufferStorage(this.gl.RENDERBUFFER, this.gl.DEPTH_COMPONENT16, this.width, this.height);
+            this.gl.bindRenderbuffer(this.gl.RENDERBUFFER, null);
+        }
+
+        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
+    };
 
 })();

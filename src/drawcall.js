@@ -65,8 +65,7 @@
             this.uniforms[name] = unit;
         }
         
-        var textureUnit = this.gl["TEXTURE" + unit];
-        
+        var textureUnit = this.gl["TEXTURE" + unit];   
         this.textures[textureUnit] = texture;
         
         return this;

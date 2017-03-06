@@ -41,8 +41,8 @@
         var generateMipmaps = options.generateMipmaps !== false && 
                             (minFilter === gl.LINEAR_MIPMAP_NEAREST || minFilter === gl.LINEAR_MIPMAP_LINEAR);
 
-        var internalFormat = options.internalFormat || gl.RGBA;
-        var type = options.type || gl.UNSIGNED_BYTE;
+        this.internalFormat = options.internalFormat || gl.RGBA;
+        this.type = options.type || gl.UNSIGNED_BYTE;
 
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, this.texture);
@@ -54,9 +54,9 @@
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, wrapT);
 
         if (array) {
-            gl.texImage2D(gl.TEXTURE_2D, 0, internalFormat, width, height, 0, internalFormat, type, image);
+            gl.texImage2D(gl.TEXTURE_2D, 0, this.internalFormat, width, height, 0, this.internalFormat, this.type, image);
         } else {
-            gl.texImage2D(gl.TEXTURE_2D, 0, internalFormat, internalFormat, type, image);
+            gl.texImage2D(gl.TEXTURE_2D, 0, this.internalFormat, this.internalFormat, this.type, image);
         }
 
         if (generateMipmaps) {
@@ -64,6 +64,17 @@
         }
 
     };
+
+    NanoGL.Texture.prototype.image = function(image, width, height) {
+        this.gl.activeTexture(this.gl.TEXTURE0);
+        this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
+
+        if (width && height) {
+            this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.internalFormat, width, height, 0, this.internalFormat, this.type, image);
+        } else {
+            this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.internalFormat, this.internalFormat, this.type, image);
+        }
+    };  
 
     NanoGL.Texture.prototype.bind = function(unit) {
         this.gl.activeTexture(unit);

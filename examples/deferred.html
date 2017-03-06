@@ -143,7 +143,6 @@
         var viewProjMatrix = mat4.create();
         mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
 
-
         var image = new Image();
 
         image.onload = function() {
@@ -219,6 +218,22 @@
                 .texture("uPositionBuffer", gBuffer.colorTextures[0])
                 .texture("uNormalBuffer", gBuffer.colorTextures[1])
                 .texture("uUVBuffer", gBuffer.colorTextures[2]);
+            }
+
+            window.onresize = function() {
+                app.resize(window.innerWidth, window.innerHeight);
+                gBuffer.resize();
+
+                mat4.perspective(projMatrix, Math.PI / 2, app.canvas.width / app.canvas.height, 0.1, 10.0);
+                mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
+
+                for (var i = 0, len = lights.length; i < len; ++i) {
+                    lightMatrix = mat4.create();
+                    utils.xformMatrix(lightMatrix, lights[i].position);
+                    mat4.multiply(lightMatrix, viewProjMatrix, lightMatrix);
+
+                    lightDrawCalls[i].uniform("uMVP", lightMatrix);
+                }
             }
 
             function draw() {
