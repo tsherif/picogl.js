@@ -101,11 +101,16 @@
         @param {Object} [contextAttributes] Context attributes to pass when calling getContext().
         @prop {DOMElement} canvas The canvas on which this app drawing.
         @prop {WebGLRenderingContext} gl The WebGL context.
+        @prop {number} width The width of the drawing surface.
+        @prop {number} height The height of the drawing surface.
         @prop {number} maxDrawBuffers The maximum number of available draw buffers.
         @prop {boolean} drawBuffersEnabled Whether the WEBGL_draw_buffers extension is enabled.
         @prop {boolean} depthTexturesEnabled Whether the WEBGL_depth_texture extension is enabled.
         @prop {boolean} floatTexturesEnabled Whether the OES_texture_float extension is enabled.
         @prop {boolean} linearFloatTexturesEnabled Whether the OES_texture_float_linear extension is enabled.
+        @prop {Object} currentState Tracked GL state.
+        @prop {GLEnum} clearBits Current clear mask to use with clear().
+        @prop {WebGLDrawBuffers} drawBuffersExtension Hold the draw buffers extension object when enabled.
     */
     NanoGL.App = function App(canvas, contextAttributes) {
         this.canvas = canvas;
@@ -136,7 +141,7 @@
         E.g. app.clearMask(NanoGL.COLOR_BUFFER_BIT).
 
         @method
-        @param {GLEnum} mask
+        @param {GLEnum} mask Bit mask of buffers to clear.
     */
     NanoGL.App.prototype.clearMask = function(mask) {
         this.clearBits = mask;
@@ -171,7 +176,7 @@
     };
 
     /**
-        Set the list of draw calls to use when calling draw().
+        Set the list of DrawCalls to use when calling draw().
 
         @method
         @param {Array} drawCallList Array of DrawCall objects.
@@ -454,34 +459,119 @@
         return this;
     };
 
+    /**
+        Create a program.
+
+        @method
+        @param {string} vsSource Vertex shader source code.
+        @param {string} fsSource Fragment shader source code.
+    */
     NanoGL.App.prototype.createProgram = function(vsSource, fsSource) {
         return new NanoGL.Program(this.gl, vsSource, fsSource);
     };
 
+    /**
+        Create an array buffer.
+
+        @method
+        @param {GLEnum} type The data type stored in the array buffer.
+        @param {number} itemSize Number of elements per vertex.
+        @param {ArrayBufferView} data Array buffer data.
+    */
     NanoGL.App.prototype.createArrayBuffer = function(type, itemSize, data) {
         return new NanoGL.ArrayBuffer(this.gl, type, itemSize, data);
     };
 
+    /**
+        Create an index array buffer.
+
+        @method
+        @param {GLEnum} type The data type stored in the index array buffer.
+        @param {number} itemSize Number of elements per primitive.
+        @param {ArrayBufferView} data Index array buffer data.
+    */
     NanoGL.App.prototype.createIndexBuffer = function(type, itemSize, data) {
         return new NanoGL.ArrayBuffer(this.gl, type, itemSize, data, true);
     };
 
+    /**
+        Create a texture.
+
+        @method
+        @param {ImageElement|ArrayBufferView} image The image data. Can be any format that would be accepted by texImage2D.
+        @param {Object} [options] Texture options.
+        @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
+        @param {GLEnum} [options.internalFormat=RGBA] Texture data format.
+        @param {boolean} [options.array=false] Whether the texture is being passed as an ArrayBufferView.
+        @param {number} [options.width] Width of the texture (only valid when passing array texture data).
+        @param {number} [options.height] Height of the texture (only valid when passing array texture data).
+        @param {boolean} [options.flipY=true] Whether th y-axis be flipped when reading the texture.
+        @param {GLEnum} [options.minFilter=LINEAR_MIPMAP_NEAREST] Minification filter.
+        @param {GLEnum} [options.magFilter=LINEAR] Magnification filter.
+        @param {GLEnum} [options.wrapS=REPEAT] Horizontal wrap mode.
+        @param {GLEnum} [options.wrapT=REPEAT] Vertical wrap mode.
+        @param {boolean} [options.generateMipmaps] Should mip maps be generated.
+    */
     NanoGL.App.prototype.createTexture = function(image, options) {
         return new NanoGL.Texture(this.gl, image, options);
     };
 
+    /**
+        Create a texture.
+
+        @method
+        @param {Object} [options] Texture options.
+        @param {ImageElement|ArrayBufferView} options.negX The image data for the negative X direction. Can be any format that would be accepted by texImage2D.
+        @param {ImageElement|ArrayBufferView} options.posX The image data for the positive X direction. Can be any format that would be accepted by texImage2D.
+        @param {ImageElement|ArrayBufferView} options.negY The image data for the negative Y direction. Can be any format that would be accepted by texImage2D.
+        @param {ImageElement|ArrayBufferView} options.posY The image data for the positive Y direction. Can be any format that would be accepted by texImage2D.
+        @param {ImageElement|ArrayBufferView} options.negZ The image data for the negative Z direction. Can be any format that would be accepted by texImage2D.
+        @param {ImageElement|ArrayBufferView} options.posZ The image data for the positive Z direction. Can be any format that would be accepted by texImage2D.
+        @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
+        @param {GLEnum} [options.internalFormat=RGBA] Texture data format.
+        @param {boolean} [options.array=false] Whether the texture is being passed as an ArrayBufferView.
+        @param {number} [options.width] Width of the texture (only valid when passing array texture data).
+        @param {number} [options.height] Height of the texture (only valid when passing array texture data).
+        @param {boolean} [options.flipY=false] Whether th y-axis be flipped when reading the texture.
+        @param {GLEnum} [options.minFilter=LINEAR_MIPMAP_NEAREST] Minification filter.
+        @param {GLEnum} [options.magFilter=LINEAR] Magnification filter.
+        @param {GLEnum} [options.wrapS=REPEAT] Horizontal wrap mode.
+        @param {GLEnum} [options.wrapT=REPEAT] Vertical wrap mode.
+        @param {boolean} [options.generateMipmaps] Should mip maps be generated.
+    */
     NanoGL.App.prototype.createCubemap = function(options) {
         return new NanoGL.Cubemap(this.gl, options);
     };
 
+    /**
+        Create a framebuffer.
+
+        @method
+        @param {number} numColorTextures The number of color draw targets to create (requires enabled drawBuffers to be greater than 1).
+        @param {GLEnum} [colorTargetType=UNSIGNED_BYTE] Type of data stored in the color targets.
+    */
     NanoGL.App.prototype.createFramebuffer = function(numColorTextures, colorTargetType) {
         return new NanoGL.Framebuffer(this.gl, this.drawBuffersExtension, numColorTextures, colorTargetType, this.depthTexturesEnabled);
     };
 
+    /**
+        Create a DrawCall. A DrawCall manages the state associated with 
+        a WebGL draw call including a program and associated attributes, textures and
+        uniforms.
+
+        @method
+        @param {Program} program The program to use for this DrawCall.
+        @param {GLEnum} [primitive=TRIANGLES] Type of primitive to draw.
+    */
     NanoGL.App.prototype.createDrawCall = function(program, primitive) {
         return new NanoGL.DrawCall(this.gl, program, primitive);
     };
 
+    /** 
+        Execute the currently attached list of DrawCalls.
+
+        @method
+    */
     NanoGL.App.prototype.draw = function() {
         for (var i = 0, len = this.currentDrawCalls.length; i < len; i++) {
             this.currentDrawCalls[i].draw(this.currentState);
@@ -518,6 +608,16 @@
     "use strict";
 
 
+    /**
+        WebGL program consisting of compiled and linked vertex and fragment
+        shaders.
+
+        @class
+        @prop {WebGLRenderingContext} gl The WebGL context.
+        @prop {WebGLProgram} program The WebGL program.
+        @prop {Object} attributes Map of attribute names to handles. 
+        @prop {Object} uniforms Map of uniform names to handles. 
+    */
     NanoGL.Program = function Program(gl, vsSource, fsSource) {
         var lines, i;
 
@@ -597,11 +697,25 @@
         }
     };
 
-    NanoGL.Program.prototype.bindAttribute = function(name, buffer) {
+    /**
+        Bind an array buffer to a program attribute.
+
+        @method
+        @param {string} name Attribute name.
+        @param {Arraybuffer} buffer Arraybuffer to bind.
+    */
+    NanoGL.Program.prototype.attribute = function(name, buffer) {
         buffer.bind(this.attributes[name]);
     };
 
-    NanoGL.Program.prototype.setUniform = function(name, value) {
+    /**
+        Set the value of a uniform.
+
+        @method
+        @param {string} name Uniform name.
+        @param {any} value Uniform value.
+    */
+    NanoGL.Program.prototype.uniform = function(name, value) {
         this.uniforms[name].set(value);
     };
 
@@ -633,6 +747,18 @@
 (function() {
     "use strict";
 
+    /**
+        Storage for vertex data.
+
+        @class
+        @prop {WebGLRenderingContext} gl The WebGL context.
+        @prop {WebGLBuffer} buffer Allocated buffer storage.
+        @prop {GLEnum} type The type of data stored in the buffer.
+        @prop {number} itemSize Number of array elements per vertex.
+        @prop {number} numItems Number of vertices represented.
+        @prop {boolean} indexArray Whether this is an index array.
+        @prop {GLEnum} binding GL binding point (ARRAY_BUFFER or ELEMENT_ARRAY_BUFFER).
+    */
     NanoGL.ArrayBuffer = function ArrayBuffer(gl, type, itemSize, data, indexArray) {
         this.gl = gl;
         this.buffer = gl.createBuffer();
@@ -647,6 +773,12 @@
         gl.bindBuffer(this.binding, null);
     };
 
+    /**
+        Bind this array buffer to a program attribute.
+
+        @method
+        @param {number} attribute The attribute handle to bind to.
+    */
     NanoGL.ArrayBuffer.prototype.bind = function(attribute) {
         this.gl.bindBuffer(this.binding, this.buffer);
 
@@ -810,11 +942,22 @@
 (function() {
     "use strict";
 
+    /**
+        General-purpose texture.
+
+        @class
+        @prop {WebGLRenderingContext} gl The WebGL context.
+        @prop {WebGLTexture} texture Handle to the texture.
+        @prop {GLEnum} internalFormat Internal arrangement of the texture data.
+        @prop {GLEnum} type Type of data stored in the texture.
+    */
     NanoGL.Texture = function Texture(gl, image, options) {
+        options = options || NanoGL.DUMMY_OBJECT;
+
         this.gl = gl;
         this.texture = gl.createTexture();
-
-        options = options || NanoGL.DUMMY_OBJECT;
+        this.internalFormat = options.internalFormat || gl.RGBA;
+        this.type = options.type || gl.UNSIGNED_BYTE;
 
         var array = options.array || false;
         var width = options.width || 0;
@@ -826,9 +969,6 @@
         var wrapT = options.wrapT || gl.REPEAT;
         var generateMipmaps = options.generateMipmaps !== false && 
                             (minFilter === gl.LINEAR_MIPMAP_NEAREST || minFilter === gl.LINEAR_MIPMAP_LINEAR);
-
-        this.internalFormat = options.internalFormat || gl.RGBA;
-        this.type = options.type || gl.UNSIGNED_BYTE;
 
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, this.texture);
@@ -851,6 +991,15 @@
 
     };
 
+    /**
+        Set the image data for the texture. Width and height should only
+        be passed for ArrayBufferView data.
+    
+        @method
+        @param {ImageElement|ArrayBufferView} image Image data.
+        @param {number} width Image width (should only be passed for ArrayBufferView data).
+        @param {number} height Image height (should only be passed for ArrayBufferView data).
+    */
     NanoGL.Texture.prototype.image = function(image, width, height) {
         this.gl.activeTexture(this.gl.TEXTURE0);
         this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
@@ -862,6 +1011,12 @@
         }
     };  
 
+    /**
+        Bind this texture to a texture unit.
+
+        @method
+        @param {number} unit The texture unit to bind to.
+    */
     NanoGL.Texture.prototype.bind = function(unit) {
         this.gl.activeTexture(unit);
         this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
@@ -894,7 +1049,14 @@
 (function() {
     "use strict";
 
-        NanoGL.Cubemap = function Texture(gl, options) {
+    /**
+        Cubemap for environment mapping.
+
+        @class
+        @prop {WebGLRenderingContext} gl The WebGL context.
+        @prop {WebGLTexture} texture Handle to the texture.
+    */
+    NanoGL.Cubemap = function Texture(gl, options) {
         this.gl = gl;
         this.texture = gl.createTexture();
 
@@ -951,6 +1113,12 @@
 
     };
 
+    /**
+        Bind this cubemap to a texture unit.
+
+        @method
+        @param {number} unit The texture unit to bind to.
+    */
     NanoGL.Cubemap.prototype.bind = function(unit) {
         this.gl.activeTexture(unit);
         this.gl.bindTexture(this.gl.TEXTURE_CUBE_MAP, this.texture);
@@ -983,15 +1151,30 @@
 (function() {
     "use strict";
 
-    NanoGL.Framebuffer = function Framebuffer(gl, drawBuffers, numColorTargets, colorTargetType, depthTexturesEnabled) {
+    /**
+        Storage for vertex data.
+
+        @class
+        @prop {WebGLRenderingContext} gl The WebGL context.
+        @prop {WebGLFramebuffer} framebuffer Handle to the framebuffer.
+        @prop {number} width The width of the framebuffer.
+        @prop {number} height The height of the framebuffer.
+        @prop {Array} colorTextures Array of color texture targets. 
+        @prop {number} numColorTargets Number of color texture targets. 
+        @prop {Texture} depthTexture Depth texture target (only available if depthTextures is enabled). 
+        @prop {WebGLRenderbuffer} depthBuffer Depth renderbuffer (only available if depthTextures is not enabled). 
+        @prop {WebGLDrawBuffers} drawBuffersExtension Hold the draw buffers extension object when enabled.
+        @prop {Array} colorAttachments Array of color attachment enums. 
+    */
+    NanoGL.Framebuffer = function Framebuffer(gl, drawBuffersExtension, numColorTargets, colorTargetType, depthTexturesEnabled) {
         this.gl = gl;
-        this.drawBuffers = drawBuffers;
         this.framebuffer = gl.createFramebuffer();
         this.width = gl.drawingBufferWidth;
         this.height = gl.drawingBufferHeight;
+        this.drawBuffersExtension = drawBuffersExtension;
         this.numColorTargets = numColorTargets !== undefined ? numColorTargets : 1;
 
-        if (!drawBuffers) {
+        if (!drawBuffersExtension) {
             this.numColorTargets = 1;
         }
 
@@ -1015,8 +1198,8 @@
                 generateMipmaps: false
             });
 
-            if (this.drawBuffers) {
-                this.colorAttachments[i] = this.drawBuffers["COLOR_ATTACHMENT" + i + "_WEBGL"];
+            if (this.drawBuffersExtension) {
+                this.colorAttachments[i] = this.drawBuffersExtension["COLOR_ATTACHMENT" + i + "_WEBGL"];
             } else {
                 this.colorAttachments[i] = gl.COLOR_ATTACHMENT0;
             }
@@ -1051,8 +1234,8 @@
             console.log("Frame buffer error: " + gl.checkFramebufferStatus(gl.FRAMEBUFFER).toString());
         }
 
-        if (this.drawBuffers) {
-            this.drawBuffers.drawBuffersWEBGL(this.colorAttachments);
+        if (this.drawBuffersExtension) {
+            this.drawBuffersExtension.drawBuffersWEBGL(this.colorAttachments);
         } 
 
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
@@ -1109,24 +1292,40 @@
 (function() {
     "use strict";
 
+    /**
+        A DrawCall represents the program and values of associated
+        attributes, uniforms and textures for a single draw call.
+
+        @class
+        @prop {WebGLRenderingContext} gl The WebGL context.
+        @prop {WebGLProgram} program Handle to the program to use for this drawcall.
+        @prop {Object} attributes Map of attribute handles to ArrayBuffers.
+        @prop {Object} uniform Map of uniform handles to values.
+        @prop {Object} textures Map of texture units to Textures.
+        @prop {number} textureCount The number of active textures for this draw call. 
+        @prop {ArrayBuffer} indexArray Index array to use for indexed drawing.
+        @prop {number} numItems The number of items that will be drawn.
+        @prop {GLEnum} primitive The primitive type being drawn. 
+    */
     NanoGL.DrawCall = function DrawCall(gl, program, primitive) {
-            this.gl = gl;
+        this.gl = gl;
         this.program = program || null;
-        this.uniforms = {};
         this.attributes = {};
+        this.uniforms = {};
         this.textures = {};
-        this.numItems = 0;
+        this.textureCount = 0;
         this.indexArray = null;
+        this.numItems = 0;
         this.primitive = primitive !== undefined ? primitive : NanoGL.TRIANGLES;
-        this.currentTextureUnit = 0;
     };
 
-    NanoGL.DrawCall.prototype.uniform = function(name, value) {
-        this.uniforms[name] = value;
+    /**
+        Set the Arraybuffer to bind to an attribute.
 
-        return this;
-    };
-
+        @method
+        @param {string} name Attribute name.
+        @param {Arraybuffer} buffer Arraybuffer to bind.
+    */
     NanoGL.DrawCall.prototype.attribute = function(name, buffer) {
         this.attributes[name] = buffer;
         if (this.numItems === 0) {
@@ -1136,6 +1335,12 @@
         return this;
     };
 
+    /**
+        Set the index ArrayBuffer.
+
+        @method
+        @param {Arraybuffer} buffer Index Arraybuffer.
+    */
     NanoGL.DrawCall.prototype.indices = function(buffer) {
         this.indexArray = buffer;
         this.numItems = buffer.numItems;
@@ -1143,10 +1348,30 @@
         return this;
     };
 
+    /**
+        Set the value for a uniform.
+
+        @method
+        @param {string} name Uniform name.
+        @param {any} value Uniform value.
+    */
+    NanoGL.DrawCall.prototype.uniform = function(name, value) {
+        this.uniforms[name] = value;
+
+        return this;
+    };
+
+    /**
+        Set a texture to bind to a sampler uniform.
+
+        @method
+        @param {string} name Sampler uniform name.
+        @param {Texture} texture Texture to bind.
+    */
     NanoGL.DrawCall.prototype.texture = function(name, texture) {
         var unit = this.uniforms[name];
         if (unit === undefined) {
-            unit = this.currentTextureUnit++;
+            unit = this.textureCount++;
             this.uniforms[name] = unit;
         }
         
@@ -1156,6 +1381,12 @@
         return this;
     };
 
+    /**
+        Draw something.
+
+        @method
+        @param {Object} state Current app state.
+    */
     NanoGL.DrawCall.prototype.draw = function(state) {
         var uniforms = this.uniforms;
         var attributes = this.attributes;
@@ -1167,11 +1398,11 @@
         }
 
         for (var uName in uniforms) {
-            this.program.setUniform(uName, uniforms[uName]);
+            this.program.uniform(uName, uniforms[uName]);
         }
 
         for (var aName in attributes) {
-            this.program.bindAttribute(aName, attributes[aName]);
+            this.program.attribute(aName, attributes[aName]);
         }
 
         for (var unit in textures) {
