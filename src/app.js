@@ -68,7 +68,7 @@
         E.g. app.clearMask(NanoGL.COLOR_BUFFER_BIT).
 
         @method
-        @param {GLEnum} mask
+        @param {GLEnum} mask Bit mask of buffers to clear.
     */
     NanoGL.App.prototype.clearMask = function(mask) {
         this.clearBits = mask;
@@ -103,7 +103,7 @@
     };
 
     /**
-        Set the list of draw calls to use when calling draw().
+        Set the list of DrawCalls to use when calling draw().
 
         @method
         @param {Array} drawCallList Array of DrawCall objects.
@@ -425,7 +425,7 @@
         Create a texture.
 
         @method
-        @param {ImageElement|ArrayBufferView} image The image data. Can be any format that would be 
+        @param {ImageElement|ArrayBufferView} image The image data. Can be any format that would be accepted by texImage2D.
         @param {Object} [options] Texture options.
         @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
         @param {GLEnum} [options.internalFormat=RGBA] Texture data format.
@@ -443,18 +443,62 @@
         return new NanoGL.Texture(this.gl, image, options);
     };
 
+    /**
+        Create a texture.
+
+        @method
+        @param {Object} [options] Texture options.
+        @param {ImageElement|ArrayBufferView} options.negX The image data for the negative X direction. Can be any format that would be accepted by texImage2D.
+        @param {ImageElement|ArrayBufferView} options.posX The image data for the positive X direction. Can be any format that would be accepted by texImage2D.
+        @param {ImageElement|ArrayBufferView} options.negY The image data for the negative Y direction. Can be any format that would be accepted by texImage2D.
+        @param {ImageElement|ArrayBufferView} options.posY The image data for the positive Y direction. Can be any format that would be accepted by texImage2D.
+        @param {ImageElement|ArrayBufferView} options.negZ The image data for the negative Z direction. Can be any format that would be accepted by texImage2D.
+        @param {ImageElement|ArrayBufferView} options.posZ The image data for the positive Z direction. Can be any format that would be accepted by texImage2D.
+        @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
+        @param {GLEnum} [options.internalFormat=RGBA] Texture data format.
+        @param {boolean} [options.array=false] Whether the texture is being passed as an ArrayBufferView.
+        @param {number} [options.width] Width of the texture (only valid when passing array texture data).
+        @param {number} [options.height] Height of the texture (only valid when passing array texture data).
+        @param {boolean} [options.flipY=false] Whether th y-axis be flipped when reading the texture.
+        @param {GLEnum} [options.minFilter=LINEAR_MIPMAP_NEAREST] Minification filter.
+        @param {GLEnum} [options.magFilter=LINEAR] Magnification filter.
+        @param {GLEnum} [options.wrapS=REPEAT] Horizontal wrap mode.
+        @param {GLEnum} [options.wrapT=REPEAT] Vertical wrap mode.
+        @param {boolean} [options.generateMipmaps] Should mip maps be generated.
+    */
     NanoGL.App.prototype.createCubemap = function(options) {
         return new NanoGL.Cubemap(this.gl, options);
     };
 
+    /**
+        Create a framebuffer.
+
+        @method
+        @param {number} numColorTextures The number of color draw targets to create (requires enabled drawBuffers to be greater than 1).
+        @param {GLEnum} [colorTargetType=UNSIGNED_BYTE] Type of data stored in the color targets.
+    */
     NanoGL.App.prototype.createFramebuffer = function(numColorTextures, colorTargetType) {
         return new NanoGL.Framebuffer(this.gl, this.drawBuffersExtension, numColorTextures, colorTargetType, this.depthTexturesEnabled);
     };
 
+    /**
+        Create a DrawCall. A DrawCall manages the state associated with 
+        a WebGL draw call including a program and associated attributes, textures and
+        uniforms.
+
+        @method
+        @param {Program} program The program to use for this DrawCall.
+        @param {GLEnum} [primitive=TRIANGLES] Type of primitive to draw.
+    */
     NanoGL.App.prototype.createDrawCall = function(program, primitive) {
         return new NanoGL.DrawCall(this.gl, program, primitive);
     };
 
+    /** 
+        Execute the currently attached list of DrawCalls.
+
+        @method
+    */
     NanoGL.App.prototype.draw = function() {
         for (var i = 0, len = this.currentDrawCalls.length; i < len; i++) {
             this.currentDrawCalls[i].draw(this.currentState);
