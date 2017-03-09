@@ -1,5 +1,6 @@
-#description {
+.description {
     width: 96%;
+    margin-bottom: 1em;
 }
 
 #examples {
