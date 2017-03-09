@@ -30,6 +30,14 @@
     <script src="../build/nanogl.js"></script>
     <script src="../utils/utils.js"></script>
     <style>
+        html {
+            overflow: hidden;
+        }
+
+        body {
+            margin: 0;
+        }
+
         #ssao-controls {
             position: absolute;
             top: 20px;
@@ -274,6 +282,11 @@
         var image = new Image();
 
         image.onload = function() {
+            if (!app.drawBuffersEnabled || !app.floatTexturesEnabled || !app.linearFloatTexturesEnabled) {
+                document.body.innerHTML = "This example requires extensions WEBGL_draw_buffers, OES_texture_float and OES_texture_float_linear which are not supported on this system."
+                return;
+            }
+            
             var noiseTextureDim = 1024;
             var numNoisePixels = noiseTextureDim * noiseTextureDim;
             var noiseTextureData = new Float32Array(numNoisePixels * 3);

@@ -26,6 +26,15 @@
     <script src="../utils/gl-matrix.js"></script>
     <script src="../build/nanogl.js"></script>
     <script src="../utils/utils.js"></script>
+    <style>
+        html {
+            overflow: hidden;
+        }
+
+        body {
+            margin: 0;
+        }
+    </style>
 </head>
 <body>
     <canvas id="gl-canvas"></canvas>
@@ -146,6 +155,11 @@
         var image = new Image();
 
         image.onload = function() {
+            if (!app.drawBuffersEnabled || !app.floatTexturesEnabled) {
+                document.body.innerHTML = "This example requires extensions WEBGL_draw_buffers and OES_texture_float which are not supported on this system."
+                return;
+            }
+
             var texture = app.createTexture(image);
 
 

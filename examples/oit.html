@@ -32,6 +32,13 @@
     <script src="../build/nanogl.js"></script>
     <script src="../utils/utils.js"></script>
     <style>
+        html {
+            overflow: hidden;
+        }
+
+        body {
+            margin: 0;
+        }
 
         #color-hud {
             position: absolute;
@@ -210,24 +217,12 @@
         var image = new Image();
 
         image.onload = function() {
-            var noiseTextureDim = 1024;
-            var numNoisePixels = noiseTextureDim * noiseTextureDim;
-            var noiseTextureData = new Float32Array(numNoisePixels * 3);
-
-            for (var i = 0; i < numNoisePixels; ++i) {
-                var index = i * 3;
-                noiseTextureData[index]     = Math.random() * 2.0 - 1.0;
-                noiseTextureData[index + 1] = Math.random() * 2.0 - 1.0;
+            if (!app.drawBuffersEnabled || !app.floatTexturesEnabled || !app.linearFloatTexturesEnabled) {
+                document.body.innerHTML = "This example requires extensions WEBGL_draw_buffers, OES_texture_float and OES_texture_float_linear which are not supported on this system."
+                return;
             }
 
             var texture = app.createTexture(image);
-            var noiseTexture = app.createTexture(noiseTextureData, {
-                array: true,
-                internalFormat: NanoGL.RGB,
-                type: NanoGL.FLOAT,
-                width: noiseTextureDim,
-                height: noiseTextureDim
-            });
 
             var NUM_SPHERES = 32;
             var NUM_PER_ROW = 8;

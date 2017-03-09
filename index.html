@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>NanoGL.js</title>
+    <link rel="stylesheet" href="site/css/docco.css"> 
+    <link rel="stylesheet" href="site/css/nanogl.css"> 
+    <script src="site/js/highlight.min.js"></script>
+</head>
+<body>
+    <a href="https://github.com/tsherif/nanogl.js"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"></a>
+    <h1>NanoGL.js</h1>
+    <div id="description">
+        NanoGL.js is minimal WebGL library. It's meant for developers who understand the GPU rendering pipeline and want to use it, but with a more convenient API. Typical usage of NanoGL.js will involve creating programs, array buffers, framebuffers, textures, and combining them into draw calls.
+    </div>
+    <pre><code class="javascript">
+    var app = NanoGL.createApp(canvas)
+    .clearColor(0.0, 0.0, 0.0, 1.0);
+
+    var program = app.createProgram(vertexShaderSource, fragmentShaderSource);
+
+    var positions = app.createArrayBuffer(NanoGL.FLOAT, 2, new Float32Array([
+        -0.5, -0.5,
+         0.5, -0.5,
+         0.0,  0.5
+    ]));
+
+    var drawCall = app.createDrawCall(program)
+    .attribute("aPosition", positions)
+    .uniform("uColor", new Float32Array([1.0, 0.0, 0.0]));
+
+    app.drawCalls([drawCall])
+    .clear()
+    .draw();
+    </code></pre>
+
+    <div>Visit the <a href="docs/">API docs</a> for more details.</div>
+
+    <h2>Examples</h2>
+    <a href="#" class="example-menu-button" id="triangles">Basic Triangles</a>
+    <a href="#" class="example-menu-button" id="cube">Phong-shaded Cube</a>
+    <a href="#" class="example-menu-button" id="cubemap">Cubemap</a>
+    <a href="#" class="example-menu-button" id="rtt">Render to Texture</a>
+    <a href="#" class="example-menu-button" id="picking">Picking</a>
+    <a href="#" class="example-menu-button" id="shadow">Shadow Mapping</a>
+    <a href="#" class="example-menu-button" id="dof">Depth of Field</a>
+    <a href="#" class="example-menu-button" id="ssao">Screen Space Ambient Occlusion</a>
+    <a href="#" class="example-menu-button" id="deferred">Deferred Rendering</a>
+    <a href="#" class="example-menu-button" id="oit">Order-independent Transparency</a>
+    <div id="example-div">
+        <div id="example-title"></div>
+        <iframe id="examples"></iframe>
+    </div>
+
+    <script>
+        var exampleFrame = document.getElementById("examples");
+        var exampleTitle = document.getElementById("example-title");
+
+        document.body.addEventListener("click", function(event) {
+            if (event.target.className !== "example-menu-button") {
+                return;
+            }
+
+            var link = event.target;
+            var title = link.text;
+            var src = "examples/" + event.target.id + ".html";
+            var sourceCodeURL = "https://github.com/tsherif/nanogl.js/blob/master/" + src;
+
+            exampleTitle.innerHTML = title + "<div><a href=\"" + sourceCodeURL + "\">Source Code</a>";
+            examples.src = src;
+
+            event.stopPropagation();
+            event.preventDefault();
+        });
+
+        var canvas = document.createElement("canvas");
+        var gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+
+        if (gl) {
+            if (gl.getExtension("WEBGL_draw_buffers") && gl.getExtension("OES_texture_float") && gl.getExtension("OES_texture_float_linear")) {
+                document.getElementById("oit").click();
+            } else {
+                document.getElementById("cube").click();
+            }
+
+        } else {
+            document.getElementById("example-div").innerHTML = "Sorry your browser does not support WebGL.";
+        }
+
+        
+
+        hljs.initHighlightingOnLoad();        
+    </script>
+    
+</body>
+</html>

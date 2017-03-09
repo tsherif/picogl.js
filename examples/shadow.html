@@ -26,6 +26,15 @@
     <script src="../utils/gl-matrix.js"></script>
     <script src="../build/nanogl.js"></script>
     <script src="../utils/utils.js"></script>
+    <style>
+        html {
+            overflow: hidden;
+        }
+
+        body {
+            margin: 0;
+        }
+    </style>
 </head>
 <body>
     <canvas id="gl-canvas"></canvas>
@@ -157,6 +166,10 @@
         var image = new Image();
 
         image.onload = function() {
+            if (!app.depthTexturesEnabled) {
+                document.body.innerHTML = "This example requires extension WEBGL_depth_texture which is not supported on this system."
+                return;
+            }
 
             var texture = app.createTexture(image);
 
