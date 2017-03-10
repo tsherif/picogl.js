@@ -96,6 +96,139 @@
         }
     };
 
+    NanoGL.IntVec2Uniform = function IntVec2Uniform(gl, handle) {
+        this.gl = gl;
+        this.handle = handle;
+        this.value = new Int32Array(2);
+    };
+
+    NanoGL.IntVec2Uniform.prototype.set = function(value) {
+        if (this.value[0] !== value[0] ||
+            this.value[1] !== value[1]) {
+            this.gl.uniform2iv(this.handle, value);
+            this.value.set(value);
+        }
+    };
+
+    NanoGL.IntVec3Uniform = function IntVec3Uniform(gl, handle) {
+        this.gl = gl;
+        this.handle = handle;
+        this.value = new Int32Array(3);
+    };
+
+    NanoGL.IntVec3Uniform.prototype.set = function(value) {
+        if (this.value[0] !== value[0] ||
+            this.value[1] !== value[1] ||
+            this.value[2] !== value[2]) {
+            this.gl.uniform3iv(this.handle, value);
+            this.value.set(value);
+        }
+    };
+
+    NanoGL.IntVec4Uniform = function IntVec4Uniform(gl, handle) {
+        this.gl = gl;
+        this.handle = handle;
+        this.value = new Int32Array(4);
+    };
+
+    NanoGL.IntVec4Uniform.prototype.set = function(value) {
+        if (this.value[0] !== value[0] ||
+            this.value[1] !== value[1] ||
+            this.value[2] !== value[2] ||
+            this.value[3] !== value[3]) {
+            this.gl.uniform4iv(this.handle, value);
+            this.value.set(value);
+        }
+    };
+
+    NanoGL.BoolVec2Uniform = function BoolVec2Uniform(gl, handle) {
+        this.gl = gl;
+        this.handle = handle;
+        this.value = [false, false];
+    };
+
+    NanoGL.BoolVec2Uniform.prototype.set = function(value) {
+        if (this.value[0] !== value[0] ||
+            this.value[1] !== value[1]) {
+            this.gl.uniform2iv(this.handle, value);
+            this.value[0] = value[0];
+            this.value[1] = value[1];
+        }
+    };
+
+    NanoGL.BoolVec3Uniform = function BoolVec3Uniform(gl, handle) {
+        this.gl = gl;
+        this.handle = handle;
+        this.value = [false, false, false];
+    };
+
+    NanoGL.BoolVec3Uniform.prototype.set = function(value) {
+        if (this.value[0] !== value[0] ||
+            this.value[1] !== value[1] ||
+            this.value[2] !== value[2]) {
+            this.gl.uniform3iv(this.handle, value);
+            this.value[0] = value[0];
+            this.value[1] = value[1];
+            this.value[2] = value[2];
+        }
+    };
+
+    NanoGL.BoolVec4Uniform = function BoolVec4Uniform(gl, handle) {
+        this.gl = gl;
+        this.handle = handle;
+        this.value = [false, false, false, false];
+    };
+
+    NanoGL.BoolVec4Uniform.prototype.set = function(value) {
+        if (this.value[0] !== value[0] ||
+            this.value[1] !== value[1] ||
+            this.value[2] !== value[2] ||
+            this.value[3] !== value[3]) {
+            this.gl.uniform4iv(this.handle, value);
+            this.value[0] = value[0];
+            this.value[1] = value[1];
+            this.value[2] = value[2];
+            this.value[3] = value[3];
+        }
+    };
+
+    NanoGL.Mat2Uniform = function Mat2Uniform(gl, handle) {
+        this.gl = gl;
+        this.handle = handle;
+        this.value = new Float32Array(4);
+    };
+
+    NanoGL.Mat2Uniform.prototype.set = function(value) {
+        if (this.value[0] !== value[0] ||
+            this.value[1] !== value[1] ||
+            this.value[2] !== value[2] ||
+            this.value[3] !== value[3]) {
+            this.gl.uniformMatrix2fv(this.handle, false, value);
+            this.value.set(value);
+        }
+    };
+
+    NanoGL.Mat3Uniform = function Mat3Uniform(gl, handle) {
+        this.gl = gl;
+        this.handle = handle;
+        this.value = new Float32Array(9);
+    };
+
+    NanoGL.Mat3Uniform.prototype.set = function(value) {
+        if (this.value[0] !== value[0] ||
+            this.value[1] !== value[1] ||
+            this.value[2] !== value[2] ||
+            this.value[3] !== value[3] ||
+            this.value[4] !== value[4] ||
+            this.value[5] !== value[5] ||
+            this.value[6] !== value[6] ||
+            this.value[7] !== value[7] ||
+            this.value[8] !== value[8]) {
+            this.gl.uniformMatrix3fv(this.handle, false, value);
+            this.value.set(value);
+        }
+    };
+
     NanoGL.Mat4Uniform = function Mat4Uniform(gl, handle) {
         this.gl = gl;
         this.handle = handle;

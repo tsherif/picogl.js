@@ -1,6 +1,6 @@
 {
   "name": "nanogl.js",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A minimal WebGL utility library",
   "repository": {
     "type": "git",

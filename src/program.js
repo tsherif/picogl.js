@@ -87,8 +87,28 @@
             var uniformInfo = gl.getActiveUniform(program, i);
             var uniformHandle = gl.getUniformLocation(this.program, uniformInfo.name);
             var UniformClass = null;
+
+            /*
+                const GLenum FLOAT_VEC2                     = 0x8B50;
+                    const GLenum FLOAT_VEC3                     = 0x8B51;
+                    const GLenum FLOAT_VEC4                     = 0x8B52;
+                    const GLenum INT_VEC2                       = 0x8B53;
+                    const GLenum INT_VEC3                       = 0x8B54;
+                    const GLenum INT_VEC4                       = 0x8B55;
+                    const GLenum BOOL                           = 0x8B56;
+                    const GLenum BOOL_VEC2                      = 0x8B57;
+                    const GLenum BOOL_VEC3                      = 0x8B58;
+                    const GLenum BOOL_VEC4                      = 0x8B59;
+                    const GLenum FLOAT_MAT2                     = 0x8B5A;
+                    const GLenum FLOAT_MAT3                     = 0x8B5B;
+                    const GLenum FLOAT_MAT4                     = 0x8B5C;
+                    const GLenum SAMPLER_2D                     = 0x8B5E;
+                    const GLenum SAMPLER_CUBE 
+            */
+
             switch (uniformInfo.type) {
                 case gl.INT: 
+                case gl.BOOL: 
                 case gl.SAMPLER_2D: 
                 case gl.SAMPLER_CUBE: 
                     UniformClass = NanoGL.IntUniform;
@@ -105,8 +125,35 @@
                 case gl.FLOAT_VEC4: 
                     UniformClass = NanoGL.Vec4Uniform;
                     break;
+                case gl.INT_VEC2: 
+                    UniformClass = NanoGL.IntVec2Uniform;
+                    break;
+                case gl.INT_VEC3: 
+                    UniformClass = NanoGL.IntVec3Uniform;
+                    break;
+                case gl.INT_VEC4: 
+                    UniformClass = NanoGL.IntVec4Uniform;
+                    break;
+                case gl.BOOL_VEC2: 
+                    UniformClass = NanoGL.BoolVec2Uniform;
+                    break;
+                case gl.BOOL_VEC3: 
+                    UniformClass = NanoGL.BoolVec3Uniform;
+                    break;
+                case gl.BOOL_VEC4: 
+                    UniformClass = NanoGL.BoolVec4Uniform;
+                    break;
+                case gl.FLOAT_MAT2: 
+                    UniformClass = NanoGL.Mat2Uniform;
+                    break;
+                case gl.FLOAT_MAT3: 
+                    UniformClass = NanoGL.Mat3Uniform;
+                    break;
                 case gl.FLOAT_MAT4: 
                     UniformClass = NanoGL.Mat4Uniform;
+                    break;
+                default:
+                    console.error("Unrecognized type for uniform ", uniformInfo.name);
                     break;
             }
 

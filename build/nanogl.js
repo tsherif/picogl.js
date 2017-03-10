@@ -670,8 +670,28 @@
             var uniformInfo = gl.getActiveUniform(program, i);
             var uniformHandle = gl.getUniformLocation(this.program, uniformInfo.name);
             var UniformClass = null;
+
+            /*
+                const GLenum FLOAT_VEC2                     = 0x8B50;
+                    const GLenum FLOAT_VEC3                     = 0x8B51;
+                    const GLenum FLOAT_VEC4                     = 0x8B52;
+                    const GLenum INT_VEC2                       = 0x8B53;
+                    const GLenum INT_VEC3                       = 0x8B54;
+                    const GLenum INT_VEC4                       = 0x8B55;
+                    const GLenum BOOL                           = 0x8B56;
+                    const GLenum BOOL_VEC2                      = 0x8B57;
+                    const GLenum BOOL_VEC3                      = 0x8B58;
+                    const GLenum BOOL_VEC4                      = 0x8B59;
+                    const GLenum FLOAT_MAT2                     = 0x8B5A;
+                    const GLenum FLOAT_MAT3                     = 0x8B5B;
+                    const GLenum FLOAT_MAT4                     = 0x8B5C;
+                    const GLenum SAMPLER_2D                     = 0x8B5E;
+                    const GLenum SAMPLER_CUBE 
+            */
+
             switch (uniformInfo.type) {
                 case gl.INT: 
+                case gl.BOOL: 
                 case gl.SAMPLER_2D: 
                 case gl.SAMPLER_CUBE: 
                     UniformClass = NanoGL.IntUniform;
@@ -688,8 +708,35 @@
                 case gl.FLOAT_VEC4: 
                     UniformClass = NanoGL.Vec4Uniform;
                     break;
+                case gl.INT_VEC2: 
+                    UniformClass = NanoGL.IntVec2Uniform;
+                    break;
+                case gl.INT_VEC3: 
+                    UniformClass = NanoGL.IntVec3Uniform;
+                    break;
+                case gl.INT_VEC4: 
+                    UniformClass = NanoGL.IntVec4Uniform;
+                    break;
+                case gl.BOOL_VEC2: 
+                    UniformClass = NanoGL.BoolVec2Uniform;
+                    break;
+                case gl.BOOL_VEC3: 
+                    UniformClass = NanoGL.BoolVec3Uniform;
+                    break;
+                case gl.BOOL_VEC4: 
+                    UniformClass = NanoGL.BoolVec4Uniform;
+                    break;
+                case gl.FLOAT_MAT2: 
+                    UniformClass = NanoGL.Mat2Uniform;
+                    break;
+                case gl.FLOAT_MAT3: 
+                    UniformClass = NanoGL.Mat3Uniform;
+                    break;
                 case gl.FLOAT_MAT4: 
                     UniformClass = NanoGL.Mat4Uniform;
+                    break;
+                default:
+                    console.error("Unrecognized type for uniform ", uniformInfo.name);
                     break;
             }
 
@@ -698,7 +745,7 @@
     };
 
     /**
-        Bind an array buffer to a program attribute.
+        Bind an Arraybuffer to a program attribute.
 
         @method
         @param {string} name Attribute name.
@@ -887,6 +934,139 @@
         }
     };
 
+    NanoGL.IntVec2Uniform = function IntVec2Uniform(gl, handle) {
+        this.gl = gl;
+        this.handle = handle;
+        this.value = new Int32Array(2);
+    };
+
+    NanoGL.IntVec2Uniform.prototype.set = function(value) {
+        if (this.value[0] !== value[0] ||
+            this.value[1] !== value[1]) {
+            this.gl.uniform2iv(this.handle, value);
+            this.value.set(value);
+        }
+    };
+
+    NanoGL.IntVec3Uniform = function IntVec3Uniform(gl, handle) {
+        this.gl = gl;
+        this.handle = handle;
+        this.value = new Int32Array(3);
+    };
+
+    NanoGL.IntVec3Uniform.prototype.set = function(value) {
+        if (this.value[0] !== value[0] ||
+            this.value[1] !== value[1] ||
+            this.value[2] !== value[2]) {
+            this.gl.uniform3iv(this.handle, value);
+            this.value.set(value);
+        }
+    };
+
+    NanoGL.IntVec4Uniform = function IntVec4Uniform(gl, handle) {
+        this.gl = gl;
+        this.handle = handle;
+        this.value = new Int32Array(4);
+    };
+
+    NanoGL.IntVec4Uniform.prototype.set = function(value) {
+        if (this.value[0] !== value[0] ||
+            this.value[1] !== value[1] ||
+            this.value[2] !== value[2] ||
+            this.value[3] !== value[3]) {
+            this.gl.uniform4iv(this.handle, value);
+            this.value.set(value);
+        }
+    };
+
+    NanoGL.BoolVec2Uniform = function BoolVec2Uniform(gl, handle) {
+        this.gl = gl;
+        this.handle = handle;
+        this.value = [false, false];
+    };
+
+    NanoGL.BoolVec2Uniform.prototype.set = function(value) {
+        if (this.value[0] !== value[0] ||
+            this.value[1] !== value[1]) {
+            this.gl.uniform2iv(this.handle, value);
+            this.value[0] = value[0];
+            this.value[1] = value[1];
+        }
+    };
+
+    NanoGL.BoolVec3Uniform = function BoolVec3Uniform(gl, handle) {
+        this.gl = gl;
+        this.handle = handle;
+        this.value = [false, false, false];
+    };
+
+    NanoGL.BoolVec3Uniform.prototype.set = function(value) {
+        if (this.value[0] !== value[0] ||
+            this.value[1] !== value[1] ||
+            this.value[2] !== value[2]) {
+            this.gl.uniform3iv(this.handle, value);
+            this.value[0] = value[0];
+            this.value[1] = value[1];
+            this.value[2] = value[2];
+        }
+    };
+
+    NanoGL.BoolVec4Uniform = function BoolVec4Uniform(gl, handle) {
+        this.gl = gl;
+        this.handle = handle;
+        this.value = [false, false, false, false];
+    };
+
+    NanoGL.BoolVec4Uniform.prototype.set = function(value) {
+        if (this.value[0] !== value[0] ||
+            this.value[1] !== value[1] ||
+            this.value[2] !== value[2] ||
+            this.value[3] !== value[3]) {
+            this.gl.uniform4iv(this.handle, value);
+            this.value[0] = value[0];
+            this.value[1] = value[1];
+            this.value[2] = value[2];
+            this.value[3] = value[3];
+        }
+    };
+
+    NanoGL.Mat2Uniform = function Mat2Uniform(gl, handle) {
+        this.gl = gl;
+        this.handle = handle;
+        this.value = new Float32Array(4);
+    };
+
+    NanoGL.Mat2Uniform.prototype.set = function(value) {
+        if (this.value[0] !== value[0] ||
+            this.value[1] !== value[1] ||
+            this.value[2] !== value[2] ||
+            this.value[3] !== value[3]) {
+            this.gl.uniformMatrix2fv(this.handle, false, value);
+            this.value.set(value);
+        }
+    };
+
+    NanoGL.Mat3Uniform = function Mat3Uniform(gl, handle) {
+        this.gl = gl;
+        this.handle = handle;
+        this.value = new Float32Array(9);
+    };
+
+    NanoGL.Mat3Uniform.prototype.set = function(value) {
+        if (this.value[0] !== value[0] ||
+            this.value[1] !== value[1] ||
+            this.value[2] !== value[2] ||
+            this.value[3] !== value[3] ||
+            this.value[4] !== value[4] ||
+            this.value[5] !== value[5] ||
+            this.value[6] !== value[6] ||
+            this.value[7] !== value[7] ||
+            this.value[8] !== value[8]) {
+            this.gl.uniformMatrix3fv(this.handle, false, value);
+            this.value.set(value);
+        }
+    };
+
     NanoGL.Mat4Uniform = function Mat4Uniform(gl, handle) {
         this.gl = gl;
         this.handle = handle;
@@ -997,8 +1177,8 @@
     
         @method
         @param {ImageElement|ArrayBufferView} image Image data.
-        @param {number} width Image width (should only be passed for ArrayBufferView data).
-        @param {number} height Image height (should only be passed for ArrayBufferView data).
+        @param {number} [width] Image width (should only be passed for ArrayBufferView data).
+        @param {number} [height] Image height (should only be passed for ArrayBufferView data).
     */
     NanoGL.Texture.prototype.image = function(image, width, height) {
         this.gl.activeTexture(this.gl.TEXTURE0);
@@ -1241,6 +1421,12 @@
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     }; 
 
+    /**
+        Resize framebuffer to current default drawing buffer
+        size. Should be called after calls to App.resize().
+
+        @method
+    */
     NanoGL.Framebuffer.prototype.resize = function() {
 
         this.width = this.gl.drawingBufferWidth;
@@ -1362,7 +1548,7 @@
     };
 
     /**
-        Set a texture to bind to a sampler uniform.
+        Set texture to bind to a sampler uniform.
 
         @method
         @param {string} name Sampler uniform name.
