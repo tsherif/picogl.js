@@ -42,14 +42,13 @@
 
         #color-hud {
             position: absolute;
-            top: 20px;
+            bottom: 20px;
             right: 20px;
             color: white;
         }
     </style>
 </head>
 <body>
-    <div id="color-hud">Color value: <div id="color-display"></div></div>
     <canvas id="gl-canvas"></canvas>
     <script id="draw-vs" type="x-shader/vs">
       
@@ -140,15 +139,10 @@
     <script type="text/javascript">
         var NEAR = 0.1;
         var FAR = 10.0;
-        var pick = false;
-        var pickX = 0;
-        var pickY = 0;
 
         var canvas = document.getElementById("gl-canvas");
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
-
-        var colorDisplay = document.getElementById("color-display");
 
         var screenTexelSize = vec2.fromValues(1.0 / canvas.width, 1.0 / canvas.height);
 
@@ -159,14 +153,6 @@
         .drawBuffers()
         .floatTextures()
         .linearFloatTextures();
-
-        canvas.addEventListener("mousemove", function(event) {
-            pick = true;
-            pickX = event.clientX;
-            pickY = canvas.height - event.clientY;
-        });
-
-        var depthRange = vec2.fromValues(NEAR, FAR);
 
         // Set up draw program
         var drawVsSource = document.getElementById("draw-vs").text;
@@ -297,12 +283,7 @@
                 .drawCalls(accumDrawCalls)
                 .blendFunc(NanoGL.ONE, NanoGL.ONE_MINUS_SRC_ALPHA)
                 .clear()
-                .draw();
-
-                if (pick) {
-                    app.readPixel(pickX, pickY, pickColor);
-                    colorDisplay.innerText = pickColor[0] + ", " + pickColor[1] + ", " + pickColor[2] + ", " + pickColor[3];
-                } 
+                .draw(); 
                                 
                 requestAnimationFrame(draw);
             }
@@ -313,6 +294,12 @@
 
         image.src = "img/khronos_webgl.png";
 
+    </script>
+    <a href="https://github.com/tsherif/nanogl.js" id="github-ribbon"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"></a>
+    <script>
+        if (window.top !== window) {
+            document.body.removeChild(document.getElementById("github-ribbon"));
+        }
     </script>
 </body>
 </html>
