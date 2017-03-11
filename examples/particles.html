@@ -54,21 +54,31 @@
         varying vec2 vScreenUV;
         uniform sampler2D uPositionBuffer;
         uniform sampler2D uVelocityBuffer;
+        uniform vec3 mass1Position;
+        uniform float mass1Factor;
+        uniform vec3 mass2Position;
+        uniform float mass2Factor;
+        uniform vec3 mass3Position;
+        uniform float mass3Factor;
 
         void main() {
-            vec3 mass1Position = vec3(-0.3);
-            vec3 mass2Position = vec3(0.3);
-
             vec3 position = texture2D(uPositionBuffer, vScreenUV).xyz;
             vec3 velocity = texture2D(uVelocityBuffer, vScreenUV).xyz;
 
+            // Attraction
             vec3 massVec = mass1Position - position;
             float massDist = max(0.1, length(massVec));
-            vec3 acceleration = normalize(massVec) / (100000.0 * massDist * massDist);
+            vec3 acceleration = mass1Factor * normalize(massVec) / (massDist * massDist);
 
-            massVec = mass2Position - position;
+            // Repulsion
+            massVec = position - mass2Position;
             massDist = max(0.1, length(massVec));
-            acceleration += normalize(massVec) / (30000.0 * massDist * massDist);
+            acceleration += mass2Factor * normalize(massVec) / (massDist * massDist);
+
+            // Attraction
+            massVec = mass3Position - position;
+            massDist = max(0.1, length(massVec));
+            acceleration += mass3Factor * normalize(massVec) / (massDist * massDist);
 
             velocity += acceleration;
 
@@ -211,6 +221,27 @@
             app.createDrawCall(updateProgram)
             .attribute("aPosition", quadPositions)
             .texture("uPositionBuffer", readPositionTexture)
+            // Attraction
+            .uniform("mass1Position", new Float32Array([
+                Math.random() * 2.0 - 1.0,
+                Math.random() * 2.0 - 1.0,
+                Math.random() * 2.0 - 1.0
+            ]))
+            .uniform("mass1Factor", Math.random() / 30000)
+            // Repulsion
+            .uniform("mass2Position", new Float32Array([
+                Math.random() - 0.5,
+                Math.random() - 0.5,
+                Math.random() - 0.5
+            ]))
+            .uniform("mass2Factor", Math.random() / 30000)
+            // Attraction
+            .uniform("mass3Position", new Float32Array([
+                Math.random() * 2.0 - 1.0,
+                Math.random() * 2.0 - 1.0,
+                Math.random() * 2.0 - 1.0
+            ]))
+            .uniform("mass3Factor", Math.random() / 30000)
         ];
 
         var mainDrawcalls = [
