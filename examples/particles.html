@@ -65,17 +65,14 @@
             vec3 position = texture2D(uPositionBuffer, vScreenUV).xyz;
             vec3 velocity = texture2D(uVelocityBuffer, vScreenUV).xyz;
 
-            // Attraction
             vec3 massVec = mass1Position - position;
             float massDist = max(0.1, length(massVec));
             vec3 acceleration = mass1Factor * normalize(massVec) / (massDist * massDist);
 
-            // Repulsion
-            massVec = position - mass2Position;
+            massVec = mass2Position - position;
             massDist = max(0.1, length(massVec));
             acceleration += mass2Factor * normalize(massVec) / (massDist * massDist);
 
-            // Attraction
             massVec = mass3Position - position;
             massDist = max(0.1, length(massVec));
             acceleration += mass3Factor * normalize(massVec) / (massDist * massDist);
@@ -221,21 +218,18 @@
             app.createDrawCall(updateProgram)
             .attribute("aPosition", quadPositions)
             .texture("uPositionBuffer", readPositionTexture)
-            // Attraction
             .uniform("mass1Position", new Float32Array([
                 Math.random() * 2.0 - 1.0,
                 Math.random() * 2.0 - 1.0,
                 Math.random() * 2.0 - 1.0
             ]))
             .uniform("mass1Factor", Math.random() / 30000)
-            // Repulsion
             .uniform("mass2Position", new Float32Array([
-                Math.random() - 0.5,
-                Math.random() - 0.5,
-                Math.random() - 0.5
+                Math.random() * 2.0 - 1.0,
+                Math.random() * 2.0 - 1.0,
+                Math.random() * 2.0 - 1.0
             ]))
             .uniform("mass2Factor", Math.random() / 30000)
-            // Attraction
             .uniform("mass3Position", new Float32Array([
                 Math.random() * 2.0 - 1.0,
                 Math.random() * 2.0 - 1.0,
