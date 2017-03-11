@@ -118,6 +118,10 @@
         .floatTextures()
         .drawBuffers();
 
+        if (!app.drawBuffersEnabled || !app.floatTexturesEnabled) {
+            document.body.innerHTML = "This example requires extensions WEBGL_draw_buffers and OES_texture_float which are not supported on this system."
+        }
+
         var DATA_TEXTURE_DIM = 1024;
         var NUM_PARTICLES = DATA_TEXTURE_DIM * DATA_TEXTURE_DIM;
         var positionTextureData = new Float32Array(NUM_PARTICLES * 3);
