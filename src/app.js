@@ -483,6 +483,8 @@
         @method
         @param {number} numColorTextures The number of color draw targets to create (requires enabled drawBuffers to be greater than 1).
         @param {GLEnum} [colorTargetType=UNSIGNED_BYTE] Type of data stored in the color targets.
+        @param {number} [width=app.width] Width of the framebuffer.
+        @param {number} [height=app.height] Height of the framebuffer.
     */
     NanoGL.App.prototype.createFramebuffer = function(numColorTextures, colorTargetType, width, height) {
         return new NanoGL.Framebuffer(this.gl, this.drawBuffersExtension, numColorTextures, colorTargetType, this.depthTexturesEnabled, width, height);

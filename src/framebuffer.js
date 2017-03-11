@@ -122,8 +122,11 @@
     }; 
 
     /**
+        Bind a new texture as a color target.
 
         @method
+        @param {Texture} texture New texture to bind.
+        @param {number} [index=0] Color attachment to bind the texture to.
     */
     NanoGL.Framebuffer.prototype.colorTexture = function(texture, index) {
         index = index || 0;
@@ -141,6 +144,8 @@
         size. Should be called after calls to App.resize().
 
         @method
+        @param {number} [width=app.width] New width of the framebuffer.
+        @param {number} [height=app.height] New height of the framebuffer.
     */
     NanoGL.Framebuffer.prototype.resize = function(width, height) {
 
