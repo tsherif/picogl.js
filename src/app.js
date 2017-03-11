@@ -129,6 +129,7 @@
     */
     NanoGL.App.prototype.framebuffer = function(framebuffer) {
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, framebuffer.framebuffer);
+        this.gl.viewport(0, 0, framebuffer.width, framebuffer.height);
 
         return this;
     };
@@ -140,6 +141,7 @@
     */
     NanoGL.App.prototype.defaultFramebuffer = function() {
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
+        this.gl.viewport(0, 0, this.width, this.height);
 
         return this;
     };
@@ -482,8 +484,8 @@
         @param {number} numColorTextures The number of color draw targets to create (requires enabled drawBuffers to be greater than 1).
         @param {GLEnum} [colorTargetType=UNSIGNED_BYTE] Type of data stored in the color targets.
     */
-    NanoGL.App.prototype.createFramebuffer = function(numColorTextures, colorTargetType) {
-        return new NanoGL.Framebuffer(this.gl, this.drawBuffersExtension, numColorTextures, colorTargetType, this.depthTexturesEnabled);
+    NanoGL.App.prototype.createFramebuffer = function(numColorTextures, colorTargetType, width, height) {
+        return new NanoGL.Framebuffer(this.gl, this.drawBuffersExtension, numColorTextures, colorTargetType, this.depthTexturesEnabled, width, height);
     };
 
     /**

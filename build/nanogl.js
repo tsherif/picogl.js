@@ -197,6 +197,7 @@
     */
     NanoGL.App.prototype.framebuffer = function(framebuffer) {
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, framebuffer.framebuffer);
+        this.gl.viewport(0, 0, framebuffer.width, framebuffer.height);
 
         return this;
     };
@@ -208,6 +209,7 @@
     */
     NanoGL.App.prototype.defaultFramebuffer = function() {
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
+        this.gl.viewport(0, 0, this.width, this.height);
 
         return this;
     };
@@ -550,8 +552,8 @@
         @param {number} numColorTextures The number of color draw targets to create (requires enabled drawBuffers to be greater than 1).
         @param {GLEnum} [colorTargetType=UNSIGNED_BYTE] Type of data stored in the color targets.
     */
-    NanoGL.App.prototype.createFramebuffer = function(numColorTextures, colorTargetType) {
-        return new NanoGL.Framebuffer(this.gl, this.drawBuffersExtension, numColorTextures, colorTargetType, this.depthTexturesEnabled);
+    NanoGL.App.prototype.createFramebuffer = function(numColorTextures, colorTargetType, width, height) {
+        return new NanoGL.Framebuffer(this.gl, this.drawBuffersExtension, numColorTextures, colorTargetType, this.depthTexturesEnabled, width, height);
     };
 
     /**
@@ -1346,11 +1348,18 @@
         @prop {WebGLDrawBuffers} drawBuffersExtension Hold the draw buffers extension object when enabled.
         @prop {Array} colorAttachments Array of color attachment enums. 
     */
-    NanoGL.Framebuffer = function Framebuffer(gl, drawBuffersExtension, numColorTargets, colorTargetType, depthTexturesEnabled) {
+    NanoGL.Framebuffer = function Framebuffer(gl, drawBuffersExtension, numColorTargets, colorTargetType, depthTexturesEnabled, width, height) {
         this.gl = gl;
         this.framebuffer = gl.createFramebuffer();
-        this.width = gl.drawingBufferWidth;
-        this.height = gl.drawingBufferHeight;
+
+        if (width && height) {
+            this.width = width;
+            this.height = height;
+        } else {
+            this.width = gl.drawingBufferWidth;
+            this.height = gl.drawingBufferHeight;
+        }
+        
         this.drawBuffersExtension = drawBuffersExtension;
         this.numColorTargets = numColorTargets !== undefined ? numColorTargets : 1;
 
@@ -1422,26 +1431,44 @@
     }; 
 
     /**
+
+        @method
+    */
+    NanoGL.Framebuffer.prototype.colorTexture = function(texture, index) {
+        index = index || 0;
+        this.colorTextures[index] = texture;
+
+        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.framebuffer);
+        for (var i = 0; i < this.numColorTargets; ++i) {
+            this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.colorAttachments[i], this.gl.TEXTURE_2D, this.colorTextures[i].texture, 0);
+        }
+        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
+    };
+
+    /**
         Resize framebuffer to current default drawing buffer
         size. Should be called after calls to App.resize().
 
         @method
     */
-    NanoGL.Framebuffer.prototype.resize = function() {
+    NanoGL.Framebuffer.prototype.resize = function(width, height) {
 
-        this.width = this.gl.drawingBufferWidth;
-        this.height = this.gl.drawingBufferHeight;
+        if (width && height) {
+            this.width = width;
+            this.height = height;
+        } else {
+            this.width = this.gl.drawingBufferWidth;
+            this.height = this.gl.drawingBufferHeight;
+        }
 
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.framebuffer);
 
         for (var i = 0; i < this.numColorTargets; ++i) {
             this.colorTextures[i].image(null, this.width, this.height);
-            // this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.colorAttachments[i], this.gl.TEXTURE_2D, this.colorTextures[i].texture, 0);
         }
 
         if (this.depthTexture) {
             this.depthTexture.image(null, this.width, this.height);
-            // this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.gl.DEPTH_ATTACHMENT, this.gl.TEXTURE_2D, this.depthTexture.texture, 0);
         } else {
             this.gl.bindRenderbuffer(this.gl.RENDERBUFFER, this.depthBuffer);
             this.gl.renderbufferStorage(this.gl.RENDERBUFFER, this.gl.DEPTH_COMPONENT16, this.width, this.height);
