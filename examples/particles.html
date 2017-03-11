@@ -66,16 +66,16 @@
             vec3 velocity = texture2D(uVelocityBuffer, vScreenUV).xyz;
 
             vec3 massVec = mass1Position - position;
-            float massDist = max(0.1, length(massVec));
-            vec3 acceleration = mass1Factor * normalize(massVec) / (massDist * massDist);
+            float massDist2 = max(0.01, dot(massVec, massVec));
+            vec3 acceleration = mass1Factor * normalize(massVec) / massDist2;
 
             massVec = mass2Position - position;
-            massDist = max(0.1, length(massVec));
-            acceleration += mass2Factor * normalize(massVec) / (massDist * massDist);
+            massDist2 = max(0.01, dot(massVec, massVec));
+            acceleration += mass2Factor * normalize(massVec) / massDist2;
 
             massVec = mass3Position - position;
-            massDist = max(0.1, length(massVec));
-            acceleration += mass3Factor * normalize(massVec) / (massDist * massDist);
+            massDist2 = max(0.01, dot(massVec, massVec));
+            acceleration += mass3Factor * normalize(massVec) / massDist2;
 
             velocity += acceleration;
 
