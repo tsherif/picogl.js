@@ -1,15 +1,15 @@
-NanoGL.js
+PicoGL.js
 ========
 
-NanoGL.js is minimal WebGL library. It's meant for developers who understand the GPU rendering pipeline and want to use it, but with a more convenient API. Typical usage of NanoGL.js will involve creating programs, arraybuffers, framebuffers, textures, and combining them into draw calls.
+PicoGL.js is minimal WebGL library. It's meant for developers who understand the GPU rendering pipeline and want to use it, but with a more convenient API. Typical usage of PicoGL.js will involve creating programs, arraybuffers, framebuffers, textures, and combining them into draw calls.
 
 ```JavaScript
-    var app = NanoGL.createApp(canvas)
+    var app = PicoGL.createApp(canvas)
     .clearColor(0.0, 0.0, 0.0, 1.0);
 
     var program = app.createProgram(vertexShaderSource, fragmentShaderSource);
 
-    var positions = app.createArrayBuffer(NanoGL.FLOAT, 2, new Float32Array([
+    var positions = app.createArrayBuffer(PicoGL.FLOAT, 2, new Float32Array([
         -0.5, -0.5,
          0.5, -0.5,
          0.0,  0.5
@@ -25,14 +25,14 @@ NanoGL.js is minimal WebGL library. It's meant for developers who understand the
 
 ``` 
 
-NanoGL.js makes it fairly easy to set up multi-pass rendering algorithms. It also has convenient utility functions to enable relevant extensions. For example, screen space ambient occlusion might be set up as follows:
+PicoGL.js makes it fairly easy to set up multi-pass rendering algorithms. It also has convenient utility functions to enable relevant extensions. For example, screen space ambient occlusion might be set up as follows:
 
 ```JavaScript
     // SET UP APP
-    var app = NanoGL.createApp(canvas)
+    var app = PicoGL.createApp(canvas)
     .clearColor(0.0, 0.0, 0.0, 1.0)
     .depthTest()
-    .depthFunc(NanoGL.LEQUAL)
+    .depthFunc(PicoGL.LEQUAL)
     .drawBuffers()           // Enable WEBGL_draw_buffers
     .floatTextures()         // Enable OES_texture_float
     .linearFloatTextures();  // Enable OES_texture_float_linear
@@ -41,11 +41,11 @@ NanoGL.js makes it fairly easy to set up multi-pass rendering algorithms. It als
     // Set up program and framebuffer to gather color and geometry data
     var colorGeoProgram = app.createProgram(colorGeoVsSource, colorGeoFsSource);
     // Framebuffer with 3 float targets: color, positions, normals
-    var colorGeoBuffer = app.createFramebuffer(3, NanoGL.FLOAT);
+    var colorGeoBuffer = app.createFramebuffer(3, PicoGL.FLOAT);
 
     // Set up ssao program
     var ssaoProgram = app.createProgram(ssaoVsSource, ssaoFsSource);
-    var ssaoBuffer = app.createFramebuffer(1, NanoGL.FLOAT);
+    var ssaoBuffer = app.createFramebuffer(1, PicoGL.FLOAT);
 
     // Set up ao blend program
     var aoBlendProgram = app.createProgram(aoBlendVsSource, aoBlendFsSource);
@@ -90,4 +90,4 @@ NanoGL.js makes it fairly easy to set up multi-pass rendering algorithms. It als
     .draw();
 ```
 
-Note that NanoGL.js is **not** a scene graph library. There are no objects, hierarchies, transforms, materials, etc. It has been designed only to make management of GPU state more convenient. Its conceptual model maps fairly directly to the constructs one deals with when writing directly with WebGL. The only higher-level construct is the **draw call**, which manages sets of related lower-level constructs. 
+Note that PicoGL.js is **not** a scene graph library. There are no objects, hierarchies, transforms, materials, etc. It has been designed only to make management of GPU state more convenient. Its conceptual model maps fairly directly to the constructs one deals with when writing directly with WebGL. The only higher-level construct is the **draw call**, which manages sets of related lower-level constructs. 

@@ -25,7 +25,7 @@
     "use strict";
 
     /**
-        Primary entry point to NanoGL. An app will store all parts of the WebGL
+        Primary entry point to PicoGL. An app will store all parts of the WebGL
         state and manage draw calls.
 
         @class
@@ -44,7 +44,7 @@
         @prop {GLEnum} clearBits Current clear mask to use with clear().
         @prop {WebGLDrawBuffers} drawBuffersExtension Hold the draw buffers extension object when enabled.
     */
-    NanoGL.App = function App(canvas, contextAttributes) {
+    PicoGL.App = function App(canvas, contextAttributes) {
         this.canvas = canvas;
         this.gl = canvas.getContext("webgl", contextAttributes) || canvas.getContext("experimental-webgl", contextAttributes);
         this.width = this.gl.drawingBufferWidth;
@@ -72,12 +72,12 @@
 
     /**
         Set the clear mask bits to use when calling clear().
-        E.g. app.clearMask(NanoGL.COLOR_BUFFER_BIT).
+        E.g. app.clearMask(PicoGL.COLOR_BUFFER_BIT).
 
         @method
         @param {GLEnum} mask Bit mask of buffers to clear.
     */
-    NanoGL.App.prototype.clearMask = function(mask) {
+    PicoGL.App.prototype.clearMask = function(mask) {
         this.clearBits = mask;
 
         return this;
@@ -92,7 +92,7 @@
         @param {number} b Blue channel.
         @param {number} a Alpha channel.
     */
-    NanoGL.App.prototype.clearColor = function(r, g, b, a) {
+    PicoGL.App.prototype.clearColor = function(r, g, b, a) {
         this.gl.clearColor(r, g, b, a);
 
         return this;
@@ -103,7 +103,7 @@
 
         @method
     */
-    NanoGL.App.prototype.clear = function() {
+    PicoGL.App.prototype.clear = function() {
         this.gl.clear(this.clearBits);
 
         return this;
@@ -116,7 +116,7 @@
         @param {Array} drawCallList Array of DrawCall objects.
         @see DrawCall
     */
-    NanoGL.App.prototype.drawCalls = function(drawCallList) {
+    PicoGL.App.prototype.drawCalls = function(drawCallList) {
         this.currentDrawCalls = drawCallList;
 
         return this;
@@ -129,7 +129,7 @@
         @param {Framebuffer} framebuffer The Framebuffer object to bind.
         @see Framebuffer
     */
-    NanoGL.App.prototype.framebuffer = function(framebuffer) {
+    PicoGL.App.prototype.framebuffer = function(framebuffer) {
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, framebuffer.framebuffer);
         this.gl.viewport(0, 0, framebuffer.width, framebuffer.height);
 
@@ -141,7 +141,7 @@
 
         @method
     */
-    NanoGL.App.prototype.defaultFramebuffer = function() {
+    PicoGL.App.prototype.defaultFramebuffer = function() {
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
         this.gl.viewport(0, 0, this.width, this.height);
 
@@ -155,7 +155,7 @@
         @param {number} near Minimum depth value. 
         @param {number} far Maximum depth value.
     */
-    NanoGL.App.prototype.depthRange = function(near, far) {
+    PicoGL.App.prototype.depthRange = function(near, far) {
         this.gl.depthRange(near, far);
 
         return this;
@@ -166,7 +166,7 @@
 
         @method
     */
-    NanoGL.App.prototype.depthTest = function() {
+    PicoGL.App.prototype.depthTest = function() {
         this.gl.enable(this.gl.DEPTH_TEST);
 
         return this;
@@ -177,7 +177,7 @@
 
         @method
     */
-    NanoGL.App.prototype.noDepthTest = function() {
+    PicoGL.App.prototype.noDepthTest = function() {
         this.gl.disable(this.gl.DEPTH_TEST);
 
         return this;
@@ -188,7 +188,7 @@
 
         @method
     */
-    NanoGL.App.prototype.depthMask = function() {
+    PicoGL.App.prototype.depthMask = function() {
         this.gl.depthMask(true);
 
         return this;
@@ -199,7 +199,7 @@
 
         @method
     */
-    NanoGL.App.prototype.noDepthMask = function() {
+    PicoGL.App.prototype.noDepthMask = function() {
         this.gl.depthMask(false);
 
         return this;
@@ -210,7 +210,7 @@
 
         @method
     */
-    NanoGL.App.prototype.blend = function() {
+    PicoGL.App.prototype.blend = function() {
         this.gl.enable(this.gl.BLEND);
 
         return this;
@@ -221,32 +221,32 @@
 
         @method
     */
-    NanoGL.App.prototype.noBlend = function() {
+    PicoGL.App.prototype.noBlend = function() {
         this.gl.disable(this.gl.BLEND);
 
         return this;
     };
 
     /**
-        Set the depth test function. E.g. app.depthFunc(NanoGL.LEQUAL).
+        Set the depth test function. E.g. app.depthFunc(PicoGL.LEQUAL).
 
         @method
         @param {GLEnum} func The depth testing function to use.
     */
-    NanoGL.App.prototype.depthFunc = function(func) {
+    PicoGL.App.prototype.depthFunc = function(func) {
         this.gl.depthFunc(func);
 
         return this;
     };
 
     /**
-        Set the blend function. E.g. app.blendFunc(NanoGL.ONE, NanoGL.ONE_MINUS_SRC_ALPHA).
+        Set the blend function. E.g. app.blendFunc(PicoGL.ONE, PicoGL.ONE_MINUS_SRC_ALPHA).
 
         @method
         @param {GLEnum} src The source blending weight.
         @param {GLEnum} dest The destination blending weight.
     */
-    NanoGL.App.prototype.blendFunc = function(src, dest) {
+    PicoGL.App.prototype.blendFunc = function(src, dest) {
         this.gl.blendFunc(src, dest);
 
         return this;
@@ -254,7 +254,7 @@
 
     /**
         Set the blend function, with separate weighting for color and alpha channels. 
-        E.g. app.blendFuncSeparate(NanoGL.ONE, NanoGL.ONE_MINUS_SRC_ALPHA, NanoGL.ONE, NanoGL.ONE).
+        E.g. app.blendFuncSeparate(PicoGL.ONE, PicoGL.ONE_MINUS_SRC_ALPHA, PicoGL.ONE, PicoGL.ONE).
 
         @method
         @param {GLEnum} csrc The source blending weight for the RGB channels.
@@ -262,7 +262,7 @@
         @param {GLEnum} asrc The source blending weight for the alpha channel.
         @param {GLEnum} adest The destination blending weight for the alpha channel.
     */
-    NanoGL.App.prototype.blendFuncSeparate = function(csrc, cdest, asrc, adest) {
+    PicoGL.App.prototype.blendFuncSeparate = function(csrc, cdest, asrc, adest) {
         this.gl.blendFuncSeparate(csrc, cdest, asrc, adest);
 
         return this;
@@ -273,7 +273,7 @@
 
         @method
     */
-    NanoGL.App.prototype.cullBackfaces = function() {
+    PicoGL.App.prototype.cullBackfaces = function() {
         this.gl.enable(this.gl.CULL_FACE);
 
         return this;
@@ -284,7 +284,7 @@
 
         @method
     */
-    NanoGL.App.prototype.drawBackfaces = function() {
+    PicoGL.App.prototype.drawBackfaces = function() {
         this.gl.disable(this.gl.CULL_FACE);
 
         return this;
@@ -298,7 +298,7 @@
         @method
         @see Framebuffer
     */
-    NanoGL.App.prototype.drawBuffers = function() {
+    PicoGL.App.prototype.drawBuffers = function() {
         this.drawBuffersExtension = this.gl.getExtension("WEBGL_draw_buffers");
         
         if (this.drawBuffersExtension) {
@@ -319,7 +319,7 @@
         @method
         @see Framebuffer
     */
-    NanoGL.App.prototype.depthTextures = function() {
+    PicoGL.App.prototype.depthTextures = function() {
         this.depthTexturesEnabled = !!this.gl.getExtension("WEBGL_depth_texture");
         
         if (!this.depthTexturesEnabled) {
@@ -331,12 +331,12 @@
 
     /**
         Enable the OES_texture_float extension. Allows for creating float textures as
-        render targets on FrameBuffer objects. E.g. app.createFramebuffer(1, NanoGL.FLOAT).
+        render targets on FrameBuffer objects. E.g. app.createFramebuffer(1, PicoGL.FLOAT).
 
         @method
         @see Framebuffer
     */
-    NanoGL.App.prototype.floatTextures = function() {
+    PicoGL.App.prototype.floatTextures = function() {
         this.floatTexturesEnabled = !!this.gl.getExtension("OES_texture_float");
         
         if (!this.floatTexturesEnabled) {
@@ -352,7 +352,7 @@
         @method
         @see Framebuffer
     */
-    NanoGL.App.prototype.linearFloatTextures = function() {
+    PicoGL.App.prototype.linearFloatTextures = function() {
         this.linearFloatTexturesEnabled = !!this.gl.getExtension("OES_texture_float_linear");
         
         if (!this.linearFloatTexturesEnabled) {
@@ -371,7 +371,7 @@
         @param {number} y The y coordinate of the pixel.
         @param {Uint8Array} outColor 4-element Uint8Array to store the pixel's color.
     */
-    NanoGL.App.prototype.readPixel = function(x, y, outColor) {
+    PicoGL.App.prototype.readPixel = function(x, y, outColor) {
         this.gl.readPixels(x, y, 1, 1, this.gl.RGBA, this.gl.UNSIGNED_BYTE, outColor);
 
         return this;
@@ -384,7 +384,7 @@
         @param {number} width The new canvas width.
         @param {number} height The new canvas height.
     */
-    NanoGL.App.prototype.resize = function(width, height) {
+    PicoGL.App.prototype.resize = function(width, height) {
         this.canvas.width = width;
         this.canvas.height = height;
 
@@ -400,7 +400,7 @@
 
         @method
     */
-    NanoGL.App.prototype.debug = function() {
+    PicoGL.App.prototype.debug = function() {
         this.debugEnabled = true; 
 
         return this;
@@ -413,8 +413,8 @@
         @param {WebGLShader|string} vertexShader Vertex shader object or source code.
         @param {WebGLShader|string} fragmentShader Fragment shader object or source code.
     */
-    NanoGL.App.prototype.createProgram = function(vsSource, fsSource) {
-        return new NanoGL.Program(this.gl, vsSource, fsSource, this.debugEnabled);
+    PicoGL.App.prototype.createProgram = function(vsSource, fsSource) {
+        return new PicoGL.Program(this.gl, vsSource, fsSource, this.debugEnabled);
     };
 
     /**
@@ -424,9 +424,9 @@
         @param {GLEnum} type Shader type.
         @param {string} source Shader source.
     */
-    NanoGL.App.prototype.createShader = function(type, source) {
+    PicoGL.App.prototype.createShader = function(type, source) {
         var shader = this.gl.createShader(type);
-        NanoGL.compileShader(this.gl, shader, source, this.debugEnabled);
+        PicoGL.compileShader(this.gl, shader, source, this.debugEnabled);
         
         return shader;
     };
@@ -439,8 +439,8 @@
         @param {number} itemSize Number of elements per vertex.
         @param {ArrayBufferView} data Array buffer data.
     */
-    NanoGL.App.prototype.createArrayBuffer = function(type, itemSize, data) {
-        return new NanoGL.ArrayBuffer(this.gl, type, itemSize, data);
+    PicoGL.App.prototype.createArrayBuffer = function(type, itemSize, data) {
+        return new PicoGL.ArrayBuffer(this.gl, type, itemSize, data);
     };
 
     /**
@@ -451,8 +451,8 @@
         @param {number} itemSize Number of elements per primitive.
         @param {ArrayBufferView} data Index array buffer data.
     */
-    NanoGL.App.prototype.createIndexBuffer = function(type, itemSize, data) {
-        return new NanoGL.ArrayBuffer(this.gl, type, itemSize, data, true);
+    PicoGL.App.prototype.createIndexBuffer = function(type, itemSize, data) {
+        return new PicoGL.ArrayBuffer(this.gl, type, itemSize, data, true);
     };
 
     /**
@@ -473,8 +473,8 @@
         @param {GLEnum} [options.wrapT=REPEAT] Vertical wrap mode.
         @param {boolean} [options.generateMipmaps] Should mip maps be generated.
     */
-    NanoGL.App.prototype.createTexture = function(image, options) {
-        return new NanoGL.Texture(this.gl, image, options);
+    PicoGL.App.prototype.createTexture = function(image, options) {
+        return new PicoGL.Texture(this.gl, image, options);
     };
 
     /**
@@ -500,8 +500,8 @@
         @param {GLEnum} [options.wrapT=REPEAT] Vertical wrap mode.
         @param {boolean} [options.generateMipmaps] Should mip maps be generated.
     */
-    NanoGL.App.prototype.createCubemap = function(options) {
-        return new NanoGL.Cubemap(this.gl, options);
+    PicoGL.App.prototype.createCubemap = function(options) {
+        return new PicoGL.Cubemap(this.gl, options);
     };
 
     /**
@@ -513,8 +513,8 @@
         @param {number} [width=app.width] Width of the framebuffer.
         @param {number} [height=app.height] Height of the framebuffer.
     */
-    NanoGL.App.prototype.createFramebuffer = function(numColorTextures, colorTargetType, width, height) {
-        return new NanoGL.Framebuffer(this.gl, this.drawBuffersExtension, numColorTextures, colorTargetType, this.depthTexturesEnabled, width, height);
+    PicoGL.App.prototype.createFramebuffer = function(numColorTextures, colorTargetType, width, height) {
+        return new PicoGL.Framebuffer(this.gl, this.drawBuffersExtension, numColorTextures, colorTargetType, this.depthTexturesEnabled, width, height);
     };
 
     /**
@@ -526,8 +526,8 @@
         @param {Program} program The program to use for this DrawCall.
         @param {GLEnum} [primitive=TRIANGLES] Type of primitive to draw.
     */
-    NanoGL.App.prototype.createDrawCall = function(program, primitive) {
-        return new NanoGL.DrawCall(this.gl, program, primitive);
+    PicoGL.App.prototype.createDrawCall = function(program, primitive) {
+        return new PicoGL.DrawCall(this.gl, program, primitive);
     };
 
     /** 
@@ -535,7 +535,7 @@
 
         @method
     */
-    NanoGL.App.prototype.draw = function() {
+    PicoGL.App.prototype.draw = function() {
         for (var i = 0, len = this.currentDrawCalls.length; i < len; i++) {
             this.currentDrawCalls[i].draw(this.currentState);
         }

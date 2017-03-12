@@ -1,24 +1,24 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>NanoGL.js</title>
+    <title>PicoGL.js</title>
     <link rel="stylesheet" href="site/css/docco.css"> 
-    <link rel="stylesheet" href="site/css/nanogl.css"> 
+    <link rel="stylesheet" href="site/css/picogl.css"> 
     <script src="site/js/highlight.min.js"></script>
 </head>
 <body>
-    <a href="https://github.com/tsherif/nanogl.js"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"></a>
-    <h1>NanoGL.js</h1>
+    <a href="https://github.com/tsherif/picogl.js"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"></a>
+    <h1>PicoGL.js</h1>
     <div class="description">
-        NanoGL.js is minimal WebGL library. It's meant for developers who understand the GPU rendering pipeline and want to use it, but with a more convenient API. Typical usage of NanoGL.js will involve creating programs, array buffers, framebuffers, textures, and combining them into draw calls.
+        PicoGL.js is minimal WebGL library. It's meant for developers who understand the GPU rendering pipeline and want to use it, but with a more convenient API. Typical usage of PicoGL.js will involve creating programs, array buffers, framebuffers, textures, and combining them into draw calls.
     </div>
     <pre><code class="javascript">
-    var app = NanoGL.createApp(canvas)
+    var app = PicoGL.createApp(canvas)
     .clearColor(0.0, 0.0, 0.0, 1.0);
 
     var program = app.createProgram(vertexShaderSource, fragmentShaderSource);
 
-    var positions = app.createArrayBuffer(NanoGL.FLOAT, 2, new Float32Array([
+    var positions = app.createArrayBuffer(PicoGL.FLOAT, 2, new Float32Array([
         -0.5, -0.5,
          0.5, -0.5,
          0.0,  0.5
@@ -34,7 +34,7 @@
     </code></pre>
     
     <div class="description">
-        Note that NanoGL.js is <strong>not</strong> a scene graph library. There are no objects, hierarchies, transforms, materials, etc. It has been designed only to make management of GPU state more convenient. Its conceptual model maps fairly directly to the constructs one deals with when writing directly with WebGL. The only higher-level construct is the draw call, which manages sets of related lower-level constructs.    
+        Note that PicoGL.js is <strong>not</strong> a scene graph library. There are no objects, hierarchies, transforms, materials, etc. It has been designed only to make management of GPU state more convenient. Its conceptual model maps fairly directly to the constructs one deals with when writing directly with WebGL. The only higher-level construct is the draw call, which manages sets of related lower-level constructs.    
     </div>
     
     <div>Visit the <a href="docs/">API docs</a> for more details.</div>
@@ -68,7 +68,7 @@
             var link = event.target;
             var title = link.text;
             var src = "examples/" + event.target.id + ".html";
-            var sourceCodeURL = "https://github.com/tsherif/nanogl.js/blob/master/" + src;
+            var sourceCodeURL = "https://github.com/tsherif/picogl.js/blob/master/" + src;
 
             exampleTitle.innerHTML = title + "<div><a href=\"" + sourceCodeURL + "\">Source Code</a>";
             examples.src = src;

@@ -31,11 +31,11 @@
         @prop {WebGLRenderingContext} gl The WebGL context.
         @prop {WebGLTexture} texture Handle to the texture.
     */
-    NanoGL.Cubemap = function Texture(gl, options) {
+    PicoGL.Cubemap = function Texture(gl, options) {
         this.gl = gl;
         this.texture = gl.createTexture();
 
-        options = options || NanoGL.DUMMY_OBJECT;
+        options = options || PicoGL.DUMMY_OBJECT;
         var negX = options.negX;
         var posX = options.posX;
         var negY = options.negY;
@@ -94,7 +94,7 @@
         @method
         @param {number} unit The texture unit to bind to.
     */
-    NanoGL.Cubemap.prototype.bind = function(unit) {
+    PicoGL.Cubemap.prototype.bind = function(unit) {
         this.gl.activeTexture(unit);
         this.gl.bindTexture(this.gl.TEXTURE_CUBE_MAP, this.texture);
     };    

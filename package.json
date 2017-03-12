@@ -1,10 +1,10 @@
 {
-  "name": "nanogl.js",
+  "name": "picogl.js",
   "version": "0.0.4",
   "description": "A minimal WebGL utility library",
   "repository": {
     "type": "git",
-    "url": "https://github.com/tsherif/nanogl.js"
+    "url": "https://github.com/tsherif/picogl.js"
   },
   "author": {
     "name": "Tarek Sherif",

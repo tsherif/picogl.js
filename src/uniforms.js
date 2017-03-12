@@ -25,39 +25,39 @@
     "use strict";
 
 
-    NanoGL.FloatUniform = function FloatUniform(gl, handle) {
+    PicoGL.FloatUniform = function FloatUniform(gl, handle) {
         this.gl = gl;
         this.handle = handle;
         this.cache = 0;
     };
 
-    NanoGL.FloatUniform.prototype.set = function(value) {
+    PicoGL.FloatUniform.prototype.set = function(value) {
         if (this.cache !== value) {
             this.gl.uniform1f(this.handle, value);
             this.cache = value;
         }
     };
 
-    NanoGL.IntUniform = function IntUniform(gl, handle) {
+    PicoGL.IntUniform = function IntUniform(gl, handle) {
         this.gl = gl;
         this.handle = handle;
         this.cache = 0;
     };
 
-    NanoGL.IntUniform.prototype.set = function(value) {
+    PicoGL.IntUniform.prototype.set = function(value) {
         if (this.cache !== value) {
             this.gl.uniform1i(this.handle, value);
             this.cache = value;
         }
     };
 
-    NanoGL.Vec2Uniform = function Vec2Uniform(gl, handle) {
+    PicoGL.Vec2Uniform = function Vec2Uniform(gl, handle) {
         this.gl = gl;
         this.handle = handle;
         this.cache = new Float32Array(2);
     };
 
-    NanoGL.Vec2Uniform.prototype.set = function(value) {
+    PicoGL.Vec2Uniform.prototype.set = function(value) {
         if (this.cache[0] !== value[0] ||
             this.cache[1] !== value[1]) {
             this.gl.uniform2fv(this.handle, value);
@@ -65,13 +65,13 @@
         }
     };
 
-    NanoGL.Vec3Uniform = function Vec3Uniform(gl, handle) {
+    PicoGL.Vec3Uniform = function Vec3Uniform(gl, handle) {
         this.gl = gl;
         this.handle = handle;
         this.cache = new Float32Array(3);
     };
 
-    NanoGL.Vec3Uniform.prototype.set = function(value) {
+    PicoGL.Vec3Uniform.prototype.set = function(value) {
         if (this.cache[0] !== value[0] ||
             this.cache[1] !== value[1] ||
             this.cache[2] !== value[2]) {
@@ -80,13 +80,13 @@
         }
     };
 
-    NanoGL.Vec4Uniform = function Vec4Uniform(gl, handle) {
+    PicoGL.Vec4Uniform = function Vec4Uniform(gl, handle) {
         this.gl = gl;
         this.handle = handle;
         this.cache = new Float32Array(4);
     };
 
-    NanoGL.Vec4Uniform.prototype.set = function(value) {
+    PicoGL.Vec4Uniform.prototype.set = function(value) {
         if (this.cache[0] !== value[0] ||
             this.cache[1] !== value[1] ||
             this.cache[2] !== value[2] ||
@@ -96,13 +96,13 @@
         }
     };
 
-    NanoGL.IntVec2Uniform = function IntVec2Uniform(gl, handle) {
+    PicoGL.IntVec2Uniform = function IntVec2Uniform(gl, handle) {
         this.gl = gl;
         this.handle = handle;
         this.cache = new Int32Array(2);
     };
 
-    NanoGL.IntVec2Uniform.prototype.set = function(value) {
+    PicoGL.IntVec2Uniform.prototype.set = function(value) {
         if (this.cache[0] !== value[0] ||
             this.cache[1] !== value[1]) {
             this.gl.uniform2iv(this.handle, value);
@@ -110,13 +110,13 @@
         }
     };
 
-    NanoGL.IntVec3Uniform = function IntVec3Uniform(gl, handle) {
+    PicoGL.IntVec3Uniform = function IntVec3Uniform(gl, handle) {
         this.gl = gl;
         this.handle = handle;
         this.cache = new Int32Array(3);
     };
 
-    NanoGL.IntVec3Uniform.prototype.set = function(value) {
+    PicoGL.IntVec3Uniform.prototype.set = function(value) {
         if (this.cache[0] !== value[0] ||
             this.cache[1] !== value[1] ||
             this.cache[2] !== value[2]) {
@@ -125,13 +125,13 @@
         }
     };
 
-    NanoGL.IntVec4Uniform = function IntVec4Uniform(gl, handle) {
+    PicoGL.IntVec4Uniform = function IntVec4Uniform(gl, handle) {
         this.gl = gl;
         this.handle = handle;
         this.cache = new Int32Array(4);
     };
 
-    NanoGL.IntVec4Uniform.prototype.set = function(value) {
+    PicoGL.IntVec4Uniform.prototype.set = function(value) {
         if (this.cache[0] !== value[0] ||
             this.cache[1] !== value[1] ||
             this.cache[2] !== value[2] ||
@@ -141,13 +141,13 @@
         }
     };
 
-    NanoGL.BoolVec2Uniform = function BoolVec2Uniform(gl, handle) {
+    PicoGL.BoolVec2Uniform = function BoolVec2Uniform(gl, handle) {
         this.gl = gl;
         this.handle = handle;
         this.cache = [false, false];
     };
 
-    NanoGL.BoolVec2Uniform.prototype.set = function(value) {
+    PicoGL.BoolVec2Uniform.prototype.set = function(value) {
         if (this.cache[0] !== value[0] ||
             this.cache[1] !== value[1]) {
             this.gl.uniform2iv(this.handle, value);
@@ -156,13 +156,13 @@
         }
     };
 
-    NanoGL.BoolVec3Uniform = function BoolVec3Uniform(gl, handle) {
+    PicoGL.BoolVec3Uniform = function BoolVec3Uniform(gl, handle) {
         this.gl = gl;
         this.handle = handle;
         this.cache = [false, false, false];
     };
 
-    NanoGL.BoolVec3Uniform.prototype.set = function(value) {
+    PicoGL.BoolVec3Uniform.prototype.set = function(value) {
         if (this.cache[0] !== value[0] ||
             this.cache[1] !== value[1] ||
             this.cache[2] !== value[2]) {
@@ -173,13 +173,13 @@
         }
     };
 
-    NanoGL.BoolVec4Uniform = function BoolVec4Uniform(gl, handle) {
+    PicoGL.BoolVec4Uniform = function BoolVec4Uniform(gl, handle) {
         this.gl = gl;
         this.handle = handle;
         this.cache = [false, false, false, false];
     };
 
-    NanoGL.BoolVec4Uniform.prototype.set = function(value) {
+    PicoGL.BoolVec4Uniform.prototype.set = function(value) {
         if (this.cache[0] !== value[0] ||
             this.cache[1] !== value[1] ||
             this.cache[2] !== value[2] ||
@@ -192,13 +192,13 @@
         }
     };
 
-    NanoGL.Mat2Uniform = function Mat2Uniform(gl, handle) {
+    PicoGL.Mat2Uniform = function Mat2Uniform(gl, handle) {
         this.gl = gl;
         this.handle = handle;
         this.cache = new Float32Array(4);
     };
 
-    NanoGL.Mat2Uniform.prototype.set = function(value) {
+    PicoGL.Mat2Uniform.prototype.set = function(value) {
         if (this.cache[0] !== value[0] ||
             this.cache[1] !== value[1] ||
             this.cache[2] !== value[2] ||
@@ -208,13 +208,13 @@
         }
     };
 
-    NanoGL.Mat3Uniform = function Mat3Uniform(gl, handle) {
+    PicoGL.Mat3Uniform = function Mat3Uniform(gl, handle) {
         this.gl = gl;
         this.handle = handle;
         this.cache = new Float32Array(9);
     };
 
-    NanoGL.Mat3Uniform.prototype.set = function(value) {
+    PicoGL.Mat3Uniform.prototype.set = function(value) {
         if (this.cache[0] !== value[0] ||
             this.cache[1] !== value[1] ||
             this.cache[2] !== value[2] ||
@@ -229,13 +229,13 @@
         }
     };
 
-    NanoGL.Mat4Uniform = function Mat4Uniform(gl, handle) {
+    PicoGL.Mat4Uniform = function Mat4Uniform(gl, handle) {
         this.gl = gl;
         this.handle = handle;
         this.cache = new Float32Array(16);
     };
 
-    NanoGL.Mat4Uniform.prototype.set = function(value) {
+    PicoGL.Mat4Uniform.prototype.set = function(value) {
         if (this.cache[0] !== value[0] ||
             this.cache[1] !== value[1] ||
             this.cache[2] !== value[2] ||

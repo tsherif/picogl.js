@@ -63,29 +63,23 @@
         @prop {Object} attributes Map of attribute names to handles. 
         @prop {Object} uniforms Map of uniform names to handles. 
     */
-    NanoGL.Program = function Program(gl, vsSource, fsSource) {
-        var lines, i;
+    PicoGL.Program = function Program(gl, vsSource, fsSource, debug) {
+        var i;
 
-        var vshader = gl.createShader(gl.VERTEX_SHADER);
-        gl.shaderSource(vshader, vsSource);
-        gl.compileShader(vshader);
-        if (!gl.getShaderParameter(vshader, gl.COMPILE_STATUS)) {
-            console.error(gl.getShaderInfoLog(vshader));
-            lines = vsSource.split("\n");
-            for (i = 0; i &lt; lines.length; ++i) {
-                console.error((i + 1) + ":", lines[i]);
-            }
+        var vshader, fshader; 
+
+        if (typeof vsSource === "string") {
+            vshader = gl.createShader(gl.VERTEX_SHADER);
+            PicoGL.compileShader(gl, vshader, vsSource, debug);
+        } else {
+            vshader = vsSource;
         }
 
-        var fshader = gl.createShader(gl.FRAGMENT_SHADER);
-        gl.shaderSource(fshader, fsSource);
-        gl.compileShader(fshader);
-        if (!gl.getShaderParameter(fshader, gl.COMPILE_STATUS)) {
-            console.error(gl.getShaderInfoLog(fshader));
-            lines = fsSource.split("\n");
-            for (i = 0; i &lt; lines.length; ++i) {
-                console.error((i + 1) + ":", lines[i]);
-            }
+        if (typeof fsSource === "string") {
+            fshader = gl.createShader(gl.FRAGMENT_SHADER);
+            PicoGL.compileShader(gl, fshader, fsSource, debug);
+        } else {
+            fshader = fsSource;
         }
 
         var program = gl.createProgram();
@@ -93,7 +87,7 @@
         gl.attachShader(program, fshader);
         gl.linkProgram(program);
 
-        if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+        if (debug &amp;&amp; !gl.getProgramParameter(program, gl.LINK_STATUS)) {
           console.error(gl.getProgramInfoLog(program));
         }
 
@@ -139,46 +133,46 @@
                 case gl.BOOL: 
                 case gl.SAMPLER_2D: 
                 case gl.SAMPLER_CUBE: 
-                    UniformClass = NanoGL.IntUniform;
+                    UniformClass = PicoGL.IntUniform;
                     break;
                 case gl.FLOAT: 
-                    UniformClass = NanoGL.FloatUniform;
+                    UniformClass = PicoGL.FloatUniform;
                     break;
                 case gl.FLOAT_VEC2: 
-                    UniformClass = NanoGL.Vec2Uniform;
+                    UniformClass = PicoGL.Vec2Uniform;
                     break;
                 case gl.FLOAT_VEC3: 
-                    UniformClass = NanoGL.Vec3Uniform;
+                    UniformClass = PicoGL.Vec3Uniform;
                     break;
                 case gl.FLOAT_VEC4: 
-                    UniformClass = NanoGL.Vec4Uniform;
+                    UniformClass = PicoGL.Vec4Uniform;
                     break;
                 case gl.INT_VEC2: 
-                    UniformClass = NanoGL.IntVec2Uniform;
+                    UniformClass = PicoGL.IntVec2Uniform;
                     break;
                 case gl.INT_VEC3: 
-                    UniformClass = NanoGL.IntVec3Uniform;
+                    UniformClass = PicoGL.IntVec3Uniform;
                     break;
                 case gl.INT_VEC4: 
-                    UniformClass = NanoGL.IntVec4Uniform;
+                    UniformClass = PicoGL.IntVec4Uniform;
                     break;
                 case gl.BOOL_VEC2: 
-                    UniformClass = NanoGL.BoolVec2Uniform;
+                    UniformClass = PicoGL.BoolVec2Uniform;
                     break;
                 case gl.BOOL_VEC3: 
-                    UniformClass = NanoGL.BoolVec3Uniform;
+                    UniformClass = PicoGL.BoolVec3Uniform;
                     break;
                 case gl.BOOL_VEC4: 
-                    UniformClass = NanoGL.BoolVec4Uniform;
+                    UniformClass = PicoGL.BoolVec4Uniform;
                     break;
                 case gl.FLOAT_MAT2: 
-                    UniformClass = NanoGL.Mat2Uniform;
+                    UniformClass = PicoGL.Mat2Uniform;
                     break;
                 case gl.FLOAT_MAT3: 
-                    UniformClass = NanoGL.Mat3Uniform;
+                    UniformClass = PicoGL.Mat3Uniform;
                     break;
                 case gl.FLOAT_MAT4: 
-                    UniformClass = NanoGL.Mat4Uniform;
+                    UniformClass = PicoGL.Mat4Uniform;
                     break;
                 default:
                     console.error("Unrecognized type for uniform ", uniformInfo.name);
@@ -196,7 +190,7 @@
         @param {string} name Attribute name.
         @param {Arraybuffer} buffer Arraybuffer to bind.
     */
-    NanoGL.Program.prototype.attribute = function(name, buffer) {
+    PicoGL.Program.prototype.attribute = function(name, buffer) {
         buffer.bind(this.attributes[name]);
     };
 
@@ -207,7 +201,7 @@
         @param {string} name Uniform name.
         @param {any} value Uniform value.
     */
-    NanoGL.Program.prototype.uniform = function(name, value) {
+    PicoGL.Program.prototype.uniform = function(name, value) {
         this.uniforms[name].set(value);
     };
 
@@ -223,13 +217,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="NanoGL.App.html">App</a></li><li><a href="NanoGL.ArrayBuffer.html">ArrayBuffer</a></li><li><a href="NanoGL.Cubemap.html">Cubemap</a></li><li><a href="NanoGL.DrawCall.html">DrawCall</a></li><li><a href="NanoGL.Framebuffer.html">Framebuffer</a></li><li><a href="NanoGL.Program.html">Program</a></li><li><a href="NanoGL.Texture.html">Texture</a></li></ul><h3>Namespaces</h3><ul><li><a href="NanoGL.html">NanoGL</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="PicoGL.App.html">App</a></li><li><a href="PicoGL.ArrayBuffer.html">ArrayBuffer</a></li><li><a href="PicoGL.Cubemap.html">Cubemap</a></li><li><a href="PicoGL.DrawCall.html">DrawCall</a></li><li><a href="PicoGL.Framebuffer.html">Framebuffer</a></li><li><a href="PicoGL.Program.html">Program</a></li><li><a href="PicoGL.Texture.html">Texture</a></li></ul><h3>Namespaces</h3><ul><li><a href="PicoGL.html">PicoGL</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sat Mar 11 2017 11:30:57 GMT-0500 (EST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sun Mar 12 2017 12:01:53 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

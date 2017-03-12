@@ -26,12 +26,12 @@
 
     /**
         
-        Global NanoGL module. For convenience, all WebGL enums are stored
-        as properties of NanoGL (e.g. NanoGL.FLOAT, NanoGL.ONE_MINUS_SRC_ALPHA).
+        Global PicoGL module. For convenience, all WebGL enums are stored
+        as properties of PicoGL (e.g. PicoGL.FLOAT, PicoGL.ONE_MINUS_SRC_ALPHA).
         
-        @namespace NanoGL
+        @namespace PicoGL
     */
-    var NanoGL = window.NanoGL = {};
+    var PicoGL = window.PicoGL = {};
 
     (function() {
         // Absorb all GL enums for convenience
@@ -44,27 +44,27 @@
 
         for (var enumName in gl) {
             if (enumName.match(/^[A-Z_]+$/) && typeof(gl[enumName]) === "number") {
-                NanoGL[enumName] = gl[enumName];
+                PicoGL[enumName] = gl[enumName];
             }
         }
 
     })();
 
-    NanoGL.DUMMY_OBJECT = {};
+    PicoGL.DUMMY_OBJECT = {};
 
     /**
-        Create a NanoGL app. The app is the primary entry point to NanoGL. It stores
+        Create a PicoGL app. The app is the primary entry point to PicoGL. It stores
         the canvas, the WebGL context and all WebGL state.
 
-        @function NanoGL.createApp
+        @function PicoGL.createApp
         @param {DOMElement} canvas The canvas on which to create the WebGL context.
         @param {Object} [contextAttributes] Context attributes to pass when calling getContext().
     */
-    NanoGL.createApp = function(canvas, contextAttributes) {
-        return new NanoGL.App(canvas, contextAttributes);
+    PicoGL.createApp = function(canvas, contextAttributes) {
+        return new PicoGL.App(canvas, contextAttributes);
     };
 
-    NanoGL.compileShader = function(gl, shader, source, debug) {
+    PicoGL.compileShader = function(gl, shader, source, debug) {
         gl.shaderSource(shader, source);
         gl.compileShader(shader);
 

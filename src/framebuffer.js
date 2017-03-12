@@ -39,7 +39,7 @@
         @prop {WebGLDrawBuffers} drawBuffersExtension Hold the draw buffers extension object when enabled.
         @prop {Array} colorAttachments Array of color attachment enums. 
     */
-    NanoGL.Framebuffer = function Framebuffer(gl, drawBuffersExtension, numColorTargets, colorTargetType, depthTexturesEnabled, width, height) {
+    PicoGL.Framebuffer = function Framebuffer(gl, drawBuffersExtension, numColorTargets, colorTargetType, depthTexturesEnabled, width, height) {
         this.gl = gl;
         this.framebuffer = gl.createFramebuffer();
 
@@ -66,7 +66,7 @@
         gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer);
         
         for (var i = 0; i < this.numColorTargets; ++i) {
-            this.colorTextures[i] = new NanoGL.Texture(gl, null, {
+            this.colorTextures[i] = new PicoGL.Texture(gl, null, {
                 array: true,
                 type: colorTargetType || gl.UNSIGNED_BYTE,
                 width: this.width,
@@ -88,7 +88,7 @@
         }
 
         if (depthTexturesEnabled) {
-            this.depthTexture = new NanoGL.Texture(gl, null, {
+            this.depthTexture = new PicoGL.Texture(gl, null, {
                 array: true,
                 internalFormat: this.gl.DEPTH_COMPONENT,
                 type: this.gl.UNSIGNED_INT,
@@ -128,7 +128,7 @@
         @param {Texture} texture New texture to bind.
         @param {number} [index=0] Color attachment to bind the texture to.
     */
-    NanoGL.Framebuffer.prototype.colorTexture = function(texture, index) {
+    PicoGL.Framebuffer.prototype.colorTexture = function(texture, index) {
         index = index || 0;
         this.colorTextures[index] = texture;
 
@@ -147,7 +147,7 @@
         @param {number} [width=app.width] New width of the framebuffer.
         @param {number} [height=app.height] New height of the framebuffer.
     */
-    NanoGL.Framebuffer.prototype.resize = function(width, height) {
+    PicoGL.Framebuffer.prototype.resize = function(width, height) {
 
         if (width && height) {
             this.width = width;

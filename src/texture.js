@@ -33,8 +33,8 @@
         @prop {GLEnum} internalFormat Internal arrangement of the texture data.
         @prop {GLEnum} type Type of data stored in the texture.
     */
-    NanoGL.Texture = function Texture(gl, image, options) {
-        options = options || NanoGL.DUMMY_OBJECT;
+    PicoGL.Texture = function Texture(gl, image, options) {
+        options = options || PicoGL.DUMMY_OBJECT;
 
         this.gl = gl;
         this.texture = gl.createTexture();
@@ -82,7 +82,7 @@
         @param {number} [width] Image width (should only be passed for ArrayBufferView data).
         @param {number} [height] Image height (should only be passed for ArrayBufferView data).
     */
-    NanoGL.Texture.prototype.image = function(image, width, height) {
+    PicoGL.Texture.prototype.image = function(image, width, height) {
         this.gl.activeTexture(this.gl.TEXTURE0);
         this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
 
@@ -99,7 +99,7 @@
         @method
         @param {number} unit The texture unit to bind to.
     */
-    NanoGL.Texture.prototype.bind = function(unit) {
+    PicoGL.Texture.prototype.bind = function(unit) {
         this.gl.activeTexture(unit);
         this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
     };   

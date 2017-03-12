@@ -28,9 +28,9 @@
 -->
 <html>
 <head>
-    <title>NanoGL.js: Order-independent Transparency</title>
+    <title>PicoGL.js: Order-independent Transparency</title>
     <script src="../utils/gl-matrix.js"></script>
-    <script src="../build/nanogl.js"></script>
+    <script src="../build/picogl.js"></script>
     <script src="../utils/utils.js"></script>
     <style>
         html {
@@ -147,7 +147,7 @@
 
         var screenTexelSize = vec2.fromValues(1.0 / canvas.width, 1.0 / canvas.height);
 
-        var app = NanoGL.createApp(canvas)
+        var app = PicoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0)
         .blend()
         .noDepthMask()
@@ -159,7 +159,7 @@
         var drawVsSource = document.getElementById("draw-vs").text;
         var drawFsSource = document.getElementById("draw-fs").text;
         var drawProgram = app.createProgram(drawVsSource, drawFsSource);
-        var drawBuffer = app.createFramebuffer(3, NanoGL.FLOAT);
+        var drawBuffer = app.createFramebuffer(3, PicoGL.FLOAT);
 
 
         var accumVsSource = document.getElementById("quad-vs").text;
@@ -168,11 +168,11 @@
 
         // Geometry
         var sphere = utils.createSphere({radius: 0.5});
-        var positions = app.createArrayBuffer(NanoGL.FLOAT, 3, new Float32Array(sphere.positions));
-        var uv = app.createArrayBuffer(NanoGL.FLOAT, 2, new Float32Array(sphere.texture_coords));
-        var normals = app.createArrayBuffer(NanoGL.FLOAT, 3, new Float32Array(sphere.normals));
+        var positions = app.createArrayBuffer(PicoGL.FLOAT, 3, new Float32Array(sphere.positions));
+        var uv = app.createArrayBuffer(PicoGL.FLOAT, 2, new Float32Array(sphere.texture_coords));
+        var normals = app.createArrayBuffer(PicoGL.FLOAT, 3, new Float32Array(sphere.normals));
 
-        var quadPositions = app.createArrayBuffer(NanoGL.FLOAT, 2, new Float32Array([
+        var quadPositions = app.createArrayBuffer(PicoGL.FLOAT, 2, new Float32Array([
             -1, 1,
             -1, -1,
             1, -1,
@@ -276,13 +276,13 @@
                 // Accumulation pass
                 app.framebuffer(drawBuffer)
                 .drawCalls(sphereDrawCalls)
-                .blendFuncSeparate(NanoGL.ONE, NanoGL.ONE, NanoGL.ZERO, NanoGL.ONE_MINUS_SRC_ALPHA)
+                .blendFuncSeparate(PicoGL.ONE, PicoGL.ONE, PicoGL.ZERO, PicoGL.ONE_MINUS_SRC_ALPHA)
                 .clear()
                 .draw()
                 // Blend
                 .defaultFramebuffer()
                 .drawCalls(accumDrawCalls)
-                .blendFunc(NanoGL.ONE, NanoGL.ONE_MINUS_SRC_ALPHA)
+                .blendFunc(PicoGL.ONE, PicoGL.ONE_MINUS_SRC_ALPHA)
                 .clear()
                 .draw(); 
                                 
@@ -296,7 +296,7 @@
         image.src = "img/khronos_webgl.png";
 
     </script>
-    <a href="https://github.com/tsherif/nanogl.js" id="github-ribbon"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"></a>
+    <a href="https://github.com/tsherif/picogl.js" id="github-ribbon"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"></a>
     <script>
         if (window.top !== window) {
             document.body.removeChild(document.getElementById("github-ribbon"));

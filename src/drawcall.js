@@ -39,7 +39,7 @@
         @prop {number} numItems The number of items that will be drawn.
         @prop {GLEnum} primitive The primitive type being drawn. 
     */
-    NanoGL.DrawCall = function DrawCall(gl, program, primitive) {
+    PicoGL.DrawCall = function DrawCall(gl, program, primitive) {
         this.gl = gl;
         this.program = program || null;
         this.attributes = {};
@@ -48,7 +48,7 @@
         this.textureCount = 0;
         this.indexArray = null;
         this.numItems = 0;
-        this.primitive = primitive !== undefined ? primitive : NanoGL.TRIANGLES;
+        this.primitive = primitive !== undefined ? primitive : PicoGL.TRIANGLES;
     };
 
     /**
@@ -58,7 +58,7 @@
         @param {string} name Attribute name.
         @param {Arraybuffer} buffer Arraybuffer to bind.
     */
-    NanoGL.DrawCall.prototype.attribute = function(name, buffer) {
+    PicoGL.DrawCall.prototype.attribute = function(name, buffer) {
         this.attributes[name] = buffer;
         if (this.numItems === 0) {
             this.numItems = buffer.numItems;
@@ -73,7 +73,7 @@
         @method
         @param {Arraybuffer} buffer Index Arraybuffer.
     */
-    NanoGL.DrawCall.prototype.indices = function(buffer) {
+    PicoGL.DrawCall.prototype.indices = function(buffer) {
         this.indexArray = buffer;
         this.numItems = buffer.numItems;
         
@@ -87,7 +87,7 @@
         @param {string} name Uniform name.
         @param {any} value Uniform value.
     */
-    NanoGL.DrawCall.prototype.uniform = function(name, value) {
+    PicoGL.DrawCall.prototype.uniform = function(name, value) {
         this.uniforms[name] = value;
 
         return this;
@@ -100,7 +100,7 @@
         @param {string} name Sampler uniform name.
         @param {Texture} texture Texture to bind.
     */
-    NanoGL.DrawCall.prototype.texture = function(name, texture) {
+    PicoGL.DrawCall.prototype.texture = function(name, texture) {
         var unit = this.uniforms[name];
         if (unit === undefined) {
             unit = this.textureCount++;
@@ -119,7 +119,7 @@
         @method
         @param {Object} state Current app state.
     */
-    NanoGL.DrawCall.prototype.draw = function(state) {
+    PicoGL.DrawCall.prototype.draw = function(state) {
         var uniforms = this.uniforms;
         var attributes = this.attributes;
         var textures = this.textures;

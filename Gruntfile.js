@@ -9,7 +9,7 @@ module.exports = function(grunt) {
         packageName: pkg.name.split(".")[0],
         uglify: {
             options: {
-                banner: "/*\nNanoGL.js v<%= pkg.version %> \n\n<%= licence %>*/\n",
+                banner: "/*\nPicoGL.js v<%= pkg.version %> \n\n<%= licence %>*/\n",
                 preserveComments: "some"
             },
             src: {
@@ -36,12 +36,12 @@ module.exports = function(grunt) {
                 },
                 src: "Gruntfile.js"
             },
-            nanogl: {
+            picogl: {
                 options: {
                     browser: true,
                     devel: true,
                     globals: {
-                        NanoGL: true
+                        PicoGL: true
                     }
                 },
                 src: "<%= concat.src.src %>"
@@ -54,7 +54,7 @@ module.exports = function(grunt) {
             },
             src: {
                 src: [
-                  "src/nanogl.js",
+                  "src/picogl.js",
                   "src/app.js",
                   "src/program.js",
                   "src/arraybuffer.js",

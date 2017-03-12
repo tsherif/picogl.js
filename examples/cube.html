@@ -23,9 +23,9 @@
 -->
 <html>
 <head>
-    <title>NanoGL.js: Phong Cube</title>
+    <title>PicoGL.js: Phong Cube</title>
     <script src="../utils/gl-matrix.js"></script>
-    <script src="../build/nanogl.js"></script>
+    <script src="../build/picogl.js"></script>
     <script src="../utils/utils.js"></script>
     <style>
         html {
@@ -84,7 +84,7 @@
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         
-        var app = NanoGL.createApp(canvas)
+        var app = PicoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0)
         .depthTest();
 
@@ -93,9 +93,9 @@
         var program = app.createProgram(vsSource, fsSource);
 
         var box = utils.createBox({dimensions: [1.0, 1.0, 1.0]})
-        var positions = app.createArrayBuffer(NanoGL.FLOAT, 3, new Float32Array(box.positions));
-        var uv = app.createArrayBuffer(NanoGL.FLOAT, 2, new Float32Array(box.texture_coords));
-        var normals = app.createArrayBuffer(NanoGL.FLOAT, 3, new Float32Array(box.normals));
+        var positions = app.createArrayBuffer(PicoGL.FLOAT, 3, new Float32Array(box.positions));
+        var uv = app.createArrayBuffer(PicoGL.FLOAT, 2, new Float32Array(box.texture_coords));
+        var normals = app.createArrayBuffer(PicoGL.FLOAT, 3, new Float32Array(box.normals));
 
         var projMatrix = mat4.create();
         mat4.perspective(projMatrix, Math.PI / 2, canvas.width / canvas.height, 0.1, 10.0);
@@ -161,7 +161,7 @@
         image.src = "img/khronos_webgl.png";
 
     </script>
-    <a href="https://github.com/tsherif/nanogl.js" id="github-ribbon"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"></a>
+    <a href="https://github.com/tsherif/picogl.js" id="github-ribbon"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"></a>
     <script>
         if (window.top !== window) {
             document.body.removeChild(document.getElementById("github-ribbon"));

@@ -35,21 +35,21 @@
         @prop {Object} attributes Map of attribute names to handles. 
         @prop {Object} uniforms Map of uniform names to handles. 
     */
-    NanoGL.Program = function Program(gl, vsSource, fsSource, debug) {
+    PicoGL.Program = function Program(gl, vsSource, fsSource, debug) {
         var i;
 
         var vshader, fshader; 
 
         if (typeof vsSource === "string") {
             vshader = gl.createShader(gl.VERTEX_SHADER);
-            NanoGL.compileShader(gl, vshader, vsSource, debug);
+            PicoGL.compileShader(gl, vshader, vsSource, debug);
         } else {
             vshader = vsSource;
         }
 
         if (typeof fsSource === "string") {
             fshader = gl.createShader(gl.FRAGMENT_SHADER);
-            NanoGL.compileShader(gl, fshader, fsSource, debug);
+            PicoGL.compileShader(gl, fshader, fsSource, debug);
         } else {
             fshader = fsSource;
         }
@@ -105,46 +105,46 @@
                 case gl.BOOL: 
                 case gl.SAMPLER_2D: 
                 case gl.SAMPLER_CUBE: 
-                    UniformClass = NanoGL.IntUniform;
+                    UniformClass = PicoGL.IntUniform;
                     break;
                 case gl.FLOAT: 
-                    UniformClass = NanoGL.FloatUniform;
+                    UniformClass = PicoGL.FloatUniform;
                     break;
                 case gl.FLOAT_VEC2: 
-                    UniformClass = NanoGL.Vec2Uniform;
+                    UniformClass = PicoGL.Vec2Uniform;
                     break;
                 case gl.FLOAT_VEC3: 
-                    UniformClass = NanoGL.Vec3Uniform;
+                    UniformClass = PicoGL.Vec3Uniform;
                     break;
                 case gl.FLOAT_VEC4: 
-                    UniformClass = NanoGL.Vec4Uniform;
+                    UniformClass = PicoGL.Vec4Uniform;
                     break;
                 case gl.INT_VEC2: 
-                    UniformClass = NanoGL.IntVec2Uniform;
+                    UniformClass = PicoGL.IntVec2Uniform;
                     break;
                 case gl.INT_VEC3: 
-                    UniformClass = NanoGL.IntVec3Uniform;
+                    UniformClass = PicoGL.IntVec3Uniform;
                     break;
                 case gl.INT_VEC4: 
-                    UniformClass = NanoGL.IntVec4Uniform;
+                    UniformClass = PicoGL.IntVec4Uniform;
                     break;
                 case gl.BOOL_VEC2: 
-                    UniformClass = NanoGL.BoolVec2Uniform;
+                    UniformClass = PicoGL.BoolVec2Uniform;
                     break;
                 case gl.BOOL_VEC3: 
-                    UniformClass = NanoGL.BoolVec3Uniform;
+                    UniformClass = PicoGL.BoolVec3Uniform;
                     break;
                 case gl.BOOL_VEC4: 
-                    UniformClass = NanoGL.BoolVec4Uniform;
+                    UniformClass = PicoGL.BoolVec4Uniform;
                     break;
                 case gl.FLOAT_MAT2: 
-                    UniformClass = NanoGL.Mat2Uniform;
+                    UniformClass = PicoGL.Mat2Uniform;
                     break;
                 case gl.FLOAT_MAT3: 
-                    UniformClass = NanoGL.Mat3Uniform;
+                    UniformClass = PicoGL.Mat3Uniform;
                     break;
                 case gl.FLOAT_MAT4: 
-                    UniformClass = NanoGL.Mat4Uniform;
+                    UniformClass = PicoGL.Mat4Uniform;
                     break;
                 default:
                     console.error("Unrecognized type for uniform ", uniformInfo.name);
@@ -162,7 +162,7 @@
         @param {string} name Attribute name.
         @param {Arraybuffer} buffer Arraybuffer to bind.
     */
-    NanoGL.Program.prototype.attribute = function(name, buffer) {
+    PicoGL.Program.prototype.attribute = function(name, buffer) {
         buffer.bind(this.attributes[name]);
     };
 
@@ -173,7 +173,7 @@
         @param {string} name Uniform name.
         @param {any} value Uniform value.
     */
-    NanoGL.Program.prototype.uniform = function(name, value) {
+    PicoGL.Program.prototype.uniform = function(name, value) {
         this.uniforms[name].set(value);
     };
 

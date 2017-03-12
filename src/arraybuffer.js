@@ -36,7 +36,7 @@
         @prop {boolean} indexArray Whether this is an index array.
         @prop {GLEnum} binding GL binding point (ARRAY_BUFFER or ELEMENT_ARRAY_BUFFER).
     */
-    NanoGL.ArrayBuffer = function ArrayBuffer(gl, type, itemSize, data, indexArray) {
+    PicoGL.ArrayBuffer = function ArrayBuffer(gl, type, itemSize, data, indexArray) {
         this.gl = gl;
         this.buffer = gl.createBuffer();
         this.type = type;
@@ -56,7 +56,7 @@
         @method
         @param {number} attribute The attribute handle to bind to.
     */
-    NanoGL.ArrayBuffer.prototype.bind = function(attribute) {
+    PicoGL.ArrayBuffer.prototype.bind = function(attribute) {
         this.gl.bindBuffer(this.binding, this.buffer);
 
         if (!this.indexArray) {
