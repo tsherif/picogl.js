@@ -224,27 +224,29 @@
 
         var depthRange = vec2.fromValues(NEAR, FAR);
 
+        console.time("Shaders")
         // Set up color/geo program
         var colorGeoVsSource =  document.getElementById("colorgeo-vs").text;
         var colorGeoFsSource =  document.getElementById("colorgeo-fs").text;
         var colorGeoProgram = app.createProgram(colorGeoVsSource, colorGeoFsSource);
         var colorGeoBuffer = app.createFramebuffer(3, NanoGL.FLOAT);
 
+        var quadVsSource =  document.getElementById("quad-vs").text;
+        var quadShader = app.createShader(NanoGL.VERTEX_SHADER, quadVsSource);
+
         // Set up ssao program
-        var ssaoVsSource =  document.getElementById("quad-vs").text;
         var ssaoFsSource =  document.getElementById("ssao-fs").text;
-        var ssaoProgram = app.createProgram(ssaoVsSource, ssaoFsSource);
+        var ssaoProgram = app.createProgram(quadShader, ssaoFsSource);
         var ssaoBuffer = app.createFramebuffer(1, NanoGL.FLOAT);
 
         // Set up ao blend program
-        var aoBlendVsSource =  document.getElementById("quad-vs").text;
         var aoBlendFsSource =  document.getElementById("aoblend-fs").text;
-        var aoBlendProgram = app.createProgram(aoBlendVsSource, aoBlendFsSource);
+        var aoBlendProgram = app.createProgram(quadShader, aoBlendFsSource);
 
         // Only draw the
-        var noSSAOVsSource =  document.getElementById("quad-vs").text;
         var noSSAOFsSource =  document.getElementById("texture-fs").text;
-        var noSSAOProgram = app.createProgram(noSSAOVsSource, noSSAOFsSource);
+        var noSSAOProgram = app.createProgram(quadShader, noSSAOFsSource);
+        console.timeEnd("Shaders")
 
         // Geometry
         var sphere = utils.createSphere({radius: 0.5});

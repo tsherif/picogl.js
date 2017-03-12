@@ -137,15 +137,6 @@
             gl_FragColor = color;
         }
     </script>
-    <script type="x-shader/fs" id="fragment-debug">
-        precision highp float;
-
-        varying vec2 vUV;
-        uniform sampler2D uTexture;
-        void main() {
-            gl_FragColor = texture2D(uTexture, vUV);
-        }
-    </script>
     <script type="text/javascript">
         var NEAR = 0.1;
         var FAR = 10.0;
@@ -175,12 +166,8 @@
         var boxProgram = app.createProgram(boxVsSource, boxFsSource);
 
         var quadVsSource =  document.getElementById("vertex-quad").text;
-
         var blurFsSource = document.getElementById("fragment-blur").text;
         var blurProgram = app.createProgram(quadVsSource, blurFsSource);
-
-        var debugFsSource =  document.getElementById("fragment-debug").text;
-        var debugProgram = app.createProgram(quadVsSource, debugFsSource);
 
         var boxBuffer = app.createFramebuffer();
         var hblurBuffer = app.createFramebuffer();

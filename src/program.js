@@ -36,28 +36,22 @@
         @prop {Object} uniforms Map of uniform names to handles. 
     */
     NanoGL.Program = function Program(gl, vsSource, fsSource) {
-        var lines, i;
+        var i;
 
-        var vshader = gl.createShader(gl.VERTEX_SHADER);
-        gl.shaderSource(vshader, vsSource);
-        gl.compileShader(vshader);
-        if (!gl.getShaderParameter(vshader, gl.COMPILE_STATUS)) {
-            console.error(gl.getShaderInfoLog(vshader));
-            lines = vsSource.split("\n");
-            for (i = 0; i < lines.length; ++i) {
-                console.error((i + 1) + ":", lines[i]);
-            }
+        var vshader, fshader; 
+
+        if (typeof vsSource === "string") {
+            vshader = gl.createShader(gl.VERTEX_SHADER);
+            NanoGL.compileShader(gl, vshader, vsSource);
+        } else {
+            vshader = vsSource;
         }
 
-        var fshader = gl.createShader(gl.FRAGMENT_SHADER);
-        gl.shaderSource(fshader, fsSource);
-        gl.compileShader(fshader);
-        if (!gl.getShaderParameter(fshader, gl.COMPILE_STATUS)) {
-            console.error(gl.getShaderInfoLog(fshader));
-            lines = fsSource.split("\n");
-            for (i = 0; i < lines.length; ++i) {
-                console.error((i + 1) + ":", lines[i]);
-            }
+        if (typeof fsSource === "string") {
+            fshader = gl.createShader(gl.FRAGMENT_SHADER);
+            NanoGL.compileShader(gl, fshader, fsSource);
+        } else {
+            fshader = fsSource;
         }
 
         var program = gl.createProgram();

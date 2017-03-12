@@ -397,11 +397,25 @@
         Create a program.
 
         @method
-        @param {string} vsSource Vertex shader source code.
-        @param {string} fsSource Fragment shader source code.
+        @param {WebGLShader|string} vertexShader Vertex shader object or source code.
+        @param {WebGLShader|string} fragmentShader Fragment shader object or source code.
     */
     NanoGL.App.prototype.createProgram = function(vsSource, fsSource) {
         return new NanoGL.Program(this.gl, vsSource, fsSource);
+    };
+
+    /**
+        Create a shader.
+
+        @method
+        @param {GLEnum} type Shader type.
+        @param {string} source Shader source.
+    */
+    NanoGL.App.prototype.createShader = function(type, source) {
+        var shader = this.gl.createShader(type);
+        NanoGL.compileShader(this.gl, shader, source);
+        
+        return shader;
     };
 
     /**
