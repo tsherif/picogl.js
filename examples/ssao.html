@@ -52,7 +52,7 @@
         Enable SSAO: <input id="ssao-toggle" type="checkbox" checked>
     </div>
     <canvas id="gl-canvas"></canvas>
-    <script id="draw-vs" type="x-shader/vs">
+    <script id="colorgeo-vs" type="x-shader/vs">
       
       attribute vec4 aPosition;
       attribute vec3 aNormal;
@@ -77,7 +77,7 @@
         gl_Position = uProjection * vViewPosition;
       }
     </script>
-    <script id="draw-fs" type="x-shader/fs">
+    <script id="colorgeo-fs" type="x-shader/fs">
         #extension GL_EXT_draw_buffers : require
         precision highp float;
 
@@ -224,11 +224,11 @@
 
         var depthRange = vec2.fromValues(NEAR, FAR);
 
-        // Set up draw program
-        var drawVsSource =  document.getElementById("draw-vs").text;
-        var drawFsSource =  document.getElementById("draw-fs").text;
-        var drawProgram = app.createProgram(drawVsSource, drawFsSource);
-        var drawBuffer = app.createFramebuffer(3, NanoGL.FLOAT);
+        // Set up color/geo program
+        var colorGeoVsSource =  document.getElementById("colorgeo-vs").text;
+        var colorGeoFsSource =  document.getElementById("colorgeo-fs").text;
+        var colorGeoProgram = app.createProgram(colorGeoVsSource, colorGeoFsSource);
+        var colorGeoBuffer = app.createFramebuffer(3, NanoGL.FLOAT);
 
         // Set up ssao program
         var ssaoVsSource =  document.getElementById("quad-vs").text;
@@ -241,9 +241,10 @@
         var aoBlendFsSource =  document.getElementById("aoblend-fs").text;
         var aoBlendProgram = app.createProgram(aoBlendVsSource, aoBlendFsSource);
 
-        var textureVsSource =  document.getElementById("quad-vs").text;
-        var textureFsSource =  document.getElementById("texture-fs").text;
-        var textureProgram = app.createProgram(textureVsSource, textureFsSource);
+        // Only draw the
+        var noSSAOVsSource =  document.getElementById("quad-vs").text;
+        var noSSAOFsSource =  document.getElementById("texture-fs").text;
+        var noSSAOProgram = app.createProgram(noSSAOVsSource, noSSAOFsSource);
 
         // Geometry
         var sphere = utils.createSphere({radius: 0.5});
@@ -274,7 +275,7 @@
 
         window.onresize = function() {
             app.resize(window.innerWidth, window.innerHeight);
-            drawBuffer.resize();
+            colorGeoBuffer.resize();
             ssaoBuffer.resize();
 
             mat4.perspective(projMatrix, Math.PI / 2, app.width / app.height, 0.1, 10.0);
@@ -324,7 +325,7 @@
                     translate: [x, y, z],
                     modelMatrix: mat4.create(),
                     mvpMatrix: mat4.create(),
-                    drawCall: app.createDrawCall(drawProgram)
+                    drawCall: app.createDrawCall(colorGeoProgram)
                 };
 
                 spheres[i].drawCall.attribute("aPosition", positions)
@@ -346,30 +347,30 @@
             .uniform("uAttenuation", vec2.fromValues(1, 1))
             .uniform("uTexelOffset", screenTexelSize)
             .uniform("uDepthRange", depthRange)
-            .texture("uPositionBuffer", drawBuffer.colorTextures[1])
-            .texture("uNormalBuffer", drawBuffer.colorTextures[2])
+            .texture("uPositionBuffer", colorGeoBuffer.colorTextures[1])
+            .texture("uNormalBuffer", colorGeoBuffer.colorTextures[2])
             .texture("uNoiseBuffer", noiseTexture);
 
             var ssaoDrawCalls = [ssaoDrawCall];
 
             var aoBlendDrawCall = app.createDrawCall(aoBlendProgram)
             .attribute("aPosition", quadPositions)
-            .texture("uColorBuffer", drawBuffer.colorTextures[0])
+            .texture("uColorBuffer", colorGeoBuffer.colorTextures[0])
             .texture("uOcclusionBuffer", ssaoBuffer.colorTextures[0]);
 
             var aoBlendDrawCalls = [aoBlendDrawCall];
 
-            var colorBufferDrawCall = app.createDrawCall(textureProgram)
+            var noSSAODrawCall = app.createDrawCall(noSSAOProgram)
             .attribute("aPosition", quadPositions)
-            .texture("uTexture", drawBuffer.colorTextures[0]);
+            .texture("uTexture", colorGeoBuffer.colorTextures[0]);
 
-            var colorBufferDrawCalls = [colorBufferDrawCall];
+            var noSSAODrawCalls = [noSSAODrawCall];
 
             var rotationMatrix = mat4.create();
 
             function draw() {
 
-                // Draw to drawBuffer
+                // Draw to colorGeoBuffer
 
                 for (var i = 0, len = spheres.length; i < len; ++i) {
                     spheres[i].rotate[1] += 0.002;
@@ -381,7 +382,7 @@
                     spheres[i].drawCall.uniform("uModelMatrix", spheres[i].modelMatrix);
                 }
 
-                app.framebuffer(drawBuffer)
+                app.framebuffer(colorGeoBuffer)
                 .drawCalls(sphereDrawCalls)
                 .clear()
                 .draw();
@@ -397,7 +398,7 @@
                     .draw();
                 } else {
                     app.defaultFramebuffer()
-                    .drawCalls(colorBufferDrawCalls)
+                    .drawCalls(noSSAODrawCalls)
                     .clear()
                     .draw();
                 }
