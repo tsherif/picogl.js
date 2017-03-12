@@ -224,7 +224,6 @@
 
         var depthRange = vec2.fromValues(NEAR, FAR);
 
-        console.time("Shaders")
         // Set up color/geo program
         var colorGeoVsSource =  document.getElementById("colorgeo-vs").text;
         var colorGeoFsSource =  document.getElementById("colorgeo-fs").text;
@@ -246,7 +245,6 @@
         // Only draw the
         var noSSAOFsSource =  document.getElementById("texture-fs").text;
         var noSSAOProgram = app.createProgram(quadShader, noSSAOFsSource);
-        console.timeEnd("Shaders")
 
         // Geometry
         var sphere = utils.createSphere({radius: 0.5});
