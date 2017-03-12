@@ -64,12 +64,13 @@
         return new NanoGL.App(canvas, contextAttributes);
     };
 
-    NanoGL.compileShader = function(gl, shader, source) {
-        var i, lines;
-
+    NanoGL.compileShader = function(gl, shader, source, debug) {
         gl.shaderSource(shader, source);
         gl.compileShader(shader);
-        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+
+        if (debug && !gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+            var i, lines;
+
             console.error(gl.getShaderInfoLog(shader));
             lines = source.split("\n");
             for (i = 0; i < lines.length; ++i) {
@@ -148,6 +149,8 @@
         this.depthTexturesEnabled = false;
         this.floatTexturesEnabled = false;
         this.linearFloatTexturesEnabled = false;
+
+        this.debugEnabled = false;
     };
 
     /**
@@ -476,14 +479,25 @@
     };
 
     /**
+        Enable debug logging.
+
+        @method
+    */
+    NanoGL.App.prototype.debug = function() {
+        this.debugEnabled = true; 
+
+        return this;
+    };
+
+    /**
         Create a program.
 
         @method
-        @param {string} vsSource Vertex shader source code.
-        @param {string} fsSource Fragment shader source code.
+        @param {WebGLShader|string} vertexShader Vertex shader object or source code.
+        @param {WebGLShader|string} fragmentShader Fragment shader object or source code.
     */
     NanoGL.App.prototype.createProgram = function(vsSource, fsSource) {
-        return new NanoGL.Program(this.gl, vsSource, fsSource);
+        return new NanoGL.Program(this.gl, vsSource, fsSource, this.debugEnabled);
     };
 
     /**
@@ -491,10 +505,11 @@
 
         @method
         @param {GLEnum} type Shader type.
+        @param {string} source Shader source.
     */
     NanoGL.App.prototype.createShader = function(type, source) {
         var shader = this.gl.createShader(type);
-        NanoGL.compileShader(this.gl, shader, source);
+        NanoGL.compileShader(this.gl, shader, source, this.debugEnabled);
         
         return shader;
     };
@@ -649,21 +664,21 @@
         @prop {Object} attributes Map of attribute names to handles. 
         @prop {Object} uniforms Map of uniform names to handles. 
     */
-    NanoGL.Program = function Program(gl, vsSource, fsSource) {
+    NanoGL.Program = function Program(gl, vsSource, fsSource, debug) {
         var i;
 
         var vshader, fshader; 
 
         if (typeof vsSource === "string") {
             vshader = gl.createShader(gl.VERTEX_SHADER);
-            NanoGL.compileShader(gl, vshader, vsSource);
+            NanoGL.compileShader(gl, vshader, vsSource, debug);
         } else {
             vshader = vsSource;
         }
 
         if (typeof fsSource === "string") {
             fshader = gl.createShader(gl.FRAGMENT_SHADER);
-            NanoGL.compileShader(gl, fshader, fsSource);
+            NanoGL.compileShader(gl, fshader, fsSource, debug);
         } else {
             fshader = fsSource;
         }
@@ -673,7 +688,7 @@
         gl.attachShader(program, fshader);
         gl.linkProgram(program);
 
-        if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+        if (debug && !gl.getProgramParameter(program, gl.LINK_STATUS)) {
           console.error(gl.getProgramInfoLog(program));
         }
 

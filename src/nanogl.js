@@ -64,12 +64,13 @@
         return new NanoGL.App(canvas, contextAttributes);
     };
 
-    NanoGL.compileShader = function(gl, shader, source) {
-        var i, lines;
-
+    NanoGL.compileShader = function(gl, shader, source, debug) {
         gl.shaderSource(shader, source);
         gl.compileShader(shader);
-        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+
+        if (debug && !gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+            var i, lines;
+
             console.error(gl.getShaderInfoLog(shader));
             lines = source.split("\n");
             for (i = 0; i < lines.length; ++i) {

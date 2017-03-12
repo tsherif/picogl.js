@@ -35,21 +35,21 @@
         @prop {Object} attributes Map of attribute names to handles. 
         @prop {Object} uniforms Map of uniform names to handles. 
     */
-    NanoGL.Program = function Program(gl, vsSource, fsSource) {
+    NanoGL.Program = function Program(gl, vsSource, fsSource, debug) {
         var i;
 
         var vshader, fshader; 
 
         if (typeof vsSource === "string") {
             vshader = gl.createShader(gl.VERTEX_SHADER);
-            NanoGL.compileShader(gl, vshader, vsSource);
+            NanoGL.compileShader(gl, vshader, vsSource, debug);
         } else {
             vshader = vsSource;
         }
 
         if (typeof fsSource === "string") {
             fshader = gl.createShader(gl.FRAGMENT_SHADER);
-            NanoGL.compileShader(gl, fshader, fsSource);
+            NanoGL.compileShader(gl, fshader, fsSource, debug);
         } else {
             fshader = fsSource;
         }
@@ -59,7 +59,7 @@
         gl.attachShader(program, fshader);
         gl.linkProgram(program);
 
-        if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+        if (debug && !gl.getProgramParameter(program, gl.LINK_STATUS)) {
           console.error(gl.getProgramInfoLog(program));
         }
 

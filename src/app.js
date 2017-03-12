@@ -66,6 +66,8 @@
         this.depthTexturesEnabled = false;
         this.floatTexturesEnabled = false;
         this.linearFloatTexturesEnabled = false;
+
+        this.debugEnabled = false;
     };
 
     /**
@@ -394,6 +396,17 @@
     };
 
     /**
+        Enable debug logging.
+
+        @method
+    */
+    NanoGL.App.prototype.debug = function() {
+        this.debugEnabled = true; 
+
+        return this;
+    };
+
+    /**
         Create a program.
 
         @method
@@ -401,7 +414,7 @@
         @param {WebGLShader|string} fragmentShader Fragment shader object or source code.
     */
     NanoGL.App.prototype.createProgram = function(vsSource, fsSource) {
-        return new NanoGL.Program(this.gl, vsSource, fsSource);
+        return new NanoGL.Program(this.gl, vsSource, fsSource, this.debugEnabled);
     };
 
     /**
@@ -413,7 +426,7 @@
     */
     NanoGL.App.prototype.createShader = function(type, source) {
         var shader = this.gl.createShader(type);
-        NanoGL.compileShader(this.gl, shader, source);
+        NanoGL.compileShader(this.gl, shader, source, this.debugEnabled);
         
         return shader;
     };
