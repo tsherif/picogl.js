@@ -1,0 +1,21 @@
+html {
+    overflow: hidden;
+}
+
+body {
+    margin: 0;
+}
+
+#example-title {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    color: white;
+    background-color: gray;
+    padding: 0.5em;
+    display: none;
+}
+
+#github-ribbon {
+    display: none;
+}
