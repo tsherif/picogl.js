@@ -70,7 +70,7 @@
             var src = "examples/" + event.target.id + ".html";
             var sourceCodeURL = "https://github.com/tsherif/picogl.js/blob/master/" + src;
 
-            exampleTitle.innerHTML = title + "<div><a href=\"" + sourceCodeURL + "\">Source Code</a>";
+            exampleTitle.innerHTML = title + "<div><a href=\"" + sourceCodeURL + "\">Source code</a>";
             examples.src = src;
 
             event.stopPropagation();
@@ -81,17 +81,27 @@
         var gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
 
         if (gl) {
-            if (gl.getExtension("WEBGL_draw_buffers") && gl.getExtension("OES_texture_float")) {
-                document.getElementById("particles").click();
+            if (gl.getExtension("WEBGL_draw_buffers") && gl.getExtension("OES_texture_float") && 
+                gl.getExtension("OES_texture_float_linear") && gl.getExtension("WEBGL_depth_texture")) {
+                
+                var showcase = [
+                    "shadow",
+                    "dof",
+                    "ssao",
+                    "deferred",
+                    "oit",
+                    "particles"
+                ];
+                var showcaseId = showcase[Math.floor(Math.random() * showcase.length)];
+                
+                document.getElementById(showcaseId).click();
             } else {
-                document.getElementById("cube").click();
+                document.getElementById("cubemap").click();
             }
 
         } else {
             document.getElementById("example-div").innerHTML = "Sorry your browser does not support WebGL.";
         }
-
-        
 
         hljs.initHighlightingOnLoad();        
     </script>
