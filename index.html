@@ -81,8 +81,8 @@
         var gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
 
         if (gl) {
-            if (gl.getExtension("WEBGL_draw_buffers") && gl.getExtension("OES_texture_float") && gl.getExtension("OES_texture_float_linear")) {
-                document.getElementById("oit").click();
+            if (gl.getExtension("WEBGL_draw_buffers") && gl.getExtension("OES_texture_float")) {
+                document.getElementById("particles").click();
             } else {
                 document.getElementById("cube").click();
             }
