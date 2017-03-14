@@ -159,9 +159,10 @@
 
         // Geometry
         var sphere = utils.createSphere({radius: 0.5});
-        var positions = app.createArrayBuffer(PicoGL.FLOAT, 3, new Float32Array(sphere.positions));
-        var uv = app.createArrayBuffer(PicoGL.FLOAT, 2, new Float32Array(sphere.texture_coords));
-        var normals = app.createArrayBuffer(PicoGL.FLOAT, 3, new Float32Array(sphere.normals));
+        var positions = app.createArrayBuffer(PicoGL.FLOAT, 3, sphere.positions);
+        var uv = app.createArrayBuffer(PicoGL.FLOAT, 2, sphere.uvs);
+        var normals = app.createArrayBuffer(PicoGL.FLOAT, 3, sphere.normals);
+        var indices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, sphere.indices)
 
         var quadPositions = app.createArrayBuffer(PicoGL.FLOAT, 2, new Float32Array([
             -1, 1,
@@ -231,6 +232,7 @@
                 spheres[i].drawCall.attribute("aPosition", positions)
                 .attribute("aNormal", normals)
                 .attribute("aUV", uv)
+                .indices(indices)
                 .uniform("uProjection", projMatrix)
                 .uniform("uViewMatrix", viewMatrix)
                 .uniform("uEyePosition", eyePosition)

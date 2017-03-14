@@ -113,9 +113,9 @@
         var skyboxProgram = app.createProgram(skyboxVsSource, skyboxFsSource);
 
         var box = utils.createBox({dimensions: [1.0, 1.0, 1.0]})
-        var positions = app.createArrayBuffer(PicoGL.FLOAT, 3, new Float32Array(box.positions));
-        var uv = app.createArrayBuffer(PicoGL.FLOAT, 2, new Float32Array(box.texture_coords));
-        var normals = app.createArrayBuffer(PicoGL.FLOAT, 3, new Float32Array(box.normals));
+        var positions = app.createArrayBuffer(PicoGL.FLOAT, 3, box.positions);
+        var uv = app.createArrayBuffer(PicoGL.FLOAT, 2, box.texture_coords);
+        var normals = app.createArrayBuffer(PicoGL.FLOAT, 3, box.normals);
 
         var projMatrix = mat4.create();
         mat4.perspective(projMatrix, Math.PI / 2, canvas.width / canvas.height, 0.1, 10.0);

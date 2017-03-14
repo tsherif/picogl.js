@@ -230,27 +230,25 @@
         createSphere: function createSphere(options) {
           options = options || {};
 
-          var position = options.position || [0, 0, 0];
           var long_bands = options.long_bands || 32;
           var lat_bands = options.lat_bands || 32;
           var radius = options.radius || 1;
           var lat_step = Math.PI / lat_bands;
           var long_step = 2 * Math.PI / long_bands;
-          var num_positions = long_bands * lat_bands * 6;
+          var num_positions = long_bands * lat_bands * 4;
+          var num_indices = long_bands * lat_bands * 6;
           var lat_angle, long_angle;
           var positions = new Float32Array(num_positions * 3);
           var normals = new Float32Array(num_positions * 3);
           var texture_coords = new Float32Array(num_positions * 2);
-          var ox = position[0];
-          var oy = position[1];
-          var oz = position[2];
+          var indices = new Uint16Array(num_indices);
           var x1, x2, x3, x4,
               y1, y2,
               z1, z2, z3, z4,
               u1, u2,
               v1, v2;
           var i, j;
-          var k = 0;
+          var k = 0, l = 0;
           var vi, ti;
 
           for (i = 0; i < lat_bands; i++) {
@@ -274,65 +272,68 @@
               vi = k * 3;
               ti = k * 2;
 
-              positions[vi] = x1 * radius + ox; 
-              positions[vi+1] = y1 * radius + oy; 
-              positions[vi+2] = z1 * radius + oz;         
-              positions[vi+3] = x2 * radius + ox; 
-              positions[vi+4] = y1 * radius + oy; 
-              positions[vi+5] = z2 * radius + oz;
-              positions[vi+6] = x3 * radius + ox; 
-              positions[vi+7] = y2 * radius + oy; 
-              positions[vi+8] = z3 * radius + oz;
-              positions[vi+9] = x3 * radius + ox; 
-              positions[vi+10] = y2 * radius + oy; 
-              positions[vi+11] = z3 * radius + oz;
-              positions[vi+15] = x4 * radius + ox; 
-              positions[vi+16] = y2 * radius + oy; 
-              positions[vi+17] = z4 * radius + oz;
-              positions[vi+12] = x2 * radius + ox; 
-              positions[vi+13] = y1 * radius + oy; 
-              positions[vi+14] = z2 * radius + oz;
+              positions[vi] = x1 * radius; 
+              positions[vi+1] = y1 * radius; 
+              positions[vi+2] = z1 * radius; //v0
+
+              positions[vi+3] = x2 * radius; 
+              positions[vi+4] = y1 * radius; 
+              positions[vi+5] = z2 * radius; //v1
+
+              positions[vi+6] = x3 * radius; 
+              positions[vi+7] = y2 * radius; 
+              positions[vi+8] = z3 * radius; // v2
+
+
+              positions[vi+9] = x4 * radius; 
+              positions[vi+10] = y2 * radius; 
+              positions[vi+11] = z4 * radius; // v3
 
               normals[vi] = x1;
               normals[vi+1] = y1; 
               normals[vi+2] = z1;
+
               normals[vi+3] = x2;
               normals[vi+4] = y1; 
               normals[vi+5] = z2;
+
               normals[vi+6] = x3;
               normals[vi+7] = y2; 
               normals[vi+8] = z3;
-              normals[vi+9] = x3;
+              
+              normals[vi+9] = x4;
               normals[vi+10] = y2; 
-              normals[vi+11] = z3;   
-              normals[vi+12] = x2;
-              normals[vi+13] = y1; 
-              normals[vi+14] = z2;
-              normals[vi+15] = x4;
-              normals[vi+16] = y2; 
-              normals[vi+17] = z4;
+              normals[vi+11] = z4;
 
               texture_coords[ti] = u1; 
               texture_coords[ti+1] = v1; 
+              
               texture_coords[ti+2] = u2; 
               texture_coords[ti+3] = v1;
+              
               texture_coords[ti+4] = u1;
               texture_coords[ti+5] = v2; 
-              texture_coords[ti+6] = u1; 
-              texture_coords[ti+7] = v2; 
-              texture_coords[ti+8] = u2; 
-              texture_coords[ti+9] = v1;
-              texture_coords[ti+10] = u2;
-              texture_coords[ti+11] = v2; 
+              
+              texture_coords[ti+6] = u2;
+              texture_coords[ti+7] = v2;
 
-              k += 6;
+              indices[l    ] = k;
+              indices[l + 1] = k + 1;
+              indices[l + 2] = k + 2;
+              indices[l + 3] = k + 2;
+              indices[l + 4] = k + 1;
+              indices[l + 5] = k + 3;
+
+              k += 4;
+              l += 6;
             }
           }
 
           return {
             positions: positions,
             normals: normals,
-            texture_coords: texture_coords
+            uvs: texture_coords,
+            indices: indices
           };
         }
     }

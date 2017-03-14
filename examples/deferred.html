@@ -133,12 +133,13 @@
 
         // Geometry
         var box = utils.createBox();
-        var positions = app.createArrayBuffer(PicoGL.FLOAT, 3, new Float32Array(box.positions));
-        var uv = app.createArrayBuffer(PicoGL.FLOAT, 2, new Float32Array(box.texture_coords));
-        var normals = app.createArrayBuffer(PicoGL.FLOAT, 3, new Float32Array(box.normals));
+        var positions = app.createArrayBuffer(PicoGL.FLOAT, 3, box.positions);
+        var uv = app.createArrayBuffer(PicoGL.FLOAT, 2, box.texture_coords);
+        var normals = app.createArrayBuffer(PicoGL.FLOAT, 3, box.normals);
 
         var sphere = utils.createSphere();
-        var lightPositions = app.createArrayBuffer(PicoGL.FLOAT, 3, new Float32Array(sphere.positions));
+        var lightPositions = app.createArrayBuffer(PicoGL.FLOAT, 3, sphere.positions);
+        var lightIndices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, sphere.indices);
 
         // Camera stuff
         var projMatrix = mat4.create();
@@ -222,6 +223,7 @@
 
                 lightDrawCalls[i] = app.createDrawCall(mainProgram)
                 .attribute("aPosition", lightPositions)
+                .indices(lightIndices)
                 .uniform("uMVP", lightMatrix)
                 .uniform("uEyePosition", eyePosition)
                 .uniform("uLightPosition", lights[i].position)
