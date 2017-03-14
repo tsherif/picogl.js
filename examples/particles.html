@@ -76,6 +76,7 @@
             acceleration += mass3Factor * normalize(massVec) / massDist2;
 
             velocity += acceleration;
+            velocity *= 0.9999;
 
             gl_FragData[0] = vec4(position + velocity, 1.0);
             gl_FragData[1] = vec4(velocity, 0.0);
@@ -89,7 +90,7 @@
 
         void main() {
             vColor = aColor;
-            gl_PointSize = 3.0;
+            gl_PointSize = 2.0;
             gl_Position = texture2D(uPositionBuffer, aUV);
         }
     </script>
@@ -120,7 +121,7 @@
             document.body.innerHTML = "This example requires extensions WEBGL_draw_buffers and OES_texture_float which are not supported on this system."
         }
 
-        var DATA_TEXTURE_DIM = 512;
+        var DATA_TEXTURE_DIM = 700;
         var NUM_PARTICLES = DATA_TEXTURE_DIM * DATA_TEXTURE_DIM;
         var positionTextureData = new Float32Array(NUM_PARTICLES * 3);
         var colorData = new Float32Array(NUM_PARTICLES * 3);
