@@ -30,8 +30,11 @@
         as properties of PicoGL (e.g. PicoGL.FLOAT, PicoGL.ONE_MINUS_SRC_ALPHA).
         
         @namespace PicoGL
+        @prop {string} version Current PicoGL version.
     */
-    var PicoGL = window.PicoGL = {};
+    var PicoGL = window.PicoGL = {
+        version: "<%= VERSION %>"
+    };
 
     (function() {
         // Absorb all GL enums for convenience

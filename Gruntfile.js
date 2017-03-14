@@ -2,15 +2,16 @@ module.exports = function(grunt) {
     "use strict";
 
     var pkg = grunt.file.readJSON("package.json");
+    var banner = "/*\nPicoGL.js v<%= pkg.version %> \n\n<%= licence %>*/\n";
 
     grunt.initConfig({
         pkg: pkg,
         licence: grunt.file.read("LICENSE"),
-        packageName: pkg.name.split(".")[0],
+        packageName: "picogl",
+        VERSION: pkg.version,
         uglify: {
             options: {
-                banner: "/*\nPicoGL.js v<%= pkg.version %> \n\n<%= licence %>*/\n",
-                preserveComments: "some"
+                banner: banner
             },
             src: {
                 src: "build/<%= packageName %>.js",
@@ -50,6 +51,11 @@ module.exports = function(grunt) {
         concat: {
             options: {
                 separator: ";",
+                banner: banner,
+                stripBanners: {
+                    line: true,
+                    block: true
+                },
                 process: true
             },
             src: {

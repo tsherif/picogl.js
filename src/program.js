@@ -82,24 +82,6 @@
             var uniformHandle = gl.getUniformLocation(this.program, uniformInfo.name);
             var UniformClass = null;
 
-            /*
-                const GLenum FLOAT_VEC2                     = 0x8B50;
-                    const GLenum FLOAT_VEC3                     = 0x8B51;
-                    const GLenum FLOAT_VEC4                     = 0x8B52;
-                    const GLenum INT_VEC2                       = 0x8B53;
-                    const GLenum INT_VEC3                       = 0x8B54;
-                    const GLenum INT_VEC4                       = 0x8B55;
-                    const GLenum BOOL                           = 0x8B56;
-                    const GLenum BOOL_VEC2                      = 0x8B57;
-                    const GLenum BOOL_VEC3                      = 0x8B58;
-                    const GLenum BOOL_VEC4                      = 0x8B59;
-                    const GLenum FLOAT_MAT2                     = 0x8B5A;
-                    const GLenum FLOAT_MAT3                     = 0x8B5B;
-                    const GLenum FLOAT_MAT4                     = 0x8B5C;
-                    const GLenum SAMPLER_2D                     = 0x8B5E;
-                    const GLenum SAMPLER_CUBE 
-            */
-
             switch (uniformInfo.type) {
                 case gl.INT: 
                 case gl.BOOL: 
