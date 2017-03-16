@@ -1080,6 +1080,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             gl.generateMipmap(gl.TEXTURE_2D);
         }
 
+        gl.bindTexture(gl.TEXTURE_2D, null);
+
     };
 
     /**
@@ -1100,6 +1102,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         } else {
             this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.internalFormat, this.internalFormat, this.type, image);
         }
+
+        this.gl.bindTexture(this.gl.TEXTURE_2D, null);
     };  
 
     /**
