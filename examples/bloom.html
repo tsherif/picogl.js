@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<!--
+  The MIT License (MIT)
+
+  Copyright (c) 2017 Tarek Sherif
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy of
+  this software and associated documentation files (the "Software"), to deal in
+  the Software without restriction, including without limitation the rights to
+  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+  the Software, and to permit persons to whom the Software is furnished to do so,
+  subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+  FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+  COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+  IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+<html>
+<head>
+    <title>PicoGL.js: Phong Cube</title>
+    <script src="../utils/gl-matrix.js"></script>
+    <script src="../build/picogl.js"></script>
+    <script src="../utils/utils.js"></script>
+    <link rel="stylesheet" href="../site/css/picogl-example.css"> 
+</head>
+<body>
+    <div id="example-title">
+        PicoGL.js Example: Phong-shaded Cube
+        <div>
+            <a href="https://github.com/tsherif/picogl.js/blob/master/examples/cube.html">Source code</a>
+        </div>
+    </div>
+    <canvas id="gl-canvas"></canvas>
+    <script type="x-shader/vs" id="vertex-cube">
+        attribute vec4 position;
+        attribute vec2 uv;
+        attribute vec4 normal;
+        uniform mat4 uViewProj;
+        uniform mat4 uModel;
+        varying vec3 vPosition;
+        varying vec2 vUV;
+        varying vec3 vNormal;
+        void main() {
+            vec4 worldPosition = uModel * position;
+            vPosition = worldPosition.xyz;
+            vUV = uv;
+            vNormal = (uModel * normal).xyz;
+            gl_Position = uViewProj * worldPosition;
+        }
+    </script>
+    <script type="x-shader/vf" id="fragment-cube">
+        #extension GL_EXT_draw_buffers : require
+        precision highp float;
+
+        uniform vec3 eyePosition;
+        uniform vec3 lightPosition;
+        uniform vec3 lightColor;
+        uniform vec3 lightPosition2;
+        uniform vec3 lightColor2;
+        uniform sampler2D tex;
+        
+        varying vec3 vPosition;
+        varying vec2 vUV;
+        varying vec3 vNormal;
+        void main() {
+            vec3 color = texture2D(tex, vUV).rgb;
+
+            vec3 normal = normalize(vNormal);
+            vec3 eyeVec = normalize(eyePosition - vPosition);
+            vec3 incidentVec = normalize(vPosition - lightPosition);
+            vec3 lightVec = -incidentVec;
+            float diffuse = max(dot(lightVec, normal), 0.0);
+            float highlight = pow(max(dot(eyeVec, reflect(incidentVec, normal)), 0.0), 100.0);
+            vec3 light = lightColor * (diffuse + highlight);
+
+            incidentVec = normalize(vPosition - lightPosition2);
+            lightVec = -incidentVec;
+            diffuse = max(dot(lightVec, normal), 0.0);
+            highlight = pow(max(dot(eyeVec, reflect(incidentVec, normal)), 0.0), 100.0);
+            light += lightColor2 * (diffuse + highlight);
+
+            gl_FragData[0] = vec4(color * light, 1.0);
+            if (dot(gl_FragData[0].rgb, vec3(0.2126, 0.7152, 0.0722)) > 1.0) {
+                gl_FragData[1] = gl_FragData[0];
+            }
+        }
+    </script>
+    <script type="x-shader/vs" id="vertex-sun">
+        attribute vec4 position;
+        uniform mat4 uMVP;
+        void main() {
+            gl_Position = uMVP * position;
+        }
+    </script>
+    <script type="x-shader/vf" id="fragment-sun">
+        #extension GL_EXT_draw_buffers : require
+        precision highp float;
+
+        uniform vec3 uColor;
+        void main() {
+            gl_FragData[0] = vec4(uColor, 1.0);
+            gl_FragData[1] = vec4(uColor, 1.0);
+        }
+    </script>
+    <script type="x-shader/vs" id="vertex-quad">
+        attribute vec4 aPosition;
+        varying vec2 vUV;
+        void main() {
+            vUV = aPosition.xy * 0.5 + 0.5;
+            gl_Position = aPosition;
+        }
+    </script>
+    <script type="x-shader/fs" id="fragment-blur">
+        precision highp float;
+
+        varying vec2 vUV;
+
+        uniform sampler2D uTexture;
+        uniform vec2 uTexelOffset;
+        void main() {
+            float blurWeights[5];
+            blurWeights[0] = 0.227027;
+            blurWeights[1] = 0.1945946;
+            blurWeights[2] = 0.1216216;
+            blurWeights[3] = 0.054054;
+            blurWeights[4] = 0.016216;
+            
+            vec3 color = vec3(0.0);
+            for (int i = 0; i < 5; ++i) {
+                color += texture2D(uTexture, vUV + (uTexelOffset * float(i))).rgb * blurWeights[i];
+                color += texture2D(uTexture, vUV - (uTexelOffset * float(i))).rgb * blurWeights[i];
+            }
+
+            gl_FragColor = vec4(color, 1.0);
+        }
+    </script>
+    <script type="x-shader/fs" id="fragment-blend">
+        precision highp float;
+
+        varying vec2 vUV;
+
+        uniform sampler2D uColor;
+        uniform sampler2D uBloom;
+        void main() {
+            gl_FragColor = texture2D(uColor, vUV) + texture2D(uBloom, vUV);
+            // if (vUV.x > -1.0) gl_FragColor = texture2D(uColor, vUV);
+        }
+    </script>
+    <script type="text/javascript">
+        var canvas = document.getElementById("gl-canvas");
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        var screenTexelSize = vec2.fromValues(1.0 / canvas.width, 1.0 / canvas.height);
+        var hTexelOffset = vec2.fromValues(screenTexelSize[0], 0.0);
+        var vTexelOffset = vec2.fromValues(0.0, screenTexelSize[1]);
+
+        var app = PicoGL.createApp(canvas)
+        .clearColor(0.0, 0.0, 0.0, 1.0)
+        .depthTest()
+        .floatTextures()
+        .drawBuffers()
+        .debug();
+
+        var vsSource =  document.getElementById("vertex-cube").text;
+        var fsSource =  document.getElementById("fragment-cube").text;
+        var program = app.createProgram(vsSource, fsSource);
+
+        var box = utils.createBox({dimensions: [1.0, 1.0, 1.0]})
+        var positions = app.createArrayBuffer(PicoGL.FLOAT, 3, box.positions);
+        var uv = app.createArrayBuffer(PicoGL.FLOAT, 2, box.texture_coords);
+        var normals = app.createArrayBuffer(PicoGL.FLOAT, 3, box.normals);
+
+        var sun = utils.createSphere({radius: 0.1});
+        var sunPositions = app.createArrayBuffer(PicoGL.FLOAT, 3, sun.positions);
+        var sunIndices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, sun.indices);
+
+        var quadPositions = app.createArrayBuffer(PicoGL.FLOAT, 2, new Float32Array([
+            -1, 1,
+            -1, -1,
+            1, -1,
+            -1, 1,
+            1, -1,
+            1, 1,
+        ]));
+
+
+        var sunVsSource =  document.getElementById("vertex-sun").text;
+        var sunFsSource =  document.getElementById("fragment-sun").text;
+        var sunProgram = app.createProgram(sunVsSource, sunFsSource);
+
+        var quadVsSource =  document.getElementById("vertex-quad").text;
+        var quadVertexShader = app.createShader(PicoGL.VERTEX_SHADER, quadVsSource);
+
+        var blurFsSource =  document.getElementById("fragment-blur").text;
+        var blurProgram = app.createProgram(quadVertexShader, blurFsSource);
+
+        var blendFsSource =  document.getElementById("fragment-blend").text;
+        var blendProgram = app.createProgram(quadVertexShader, blendFsSource);
+
+        var colorBuffer = app.createFramebuffer(2, PicoGL.FLOAT);
+        var blurBuffer = app.createFramebuffer(1, PicoGL.FLOAT);
+        var bloomBuffer = app.createFramebuffer(1, PicoGL.FLOAT);
+
+        var projMatrix = mat4.create();
+        mat4.perspective(projMatrix, Math.PI / 2, canvas.width / canvas.height, 0.1, 10.0);
+
+        var viewMatrix = mat4.create();
+        var eyePosition = vec3.fromValues(1, 1, 1);
+        mat4.lookAt(viewMatrix, eyePosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
+
+        var viewProjMatrix = mat4.create();
+        mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
+
+        var lightPosition = vec3.fromValues(0.7, 0.7, 0.5);
+        var lightColor = vec3.fromValues(1, 0.5, 0);
+
+        var light2Position = vec3.fromValues(-1.2, 0.5, 0);
+        var light2Color = vec3.fromValues(0, 0, 1);
+
+        var modelMatrix = mat4.create();
+        var rotateXMatrix = mat4.create();
+        var rotateYMatrix = mat4.create();
+
+        var sunModelMatrix = mat4.create();
+        var sunMVPMatrix = mat4.create();
+        mat4.fromTranslation(sunModelMatrix, lightPosition);
+        mat4.multiply(sunMVPMatrix, viewProjMatrix, sunModelMatrix);
+
+        var sun2ModelMatrix = mat4.create();
+        var sun2MVPMatrix = mat4.create();
+        utils.xformMatrix(sun2ModelMatrix, light2Position, null, vec3.fromValues(5, 5, 5));
+        mat4.multiply(sun2MVPMatrix, viewProjMatrix, sun2ModelMatrix);
+
+        var angleX = 0;
+        var angleY = 0;
+
+        window.onresize = function() {
+            app.resize(window.innerWidth, window.innerHeight);
+
+            mat4.perspective(projMatrix, Math.PI / 2, app.width / app.height, 0.1, 10.0);
+            mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
+        }
+
+        var image = new Image();
+
+        image.onload = function() {
+            var texture = app.createTexture(image);
+
+            var drawCall = app.createDrawCall(program)
+            .attribute("position", positions)
+            .attribute("uv", uv)
+            .attribute("normal", normals)
+            .uniform("uViewProj", viewProjMatrix)
+            .uniform("eyePosition", eyePosition)
+            .uniform("lightPosition", lightPosition)
+            .uniform("lightColor", lightColor)
+            .uniform("lightPosition2", light2Position)
+            .uniform("lightColor2", light2Color)
+            .texture("tex", texture);
+
+            var sunDrawCall = app.createDrawCall(sunProgram)
+            .attribute("position", sunPositions)
+            .indices(sunIndices)
+            .uniform("uColor", lightColor)
+            .uniform("uMVP", sunMVPMatrix);
+
+            var sun2DrawCall = app.createDrawCall(sunProgram)
+            .attribute("position", sunPositions)
+            .indices(sunIndices)
+            .uniform("uColor", light2Color)
+            .uniform("uMVP", sun2MVPMatrix);
+
+            var hBlurDrawCall = app.createDrawCall(blurProgram)
+            .attribute("position", quadPositions)
+            .uniform("uTexelOffset", hTexelOffset)
+            .texture("uTexture", colorBuffer.colorTextures[1]);
+
+            var vBlurDrawCall = app.createDrawCall(blurProgram)
+            .attribute("position", quadPositions)
+            .uniform("uTexelOffset", vTexelOffset)
+            .texture("uTexture", blurBuffer.colorTextures[0]);
+
+            var blendDrawCall = app.createDrawCall(blendProgram)
+            .attribute("position", quadPositions)
+            .texture("uColor", colorBuffer.colorTextures[0])
+            .texture("uBloom", bloomBuffer.colorTextures[0]);
+
+            var blurTextureA = colorBuffer.colorTextures[1];
+            var blurTextureB = bloomBuffer.colorTextures[0];
+
+            var colorDrawCalls = [drawCall, sunDrawCall, sun2DrawCall];
+            var hBlurDrawCalls = [hBlurDrawCall];
+            var vBlurDrawCalls = [vBlurDrawCall];
+            var blendDrawCalls = [blendDrawCall];
+
+            var blurReadTexture = blurTextureA;
+            var blurWriteTexture = blurTextureB;
+
+            function draw() {
+                angleX += 0.01;
+                angleY += 0.02;
+
+                mat4.fromXRotation(rotateXMatrix, angleX);
+                mat4.fromYRotation(rotateYMatrix, angleY);
+                mat4.multiply(modelMatrix, rotateXMatrix, rotateYMatrix);
+
+                drawCall.uniform("uModel", modelMatrix);
+
+                colorBuffer.colorTexture(blurReadTexture, 1);
+
+                app.framebuffer(colorBuffer)
+                .drawCalls(colorDrawCalls)
+                .clear()
+                .draw();
+
+                for (var i = 0; i < 5; ++i) {
+                    hBlurDrawCall.texture("uTexture", blurReadTexture);
+                    bloomBuffer.colorTexture(blurWriteTexture);
+
+                    app.framebuffer(blurBuffer)
+                    .drawCalls(hBlurDrawCalls)
+                    .clear()
+                    .draw()
+                    .framebuffer(bloomBuffer)
+                    .drawCalls(vBlurDrawCalls)
+                    .clear()
+                    .draw();
+
+                    if (blurReadTexture === blurTextureA) {
+                        blurReadTexture = blurTextureB;
+                        blurWriteTexture = blurTextureA;
+                    } else {
+                        blurReadTexture = blurTextureA;
+                        blurWriteTexture = blurTextureB;
+                    }
+                }
+
+                blendDrawCall.texture("uBloom", blurWriteTexture);
+
+                app.defaultFramebuffer()
+                .drawCalls(blendDrawCalls)
+                .clear()
+                .draw();
+
+                requestAnimationFrame(draw);
+            }
+
+            requestAnimationFrame(draw);
+            
+        }
+
+        image.src = "img/khronos_webgl.png";
+
+    </script>
+    <a href="https://github.com/tsherif/picogl.js" id="github-ribbon"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"></a>
+    <script src="../site/js/iframe.js"></script>
+</body>
+</html>
