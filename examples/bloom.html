@@ -26,7 +26,7 @@
     Based on: https://learnopengl.com/#!Advanced-Lighting/Bloom
  -->
 <head>
-    <title>PicoGL.js: Phong Cube</title>
+    <title>PicoGL.js: Bloom</title>
     <script src="../utils/gl-matrix.js"></script>
     <script src="../build/picogl.js"></script>
     <script src="../utils/utils.js"></script>
@@ -34,7 +34,7 @@
 </head>
 <body>
     <div id="example-title">
-        PicoGL.js Example: Phong-shaded Cube
+        PicoGL.js Example: Bloom
         <div>
             <a href="https://github.com/tsherif/picogl.js/blob/master/examples/cube.html">Source code</a>
         </div>
@@ -152,7 +152,6 @@
         uniform sampler2D uBloom;
         void main() {
             gl_FragColor = texture2D(uColor, vUV) + texture2D(uBloom, vUV);
-            // if (vUV.x > -1.0) gl_FragColor = texture2D(uColor, vUV);
         }
     </script>
     <script type="text/javascript">
@@ -171,14 +170,39 @@
         .drawBuffers()
         .debug();
 
-        var vsSource =  document.getElementById("vertex-cube").text;
-        var fsSource =  document.getElementById("fragment-cube").text;
-        var program = app.createProgram(vsSource, fsSource);
+        // SET UP PROGRAMS
 
-        var box = utils.createBox({dimensions: [1.0, 1.0, 1.0]})
-        var positions = app.createArrayBuffer(PicoGL.FLOAT, 3, box.positions);
-        var uv = app.createArrayBuffer(PicoGL.FLOAT, 2, box.texture_coords);
-        var normals = app.createArrayBuffer(PicoGL.FLOAT, 3, box.normals);
+        var cubeVsSource =  document.getElementById("vertex-cube").text;
+        var cubeFsSource =  document.getElementById("fragment-cube").text;
+        var cubeProgram = app.createProgram(cubeVsSource, cubeFsSource);
+
+        var sunVsSource =  document.getElementById("vertex-sun").text;
+        var sunFsSource =  document.getElementById("fragment-sun").text;
+        var sunProgram = app.createProgram(sunVsSource, sunFsSource);
+
+        var quadVsSource =  document.getElementById("vertex-quad").text;
+        var quadVertexShader = app.createShader(PicoGL.VERTEX_SHADER, quadVsSource);
+
+        var blurFsSource =  document.getElementById("fragment-blur").text;
+        var blurProgram = app.createProgram(quadVertexShader, blurFsSource);
+
+        var blendFsSource =  document.getElementById("fragment-blend").text;
+        var blendProgram = app.createProgram(quadVertexShader, blendFsSource);
+
+
+        // SET UP FRAME BUFFERS
+
+        var colorBuffer = app.createFramebuffer(2, PicoGL.FLOAT);
+        var blurBuffer = app.createFramebuffer(1, PicoGL.FLOAT);
+        var bloomBuffer = app.createFramebuffer(1, PicoGL.FLOAT);
+
+
+        // SET UP GEOMETRY
+
+        var cube = utils.createBox({dimensions: [1.0, 1.0, 1.0]})
+        var cubePositions = app.createArrayBuffer(PicoGL.FLOAT, 3, cube.positions);
+        var cubeUVs = app.createArrayBuffer(PicoGL.FLOAT, 2, cube.texture_coords);
+        var cubeNormals = app.createArrayBuffer(PicoGL.FLOAT, 3, cube.normals);
 
         var sun = utils.createSphere({radius: 0.1});
         var sunPositions = app.createArrayBuffer(PicoGL.FLOAT, 3, sun.positions);
@@ -194,22 +218,7 @@
         ]));
 
 
-        var sunVsSource =  document.getElementById("vertex-sun").text;
-        var sunFsSource =  document.getElementById("fragment-sun").text;
-        var sunProgram = app.createProgram(sunVsSource, sunFsSource);
-
-        var quadVsSource =  document.getElementById("vertex-quad").text;
-        var quadVertexShader = app.createShader(PicoGL.VERTEX_SHADER, quadVsSource);
-
-        var blurFsSource =  document.getElementById("fragment-blur").text;
-        var blurProgram = app.createProgram(quadVertexShader, blurFsSource);
-
-        var blendFsSource =  document.getElementById("fragment-blend").text;
-        var blendProgram = app.createProgram(quadVertexShader, blendFsSource);
-
-        var colorBuffer = app.createFramebuffer(2, PicoGL.FLOAT);
-        var blurBuffer = app.createFramebuffer(1, PicoGL.FLOAT);
-        var bloomBuffer = app.createFramebuffer(1, PicoGL.FLOAT);
+        // SET UP OTHER DATA
 
         var projMatrix = mat4.create();
         mat4.perspective(projMatrix, Math.PI / 2, canvas.width / canvas.height, 0.1, 10.0);
@@ -221,28 +230,34 @@
         var viewProjMatrix = mat4.create();
         mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
 
-        var lightPosition = vec3.fromValues(0.7, 0.7, 0.5);
-        var lightColor = vec3.fromValues(1, 0.5, 0);
+        var cube = {
+            rotation: vec3.create(),
+            modelMatrix: mat4.create(),
+            mvpMatrix: mat4.create()
+        };
 
-        var light2Position = vec3.fromValues(-1.2, 0.5, 0);
-        var light2Color = vec3.fromValues(0, 0, 1);
+        var suns = [
+            {
+                position: vec3.fromValues(0.7, 0.7, 0.5),
+                color: vec3.fromValues(1, 0.5, 0),
+                modelMatrix: mat4.create(),
+                mvpMatrix: mat4.create()
+            },
+            {
+                position: vec3.fromValues(-1.2, 0.5, 0),
+                color: vec3.fromValues(0, 0, 1),
+                modelMatrix: mat4.create(),
+                mvpMatrix: mat4.create()
+            }
 
-        var modelMatrix = mat4.create();
-        var rotateXMatrix = mat4.create();
-        var rotateYMatrix = mat4.create();
+        ];
+        
+        utils.xformMatrix(suns[0].modelMatrix, suns[0].position, null, null);
+        mat4.multiply(suns[0].mvpMatrix, viewProjMatrix, suns[0].modelMatrix);
 
-        var sunModelMatrix = mat4.create();
-        var sunMVPMatrix = mat4.create();
-        mat4.fromTranslation(sunModelMatrix, lightPosition);
-        mat4.multiply(sunMVPMatrix, viewProjMatrix, sunModelMatrix);
+        utils.xformMatrix(suns[1].modelMatrix, suns[1].position, null, vec3.fromValues(5, 5, 5));
+        mat4.multiply(suns[1].mvpMatrix, viewProjMatrix, suns[1].modelMatrix);
 
-        var sun2ModelMatrix = mat4.create();
-        var sun2MVPMatrix = mat4.create();
-        utils.xformMatrix(sun2ModelMatrix, light2Position, null, vec3.fromValues(5, 5, 5));
-        mat4.multiply(sun2MVPMatrix, viewProjMatrix, sun2ModelMatrix);
-
-        var angleX = 0;
-        var angleY = 0;
 
         window.onresize = function() {
             app.resize(window.innerWidth, window.innerHeight);
@@ -256,29 +271,29 @@
         image.onload = function() {
             var texture = app.createTexture(image);
 
-            var drawCall = app.createDrawCall(program)
-            .attribute("position", positions)
-            .attribute("uv", uv)
-            .attribute("normal", normals)
+            var drawCall = app.createDrawCall(cubeProgram)
+            .attribute("position", cubePositions)
+            .attribute("uv", cubeUVs)
+            .attribute("normal", cubeNormals)
             .uniform("uViewProj", viewProjMatrix)
             .uniform("eyePosition", eyePosition)
-            .uniform("lightPosition", lightPosition)
-            .uniform("lightColor", lightColor)
-            .uniform("lightPosition2", light2Position)
-            .uniform("lightColor2", light2Color)
+            .uniform("lightPosition", suns[0].position)
+            .uniform("lightColor", suns[0].color)
+            .uniform("lightPosition2", suns[1].position)
+            .uniform("lightColor2", suns[1].color)
             .texture("tex", texture);
 
             var sunDrawCall = app.createDrawCall(sunProgram)
             .attribute("position", sunPositions)
             .indices(sunIndices)
-            .uniform("uColor", lightColor)
-            .uniform("uMVP", sunMVPMatrix);
+            .uniform("uColor", suns[0].color)
+            .uniform("uMVP", suns[0].mvpMatrix);
 
             var sun2DrawCall = app.createDrawCall(sunProgram)
             .attribute("position", sunPositions)
             .indices(sunIndices)
-            .uniform("uColor", light2Color)
-            .uniform("uMVP", sun2MVPMatrix);
+            .uniform("uColor", suns[1].color)
+            .uniform("uMVP", suns[1].mvpMatrix);
 
             var hBlurDrawCall = app.createDrawCall(blurProgram)
             .attribute("position", quadPositions)
@@ -307,14 +322,11 @@
             var blurWriteTexture = blurTextureB;
 
             function draw() {
-                angleX += 0.01;
-                angleY += 0.02;
+                cube.rotation[0] += 0.01;
+                cube.rotation[1] += 0.02;
 
-                mat4.fromXRotation(rotateXMatrix, angleX);
-                mat4.fromYRotation(rotateYMatrix, angleY);
-                mat4.multiply(modelMatrix, rotateXMatrix, rotateYMatrix);
-
-                drawCall.uniform("uModel", modelMatrix);
+                utils.xformMatrix(cube.modelMatrix, null, cube.rotation, null);
+                drawCall.uniform("uModel", cube.modelMatrix);
 
                 colorBuffer.colorTexture(blurReadTexture, 1);
 
