@@ -31,6 +31,14 @@
     <script src="../build/picogl.js"></script>
     <script src="../utils/utils.js"></script>
     <link rel="stylesheet" href="../site/css/picogl-example.css"> 
+    <style>
+        #bloom-controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            color: white;
+        }
+    </style>
 </head>
 <body>
     <div id="example-title">
@@ -38,6 +46,9 @@
         <div>
             <a href="https://github.com/tsherif/picogl.js/blob/master/examples/cube.html">Source code</a>
         </div>
+    </div>
+    <div id="bloom-controls">
+        Enable Bloom: <input id="bloom-toggle" type="checkbox" checked>
     </div>
     <canvas id="gl-canvas"></canvas>
     <script type="x-shader/vs" id="vertex-cube">
@@ -156,6 +167,12 @@
         }
     </script>
     <script type="text/javascript">
+        var bloomEnabled = true;
+
+        document.getElementById("bloom-toggle").addEventListener("change", function() {
+            bloomEnabled = this.checked;
+        });
+
         var canvas = document.getElementById("gl-canvas");
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
@@ -191,11 +208,17 @@
         var blendProgram = app.createProgram(quadVertexShader, blendFsSource);
 
 
-        // SET UP FRAMEBUFFERS
+        // SET UP FRAMEBUFFERS AND TEXTURES
 
         var colorBuffer = app.createFramebuffer(2, PicoGL.FLOAT);
         var blurBuffer = app.createFramebuffer(1, PicoGL.FLOAT);
         var bloomBuffer = app.createFramebuffer(1, PicoGL.FLOAT);
+
+        var blankTexture = app.createTexture(null, {
+            array: true,
+            width: 1,
+            height: 1
+        });
 
 
         // SET UP GEOMETRY
@@ -240,7 +263,7 @@
         var suns = [
             {
                 position: vec3.fromValues(0.7, 0.75, 0.3),
-                color: vec3.fromValues(1, 0.5, 0),
+                color: vec3.fromValues(1, 1, 1),
                 modelMatrix: mat4.create(),
                 mvpMatrix: mat4.create()
             },
@@ -338,29 +361,35 @@
                 .clear()
                 .draw();
 
-                for (var i = 0; i < 5; ++i) {
-                    hBlurDrawCall.texture("uTexture", blurReadTexture);
-                    bloomBuffer.colorTexture(blurWriteTexture);
+                if (bloomEnabled) {
+                    for (var i = 0; i < 4; ++i) {
+                        hBlurDrawCall.texture("uTexture", blurReadTexture);
+                        bloomBuffer.colorTexture(blurWriteTexture);
 
-                    app.framebuffer(blurBuffer)
-                    .drawCalls(hBlurDrawCalls)
-                    .clear()
-                    .draw()
-                    .framebuffer(bloomBuffer)
-                    .drawCalls(vBlurDrawCalls)
-                    .clear()
-                    .draw();
+                        app.framebuffer(blurBuffer)
+                        .drawCalls(hBlurDrawCalls)
+                        .clear()
+                        .draw()
+                        .framebuffer(bloomBuffer)
+                        .drawCalls(vBlurDrawCalls)
+                        .clear()
+                        .draw();
 
-                    if (blurReadTexture === blurTextureA) {
-                        blurReadTexture = blurTextureB;
-                        blurWriteTexture = blurTextureA;
-                    } else {
-                        blurReadTexture = blurTextureA;
-                        blurWriteTexture = blurTextureB;
+                        if (blurReadTexture === blurTextureA) {
+                            blurReadTexture = blurTextureB;
+                            blurWriteTexture = blurTextureA;
+                        } else {
+                            blurReadTexture = blurTextureA;
+                            blurWriteTexture = blurTextureB;
+                        }
                     }
+
+                    blendDrawCall.texture("uBloom", blurWriteTexture);
+                } else {
+                    blendDrawCall.texture("uBloom", blankTexture);
                 }
 
-                blendDrawCall.texture("uBloom", blurWriteTexture);
+                
 
                 app.defaultFramebuffer()
                 .drawCalls(blendDrawCalls)
