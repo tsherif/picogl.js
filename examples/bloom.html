@@ -190,7 +190,7 @@
         var blendProgram = app.createProgram(quadVertexShader, blendFsSource);
 
 
-        // SET UP FRAME BUFFERS
+        // SET UP FRAMEBUFFERS
 
         var colorBuffer = app.createFramebuffer(2, PicoGL.FLOAT);
         var blurBuffer = app.createFramebuffer(1, PicoGL.FLOAT);
@@ -271,6 +271,7 @@
         image.onload = function() {
             var texture = app.createTexture(image);
 
+            // PREPARE DRAW CALLS
             var drawCall = app.createDrawCall(cubeProgram)
             .attribute("position", cubePositions)
             .attribute("uv", cubeUVs)
@@ -310,14 +311,15 @@
             .texture("uColor", colorBuffer.colorTextures[0])
             .texture("uBloom", bloomBuffer.colorTextures[0]);
 
-            var blurTextureA = colorBuffer.colorTextures[1];
-            var blurTextureB = bloomBuffer.colorTextures[0];
-
             var colorDrawCalls = [drawCall, sunDrawCall, sun2DrawCall];
             var hBlurDrawCalls = [hBlurDrawCall];
             var vBlurDrawCalls = [vBlurDrawCall];
             var blendDrawCalls = [blendDrawCall];
 
+
+            // TEXTURES FOR PING PONGING THE BLUR
+            var blurTextureA = colorBuffer.colorTextures[1];
+            var blurTextureB = bloomBuffer.colorTextures[0];
             var blurReadTexture = blurTextureA;
             var blurWriteTexture = blurTextureB;
 
