@@ -87,6 +87,7 @@
             diffuse = max(dot(lightVec, normal), 0.0);
             highlight = pow(max(dot(eyeVec, reflect(incidentVec, normal)), 0.0), 100.0);
             light += lightColor2 * (diffuse + highlight);
+            light += 0.1;
 
             gl_FragData[0] = vec4(color * light, 1.0);
             if (dot(gl_FragData[0].rgb, vec3(0.2126, 0.7152, 0.0722)) > 1.0) {
@@ -238,13 +239,13 @@
 
         var suns = [
             {
-                position: vec3.fromValues(0.7, 0.7, 0.5),
+                position: vec3.fromValues(0.7, 0.75, 0.3),
                 color: vec3.fromValues(1, 0.5, 0),
                 modelMatrix: mat4.create(),
                 mvpMatrix: mat4.create()
             },
             {
-                position: vec3.fromValues(-1.2, 0.5, 0),
+                position: vec3.fromValues(-4, -1.5, -2),
                 color: vec3.fromValues(0, 0, 1),
                 modelMatrix: mat4.create(),
                 mvpMatrix: mat4.create()
@@ -255,7 +256,7 @@
         utils.xformMatrix(suns[0].modelMatrix, suns[0].position, null, null);
         mat4.multiply(suns[0].mvpMatrix, viewProjMatrix, suns[0].modelMatrix);
 
-        utils.xformMatrix(suns[1].modelMatrix, suns[1].position, null, vec3.fromValues(5, 5, 5));
+        utils.xformMatrix(suns[1].modelMatrix, suns[1].position, null, vec3.fromValues(30, 30, 30));
         mat4.multiply(suns[1].mvpMatrix, viewProjMatrix, suns[1].modelMatrix);
 
 
