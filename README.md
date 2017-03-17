@@ -54,7 +54,7 @@ PicoGL.js makes it fairly easy to set up multi-pass rendering algorithms. It als
     // ...etc.
 
     // SET UP DRAW CALLS
-    var colorGeoDrawCall = app.createDrawCall(colorGeoProgram);
+    var colorGeoDrawCall = app.createDrawCall(colorGeoProgram)
     .attribute("aPosition", positions)
     .attribute("aNormal", normals)
     // ...etc.
