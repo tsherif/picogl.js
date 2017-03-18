@@ -151,7 +151,7 @@
             fbr.x, fbr.y, fbr.z,
           ]);
 
-          var texture_coords = new Float32Array([
+          var uvs = new Float32Array([
             //front
             0, 0,
             1, 0,
@@ -222,7 +222,7 @@
           return {
             positions: positions,
             normals: normals,
-            texture_coords: texture_coords
+            uvs: uvs
           };
 
         },
@@ -240,7 +240,7 @@
           var lat_angle, long_angle;
           var positions = new Float32Array(num_positions * 3);
           var normals = new Float32Array(num_positions * 3);
-          var texture_coords = new Float32Array(num_positions * 2);
+          var uvs = new Float32Array(num_positions * 2);
           var indices = new Uint16Array(num_indices);
           var x1, x2, x3, x4,
               y1, y2,
@@ -305,17 +305,17 @@
               normals[vi+10] = y2; 
               normals[vi+11] = z4;
 
-              texture_coords[ti] = u1; 
-              texture_coords[ti+1] = v1; 
+              uvs[ti] = u1; 
+              uvs[ti+1] = v1; 
               
-              texture_coords[ti+2] = u2; 
-              texture_coords[ti+3] = v1;
+              uvs[ti+2] = u2; 
+              uvs[ti+3] = v1;
               
-              texture_coords[ti+4] = u1;
-              texture_coords[ti+5] = v2; 
+              uvs[ti+4] = u1;
+              uvs[ti+5] = v2; 
               
-              texture_coords[ti+6] = u2;
-              texture_coords[ti+7] = v2;
+              uvs[ti+6] = u2;
+              uvs[ti+7] = v2;
 
               indices[l    ] = k;
               indices[l + 1] = k + 1;
@@ -332,7 +332,7 @@
           return {
             positions: positions,
             normals: normals,
-            uvs: texture_coords,
+            uvs: uvs,
             indices: indices
           };
         }

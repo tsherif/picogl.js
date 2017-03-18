@@ -225,7 +225,7 @@
 
         var cube = utils.createBox({dimensions: [1.0, 1.0, 1.0]})
         var cubePositions = app.createArrayBuffer(PicoGL.FLOAT, 3, cube.positions);
-        var cubeUVs = app.createArrayBuffer(PicoGL.FLOAT, 2, cube.texture_coords);
+        var cubeUVs = app.createArrayBuffer(PicoGL.FLOAT, 2, cube.uvs);
         var cubeNormals = app.createArrayBuffer(PicoGL.FLOAT, 3, cube.normals);
 
         var sun = utils.createSphere({radius: 0.1});

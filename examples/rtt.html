@@ -93,7 +93,7 @@
         // Geometry
         var box = utils.createBox({dimensions: [1.0, 1.0, 1.0]})
         var positions = app.createArrayBuffer(PicoGL.FLOAT, 3, box.positions);
-        var uv = app.createArrayBuffer(PicoGL.FLOAT, 2, box.texture_coords);
+        var uv = app.createArrayBuffer(PicoGL.FLOAT, 2, box.uvs);
         var normals = app.createArrayBuffer(PicoGL.FLOAT, 3, box.normals);
 
         // Camera stuff
