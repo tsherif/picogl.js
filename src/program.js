@@ -68,14 +68,7 @@
         this.attributes = {};
         this.uniforms = {};
 
-        var numAttributes = gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES);
         var numUniforms = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
-
-        for (i = 0; i < numAttributes; ++i) {
-            var attributeInfo = gl.getActiveAttrib(program, i);
-            var attributeHandle = this.gl.getAttribLocation(this.program, attributeInfo.name);
-            this.attributes[attributeInfo.name] = attributeHandle;
-        }
 
         for (i = 0; i < numUniforms; ++i) {
             var uniformInfo = gl.getActiveUniform(program, i);
@@ -135,17 +128,6 @@
 
             this.uniforms[uniformInfo.name] = new UniformClass(gl, uniformHandle);
         }
-    };
-
-    /**
-        Bind an Arraybuffer to a program attribute.
-
-        @method
-        @param {string} name Attribute name.
-        @param {Arraybuffer} buffer Arraybuffer to bind.
-    */
-    PicoGL.Program.prototype.attribute = function(name, buffer) {
-        buffer.bind(this.attributes[name]);
     };
 
     /**

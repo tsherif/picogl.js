@@ -110,7 +110,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     */
     PicoGL.App = function App(canvas, contextAttributes) {
         this.canvas = canvas;
-        this.gl = canvas.getContext("webgl", contextAttributes) || canvas.getContext("experimental-webgl", contextAttributes);
+        this.gl = canvas.getContext("webgl2", contextAttributes);
         this.width = this.gl.drawingBufferWidth;
         this.height = this.gl.drawingBufferHeight;
         this.currentDrawCalls = null;
@@ -123,12 +123,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         
         this.gl.viewport(0, 0, this.width, this.height);    
         
-        this.drawBuffersExtension = null;
-        
-        this.maxDrawBuffers = 1;
-        this.drawBuffersEnabled = false;
-        this.depthTexturesEnabled = false;
-        this.floatTexturesEnabled = false;
+        this.colorBufferFloatEnabled = false;
         this.linearFloatTexturesEnabled = false;
 
         this.debugEnabled = false;
@@ -355,27 +350,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     };
 
     /**
-        Enable the WEBGL_draw_buffers extension. Allows multiple render targets
-        to be drawn in a single draw call, which will be stored in the colorTextures
-        array of a Framebuffer object.
-
-        @method
-        @see Framebuffer
-    */
-    PicoGL.App.prototype.drawBuffers = function() {
-        this.drawBuffersExtension = this.gl.getExtension("WEBGL_draw_buffers");
-        
-        if (this.drawBuffersExtension) {
-            this.maxDrawBuffers = this.gl.getParameter(this.drawBuffersExtension.MAX_DRAW_BUFFERS_WEBGL);
-            this.drawBuffersEnabled = true;
-        } else {
-            console.warn("Extension WEBGL_draw_buffers unavailable. Cannot enable draw buffers.");
-        }
-        
-        return this;
-    };
-
-    /**
         Enable the WEBGL_depth_texture extension. Allows for writing depth values
         to a texture, which will be stored in the depthTexture property of a Framebuffer
         object.
@@ -394,17 +368,17 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     };
 
     /**
-        Enable the OES_texture_float extension. Allows for creating float textures as
+        Enable the EXT_color_buffer_float extension. Allows for creating float textures as
         render targets on FrameBuffer objects. E.g. app.createFramebuffer(1, PicoGL.FLOAT).
 
         @method
         @see Framebuffer
     */
-    PicoGL.App.prototype.floatTextures = function() {
-        this.floatTexturesEnabled = !!this.gl.getExtension("OES_texture_float");
+    PicoGL.App.prototype.renderToFloat = function() {
+        this.colorBufferFloatEnabled = !!this.gl.getExtension("EXT_color_buffer_float");
         
-        if (!this.floatTexturesEnabled) {
-            console.warn("Extension OES_texture_float unavailable. Cannot enable float textures.");
+        if (!this.colorBufferFloatEnabled) {
+            console.warn("Extension EXT_color_buffer_float unavailable. Cannot enable float textures.");
         }
         
         return this;
@@ -493,6 +467,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         PicoGL.compileShader(this.gl, shader, source, this.debugEnabled);
         
         return shader;
+    };
+
+    PicoGL.App.prototype.createVertexArray = function() {
+        return new PicoGL.VertexArray(this.gl);
     };
 
     /**
@@ -655,14 +633,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         this.attributes = {};
         this.uniforms = {};
 
-        var numAttributes = gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES);
         var numUniforms = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
-
-        for (i = 0; i < numAttributes; ++i) {
-            var attributeInfo = gl.getActiveAttrib(program, i);
-            var attributeHandle = this.gl.getAttribLocation(this.program, attributeInfo.name);
-            this.attributes[attributeInfo.name] = attributeHandle;
-        }
 
         for (i = 0; i < numUniforms; ++i) {
             var uniformInfo = gl.getActiveUniform(program, i);
@@ -725,17 +696,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     };
 
     /**
-        Bind an Arraybuffer to a program attribute.
-
-        @method
-        @param {string} name Attribute name.
-        @param {Arraybuffer} buffer Arraybuffer to bind.
-    */
-    PicoGL.Program.prototype.attribute = function(name, buffer) {
-        buffer.bind(this.attributes[name]);
-    };
-
-    /**
         Set the value of a uniform.
 
         @method
@@ -748,6 +708,62 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 })();
 
+;(function() {
+    "use strict";
+
+    /**
+        Storage for vertex data.
+
+        @class
+        @prop {WebGLRenderingContext} gl The WebGL context.
+        @prop {WebGLBuffer} buffer Allocated buffer storage.
+        @prop {GLEnum} type The type of data stored in the buffer.
+        @prop {number} itemSize Number of array elements per vertex.
+        @prop {number} numItems Number of vertices represented.
+        @prop {boolean} indexArray Whether this is an index array.
+        @prop {GLEnum} binding GL binding point (ARRAY_BUFFER or ELEMENT_ARRAY_BUFFER).
+    */
+    PicoGL.VertexArray = function VertexArray(gl) {
+        this.gl = gl;
+        this.vertexArray = gl.createVertexArray();
+        this.numElements = 0;
+        this.indexType = null;
+        this.indexed = false;
+    };
+
+    PicoGL.VertexArray.prototype.attributeBuffer = function(arrayBuffer, attributeIndex) {
+        arrayBuffer.bind();
+
+        this.gl.vertexAttribPointer(attributeIndex, arrayBuffer.itemSize, arrayBuffer.type, false, 0, 0);
+        this.gl.enableVertexAttribArray(attributeIndex);
+        this.numElements = this.numElements || arrayBuffer.numItems; 
+
+        return this;
+    };
+
+    PicoGL.VertexArray.prototype.indexBuffer = function(arrayBuffer) {
+        arrayBuffer.bind();
+
+        this.numElements = arrayBuffer.numItems * 3;
+        this.indexType = arrayBuffer.type;
+        this.indexed = true;
+
+        return this;
+    };
+
+    PicoGL.VertexArray.prototype.bind = function() {
+        this.gl.bindVertexArray(this.vertexArray);
+
+        return this;
+    };
+
+    PicoGL.VertexArray.prototype.unbind = function() {
+        this.gl.bindVertexArray(null);
+
+        return this;
+    };
+
+})();
 ;(function() {
     "use strict";
 
@@ -783,13 +799,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @method
         @param {number} attribute The attribute handle to bind to.
     */
-    PicoGL.ArrayBuffer.prototype.bind = function(attribute) {
+    PicoGL.ArrayBuffer.prototype.bind = function() {
         this.gl.bindBuffer(this.binding, this.buffer);
-
-        if (!this.indexArray) {
-            this.gl.vertexAttribPointer(attribute, this.itemSize, this.type, false, 0, 0);
-            this.gl.enableVertexAttribArray(attribute); 
-        }
     };
 
 })();
@@ -1369,32 +1380,16 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @prop {number} numItems The number of items that will be drawn.
         @prop {GLEnum} primitive The primitive type being drawn. 
     */
-    PicoGL.DrawCall = function DrawCall(gl, program, primitive) {
+    PicoGL.DrawCall = function DrawCall(gl, program, vertexArray, primitive) {
         this.gl = gl;
         this.program = program || null;
-        this.attributes = {};
+        this.vertexArray = vertexArray || null;
         this.uniforms = {};
         this.textures = {};
         this.textureCount = 0;
         this.indexArray = null;
         this.numItems = 0;
         this.primitive = primitive !== undefined ? primitive : PicoGL.TRIANGLES;
-    };
-
-    /**
-        Set the Arraybuffer to bind to an attribute.
-
-        @method
-        @param {string} name Attribute name.
-        @param {Arraybuffer} buffer Arraybuffer to bind.
-    */
-    PicoGL.DrawCall.prototype.attribute = function(name, buffer) {
-        this.attributes[name] = buffer;
-        if (this.numItems === 0) {
-            this.numItems = buffer.numItems;
-        }
-
-        return this;
     };
 
     /**
@@ -1451,7 +1446,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     */
     PicoGL.DrawCall.prototype.draw = function(state) {
         var uniforms = this.uniforms;
-        var attributes = this.attributes;
         var textures = this.textures;
 
         if (state.program !== this.program) {
@@ -1463,19 +1457,19 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             this.program.uniform(uName, uniforms[uName]);
         }
 
-        for (var aName in attributes) {
-            this.program.attribute(aName, attributes[aName]);
-        }
-
         for (var unit in textures) {
             textures[unit].bind(unit);
         }
 
-        if (this.indexArray) {
-            this.indexArray.bind();
-            this.gl.drawElements(this.primitive, this.numItems * 3, this.indexArray.type, 0);
+        if (state.vertexArray !== this.vertexArray) {
+            this.vertexArray.bind();
+            state.vertexArray = this.vertexArray;
+        }
+
+        if (this.vertexArray.indexed) {
+            this.gl.drawElements(this.primitive, this.vertexArray.numElements, this.vertexArray.indexType, 0);
         } else {
-            this.gl.drawArrays(this.primitive, 0, this.numItems);
+            this.gl.drawArrays(this.primitive, 0, this.vertexArray.numElements);
         }
     };
 

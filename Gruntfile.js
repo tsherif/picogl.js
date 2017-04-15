@@ -63,6 +63,7 @@ module.exports = function(grunt) {
                   "src/picogl.js",
                   "src/app.js",
                   "src/program.js",
+                  "src/vertexarray.js",
                   "src/arraybuffer.js",
                   "src/uniforms.js",
                   "src/texture.js",

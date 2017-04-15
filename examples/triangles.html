@@ -41,28 +41,33 @@
         canvas.height = window.innerHeight;
         
         var app = PicoGL.createApp(canvas)
-        .clearColor(0.0, 0.0, 0.0, 1.0);
+        .clearColor(0.0, 0.0, 0.0, 1.0).debug();
 
-        var vsSource =  "attribute vec4 position;" +
-                        "attribute vec2 uv;" +
+        var vsSource =  "#version 300 es\n" +
+                        "layout(location = 0) in vec4 position;" +
+                        "layout(location = 1) in vec2 uv;" +
                         "uniform vec3 offset;" +
-                        "varying vec2 vUV;" +
+                        "out vec2 vUV;" +
                         "void main() {" +
                         " vUV = uv;" +
                         " gl_Position = position;" +
                         " gl_Position.xyz += offset;" +
                         "}";
-        var fsSource =  "precision highp float;" +
+        var fsSource =  "#version 300 es\n" +
+                        "precision highp float;" +
                         "uniform sampler2D tex;" +
-                        "varying vec2 vUV;" +
+                        "in vec2 vUV;" +
+                        "out vec4 fragColor;" +
                         "void main() {" +
-                        " gl_FragColor = vec4(texture2D(tex, vUV).rgb, 1.0);" +
+                        " fragColor = vec4(texture(tex, vUV).rgb, 1.0);" +
                         "}";
 
-        var fsSource2 =  "precision highp float;" +
+        var fsSource2 = "#version 300 es\n" +
+                        "precision highp float;" +
                         "uniform vec3 color;" +
+                        "out vec4 fragColor;" +
                         "void main() {" +
-                        " gl_FragColor = vec4(color, 1.0);" +
+                        " fragColor = vec4(color, 1.0);" +
                         "}";
                         
         var program = app.createProgram(vsSource, fsSource);
@@ -84,6 +89,13 @@
             0, 1, 2
         ]));
 
+        var triangleArray = app.createVertexArray()
+        .bind()
+        .attributeBuffer(positions, 0)
+        .attributeBuffer(uv, 1)
+        .indexBuffer(indices)
+        .unbind();
+
         var image = new Image();
 
         image.onload = function() {
@@ -95,15 +107,10 @@
             var inc = 0.01;
             var inc2 = -0.01;
 
-            var drawCall = app.createDrawCall(program)
-            .attribute("position", positions)
-            .attribute("uv", uv)
-            .indices(indices)
+            var drawCall = app.createDrawCall(program, triangleArray)
             .texture("tex", texture);
 
-            var drawCall2 = app.createDrawCall(program2)
-            .attribute("position", positions)
-            .indices(indices)
+            var drawCall2 = app.createDrawCall(program2, triangleArray)
             .uniform("color", color);
             
             app.drawCalls([drawCall, drawCall2]);

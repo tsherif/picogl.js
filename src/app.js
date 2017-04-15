@@ -46,7 +46,7 @@
     */
     PicoGL.App = function App(canvas, contextAttributes) {
         this.canvas = canvas;
-        this.gl = canvas.getContext("webgl", contextAttributes) || canvas.getContext("experimental-webgl", contextAttributes);
+        this.gl = canvas.getContext("webgl2", contextAttributes);
         this.width = this.gl.drawingBufferWidth;
         this.height = this.gl.drawingBufferHeight;
         this.currentDrawCalls = null;
@@ -59,12 +59,7 @@
         
         this.gl.viewport(0, 0, this.width, this.height);    
         
-        this.drawBuffersExtension = null;
-        
-        this.maxDrawBuffers = 1;
-        this.drawBuffersEnabled = false;
-        this.depthTexturesEnabled = false;
-        this.floatTexturesEnabled = false;
+        this.colorBufferFloatEnabled = false;
         this.linearFloatTexturesEnabled = false;
 
         this.debugEnabled = false;
@@ -291,27 +286,6 @@
     };
 
     /**
-        Enable the WEBGL_draw_buffers extension. Allows multiple render targets
-        to be drawn in a single draw call, which will be stored in the colorTextures
-        array of a Framebuffer object.
-
-        @method
-        @see Framebuffer
-    */
-    PicoGL.App.prototype.drawBuffers = function() {
-        this.drawBuffersExtension = this.gl.getExtension("WEBGL_draw_buffers");
-        
-        if (this.drawBuffersExtension) {
-            this.maxDrawBuffers = this.gl.getParameter(this.drawBuffersExtension.MAX_DRAW_BUFFERS_WEBGL);
-            this.drawBuffersEnabled = true;
-        } else {
-            console.warn("Extension WEBGL_draw_buffers unavailable. Cannot enable draw buffers.");
-        }
-        
-        return this;
-    };
-
-    /**
         Enable the WEBGL_depth_texture extension. Allows for writing depth values
         to a texture, which will be stored in the depthTexture property of a Framebuffer
         object.
@@ -330,17 +304,17 @@
     };
 
     /**
-        Enable the OES_texture_float extension. Allows for creating float textures as
+        Enable the EXT_color_buffer_float extension. Allows for creating float textures as
         render targets on FrameBuffer objects. E.g. app.createFramebuffer(1, PicoGL.FLOAT).
 
         @method
         @see Framebuffer
     */
-    PicoGL.App.prototype.floatTextures = function() {
-        this.floatTexturesEnabled = !!this.gl.getExtension("OES_texture_float");
+    PicoGL.App.prototype.renderToFloat = function() {
+        this.colorBufferFloatEnabled = !!this.gl.getExtension("EXT_color_buffer_float");
         
-        if (!this.floatTexturesEnabled) {
-            console.warn("Extension OES_texture_float unavailable. Cannot enable float textures.");
+        if (!this.colorBufferFloatEnabled) {
+            console.warn("Extension EXT_color_buffer_float unavailable. Cannot enable float textures.");
         }
         
         return this;
@@ -429,6 +403,10 @@
         PicoGL.compileShader(this.gl, shader, source, this.debugEnabled);
         
         return shader;
+    };
+
+    PicoGL.App.prototype.createVertexArray = function() {
+        return new PicoGL.VertexArray(this.gl);
     };
 
     /**

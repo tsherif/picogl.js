@@ -39,32 +39,16 @@
         @prop {number} numItems The number of items that will be drawn.
         @prop {GLEnum} primitive The primitive type being drawn. 
     */
-    PicoGL.DrawCall = function DrawCall(gl, program, primitive) {
+    PicoGL.DrawCall = function DrawCall(gl, program, vertexArray, primitive) {
         this.gl = gl;
         this.program = program || null;
-        this.attributes = {};
+        this.vertexArray = vertexArray || null;
         this.uniforms = {};
         this.textures = {};
         this.textureCount = 0;
         this.indexArray = null;
         this.numItems = 0;
         this.primitive = primitive !== undefined ? primitive : PicoGL.TRIANGLES;
-    };
-
-    /**
-        Set the Arraybuffer to bind to an attribute.
-
-        @method
-        @param {string} name Attribute name.
-        @param {Arraybuffer} buffer Arraybuffer to bind.
-    */
-    PicoGL.DrawCall.prototype.attribute = function(name, buffer) {
-        this.attributes[name] = buffer;
-        if (this.numItems === 0) {
-            this.numItems = buffer.numItems;
-        }
-
-        return this;
     };
 
     /**
@@ -121,7 +105,6 @@
     */
     PicoGL.DrawCall.prototype.draw = function(state) {
         var uniforms = this.uniforms;
-        var attributes = this.attributes;
         var textures = this.textures;
 
         if (state.program !== this.program) {
@@ -133,19 +116,19 @@
             this.program.uniform(uName, uniforms[uName]);
         }
 
-        for (var aName in attributes) {
-            this.program.attribute(aName, attributes[aName]);
-        }
-
         for (var unit in textures) {
             textures[unit].bind(unit);
         }
 
-        if (this.indexArray) {
-            this.indexArray.bind();
-            this.gl.drawElements(this.primitive, this.numItems * 3, this.indexArray.type, 0);
+        if (state.vertexArray !== this.vertexArray) {
+            this.vertexArray.bind();
+            state.vertexArray = this.vertexArray;
+        }
+
+        if (this.vertexArray.indexed) {
+            this.gl.drawElements(this.primitive, this.vertexArray.numElements, this.vertexArray.indexType, 0);
         } else {
-            this.gl.drawArrays(this.primitive, 0, this.numItems);
+            this.gl.drawArrays(this.primitive, 0, this.vertexArray.numElements);
         }
     };
 

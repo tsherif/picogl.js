@@ -36,28 +36,44 @@
         @prop {boolean} indexArray Whether this is an index array.
         @prop {GLEnum} binding GL binding point (ARRAY_BUFFER or ELEMENT_ARRAY_BUFFER).
     */
-    PicoGL.ArrayBuffer = function ArrayBuffer(gl, type, itemSize, data, indexArray) {
+    PicoGL.VertexArray = function VertexArray(gl) {
         this.gl = gl;
-        this.buffer = gl.createBuffer();
-        this.type = type;
-        this.itemSize = itemSize;
-        this.numItems = data.length / itemSize;
-        this.indexArray = !!indexArray;
-        this.binding = this.indexArray ? gl.ELEMENT_ARRAY_BUFFER : gl.ARRAY_BUFFER;
-
-        gl.bindBuffer(this.binding, this.buffer);
-        gl.bufferData(this.binding, data, gl.STATIC_DRAW);
-        gl.bindBuffer(this.binding, null);
+        this.vertexArray = gl.createVertexArray();
+        this.numElements = 0;
+        this.indexType = null;
+        this.indexed = false;
     };
 
-    /**
-        Bind this array buffer to a program attribute.
+    PicoGL.VertexArray.prototype.attributeBuffer = function(arrayBuffer, attributeIndex) {
+        arrayBuffer.bind();
 
-        @method
-        @param {number} attribute The attribute handle to bind to.
-    */
-    PicoGL.ArrayBuffer.prototype.bind = function() {
-        this.gl.bindBuffer(this.binding, this.buffer);
+        this.gl.vertexAttribPointer(attributeIndex, arrayBuffer.itemSize, arrayBuffer.type, false, 0, 0);
+        this.gl.enableVertexAttribArray(attributeIndex);
+        this.numElements = this.numElements || arrayBuffer.numItems; 
+
+        return this;
+    };
+
+    PicoGL.VertexArray.prototype.indexBuffer = function(arrayBuffer) {
+        arrayBuffer.bind();
+
+        this.numElements = arrayBuffer.numItems * 3;
+        this.indexType = arrayBuffer.type;
+        this.indexed = true;
+
+        return this;
+    };
+
+    PicoGL.VertexArray.prototype.bind = function() {
+        this.gl.bindVertexArray(this.vertexArray);
+
+        return this;
+    };
+
+    PicoGL.VertexArray.prototype.unbind = function() {
+        this.gl.bindVertexArray(null);
+
+        return this;
     };
 
 })();
