@@ -58,6 +58,8 @@
     */
     PicoGL.ArrayBuffer.prototype.bind = function() {
         this.gl.bindBuffer(this.binding, this.buffer);
+
+        return this;
     };
 
 })();

@@ -95,6 +95,8 @@
         }
 
         this.gl.bindTexture(this.gl.TEXTURE_2D, null);
+
+        return this;
     };  
 
     /**
@@ -106,6 +108,8 @@
     PicoGL.Texture.prototype.bind = function(unit) {
         this.gl.activeTexture(unit);
         this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
+
+        return this;
     };   
 
 })();

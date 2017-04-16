@@ -78,6 +78,10 @@
             vec4 lightPosition;
         };
 
+        uniform test {
+            vec2 x;
+        };
+
         uniform sampler2D tex;
         
         in vec3 vPosition;
@@ -136,12 +140,11 @@
 
         var lightPosition = vec3.fromValues(1, 1, 0.5);
 
-        var sceneUniformData = new Float32Array(24);
-        sceneUniformData.set(viewProjMatrix);
-        sceneUniformData.set(eyePosition, 16);
-        sceneUniformData.set(lightPosition, 20);
-
-        var sceneUniformBuffer = app.createUniformBuffer(sceneUniformData);
+        var sceneUniformBuffer = app.createUniformBuffer()
+        .mat4(viewProjMatrix)
+        .vec4(eyePosition)
+        .vec4(lightPosition)
+        .build();
 
 
         var modelMatrix = mat4.create();

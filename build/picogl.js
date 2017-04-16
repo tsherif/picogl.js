@@ -485,8 +485,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         return new PicoGL.ArrayBuffer(this.gl, type, itemSize, data);
     };
 
-    PicoGL.App.prototype.createUniformBuffer = function(data) {
-        return new PicoGL.UniformBuffer(this.gl, data);
+    PicoGL.App.prototype.createUniformBuffer = function() {
+        return new PicoGL.UniformBuffer(this.gl);
     };
 
     /**
@@ -818,6 +818,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     */
     PicoGL.ArrayBuffer.prototype.bind = function() {
         this.gl.bindBuffer(this.binding, this.buffer);
+
+        return this;
     };
 
 })();
@@ -1061,19 +1063,61 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ;(function() {
     "use strict";
 
-    PicoGL.UniformBuffer = function UniformBuffer(gl, data) {
+    PicoGL.UniformBuffer = function UniformBuffer(gl) {
         this.gl = gl;
         this.buffer = gl.createBuffer();
+        this.values = [];
+        this.offsets = [];
+        this.size = 0;
+    };
 
-        gl.bindBuffer(gl.UNIFORM_BUFFER, this.buffer);
-        gl.bindBufferBase(gl.UNIFORM_BUFFER, 0, this.buffer);
-        gl.bufferData(gl.UNIFORM_BUFFER, data, gl.STATIC_DRAW);
-        gl.bindBuffer(gl.UNIFORM_BUFFER, null);
+    PicoGL.UniformBuffer.prototype.vec4 = function(value) {
+        if (this.size % 4 > 0) {
+            this.size += 4 - this.size % 4;
+        }
+        this.offsets.push(this.size);
+        this.values.push(value);
+
+        this.size += 4;
+
+        return this;
+    };
+
+    PicoGL.UniformBuffer.prototype.mat4 = function(value) {
+        if (this.size % 4 > 0) {
+            this.size += 4 - this.size % 4;
+        }
+        this.offsets.push(this.size);
+        this.values.push(value);
+
+        this.size += 16;
+
+        return this;
+    };
+
+    PicoGL.UniformBuffer.prototype.build = function() {
+        if (this.size % 4 > 0) {
+            this.size += 4 - this.size % 4;
+        }
+        var data = new Float32Array(this.size);
+
+        for (var i = 0, len = this.values.length; i < len; ++i) {
+            data.set(this.values[i], this.offsets[i]);
+        }
+
+        this.gl.bindBuffer(this.gl.UNIFORM_BUFFER, this.buffer);
+        this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, 0, this.buffer);
+        this.gl.bufferData(this.gl.UNIFORM_BUFFER, data, this.gl.STATIC_DRAW);
+        this.gl.bindBuffer(this.gl.UNIFORM_BUFFER, null);
+
+        return this;
     };
 
     PicoGL.UniformBuffer.prototype.bind = function(base) {
         this.gl.bindBuffer(this.gl.UNIFORM_BUFFER, this.buffer);
         this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, base, this.buffer);
+
+        return this;
     };
 
 })();
@@ -1151,6 +1195,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         }
 
         this.gl.bindTexture(this.gl.TEXTURE_2D, null);
+
+        return this;
     };  
 
     /**
@@ -1162,6 +1208,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     PicoGL.Texture.prototype.bind = function(unit) {
         this.gl.activeTexture(unit);
         this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
+
+        return this;
     };   
 
 })();
