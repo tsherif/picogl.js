@@ -157,11 +157,9 @@
         var normals = app.createArrayBuffer(PicoGL.FLOAT, 3, box.normals);
 
         var boxArray = app.createVertexArray()
-        .bind()
         .attributeBuffer(0, positions)
         .attributeBuffer(1, uv)
         .attributeBuffer(2, normals)
-        .unbind();
 
         var projMatrix = mat4.create();
         mat4.perspective(projMatrix, Math.PI / 2, canvas.width / canvas.height, 0.1, 10.0);

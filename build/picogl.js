@@ -749,21 +749,27 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     };
 
     PicoGL.VertexArray.prototype.attributeBuffer = function(attributeIndex, arrayBuffer) {
+        this.gl.bindVertexArray(this.vertexArray);
         arrayBuffer.bind();
 
         this.gl.vertexAttribPointer(attributeIndex, arrayBuffer.itemSize, arrayBuffer.type, false, 0, 0);
         this.gl.enableVertexAttribArray(attributeIndex);
         this.numElements = this.numElements || arrayBuffer.numItems; 
 
+        this.gl.bindVertexArray(null);
+
         return this;
     };
 
     PicoGL.VertexArray.prototype.indexBuffer = function(arrayBuffer) {
+        this.gl.bindVertexArray(this.vertexArray);
         arrayBuffer.bind();
 
         this.numElements = arrayBuffer.numItems * 3;
         this.indexType = arrayBuffer.type;
         this.indexed = true;
+
+        this.gl.bindVertexArray(null);
 
         return this;
     };
