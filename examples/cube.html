@@ -38,14 +38,15 @@
     </div>
     <canvas id="gl-canvas"></canvas>
     <script type="x-shader/vs" id="vertex-draw">
-        attribute vec4 position;
-        attribute vec2 uv;
-        attribute vec4 normal;
+        #version 300 es
+        layout(location=0) in vec4 position;
+        layout(location=1) in vec2 uv;
+        layout(location=2) in vec4 normal;
         uniform mat4 uViewProj;
         uniform mat4 uModel;
-        varying vec3 vPosition;
-        varying vec2 vUV;
-        varying vec3 vNormal;
+        out vec3 vPosition;
+        out vec2 vUV;
+        out vec3 vNormal;
         void main() {
             vec4 worldPosition = uModel * position;
             vPosition = worldPosition.xyz;
@@ -55,17 +56,20 @@
         }
     </script>
     <script type="x-shader/vf" id="fragment-draw">
+        #version 300 es
         precision highp float;
 
         uniform vec3 eyePosition;
         uniform vec3 lightPosition;
         uniform sampler2D tex;
         
-        varying vec3 vPosition;
-        varying vec2 vUV;
-        varying vec3 vNormal;
+        in vec3 vPosition;
+        in vec2 vUV;
+        in vec3 vNormal;
+
+        out vec4 fragColor;
         void main() {
-            vec3 color = texture2D(tex, vUV).rgb;
+            vec3 color = texture(tex, vUV).rgb;
 
             vec3 normal = normalize(vNormal);
             vec3 eyeVec = normalize(eyePosition - vPosition);
@@ -74,7 +78,7 @@
             float diffuse = max(dot(lightVec, normal), 0.0);
             float highlight = pow(max(dot(eyeVec, reflect(incidentVec, normal)), 0.0), 100.0);
             float ambient = 0.1;
-            gl_FragColor = vec4(color * (diffuse + highlight + ambient), 1.0);
+            fragColor = vec4(color * (diffuse + highlight + ambient), 1.0);
         }
     </script>
     <script type="text/javascript">
@@ -86,14 +90,21 @@
         .clearColor(0.0, 0.0, 0.0, 1.0)
         .depthTest();
 
-        var vsSource =  document.getElementById("vertex-draw").text;
-        var fsSource =  document.getElementById("fragment-draw").text;
+        var vsSource =  document.getElementById("vertex-draw").text.trim();
+        var fsSource =  document.getElementById("fragment-draw").text.trim();
         var program = app.createProgram(vsSource, fsSource);
 
         var box = utils.createBox({dimensions: [1.0, 1.0, 1.0]})
         var positions = app.createArrayBuffer(PicoGL.FLOAT, 3, box.positions);
         var uv = app.createArrayBuffer(PicoGL.FLOAT, 2, box.uvs);
         var normals = app.createArrayBuffer(PicoGL.FLOAT, 3, box.normals);
+
+        var boxArray = app.createVertexArray()
+        .bind()
+        .attributeBuffer(positions, 0)
+        .attributeBuffer(uv, 1)
+        .attributeBuffer(normals, 2)
+        .unbind();
 
         var projMatrix = mat4.create();
         mat4.perspective(projMatrix, Math.PI / 2, canvas.width / canvas.height, 0.1, 10.0);
@@ -126,10 +137,7 @@
         image.onload = function() {
             var texture = app.createTexture(image);
 
-            var drawCall = app.createDrawCall(program)
-            .attribute("position", positions)
-            .attribute("uv", uv)
-            .attribute("normal", normals)
+            var drawCall = app.createDrawCall(program, boxArray)
             .uniform("uViewProj", viewProjMatrix)
             .uniform("eyePosition", eyePosition)
             .uniform("lightPosition", lightPosition)
