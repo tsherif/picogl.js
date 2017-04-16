@@ -91,8 +91,8 @@
 
         var triangleArray = app.createVertexArray()
         .bind()
-        .attributeBuffer(positions, 0)
-        .attributeBuffer(uv, 1)
+        .attributeBuffer(0, positions)
+        .attributeBuffer(1, uv)
         .indexBuffer(indices)
         .unbind();
 

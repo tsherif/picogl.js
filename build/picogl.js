@@ -47,7 +47,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         }
 
         for (var enumName in gl) {
-            if (enumName.match(/^[A-Z_]+$/) && typeof(gl[enumName]) === "number") {
+            if (enumName.match(/^[A-Z0-9_]+$/) && typeof(gl[enumName]) === "number") {
                 PicoGL[enumName] = gl[enumName];
             }
         }
@@ -485,8 +485,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         return new PicoGL.ArrayBuffer(this.gl, type, itemSize, data);
     };
 
-    PicoGL.App.prototype.createUniformBuffer = function(usage) {
-        return new PicoGL.UniformBuffer(this.gl, usage);
+    PicoGL.App.prototype.createUniformBuffer = function(layout, usage) {
+        return new PicoGL.UniformBuffer(this.gl, layout, usage);
     };
 
     /**
@@ -748,7 +748,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         this.indexed = false;
     };
 
-    PicoGL.VertexArray.prototype.attributeBuffer = function(arrayBuffer, attributeIndex) {
+    PicoGL.VertexArray.prototype.attributeBuffer = function(attributeIndex, arrayBuffer) {
         arrayBuffer.bind();
 
         this.gl.vertexAttribPointer(attributeIndex, arrayBuffer.itemSize, arrayBuffer.type, false, 0, 0);
@@ -1063,68 +1063,53 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ;(function() {
     "use strict";
 
-    PicoGL.UniformBuffer = function UniformBuffer(gl, usage) {
+    PicoGL.UniformBuffer = function UniformBuffer(gl, layout, usage) {
         this.gl = gl;
         this.buffer = gl.createBuffer();
         this.data = null;
-        this.initValues = {};
-        this.offsets = {};
+        this.offsets = new Array(layout.length);
         this.size = 0;
-        this.usage = usage || gl.STATIC_DRAW;
+        this.usage = usage || gl.DYNAMIC_DRAW;
+
+        for (var i = 0, len = layout.length; i < len; ++i) {
+            var type = layout[i];
+            if (type === PicoGL.FLOAT_VEC4) {
+                if (this.size % 4 > 0) {
+                    this.size += 4 - this.size % 4;
+                }
+                this.offsets[i] = this.size;
+
+                this.size += 4;
+            } else if (type === PicoGL.MAT4) {
+                if (this.size % 4 > 0) {
+                    this.size += 4 - this.size % 4;
+                }
+                this.offsets[i] = this.size;
+
+                this.size += 16;
+            }
+        }
+
+        if (this.size % 4 > 0) {
+            this.size += 4 - this.size % 4;
+        }
+
+        this.data = new Float32Array(this.size);
+
+        this.gl.bindBuffer(this.gl.UNIFORM_BUFFER, this.buffer);
+        this.gl.bufferData(this.gl.UNIFORM_BUFFER, this.size * 4, this.usage);
+        this.gl.bindBuffer(this.gl.UNIFORM_BUFFER, null);
     };
 
-    PicoGL.UniformBuffer.prototype.vec4 = function(name, value) {
-        if (this.offsets[name]) {
-            this.data.set(value, this.offsets[name]);
-        } else {
-            if (this.size % 4 > 0) {
-                this.size += 4 - this.size % 4;
-            }
-            this.offsets[name] = this.size;
-            this.initValues[name] = value;
-
-            this.size += 4;
-        }
+    PicoGL.UniformBuffer.prototype.set = function(index, value) {
+        this.data.set(value, this.offsets[index]);
     
-        return this;
-    };
-
-    PicoGL.UniformBuffer.prototype.mat4 = function(name, value) {
-        if (this.offsets[name]) {
-            this.data.set(value, this.offsets[name]);
-        } else {
-            if (this.size % 4 > 0) {
-                this.size += 4 - this.size % 4;
-            }
-            this.offsets[name] = this.size;
-            this.initValues[name] = value;
-
-            this.size += 16;
-        }
-
         return this;
     };
 
     PicoGL.UniformBuffer.prototype.update = function() {
         this.gl.bindBuffer(this.gl.UNIFORM_BUFFER, this.buffer);
-        
-        if (this.data) {
-            this.gl.bufferSubData(this.gl.UNIFORM_BUFFER, 0, this.data);
-        } else {
-            if (this.size % 4 > 0) {
-                this.size += 4 - this.size % 4;
-            }
-            this.data = new Float32Array(this.size);
-
-            for (var name in this.initValues) {
-                this.data.set(this.initValues[name], this.offsets[name]);
-            }
-            
-            this.initValues = null;
-
-            this.gl.bufferData(this.gl.UNIFORM_BUFFER, this.data, this.usage);
-        }
-
+        this.gl.bufferSubData(this.gl.UNIFORM_BUFFER, 0, this.data);
         this.gl.bindBuffer(this.gl.UNIFORM_BUFFER, null);
 
         return this;

@@ -46,7 +46,7 @@
         }
 
         for (var enumName in gl) {
-            if (enumName.match(/^[A-Z_]+$/) && typeof(gl[enumName]) === "number") {
+            if (enumName.match(/^[A-Z0-9_]+$/) && typeof(gl[enumName]) === "number") {
                 PicoGL[enumName] = gl[enumName];
             }
         }

@@ -123,9 +123,9 @@
 
         var boxArray = app.createVertexArray()
         .bind()
-        .attributeBuffer(positions, 0)
-        .attributeBuffer(uv, 1)
-        .attributeBuffer(normals, 2)
+        .attributeBuffer(0, positions)
+        .attributeBuffer(1, uv)
+        .attributeBuffer(2, normals)
         .unbind();
 
         var projMatrix = mat4.create();
@@ -140,13 +140,17 @@
 
         var lightPosition = vec3.fromValues(1, 1, 0.5);
 
-        var sceneUniformBuffer = app.createUniformBuffer(PicoGL.DYNAMIC_DRAW)
-        .mat4("viewProj", viewProjMatrix)
-        .vec4("eyePosition", eyePosition)
-        .vec4("lightPosition", lightPosition)
+        var sceneUniformBuffer = app.createUniformBuffer([
+            PicoGL.MAT4,
+            PicoGL.FLOAT_VEC4,
+            PicoGL.FLOAT_VEC4
+        ])
+        .set(0, viewProjMatrix)
+        .set(1, eyePosition)
+        .set(2, lightPosition)
         .update();
 
-        sceneUniformBuffer.vec4("lightPosition", lightPosition).update();
+        // sceneUniformBuffer.vec4("lightPosition", lightPosition).update();
 
         var modelMatrix = mat4.create();
         var rotateXMatrix = mat4.create();

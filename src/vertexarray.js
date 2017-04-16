@@ -44,7 +44,7 @@
         this.indexed = false;
     };
 
-    PicoGL.VertexArray.prototype.attributeBuffer = function(arrayBuffer, attributeIndex) {
+    PicoGL.VertexArray.prototype.attributeBuffer = function(attributeIndex, arrayBuffer) {
         arrayBuffer.bind();
 
         this.gl.vertexAttribPointer(attributeIndex, arrayBuffer.itemSize, arrayBuffer.type, false, 0, 0);
