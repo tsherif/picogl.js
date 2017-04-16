@@ -24,51 +24,68 @@
 (function() {
     "use strict";
 
-    PicoGL.UniformBuffer = function UniformBuffer(gl) {
+    PicoGL.UniformBuffer = function UniformBuffer(gl, usage) {
         this.gl = gl;
         this.buffer = gl.createBuffer();
-        this.values = [];
-        this.offsets = [];
+        this.data = null;
+        this.initValues = {};
+        this.offsets = {};
         this.size = 0;
+        this.usage = usage || gl.STATIC_DRAW;
     };
 
-    PicoGL.UniformBuffer.prototype.vec4 = function(value) {
-        if (this.size % 4 > 0) {
-            this.size += 4 - this.size % 4;
-        }
-        this.offsets.push(this.size);
-        this.values.push(value);
+    PicoGL.UniformBuffer.prototype.vec4 = function(name, value) {
+        if (this.offsets[name]) {
+            this.data.set(value, this.offsets[name]);
+        } else {
+            if (this.size % 4 > 0) {
+                this.size += 4 - this.size % 4;
+            }
+            this.offsets[name] = this.size;
+            this.initValues[name] = value;
 
-        this.size += 4;
+            this.size += 4;
+        }
+    
+        return this;
+    };
+
+    PicoGL.UniformBuffer.prototype.mat4 = function(name, value) {
+        if (this.offsets[name]) {
+            this.data.set(value, this.offsets[name]);
+        } else {
+            if (this.size % 4 > 0) {
+                this.size += 4 - this.size % 4;
+            }
+            this.offsets[name] = this.size;
+            this.initValues[name] = value;
+
+            this.size += 16;
+        }
 
         return this;
     };
 
-    PicoGL.UniformBuffer.prototype.mat4 = function(value) {
-        if (this.size % 4 > 0) {
-            this.size += 4 - this.size % 4;
-        }
-        this.offsets.push(this.size);
-        this.values.push(value);
-
-        this.size += 16;
-
-        return this;
-    };
-
-    PicoGL.UniformBuffer.prototype.build = function() {
-        if (this.size % 4 > 0) {
-            this.size += 4 - this.size % 4;
-        }
-        var data = new Float32Array(this.size);
-
-        for (var i = 0, len = this.values.length; i < len; ++i) {
-            data.set(this.values[i], this.offsets[i]);
-        }
-
+    PicoGL.UniformBuffer.prototype.update = function() {
         this.gl.bindBuffer(this.gl.UNIFORM_BUFFER, this.buffer);
-        this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, 0, this.buffer);
-        this.gl.bufferData(this.gl.UNIFORM_BUFFER, data, this.gl.STATIC_DRAW);
+        
+        if (this.data) {
+            this.gl.bufferSubData(this.gl.UNIFORM_BUFFER, 0, this.data);
+        } else {
+            if (this.size % 4 > 0) {
+                this.size += 4 - this.size % 4;
+            }
+            this.data = new Float32Array(this.size);
+
+            for (var name in this.initValues) {
+                this.data.set(this.initValues[name], this.offsets[name]);
+            }
+            
+            this.initValues = null;
+
+            this.gl.bufferData(this.gl.UNIFORM_BUFFER, this.data, this.usage);
+        }
+
         this.gl.bindBuffer(this.gl.UNIFORM_BUFFER, null);
 
         return this;

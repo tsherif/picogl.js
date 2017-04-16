@@ -421,8 +421,8 @@
         return new PicoGL.ArrayBuffer(this.gl, type, itemSize, data);
     };
 
-    PicoGL.App.prototype.createUniformBuffer = function() {
-        return new PicoGL.UniformBuffer(this.gl);
+    PicoGL.App.prototype.createUniformBuffer = function(usage) {
+        return new PicoGL.UniformBuffer(this.gl, usage);
     };
 
     /**

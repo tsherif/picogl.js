@@ -140,12 +140,13 @@
 
         var lightPosition = vec3.fromValues(1, 1, 0.5);
 
-        var sceneUniformBuffer = app.createUniformBuffer()
-        .mat4(viewProjMatrix)
-        .vec4(eyePosition)
-        .vec4(lightPosition)
-        .build();
+        var sceneUniformBuffer = app.createUniformBuffer(PicoGL.DYNAMIC_DRAW)
+        .mat4("viewProj", viewProjMatrix)
+        .vec4("eyePosition", eyePosition)
+        .vec4("lightPosition", lightPosition)
+        .update();
 
+        sceneUniformBuffer.vec4("lightPosition", lightPosition).update();
 
         var modelMatrix = mat4.create();
         var rotateXMatrix = mat4.create();
