@@ -78,10 +78,6 @@
             vec4 lightPosition;
         };
 
-        uniform test {
-            vec2 x;
-        };
-
         uniform sampler2D tex;
         
         in vec3 vPosition;
@@ -150,8 +146,6 @@
         .set(2, lightPosition)
         .update();
 
-        // sceneUniformBuffer.vec4("lightPosition", lightPosition).update();
-
         var modelMatrix = mat4.create();
         var rotateXMatrix = mat4.create();
         var rotateYMatrix = mat4.create();
@@ -164,6 +158,8 @@
 
             mat4.perspective(projMatrix, Math.PI / 2, app.width / app.height, 0.1, 10.0);
             mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
+            
+            sceneUniformBuffer.set(0, viewProjMatrix).update();
         }
 
         var image = new Image();
