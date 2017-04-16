@@ -44,6 +44,9 @@
         this.program = program || null;
         this.vertexArray = vertexArray || null;
         this.uniforms = {};
+        this.uniformBlocks = {};
+        this.uniformBlockBases = {};
+        this.uniformBlockCount = 0;
         this.textures = {};
         this.textureCount = 0;
         this.indexArray = null;
@@ -97,6 +100,18 @@
         return this;
     };
 
+    PicoGL.DrawCall.prototype.uniformBlock = function(name, block) {
+        var base = this.uniformBlockBases[name];
+        if (base === undefined) {
+            base = this.uniformBlockCount++;
+            this.uniformBlockBases[name] = base;
+        }
+        
+        this.uniformBlocks[base] = block;
+        
+        return this;
+    };
+
     /**
         Draw something.
 
@@ -105,6 +120,8 @@
     */
     PicoGL.DrawCall.prototype.draw = function(state) {
         var uniforms = this.uniforms;
+        var uniformBlocks = this.uniformBlocks;
+        var uniformBlockBases = this.uniformBlockBases;
         var textures = this.textures;
 
         if (state.program !== this.program) {
@@ -114,6 +131,12 @@
 
         for (var uName in uniforms) {
             this.program.uniform(uName, uniforms[uName]);
+        }
+
+        for (var ubName in uniformBlockBases) {
+            var base = uniformBlockBases[ubName];
+            this.program.uniformBlock(ubName, base);
+            uniformBlocks[base].bind(base);
         }
 
         for (var unit in textures) {

@@ -39,28 +39,45 @@
     <canvas id="gl-canvas"></canvas>
     <script type="x-shader/vs" id="vertex-draw">
         #version 300 es
+
+        layout(std140, column_major) uniform;
+
         layout(location=0) in vec4 position;
         layout(location=1) in vec2 uv;
         layout(location=2) in vec4 normal;
-        uniform mat4 uViewProj;
+        
+        uniform SceneUniforms {
+            mat4 viewProj;
+            vec4 eyePosition;
+            vec4 lightPosition;
+        };
+
         uniform mat4 uModel;
+        
         out vec3 vPosition;
         out vec2 vUV;
         out vec3 vNormal;
+
         void main() {
             vec4 worldPosition = uModel * position;
             vPosition = worldPosition.xyz;
             vUV = uv;
             vNormal = (uModel * normal).xyz;
-            gl_Position = uViewProj * worldPosition;
+            gl_Position = viewProj * worldPosition;
         }
     </script>
     <script type="x-shader/vf" id="fragment-draw">
         #version 300 es
         precision highp float;
 
-        uniform vec3 eyePosition;
-        uniform vec3 lightPosition;
+        layout(std140, column_major) uniform;
+
+        uniform SceneUniforms {
+            mat4 viewProj;
+            vec4 eyePosition;
+            vec4 lightPosition;
+        };
+
         uniform sampler2D tex;
         
         in vec3 vPosition;
@@ -72,8 +89,8 @@
             vec3 color = texture(tex, vUV).rgb;
 
             vec3 normal = normalize(vNormal);
-            vec3 eyeVec = normalize(eyePosition - vPosition);
-            vec3 incidentVec = normalize(vPosition - lightPosition);
+            vec3 eyeVec = normalize(eyePosition.xyz - vPosition);
+            vec3 incidentVec = normalize(vPosition - lightPosition.xyz);
             vec3 lightVec = -incidentVec;
             float diffuse = max(dot(lightVec, normal), 0.0);
             float highlight = pow(max(dot(eyeVec, reflect(incidentVec, normal)), 0.0), 100.0);
@@ -88,7 +105,8 @@
         
         var app = PicoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0)
-        .depthTest();
+        .depthTest()
+        .debug();
 
         var vsSource =  document.getElementById("vertex-draw").text.trim();
         var fsSource =  document.getElementById("fragment-draw").text.trim();
@@ -118,6 +136,14 @@
 
         var lightPosition = vec3.fromValues(1, 1, 0.5);
 
+        var sceneUniformData = new Float32Array(24);
+        sceneUniformData.set(viewProjMatrix);
+        sceneUniformData.set(eyePosition, 16);
+        sceneUniformData.set(lightPosition, 20);
+
+        var sceneUniformBuffer = app.createUniformBuffer(sceneUniformData);
+
+
         var modelMatrix = mat4.create();
         var rotateXMatrix = mat4.create();
         var rotateYMatrix = mat4.create();
@@ -138,9 +164,7 @@
             var texture = app.createTexture(image);
 
             var drawCall = app.createDrawCall(program, boxArray)
-            .uniform("uViewProj", viewProjMatrix)
-            .uniform("eyePosition", eyePosition)
-            .uniform("lightPosition", lightPosition)
+            .uniformBlock("SceneUniforms", sceneUniformBuffer)
             .texture("tex", texture);
 
             app.drawCalls([drawCall]);

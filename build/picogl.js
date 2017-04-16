@@ -485,6 +485,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         return new PicoGL.ArrayBuffer(this.gl, type, itemSize, data);
     };
 
+    PicoGL.App.prototype.createUniformBuffer = function(data) {
+        return new PicoGL.UniformBuffer(this.gl, data);
+    };
+
     /**
         Create an index array buffer.
 
@@ -630,8 +634,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
         this.gl = gl;
         this.program = program;
-        this.attributes = {};
         this.uniforms = {};
+        this.uniformBlocks = {};
 
         var numUniforms = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
 
@@ -693,6 +697,15 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
             this.uniforms[uniformInfo.name] = new UniformClass(gl, uniformHandle);
         }
+
+        var numUniformBlocks = gl.getProgramParameter(program, gl.ACTIVE_UNIFORM_BLOCKS);
+
+        for (i = 0; i < numUniformBlocks; ++i) {
+            var blockName = gl.getActiveUniformBlockName(this.program, i);
+            var blockIndex = gl.getUniformBlockIndex(this.program, blockName);
+
+            this.uniformBlocks[blockName] = blockIndex;
+        }
     };
 
     /**
@@ -704,6 +717,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     */
     PicoGL.Program.prototype.uniform = function(name, value) {
         this.uniforms[name].set(value);
+    };
+
+    PicoGL.Program.prototype.uniformBlock = function(name, base) {
+        this.gl.uniformBlockBinding(this.program, this.uniformBlocks[name], base);
     };
 
 })();
@@ -1038,6 +1055,25 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             this.gl.uniformMatrix4fv(this.handle, false, value);
             this.cache.set(value);
         }
+    };
+
+})();
+;(function() {
+    "use strict";
+
+    PicoGL.UniformBuffer = function UniformBuffer(gl, data) {
+        this.gl = gl;
+        this.buffer = gl.createBuffer();
+
+        gl.bindBuffer(gl.UNIFORM_BUFFER, this.buffer);
+        gl.bindBufferBase(gl.UNIFORM_BUFFER, 0, this.buffer);
+        gl.bufferData(gl.UNIFORM_BUFFER, data, gl.STATIC_DRAW);
+        gl.bindBuffer(gl.UNIFORM_BUFFER, null);
+    };
+
+    PicoGL.UniformBuffer.prototype.bind = function(base) {
+        this.gl.bindBuffer(this.gl.UNIFORM_BUFFER, this.buffer);
+        this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, base, this.buffer);
     };
 
 })();
@@ -1385,6 +1421,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         this.program = program || null;
         this.vertexArray = vertexArray || null;
         this.uniforms = {};
+        this.uniformBlocks = {};
+        this.uniformBlockBases = {};
+        this.uniformBlockCount = 0;
         this.textures = {};
         this.textureCount = 0;
         this.indexArray = null;
@@ -1438,6 +1477,18 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         return this;
     };
 
+    PicoGL.DrawCall.prototype.uniformBlock = function(name, block) {
+        var base = this.uniformBlockBases[name];
+        if (base === undefined) {
+            base = this.uniformBlockCount++;
+            this.uniformBlockBases[name] = base;
+        }
+        
+        this.uniformBlocks[base] = block;
+        
+        return this;
+    };
+
     /**
         Draw something.
 
@@ -1446,6 +1497,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     */
     PicoGL.DrawCall.prototype.draw = function(state) {
         var uniforms = this.uniforms;
+        var uniformBlocks = this.uniformBlocks;
+        var uniformBlockBases = this.uniformBlockBases;
         var textures = this.textures;
 
         if (state.program !== this.program) {
@@ -1455,6 +1508,12 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
         for (var uName in uniforms) {
             this.program.uniform(uName, uniforms[uName]);
+        }
+
+        for (var ubName in uniformBlockBases) {
+            var base = uniformBlockBases[ubName];
+            this.program.uniformBlock(ubName, base);
+            uniformBlocks[base].bind(base);
         }
 
         for (var unit in textures) {

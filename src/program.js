@@ -65,8 +65,8 @@
 
         this.gl = gl;
         this.program = program;
-        this.attributes = {};
         this.uniforms = {};
+        this.uniformBlocks = {};
 
         var numUniforms = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
 
@@ -128,6 +128,15 @@
 
             this.uniforms[uniformInfo.name] = new UniformClass(gl, uniformHandle);
         }
+
+        var numUniformBlocks = gl.getProgramParameter(program, gl.ACTIVE_UNIFORM_BLOCKS);
+
+        for (i = 0; i < numUniformBlocks; ++i) {
+            var blockName = gl.getActiveUniformBlockName(this.program, i);
+            var blockIndex = gl.getUniformBlockIndex(this.program, blockName);
+
+            this.uniformBlocks[blockName] = blockIndex;
+        }
     };
 
     /**
@@ -139,6 +148,10 @@
     */
     PicoGL.Program.prototype.uniform = function(name, value) {
         this.uniforms[name].set(value);
+    };
+
+    PicoGL.Program.prototype.uniformBlock = function(name, base) {
+        this.gl.uniformBlockBinding(this.program, this.uniformBlocks[name], base);
     };
 
 })();

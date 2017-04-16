@@ -421,6 +421,10 @@
         return new PicoGL.ArrayBuffer(this.gl, type, itemSize, data);
     };
 
+    PicoGL.App.prototype.createUniformBuffer = function(data) {
+        return new PicoGL.UniformBuffer(this.gl, data);
+    };
+
     /**
         Create an index array buffer.
 
