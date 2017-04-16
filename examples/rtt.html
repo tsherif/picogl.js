@@ -38,14 +38,25 @@
     </div>
     <canvas id="gl-canvas"></canvas>
     <script type="x-shader/vs" id="vertex-draw">
-        attribute vec4 position;
-        attribute vec2 uv;
-        attribute vec4 normal;
-        uniform mat4 uViewProj;
+        #version 300 es
+        
+        layout(std140, column_major) uniform;
+
+        layout(location=0) in vec4 position;
+        layout(location=1) in vec2 uv;
+        layout(location=2) in vec4 normal;
+        
+        uniform SceneUniforms {
+            mat4 uViewProj;
+            vec4 uEyePosition;
+            vec4 uLightPosition;
+        };
+
         uniform mat4 uModel;
-        varying vec3 vPosition;
-        varying vec2 vUV;
-        varying vec3 vNormal;
+        
+        out vec3 vPosition;
+        out vec2 vUV;
+        out vec3 vNormal;
         void main() {
             vec4 worldPosition = uModel * position;
             vPosition = worldPosition.xyz;
@@ -55,26 +66,35 @@
         }
     </script>
     <script type="x-shader/vf" id="fragment-draw">
+        #version 300 es
         precision highp float;
 
-        uniform vec3 eyePosition;
-        uniform vec3 lightPosition;
+        layout(std140, column_major) uniform;
+        
+        uniform SceneUniforms {
+            mat4 uViewProj;
+            vec4 uEyePosition;
+            vec4 uLightPosition;
+        };
+
         uniform sampler2D tex;
         
-        varying vec3 vPosition;
-        varying vec2 vUV;
-        varying vec3 vNormal;
+        in vec3 vPosition;
+        in vec2 vUV;
+        in vec3 vNormal;
+
+        out vec4 fragColor;
         void main() {
-            vec3 color = texture2D(tex, vUV).rgb;
+            vec3 color = texture(tex, vUV).rgb;
 
             vec3 normal = normalize(vNormal);
-            vec3 eyeVec = normalize(eyePosition - vPosition);
-            vec3 incidentVec = normalize(vPosition - lightPosition);
+            vec3 eyeVec = normalize(uEyePosition.xyz - vPosition);
+            vec3 incidentVec = normalize(vPosition - uLightPosition.xyz);
             vec3 lightVec = -incidentVec;
             float diffuse = max(dot(lightVec, normal), 0.0);
             float highlight = pow(max(dot(eyeVec, reflect(incidentVec, normal)), 0.0), 100.0);
             float ambient = 0.1;
-            gl_FragColor = vec4(color * (diffuse + highlight + ambient), 1.0);
+            fragColor = vec4(color * (diffuse + highlight + ambient), 1.0);
         }
     </script>
     <script type="text/javascript">
@@ -83,10 +103,10 @@
         canvas.height = window.innerHeight;
         
         var app = PicoGL.createApp(canvas)
-        .depthTest();
+        .depthTest().debug();
 
-        var vsSource =  document.getElementById("vertex-draw").text;
-        var fsSource =  document.getElementById("fragment-draw").text;
+        var vsSource =  document.getElementById("vertex-draw").text.trim();
+        var fsSource =  document.getElementById("fragment-draw").text.trim();
         var program = app.createProgram(vsSource, fsSource);
         var rttBuffer = app.createFramebuffer();
 
@@ -95,6 +115,11 @@
         var positions = app.createArrayBuffer(PicoGL.FLOAT, 3, box.positions);
         var uv = app.createArrayBuffer(PicoGL.FLOAT, 2, box.uvs);
         var normals = app.createArrayBuffer(PicoGL.FLOAT, 3, box.normals);
+
+        var boxArray = app.createVertexArray()
+        .attributeBuffer(0, positions)
+        .attributeBuffer(1, uv)
+        .attributeBuffer(2, normals)
 
         // Camera stuff
         var projMatrix = mat4.create();
@@ -109,6 +134,16 @@
 
         var lightPosition = vec3.fromValues(1, 1, 0.5);
 
+        var sceneUniformBuffer = app.createUniformBuffer([
+            PicoGL.MAT4,
+            PicoGL.FLOAT_VEC4,
+            PicoGL.FLOAT_VEC4
+        ])
+        .set(0, viewProjMatrix)
+        .set(1, eyePosition)
+        .set(2, lightPosition)
+        .update();
+
         var modelMatrix = mat4.create();
         var rotateXMatrix = mat4.create();
         var rotateYMatrix = mat4.create();
@@ -119,6 +154,8 @@
 
             mat4.perspective(projMatrix, Math.PI / 2, app.width / app.height, 0.1, 10.0);
             mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
+
+            sceneUniformBuffer.set(0, viewProjMatrix).update();
         };
 
         var image = new Image();
@@ -126,13 +163,8 @@
         image.onload = function() {
             var texture = app.createTexture(image);
 
-            var drawCall = app.createDrawCall(program)
-            .attribute("position", positions)
-            .attribute("uv", uv)
-            .attribute("normal", normals)
-            .uniform("uViewProj", viewProjMatrix)
-            .uniform("eyePosition", eyePosition)
-            .uniform("lightPosition", lightPosition);
+            var drawCall = app.createDrawCall(program, boxArray)
+            .uniformBlock("SceneUniforms", sceneUniformBuffer);
 
             app.drawCalls([drawCall]);
 
