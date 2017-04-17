@@ -52,7 +52,8 @@
         this.currentDrawCalls = null;
 
         this.currentState = {
-            program: null
+            program: null,
+            vertexArray: null
         };
 
         this.clearBits = this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT;
