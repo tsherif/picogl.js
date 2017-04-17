@@ -39,7 +39,9 @@
     <canvas id="gl-canvas"></canvas> 
     <script id="picking-vs" type="x-vertex-shader">
         #version 300 es
+
         layout(location=0) in vec4 aPosition;
+        
         uniform mat4 uMVP;
 
         void main() {
@@ -49,6 +51,7 @@
     <script id="picking-fs" type="x-fragment-shader">
         #version 300 es
         precision highp float;
+
         uniform vec3 uPickColor;
 
         out vec4 fragColor;
