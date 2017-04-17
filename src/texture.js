@@ -38,6 +38,7 @@
 
         this.gl = gl;
         this.texture = gl.createTexture();
+        this.format = options.format || gl.RGBA;
         this.internalFormat = options.internalFormat || gl.RGBA;
         this.type = options.type || gl.UNSIGNED_BYTE;
 
@@ -62,9 +63,9 @@
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, wrapT);
 
         if (array) {
-            gl.texImage2D(gl.TEXTURE_2D, 0, this.internalFormat, width, height, 0, this.internalFormat, this.type, image);
+            gl.texImage2D(gl.TEXTURE_2D, 0, this.internalFormat, width, height, 0, this.format, this.type, image);
         } else {
-            gl.texImage2D(gl.TEXTURE_2D, 0, this.internalFormat, this.internalFormat, this.type, image);
+            gl.texImage2D(gl.TEXTURE_2D, 0, this.internalFormat, this.format, this.type, image);
         }
 
         if (generateMipmaps) {
@@ -89,9 +90,9 @@
         this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
 
         if (width && height) {
-            this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.internalFormat, width, height, 0, this.internalFormat, this.type, image);
+            this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.internalFormat, width, height, 0, this.format, this.type, image);
         } else {
-            this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.internalFormat, this.internalFormat, this.type, image);
+            this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.internalFormat, this.format, this.type, image);
         }
 
         this.gl.bindTexture(this.gl.TEXTURE_2D, null);

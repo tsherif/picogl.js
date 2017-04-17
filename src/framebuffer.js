@@ -39,7 +39,7 @@
         @prop {WebGLDrawBuffers} drawBuffersExtension Hold the draw buffers extension object when enabled.
         @prop {Array} colorAttachments Array of color attachment enums. 
     */
-    PicoGL.Framebuffer = function Framebuffer(gl, drawBuffersExtension, numColorTargets, colorTargetType, depthTexturesEnabled, width, height) {
+    PicoGL.Framebuffer = function Framebuffer(gl, numColorTargets, colorTargetType, width, height) {
         this.gl = gl;
         this.framebuffer = gl.createFramebuffer();
 
@@ -51,12 +51,7 @@
             this.height = gl.drawingBufferHeight;
         }
         
-        this.drawBuffersExtension = drawBuffersExtension;
         this.numColorTargets = numColorTargets !== undefined ? numColorTargets : 1;
-
-        if (!drawBuffersExtension) {
-            this.numColorTargets = 1;
-        }
 
         this.colorTextures = new Array(this.numColorTargets);
         this.colorAttachments = new Array(this.numColorTargets);
@@ -78,45 +73,33 @@
                 generateMipmaps: false
             });
 
-            if (this.drawBuffersExtension) {
-                this.colorAttachments[i] = this.drawBuffersExtension["COLOR_ATTACHMENT" + i + "_WEBGL"];
-            } else {
-                this.colorAttachments[i] = gl.COLOR_ATTACHMENT0;
-            }
+            this.colorAttachments[i] = this.gl["COLOR_ATTACHMENT" + i];
             
             gl.framebufferTexture2D(gl.FRAMEBUFFER, this.colorAttachments[i], gl.TEXTURE_2D, this.colorTextures[i].texture, 0);
         }
 
-        if (depthTexturesEnabled) {
-            this.depthTexture = new PicoGL.Texture(gl, null, {
-                array: true,
-                internalFormat: this.gl.DEPTH_COMPONENT,
-                type: this.gl.UNSIGNED_INT,
-                width: this.width,
-                height: this.height,
-                minFilter: gl.NEAREST,
-                magFilter: gl.NEAREST,
-                wrapS: gl.CLAMP_TO_EDGE,
-                wrapT: gl.CLAMP_TO_EDGE,
-                generateMipmaps: false
-            });
+        this.depthTexture = new PicoGL.Texture(gl, null, {
+            array: true,
+            format: this.gl.DEPTH_COMPONENT,
+            internalFormat: this.gl.DEPTH_COMPONENT16,
+            type: this.gl.UNSIGNED_SHORT,
+            width: this.width,
+            height: this.height,
+            minFilter: gl.NEAREST,
+            magFilter: gl.NEAREST,
+            wrapS: gl.CLAMP_TO_EDGE,
+            wrapT: gl.CLAMP_TO_EDGE,
+            generateMipmaps: false
+        });
 
-            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, this.depthTexture.texture, 0);
-        } else {
-            this.depthBuffer = gl.createRenderbuffer();
-            gl.bindRenderbuffer(gl.RENDERBUFFER, this.depthBuffer);
-            gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, this.width, this.height);
-            gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, this.depthBuffer);
-            gl.bindRenderbuffer(gl.RENDERBUFFER, null);
-        }
+        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, this.depthTexture.texture, 0);
+        
 
         if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE) {
             console.log("Frame buffer error: " + gl.checkFramebufferStatus(gl.FRAMEBUFFER).toString());
         }
 
-        if (this.drawBuffersExtension) {
-            this.drawBuffersExtension.drawBuffersWEBGL(this.colorAttachments);
-        } 
+        this.gl.drawBuffers(this.colorAttachments);
 
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     }; 
