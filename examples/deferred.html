@@ -44,8 +44,10 @@
         layout(location=1) in vec3 aNormal;
         layout(location=2) in vec4 aUV;
         
-        uniform mat4 uMVP;
-        uniform mat4 uModelMatrix;
+        layout(std140) uniform BoxUniforms {
+            mat4 uMVP;
+            mat4 uModelMatrix;
+        };
         
         out vec4 vPosition;
         out vec4 vNormal;
@@ -79,7 +81,11 @@
         
         layout(location=0) in vec4 aPosition;
 
-        uniform mat4 uMVP;
+        layout(std140) uniform LightUniforms {
+            mat4 uMVP;
+            vec4 uLightPosition;
+            vec4 uLightColor;
+        };
 
         void main() {
             gl_Position = uMVP * aPosition;
@@ -89,9 +95,14 @@
         #version 300 es
         precision highp float;
 
-        uniform vec3 uLightPosition;
+        layout(std140) uniform LightUniforms {
+            mat4 uMVP;
+            vec4 uLightPosition;
+            vec4 uLightColor;
+        };
+
         uniform vec3 uEyePosition;
-        uniform vec3 uLightColor;
+
         uniform sampler2D uPositionBuffer;
         uniform sampler2D uNormalBuffer;
         uniform sampler2D uUVBuffer;
@@ -108,14 +119,14 @@
 
 
             vec3 eyeDirection = normalize(uEyePosition - position);
-            vec3 lightVec = uLightPosition - position;
+            vec3 lightVec = uLightPosition.xyz - position;
             float attenuation = 1.0 - length(lightVec);
             vec3 lightDirection = normalize(lightVec);
             vec3 reflectionDirection = reflect(-lightDirection, normal);
             float nDotL = max(dot(lightDirection, normal), 0.0);
-            vec3 diffuse = nDotL * uLightColor;
+            vec3 diffuse = nDotL * uLightColor.rgb;
             float ambient = 0.1;
-            vec3 specular = pow(max(dot(reflectionDirection, eyeDirection), 0.0), 20.0) * uLightColor;
+            vec3 specular = pow(max(dot(reflectionDirection, eyeDirection), 0.0), 20.0) * uLightColor.rgb;
 
             fragColor = vec4(attenuation * (ambient + diffuse + specular) * baseColor.rgb, baseColor.a);
         }
@@ -130,14 +141,17 @@
         .depthTest()
         .depthFunc(PicoGL.LEQUAL)
         .blendFunc(PicoGL.ONE, PicoGL.ONE)
-        .renderToFloat()
-        .debug();
+        .floatRenderTargets().debug();
 
         // Set up gbuffer program
         var geoVsSource =  document.getElementById("geo-vs").text.trim();
         var geoFsSource =  document.getElementById("geo-fs").text.trim();
         var geoProgram = app.createProgram(geoVsSource, geoFsSource);
-        var gBuffer = app.createFramebuffer(3, PicoGL.FLOAT);
+        var gBuffer = app.createFramebuffer(3)
+        .colorTarget(0, PicoGL.Float, PicoGL.RGBA)
+        .colorTarget(1, PicoGL.Float, PicoGL.RGBA)
+        .colorTarget(2, PicoGL.Float, PicoGL.RG)
+        .depthTarget();
 
         // Set up main program
         var vsSource =  document.getElementById("main-vs").text.trim();
@@ -177,7 +191,7 @@
         var image = new Image();
 
         image.onload = function() {
-            if (!app.colorBufferFloatEnabled) {
+            if (!app.floatRenderTargetsEnabled) {
                 document.body.innerHTML = "This example requires extensions EXT_color_buffer_float which are not supported on this system."
                 return;
             }
@@ -191,6 +205,10 @@
                     translate: [0, 0, 0],
                     modelMatrix: mat4.create(),
                     mvpMatrix: mat4.create(),
+                    matrixUniforms: app.createUniformBuffer([
+                        PicoGL.MAT4,
+                        PicoGL.MAT4
+                    ]),
                     drawCall: null
                 },
                 {
@@ -199,6 +217,10 @@
                     translate: [0.8, 0.8, 0.4],
                     modelMatrix: mat4.create(),
                     mvpMatrix: mat4.create(),
+                    matrixUniforms: app.createUniformBuffer([
+                        PicoGL.MAT4,
+                        PicoGL.MAT4
+                    ]),
                     drawCall: null
                 }
             ];
@@ -206,26 +228,31 @@
             var geoDrawCalls = new Array(boxes.length);
 
             for (var i = 0, len = boxes.length; i < len; ++i) {
-                geoDrawCalls[i] = boxes[i].drawCall = app.createDrawCall(geoProgram, boxArray);
+                geoDrawCalls[i] = boxes[i].drawCall = app.createDrawCall(geoProgram, boxArray)
+                .uniformBlock("BoxUniforms", boxes[i].matrixUniforms);
             }
 
 
             var lights = [
                 {
                     position: vec3.fromValues(0, 1, 0.5),
-                    color:    vec3.fromValues(0.8, 0.0, 0.0)
+                    color:    vec3.fromValues(0.8, 0.0, 0.0),
+                    uniforms: null
                 },
                 {
                     position: vec3.fromValues(1, 1, 0.5),
-                    color:    vec3.fromValues(0.0, 0.0, 0.8)
+                    color:    vec3.fromValues(0.0, 0.0, 0.8),
+                    uniforms: null
                 },
                 {
                     position: vec3.fromValues(1, 0, 0.5),
-                    color:    vec3.fromValues(0.0, 0.8, 0.0)
+                    color:    vec3.fromValues(0.0, 0.8, 0.0),
+                    uniforms: null
                 },
                 {
                     position: vec3.fromValues(0.5, 0, 1),
-                    color:    vec3.fromValues(0.0, 0.8, 0.8)
+                    color:    vec3.fromValues(0.0, 0.8, 0.8),
+                    uniforms: null
                 }
             ];
                 
@@ -237,11 +264,19 @@
                 utils.xformMatrix(lightMatrix, lights[i].position);
                 mat4.multiply(lightMatrix, viewProjMatrix, lightMatrix);
 
+                lights[i].uniforms = app.createUniformBuffer([
+                    PicoGL.MAT4,
+                    PicoGL.FLOAT_VEC4,
+                    PicoGL.FLOAT_VEC4
+                ])
+                .set(0, lightMatrix)
+                .set(1, lights[i].position)
+                .set(2, lights[i].color)
+                .update();
+
                 lightDrawCalls[i] = app.createDrawCall(mainProgram, sphereArray)
-                .uniform("uMVP", lightMatrix)
+                .uniformBlock("LightUniforms", lights[i].uniforms)
                 .uniform("uEyePosition", eyePosition)
-                .uniform("uLightPosition", lights[i].position)
-                .uniform("uLightColor", lights[i].color)
                 .texture("uTextureMap", texture)
                 .texture("uPositionBuffer", gBuffer.colorTextures[0])
                 .texture("uNormalBuffer", gBuffer.colorTextures[1])
@@ -261,7 +296,7 @@
                     mat4.multiply(lightMatrix, viewProjMatrix, lightMatrix);
 
 
-                    lightDrawCalls[i].uniform("uMVP", lightMatrix);
+                    lights[i].uniforms.set(0, lightMatrix).update();
                 }
             }
 
@@ -274,8 +309,9 @@
                     utils.xformMatrix(boxes[i].modelMatrix, boxes[i].translate, boxes[i].rotate, boxes[i].scale);
                     mat4.multiply(boxes[i].mvpMatrix, viewProjMatrix, boxes[i].modelMatrix);
                 
-                    boxes[i].drawCall.uniform("uMVP", boxes[i].mvpMatrix)
-                    .uniform("uModelMatrix", boxes[i].modelMatrix);
+                    boxes[i].matrixUniforms.set(0, boxes[i].mvpMatrix)
+                    .set(1, boxes[i].modelMatrix)
+                    .update();
                 }
 
                 // Draw to gBuffer

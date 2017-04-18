@@ -60,7 +60,7 @@
         
         this.gl.viewport(0, 0, this.width, this.height);    
         
-        this.colorBufferFloatEnabled = false;
+        this.floatRenderTargetsEnabled = false;
         this.linearFloatTexturesEnabled = false;
 
         this.debugEnabled = false;
@@ -311,10 +311,10 @@
         @method
         @see Framebuffer
     */
-    PicoGL.App.prototype.renderToFloat = function() {
-        this.colorBufferFloatEnabled = !!this.gl.getExtension("EXT_color_buffer_float");
+    PicoGL.App.prototype.floatRenderTargets = function() {
+        this.floatRenderTargetsEnabled = !!this.gl.getExtension("EXT_color_buffer_float");
         
-        if (!this.colorBufferFloatEnabled) {
+        if (!this.floatRenderTargetsEnabled) {
             console.warn("Extension EXT_color_buffer_float unavailable. Cannot enable float textures.");
         }
         

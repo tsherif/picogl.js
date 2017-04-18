@@ -50,7 +50,24 @@
             }
         }
 
+        PicoGL.FRAMEBUFFER_INTERNAL_FORMAT = {};
+        var UNSIGNED_BYTE = PicoGL.FRAMEBUFFER_INTERNAL_FORMAT[gl.UNSIGNED_BYTE] = {};
+        UNSIGNED_BYTE[gl.RED] = gl.R8;
+        UNSIGNED_BYTE[gl.RG] = gl.RG8;
+        UNSIGNED_BYTE[gl.RGBA] = gl.RGBA;
+
+        var UNSIGNED_SHORT = PicoGL.FRAMEBUFFER_INTERNAL_FORMAT[gl.UNSIGNED_SHORT] = {};
+        UNSIGNED_SHORT[gl.DEPTH_COMPONENT] = gl.DEPTH_COMPONENT16;
+
+        var FLOAT = PicoGL.FRAMEBUFFER_INTERNAL_FORMAT[gl.FLOAT] = {};
+        FLOAT[gl.RED] = gl.R16F;
+        FLOAT[gl.RG] = gl.RG16F;
+        FLOAT[gl.RGBA] = gl.RGBA16F;
+        FLOAT[gl.DEPTH_COMPONENT] = gl.DEPTH_COMPONENT32F;
+
     })();
+
+
 
     PicoGL.DUMMY_OBJECT = {};
 

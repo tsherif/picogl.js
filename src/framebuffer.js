@@ -39,7 +39,7 @@
         @prop {WebGLDrawBuffers} drawBuffersExtension Hold the draw buffers extension object when enabled.
         @prop {Array} colorAttachments Array of color attachment enums. 
     */
-    PicoGL.Framebuffer = function Framebuffer(gl, numColorTargets, colorTargetType, width, height) {
+    PicoGL.Framebuffer = function Framebuffer(gl, numColorTargets, width, height) {
         this.gl = gl;
         this.framebuffer = gl.createFramebuffer();
 
@@ -51,8 +51,6 @@
             this.height = gl.drawingBufferHeight;
         }
 
-        var internalFormat = colorTargetType === gl.FLOAT ? gl.RGBA16F : gl.RGBA;
-        
         this.numColorTargets = numColorTargets !== undefined ? numColorTargets : 1;
 
         this.colorTextures = new Array(this.numColorTargets);
@@ -60,52 +58,72 @@
         this.depthTexture = null;
         this.depthBuffer =  null;
 
-        gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer);
         
         for (var i = 0; i < this.numColorTargets; ++i) {
-            this.colorTextures[i] = new PicoGL.Texture(gl, null, {
-                array: true,
-                type: colorTargetType || gl.UNSIGNED_BYTE,
-                internalFormat: internalFormat,
-                width: this.width,
-                height: this.height,
-                minFilter: gl.NEAREST,
-                magFilter: gl.NEAREST,
-                wrapS: gl.CLAMP_TO_EDGE,
-                wrapT: gl.CLAMP_TO_EDGE,
-                generateMipmaps: false
-            });
-
             this.colorAttachments[i] = this.gl["COLOR_ATTACHMENT" + i];
             
-            gl.framebufferTexture2D(gl.FRAMEBUFFER, this.colorAttachments[i], gl.TEXTURE_2D, this.colorTextures[i].texture, 0);
         }
 
-        this.depthTexture = new PicoGL.Texture(gl, null, {
+        gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer);
+        this.gl.drawBuffers(this.colorAttachments);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    }; 
+
+    PicoGL.Framebuffer.prototype.colorTarget = function(index, type, format, internalFormat) {
+        type = type || this.gl.UNSIGNED_BYTE;
+        format = format || this.gl.RGBA;
+        internalFormat = internalFormat || PicoGL.FRAMEBUFFER_INTERNAL_FORMAT[type][format];
+
+        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.framebuffer);
+
+        this.colorTextures[index] = new PicoGL.Texture(this.gl, null, {
             array: true,
-            format: this.gl.DEPTH_COMPONENT,
-            internalFormat: this.gl.DEPTH_COMPONENT16,
-            type: this.gl.UNSIGNED_SHORT,
+            type: type,
+            format: format,
+            internalFormat: internalFormat,
             width: this.width,
             height: this.height,
-            minFilter: gl.NEAREST,
-            magFilter: gl.NEAREST,
-            wrapS: gl.CLAMP_TO_EDGE,
-            wrapT: gl.CLAMP_TO_EDGE,
+            minFilter: this.gl.NEAREST,
+            magFilter: this.gl.NEAREST,
+            wrapS: this.gl.CLAMP_TO_EDGE,
+            wrapT: this.gl.CLAMP_TO_EDGE,
             generateMipmaps: false
         });
 
-        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, this.depthTexture.texture, 0);
+        this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.colorAttachments[index], this.gl.TEXTURE_2D, this.colorTextures[index].texture, 0);
+    
+        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
+
+        return this;
+    };
+
+    PicoGL.Framebuffer.prototype.depthTarget = function(type, internalFormat) {
+        var format = this.gl.DEPTH_COMPONENT;  
+        type = type || this.gl.UNSIGNED_SHORT;
+        internalFormat = internalFormat || PicoGL.FRAMEBUFFER_INTERNAL_FORMAT[type][format];
+
+        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.framebuffer);
+
+        this.depthTexture = new PicoGL.Texture(this.gl, null, {
+            array: true,
+            format: format,
+            internalFormat: internalFormat,
+            type: type,
+            width: this.width,
+            height: this.height,
+            minFilter: this.gl.NEAREST,
+            magFilter: this.gl.NEAREST,
+            wrapS: this.gl.CLAMP_TO_EDGE,
+            wrapT: this.gl.CLAMP_TO_EDGE,
+            generateMipmaps: false
+        });
+
+        this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.gl.DEPTH_ATTACHMENT, this.gl.TEXTURE_2D, this.depthTexture.texture, 0);
+
+        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
         
-
-        if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE) {
-            console.log("Frame buffer error: " + gl.checkFramebufferStatus(gl.FRAMEBUFFER).toString());
-        }
-
-        this.gl.drawBuffers(this.colorAttachments);
-
-        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-    }; 
+        return this;
+    };
 
     /**
         Bind a new texture as a color target.
@@ -114,7 +132,7 @@
         @param {Texture} texture New texture to bind.
         @param {number} [index=0] Color attachment to bind the texture to.
     */
-    PicoGL.Framebuffer.prototype.colorTexture = function(texture, index) {
+    PicoGL.Framebuffer.prototype.replaceTexture = function(index, texture) {
         index = index || 0;
         this.colorTextures[index] = texture;
 
@@ -123,6 +141,8 @@
             this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.colorAttachments[i], this.gl.TEXTURE_2D, this.colorTextures[i].texture, 0);
         }
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
+      
+        return this;
     };
 
     /**
@@ -158,6 +178,8 @@
         }
 
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
+      
+        return this;
     };
 
 })();
