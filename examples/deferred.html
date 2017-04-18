@@ -89,7 +89,6 @@
         #version 300 es
         precision highp float;
 
-        uniform vec2 uResolution;
         uniform vec3 uLightPosition;
         uniform vec3 uEyePosition;
         uniform vec3 uLightColor;
@@ -100,10 +99,10 @@
 
         out vec4 fragColor;
         void main() {
-            vec2 bufferUV = gl_FragCoord.xy / uResolution;
-            vec3 position = texture(uPositionBuffer, bufferUV).xyz;
-            vec3 normal = normalize(texture(uNormalBuffer, bufferUV).xyz);
-            vec2 uv = texture(uUVBuffer, bufferUV).xy;
+            ivec2 fragCoord = ivec2(gl_FragCoord.xy);
+            vec3 position = texelFetch(uPositionBuffer, fragCoord, 0).xyz;
+            vec3 normal = normalize(texelFetch(uNormalBuffer, fragCoord, 0).xyz);
+            vec2 uv = texelFetch(uUVBuffer, fragCoord, 0).xy;
 
             vec4 baseColor = texture(uTextureMap, uv);
 
@@ -125,7 +124,6 @@
         var canvas = document.getElementById("gl-canvas");
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
-        var resolution = vec2.fromValues(canvas.width, canvas.height);
 
         var app = PicoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0)
@@ -244,7 +242,6 @@
                 .uniform("uEyePosition", eyePosition)
                 .uniform("uLightPosition", lights[i].position)
                 .uniform("uLightColor", lights[i].color)
-                .uniform("uResolution", resolution)
                 .texture("uTextureMap", texture)
                 .texture("uPositionBuffer", gBuffer.colorTextures[0])
                 .texture("uNormalBuffer", gBuffer.colorTextures[1])
@@ -257,9 +254,6 @@
 
                 mat4.perspective(projMatrix, Math.PI / 2, app.canvas.width / app.canvas.height, 0.1, 10.0);
                 mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
-
-                resolution[0] = app.width;
-                resolution[1] = app.height;
 
                 for (var i = 0, len = lights.length; i < len; ++i) {
                     lightMatrix = mat4.create();
