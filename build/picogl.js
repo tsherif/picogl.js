@@ -1119,7 +1119,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
         this.data = new Float32Array(this.size);
 
-        this.gl.bindBuffer(this.gl.UNIFORM_BUFFER, this.buffer);
+        // this.gl.bindBuffer(this.gl.UNIFORM_BUFFER, this.buffer);
+        this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, 0, this.buffer);
         this.gl.bufferData(this.gl.UNIFORM_BUFFER, this.size * 4, this.usage);
         this.gl.bindBuffer(this.gl.UNIFORM_BUFFER, null);
     };
@@ -1131,7 +1132,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     };
 
     PicoGL.UniformBuffer.prototype.update = function() {
-        this.gl.bindBuffer(this.gl.UNIFORM_BUFFER, this.buffer);
+        // this.gl.bindBuffer(this.gl.UNIFORM_BUFFER, this.buffer);
+        this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, 0, this.buffer);
         this.gl.bufferSubData(this.gl.UNIFORM_BUFFER, 0, this.data);
         this.gl.bindBuffer(this.gl.UNIFORM_BUFFER, null);
 
@@ -1139,7 +1141,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     };
 
     PicoGL.UniformBuffer.prototype.bind = function(base) {
-        this.gl.bindBuffer(this.gl.UNIFORM_BUFFER, this.buffer);
+        // this.gl.bindBuffer(this.gl.UNIFORM_BUFFER, this.buffer);
         this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, base, this.buffer);
 
         return this;
