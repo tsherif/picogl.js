@@ -26,7 +26,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     "use strict";
 
     /**
-        
         Global PicoGL module. For convenience, all WebGL enums are stored
         as properties of PicoGL (e.g. PicoGL.FLOAT, PicoGL.ONE_MINUS_SRC_ALPHA).
         
@@ -40,7 +39,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     (function() {
         // Absorb all GL enums for convenience
         var canvas = document.createElement("canvas");
-        var gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+        var gl = canvas.getContext("webgl2");
         
         if (!gl) {
             return;
@@ -561,7 +560,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {number} [height=app.height] Height of the framebuffer.
     */
     PicoGL.App.prototype.createFramebuffer = function(numColorTextures, colorTargetType, width, height) {
-        return new PicoGL.Framebuffer(this.gl, this.drawBuffersExtension, numColorTextures, colorTargetType, this.depthTexturesEnabled, width, height);
+        return new PicoGL.Framebuffer(this.gl, numColorTextures, colorTargetType, width, height);
     };
 
     /**
@@ -1331,6 +1330,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             this.width = gl.drawingBufferWidth;
             this.height = gl.drawingBufferHeight;
         }
+
+        var internalFormat = colorTargetType === gl.FLOAT ? gl.RGBA16F : gl.RGBA;
         
         this.numColorTargets = numColorTargets !== undefined ? numColorTargets : 1;
 
@@ -1345,6 +1346,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             this.colorTextures[i] = new PicoGL.Texture(gl, null, {
                 array: true,
                 type: colorTargetType || gl.UNSIGNED_BYTE,
+                internalFormat: internalFormat,
                 width: this.width,
                 height: this.height,
                 minFilter: gl.NEAREST,

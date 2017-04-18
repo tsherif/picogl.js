@@ -50,6 +50,8 @@
             this.width = gl.drawingBufferWidth;
             this.height = gl.drawingBufferHeight;
         }
+
+        var internalFormat = colorTargetType === gl.FLOAT ? gl.RGBA16F : gl.RGBA;
         
         this.numColorTargets = numColorTargets !== undefined ? numColorTargets : 1;
 
@@ -64,6 +66,7 @@
             this.colorTextures[i] = new PicoGL.Texture(gl, null, {
                 array: true,
                 type: colorTargetType || gl.UNSIGNED_BYTE,
+                internalFormat: internalFormat,
                 width: this.width,
                 height: this.height,
                 minFilter: gl.NEAREST,

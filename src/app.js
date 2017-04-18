@@ -497,7 +497,7 @@
         @param {number} [height=app.height] Height of the framebuffer.
     */
     PicoGL.App.prototype.createFramebuffer = function(numColorTextures, colorTargetType, width, height) {
-        return new PicoGL.Framebuffer(this.gl, this.drawBuffersExtension, numColorTextures, colorTargetType, this.depthTexturesEnabled, width, height);
+        return new PicoGL.Framebuffer(this.gl, numColorTextures, colorTargetType, width, height);
     };
 
     /**

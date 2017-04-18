@@ -25,7 +25,6 @@
     "use strict";
 
     /**
-        
         Global PicoGL module. For convenience, all WebGL enums are stored
         as properties of PicoGL (e.g. PicoGL.FLOAT, PicoGL.ONE_MINUS_SRC_ALPHA).
         
@@ -39,7 +38,7 @@
     (function() {
         // Absorb all GL enums for convenience
         var canvas = document.createElement("canvas");
-        var gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+        var gl = canvas.getContext("webgl2");
         
         if (!gl) {
             return;

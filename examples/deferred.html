@@ -38,35 +38,47 @@
     </div>
     <canvas id="gl-canvas"></canvas>
     <script id="geo-vs" type="x-vertex-shader">
-      attribute vec4 aPosition;
-      attribute vec3 aNormal;
-      attribute vec4 aUV;
-      varying vec4 vPosition;
-      varying vec4 vNormal;
-      varying vec4 vUV;
-      uniform mat4 uMVP;
-      uniform mat4 uModelMatrix;
-      void main() {
-        vPosition = uModelMatrix * aPosition;
-        vNormal = uModelMatrix * vec4(aNormal, 0.0);
-        vUV = aUV;
-        gl_Position = uMVP * aPosition;
-      }
+        #version 300 es
+        
+        layout(location=0) in vec4 aPosition;
+        layout(location=1) in vec3 aNormal;
+        layout(location=2) in vec4 aUV;
+        
+        uniform mat4 uMVP;
+        uniform mat4 uModelMatrix;
+        
+        out vec4 vPosition;
+        out vec4 vNormal;
+        out vec4 vUV;
+        void main() {
+            vPosition = uModelMatrix * aPosition;
+            vNormal = uModelMatrix * vec4(aNormal, 0.0);
+            vUV = aUV;
+            gl_Position = uMVP * aPosition;
+        }
     </script>
     <script id="geo-fs" type="x-fragment-shader">
-        #extension GL_EXT_draw_buffers : require
+        #version 300 es
         precision highp float;
-        varying vec4 vPosition;
-        varying vec4 vNormal;
-        varying vec4 vUV;
+
+        in vec4 vPosition;
+        in vec4 vNormal;
+        in vec4 vUV;
+
+        layout(location=0) out vec4 position;
+        layout(location=1) out vec4 normal;
+        layout(location=2) out vec4 uv;
         void main() {
-            gl_FragData[0] = vPosition;
-            gl_FragData[1] = vec4(normalize(vNormal.xyz), 0.0);
-            gl_FragData[2] = vUV;
+            position = vPosition;
+            normal = vec4(normalize(vNormal.xyz), 0.0);
+            uv = vUV;
         }
     </script> 
     <script id="main-vs" type="x-vertex-shader">
-        attribute vec4 aPosition;
+        #version 300 es
+        
+        layout(location=0) in vec4 aPosition;
+
         uniform mat4 uMVP;
 
         void main() {
@@ -74,7 +86,9 @@
         }
     </script>
     <script id="main-fs" type="x-fragment-shader">
+        #version 300 es
         precision highp float;
+
         uniform vec2 uResolution;
         uniform vec3 uLightPosition;
         uniform vec3 uEyePosition;
@@ -84,13 +98,14 @@
         uniform sampler2D uUVBuffer;
         uniform sampler2D uTextureMap;
 
+        out vec4 fragColor;
         void main() {
             vec2 bufferUV = gl_FragCoord.xy / uResolution;
-            vec3 position = texture2D(uPositionBuffer, bufferUV).xyz;
-            vec3 normal = normalize(texture2D(uNormalBuffer, bufferUV).xyz);
-            vec2 uv = texture2D(uUVBuffer, bufferUV).xy;
+            vec3 position = texture(uPositionBuffer, bufferUV).xyz;
+            vec3 normal = normalize(texture(uNormalBuffer, bufferUV).xyz);
+            vec2 uv = texture(uUVBuffer, bufferUV).xy;
 
-            vec4 baseColor = texture2D(uTextureMap, uv);
+            vec4 baseColor = texture(uTextureMap, uv);
 
 
             vec3 eyeDirection = normalize(uEyePosition - position);
@@ -103,7 +118,7 @@
             float ambient = 0.1;
             vec3 specular = pow(max(dot(reflectionDirection, eyeDirection), 0.0), 20.0) * uLightColor;
 
-            gl_FragColor = vec4(attenuation * (ambient + diffuse + specular) * baseColor.rgb, baseColor.a);
+            fragColor = vec4(attenuation * (ambient + diffuse + specular) * baseColor.rgb, baseColor.a);
         }
     </script> 
     <script type="text/javascript">
@@ -117,29 +132,38 @@
         .depthTest()
         .depthFunc(PicoGL.LEQUAL)
         .blendFunc(PicoGL.ONE, PicoGL.ONE)
-        .drawBuffers()
-        .floatTextures();
+        .renderToFloat()
+        .debug();
 
         // Set up gbuffer program
-        var geoVsSource =  document.getElementById("geo-vs").text;
-        var geoFsSource =  document.getElementById("geo-fs").text;
+        var geoVsSource =  document.getElementById("geo-vs").text.trim();
+        var geoFsSource =  document.getElementById("geo-fs").text.trim();
         var geoProgram = app.createProgram(geoVsSource, geoFsSource);
         var gBuffer = app.createFramebuffer(3, PicoGL.FLOAT);
 
         // Set up main program
-        var vsSource =  document.getElementById("main-vs").text;
-        var fsSource =  document.getElementById("main-fs").text;
+        var vsSource =  document.getElementById("main-vs").text.trim();
+        var fsSource =  document.getElementById("main-fs").text.trim();
         var mainProgram = app.createProgram(vsSource, fsSource);
 
         // Geometry
         var box = utils.createBox();
         var positions = app.createArrayBuffer(PicoGL.FLOAT, 3, box.positions);
-        var uv = app.createArrayBuffer(PicoGL.FLOAT, 2, box.uvs);
         var normals = app.createArrayBuffer(PicoGL.FLOAT, 3, box.normals);
+        var uv = app.createArrayBuffer(PicoGL.FLOAT, 2, box.uvs);
+
+        var boxArray = app.createVertexArray()
+        .attributeBuffer(0, positions)
+        .attributeBuffer(1, normals)
+        .attributeBuffer(2, uv);
 
         var sphere = utils.createSphere();
         var lightPositions = app.createArrayBuffer(PicoGL.FLOAT, 3, sphere.positions);
         var lightIndices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, sphere.indices);
+
+        var sphereArray = app.createVertexArray()
+        .attributeBuffer(0, lightPositions)
+        .indexBuffer(lightIndices);
 
         // Camera stuff
         var projMatrix = mat4.create();
@@ -155,13 +179,12 @@
         var image = new Image();
 
         image.onload = function() {
-            if (!app.drawBuffersEnabled || !app.floatTexturesEnabled) {
-                document.body.innerHTML = "This example requires extensions WEBGL_draw_buffers and OES_texture_float which are not supported on this system."
+            if (!app.colorBufferFloatEnabled) {
+                document.body.innerHTML = "This example requires extensions EXT_color_buffer_float which are not supported on this system."
                 return;
             }
 
             var texture = app.createTexture(image);
-
 
             var boxes = [
                 {
@@ -185,12 +208,7 @@
             var geoDrawCalls = new Array(boxes.length);
 
             for (var i = 0, len = boxes.length; i < len; ++i) {
-                geoDrawCalls[i] = app.createDrawCall(geoProgram)
-                .attribute("aPosition", positions)
-                .attribute("aNormal", normals)
-                .attribute("aUV", uv);
-
-                boxes[i].drawCall = geoDrawCalls[i];
+                geoDrawCalls[i] = boxes[i].drawCall = app.createDrawCall(geoProgram, boxArray);
             }
 
 
@@ -221,9 +239,7 @@
                 utils.xformMatrix(lightMatrix, lights[i].position);
                 mat4.multiply(lightMatrix, viewProjMatrix, lightMatrix);
 
-                lightDrawCalls[i] = app.createDrawCall(mainProgram)
-                .attribute("aPosition", lightPositions)
-                .indices(lightIndices)
+                lightDrawCalls[i] = app.createDrawCall(mainProgram, sphereArray)
                 .uniform("uMVP", lightMatrix)
                 .uniform("uEyePosition", eyePosition)
                 .uniform("uLightPosition", lights[i].position)
