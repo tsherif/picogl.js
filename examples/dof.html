@@ -47,10 +47,10 @@
         layout(location=1) in vec2 aUV;
         layout(location=2) in vec3 aNormal;
         
-        // layout(std140) uniform MatrixUniforms {
-            uniform mat4 uMVP;
-            uniform mat4 uModel;
-        // };
+        layout(std140) uniform MatrixUniforms {
+            mat4 uMVP;
+            mat4 uModel;
+        };
 
         out vec3 vPosition;
         out vec2 vUV;
@@ -68,10 +68,10 @@
         
         precision highp float;
 
-        // layout(std140) uniform SceneUniforms {
-            uniform vec3 uEyePosition;
-            uniform vec3 uLightPosition;    
-        // }
+        layout(std140) uniform SceneUniforms {
+            vec4 uEyePosition;
+            vec4 uLightPosition;    
+        };
 
         uniform sampler2D uTexture;
         
@@ -110,13 +110,13 @@
 
         #define MAX_BLUR 20.0
 
-        // uniform DOFUniforms {
-        uniform vec2  uDepthRange; 
-        uniform vec2  uResolution;
-        uniform float uFocusDistance;
-        uniform float uBlurCoefficient;
-        uniform float uPPM;
-       // };
+        uniform DOFUniforms {
+            vec2  uDepthRange; 
+            vec2  uResolution;
+            float uFocusDistance;
+            float uBlurCoefficient;
+            float uPPM;
+        };
         
         uniform vec2 uTexelOffset;
 
@@ -249,6 +249,34 @@
             mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
         };
 
+        var sceneUniforms = app.createUniformBuffer([
+            PicoGL.FLOAT_VEC4,
+            PicoGL.FLOAT_VEC4
+        ])
+        .set(0, eyePosition)
+        .set(1, lightPosition)
+        .update();;
+
+// uniform vec2  uDepthRange; 
+//             uniform vec2  uResolution;
+//             uniform float uFocusDistance;
+//             uniform float uBlurCoefficient;
+//             uniform float uPPM;
+
+        var dofUniforms = app.createUniformBuffer([
+            PicoGL.FLOAT_VEC2,
+            PicoGL.FLOAT_VEC2,
+            PicoGL.FLOAT,
+            PicoGL.FLOAT,
+            PicoGL.FLOAT
+        ])
+        .set(0, depthRange)
+        .set(1, resolution)
+        .set(2, FOCUS_DISTANCE)
+        .set(3, BLUR_COEFFICIENT)
+        .set(4, PPM)
+        .update();
+
         var image = new Image();
 
         image.onload = function() {
@@ -271,11 +299,15 @@
                         translate: [-i + 2 - rowOffset, 0, -i + 2 + rowOffset],
                         modelMatrix: mat4.create(),
                         mvpMatrix: mat4.create(),
+                        matrixUniforms: app.createUniformBuffer([
+                            PicoGL.MAT4,
+                            PicoGL.MAT4
+                        ]),
                         drawCall: app.createDrawCall(boxProgram, boxArray)
                     }
 
-                    boxes[boxI].drawCall.uniform("uEyePosition", eyePosition)
-                    .uniform("uLightPosition", lightPosition)
+                    boxes[boxI].drawCall.uniformBlock("MatrixUniforms", boxes[boxI].matrixUniforms)
+                    .uniformBlock("SceneUniforms", sceneUniforms)
                     .texture("uTexture", texture);
 
                     boxDrawCalls[boxI] = boxes[boxI].drawCall;
@@ -287,24 +319,16 @@
             var vTexelOffset = vec2.fromValues(0.0, 1.0);
 
             var hBlurDrawCall = app.createDrawCall(blurProgram, quadArray)
-            .uniform("uFocusDistance", FOCUS_DISTANCE)
-            .uniform("uBlurCoefficient", BLUR_COEFFICIENT)
-            .uniform("uPPM", PPM)
+            .uniformBlock("DOFUniforms", dofUniforms)
             .uniform("uTexelOffset", hTexelOffset)
-            .uniform("uDepthRange", depthRange)
-            .uniform("uResolution", resolution)
             .texture("uColor", boxBuffer.colorTextures[0])
             .texture("uDepth", boxBuffer.depthTexture);
 
             var hBlurDrawCalls = [hBlurDrawCall];
 
             var finalDrawCall = app.createDrawCall(blurProgram, quadArray)
-            .uniform("uFocusDistance", FOCUS_DISTANCE)
-            .uniform("uBlurCoefficient", BLUR_COEFFICIENT)
-            .uniform("uPPM", PPM)
-            .uniform("uTexelOffset", vTexelOffset)
-            .uniform("uDepthRange", depthRange)
-            .uniform("uResolution", resolution)
+            .uniformBlock("DOFUniforms", dofUniforms)
+            .uniform("uTexelOffset", hTexelOffset)
             .texture("uColor", hblurBuffer.colorTextures[0])
             .texture("uDepth", boxBuffer.depthTexture);
 
@@ -319,8 +343,7 @@
                     utils.xformMatrix(boxes[i].modelMatrix, boxes[i].translate, boxes[i].rotate, boxes[i].scale);
                     mat4.multiply(boxes[i].mvpMatrix, viewProjMatrix, boxes[i].modelMatrix);
                 
-                    boxes[i].drawCall.uniform("uMVP", boxes[i].mvpMatrix);
-                    boxes[i].drawCall.uniform("uModel", boxes[i].modelMatrix);
+                    boxes[i].matrixUniforms.set(0, boxes[i].mvpMatrix).set(1, boxes[i].modelMatrix).update();
                 }
 
                 // Color and depth

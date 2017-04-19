@@ -1098,6 +1098,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             var type = layout[i];
             if (type === PicoGL.FLOAT) {
                 this.offsets[i] = this.size;
+                this.size++;
             } else if (type === PicoGL.FLOAT_VEC2) {
                 this.size += this.size % 2;
                 this.offsets[i] = this.size;
@@ -1126,8 +1127,12 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     };
 
     PicoGL.UniformBuffer.prototype.set = function(index, value) {
-        this.data.set(value, this.offsets[index]);
-    
+        if (typeof value === "number")  {
+            this.data[this.offsets[index]] = value;
+        } else {
+            this.data.set(value, this.offsets[index]);
+        }
+        
         return this;
     };
 
