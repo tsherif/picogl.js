@@ -70,6 +70,7 @@
     }; 
 
     PicoGL.Framebuffer.prototype.colorTarget = function(index, type, format, internalFormat) {
+        index = index || 0;
         type = type || this.gl.UNSIGNED_BYTE;
         format = format || this.gl.RGBA;
         internalFormat = internalFormat || PicoGL.FRAMEBUFFER_INTERNAL_FORMAT[type][format];

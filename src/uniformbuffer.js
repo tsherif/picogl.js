@@ -34,32 +34,33 @@
 
         for (var i = 0, len = layout.length; i < len; ++i) {
             var type = layout[i];
-            if (type === PicoGL.FLOAT_VEC4) {
-                if (this.size % 4 > 0) {
-                    this.size += 4 - this.size % 4;
-                }
+            if (type === PicoGL.FLOAT) {
+                this.offsets[i] = this.size;
+            } else if (type === PicoGL.FLOAT_VEC2) {
+                this.size += this.size % 2;
+                this.offsets[i] = this.size;
+
+                this.size += 2;
+            } else if (type === PicoGL.FLOAT_VEC4) {
+                this.size += (4 - this.size % 4) % 4;
                 this.offsets[i] = this.size;
 
                 this.size += 4;
             } else if (type === PicoGL.MAT4) {
-                if (this.size % 4 > 0) {
-                    this.size += 4 - this.size % 4;
-                }
+                this.size += (4 - this.size % 4) % 4;
                 this.offsets[i] = this.size;
 
                 this.size += 16;
             }
         }
 
-        if (this.size % 4 > 0) {
-            this.size += 4 - this.size % 4;
-        }
+        this.size += (4 - this.size % 4) % 4;
 
         this.data = new Float32Array(this.size);
 
         this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, 0, this.buffer);
         this.gl.bufferData(this.gl.UNIFORM_BUFFER, this.size * 4, this.usage);
-        this.gl.bindBuffer(this.gl.UNIFORM_BUFFER, null);
+        this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, 0, null);
     };
 
     PicoGL.UniformBuffer.prototype.set = function(index, value) {
@@ -71,7 +72,7 @@
     PicoGL.UniformBuffer.prototype.update = function() {
         this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, 0, this.buffer);
         this.gl.bufferSubData(this.gl.UNIFORM_BUFFER, 0, this.data);
-        this.gl.bindBuffer(this.gl.UNIFORM_BUFFER, null);
+        this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, 0, null);
 
         return this;
     };
