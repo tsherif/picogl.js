@@ -256,7 +256,7 @@
         ])
         .set(0, eyePosition)
         .set(1, lightPosition)
-        .update();;
+        .update();
 
         var dofUniforms = app.createUniformBuffer([
             PicoGL.FLOAT_VEC2,
@@ -295,8 +295,8 @@
                         modelMatrix: mat4.create(),
                         mvpMatrix: mat4.create(),
                         matrixUniforms: app.createUniformBuffer([
-                            PicoGL.MAT4,
-                            PicoGL.MAT4
+                            PicoGL.FLOAT_MAT4,
+                            PicoGL.FLOAT_MAT4
                         ]),
                         drawCall: app.createDrawCall(boxProgram, boxArray)
                     }

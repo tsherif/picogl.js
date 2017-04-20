@@ -1091,6 +1091,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         this.buffer = gl.createBuffer();
         this.data = null;
         this.offsets = new Array(layout.length);
+        this.sizes = new Array(layout.length);
         this.size = 0;
         this.usage = usage || gl.DYNAMIC_DRAW;
 
@@ -1098,22 +1099,29 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             var type = layout[i];
             if (type === PicoGL.FLOAT) {
                 this.offsets[i] = this.size;
+                this.sizes[i] = 1;
+
                 this.size++;
             } else if (type === PicoGL.FLOAT_VEC2) {
                 this.size += this.size % 2;
                 this.offsets[i] = this.size;
+                this.sizes[i] = 2;
 
                 this.size += 2;
             } else if (type === PicoGL.FLOAT_VEC4) {
                 this.size += (4 - this.size % 4) % 4;
                 this.offsets[i] = this.size;
+                this.sizes[i] = 4;
 
                 this.size += 4;
-            } else if (type === PicoGL.MAT4) {
+            } else if (type === PicoGL.FLOAT_MAT4) {
                 this.size += (4 - this.size % 4) % 4;
                 this.offsets[i] = this.size;
+                this.sizes[i] = 16;
 
                 this.size += 16;
+            } else {
+                console.error("Unsupported type for uniform buffer.");
             }
         }
 
@@ -1127,7 +1135,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     };
 
     PicoGL.UniformBuffer.prototype.set = function(index, value) {
-        if (typeof value === "number")  {
+        if (this.sizes[index] === 1)  {
             this.data[this.offsets[index]] = value;
         } else {
             this.data.set(value, this.offsets[index]);

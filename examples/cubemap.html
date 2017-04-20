@@ -181,7 +181,7 @@
         mat4.multiply(skyboxViewProjMatrix, projMatrix, skyboxViewMatrix);
 
         var sceneUniforms = app.createUniformBuffer([
-            PicoGL.MAT4,
+            PicoGL.FLOAT_MAT4,
             PicoGL.FLOAT_VEC4
         ])
         .set(0, viewProjMatrix)
@@ -189,7 +189,7 @@
         .update();
 
         var skyboxSceneUniforms = app.createUniformBuffer([
-            PicoGL.MAT4,
+            PicoGL.FLOAT_MAT4,
             PicoGL.FLOAT_VEC4
         ])
         .set(0, skyboxViewProjMatrix)

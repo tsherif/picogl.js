@@ -206,8 +206,8 @@
                     modelMatrix: mat4.create(),
                     pickColor: vec3.fromValues(1.0, 0.0, 0.0),
                     frameUniforms: app.createUniformBuffer([
-                        PicoGL.MAT4,
-                        PicoGL.MAT4,
+                        PicoGL.FLOAT_MAT4,
+                        PicoGL.FLOAT_MAT4,
                         PicoGL.FLOAT_VEC4
                     ]).set(2, unhighlightColor),
                     mainDrawCall: null,
@@ -221,8 +221,8 @@
                     modelMatrix: mat4.create(),
                     pickColor: vec3.fromValues(0.0, 1.0, 0.0),
                     frameUniforms: app.createUniformBuffer([
-                        PicoGL.MAT4,
-                        PicoGL.MAT4,
+                        PicoGL.FLOAT_MAT4,
+                        PicoGL.FLOAT_MAT4,
                         PicoGL.FLOAT_VEC4
                     ]).set(2, unhighlightColor),
                     mainDrawCall: null,

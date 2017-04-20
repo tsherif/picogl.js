@@ -206,8 +206,8 @@
                     modelMatrix: mat4.create(),
                     mvpMatrix: mat4.create(),
                     matrixUniforms: app.createUniformBuffer([
-                        PicoGL.MAT4,
-                        PicoGL.MAT4
+                        PicoGL.FLOAT_MAT4,
+                        PicoGL.FLOAT_MAT4
                     ]),
                     drawCall: null
                 },
@@ -218,8 +218,8 @@
                     modelMatrix: mat4.create(),
                     mvpMatrix: mat4.create(),
                     matrixUniforms: app.createUniformBuffer([
-                        PicoGL.MAT4,
-                        PicoGL.MAT4
+                        PicoGL.FLOAT_MAT4,
+                        PicoGL.FLOAT_MAT4
                     ]),
                     drawCall: null
                 }
@@ -265,7 +265,7 @@
                 mat4.multiply(lightMatrix, viewProjMatrix, lightMatrix);
 
                 lights[i].uniforms = app.createUniformBuffer([
-                    PicoGL.MAT4,
+                    PicoGL.FLOAT_MAT4,
                     PicoGL.FLOAT_VEC4,
                     PicoGL.FLOAT_VEC4
                 ])
