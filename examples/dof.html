@@ -178,8 +178,6 @@
         var BLUR_COEFFICIENT = FOCAL_LENGTH * MAGNIFICATION / FSTOP;
         var PPM = Math.sqrt(canvas.width * canvas.width + canvas.height * canvas.height) / 35;   
 
-        var screenTexelSize = vec2.fromValues(1.0 / canvas.width, 1.0 / canvas.height);
-        
         var app = PicoGL.createApp(canvas)
         .depthTest()
         .clearColor(0.0, 0.0, 0.0, 1.0).debug()
@@ -247,6 +245,9 @@
 
             mat4.perspective(projMatrix, Math.PI / 2, app.canvas.width / app.canvas.height, 0.1, 10.0);
             mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
+
+            resolution = vec2.fromValues(app.gl.drawingBufferWidth, app.gl.drawingBufferHeight);
+            dofUniforms.set(1, resolution).update();
         };
 
         var sceneUniforms = app.createUniformBuffer([
@@ -256,12 +257,6 @@
         .set(0, eyePosition)
         .set(1, lightPosition)
         .update();;
-
-// uniform vec2  uDepthRange; 
-//             uniform vec2  uResolution;
-//             uniform float uFocusDistance;
-//             uniform float uBlurCoefficient;
-//             uniform float uPPM;
 
         var dofUniforms = app.createUniformBuffer([
             PicoGL.FLOAT_VEC2,
