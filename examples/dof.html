@@ -46,10 +46,12 @@
         layout(location=0) in vec4 aPosition;
         layout(location=1) in vec2 aUV;
         layout(location=2) in vec3 aNormal;
+        layout(location=3) in mat4 uModel;
         
-        layout(std140) uniform MatrixUniforms {
-            mat4 uMVP;
-            mat4 uModel;
+        layout(std140) uniform SceneUniforms {
+            mat4 uViewProj;
+            vec4 uEyePosition;
+            vec4 uLightPosition;    
         };
 
         out vec3 vPosition;
@@ -60,7 +62,7 @@
             vPosition = worldPosition.xyz;
             vUV = aUV;
             vNormal = (uModel * vec4(aNormal, 0.0)).xyz;
-            gl_Position = uMVP * aPosition;
+            gl_Position = uViewProj * worldPosition;
         }
     </script>
     <script type="x-shader/fs" id="fragment-boxes">
@@ -69,6 +71,7 @@
         precision highp float;
 
         layout(std140) uniform SceneUniforms {
+            mat4 uViewProj;
             vec4 uEyePosition;
             vec4 uLightPosition;    
         };
@@ -178,6 +181,10 @@
         var BLUR_COEFFICIENT = FOCAL_LENGTH * MAGNIFICATION / FSTOP;
         var PPM = Math.sqrt(canvas.width * canvas.width + canvas.height * canvas.height) / 35;   
 
+        var NUM_ROWS = 5;
+        var BOXES_PER_ROW = 20;
+        var NUM_BOXES = BOXES_PER_ROW * NUM_ROWS;
+
         var app = PicoGL.createApp(canvas)
         .depthTest()
         .clearColor(0.0, 0.0, 0.0, 1.0).debug()
@@ -203,10 +210,14 @@
         var uv = app.createArrayBuffer(PicoGL.FLOAT, 2, box.uvs);
         var normals = app.createArrayBuffer(PicoGL.FLOAT, 3, box.normals);
 
+        var modelMatrixData = new Float32Array(NUM_BOXES * 16);
+        var modelMatrices = app.createInstancedMatrixBuffer(PicoGL.FLOAT_MAT4, modelMatrixData);
+
         var boxArray = app.createVertexArray()
         .attributeBuffer(0, positions)
         .attributeBuffer(1, uv)
-        .attributeBuffer(2, normals);
+        .attributeBuffer(2, normals)
+        .attributeBuffer(3, modelMatrices);
 
         var quadPositions = app.createArrayBuffer(PicoGL.FLOAT, 2, new Float32Array([
             -1, 1,
@@ -251,11 +262,13 @@
         };
 
         var sceneUniforms = app.createUniformBuffer([
+            PicoGL.FLOAT_MAT4,
             PicoGL.FLOAT_VEC4,
             PicoGL.FLOAT_VEC4
         ])
-        .set(0, eyePosition)
-        .set(1, lightPosition)
+        .set(0, viewProjMatrix)
+        .set(1, eyePosition)
+        .set(2, lightPosition)
         .update();
 
         var dofUniforms = app.createUniformBuffer([
@@ -278,11 +291,11 @@
 
             var texture = app.createTexture(image);
 
-            var NUM_ROWS = 5;
-            var BOXES_PER_ROW = 20;
-            var NUM_BOXES = BOXES_PER_ROW * NUM_ROWS;
+            
             var boxes = new Array(NUM_BOXES);
-            var boxDrawCalls = new Array(NUM_BOXES);
+            var boxesDrawCall = app.createDrawCall(boxProgram, boxArray)
+            .uniformBlock("SceneUniforms", sceneUniforms)
+            .texture("uTexture", texture);
 
             var boxI = 0;
             for (var j = 0; j < NUM_ROWS; ++j) {
@@ -293,19 +306,7 @@
                         rotate: [-boxI / Math.PI, 0, boxI / Math.PI],
                         translate: [-i + 2 - rowOffset, 0, -i + 2 + rowOffset],
                         modelMatrix: mat4.create(),
-                        mvpMatrix: mat4.create(),
-                        matrixUniforms: app.createUniformBuffer([
-                            PicoGL.FLOAT_MAT4,
-                            PicoGL.FLOAT_MAT4
-                        ]),
-                        drawCall: app.createDrawCall(boxProgram, boxArray)
                     }
-
-                    boxes[boxI].drawCall.uniformBlock("MatrixUniforms", boxes[boxI].matrixUniforms)
-                    .uniformBlock("SceneUniforms", sceneUniforms)
-                    .texture("uTexture", texture);
-
-                    boxDrawCalls[boxI] = boxes[boxI].drawCall;
                     ++boxI;
                 }
             }
@@ -336,14 +337,15 @@
                     boxes[i].rotate[1] += 0.02;
 
                     utils.xformMatrix(boxes[i].modelMatrix, boxes[i].translate, boxes[i].rotate, boxes[i].scale);
-                    mat4.multiply(boxes[i].mvpMatrix, viewProjMatrix, boxes[i].modelMatrix);
                 
-                    boxes[i].matrixUniforms.set(0, boxes[i].mvpMatrix).set(1, boxes[i].modelMatrix).update();
+                    modelMatrixData.set(boxes[i].modelMatrix, i * 16);
+
+                    modelMatrices.update(modelMatrixData);
                 }
 
                 // Color and depth
                 app.framebuffer(boxBuffer)
-                .drawCalls(boxDrawCalls)
+                .drawCalls([boxesDrawCall])
                 .clear()
                 .draw()
                 // Horizontal blur

@@ -418,8 +418,20 @@
         @param {number} itemSize Number of elements per vertex.
         @param {ArrayBufferView} data Array buffer data.
     */
-    PicoGL.App.prototype.createArrayBuffer = function(type, itemSize, data) {
-        return new PicoGL.ArrayBuffer(this.gl, type, itemSize, data);
+    PicoGL.App.prototype.createArrayBuffer = function(type, itemSize, data, usage) {
+        return new PicoGL.ArrayBuffer(this.gl, type, itemSize, data, usage);
+    };
+
+    PicoGL.App.prototype.createInstancedArrayBuffer = function(type, itemSize, data, usage) {
+        return new PicoGL.ArrayBuffer(this.gl, type, itemSize, data, usage, false, true);
+    };
+
+    PicoGL.App.prototype.createMatrixBuffer = function(type, data, usage) {
+        return new PicoGL.ArrayBuffer(this.gl, type, null, data, usage);
+    };
+
+    PicoGL.App.prototype.createInstancedMatrixBuffer = function(type, data, usage) {
+        return new PicoGL.ArrayBuffer(this.gl, type, null, data, usage, false, true);
     };
 
     PicoGL.App.prototype.createUniformBuffer = function(layout, usage) {

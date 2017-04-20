@@ -148,11 +148,20 @@
             state.vertexArray = this.vertexArray;
         }
 
-        if (this.vertexArray.indexed) {
-            this.gl.drawElements(this.primitive, this.vertexArray.numElements, this.vertexArray.indexType, 0);
+        if (this.vertexArray.instanced) {
+            if (this.vertexArray.indexed) {
+                this.gl.drawElementsInstanced(this.primitive, this.vertexArray.numElements, this.vertexArray.indexType, 0, this.vertexArray.numInstances);
+            } else {
+                this.gl.drawArraysInstanced(this.primitive, 0, this.vertexArray.numElements, this.vertexArray.numInstances);
+            }
         } else {
-            this.gl.drawArrays(this.primitive, 0, this.vertexArray.numElements);
+            if (this.vertexArray.indexed) {
+                this.gl.drawElements(this.primitive, this.vertexArray.numElements, this.vertexArray.indexType, 0);
+            } else {
+                this.gl.drawArrays(this.primitive, 0, this.vertexArray.numElements);
+            }
         }
+
     };
 
 })();

@@ -42,15 +42,38 @@
         this.numElements = 0;
         this.indexType = null;
         this.indexed = false;
+        this.numInstances = 0;
     };
 
     PicoGL.VertexArray.prototype.attributeBuffer = function(attributeIndex, arrayBuffer) {
         this.gl.bindVertexArray(this.vertexArray);
+        var numRows = arrayBuffer.numRows;
+        
         arrayBuffer.bind();
 
-        this.gl.vertexAttribPointer(attributeIndex, arrayBuffer.itemSize, arrayBuffer.type, false, 0, 0);
-        this.gl.enableVertexAttribArray(attributeIndex);
-        this.numElements = this.numElements || arrayBuffer.numItems; 
+        for (var i = 0; i < numRows; ++i) {
+            this.gl.vertexAttribPointer(
+                attributeIndex + i, 
+                arrayBuffer.itemSize, 
+                arrayBuffer.type, 
+                false, 
+                numRows * arrayBuffer.itemSize * 4, 
+                i * arrayBuffer.itemSize * 4);
+
+            if (arrayBuffer.instanced) {
+                this.gl.vertexAttribDivisor(attributeIndex + i, 1);
+            }
+
+            this.gl.enableVertexAttribArray(attributeIndex + i);
+        }
+        
+        this.instanced = this.instanced || arrayBuffer.instanced;
+
+        if (arrayBuffer.instanced) {
+            this.numInstances = arrayBuffer.numItems; 
+        } else {
+            this.numElements = this.numElements || arrayBuffer.numItems; 
+        }
 
         this.gl.bindVertexArray(null);
 

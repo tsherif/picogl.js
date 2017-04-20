@@ -498,8 +498,20 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {number} itemSize Number of elements per vertex.
         @param {ArrayBufferView} data Array buffer data.
     */
-    PicoGL.App.prototype.createArrayBuffer = function(type, itemSize, data) {
-        return new PicoGL.ArrayBuffer(this.gl, type, itemSize, data);
+    PicoGL.App.prototype.createArrayBuffer = function(type, itemSize, data, usage) {
+        return new PicoGL.ArrayBuffer(this.gl, type, itemSize, data, usage);
+    };
+
+    PicoGL.App.prototype.createInstancedArrayBuffer = function(type, itemSize, data, usage) {
+        return new PicoGL.ArrayBuffer(this.gl, type, itemSize, data, usage, false, true);
+    };
+
+    PicoGL.App.prototype.createMatrixBuffer = function(type, data, usage) {
+        return new PicoGL.ArrayBuffer(this.gl, type, null, data, usage);
+    };
+
+    PicoGL.App.prototype.createInstancedMatrixBuffer = function(type, data, usage) {
+        return new PicoGL.ArrayBuffer(this.gl, type, null, data, usage, false, true);
     };
 
     PicoGL.App.prototype.createUniformBuffer = function(layout, usage) {
@@ -763,15 +775,43 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         this.numElements = 0;
         this.indexType = null;
         this.indexed = false;
+        this.numInstances = 0;
     };
 
     PicoGL.VertexArray.prototype.attributeBuffer = function(attributeIndex, arrayBuffer) {
         this.gl.bindVertexArray(this.vertexArray);
+        var numRows = arrayBuffer.numRows;
+        
         arrayBuffer.bind();
 
-        this.gl.vertexAttribPointer(attributeIndex, arrayBuffer.itemSize, arrayBuffer.type, false, 0, 0);
-        this.gl.enableVertexAttribArray(attributeIndex);
-        this.numElements = this.numElements || arrayBuffer.numItems; 
+        for (var i = 0; i < numRows; ++i) {
+            this.gl.vertexAttribPointer(
+                attributeIndex + i, 
+                arrayBuffer.itemSize, 
+                arrayBuffer.type, 
+                false, 
+                numRows * arrayBuffer.itemSize * 4, 
+                i * arrayBuffer.itemSize * 4);
+
+            if (numRows > 1) {
+                console.log(numRows * arrayBuffer.itemSize * 4, 
+                i * arrayBuffer.itemSize * 4);
+            }
+
+            if (arrayBuffer.instanced) {
+                this.gl.vertexAttribDivisor(attributeIndex + i, 1);
+            }
+
+            this.gl.enableVertexAttribArray(attributeIndex + i);
+        }
+        
+        this.instanced = this.instanced || arrayBuffer.instanced;
+
+        if (arrayBuffer.instanced) {
+            this.numInstances = arrayBuffer.numItems; 
+        } else {
+            this.numElements = this.numElements || arrayBuffer.numItems; 
+        }
 
         this.gl.bindVertexArray(null);
 
@@ -819,18 +859,44 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @prop {boolean} indexArray Whether this is an index array.
         @prop {GLEnum} binding GL binding point (ARRAY_BUFFER or ELEMENT_ARRAY_BUFFER).
     */
-    PicoGL.ArrayBuffer = function ArrayBuffer(gl, type, itemSize, data, indexArray) {
+    PicoGL.ArrayBuffer = function ArrayBuffer(gl, type, itemSize, data, usage, indexArray, instanced) {
+        var numRows = 1;
+        if (type === PicoGL.FLOAT_MAT4) {
+            type = PicoGL.FLOAT;
+            itemSize = 4;
+            numRows = 4;
+        } else if (type === PicoGL.FLOAT_MAT3) {
+            type = PicoGL.FLOAT;
+            itemSize = 3;
+            numRows = 3;
+        }  else if (type === PicoGL.FLOAT_MAT2) {
+            type = PicoGL.FLOAT;
+            itemSize = 2;
+            numRows = 2;
+        }
+
         this.gl = gl;
         this.buffer = gl.createBuffer();
         this.type = type;
         this.itemSize = itemSize;
-        this.numItems = data.length / itemSize;
+        this.numItems = data.length / (itemSize * numRows);
+        this.numRows = numRows;
+        this.usage = usage || gl.STATIC_DRAW;
         this.indexArray = !!indexArray;
+        this.instanced = !!instanced;
         this.binding = this.indexArray ? gl.ELEMENT_ARRAY_BUFFER : gl.ARRAY_BUFFER;
 
         gl.bindBuffer(this.binding, this.buffer);
-        gl.bufferData(this.binding, data, gl.STATIC_DRAW);
+        gl.bufferData(this.binding, data, this.usage);
         gl.bindBuffer(this.binding, null);
+    };
+
+    PicoGL.ArrayBuffer.prototype.update = function(data) {
+        this.gl.bindBuffer(this.binding, this.buffer);
+        this.gl.bufferSubData(this.binding, 0, data);
+        this.gl.bindBuffer(this.binding, null);
+
+        return this;
     };
 
     /**
@@ -1621,11 +1687,20 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             state.vertexArray = this.vertexArray;
         }
 
-        if (this.vertexArray.indexed) {
-            this.gl.drawElements(this.primitive, this.vertexArray.numElements, this.vertexArray.indexType, 0);
+        if (this.vertexArray.instanced) {
+            if (this.vertexArray.indexed) {
+                this.gl.drawElementsInstanced(this.primitive, this.vertexArray.numElements, this.vertexArray.indexType, 0, this.vertexArray.numInstances);
+            } else {
+                this.gl.drawArraysInstanced(this.primitive, 0, this.vertexArray.numElements, this.vertexArray.numInstances);
+            }
         } else {
-            this.gl.drawArrays(this.primitive, 0, this.vertexArray.numElements);
+            if (this.vertexArray.indexed) {
+                this.gl.drawElements(this.primitive, this.vertexArray.numElements, this.vertexArray.indexType, 0);
+            } else {
+                this.gl.drawArrays(this.primitive, 0, this.vertexArray.numElements);
+            }
         }
+
     };
 
 })();
