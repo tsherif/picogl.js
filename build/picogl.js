@@ -527,7 +527,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {ArrayBufferView} data Index array buffer data.
     */
     PicoGL.App.prototype.createIndexBuffer = function(type, itemSize, data) {
-        return new PicoGL.ArrayBuffer(this.gl, type, itemSize, data, true);
+        return new PicoGL.ArrayBuffer(this.gl, type, itemSize, data, null, true);
     };
 
     /**
@@ -792,11 +792,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                 false, 
                 numRows * arrayBuffer.itemSize * 4, 
                 i * arrayBuffer.itemSize * 4);
-
-            if (numRows > 1) {
-                console.log(numRows * arrayBuffer.itemSize * 4, 
-                i * arrayBuffer.itemSize * 4);
-            }
 
             if (arrayBuffer.instanced) {
                 this.gl.vertexAttribDivisor(attributeIndex + i, 1);

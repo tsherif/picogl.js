@@ -447,7 +447,7 @@
         @param {ArrayBufferView} data Index array buffer data.
     */
     PicoGL.App.prototype.createIndexBuffer = function(type, itemSize, data) {
-        return new PicoGL.ArrayBuffer(this.gl, type, itemSize, data, true);
+        return new PicoGL.ArrayBuffer(this.gl, type, itemSize, data, null, true);
     };
 
     /**

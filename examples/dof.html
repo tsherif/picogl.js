@@ -256,6 +256,7 @@
 
             mat4.perspective(projMatrix, Math.PI / 2, app.canvas.width / app.canvas.height, 0.1, 10.0);
             mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
+            sceneUniforms.set(0, viewProjMatrix).update();
 
             resolution = vec2.fromValues(app.gl.drawingBufferWidth, app.gl.drawingBufferHeight);
             dofUniforms.set(1, resolution).update();
@@ -290,7 +291,6 @@
         image.onload = function() {
 
             var texture = app.createTexture(image);
-
             
             var boxes = new Array(NUM_BOXES);
             var boxesDrawCall = app.createDrawCall(boxProgram, boxArray)
