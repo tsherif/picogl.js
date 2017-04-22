@@ -172,10 +172,6 @@
 
         if (this.depthTexture) {
             this.depthTexture.image(null, this.width, this.height);
-        } else {
-            this.gl.bindRenderbuffer(this.gl.RENDERBUFFER, this.depthBuffer);
-            this.gl.renderbufferStorage(this.gl.RENDERBUFFER, this.gl.DEPTH_COMPONENT16, this.width, this.height);
-            this.gl.bindRenderbuffer(this.gl.RENDERBUFFER, null);
         }
 
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);

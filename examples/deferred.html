@@ -81,11 +81,11 @@
         
         layout(location=0) in vec4 aPosition;
 
-        // layout(std140) uniform LightUniforms {
-            uniform mat4 uMVP;
-            uniform vec4 uLightPosition;
-            uniform vec4 uLightColor;
-        // };
+        layout(std140) uniform LightUniforms {
+            mat4 uMVP;
+            vec4 uLightPosition;
+            vec4 uLightColor;
+        };
 
         void main() {
             gl_Position = uMVP * aPosition;
@@ -95,11 +95,11 @@
         #version 300 es
         precision highp float;
 
-        // layout(std140) uniform LightUniforms {
-            uniform mat4 uMVP;
-            uniform vec4 uLightPosition;
-            uniform vec4 uLightColor;
-        // };
+        layout(std140) uniform LightUniforms {
+            mat4 uMVP;
+            vec4 uLightPosition;
+            vec4 uLightColor;
+        };
 
         uniform vec3 uEyePosition;
 
@@ -148,9 +148,9 @@
         var geoFsSource =  document.getElementById("geo-fs").text.trim();
         var geoProgram = app.createProgram(geoVsSource, geoFsSource);
         var gBuffer = app.createFramebuffer(3)
-        .colorTarget(0, PicoGL.Float, PicoGL.RGBA)
-        .colorTarget(1, PicoGL.Float, PicoGL.RGBA)
-        .colorTarget(2, PicoGL.Float, PicoGL.RG)
+        .colorTarget(0, PicoGL.FLOAT)
+        .colorTarget(1, PicoGL.FLOAT)
+        .colorTarget(2, PicoGL.FLOAT, PicoGL.RG)
         .depthTarget();
 
         // Set up main program
