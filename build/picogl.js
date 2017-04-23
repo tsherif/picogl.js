@@ -66,6 +66,15 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         FLOAT[gl.RGBA] = gl.RGBA16F;
         FLOAT[gl.DEPTH_COMPONENT] = gl.DEPTH_COMPONENT32F;
 
+        PicoGL.TYPE_SIZE = {};
+        PicoGL.TYPE_SIZE[gl.BYTE]              = 1;
+        PicoGL.TYPE_SIZE[gl.UNSIGNED_BYTE]     = 1;
+        PicoGL.TYPE_SIZE[gl.SHORT]             = 2;
+        PicoGL.TYPE_SIZE[gl.UNSIGNED_SHORT]    = 2;
+        PicoGL.TYPE_SIZE[gl.INT]               = 4;
+        PicoGL.TYPE_SIZE[gl.UNSIGNED_INT]      = 4;
+        PicoGL.TYPE_SIZE[gl.FLOAT]             = 4;
+
     })();
 
 
@@ -808,15 +817,14 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         
         arrayBuffer.bind();
 
-        //TODO(Tarek): Fix assumtions of 4 bytes/item
         for (var i = 0; i < numRows; ++i) {
             this.gl.vertexAttribPointer(
                 attributeIndex + i, 
                 arrayBuffer.itemSize, 
                 arrayBuffer.type, 
                 false, 
-                numRows * arrayBuffer.itemSize * 4, 
-                i * arrayBuffer.itemSize * 4);
+                numRows * arrayBuffer.itemSize * PicoGL.TYPE_SIZE[arrayBuffer.type], 
+                i * arrayBuffer.itemSize * PicoGL.TYPE_SIZE[arrayBuffer.type]);
 
             if (arrayBuffer.instanced) {
                 this.gl.vertexAttribDivisor(attributeIndex + i, 1);
@@ -940,6 +948,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @prop {boolean} indexArray Whether this is an index array.
         @prop {GLEnum} binding GL binding point (ARRAY_BUFFER or ELEMENT_ARRAY_BUFFER).
     */
+    // TODO(Tarek): Allow buffer to be initialized with size
     PicoGL.ArrayBuffer = function ArrayBuffer(gl, type, itemSize, data, usage, indexArray, instanced) {
         var numRows = 1;
         if (type === PicoGL.FLOAT_MAT4) {
@@ -1243,11 +1252,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         this.size = 0;
         this.usage = usage || gl.DYNAMIC_DRAW;
 
+        // TODO(Tarek): MAT2/MAT3?
         for (var i = 0, len = layout.length; i < len; ++i) {
             var type = layout[i];
             switch(type) { 
                 case PicoGL.FLOAT:
                 case PicoGL.INT:
+                case PicoGL.BOOL:
                     this.offsets[i] = this.size;
                     this.sizes[i] = 1;
                     this.integer[i] = type === PicoGL.INT;
@@ -1256,6 +1267,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                     break;
                 case PicoGL.FLOAT_VEC2:
                 case PicoGL.INT_VEC2:
+                case PicoGL.BOOL_VEC2:
                     this.size += this.size % 2;
                     this.offsets[i] = this.size;
                     this.sizes[i] = 2;
@@ -1265,6 +1277,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                     break;
                 case PicoGL.FLOAT_VEC4:
                 case PicoGL.INT_VEC4:
+                case PicoGL.BOOL_VEC4:
                     this.size += (4 - this.size % 4) % 4;
                     this.offsets[i] = this.size;
                     this.sizes[i] = 4;

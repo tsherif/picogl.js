@@ -36,12 +36,14 @@
         @prop {boolean} indexArray Whether this is an index array.
         @prop {GLEnum} binding GL binding point (ARRAY_BUFFER or ELEMENT_ARRAY_BUFFER).
     */
+    // TODO(Tarek): Allow buffer to be initialized with size
     PicoGL.ArrayBuffer = function ArrayBuffer(gl, type, itemSize, data, usage, indexArray, instanced) {
         var numRows = 1;
         if (type === PicoGL.FLOAT_MAT4) {
             type = PicoGL.FLOAT;
             itemSize = 4;
             numRows = 4;
+        // TODO(Tarek): Make sure MAT3/MAT2 work!
         } else if (type === PicoGL.FLOAT_MAT3) {
             type = PicoGL.FLOAT;
             itemSize = 3;

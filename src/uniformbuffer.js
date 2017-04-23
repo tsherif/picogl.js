@@ -34,6 +34,7 @@
         this.size = 0;
         this.usage = usage || gl.DYNAMIC_DRAW;
 
+        // TODO(Tarek): MAT2/MAT3?
         for (var i = 0, len = layout.length; i < len; ++i) {
             var type = layout[i];
             switch(type) { 

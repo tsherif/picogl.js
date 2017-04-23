@@ -65,6 +65,15 @@
         FLOAT[gl.RGBA] = gl.RGBA16F;
         FLOAT[gl.DEPTH_COMPONENT] = gl.DEPTH_COMPONENT32F;
 
+        PicoGL.TYPE_SIZE = {};
+        PicoGL.TYPE_SIZE[gl.BYTE]              = 1;
+        PicoGL.TYPE_SIZE[gl.UNSIGNED_BYTE]     = 1;
+        PicoGL.TYPE_SIZE[gl.SHORT]             = 2;
+        PicoGL.TYPE_SIZE[gl.UNSIGNED_SHORT]    = 2;
+        PicoGL.TYPE_SIZE[gl.INT]               = 4;
+        PicoGL.TYPE_SIZE[gl.UNSIGNED_INT]      = 4;
+        PicoGL.TYPE_SIZE[gl.FLOAT]             = 4;
+
     })();
 
 

@@ -54,15 +54,14 @@
         
         arrayBuffer.bind();
 
-        //TODO(Tarek): Fix assumtions of 4 bytes/item
         for (var i = 0; i < numRows; ++i) {
             this.gl.vertexAttribPointer(
                 attributeIndex + i, 
                 arrayBuffer.itemSize, 
                 arrayBuffer.type, 
                 false, 
-                numRows * arrayBuffer.itemSize * 4, 
-                i * arrayBuffer.itemSize * 4);
+                numRows * arrayBuffer.itemSize * PicoGL.TYPE_SIZE[arrayBuffer.type], 
+                i * arrayBuffer.itemSize * PicoGL.TYPE_SIZE[arrayBuffer.type]);
 
             if (arrayBuffer.instanced) {
                 this.gl.vertexAttribDivisor(attributeIndex + i, 1);
