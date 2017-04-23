@@ -37,13 +37,14 @@
         </div>
     </div>
     <canvas id="gl-canvas"></canvas>
-    <script id="update-vs" type="x-shader/vs">
+    <script id="main-vs" type="x-shader/vs">
         #version 300 es
 
         layout(std140) uniform;
 
         layout(location=0) in vec3 aPosition;
         layout(location=1) in vec3 aVelocity;
+        layout(location=2) in vec3 aColor;
 
         uniform Mass {
             vec4 mass1Position;
@@ -56,6 +57,7 @@
     
         out vec3 vPosition;
         out vec3 vVelocity;
+        out vec3 vColor;
         void main() {
             vec3 position = aPosition;
             vec3 velocity = aVelocity;
@@ -77,28 +79,11 @@
 
             vPosition = position + velocity;
             vVelocity = velocity;
-        }
-    </script>
-    <script id="update-fs" type="x-fragment-shader">
-        #version 300 es
-        precision highp float;
 
-        void main() {
-            
-        }
-    </script>
-    <script id="main-vs" type="x-vertex-shader">
-        #version 300 es
 
-        layout(location=0) in vec4 position;
-        layout(location=2) in vec3 aColor;
-        
-        out vec3 vColor;
-
-        void main() {
             vColor = aColor;
             gl_PointSize = 2.0;
-            gl_Position = position;
+            gl_Position = vec4(position, 1.0);
         }
     </script>
     <script id="main-fs" type="x-fragment-shader">
@@ -129,8 +114,9 @@
         var colorData = new Float32Array(NUM_PARTICLES * 3);
 
         // Set up main program
-        var updateVsSource = document.getElementById("update-vs").text.trim();
-        var updateProgram = app.createTransformFeedbackProgram(updateVsSource, ["vPosition", "vVelocity"]);
+        var vsSource = document.getElementById("main-vs").text.trim();
+        var fsSource = document.getElementById("main-fs").text.trim();
+        var program = app.createTransformFeedbackProgram(vsSource, fsSource, ["vPosition", "vVelocity"]);
 
         for (var i = 0; i < NUM_PARTICLES; ++i) {
             var vec3i = i * 3;
@@ -143,11 +129,6 @@
             colorData[vec3i + 1] = Math.random();
             colorData[vec3i + 2] = Math.random();
         }
-
-        // Set up main program
-        var vsSource = document.getElementById("main-vs").text.trim();
-        var fsSource = document.getElementById("main-fs").text.trim();
-        var mainProgram = app.createProgram(vsSource, fsSource);
 
         var positions1 = app.createArrayBuffer(PicoGL.FLOAT, 3, positionData);
         var velocities1 = app.createArrayBuffer(PicoGL.FLOAT, 3, new Float32Array(positionData.length));
@@ -199,28 +180,17 @@
             mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
         };
 
-        var updateDrawCalls = [
-            app.createDrawCall(updateProgram, PicoGL.POINTS)
+        var drawCalls = [
+            app.createDrawCall(program, PicoGL.POINTS)
             .transformFeedback(transformFeedback)
             .uniformBlock("Mass", massUniforms)
         ];
 
-        var mainDrawcalls = [
-            app.createDrawCall(mainProgram, PicoGL.POINTS)
-        ];
 
         function draw() {      
 
             // Main draw
-            app.drawCalls(updateDrawCalls)
-            .noRasterize()
-            .clear()
-            .draw();
-            
-            mainDrawcalls[0].vertexArray(transformFeedback.outputVertexArray);
-
-            app.drawCalls(mainDrawcalls)
-            .rasterize()
+            app.drawCalls(drawCalls)
             .clear()
             .draw();
 

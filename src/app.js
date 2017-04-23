@@ -405,13 +405,13 @@
         return new PicoGL.Program(this.gl, vsSource, fsSource, null, this.debugEnabled);
     };
 
-    PicoGL.App.prototype.createTransformFeedbackProgram = function(vsSource, xformFeedbackVars) {
+    PicoGL.App.prototype.createTransformFeedbackProgram = function(vsSource, fsSource, xformFeedbackVars) {
         if (!this.emptyFragmentShader) {
             this.emptyFragmentShader = this.gl.createShader(this.gl.FRAGMENT_SHADER);
             this.gl.shaderSource(this.emptyFragmentShader, "#version 300 es\nvoid main() {}");
             this.gl.compileShader(this.emptyFragmentShader);
         }
-        return new PicoGL.Program(this.gl, vsSource, this.emptyFragmentShader, xformFeedbackVars, this.debugEnabled);
+        return new PicoGL.Program(this.gl, vsSource, fsSource, xformFeedbackVars, this.debugEnabled);
     };
 
     /**
