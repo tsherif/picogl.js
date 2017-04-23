@@ -39,6 +39,7 @@
             switch(type) { 
                 case PicoGL.FLOAT:
                 case PicoGL.INT:
+                case PicoGL.BOOL:
                     this.offsets[i] = this.size;
                     this.sizes[i] = 1;
                     this.integer[i] = type === PicoGL.INT;
@@ -47,6 +48,7 @@
                     break;
                 case PicoGL.FLOAT_VEC2:
                 case PicoGL.INT_VEC2:
+                case PicoGL.BOOL_VEC2:
                     this.size += this.size % 2;
                     this.offsets[i] = this.size;
                     this.sizes[i] = 2;
@@ -56,6 +58,7 @@
                     break;
                 case PicoGL.FLOAT_VEC4:
                 case PicoGL.INT_VEC4:
+                case PicoGL.BOOL_VEC4:
                     this.size += (4 - this.size % 4) % 4;
                     this.offsets[i] = this.size;
                     this.sizes[i] = 4;
