@@ -275,15 +275,13 @@
 
             var texture = app.createTexture(image);
 
-            var sphereDrawCall = app.createDrawCall(accumProgram)
-            .vertexArray(sphereArray)
+            var sphereDrawCall = app.createDrawCall(accumProgram, sphereArray)
             .uniformBlock("SceneUniforms", sceneUniforms)
             .texture("uTexture", texture);
 
             var sphereDrawCalls = [sphereDrawCall];
 
-            var accumDrawCall = app.createDrawCall(drawProgram)
-            .vertexArray(quadArray)
+            var accumDrawCall = app.createDrawCall(drawProgram, quadArray)
             .texture("uAccumulate", accumBuffer.colorTextures[0])
             .texture("uAccumulateAlpha", accumBuffer.colorTextures[1]);
 

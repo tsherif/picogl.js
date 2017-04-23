@@ -38,11 +38,18 @@
         @prop {ArrayBuffer} indexArray Index array to use for indexed drawing.
         @prop {GLEnum} primitive The primitive type being drawn. 
     */
-    PicoGL.DrawCall = function DrawCall(gl, program, primitive) {
+    PicoGL.DrawCall = function DrawCall(gl, program, geometry, primitive) {
         this.gl = gl;
-        this.currentProgram = program || null;
-        this.currentVertexArray = null;
-        this.currentTransformFeedback = null;
+        this.currentProgram = program;
+        
+        if (program.transformFeedback) {
+            this.currentVertexArray = null;
+            this.currentTransformFeedback = geometry;
+        } else {
+            this.currentVertexArray = geometry;
+            this.currentTransformFeedback = null;    
+        }
+        
         this.uniforms = {};
         this.uniformBlocks = {};
         this.uniformBlockBases = {};
@@ -51,25 +58,6 @@
         this.textureCount = 0;
         this.indexArray = null;
         this.primitive = primitive !== undefined ? primitive : PicoGL.TRIANGLES;
-    };
-
-    /**
-        Set the value for a uniform.
-
-        @method
-        @param {string} name Uniform name.
-        @param {any} value Uniform value.
-    */
-    PicoGL.DrawCall.prototype.vertexArray = function(vertexArray) {
-        this.currentVertexArray = vertexArray;
-
-        return this;
-    };
-
-    PicoGL.DrawCall.prototype.transformFeedback = function(transformFeedback) {
-        this.currentTransformFeedback = transformFeedback;
-
-        return this;
     };
 
     /**

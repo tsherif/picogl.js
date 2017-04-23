@@ -105,12 +105,10 @@
             var inc = 0.01;
             var inc2 = -0.01;
 
-            var drawCall = app.createDrawCall(program)
-            .vertexArray(triangleArray)
+            var drawCall = app.createDrawCall(program, triangleArray)
             .texture("tex", texture);
 
-            var drawCall2 = app.createDrawCall(program2)
-            .vertexArray(triangleArray)
+            var drawCall2 = app.createDrawCall(program2, triangleArray)
             .uniform("color", color);
             
             app.drawCalls([drawCall, drawCall2]);

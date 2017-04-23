@@ -235,13 +235,11 @@
                     posZ: posZ
                 })
 
-                var skyboxDrawcall = app.createDrawCall(skyboxProgram)
-                .vertexArray(boxArray)
+                var skyboxDrawcall = app.createDrawCall(skyboxProgram, boxArray)
                 .uniformBlock("SceneUniforms", skyboxSceneUniforms)
                 .texture("cubemap", cubemap);
 
-                var drawCall = app.createDrawCall(program)
-                .vertexArray(boxArray)
+                var drawCall = app.createDrawCall(program, boxArray)
                 .uniformBlock("SceneUniforms", sceneUniforms)
                 .texture("tex", texture)
                 .texture("cubemap", cubemap);

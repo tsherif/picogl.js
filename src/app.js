@@ -401,16 +401,7 @@
         @param {WebGLShader|string} vertexShader Vertex shader object or source code.
         @param {WebGLShader|string} fragmentShader Fragment shader object or source code.
     */
-    PicoGL.App.prototype.createProgram = function(vsSource, fsSource) {
-        return new PicoGL.Program(this.gl, vsSource, fsSource, null, this.debugEnabled);
-    };
-
-    PicoGL.App.prototype.createTransformFeedbackProgram = function(vsSource, fsSource, xformFeedbackVars) {
-        if (!this.emptyFragmentShader) {
-            this.emptyFragmentShader = this.gl.createShader(this.gl.FRAGMENT_SHADER);
-            this.gl.shaderSource(this.emptyFragmentShader, "#version 300 es\nvoid main() {}");
-            this.gl.compileShader(this.emptyFragmentShader);
-        }
+    PicoGL.App.prototype.createProgram = function(vsSource, fsSource, xformFeedbackVars) {
         return new PicoGL.Program(this.gl, vsSource, fsSource, xformFeedbackVars, this.debugEnabled);
     };
 
@@ -547,8 +538,8 @@
         @param {Program} program The program to use for this DrawCall.
         @param {GLEnum} [primitive=TRIANGLES] Type of primitive to draw.
     */
-    PicoGL.App.prototype.createDrawCall = function(program, primitive) {
-        return new PicoGL.DrawCall(this.gl, program, primitive);
+    PicoGL.App.prototype.createDrawCall = function(program, geometry, primitive) {
+        return new PicoGL.DrawCall(this.gl, program, geometry, primitive);
     };
 
     /** 

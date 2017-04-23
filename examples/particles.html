@@ -116,7 +116,7 @@
         // Set up main program
         var vsSource = document.getElementById("main-vs").text.trim();
         var fsSource = document.getElementById("main-fs").text.trim();
-        var program = app.createTransformFeedbackProgram(vsSource, fsSource, ["vPosition", "vVelocity"]);
+        var program = app.createProgram(vsSource, fsSource, ["vPosition", "vVelocity"]);
 
         for (var i = 0; i < NUM_PARTICLES; ++i) {
             var vec3i = i * 3;
@@ -181,8 +181,7 @@
         };
 
         var drawCalls = [
-            app.createDrawCall(program, PicoGL.POINTS)
-            .transformFeedback(transformFeedback)
+            app.createDrawCall(program, transformFeedback, PicoGL.POINTS)
             .uniformBlock("Mass", massUniforms)
         ];
 

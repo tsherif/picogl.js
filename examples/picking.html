@@ -139,7 +139,7 @@
         var pickingVsSource = document.getElementById("picking-vs").text.trim();
         var pickingFsSource = document.getElementById("picking-fs").text.trim();
         var pickingProgram = app.createProgram(pickingVsSource, pickingFsSource);
-        var pickingBuffer = app.createFramebuffer();
+        var pickingBuffer = app.createFramebuffer().colorTarget().depthTarget();
 
         // Set up main program
         var vsSource = document.getElementById("main-vs").text.trim();
@@ -234,12 +234,10 @@
             var mainDrawCalls = new Array(boxes.length);
 
             for (var i = 0, len = boxes.length; i < len; ++i) {
-                pickingDrawCalls[i] = app.createDrawCall(pickingProgram)
-                .vertexArray(boxArray)
+                pickingDrawCalls[i] = app.createDrawCall(pickingProgram, boxArray)
                 .uniform("uPickColor", boxes[i].pickColor);
 
-                mainDrawCalls[i] = app.createDrawCall(mainProgram)
-                .vertexArray(boxArray)
+                mainDrawCalls[i] = app.createDrawCall(mainProgram, boxArray)
                 .uniformBlock("SceneUniforms", sceneUniforms)
                 .uniformBlock("FrameUniforms", boxes[i].frameUniforms)
                 .texture("uTextureMap", texture);

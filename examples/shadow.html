@@ -207,11 +207,9 @@
             var mainDrawCalls = new Array(boxes.length);
 
             for (var i = 0, len = boxes.length; i < len; ++i) {
-                shadowDrawCalls[i] = app.createDrawCall(shadowProgram)
-                .vertexArray(boxArray)
+                shadowDrawCalls[i] = app.createDrawCall(shadowProgram, boxArray)
 
-                mainDrawCalls[i] = app.createDrawCall(mainProgram)
-                .vertexArray(boxArray)
+                mainDrawCalls[i] = app.createDrawCall(mainProgram, boxArray)
                 .uniform("uLightPosition", lightPosition)
                 .uniform("uEyePosition", eyePosition)
                 .texture("uTextureMap", texture)
