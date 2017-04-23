@@ -39,7 +39,7 @@
         @prop {WebGLDrawBuffers} drawBuffersExtension Hold the draw buffers extension object when enabled.
         @prop {Array} colorAttachments Array of color attachment enums. 
     */
-    PicoGL.Framebuffer = function Framebuffer(gl, numColorTargets, width, height) {
+    PicoGL.Framebuffer = function Framebuffer(gl, width, height) {
         this.gl = gl;
         this.framebuffer = gl.createFramebuffer();
 
@@ -51,10 +51,10 @@
             this.height = gl.drawingBufferHeight;
         }
 
-        this.numColorTargets = numColorTargets !== undefined ? numColorTargets : 1;
+        this.numColorTargets = 0;
 
-        this.colorTextures = new Array(this.numColorTargets);
-        this.colorAttachments = new Array(this.numColorTargets);
+        this.colorTextures = [];
+        this.colorAttachments = [];
         this.depthTexture = null;
         this.depthBuffer =  null;
 
@@ -75,6 +75,7 @@
         format = format || this.gl.RGBA;
         internalFormat = internalFormat || PicoGL.FRAMEBUFFER_INTERNAL_FORMAT[type][format];
 
+        this.colorAttachments[index] = this.gl["COLOR_ATTACHMENT" + index];
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.framebuffer);
 
         this.colorTextures[index] = new PicoGL.Texture(this.gl, null, {
@@ -92,7 +93,9 @@
         });
 
         this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.colorAttachments[index], this.gl.TEXTURE_2D, this.colorTextures[index].texture, 0);
-    
+        this.gl.drawBuffers(this.colorAttachments);
+        this.numColorTargets++;
+
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
 
         return this;
@@ -138,9 +141,7 @@
         this.colorTextures[index] = texture;
 
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.framebuffer);
-        for (var i = 0; i < this.numColorTargets; ++i) {
-            this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.colorAttachments[i], this.gl.TEXTURE_2D, this.colorTextures[i].texture, 0);
-        }
+        this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.colorAttachments[index], this.gl.TEXTURE_2D, this.colorTextures[index].texture, 0);
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
       
         return this;

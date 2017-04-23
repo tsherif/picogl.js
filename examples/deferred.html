@@ -147,7 +147,7 @@
         var geoVsSource =  document.getElementById("geo-vs").text.trim();
         var geoFsSource =  document.getElementById("geo-fs").text.trim();
         var geoProgram = app.createProgram(geoVsSource, geoFsSource);
-        var gBuffer = app.createFramebuffer(3)
+        var gBuffer = app.createFramebuffer()
         .colorTarget(0, PicoGL.FLOAT)
         .colorTarget(1, PicoGL.FLOAT)
         .colorTarget(2, PicoGL.FLOAT, PicoGL.RG)

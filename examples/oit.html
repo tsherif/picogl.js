@@ -192,7 +192,7 @@
         var accumVsSource = document.getElementById("vertex-accum").text.trim();
         var accumFsSource = document.getElementById("fragment-accum").text.trim();
         var accumProgram = app.createProgram(accumVsSource, accumFsSource);
-        var accumBuffer = app.createFramebuffer(2)
+        var accumBuffer = app.createFramebuffer()
         .colorTarget(0, PicoGL.FLOAT)
         .colorTarget(1, PicoGL.FLOAT);
 

@@ -52,14 +52,18 @@
     </div>
     <canvas id="gl-canvas"></canvas>
     <script type="x-shader/vs" id="vertex-cube">
-        attribute vec4 position;
-        attribute vec2 uv;
-        attribute vec4 normal;
+        #version 300 es
+
+        layout(location=0) in vec4 position;
+        layout(location=1) in vec2 uv;
+        layout(location=2) in vec4 normal;
+        
         uniform mat4 uViewProj;
         uniform mat4 uModel;
-        varying vec3 vPosition;
-        varying vec2 vUV;
-        varying vec3 vNormal;
+        
+        out vec3 vPosition;
+        out vec2 vUV;
+        out vec3 vNormal;
         void main() {
             vec4 worldPosition = uModel * position;
             vPosition = worldPosition.xyz;
@@ -69,7 +73,7 @@
         }
     </script>
     <script type="x-shader/vf" id="fragment-cube">
-        #extension GL_EXT_draw_buffers : require
+        #version 300 es
         precision highp float;
 
         uniform vec3 eyePosition;
@@ -79,11 +83,14 @@
         uniform vec3 lightColor2;
         uniform sampler2D tex;
         
-        varying vec3 vPosition;
-        varying vec2 vUV;
-        varying vec3 vNormal;
+        in vec3 vPosition;
+        in vec2 vUV;
+        in vec3 vNormal;
+        
+        layout(location=0) out vec4 fragColor;
+        layout(location=1) out vec4 bloom;
         void main() {
-            vec3 color = texture2D(tex, vUV).rgb;
+            vec3 color = texture(tex, vUV).rgb;
 
             vec3 normal = normalize(vNormal);
             vec3 eyeVec = normalize(eyePosition - vPosition);
@@ -100,44 +107,59 @@
             light += lightColor2 * (diffuse + highlight);
             light += 0.1;
 
-            gl_FragData[0] = vec4(color * light, 1.0);
-            if (dot(gl_FragData[0].rgb, vec3(0.2126, 0.7152, 0.0722)) > 1.0) {
-                gl_FragData[1] = gl_FragData[0];
+            fragColor = vec4(color * light, 1.0);
+            if (dot(fragColor.rgb, vec3(0.2126, 0.7152, 0.0722)) > 1.0) {
+                bloom = fragColor;
             }
         }
     </script>
     <script type="x-shader/vs" id="vertex-sun">
-        attribute vec4 position;
+        #version 300 es
+
+        layout(location=0) in vec4 position;
+
         uniform mat4 uMVP;
+        
         void main() {
             gl_Position = uMVP * position;
         }
     </script>
     <script type="x-shader/vf" id="fragment-sun">
-        #extension GL_EXT_draw_buffers : require
+        #version 300 es
+
         precision highp float;
 
         uniform vec3 uColor;
+
+        layout(location=0) out vec4 fragColor;
+        layout(location=1) out vec4 bloom;    
         void main() {
-            gl_FragData[0] = vec4(uColor, 1.0);
-            gl_FragData[1] = vec4(uColor, 1.0);
+            fragColor = vec4(uColor, 1.0);
+            bloom = vec4(uColor, 1.0);
         }
     </script>
     <script type="x-shader/vs" id="vertex-quad">
-        attribute vec4 aPosition;
-        varying vec2 vUV;
+        #version 300 es
+
+        layout(location=0) in vec4 position;
+
+        out vec2 vUV;
         void main() {
-            vUV = aPosition.xy * 0.5 + 0.5;
-            gl_Position = aPosition;
+            vUV = position.xy * 0.5 + 0.5;
+            gl_Position = position;
         }
     </script>
     <script type="x-shader/fs" id="fragment-blur">
+        #version 300 es
+
         precision highp float;
 
-        varying vec2 vUV;
+        in vec2 vUV;
 
         uniform sampler2D uTexture;
         uniform vec2 uTexelOffset;
+
+        out vec4 fragColor;
         void main() {
             float blurWeights[5];
             blurWeights[0] = 0.227027;
@@ -148,25 +170,29 @@
             
             vec3 color = vec3(0.0);
             for (int i = 0; i < 5; ++i) {
-                color += texture2D(uTexture, vUV + (uTexelOffset * float(i))).rgb * blurWeights[i];
-                color += texture2D(uTexture, vUV - (uTexelOffset * float(i))).rgb * blurWeights[i];
+                color += texture(uTexture, vUV + (uTexelOffset * float(i))).rgb * blurWeights[i];
+                color += texture(uTexture, vUV - (uTexelOffset * float(i))).rgb * blurWeights[i];
             }
 
-            gl_FragColor = vec4(color, 1.0);
+            fragColor = vec4(color, 1.0);
         }
     </script>
     <script type="x-shader/fs" id="fragment-blend">
+        #version 300 es
+
         precision highp float;
 
-        varying vec2 vUV;
+        in vec2 vUV;
 
         uniform sampler2D uColor;
         uniform sampler2D uBloom;
+        
+        out vec4 fragColor;
         void main() {
-            gl_FragColor = texture2D(uColor, vUV) + texture2D(uBloom, vUV);
+            fragColor = texture(uColor, vUV) + texture(uBloom, vUV);
         }
     </script>
-    <script type="text/javascript">
+    <script>
         var bloomEnabled = true;
 
         document.getElementById("bloom-toggle").addEventListener("change", function() {
@@ -184,35 +210,39 @@
         var app = PicoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0)
         .depthTest()
-        .floatTextures()
-        .drawBuffers()
+        .floatRenderTargets()
         .debug();
 
         // SET UP PROGRAMS
 
-        var cubeVsSource =  document.getElementById("vertex-cube").text;
-        var cubeFsSource =  document.getElementById("fragment-cube").text;
+        var cubeVsSource =  document.getElementById("vertex-cube").text.trim();
+        var cubeFsSource =  document.getElementById("fragment-cube").text.trim();
         var cubeProgram = app.createProgram(cubeVsSource, cubeFsSource);
 
-        var sunVsSource =  document.getElementById("vertex-sun").text;
-        var sunFsSource =  document.getElementById("fragment-sun").text;
+        var sunVsSource =  document.getElementById("vertex-sun").text.trim();
+        var sunFsSource =  document.getElementById("fragment-sun").text.trim();
         var sunProgram = app.createProgram(sunVsSource, sunFsSource);
 
-        var quadVsSource =  document.getElementById("vertex-quad").text;
+        var quadVsSource =  document.getElementById("vertex-quad").text.trim();
         var quadVertexShader = app.createShader(PicoGL.VERTEX_SHADER, quadVsSource);
 
-        var blurFsSource =  document.getElementById("fragment-blur").text;
+        var blurFsSource =  document.getElementById("fragment-blur").text.trim();
         var blurProgram = app.createProgram(quadVertexShader, blurFsSource);
 
-        var blendFsSource =  document.getElementById("fragment-blend").text;
+        var blendFsSource =  document.getElementById("fragment-blend").text.trim();
         var blendProgram = app.createProgram(quadVertexShader, blendFsSource);
 
 
         // SET UP FRAMEBUFFERS AND TEXTURES
 
-        var colorBuffer = app.createFramebuffer(2, PicoGL.FLOAT);
-        var blurBuffer = app.createFramebuffer(1, PicoGL.FLOAT);
-        var bloomBuffer = app.createFramebuffer(1, PicoGL.FLOAT);
+        var colorBuffer = app.createFramebuffer()
+        .colorTarget(0, PicoGL.FLOAT)
+        .colorTarget(1, PicoGL.FLOAT)
+        .depthTarget();
+        var blurBuffer = app.createFramebuffer()
+        .colorTarget(0, PicoGL.FLOAT);
+        var bloomBuffer = app.createFramebuffer()
+        .colorTarget(0, PicoGL.FLOAT);
 
         var blankTexture = app.createTexture(null, {
             array: true,
@@ -228,9 +258,18 @@
         var cubeUVs = app.createArrayBuffer(PicoGL.FLOAT, 2, cube.uvs);
         var cubeNormals = app.createArrayBuffer(PicoGL.FLOAT, 3, cube.normals);
 
+        var cubeArray = app.createVertexArray()
+        .attributeBuffer(0, cubePositions)
+        .attributeBuffer(1, cubeUVs)
+        .attributeBuffer(2, cubeNormals);
+
         var sun = utils.createSphere({radius: 0.1});
         var sunPositions = app.createArrayBuffer(PicoGL.FLOAT, 3, sun.positions);
         var sunIndices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, sun.indices);
+
+        var sunArray = app.createVertexArray()
+        .attributeBuffer(0, sunPositions)
+        .indexBuffer(sunIndices);
 
         var quadPositions = app.createArrayBuffer(PicoGL.FLOAT, 2, new Float32Array([
             -1, 1,
@@ -240,6 +279,8 @@
             1, -1,
             1, 1,
         ]));
+
+        var quadArray = app.createVertexArray().attributeBuffer(0, quadPositions);
 
 
         // SET UP OTHER DATA
@@ -296,10 +337,7 @@
             var texture = app.createTexture(image);
 
             // PREPARE DRAW CALLS
-            var drawCall = app.createDrawCall(cubeProgram)
-            .attribute("position", cubePositions)
-            .attribute("uv", cubeUVs)
-            .attribute("normal", cubeNormals)
+            var drawCall = app.createDrawCall(cubeProgram, cubeArray)
             .uniform("uViewProj", viewProjMatrix)
             .uniform("eyePosition", eyePosition)
             .uniform("lightPosition", suns[0].position)
@@ -308,30 +346,23 @@
             .uniform("lightColor2", suns[1].color)
             .texture("tex", texture);
 
-            var sunDrawCall = app.createDrawCall(sunProgram)
-            .attribute("position", sunPositions)
-            .indices(sunIndices)
+            var sunDrawCall = app.createDrawCall(sunProgram, sunArray)
             .uniform("uColor", suns[0].color)
             .uniform("uMVP", suns[0].mvpMatrix);
 
-            var sun2DrawCall = app.createDrawCall(sunProgram)
-            .attribute("position", sunPositions)
-            .indices(sunIndices)
+            var sun2DrawCall = app.createDrawCall(sunProgram, sunArray)
             .uniform("uColor", suns[1].color)
             .uniform("uMVP", suns[1].mvpMatrix);
 
-            var hBlurDrawCall = app.createDrawCall(blurProgram)
-            .attribute("position", quadPositions)
+            var hBlurDrawCall = app.createDrawCall(blurProgram, quadArray)
             .uniform("uTexelOffset", hTexelOffset)
             .texture("uTexture", colorBuffer.colorTextures[1]);
 
-            var vBlurDrawCall = app.createDrawCall(blurProgram)
-            .attribute("position", quadPositions)
+            var vBlurDrawCall = app.createDrawCall(blurProgram, quadArray)
             .uniform("uTexelOffset", vTexelOffset)
             .texture("uTexture", blurBuffer.colorTextures[0]);
 
-            var blendDrawCall = app.createDrawCall(blendProgram)
-            .attribute("position", quadPositions)
+            var blendDrawCall = app.createDrawCall(blendProgram, quadArray)
             .texture("uColor", colorBuffer.colorTextures[0])
             .texture("uBloom", bloomBuffer.colorTextures[0]);
 
@@ -354,7 +385,7 @@
                 utils.xformMatrix(cube.modelMatrix, null, cube.rotation, null);
                 drawCall.uniform("uModel", cube.modelMatrix);
 
-                colorBuffer.colorTexture(blurReadTexture, 1);
+                colorBuffer.replaceTexture(1, blurReadTexture);
 
                 app.framebuffer(colorBuffer)
                 .drawCalls(colorDrawCalls)
@@ -364,7 +395,7 @@
                 if (bloomEnabled) {
                     for (var i = 0; i < 4; ++i) {
                         hBlurDrawCall.texture("uTexture", blurReadTexture);
-                        bloomBuffer.colorTexture(blurWriteTexture);
+                        bloomBuffer.replaceTexture(0, blurWriteTexture);
 
                         app.framebuffer(blurBuffer)
                         .drawCalls(hBlurDrawCalls)

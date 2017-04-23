@@ -274,7 +274,7 @@
         var colorGeoVsSource =  document.getElementById("vertex-colorgeo").text.trim();
         var colorGeoFsSource =  document.getElementById("fragment-colorgeo").text.trim();
         var colorGeoProgram = app.createProgram(colorGeoVsSource, colorGeoFsSource);
-        var colorGeoBuffer = app.createFramebuffer(3)
+        var colorGeoBuffer = app.createFramebuffer()
         .colorTarget(0)
         .colorTarget(1, PicoGL.FLOAT, PicoGL.RGBA)
         .colorTarget(2, PicoGL.FLOAT, PicoGL.RGBA)
@@ -286,7 +286,7 @@
         // Set up ssao program
         var ssaoFsSource =  document.getElementById("fragment-ssao").text.trim();
         var ssaoProgram = app.createProgram(quadShader, ssaoFsSource);
-        var ssaoBuffer = app.createFramebuffer(1).colorTarget(0, PicoGL.FLOAT);
+        var ssaoBuffer = app.createFramebuffer().colorTarget(0, PicoGL.FLOAT);
 
         // Set up ao blend program
         var aoBlendFsSource =  document.getElementById("fragment-aoblend").text.trim();
