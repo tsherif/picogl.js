@@ -131,7 +131,7 @@
         var shadowVsSource =  document.getElementById("shadow-vs").text.trim();
         var shadowFsSource =  document.getElementById("shadow-fs").text.trim();
         var shadowProgram = app.createProgram(shadowVsSource, shadowFsSource);
-        var shadowBuffer = app.createFramebuffer(0);
+        var shadowBuffer = app.createFramebuffer().depthTarget();
 
         // Set up main program
         var vsSource =  document.getElementById("main-vs").text.trim();
@@ -207,9 +207,11 @@
             var mainDrawCalls = new Array(boxes.length);
 
             for (var i = 0, len = boxes.length; i < len; ++i) {
-                shadowDrawCalls[i] = app.createDrawCall(shadowProgram, boxArray);
+                shadowDrawCalls[i] = app.createDrawCall(shadowProgram)
+                .vertexArray(boxArray)
 
-                mainDrawCalls[i] = app.createDrawCall(mainProgram, boxArray)
+                mainDrawCalls[i] = app.createDrawCall(mainProgram)
+                .vertexArray(boxArray)
                 .uniform("uLightPosition", lightPosition)
                 .uniform("uEyePosition", eyePosition)
                 .texture("uTextureMap", texture)

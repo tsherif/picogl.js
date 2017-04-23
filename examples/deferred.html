@@ -228,7 +228,8 @@
             var geoDrawCalls = new Array(boxes.length);
 
             for (var i = 0, len = boxes.length; i < len; ++i) {
-                geoDrawCalls[i] = boxes[i].drawCall = app.createDrawCall(geoProgram, boxArray)
+                geoDrawCalls[i] = boxes[i].drawCall = app.createDrawCall(geoProgram)
+                .vertexArray(boxArray)
                 .uniformBlock("BoxUniforms", boxes[i].matrixUniforms);
             }
 
@@ -274,7 +275,8 @@
                 .set(2, lights[i].color)
                 .update();
 
-                lightDrawCalls[i] = app.createDrawCall(mainProgram, sphereArray)
+                lightDrawCalls[i] = app.createDrawCall(mainProgram)
+                .vertexArray(sphereArray)
                 .uniformBlock("LightUniforms", lights[i].uniforms)
                 .uniform("uEyePosition", eyePosition)
                 .texture("uTextureMap", texture)

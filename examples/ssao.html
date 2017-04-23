@@ -412,13 +412,15 @@
 
             var texture = app.createTexture(image);
 
-            var colorGeoDrawcall = app.createDrawCall(colorGeoProgram, sphereArray)
+            var colorGeoDrawcall = app.createDrawCall(colorGeoProgram)
+            .vertexArray(sphereArray)
             .uniformBlock("SceneUniforms", sceneUniforms)
             .texture("uTexture", texture);
 
             var colorGeoDrawcalls = [colorGeoDrawcall];
 
-            var ssaoDrawCall = app.createDrawCall(ssaoProgram, quadArray)
+            var ssaoDrawCall = app.createDrawCall(ssaoProgram)
+            .vertexArray(quadArray)
             .uniformBlock("SSAOUniforms", ssaoUniforms)
             .texture("uPositionBuffer", colorGeoBuffer.colorTextures[1])
             .texture("uNormalBuffer", colorGeoBuffer.colorTextures[2])
@@ -426,13 +428,15 @@
 
             var ssaoDrawCalls = [ssaoDrawCall];
 
-            var aoBlendDrawCall = app.createDrawCall(aoBlendProgram, quadArray)
+            var aoBlendDrawCall = app.createDrawCall(aoBlendProgram)
+            .vertexArray(quadArray)
             .texture("uColorBuffer", colorGeoBuffer.colorTextures[0])
             .texture("uOcclusionBuffer", ssaoBuffer.colorTextures[0]);
 
             var aoBlendDrawCalls = [aoBlendDrawCall];
 
-            var noSSAODrawCall = app.createDrawCall(noSSAOProgram, quadArray)
+            var noSSAODrawCall = app.createDrawCall(noSSAOProgram)
+            .vertexArray(quadArray)
             .texture("uColorBuffer", colorGeoBuffer.colorTextures[0]);
 
             var noSSAODrawCalls = [noSSAODrawCall];

@@ -165,7 +165,8 @@
         image.onload = function() {
             var texture = app.createTexture(image);
 
-            var drawCall = app.createDrawCall(program, boxArray)
+            var drawCall = app.createDrawCall(program)
+            .vertexArray(boxArray)
             .uniformBlock("SceneUniforms", sceneUniformBuffer)
             .texture("tex", texture);
 

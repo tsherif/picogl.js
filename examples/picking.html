@@ -234,10 +234,12 @@
             var mainDrawCalls = new Array(boxes.length);
 
             for (var i = 0, len = boxes.length; i < len; ++i) {
-                pickingDrawCalls[i] = app.createDrawCall(pickingProgram, boxArray)
+                pickingDrawCalls[i] = app.createDrawCall(pickingProgram)
+                .vertexArray(boxArray)
                 .uniform("uPickColor", boxes[i].pickColor);
 
-                mainDrawCalls[i] = app.createDrawCall(mainProgram, boxArray)
+                mainDrawCalls[i] = app.createDrawCall(mainProgram)
+                .vertexArray(boxArray)
                 .uniformBlock("SceneUniforms", sceneUniforms)
                 .uniformBlock("FrameUniforms", boxes[i].frameUniforms)
                 .texture("uTextureMap", texture);

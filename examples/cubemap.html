@@ -218,50 +218,52 @@
 
         image.onload = function() {
             utils.loadCubemapImages({
-              negX: "img/sky-negx.png",
-              posX: "img/sky-posx.png",
-              negY: "img/sky-negy.png",
-              posY: "img/sky-posy.png",
-              negZ: "img/sky-negz.png",
-              posZ: "img/sky-posz.png"
+                negX: "img/sky-negx.png",
+                posX: "img/sky-posx.png",
+                negY: "img/sky-negy.png",
+                posY: "img/sky-posy.png",
+                negZ: "img/sky-negz.png",
+                posZ: "img/sky-posz.png"
             }, function(negX, posX, negY, posY, negZ, posZ) {
-              var texture = app.createTexture(image);
-              var cubemap = app.createCubemap({
-                negX: negX,
-                posX: posX,
-                negY: negY,
-                posY: posY,
-                negZ: negZ,
-                posZ: posZ
-              })
+                var texture = app.createTexture(image);
+                var cubemap = app.createCubemap({
+                    negX: negX,
+                    posX: posX,
+                    negY: negY,
+                    posY: posY,
+                    negZ: negZ,
+                    posZ: posZ
+                })
 
-              var skyboxDrawcall = app.createDrawCall(skyboxProgram, boxArray)
-              .uniformBlock("SceneUniforms", skyboxSceneUniforms)
-              .texture("cubemap", cubemap);
+                var skyboxDrawcall = app.createDrawCall(skyboxProgram)
+                .vertexArray(boxArray)
+                .uniformBlock("SceneUniforms", skyboxSceneUniforms)
+                .texture("cubemap", cubemap);
 
-              var drawCall = app.createDrawCall(program, boxArray)
-              .uniformBlock("SceneUniforms", sceneUniforms)
-              .texture("tex", texture)
-              .texture("cubemap", cubemap);
+                var drawCall = app.createDrawCall(program)
+                .vertexArray(boxArray)
+                .uniformBlock("SceneUniforms", sceneUniforms)
+                .texture("tex", texture)
+                .texture("cubemap", cubemap);
 
-              app.drawCalls([skyboxDrawcall, drawCall]);
+                app.drawCalls([skyboxDrawcall, drawCall]);
 
-              function draw() {
-                  angleX += 0.01;
-                  angleY += 0.02;
+                function draw() {
+                    angleX += 0.01;
+                    angleY += 0.02;
 
-                  mat4.fromXRotation(rotateXMatrix, angleX);
-                  mat4.fromYRotation(rotateYMatrix, angleY);
-                  mat4.multiply(modelMatrix, rotateXMatrix, rotateYMatrix);
+                    mat4.fromXRotation(rotateXMatrix, angleX);
+                    mat4.fromYRotation(rotateYMatrix, angleY);
+                    mat4.multiply(modelMatrix, rotateXMatrix, rotateYMatrix);
 
-                  drawCall.uniform("uModel", modelMatrix);
+                    drawCall.uniform("uModel", modelMatrix);
 
-                  app.clear().draw();
+                    app.clear().draw();
 
-                  requestAnimationFrame(draw);
-              }
+                    requestAnimationFrame(draw);
+                }
 
-              requestAnimationFrame(draw);
+                requestAnimationFrame(draw);
             });
             
             
