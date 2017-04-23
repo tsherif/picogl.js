@@ -160,9 +160,7 @@
 
         layout(location=0) in vec4 position;
 
-        out vec2 vUV;
         void main() {
-            vUV = position.xy * 0.5 + 0.5;
             gl_Position = position;
         }
     </script>
@@ -171,10 +169,9 @@
 
         precision highp float;
 
-        in vec2 vUV;
-
+        uniform ivec2 uTexelOffset;
+        uniform ivec2 uResolution;
         uniform sampler2D uTexture;
-        uniform vec2 uTexelOffset;
 
         out vec4 fragColor;
         void main() {
@@ -184,11 +181,15 @@
             blurWeights[2] = 0.1216216;
             blurWeights[3] = 0.054054;
             blurWeights[4] = 0.016216;
+
+            ivec2 fragCoord = ivec2(gl_FragCoord.xy);
             
             vec3 color = vec3(0.0);
             for (int i = 0; i < 5; ++i) {
-                color += texture(uTexture, vUV + (uTexelOffset * float(i))).rgb * blurWeights[i];
-                color += texture(uTexture, vUV - (uTexelOffset * float(i))).rgb * blurWeights[i];
+                ivec2 lowSampleCoord = clamp(fragCoord - uTexelOffset * i, ivec2(0), uResolution);
+                ivec2 highSampleCoord = clamp(fragCoord + uTexelOffset * i, ivec2(0), uResolution);
+                color += texelFetch(uTexture, lowSampleCoord, 0).rgb * blurWeights[i];
+                color += texelFetch(uTexture, highSampleCoord, 0).rgb * blurWeights[i];
             }
 
             fragColor = vec4(color, 1.0);
@@ -199,14 +200,13 @@
 
         precision highp float;
 
-        in vec2 vUV;
-
         uniform sampler2D uColor;
         uniform sampler2D uBloom;
         
         out vec4 fragColor;
         void main() {
-            fragColor = texture(uColor, vUV) + texture(uBloom, vUV);
+            ivec2 fragCoord = ivec2(gl_FragCoord.xy);
+            fragColor = texelFetch(uColor, fragCoord, 0) + texelFetch(uBloom, fragCoord, 0);
         }
     </script>
     <script>
@@ -220,15 +220,19 @@
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
-        var screenTexelSize = vec2.fromValues(1.0 / canvas.width, 1.0 / canvas.height);
-        var hTexelOffset = vec2.fromValues(screenTexelSize[0], 0.0);
-        var vTexelOffset = vec2.fromValues(0.0, screenTexelSize[1]);
+        var hTexelOffset = new Int32Array([1, 0]);
+        var vTexelOffset = new Int32Array([0, 1]);
 
         var app = PicoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0)
         .depthTest()
         .floatRenderTargets()
         .debug();
+
+        var resolution = new Int32Array([
+            app.gl.drawingBufferWidth,
+            app.gl.drawingBufferHeight
+        ]);
 
         // SET UP PROGRAMS
 
@@ -397,10 +401,12 @@
     
             var hBlurDrawCall = app.createDrawCall(blurProgram, quadArray)
             .uniform("uTexelOffset", hTexelOffset)
+            .uniform("uResolution", resolution)
             .texture("uTexture", colorBuffer.colorTextures[1]);
 
             var vBlurDrawCall = app.createDrawCall(blurProgram, quadArray)
             .uniform("uTexelOffset", vTexelOffset)
+            .uniform("uResolution", resolution)
             .texture("uTexture", blurBuffer.colorTextures[0]);
 
             var blendDrawCall = app.createDrawCall(blendProgram, quadArray)
