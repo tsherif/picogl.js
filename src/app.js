@@ -50,6 +50,7 @@
         this.width = this.gl.drawingBufferWidth;
         this.height = this.gl.drawingBufferHeight;
         this.currentDrawCalls = null;
+        this.emptyFragmentShader = null;
 
         this.currentState = {
             program: null,
@@ -223,6 +224,18 @@
         return this;
     };
 
+    PicoGL.App.prototype.rasterize = function() {
+        this.gl.disable(this.gl.RASTERIZER_DISCARD);
+
+        return this;
+    };
+
+    PicoGL.App.prototype.noRasterize = function() {
+        this.gl.enable(this.gl.RASTERIZER_DISCARD);
+
+        return this;
+    };
+
     /**
         Set the depth test function. E.g. app.depthFunc(PicoGL.LEQUAL).
 
@@ -389,7 +402,16 @@
         @param {WebGLShader|string} fragmentShader Fragment shader object or source code.
     */
     PicoGL.App.prototype.createProgram = function(vsSource, fsSource) {
-        return new PicoGL.Program(this.gl, vsSource, fsSource, this.debugEnabled);
+        return new PicoGL.Program(this.gl, vsSource, fsSource, null, this.debugEnabled);
+    };
+
+    PicoGL.App.prototype.createTransformFeedbackProgram = function(vsSource, xformFeedbackVars) {
+        if (!this.emptyFragmentShader) {
+            this.emptyFragmentShader = this.gl.createShader(this.gl.FRAGMENT_SHADER);
+            this.gl.shaderSource(this.emptyFragmentShader, "#version 300 es\nvoid main() {}");
+            this.gl.compileShader(this.emptyFragmentShader);
+        }
+        return new PicoGL.Program(this.gl, vsSource, this.emptyFragmentShader, xformFeedbackVars, this.debugEnabled);
     };
 
     /**
@@ -408,6 +430,10 @@
 
     PicoGL.App.prototype.createVertexArray = function() {
         return new PicoGL.VertexArray(this.gl);
+    };
+
+    PicoGL.App.prototype.createTransformFeedback = function(vertexArray1, vertexArray2, varyingBufferIndices) {
+        return new PicoGL.TransformFeedback(this.gl, vertexArray1, vertexArray2, varyingBufferIndices);
     };
 
     /**

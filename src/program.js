@@ -35,7 +35,7 @@
         @prop {Object} attributes Map of attribute names to handles. 
         @prop {Object} uniforms Map of uniform names to handles. 
     */
-    PicoGL.Program = function Program(gl, vsSource, fsSource, debug) {
+    PicoGL.Program = function Program(gl, vsSource, fsSource, xformFeebackVars, debug) {
         var i;
 
         var vshader, fshader; 
@@ -57,6 +57,9 @@
         var program = gl.createProgram();
         gl.attachShader(program, vshader);
         gl.attachShader(program, fshader);
+        if (xformFeebackVars) {
+            gl.transformFeedbackVaryings(program, xformFeebackVars, gl.SEPARATE_ATTRIBS);
+        }
         gl.linkProgram(program);
 
         if (debug && !gl.getProgramParameter(program, gl.LINK_STATUS)) {
@@ -65,6 +68,7 @@
 
         this.gl = gl;
         this.program = program;
+        this.transformFeedback = !!xformFeebackVars;
         this.uniforms = {};
         this.uniformBlocks = {};
 

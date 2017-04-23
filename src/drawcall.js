@@ -36,13 +36,13 @@
         @prop {Object} textures Map of texture units to Textures.
         @prop {number} textureCount The number of active textures for this draw call. 
         @prop {ArrayBuffer} indexArray Index array to use for indexed drawing.
-        @prop {number} numItems The number of items that will be drawn.
         @prop {GLEnum} primitive The primitive type being drawn. 
     */
-    PicoGL.DrawCall = function DrawCall(gl, program, vertexArray, primitive) {
+    PicoGL.DrawCall = function DrawCall(gl, program, primitive) {
         this.gl = gl;
-        this.program = program || null;
-        this.vertexArray = vertexArray || null;
+        this.currentProgram = program || null;
+        this.currentVertexArray = null;
+        this.currentTransformFeedback = null;
         this.uniforms = {};
         this.uniformBlocks = {};
         this.uniformBlockBases = {};
@@ -50,20 +50,25 @@
         this.textures = {};
         this.textureCount = 0;
         this.indexArray = null;
-        this.numItems = 0;
         this.primitive = primitive !== undefined ? primitive : PicoGL.TRIANGLES;
     };
 
     /**
-        Set the index ArrayBuffer.
+        Set the value for a uniform.
 
         @method
-        @param {Arraybuffer} buffer Index Arraybuffer.
+        @param {string} name Uniform name.
+        @param {any} value Uniform value.
     */
-    PicoGL.DrawCall.prototype.indices = function(buffer) {
-        this.indexArray = buffer;
-        this.numItems = buffer.numItems;
-        
+    PicoGL.DrawCall.prototype.vertexArray = function(vertexArray) {
+        this.currentVertexArray = vertexArray;
+
+        return this;
+    };
+
+    PicoGL.DrawCall.prototype.transformFeedback = function(transformFeedback) {
+        this.currentTransformFeedback = transformFeedback;
+
         return this;
     };
 
@@ -124,18 +129,18 @@
         var uniformBlockBases = this.uniformBlockBases;
         var textures = this.textures;
 
-        if (state.program !== this.program) {
-            this.gl.useProgram(this.program.program);
-            state.program = this.program;
+        if (state.program !== this.currentProgram) {
+            this.gl.useProgram(this.currentProgram.program);
+            state.program = this.currentProgram;
         }
 
         for (var uName in uniforms) {
-            this.program.uniform(uName, uniforms[uName]);
+            this.currentProgram.uniform(uName, uniforms[uName]);
         }
 
         for (var ubName in uniformBlockBases) {
             var base = uniformBlockBases[ubName];
-            this.program.uniformBlock(ubName, base);
+            this.currentProgram.uniformBlock(ubName, base);
             uniformBlocks[base].bind(base);
         }
 
@@ -143,23 +148,33 @@
             textures[unit].bind(unit);
         }
 
-        if (state.vertexArray !== this.vertexArray) {
-            this.vertexArray.bind();
-            state.vertexArray = this.vertexArray;
+        if (this.currentTransformFeedback) {
+            this.currentTransformFeedback.bind(this.primitive);
+            this.currentVertexArray = this.currentTransformFeedback.inputVertexArray;
         }
 
-        if (this.vertexArray.instanced) {
-            if (this.vertexArray.indexed) {
-                this.gl.drawElementsInstanced(this.primitive, this.vertexArray.numElements, this.vertexArray.indexType, 0, this.vertexArray.numInstances);
+        if (state.vertexArray !== this.currentVertexArray) {
+            this.currentVertexArray.bind();
+            state.vertexArray = this.currentVertexArray;
+        }
+
+
+        if (this.currentVertexArray.instanced) {
+            if (this.currentVertexArray.indexed) {
+                this.gl.drawElementsInstanced(this.primitive, this.currentVertexArray.numElements, this.currentVertexArray.indexType, 0, this.currentVertexArray.numInstances);
             } else {
-                this.gl.drawArraysInstanced(this.primitive, 0, this.vertexArray.numElements, this.vertexArray.numInstances);
+                this.gl.drawArraysInstanced(this.primitive, 0, this.currentVertexArray.numElements, this.currentVertexArray.numInstances);
             }
         } else {
-            if (this.vertexArray.indexed) {
-                this.gl.drawElements(this.primitive, this.vertexArray.numElements, this.vertexArray.indexType, 0);
+            if (this.currentVertexArray.indexed) {
+                this.gl.drawElements(this.primitive, this.currentVertexArray.numElements, this.currentVertexArray.indexType, 0);
             } else {
-                this.gl.drawArrays(this.primitive, 0, this.vertexArray.numElements);
+                this.gl.drawArrays(this.primitive, 0, this.currentVertexArray.numElements);
             }
+        }
+
+        if (this.currentTransformFeedback) {
+            this.currentTransformFeedback.unbind();
         }
 
     };

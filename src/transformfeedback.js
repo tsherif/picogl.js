@@ -36,75 +36,47 @@
         @prop {boolean} indexArray Whether this is an index array.
         @prop {GLEnum} binding GL binding point (ARRAY_BUFFER or ELEMENT_ARRAY_BUFFER).
     */
-    PicoGL.VertexArray = function VertexArray(gl) {
+    PicoGL.TransformFeedback = function TransformFeedback(gl, vertexArray1, vertexArray2, varyingBufferIndices) {
         this.gl = gl;
-        this.vertexArray = gl.createVertexArray();
-        this.attributeBuffers = [];
-        this.numElements = 0;
-        this.indexType = null;
-        this.indexed = false;
-        this.numInstances = 0;
+        this.transformFeedback = gl.createTransformFeedback();
+        this.inputVertexArray = vertexArray1;
+        this.outputVertexArray = vertexArray2;
+        this.inputBuffers = new Array(varyingBufferIndices.length);
+        this.outputBuffers = new Array(varyingBufferIndices.length);
+
+        for (var i = 0, len = varyingBufferIndices.length; i < len; ++i) {
+            this.inputBuffers[i] = vertexArray1.attributeBuffers[varyingBufferIndices[i]];
+            this.outputBuffers[i] = vertexArray2.attributeBuffers[varyingBufferIndices[i]];
+        }
     };
 
-    PicoGL.VertexArray.prototype.attributeBuffer = function(attributeIndex, arrayBuffer) {
-        this.gl.bindVertexArray(this.vertexArray);
-
-        this.attributeBuffers[attributeIndex] = arrayBuffer;
-        var numRows = arrayBuffer.numRows;
+    PicoGL.TransformFeedback.prototype.bind = function(primitive) {
+        this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedback);
         
-        arrayBuffer.bind();
-
-        //TODO(Tarek): Fix assumtions of 4 bytes/item
-        for (var i = 0; i < numRows; ++i) {
-            this.gl.vertexAttribPointer(
-                attributeIndex + i, 
-                arrayBuffer.itemSize, 
-                arrayBuffer.type, 
-                false, 
-                numRows * arrayBuffer.itemSize * 4, 
-                i * arrayBuffer.itemSize * 4);
-
-            if (arrayBuffer.instanced) {
-                this.gl.vertexAttribDivisor(attributeIndex + i, 1);
-            }
-
-            this.gl.enableVertexAttribArray(attributeIndex + i);
-        }
-        
-        this.instanced = this.instanced || arrayBuffer.instanced;
-
-        if (arrayBuffer.instanced) {
-            this.numInstances = arrayBuffer.numItems; 
-        } else {
-            this.numElements = this.numElements || arrayBuffer.numItems; 
+        for (var i = 0, len = this.outputBuffers.length; i < len; ++i) {
+            this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, i, this.outputBuffers[i].buffer);
         }
 
-        this.gl.bindVertexArray(null);
+        this.gl.beginTransformFeedback(primitive);
 
         return this;
     };
 
-    PicoGL.VertexArray.prototype.indexBuffer = function(arrayBuffer) {
-        this.gl.bindVertexArray(this.vertexArray);
-        arrayBuffer.bind();
+    PicoGL.TransformFeedback.prototype.swapBuffers = function() {
+        var va = this.inputVertexArray;
+        this.inputVertexArray = this.outputVertexArray;
+        this.outputVertexArray = va;
 
-        this.numElements = arrayBuffer.numItems * 3;
-        this.indexType = arrayBuffer.type;
-        this.indexed = true;
-
-        this.gl.bindVertexArray(null);
-
-        return this;
-    };
-
-    PicoGL.VertexArray.prototype.bind = function() {
-        this.gl.bindVertexArray(this.vertexArray);
+        var vb = this.inputBuffers;
+        this.inputBuffers = this.outputBuffers;
+        this.outputBuffers = vb;
 
         return this;
     };
 
-    PicoGL.VertexArray.prototype.unbind = function() {
-        this.gl.bindVertexArray(null);
+    PicoGL.TransformFeedback.prototype.unbind = function() {
+        this.gl.endTransformFeedback();    
+        this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, null);
 
         return this;
     };

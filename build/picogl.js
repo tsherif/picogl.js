@@ -130,6 +130,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         this.width = this.gl.drawingBufferWidth;
         this.height = this.gl.drawingBufferHeight;
         this.currentDrawCalls = null;
+        this.emptyFragmentShader = null;
 
         this.currentState = {
             program: null,
@@ -303,6 +304,18 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         return this;
     };
 
+    PicoGL.App.prototype.rasterize = function() {
+        this.gl.disable(this.gl.RASTERIZER_DISCARD);
+
+        return this;
+    };
+
+    PicoGL.App.prototype.noRasterize = function() {
+        this.gl.enable(this.gl.RASTERIZER_DISCARD);
+
+        return this;
+    };
+
     /**
         Set the depth test function. E.g. app.depthFunc(PicoGL.LEQUAL).
 
@@ -469,7 +482,16 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {WebGLShader|string} fragmentShader Fragment shader object or source code.
     */
     PicoGL.App.prototype.createProgram = function(vsSource, fsSource) {
-        return new PicoGL.Program(this.gl, vsSource, fsSource, this.debugEnabled);
+        return new PicoGL.Program(this.gl, vsSource, fsSource, null, this.debugEnabled);
+    };
+
+    PicoGL.App.prototype.createTransformFeedbackProgram = function(vsSource, xformFeedbackVars) {
+        if (!this.emptyFragmentShader) {
+            this.emptyFragmentShader = this.gl.createShader(this.gl.FRAGMENT_SHADER);
+            this.gl.shaderSource(this.emptyFragmentShader, "#version 300 es\nvoid main() {}");
+            this.gl.compileShader(this.emptyFragmentShader);
+        }
+        return new PicoGL.Program(this.gl, vsSource, this.emptyFragmentShader, xformFeedbackVars, this.debugEnabled);
     };
 
     /**
@@ -488,6 +510,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
     PicoGL.App.prototype.createVertexArray = function() {
         return new PicoGL.VertexArray(this.gl);
+    };
+
+    PicoGL.App.prototype.createTransformFeedback = function(vertexArray1, vertexArray2, varyingBufferIndices) {
+        return new PicoGL.TransformFeedback(this.gl, vertexArray1, vertexArray2, varyingBufferIndices);
     };
 
     /**
@@ -633,7 +659,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @prop {Object} attributes Map of attribute names to handles. 
         @prop {Object} uniforms Map of uniform names to handles. 
     */
-    PicoGL.Program = function Program(gl, vsSource, fsSource, debug) {
+    PicoGL.Program = function Program(gl, vsSource, fsSource, xformFeebackVars, debug) {
         var i;
 
         var vshader, fshader; 
@@ -655,6 +681,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         var program = gl.createProgram();
         gl.attachShader(program, vshader);
         gl.attachShader(program, fshader);
+        if (xformFeebackVars) {
+            gl.transformFeedbackVaryings(program, xformFeebackVars, gl.SEPARATE_ATTRIBS);
+        }
         gl.linkProgram(program);
 
         if (debug && !gl.getProgramParameter(program, gl.LINK_STATUS)) {
@@ -663,6 +692,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
         this.gl = gl;
         this.program = program;
+        this.transformFeedback = !!xformFeebackVars;
         this.uniforms = {};
         this.uniformBlocks = {};
 
@@ -772,6 +802,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     PicoGL.VertexArray = function VertexArray(gl) {
         this.gl = gl;
         this.vertexArray = gl.createVertexArray();
+        this.attributeBuffers = [];
         this.numElements = 0;
         this.indexType = null;
         this.indexed = false;
@@ -780,10 +811,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
     PicoGL.VertexArray.prototype.attributeBuffer = function(attributeIndex, arrayBuffer) {
         this.gl.bindVertexArray(this.vertexArray);
+
+        this.attributeBuffers[attributeIndex] = arrayBuffer;
         var numRows = arrayBuffer.numRows;
         
         arrayBuffer.bind();
 
+        //TODO(Tarek): Fix assumtions of 4 bytes/item
         for (var i = 0; i < numRows; ++i) {
             this.gl.vertexAttribPointer(
                 attributeIndex + i, 
@@ -834,6 +868,67 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
     PicoGL.VertexArray.prototype.unbind = function() {
         this.gl.bindVertexArray(null);
+
+        return this;
+    };
+
+})();
+;(function() {
+    "use strict";
+
+    /**
+        Storage for vertex data.
+
+        @class
+        @prop {WebGLRenderingContext} gl The WebGL context.
+        @prop {WebGLBuffer} buffer Allocated buffer storage.
+        @prop {GLEnum} type The type of data stored in the buffer.
+        @prop {number} itemSize Number of array elements per vertex.
+        @prop {number} numItems Number of vertices represented.
+        @prop {boolean} indexArray Whether this is an index array.
+        @prop {GLEnum} binding GL binding point (ARRAY_BUFFER or ELEMENT_ARRAY_BUFFER).
+    */
+    PicoGL.TransformFeedback = function TransformFeedback(gl, vertexArray1, vertexArray2, varyingBufferIndices) {
+        this.gl = gl;
+        this.transformFeedback = gl.createTransformFeedback();
+        this.inputVertexArray = vertexArray1;
+        this.outputVertexArray = vertexArray2;
+        this.inputBuffers = new Array(varyingBufferIndices.length);
+        this.outputBuffers = new Array(varyingBufferIndices.length);
+
+        for (var i = 0, len = varyingBufferIndices.length; i < len; ++i) {
+            this.inputBuffers[i] = vertexArray1.attributeBuffers[varyingBufferIndices[i]];
+            this.outputBuffers[i] = vertexArray2.attributeBuffers[varyingBufferIndices[i]];
+        }
+    };
+
+    PicoGL.TransformFeedback.prototype.bind = function(primitive) {
+        this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedback);
+        
+        for (var i = 0, len = this.outputBuffers.length; i < len; ++i) {
+            this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, i, this.outputBuffers[i].buffer);
+        }
+
+        this.gl.beginTransformFeedback(primitive);
+
+        return this;
+    };
+
+    PicoGL.TransformFeedback.prototype.swapBuffers = function() {
+        var va = this.inputVertexArray;
+        this.inputVertexArray = this.outputVertexArray;
+        this.outputVertexArray = va;
+
+        var vb = this.inputBuffers;
+        this.inputBuffers = this.outputBuffers;
+        this.outputBuffers = vb;
+
+        return this;
+    };
+
+    PicoGL.TransformFeedback.prototype.unbind = function() {
+        this.gl.endTransformFeedback();    
+        this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, null);
 
         return this;
     };
@@ -1566,13 +1661,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @prop {Object} textures Map of texture units to Textures.
         @prop {number} textureCount The number of active textures for this draw call. 
         @prop {ArrayBuffer} indexArray Index array to use for indexed drawing.
-        @prop {number} numItems The number of items that will be drawn.
         @prop {GLEnum} primitive The primitive type being drawn. 
     */
-    PicoGL.DrawCall = function DrawCall(gl, program, vertexArray, primitive) {
+    PicoGL.DrawCall = function DrawCall(gl, program, primitive) {
         this.gl = gl;
-        this.program = program || null;
-        this.vertexArray = vertexArray || null;
+        this.currentProgram = program || null;
+        this.currentVertexArray = null;
+        this.currentTransformFeedback = null;
         this.uniforms = {};
         this.uniformBlocks = {};
         this.uniformBlockBases = {};
@@ -1580,20 +1675,25 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         this.textures = {};
         this.textureCount = 0;
         this.indexArray = null;
-        this.numItems = 0;
         this.primitive = primitive !== undefined ? primitive : PicoGL.TRIANGLES;
     };
 
     /**
-        Set the index ArrayBuffer.
+        Set the value for a uniform.
 
         @method
-        @param {Arraybuffer} buffer Index Arraybuffer.
+        @param {string} name Uniform name.
+        @param {any} value Uniform value.
     */
-    PicoGL.DrawCall.prototype.indices = function(buffer) {
-        this.indexArray = buffer;
-        this.numItems = buffer.numItems;
-        
+    PicoGL.DrawCall.prototype.vertexArray = function(vertexArray) {
+        this.currentVertexArray = vertexArray;
+
+        return this;
+    };
+
+    PicoGL.DrawCall.prototype.transformFeedback = function(transformFeedback) {
+        this.currentTransformFeedback = transformFeedback;
+
         return this;
     };
 
@@ -1654,18 +1754,18 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         var uniformBlockBases = this.uniformBlockBases;
         var textures = this.textures;
 
-        if (state.program !== this.program) {
-            this.gl.useProgram(this.program.program);
-            state.program = this.program;
+        if (state.program !== this.currentProgram) {
+            this.gl.useProgram(this.currentProgram.program);
+            state.program = this.currentProgram;
         }
 
         for (var uName in uniforms) {
-            this.program.uniform(uName, uniforms[uName]);
+            this.currentProgram.uniform(uName, uniforms[uName]);
         }
 
         for (var ubName in uniformBlockBases) {
             var base = uniformBlockBases[ubName];
-            this.program.uniformBlock(ubName, base);
+            this.currentProgram.uniformBlock(ubName, base);
             uniformBlocks[base].bind(base);
         }
 
@@ -1673,23 +1773,33 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             textures[unit].bind(unit);
         }
 
-        if (state.vertexArray !== this.vertexArray) {
-            this.vertexArray.bind();
-            state.vertexArray = this.vertexArray;
+        if (this.currentTransformFeedback) {
+            this.currentTransformFeedback.bind(this.primitive);
+            this.currentVertexArray = this.currentTransformFeedback.inputVertexArray;
         }
 
-        if (this.vertexArray.instanced) {
-            if (this.vertexArray.indexed) {
-                this.gl.drawElementsInstanced(this.primitive, this.vertexArray.numElements, this.vertexArray.indexType, 0, this.vertexArray.numInstances);
+        if (state.vertexArray !== this.currentVertexArray) {
+            this.currentVertexArray.bind();
+            state.vertexArray = this.currentVertexArray;
+        }
+
+
+        if (this.currentVertexArray.instanced) {
+            if (this.currentVertexArray.indexed) {
+                this.gl.drawElementsInstanced(this.primitive, this.currentVertexArray.numElements, this.currentVertexArray.indexType, 0, this.currentVertexArray.numInstances);
             } else {
-                this.gl.drawArraysInstanced(this.primitive, 0, this.vertexArray.numElements, this.vertexArray.numInstances);
+                this.gl.drawArraysInstanced(this.primitive, 0, this.currentVertexArray.numElements, this.currentVertexArray.numInstances);
             }
         } else {
-            if (this.vertexArray.indexed) {
-                this.gl.drawElements(this.primitive, this.vertexArray.numElements, this.vertexArray.indexType, 0);
+            if (this.currentVertexArray.indexed) {
+                this.gl.drawElements(this.primitive, this.currentVertexArray.numElements, this.currentVertexArray.indexType, 0);
             } else {
-                this.gl.drawArrays(this.primitive, 0, this.vertexArray.numElements);
+                this.gl.drawArrays(this.primitive, 0, this.currentVertexArray.numElements);
             }
+        }
+
+        if (this.currentTransformFeedback) {
+            this.currentTransformFeedback.unbind();
         }
 
     };
