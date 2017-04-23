@@ -27,45 +27,58 @@
     PicoGL.UniformBuffer = function UniformBuffer(gl, layout, usage) {
         this.gl = gl;
         this.buffer = gl.createBuffer();
-        this.data = null;
+        this.floatView = null;
         this.offsets = new Array(layout.length);
         this.sizes = new Array(layout.length);
+        this.integer = new Array(layout.length);
         this.size = 0;
         this.usage = usage || gl.DYNAMIC_DRAW;
 
         for (var i = 0, len = layout.length; i < len; ++i) {
             var type = layout[i];
-            if (type === PicoGL.FLOAT) {
-                this.offsets[i] = this.size;
-                this.sizes[i] = 1;
+            switch(type) { 
+                case PicoGL.FLOAT:
+                case PicoGL.INT:
+                    this.offsets[i] = this.size;
+                    this.sizes[i] = 1;
+                    this.integer[i] = type === PicoGL.INT;
 
-                this.size++;
-            } else if (type === PicoGL.FLOAT_VEC2) {
-                this.size += this.size % 2;
-                this.offsets[i] = this.size;
-                this.sizes[i] = 2;
+                    this.size++;
+                    break;
+                case PicoGL.FLOAT_VEC2:
+                case PicoGL.INT_VEC2:
+                    this.size += this.size % 2;
+                    this.offsets[i] = this.size;
+                    this.sizes[i] = 2;
+                    this.integer[i] = type === PicoGL.INT_VEC2;
 
-                this.size += 2;
-            } else if (type === PicoGL.FLOAT_VEC4) {
-                this.size += (4 - this.size % 4) % 4;
-                this.offsets[i] = this.size;
-                this.sizes[i] = 4;
+                    this.size += 2;
+                    break;
+                case PicoGL.FLOAT_VEC4:
+                case PicoGL.INT_VEC4:
+                    this.size += (4 - this.size % 4) % 4;
+                    this.offsets[i] = this.size;
+                    this.sizes[i] = 4;
+                    this.integer[i] = type === PicoGL.INT_VEC4;
 
-                this.size += 4;
-            } else if (type === PicoGL.FLOAT_MAT4) {
-                this.size += (4 - this.size % 4) % 4;
-                this.offsets[i] = this.size;
-                this.sizes[i] = 16;
+                    this.size += 4;
+                    break;
+                case PicoGL.FLOAT_MAT4:
+                    this.size += (4 - this.size % 4) % 4;
+                    this.offsets[i] = this.size;
+                    this.sizes[i] = 16;
 
-                this.size += 16;
-            } else {
-                console.error("Unsupported type for uniform buffer.");
+                    this.size += 16;
+                    break;
+                default:
+                    console.error("Unsupported type for uniform buffer.");
             }
         }
 
         this.size += (4 - this.size % 4) % 4;
 
-        this.data = new Float32Array(this.size);
+        this.floatView = new Float32Array(this.size);
+        this.integerView = new Int32Array(this.floatView.buffer);
 
         this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, 0, this.buffer);
         this.gl.bufferData(this.gl.UNIFORM_BUFFER, this.size * 4, this.usage);
@@ -73,10 +86,12 @@
     };
 
     PicoGL.UniformBuffer.prototype.set = function(index, value) {
+        var view = this.integer[index] ? this.integerView : this.floatView;
+
         if (this.sizes[index] === 1)  {
-            this.data[this.offsets[index]] = value;
+            view[this.offsets[index]] = value;
         } else {
-            this.data.set(value, this.offsets[index]);
+            view.set(value, this.offsets[index]);
         }
         
         return this;
@@ -84,7 +99,7 @@
 
     PicoGL.UniformBuffer.prototype.update = function() {
         this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, 0, this.buffer);
-        this.gl.bufferSubData(this.gl.UNIFORM_BUFFER, 0, this.data);
+        this.gl.bufferSubData(this.gl.UNIFORM_BUFFER, 0, this.floatView);
         this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, 0, null);
 
         return this;

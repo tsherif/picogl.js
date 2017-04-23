@@ -190,7 +190,7 @@
         .clearColor(0.0, 0.0, 0.0, 1.0).debug()
 
         var depthRange = vec2.fromValues(NEAR, FAR);
-        var resolution = vec2.fromValues(app.gl.drawingBufferWidth, app.gl.drawingBufferHeight);
+        var resolution = vec2.fromValues(app.width, app.height);
 
         var boxVsSource =  document.getElementById("vertex-boxes").text.trim();
         var boxFsSource =  document.getElementById("fragment-boxes").text.trim();
@@ -258,7 +258,7 @@
             mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
             sceneUniforms.set(0, viewProjMatrix).update();
 
-            resolution = vec2.fromValues(app.gl.drawingBufferWidth, app.gl.drawingBufferHeight);
+            resolution = vec2.fromValues(app.width, app.height);
             dofUniforms.set(1, resolution).update();
         };
 

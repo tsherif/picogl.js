@@ -169,8 +169,11 @@
 
         precision highp float;
 
-        uniform ivec2 uTexelOffset;
-        uniform ivec2 uResolution;
+        layout(std140) uniform BlurUniforms {
+            ivec2 uTexelOffset;
+            ivec2 uResolution;
+        };
+        
         uniform sampler2D uTexture;
 
         out vec4 fragColor;
@@ -229,10 +232,7 @@
         .floatRenderTargets()
         .debug();
 
-        var resolution = new Int32Array([
-            app.gl.drawingBufferWidth,
-            app.gl.drawingBufferHeight
-        ]);
+        var resolution = new Int32Array([app.width, app.height]);
 
         // SET UP PROGRAMS
 
@@ -376,6 +376,22 @@
         .set(5, suns[1].color)
         .update();
 
+        var hBlurUniforms = app.createUniformBuffer([
+            PicoGL.INT_VEC2,
+            PicoGL.INT_VEC2
+        ])
+        .set(0, hTexelOffset)
+        .set(1, resolution)
+        .update();
+
+        var vBlurUniforms = app.createUniformBuffer([
+            PicoGL.INT_VEC2,
+            PicoGL.INT_VEC2
+        ])
+        .set(0, vTexelOffset)
+        .set(1, resolution)
+        .update();
+
         window.onresize = function() {
             app.resize(window.innerWidth, window.innerHeight);
 
@@ -400,13 +416,11 @@
             .uniformBlock("SunUniforms", suns[1].uniforms);
     
             var hBlurDrawCall = app.createDrawCall(blurProgram, quadArray)
-            .uniform("uTexelOffset", hTexelOffset)
-            .uniform("uResolution", resolution)
+            .uniformBlock("BlurUniforms", hBlurUniforms)
             .texture("uTexture", colorBuffer.colorTextures[1]);
 
             var vBlurDrawCall = app.createDrawCall(blurProgram, quadArray)
-            .uniform("uTexelOffset", vTexelOffset)
-            .uniform("uResolution", resolution)
+            .uniformBlock("BlurUniforms", vBlurUniforms)
             .texture("uTexture", blurBuffer.colorTextures[0]);
 
             var blendDrawCall = app.createDrawCall(blendProgram, quadArray)
