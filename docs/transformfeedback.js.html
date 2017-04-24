@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: picogl.js</title>
+    <title>JSDoc: Source: transformfeedback.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: picogl.js</h1>
+    <h1 class="page-title">Source: transformfeedback.js</h1>
 
     
 
@@ -53,90 +53,63 @@
     "use strict";
 
     /**
-        Global PicoGL module. For convenience, all WebGL enums are stored
-        as properties of PicoGL (e.g. PicoGL.FLOAT, PicoGL.ONE_MINUS_SRC_ALPHA).
-        
-        @namespace PicoGL
-        @prop {string} version Current PicoGL version.
+        Storage for vertex data.
+
+        @class
+        @prop {WebGLRenderingContext} gl The WebGL context.
+        @prop {WebGLBuffer} buffer Allocated buffer storage.
+        @prop {GLEnum} type The type of data stored in the buffer.
+        @prop {number} itemSize Number of array elements per vertex.
+        @prop {number} numItems Number of vertices represented.
+        @prop {boolean} indexArray Whether this is an index array.
+        @prop {GLEnum} binding GL binding point (ARRAY_BUFFER or ELEMENT_ARRAY_BUFFER).
     */
-    var PicoGL = window.PicoGL = {
-        version: "&lt;%= VERSION %>"
+    PicoGL.TransformFeedback = function TransformFeedback(gl, vertexArray1, vertexArray2, varyingBufferIndices) {
+        this.gl = gl;
+        this.transformFeedback = gl.createTransformFeedback();
+        this.inputVertexArray = vertexArray1;
+        this.outputVertexArray = vertexArray2;
+        this.inputBuffers = new Array(varyingBufferIndices.length);
+        this.outputBuffers = new Array(varyingBufferIndices.length);
+
+        for (var i = 0, len = varyingBufferIndices.length; i &lt; len; ++i) {
+            this.inputBuffers[i] = vertexArray1.attributeBuffers[varyingBufferIndices[i]];
+            this.outputBuffers[i] = vertexArray2.attributeBuffers[varyingBufferIndices[i]];
+        }
     };
 
-    (function() {
-        // Absorb all GL enums for convenience
-        var canvas = document.createElement("canvas");
-        var gl = canvas.getContext("webgl2");
+    PicoGL.TransformFeedback.prototype.bind = function(primitive) {
+        this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedback);
         
-        if (!gl) {
-            return;
+        for (var i = 0, len = this.outputBuffers.length; i &lt; len; ++i) {
+            this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, i, this.outputBuffers[i].buffer);
         }
 
-        for (var enumName in gl) {
-            if (enumName.match(/^[A-Z0-9_]+$/) &amp;&amp; typeof(gl[enumName]) === "number") {
-                PicoGL[enumName] = gl[enumName];
-            }
-        }
+        this.gl.beginTransformFeedback(primitive);
 
-        PicoGL.FRAMEBUFFER_INTERNAL_FORMAT = {};
-        var UNSIGNED_BYTE = PicoGL.FRAMEBUFFER_INTERNAL_FORMAT[gl.UNSIGNED_BYTE] = {};
-        UNSIGNED_BYTE[gl.RED] = gl.R8;
-        UNSIGNED_BYTE[gl.RG] = gl.RG8;
-        UNSIGNED_BYTE[gl.RGBA] = gl.RGBA;
-
-        var UNSIGNED_SHORT = PicoGL.FRAMEBUFFER_INTERNAL_FORMAT[gl.UNSIGNED_SHORT] = {};
-        UNSIGNED_SHORT[gl.DEPTH_COMPONENT] = gl.DEPTH_COMPONENT16;
-
-        var FLOAT = PicoGL.FRAMEBUFFER_INTERNAL_FORMAT[gl.FLOAT] = {};
-        FLOAT[gl.RED] = gl.R16F;
-        FLOAT[gl.RG] = gl.RG16F;
-        FLOAT[gl.RGBA] = gl.RGBA16F;
-        FLOAT[gl.DEPTH_COMPONENT] = gl.DEPTH_COMPONENT32F;
-
-        PicoGL.TYPE_SIZE = {};
-        PicoGL.TYPE_SIZE[gl.BYTE]              = 1;
-        PicoGL.TYPE_SIZE[gl.UNSIGNED_BYTE]     = 1;
-        PicoGL.TYPE_SIZE[gl.SHORT]             = 2;
-        PicoGL.TYPE_SIZE[gl.UNSIGNED_SHORT]    = 2;
-        PicoGL.TYPE_SIZE[gl.INT]               = 4;
-        PicoGL.TYPE_SIZE[gl.UNSIGNED_INT]      = 4;
-        PicoGL.TYPE_SIZE[gl.FLOAT]             = 4;
-
-    })();
-
-
-
-    PicoGL.DUMMY_OBJECT = {};
-
-    /**
-        Create a PicoGL app. The app is the primary entry point to PicoGL. It stores
-        the canvas, the WebGL context and all WebGL state.
-
-        @function PicoGL.createApp
-        @param {DOMElement} canvas The canvas on which to create the WebGL context.
-        @param {Object} [contextAttributes] Context attributes to pass when calling getContext().
-    */
-    PicoGL.createApp = function(canvas, contextAttributes) {
-        return new PicoGL.App(canvas, contextAttributes);
+        return this;
     };
 
-    PicoGL.compileShader = function(gl, shader, source, debug) {
-        gl.shaderSource(shader, source);
-        gl.compileShader(shader);
+    PicoGL.TransformFeedback.prototype.swapBuffers = function() {
+        var va = this.inputVertexArray;
+        this.inputVertexArray = this.outputVertexArray;
+        this.outputVertexArray = va;
 
-        if (debug &amp;&amp; !gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-            var i, lines;
+        var vb = this.inputBuffers;
+        this.inputBuffers = this.outputBuffers;
+        this.outputBuffers = vb;
 
-            console.error(gl.getShaderInfoLog(shader));
-            lines = source.split("\n");
-            for (i = 0; i &lt; lines.length; ++i) {
-                console.error((i + 1) + ":", lines[i]);
-            }
-        }
+        return this;
+    };
+
+    PicoGL.TransformFeedback.prototype.unbind = function() {
+        this.gl.endTransformFeedback();    
+        this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, null);
+
+        return this;
     };
 
 })();
-
 </code></pre>
         </article>
     </section>

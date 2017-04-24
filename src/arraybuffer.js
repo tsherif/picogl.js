@@ -33,7 +33,9 @@
         @prop {GLEnum} type The type of data stored in the buffer.
         @prop {number} itemSize Number of array elements per vertex.
         @prop {number} numItems Number of vertices represented.
+        @prop {GLEnum} usage The usage pattern of the buffer.
         @prop {boolean} indexArray Whether this is an index array.
+        @prop {boolean} instanced Whether this is an instanced array.
         @prop {GLEnum} binding GL binding point (ARRAY_BUFFER or ELEMENT_ARRAY_BUFFER).
     */
     // TODO(Tarek): Allow buffer to be initialized with size
@@ -70,6 +72,12 @@
         gl.bindBuffer(this.binding, null);
     };
 
+    /**
+        Update data in this buffer.
+
+        @method
+        @param {ArrayBufferView} data Data to store in the buffer.
+    */
     PicoGL.ArrayBuffer.prototype.update = function(data) {
         this.gl.bindBuffer(this.binding, this.buffer);
         this.gl.bufferSubData(this.binding, 0, data);
@@ -79,10 +87,9 @@
     };
 
     /**
-        Bind this array buffer to a program attribute.
+        Bind this array buffer.
 
         @method
-        @param {number} attribute The attribute handle to bind to.
     */
     PicoGL.ArrayBuffer.prototype.bind = function() {
         this.gl.bindBuffer(this.binding, this.buffer);

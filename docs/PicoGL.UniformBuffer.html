@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Class: Texture</title>
+    <title>JSDoc: Class: UniformBuffer</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Class: Texture</h1>
+    <h1 class="page-title">Class: UniformBuffer</h1>
 
     
 
@@ -29,7 +29,7 @@
 <header>
     
         <h2>
-            <span class="ancestors"><a href="PicoGL.html">PicoGL</a>.</span>Texture</h2>
+            <span class="ancestors"><a href="PicoGL.html">PicoGL</a>.</span>UniformBuffer</h2>
         
     
 </header>
@@ -41,14 +41,14 @@
 
     
 
-    <h4 class="name" id="Texture"><span class="type-signature"></span>new Texture<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="UniformBuffer"><span class="type-signature"></span>new UniformBuffer<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
 
 
 <div class="description">
-    General-purpose texture.
+    Storage for uniform data. Data is stored in std140 layout.
 </div>
 
 
@@ -112,13 +112,13 @@
 
         <tr>
             
-                <td class="name"><code>texture</code></td>
+                <td class="name"><code>buffer</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">WebGLTexture</span>
+<span class="param-type">WebGLBuffer</span>
 
 
             
@@ -128,14 +128,152 @@
 
             
 
-            <td class="description last">Handle to the texture.</td>
+            <td class="description last">Allocated buffer storage.</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>internalFormat</code></td>
+                <td class="name"><code>floatView</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Float32Array</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Floating point view of the buffer data.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>intView</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Int32Array</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Integer view of the buffer data.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>offsets</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Offsets into the array for each item in the buffer.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>sizes</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Size of the item of the item at the given offset.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>integer</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Whether or not the item at the given offset is an integer.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>size</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The size of the buffer (in 4-byte items).</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>usage</code></td>
             
 
             <td class="type">
@@ -151,30 +289,7 @@
 
             
 
-            <td class="description last">Internal arrangement of the texture data.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>type</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">GLEnum</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Type of data stored in the texture.</td>
+            <td class="description last">Usage pattern of the buffer.</td>
         </tr>
 
     
@@ -213,7 +328,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="texture.js.html">texture.js</a>, <a href="texture.js.html#line36">line 36</a>
+        <a href="uniformbuffer.js.html">uniformbuffer.js</a>, <a href="uniformbuffer.js.html#line41">line 41</a>
     </li></ul></dd>
     
 
@@ -262,14 +377,14 @@
 
     
 
-    <h4 class="name" id="bind"><span class="type-signature"></span>bind<span class="signature">(unit)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="bind"><span class="type-signature"></span>bind<span class="signature">(base)</span><span class="type-signature"></span></h4>
 
     
 
 
 
 <div class="description">
-    Bind this texture to a texture unit.
+    Bind this array buffer.
 </div>
 
 
@@ -305,7 +420,7 @@
 
         <tr>
             
-                <td class="name"><code>unit</code></td>
+                <td class="name"><code>base</code></td>
             
 
             <td class="type">
@@ -321,7 +436,7 @@
 
             
 
-            <td class="description last">The texture unit to bind to.</td>
+            <td class="description last">Buffer base to bind to.</td>
         </tr>
 
     
@@ -362,7 +477,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="texture.js.html">texture.js</a>, <a href="texture.js.html#line109">line 109</a>
+        <a href="uniformbuffer.js.html">uniformbuffer.js</a>, <a href="uniformbuffer.js.html#line146">line 146</a>
     </li></ul></dd>
     
 
@@ -393,15 +508,15 @@
 
     
 
-    <h4 class="name" id="image"><span class="type-signature"></span>image<span class="signature">(image, width<span class="signature-attributes">opt</span>, height<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="set"><span class="type-signature"></span>set<span class="signature">(index, value)</span><span class="type-signature"></span></h4>
 
     
 
 
 
 <div class="description">
-    Set the image data for the texture. Width and height should only
-        be passed for ArrayBufferView data.
+    Update data associated with the buffer. NOTE: Data is not 
+        sent the the GPU until the update() method is called!
 </div>
 
 
@@ -425,8 +540,6 @@
         <th>Type</th>
 
         
-        <th>Attributes</th>
-        
 
         
 
@@ -439,15 +552,35 @@
 
         <tr>
             
-                <td class="name"><code>image</code></td>
+                <td class="name"><code>index</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">ImageElement</span>
-|
+<span class="param-type">number</span>
 
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Location in the layout to update.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>value</code></td>
+            
+
+            <td class="type">
+            
+                
 <span class="param-type">ArrayBufferView</span>
 
 
@@ -455,84 +588,10 @@
             </td>
 
             
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
 
             
 
-            <td class="description last">Image data.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>width</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">Image width (should only be passed for ArrayBufferView data).</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>height</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">Image height (should only be passed for ArrayBufferView data).</td>
+            <td class="description last">Value to store at the layout location.</td>
         </tr>
 
     
@@ -573,7 +632,89 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="texture.js.html">texture.js</a>, <a href="texture.js.html#line88">line 88</a>
+        <a href="uniformbuffer.js.html">uniformbuffer.js</a>, <a href="uniformbuffer.js.html#line115">line 115</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="update"><span class="type-signature"></span>update<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Send stored buffer data to the GPU.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="uniformbuffer.js.html">uniformbuffer.js</a>, <a href="uniformbuffer.js.html#line132">line 132</a>
     </li></ul></dd>
     
 
