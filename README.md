@@ -1,7 +1,7 @@
 PicoGL.js
 ========
 
-PicoGL.js is minimal WebGL library. It's meant for developers who understand the GPU rendering pipeline and want to use it, but with a more convenient API. Typical usage of PicoGL.js will involve creating programs, arraybuffers, framebuffers, textures, and combining them into draw calls.
+PicoGL.js is minimal WebGL 2-only rendering library. It's meant for developers who understand the GPU rendering pipeline and want to use it, but with a more convenient API. Typical usage of PicoGL.js will involve creating programs, array buffers, vertex arrays, uniform buffers, framebuffers, textures, transform feedbacks, and combining them into draw calls.
 
 ```JavaScript
     var app = PicoGL.createApp(canvas)
@@ -15,9 +15,19 @@ PicoGL.js is minimal WebGL library. It's meant for developers who understand the
          0.0,  0.5
     ]));
 
-    var drawCall = app.createDrawCall(program)
-    .attribute("aPosition", positions)
-    .uniform("uColor", new Float32Array([1.0, 0.0, 0.0]));
+    var vertexArray = app.createVertexArray()
+    .attributeBuffer(0, positions);
+
+    var uniformBuffer = app.createUniformBuffer([
+        PicoGL.FLOAT_VEC4,
+        PicoGL.FLOAT_VEC4
+    ])
+    .set(0, new Float32Array([1.0, 0.0, 0.0, 0.3]))
+    .set(1, new Float32Array([0.0, 0.0, 1.0, 0.7]))
+    .update();
+
+    var drawCall = app.createDrawCall(program, vertexArray)
+    .uniformBlock("ColorUniforms", uniformBuffer);
 
     app.drawCalls([drawCall])
     .clear()
@@ -25,69 +35,101 @@ PicoGL.js is minimal WebGL library. It's meant for developers who understand the
 
 ``` 
 
-PicoGL.js makes it fairly easy to set up multi-pass rendering algorithms. It also has convenient utility functions to enable relevant extensions. For example, screen space ambient occlusion might be set up as follows:
+
+Note that PicoGL.js is **not** a scene graph library. There are no objects, hierarchies, transforms, materials, etc. It has been designed only to make management of GPU state more convenient. Its conceptual model maps fairly directly to the constructs one deals with when writing directly with WebGL. The only higher-level construct is the **draw call**, which manages sets of related lower-level constructs. 
+
+PicoGL.js simplifies usage of some more complex WebGL 2 features, such as multiple render targets, uniform buffers and transform feedback.
+
+Multiple Render Targets
+-----------------------
 
 ```JavaScript
-    // SET UP APP
     var app = PicoGL.createApp(canvas)
     .clearColor(0.0, 0.0, 0.0, 1.0)
-    .depthTest()
-    .depthFunc(PicoGL.LEQUAL)
-    .drawBuffers()           // Enable WEBGL_draw_buffers
-    .floatTextures()         // Enable OES_texture_float
-    .linearFloatTextures();  // Enable OES_texture_float_linear
+    .floatRenderTargets();  // EXT_color_buffer_float 
 
-    // SET UP PROGRAMS AND FRAMEBUFFERS
-    // Set up program and framebuffer to gather color and geometry data
-    var colorGeoProgram = app.createProgram(colorGeoVsSource, colorGeoFsSource);
-    // Framebuffer with 3 float targets: color, positions, normals
-    var colorGeoBuffer = app.createFramebuffer(3, PicoGL.FLOAT);
+    var framebuffer = app.createFramebuffer()
+    .colorTarget(0, PicoGL.FLOAT)
+    .colorTarget(1, PicoGL.FLOAT)
+    .depthTarget();
+    
+    // ... set up programs and vertex arrays for offscreen and
+    // main draw passes...
 
-    // Set up ssao program
-    var ssaoProgram = app.createProgram(ssaoVsSource, ssaoFsSource);
-    var ssaoBuffer = app.createFramebuffer(1, PicoGL.FLOAT);
+    var offscreenDrawCall = app.createDrawCall(offscreenProgram, offscreenVAO);
 
-    // Set up ao blend program
-    var aoBlendProgram = app.createProgram(aoBlendVsSource, aoBlendFsSource);
+    // Bind main program texture samplers to framebuffer targets
+    var mainDrawCall = app.createDrawCall(mainProgram, mainVAO)
+    .texture("texture1", frameBuffer.colorTexture[0])
+    .texture("texture2", frameBuffer.colorTexture[1])
+    .texture("depthTexture", frameBuffer.depthTexture);
 
-    // SET UP ARRAY BUFFERS AND OTHER DATA
-    // ...etc.
-
-    // SET UP DRAW CALLS
-    var colorGeoDrawCall = app.createDrawCall(colorGeoProgram)
-    .attribute("aPosition", positions)
-    .attribute("aNormal", normals)
-    // ...etc.
-
-    var ssaoDrawCall = app.createDrawCall(ssaoProgram)
-    .attribute("aPosition", quadPositions)
-    // ...etc.
-    // Bind geo targets from colorGeoBuffer
-    .texture("uPositionBuffer", colorGeoBuffer.colorTextures[1])
-    .texture("uNormalBuffer", colorGeoBuffer.colorTextures[2]);
-
-    var aoBlendDrawCall = app.createDrawCall(aoBlendProgram)
-    .attribute("aPosition", quadPositions)
-    // Bind color targets from first two passes
-    .texture("uColorBuffer", colorGeoBuffer.colorTextures[0])
-    .texture("uOcclusionBuffer", ssaoBuffer.colorTextures[0]);
-
-    // DRAW
-    // Color/geo pass
-    app.framebuffer(colorGeoBuffer)
-    .drawCalls([colorGeoDrawCall])
+    // Offscreen pass
+    app.framebuffer(framebuffer)
+    .drawCalls([offscreenDrawCall])
     .clear()
     .draw()
-    // SSAO pass
-    .framebuffer(ssaoBuffer)
-    .drawCalls([ssaoDrawCall])
-    .clear()
-    .draw()
-    // Final blend pass
+    // Main draw pass
     .defaultFramebuffer()
-    .drawCalls([aoBlendDrawCall])
+    .drawCalls([mainDrawCall])
     .clear()
     .draw();
 ```
 
-Note that PicoGL.js is **not** a scene graph library. There are no objects, hierarchies, transforms, materials, etc. It has been designed only to make management of GPU state more convenient. Its conceptual model maps fairly directly to the constructs one deals with when writing directly with WebGL. The only higher-level construct is the **draw call**, which manages sets of related lower-level constructs. 
+Uniform Buffers
+---------------
+
+```JavaScript
+    var app = PicoGL.createApp(canvas)
+    .clearColor(0.0, 0.0, 0.0, 1.0);
+    
+    // ... set up program and vertex array...
+
+    // Layout is std140
+    var uniformBuffer = app.createUniformBuffer([
+        PicoGL.FLOAT_MAT4,
+        PicoGL.FLOAT_VEC4,
+        PicoGL.INT_VEC4,
+        PicoGL.FLOAT
+    ])
+    .set(0, matrix)
+    .set(1, float32Vector)
+    .set(2, int32Vector)
+    .set(3, scalar)
+    .update();      // Data only sent to GPU when update() is called.
+
+    var drawCall = app.createDrawCall(program, vertexArray)
+    .uniformBlock("UniformBlock", uniformBuffer);
+```
+
+Transform Feedback
+------------------
+
+```JavaScript
+    var app = PicoGL.createApp(canvas)
+    .clearColor(0.0, 0.0, 0.0, 1.0);
+
+    // Last argument is transform feedback varyings.
+    var program = app.createProgram(vertexShaderSource, fragmentShaderSource, ["vPosition"]);
+
+    var positions1 = app.createArrayBuffer(PicoGL.FLOAT, 2, new Float32Array(6));
+    var vertexArray1 = app.createVertexArray()
+    .attributeBuffer(0, positions1);
+
+    var positions2 = app.createArrayBuffer(PicoGL.FLOAT, 2, new Float32Array(6));
+    var vertexArray2 = app.createVertexArray()
+    .attributeBuffer(0, positions2);
+
+    // Last argument indices of buffers in the vertex arrays that will be used
+    // for transform feedback
+    var transformFeedback = app.createTransformFeedback(vertexArray1, vertexArray2, [0]);
+
+    var drawCall = app.createDrawCall(program, transformFeedback);
+
+    app.drawCalls([drawCall])
+    .clear()
+    .draw();
+
+    // Swap input and output buffers
+    transformFeedback.swapBuffers();
+``` 
