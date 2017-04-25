@@ -245,6 +245,12 @@
         var SPHERE_RADIUS = 0.6;
 
         var canvas = document.getElementById("gl-canvas");
+
+        if (!canvas.getContext("webgl2")) {
+            console.error("WebGL 2 not available");
+            document.body.innerHTML = "This example requires WebGL 2 which is unavailable on this system."
+        }
+
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
@@ -269,6 +275,10 @@
         .depthTest()
         .depthFunc(PicoGL.LEQUAL)
         .floatRenderTargets();
+
+        if (!app.floatRenderTargetsEnabled) {
+            document.body.innerHTML = "This example requires extension EXT_color_buffer_float which is not supported on this system."
+        }
 
         // Set up color/geo program
         var colorGeoVsSource =  document.getElementById("vertex-colorgeo").text.trim();
@@ -405,11 +415,6 @@
         var image = new Image();
 
         image.onload = function() {
-            if (!app.floatRenderTargetsEnabled) {
-                document.body.innerHTML = "This example requires extensions WEBGL_draw_buffers, OES_texture_float and OES_texture_float_linear which are not supported on this system."
-                return;
-            }
-
             var texture = app.createTexture(image);
 
             var colorGeoDrawcall = app.createDrawCall(colorGeoProgram, sphereArray)

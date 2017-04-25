@@ -220,6 +220,12 @@
         });
 
         var canvas = document.getElementById("gl-canvas");
+
+        if (!canvas.getContext("webgl2")) {
+            console.error("WebGL 2 not available");
+            document.body.innerHTML = "This example requires WebGL 2 which is unavailable on this system."
+        }
+
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
@@ -229,8 +235,11 @@
         var app = PicoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0)
         .depthTest()
-        .floatRenderTargets()
-        .debug();
+        .floatRenderTargets();;
+
+        if (!app.floatRenderTargetsEnabled) {
+            document.body.innerHTML = "This example requires extension EXT_color_buffer_float which is not supported on this system."
+        }
 
         var resolution = new Int32Array([app.width, app.height]);
 

@@ -169,6 +169,12 @@
     </script>
     <script type="text/javascript">
         var canvas = document.getElementById("gl-canvas");
+
+        if (!canvas.getContext("webgl2")) {
+            console.error("WebGL 2 not available");
+            document.body.innerHTML = "This example requires WebGL 2 which is unavailable on this system."
+        }
+
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
@@ -187,7 +193,7 @@
 
         var app = PicoGL.createApp(canvas)
         .depthTest()
-        .clearColor(0.0, 0.0, 0.0, 1.0).debug()
+        .clearColor(0.0, 0.0, 0.0, 1.0);
 
         var depthRange = vec2.fromValues(NEAR, FAR);
         var resolution = vec2.fromValues(app.width, app.height);

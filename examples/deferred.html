@@ -133,6 +133,12 @@
     </script> 
     <script type="text/javascript">
         var canvas = document.getElementById("gl-canvas");
+
+        if (!canvas.getContext("webgl2")) {
+            console.error("WebGL 2 not available");
+            document.body.innerHTML = "This example requires WebGL 2 which is unavailable on this system."
+        }
+
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
@@ -141,7 +147,11 @@
         .depthTest()
         .depthFunc(PicoGL.LEQUAL)
         .blendFunc(PicoGL.ONE, PicoGL.ONE)
-        .floatRenderTargets().debug();
+        .floatRenderTargets();
+
+        if (!app.floatRenderTargetsEnabled) {
+            document.body.innerHTML = "This example requires extension EXT_color_buffer_float which is not supported on this system."
+        }
 
         // Set up gbuffer program
         var geoVsSource =  document.getElementById("geo-vs").text.trim();

@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.0.5 
+PicoGL.js v0.1.0 
 
 The MIT License (MIT)
 
@@ -31,9 +31,11 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         
         @namespace PicoGL
         @prop {string} version Current PicoGL version.
+        @prop {object} FRAMEBUFFER_INTERNAL_FORMAT Map of framebuffer texture formats to internal formats.
+        @prop {object} TYPE_SIZE Map of data types to sizes in bytes.
     */
     var PicoGL = window.PicoGL = {
-        version: "0.0.5"
+        version: "0.1.0"
     };
 
     (function() {
@@ -118,20 +120,15 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         state and manage draw calls.
 
         @class
-        @param {DOMElement} canvas The canvas on which to create the WebGL context.
-        @param {Object} [contextAttributes] Context attributes to pass when calling getContext().
         @prop {DOMElement} canvas The canvas on which this app drawing.
         @prop {WebGLRenderingContext} gl The WebGL context.
         @prop {number} width The width of the drawing surface.
         @prop {number} height The height of the drawing surface.
-        @prop {number} maxDrawBuffers The maximum number of available draw buffers.
-        @prop {boolean} drawBuffersEnabled Whether the WEBGL_draw_buffers extension is enabled.
-        @prop {boolean} depthTexturesEnabled Whether the WEBGL_depth_texture extension is enabled.
-        @prop {boolean} floatTexturesEnabled Whether the OES_texture_float extension is enabled.
+        @prop {boolean} floatRenderTargetsEnabled Whether the EXT_color_buffer_float extension is enabled.
         @prop {boolean} linearFloatTexturesEnabled Whether the OES_texture_float_linear extension is enabled.
+        @prop {boolean} debugEnabled Whether debug logging is enabled.
         @prop {Object} currentState Tracked GL state.
         @prop {GLEnum} clearBits Current clear mask to use with clear().
-        @prop {WebGLDrawBuffers} drawBuffersExtension Hold the draw buffers extension object when enabled.
     */
     PicoGL.App = function App(canvas, contextAttributes) {
         this.canvas = canvas;
@@ -313,12 +310,22 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         return this;
     };
 
+    /**
+        Enable rasterization step.
+
+        @method
+    */
     PicoGL.App.prototype.rasterize = function() {
         this.gl.disable(this.gl.RASTERIZER_DISCARD);
 
         return this;
     };
 
+    /**
+        Disable rasterization step.
+
+        @method
+    */
     PicoGL.App.prototype.noRasterize = function() {
         this.gl.enable(this.gl.RASTERIZER_DISCARD);
 
@@ -408,7 +415,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
     /**
         Enable the EXT_color_buffer_float extension. Allows for creating float textures as
-        render targets on FrameBuffer objects. E.g. app.createFramebuffer(1, PicoGL.FLOAT).
+        render targets on FrameBuffer objects. E.g. app.createFramebuffer().colorTarget(0, PicoGL.FLOAT).
 
         @method
         @see Framebuffer
@@ -489,6 +496,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @method
         @param {WebGLShader|string} vertexShader Vertex shader object or source code.
         @param {WebGLShader|string} fragmentShader Fragment shader object or source code.
+        @param {Array} [xformFeedbackVars] Transform feedback varyings.
     */
     PicoGL.App.prototype.createProgram = function(vsSource, fsSource, xformFeedbackVars) {
         return new PicoGL.Program(this.gl, vsSource, fsSource, xformFeedbackVars, this.debugEnabled);
@@ -508,10 +516,24 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         return shader;
     };
 
+    /**
+        Create a vertex array.
+
+        @method
+    */
     PicoGL.App.prototype.createVertexArray = function() {
         return new PicoGL.VertexArray(this.gl);
     };
 
+    /**
+        Create a transform feedback object.
+
+        @method
+        @param {VertexArray} vertexArray1 Vertex array containing first set of transform feedback buffers.
+        @param {VertexArray} vertexArray2 Vertex array containing second set of transform feedback buffers.
+        @param {Array} varryingBufferIndices Locations in the vertex arrays of buffers to use for transform feedback.
+
+    */
     PicoGL.App.prototype.createTransformFeedback = function(vertexArray1, vertexArray2, varyingBufferIndices) {
         return new PicoGL.TransformFeedback(this.gl, vertexArray1, vertexArray2, varyingBufferIndices);
     };
@@ -523,23 +545,63 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {GLEnum} type The data type stored in the array buffer.
         @param {number} itemSize Number of elements per vertex.
         @param {ArrayBufferView} data Array buffer data.
+        @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
     */
     PicoGL.App.prototype.createArrayBuffer = function(type, itemSize, data, usage) {
         return new PicoGL.ArrayBuffer(this.gl, type, itemSize, data, usage);
     };
 
+    /**
+        Create an instanced array buffer. Array items will be per-instance
+        rather than per-vertex.
+
+        @method
+        @param {GLEnum} type The data type stored in the array buffer.
+        @param {number} itemSize Number of elements per vertex.
+        @param {ArrayBufferView} data Array buffer data.
+        @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
+    */
     PicoGL.App.prototype.createInstancedArrayBuffer = function(type, itemSize, data, usage) {
         return new PicoGL.ArrayBuffer(this.gl, type, itemSize, data, usage, false, true);
     };
 
+    /**
+        Create an matrix array buffer. Matrix buffers ensure that columns
+        are correctly split across attribute locations.
+
+        @method
+        @param {GLEnum} type The data type stored in the array buffer. Valid types
+        are FLOAT_MAT4, FLOAT_MAT3, FLOAT_MAT2.
+        @param {ArrayBufferView} data Array buffer data.
+        @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
+    */
     PicoGL.App.prototype.createMatrixBuffer = function(type, data, usage) {
         return new PicoGL.ArrayBuffer(this.gl, type, null, data, usage);
     };
 
+    /**
+        Create an matrix array buffer. Matrix buffers ensure that columns
+        are correctly split across attribute locations. Array items will be per-instance
+        rather than per-vertex.
+
+        @method
+        @param {GLEnum} type The data type stored in the array buffer. Valid types
+        are FLOAT_MAT4, FLOAT_MAT3, FLOAT_MAT2.
+        @param {ArrayBufferView} data Array buffer data.
+        @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
+    */
     PicoGL.App.prototype.createInstancedMatrixBuffer = function(type, data, usage) {
         return new PicoGL.ArrayBuffer(this.gl, type, null, data, usage, false, true);
     };
 
+    /**
+        Create a uniform buffer. Layout is std140.
+
+        @method
+        @param {Array} layout Array indicating the order and types of items to 
+        be stored in the buffer.
+        @param {GLEnum} [usage=DYNAMIC_DRAW] Buffer usage.
+    */
     PicoGL.App.prototype.createUniformBuffer = function(layout, usage) {
         return new PicoGL.UniformBuffer(this.gl, layout, usage);
     };
@@ -563,7 +625,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {ImageElement|ArrayBufferView} image The image data. Can be any format that would be accepted by texImage2D.
         @param {Object} [options] Texture options.
         @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
-        @param {GLEnum} [options.internalFormat=RGBA] Texture data format.
+        @param {GLEnum} [options.format=RGBA] Texture data format.
+        @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
         @param {boolean} [options.array=false] Whether the texture is being passed as an ArrayBufferView.
         @param {number} [options.width] Width of the texture (only valid when passing array texture data).
         @param {number} [options.height] Height of the texture (only valid when passing array texture data).
@@ -582,7 +645,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         Create a texture.
 
         @method
-        @param {Object} [options] Texture options.
+        @param {Object} options Texture options.
         @param {ImageElement|ArrayBufferView} options.negX The image data for the negative X direction. Can be any format that would be accepted by texImage2D.
         @param {ImageElement|ArrayBufferView} options.posX The image data for the positive X direction. Can be any format that would be accepted by texImage2D.
         @param {ImageElement|ArrayBufferView} options.negY The image data for the negative Y direction. Can be any format that would be accepted by texImage2D.
@@ -590,7 +653,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {ImageElement|ArrayBufferView} options.negZ The image data for the negative Z direction. Can be any format that would be accepted by texImage2D.
         @param {ImageElement|ArrayBufferView} options.posZ The image data for the positive Z direction. Can be any format that would be accepted by texImage2D.
         @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
-        @param {GLEnum} [options.internalFormat=RGBA] Texture data format.
+        @param {GLEnum} [options.format=RGBA] Texture data format.
+        @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
         @param {boolean} [options.array=false] Whether the texture is being passed as an ArrayBufferView.
         @param {number} [options.width] Width of the texture (only valid when passing array texture data).
         @param {number} [options.height] Height of the texture (only valid when passing array texture data).
@@ -609,8 +673,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         Create a framebuffer.
 
         @method
-        @param {number} numColorTextures The number of color draw targets to create (requires enabled drawBuffers to be greater than 1).
-        @param {GLEnum} [colorTargetType=UNSIGNED_BYTE] Type of data stored in the color targets.
         @param {number} [width=app.width] Width of the framebuffer.
         @param {number} [height=app.height] Height of the framebuffer.
     */
@@ -620,11 +682,12 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
     /**
         Create a DrawCall. A DrawCall manages the state associated with 
-        a WebGL draw call including a program and associated attributes, textures and
-        uniforms.
+        a WebGL draw call including a program and associated vertex data, textures, 
+        uniforms and uniform blocks.
 
         @method
         @param {Program} program The program to use for this DrawCall.
+        @param {VertexArray|TransformFeedback} geometry Vertex data to use for drawing.
         @param {GLEnum} [primitive=TRIANGLES] Type of primitive to draw.
     */
     PicoGL.App.prototype.createDrawCall = function(program, geometry, primitive) {
@@ -656,8 +719,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @class
         @prop {WebGLRenderingContext} gl The WebGL context.
         @prop {WebGLProgram} program The WebGL program.
-        @prop {Object} attributes Map of attribute names to handles. 
+        @prop {boolean} transformFeedback Whether this program is set up for transform feedback. 
         @prop {Object} uniforms Map of uniform names to handles. 
+        @prop {Object} uniformBlockss Map of uniform block names to handles. 
     */
     PicoGL.Program = function Program(gl, vsSource, fsSource, xformFeebackVars, debug) {
         var i;
@@ -778,6 +842,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         this.uniforms[name].set(value);
     };
 
+    /**
+        Bind a uniform block to a uniform buffer base.
+
+        @method
+        @param {string} name Uniform block name.
+        @param {number} base Uniform buffer base to bind the block to.
+    */
     PicoGL.Program.prototype.uniformBlock = function(name, base) {
         this.gl.uniformBlockBinding(this.program, this.uniformBlocks[name], base);
     };
@@ -792,12 +863,12 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
         @class
         @prop {WebGLRenderingContext} gl The WebGL context.
-        @prop {WebGLBuffer} buffer Allocated buffer storage.
-        @prop {GLEnum} type The type of data stored in the buffer.
-        @prop {number} itemSize Number of array elements per vertex.
-        @prop {number} numItems Number of vertices represented.
-        @prop {boolean} indexArray Whether this is an index array.
-        @prop {GLEnum} binding GL binding point (ARRAY_BUFFER or ELEMENT_ARRAY_BUFFER).
+        @prop {WebGLVertexArrayObject} vertexArray Vertex array object.
+        @prop {array} attributeBuffers The attribute ArrayBuffers associated with this vertex array.
+        @prop {number} numElements Number of elements in the vertex array.
+        @prop {Glenum} indexType Data type of the indices.
+        @prop {boolean} indexed Whether this vertex array is set up for indexed drawing.
+        @prop {number} numInstances Number of instances to draw with this vertex array.
     */
     PicoGL.VertexArray = function VertexArray(gl) {
         this.gl = gl;
@@ -809,6 +880,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         this.numInstances = 0;
     };
 
+    /**
+        Bind an attribute buffer to this vertex array.
+
+        @method
+        @param {number} attributeIndex The attribute location to bind to.
+        @param {ArrayBuffer} arrayBuffer The ArrayBuffer to bind.
+    */
     PicoGL.VertexArray.prototype.attributeBuffer = function(attributeIndex, arrayBuffer) {
         this.gl.bindVertexArray(this.vertexArray);
 
@@ -846,6 +924,12 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         return this;
     };
 
+    /**
+        Bind an index buffer to this vertex array.
+
+        @method
+        @param {ArrayBuffer} arrayBuffer The ArrayBuffer to bind.
+    */
     PicoGL.VertexArray.prototype.indexBuffer = function(arrayBuffer) {
         this.gl.bindVertexArray(this.vertexArray);
         arrayBuffer.bind();
@@ -859,12 +943,22 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         return this;
     };
 
+    /**
+        Bind this vertex array.
+
+        @method
+    */
     PicoGL.VertexArray.prototype.bind = function() {
         this.gl.bindVertexArray(this.vertexArray);
 
         return this;
     };
 
+    /**
+        Unbind this vertex array.
+
+        @method
+    */
     PicoGL.VertexArray.prototype.unbind = function() {
         this.gl.bindVertexArray(null);
 
@@ -876,16 +970,15 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     "use strict";
 
     /**
-        Storage for vertex data.
+        Tranform feedback object.
 
         @class
         @prop {WebGLRenderingContext} gl The WebGL context.
-        @prop {WebGLBuffer} buffer Allocated buffer storage.
-        @prop {GLEnum} type The type of data stored in the buffer.
-        @prop {number} itemSize Number of array elements per vertex.
-        @prop {number} numItems Number of vertices represented.
-        @prop {boolean} indexArray Whether this is an index array.
-        @prop {GLEnum} binding GL binding point (ARRAY_BUFFER or ELEMENT_ARRAY_BUFFER).
+        @prop {WebGLTransformFeedback} transformFeedback Transform feedback object.
+        @prop {VertexArray} inputVertexArray Vertex array to use as input to the next pass.
+        @prop {array} inputBuffers Transform feedback buffers bound to the input vertex array.
+        @prop {VertexArray} outputVertexArray Vertex array to store output from the next pass.
+        @prop {array} outputBuffers Transform feedback buffers bound to the output vertex array.
     */
     PicoGL.TransformFeedback = function TransformFeedback(gl, vertexArray1, vertexArray2, varyingBufferIndices) {
         this.gl = gl;
@@ -901,6 +994,12 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         }
     };
 
+    /**
+        Bind this transform feedback.
+
+        @method
+        @param {GLenum} primitive Primitive being drawn.
+    */
     PicoGL.TransformFeedback.prototype.bind = function(primitive) {
         this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedback);
         
@@ -913,6 +1012,11 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         return this;
     };
 
+     /**
+        Swap the input and output buffers.
+
+        @method
+    */
     PicoGL.TransformFeedback.prototype.swapBuffers = function() {
         var va = this.inputVertexArray;
         this.inputVertexArray = this.outputVertexArray;
@@ -925,6 +1029,11 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         return this;
     };
 
+     /**
+        Unbind this transform feedback.
+
+        @method
+    */
     PicoGL.TransformFeedback.prototype.unbind = function() {
         this.gl.endTransformFeedback();    
         this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, null);
@@ -945,7 +1054,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @prop {GLEnum} type The type of data stored in the buffer.
         @prop {number} itemSize Number of array elements per vertex.
         @prop {number} numItems Number of vertices represented.
+        @prop {GLEnum} usage The usage pattern of the buffer.
         @prop {boolean} indexArray Whether this is an index array.
+        @prop {boolean} instanced Whether this is an instanced array.
         @prop {GLEnum} binding GL binding point (ARRAY_BUFFER or ELEMENT_ARRAY_BUFFER).
     */
     // TODO(Tarek): Allow buffer to be initialized with size
@@ -955,6 +1066,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             type = PicoGL.FLOAT;
             itemSize = 4;
             numRows = 4;
+        // TODO(Tarek): Make sure MAT3/MAT2 work!
         } else if (type === PicoGL.FLOAT_MAT3) {
             type = PicoGL.FLOAT;
             itemSize = 3;
@@ -981,6 +1093,12 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         gl.bindBuffer(this.binding, null);
     };
 
+    /**
+        Update data in this buffer.
+
+        @method
+        @param {ArrayBufferView} data Data to store in the buffer.
+    */
     PicoGL.ArrayBuffer.prototype.update = function(data) {
         this.gl.bindBuffer(this.binding, this.buffer);
         this.gl.bufferSubData(this.binding, 0, data);
@@ -990,10 +1108,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     };
 
     /**
-        Bind this array buffer to a program attribute.
+        Bind this array buffer.
 
         @method
-        @param {number} attribute The attribute handle to bind to.
     */
     PicoGL.ArrayBuffer.prototype.bind = function() {
         this.gl.bindBuffer(this.binding, this.buffer);
@@ -1242,10 +1359,25 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ;(function() {
     "use strict";
 
+    /**
+        Storage for uniform data. Data is stored in std140 layout.
+
+        @class
+        @prop {WebGLRenderingContext} gl The WebGL context.
+        @prop {WebGLBuffer} buffer Allocated buffer storage.
+        @prop {Float32Array} floatView Floating point view of the buffer data.
+        @prop {Int32Array} intView Integer view of the buffer data.
+        @prop {Array} offsets Offsets into the array for each item in the buffer.
+        @prop {Array} sizes Size of the item at the given offset.
+        @prop {Array} integer Whether or not the item at the given offset is an integer.
+        @prop {number} size The size of the buffer (in 4-byte items).
+        @prop {GLEnum} usage Usage pattern of the buffer.
+    */
     PicoGL.UniformBuffer = function UniformBuffer(gl, layout, usage) {
         this.gl = gl;
         this.buffer = gl.createBuffer();
         this.floatView = null;
+        this.intView = null;
         this.offsets = new Array(layout.length);
         this.sizes = new Array(layout.length);
         this.integer = new Array(layout.length);
@@ -1300,15 +1432,23 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         this.size += (4 - this.size % 4) % 4;
 
         this.floatView = new Float32Array(this.size);
-        this.integerView = new Int32Array(this.floatView.buffer);
+        this.intView = new Int32Array(this.floatView.buffer);
 
         this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, 0, this.buffer);
         this.gl.bufferData(this.gl.UNIFORM_BUFFER, this.size * 4, this.usage);
         this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, 0, null);
     };
 
+    /**
+        Update data for a given item in the buffer. NOTE: Data is not 
+        sent the the GPU until the update() method is called!
+
+        @method
+        @param {number} index Location in the layout to update.
+        @param {ArrayBufferView} value Value to store at the layout location.
+    */
     PicoGL.UniformBuffer.prototype.set = function(index, value) {
-        var view = this.integer[index] ? this.integerView : this.floatView;
+        var view = this.integer[index] ? this.intView : this.floatView;
 
         if (this.sizes[index] === 1)  {
             view[this.offsets[index]] = value;
@@ -1319,6 +1459,11 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         return this;
     };
 
+    /**
+        Send stored buffer data to the GPU.
+
+        @method
+    */
     PicoGL.UniformBuffer.prototype.update = function() {
         this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, 0, this.buffer);
         this.gl.bufferSubData(this.gl.UNIFORM_BUFFER, 0, this.floatView);
@@ -1327,6 +1472,12 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         return this;
     };
 
+    /**
+        Bind this array buffer.
+
+        @method
+        @param {number} base Buffer base to bind to.
+    */
     PicoGL.UniformBuffer.prototype.bind = function(base) {
         this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, base, this.buffer);
 
@@ -1519,8 +1670,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @prop {number} height The height of the framebuffer.
         @prop {Array} colorTextures Array of color texture targets. 
         @prop {number} numColorTargets Number of color texture targets. 
-        @prop {Texture} depthTexture Depth texture target (only available if depthTextures is enabled). 
-        @prop {WebGLRenderbuffer} depthBuffer Depth renderbuffer (only available if depthTextures is not enabled). 
+        @prop {Texture} depthTexture Depth texture target. 
         @prop {WebGLDrawBuffers} drawBuffersExtension Hold the draw buffers extension object when enabled.
         @prop {Array} colorAttachments Array of color attachment enums. 
     */
@@ -1541,19 +1691,21 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         this.colorTextures = [];
         this.colorAttachments = [];
         this.depthTexture = null;
-        this.depthBuffer =  null;
-
-        
-        for (var i = 0; i < this.numColorTargets; ++i) {
-            this.colorAttachments[i] = this.gl["COLOR_ATTACHMENT" + i];
-            
-        }
 
         gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer);
         this.gl.drawBuffers(this.colorAttachments);
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     }; 
 
+    /**
+        Add a color target to this framebuffer.
+
+        @method
+        @param {number} [index=0] Color attachment index.
+        @param {GLenum} [type=UNSIGNED_BYTE] Texture data type.
+        @param {GLenum} [format=RGBA] Texture data format.
+        @param {GLenum} [internalFormat=FRAMEBUFFER_INTERNAL_FORMAT[type]] Texture data internal format.
+    */
     PicoGL.Framebuffer.prototype.colorTarget = function(index, type, format, internalFormat) {
         index = index || 0;
         type = type || this.gl.UNSIGNED_BYTE;
@@ -1586,6 +1738,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         return this;
     };
 
+    /**
+        Add a depth target to this framebuffer.
+
+        @method
+        @param {GLenum} [type=UNSIGNED_SHORT] Texture data type.
+        @param {GLenum} [internalFormat=FRAMEBUFFER_INTERNAL_FORMAT[type]] Texture data internal format.
+    */
     PicoGL.Framebuffer.prototype.depthTarget = function(type, internalFormat) {
         var format = this.gl.DEPTH_COMPONENT;  
         type = type || this.gl.UNSIGNED_SHORT;
@@ -1618,8 +1777,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         Bind a new texture as a color target.
 
         @method
-        @param {Texture} texture New texture to bind.
         @param {number} [index=0] Color attachment to bind the texture to.
+        @param {Texture} texture New texture to bind.
     */
     PicoGL.Framebuffer.prototype.replaceTexture = function(index, texture) {
         index = index || 0;
@@ -1675,12 +1834,15 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
         @class
         @prop {WebGLRenderingContext} gl The WebGL context.
-        @prop {WebGLProgram} program Handle to the program to use for this drawcall.
-        @prop {Object} attributes Map of attribute handles to ArrayBuffers.
+        @prop {Program} currentProgram The program to use for this draw call.
+        @prop {VertexArray} currentVertexArray Vertex array to use for this draw call.
+        @prop {TransformFeedback} currentTransformFeedback Transform feedback to use for this draw call.
+        @prop {Object} uniformBuffers Map of uniform buffer bases to uniform buffers.
+        @prop {Object} uniformBlockBases Map of uniform blocks to uniform buffer bases.
+        @prop {Number} uniformBlockCount Number of active uniform blocks for this draw call.
         @prop {Object} uniform Map of uniform handles to values.
         @prop {Object} textures Map of texture units to Textures.
         @prop {number} textureCount The number of active textures for this draw call. 
-        @prop {ArrayBuffer} indexArray Index array to use for indexed drawing.
         @prop {GLEnum} primitive The primitive type being drawn. 
     */
     PicoGL.DrawCall = function DrawCall(gl, program, geometry, primitive) {
@@ -1696,12 +1858,11 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         }
         
         this.uniforms = {};
-        this.uniformBlocks = {};
+        this.uniformBuffers = {};
         this.uniformBlockBases = {};
         this.uniformBlockCount = 0;
         this.textures = {};
         this.textureCount = 0;
-        this.indexArray = null;
         this.primitive = primitive !== undefined ? primitive : PicoGL.TRIANGLES;
     };
 
@@ -1738,14 +1899,21 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         return this;
     };
 
-    PicoGL.DrawCall.prototype.uniformBlock = function(name, block) {
+    /**
+        Set uniform buffer to bind to a uniform block.
+
+        @method
+        @param {string} name Uniform block name.
+        @param {UniformBuffer} buffer Uniform buffer to bind.
+    */
+    PicoGL.DrawCall.prototype.uniformBlock = function(name, buffer) {
         var base = this.uniformBlockBases[name];
         if (base === undefined) {
             base = this.uniformBlockCount++;
             this.uniformBlockBases[name] = base;
         }
         
-        this.uniformBlocks[base] = block;
+        this.uniformBuffers[base] = buffer;
         
         return this;
     };
@@ -1758,7 +1926,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     */
     PicoGL.DrawCall.prototype.draw = function(state) {
         var uniforms = this.uniforms;
-        var uniformBlocks = this.uniformBlocks;
+        var uniformBuffers = this.uniformBuffers;
         var uniformBlockBases = this.uniformBlockBases;
         var textures = this.textures;
 
@@ -1774,7 +1942,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         for (var ubName in uniformBlockBases) {
             var base = uniformBlockBases[ubName];
             this.currentProgram.uniformBlock(ubName, base);
-            uniformBlocks[base].bind(base);
+            uniformBuffers[base].bind(base);
         }
 
         for (var unit in textures) {

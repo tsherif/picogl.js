@@ -100,13 +100,24 @@
     </script>
     <script type="text/javascript">
         var canvas = document.getElementById("gl-canvas");
+
+        if (!canvas.getContext("webgl2")) {
+            console.error("WebGL 2 not available");
+            document.body.innerHTML = "This example requires WebGL 2 which is unavailable on this system."
+        }
+
+
+        if (!canvas.getContext("webgl2")) {
+            console.error("WebGL 2 not available");
+            document.body.innerHTML = "This example requires WebGL 2 which is unavailable on this system."
+        }
+
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         
         var app = PicoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0)
-        .depthTest()
-        .debug();
+        .depthTest();
 
         var vsSource =  document.getElementById("vertex-draw").text.trim();
         var fsSource =  document.getElementById("fragment-draw").text.trim();
