@@ -29,8 +29,6 @@
         state and manage draw calls.
 
         @class
-        @param {DOMElement} canvas The canvas on which to create the WebGL context.
-        @param {Object} [contextAttributes] Context attributes to pass when calling getContext().
         @prop {DOMElement} canvas The canvas on which this app drawing.
         @prop {WebGLRenderingContext} gl The WebGL context.
         @prop {number} width The width of the drawing surface.
@@ -506,12 +504,11 @@
     };
 
     /**
-        Create a uniform buffers.
+        Create a uniform buffer. Layout is std140.
 
         @method
         @param {Array} layout Array indicating the order and types of items to 
-        be stored in the buffer. Items will be arranged according to an std140
-        layout.
+        be stored in the buffer.
         @param {GLEnum} [usage=DYNAMIC_DRAW] Buffer usage.
     */
     PicoGL.App.prototype.createUniformBuffer = function(layout, usage) {
@@ -557,7 +554,7 @@
         Create a texture.
 
         @method
-        @param {Object} [options] Texture options.
+        @param {Object} options Texture options.
         @param {ImageElement|ArrayBufferView} options.negX The image data for the negative X direction. Can be any format that would be accepted by texImage2D.
         @param {ImageElement|ArrayBufferView} options.posX The image data for the positive X direction. Can be any format that would be accepted by texImage2D.
         @param {ImageElement|ArrayBufferView} options.negY The image data for the negative Y direction. Can be any format that would be accepted by texImage2D.

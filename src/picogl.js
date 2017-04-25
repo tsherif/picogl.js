@@ -30,6 +30,8 @@
         
         @namespace PicoGL
         @prop {string} version Current PicoGL version.
+        @prop {object} FRAMEBUFFER_INTERNAL_FORMAT Map of framebuffer texture formats to internal formats.
+        @prop {object} TYPE_SIZE Map of data types to sizes in bytes.
     */
     var PicoGL = window.PicoGL = {
         version: "<%= VERSION %>"

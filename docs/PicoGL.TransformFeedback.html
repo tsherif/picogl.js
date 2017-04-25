@@ -48,7 +48,7 @@
 
 
 <div class="description">
-    Storage for vertex data.
+    Tranform feedback object.
 </div>
 
 
@@ -112,13 +112,13 @@
 
         <tr>
             
-                <td class="name"><code>buffer</code></td>
+                <td class="name"><code>transformFeedback</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">WebGLBuffer</span>
+<span class="param-type">WebGLTransformFeedback</span>
 
 
             
@@ -128,20 +128,20 @@
 
             
 
-            <td class="description last">Allocated buffer storage.</td>
+            <td class="description last">Transform feedback object.</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>type</code></td>
+                <td class="name"><code>inputVertexArray</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">GLEnum</span>
+<span class="param-type">VertexArray</span>
 
 
             
@@ -151,20 +151,20 @@
 
             
 
-            <td class="description last">The type of data stored in the buffer.</td>
+            <td class="description last">Vertex array to use as input to the next pass.</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>itemSize</code></td>
+                <td class="name"><code>inputBuffers</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">number</span>
+<span class="param-type">array</span>
 
 
             
@@ -174,20 +174,20 @@
 
             
 
-            <td class="description last">Number of array elements per vertex.</td>
+            <td class="description last">Transform feedback buffers bound to the input vertex array.</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>numItems</code></td>
+                <td class="name"><code>outputVertexArray</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">number</span>
+<span class="param-type">VertexArray</span>
 
 
             
@@ -197,20 +197,20 @@
 
             
 
-            <td class="description last">Number of vertices represented.</td>
+            <td class="description last">Vertex array to store output from the next pass.</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>indexArray</code></td>
+                <td class="name"><code>outputBuffers</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">boolean</span>
+<span class="param-type">array</span>
 
 
             
@@ -220,30 +220,7 @@
 
             
 
-            <td class="description last">Whether this is an index array.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>binding</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">GLEnum</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">GL binding point (ARRAY_BUFFER or ELEMENT_ARRAY_BUFFER).</td>
+            <td class="description last">Transform feedback buffers bound to the output vertex array.</td>
         </tr>
 
     
@@ -282,7 +259,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="transformfeedback.js.html">transformfeedback.js</a>, <a href="transformfeedback.js.html#line39">line 39</a>
+        <a href="transformfeedback.js.html">transformfeedback.js</a>, <a href="transformfeedback.js.html#line38">line 38</a>
     </li></ul></dd>
     
 
@@ -324,6 +301,305 @@
     
 
     
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    <h4 class="name" id="bind"><span class="type-signature"></span>bind<span class="signature">(primitive)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Bind this transform feedback.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>primitive</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">GLenum</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Primitive being drawn.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="transformfeedback.js.html">transformfeedback.js</a>, <a href="transformfeedback.js.html#line58">line 58</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="swapBuffers"><span class="type-signature"></span>swapBuffers<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Swap the input and output buffers.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="transformfeedback.js.html">transformfeedback.js</a>, <a href="transformfeedback.js.html#line75">line 75</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="unbind"><span class="type-signature"></span>unbind<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Unbind this transform feedback.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="transformfeedback.js.html">transformfeedback.js</a>, <a href="transformfeedback.js.html#line92">line 92</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+    
 
     
 
@@ -344,7 +620,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon Apr 24 2017 08:35:22 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue Apr 25 2017 06:35:33 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

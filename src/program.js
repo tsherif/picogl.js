@@ -32,8 +32,9 @@
         @class
         @prop {WebGLRenderingContext} gl The WebGL context.
         @prop {WebGLProgram} program The WebGL program.
-        @prop {Object} attributes Map of attribute names to handles. 
+        @prop {boolean} transformFeedback Whether this program is set up for transform feedback. 
         @prop {Object} uniforms Map of uniform names to handles. 
+        @prop {Object} uniformBlockss Map of uniform block names to handles. 
     */
     PicoGL.Program = function Program(gl, vsSource, fsSource, xformFeebackVars, debug) {
         var i;
@@ -154,6 +155,13 @@
         this.uniforms[name].set(value);
     };
 
+    /**
+        Bind a uniform block to a uniform buffer base.
+
+        @method
+        @param {string} name Uniform block name.
+        @param {number} base Uniform buffer base to bind the block to.
+    */
     PicoGL.Program.prototype.uniformBlock = function(name, base) {
         this.gl.uniformBlockBinding(this.program, this.uniformBlocks[name], base);
     };

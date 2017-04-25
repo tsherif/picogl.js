@@ -29,12 +29,12 @@
 
         @class
         @prop {WebGLRenderingContext} gl The WebGL context.
-        @prop {WebGLBuffer} buffer Allocated buffer storage.
-        @prop {GLEnum} type The type of data stored in the buffer.
-        @prop {number} itemSize Number of array elements per vertex.
-        @prop {number} numItems Number of vertices represented.
-        @prop {boolean} indexArray Whether this is an index array.
-        @prop {GLEnum} binding GL binding point (ARRAY_BUFFER or ELEMENT_ARRAY_BUFFER).
+        @prop {WebGLVertexArrayObject} vertexArray Vertex array object.
+        @prop {array} attributeBuffers The attribute ArrayBuffers associated with this vertex array.
+        @prop {number} numElements Number of elements in the vertex array.
+        @prop {Glenum} indexType Data type of the indices.
+        @prop {boolean} indexed Whether this vertex array is set up for indexed drawing.
+        @prop {number} numInstances Number of instances to draw with this vertex array.
     */
     PicoGL.VertexArray = function VertexArray(gl) {
         this.gl = gl;
@@ -46,6 +46,13 @@
         this.numInstances = 0;
     };
 
+    /**
+        Bind an attribute buffer to this vertex array.
+
+        @method
+        @param {number} attributeIndex The attribute location to bind to.
+        @param {ArrayBuffer} arrayBuffer The ArrayBuffer to bind.
+    */
     PicoGL.VertexArray.prototype.attributeBuffer = function(attributeIndex, arrayBuffer) {
         this.gl.bindVertexArray(this.vertexArray);
 
@@ -83,6 +90,12 @@
         return this;
     };
 
+    /**
+        Bind an index buffer to this vertex array.
+
+        @method
+        @param {ArrayBuffer} arrayBuffer The ArrayBuffer to bind.
+    */
     PicoGL.VertexArray.prototype.indexBuffer = function(arrayBuffer) {
         this.gl.bindVertexArray(this.vertexArray);
         arrayBuffer.bind();
@@ -96,12 +109,22 @@
         return this;
     };
 
+    /**
+        Bind this vertex array.
+
+        @method
+    */
     PicoGL.VertexArray.prototype.bind = function() {
         this.gl.bindVertexArray(this.vertexArray);
 
         return this;
     };
 
+    /**
+        Unbind this vertex array.
+
+        @method
+    */
     PicoGL.VertexArray.prototype.unbind = function() {
         this.gl.bindVertexArray(null);
 

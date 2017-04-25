@@ -243,30 +243,7 @@
 
             
 
-            <td class="description last">Depth texture target (only available if depthTextures is enabled).</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>depthBuffer</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">WebGLRenderbuffer</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Depth renderbuffer (only available if depthTextures is not enabled).</td>
+            <td class="description last">Depth texture target.</td>
         </tr>
 
     
@@ -351,7 +328,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="framebuffer.js.html">framebuffer.js</a>, <a href="framebuffer.js.html#line42">line 42</a>
+        <a href="framebuffer.js.html">framebuffer.js</a>, <a href="framebuffer.js.html#line41">line 41</a>
     </li></ul></dd>
     
 
@@ -400,7 +377,465 @@
 
     
 
-    <h4 class="name" id="replaceTexture"><span class="type-signature"></span>replaceTexture<span class="signature">(texture, index<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="colorTarget"><span class="type-signature"></span>colorTarget<span class="signature">(index<span class="signature-attributes">opt</span>, type<span class="signature-attributes">opt</span>, format<span class="signature-attributes">opt</span>, internalFormat<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Add a color target to this framebuffer.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>index</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    0
+                
+                </td>
+            
+
+            <td class="description last">Color attachment index.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>type</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">GLenum</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    UNSIGNED_BYTE
+                
+                </td>
+            
+
+            <td class="description last">Texture data type.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>format</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">GLenum</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    RGBA
+                
+                </td>
+            
+
+            <td class="description last">Texture data format.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>internalFormat</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">GLenum</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    FRAMEBUFFER_INTERNAL_FORMAT[type]
+                
+                </td>
+            
+
+            <td class="description last">Texture data internal format.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="framebuffer.js.html">framebuffer.js</a>, <a href="framebuffer.js.html#line73">line 73</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="depthTarget"><span class="type-signature"></span>depthTarget<span class="signature">(type<span class="signature-attributes">opt</span>, internalFormat<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Add a depth target to this framebuffer.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>type</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">GLenum</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    UNSIGNED_SHORT
+                
+                </td>
+            
+
+            <td class="description last">Texture data type.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>internalFormat</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">GLenum</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    FRAMEBUFFER_INTERNAL_FORMAT[type]
+                
+                </td>
+            
+
+            <td class="description last">Texture data internal format.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="framebuffer.js.html">framebuffer.js</a>, <a href="framebuffer.js.html#line112">line 112</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="replaceTexture"><span class="type-signature"></span>replaceTexture<span class="signature">(index<span class="signature-attributes">opt</span>, texture)</span><span class="type-signature"></span></h4>
 
     
 
@@ -447,41 +882,6 @@
 
         <tr>
             
-                <td class="name"><code>texture</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Texture</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last">New texture to bind.</td>
-        </tr>
-
-    
-
-        <tr>
-            
                 <td class="name"><code>index</code></td>
             
 
@@ -515,6 +915,41 @@
             
 
             <td class="description last">Color attachment to bind the texture to.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>texture</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Texture</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">New texture to bind.</td>
         </tr>
 
     
@@ -555,7 +990,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="framebuffer.js.html">framebuffer.js</a>, <a href="framebuffer.js.html#line139">line 139</a>
+        <a href="framebuffer.js.html">framebuffer.js</a>, <a href="framebuffer.js.html#line147">line 147</a>
     </li></ul></dd>
     
 
@@ -746,7 +1181,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="framebuffer.js.html">framebuffer.js</a>, <a href="framebuffer.js.html#line158">line 158</a>
+        <a href="framebuffer.js.html">framebuffer.js</a>, <a href="framebuffer.js.html#line166">line 166</a>
     </li></ul></dd>
     
 
@@ -794,7 +1229,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon Apr 24 2017 08:35:22 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue Apr 25 2017 06:35:33 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

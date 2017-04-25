@@ -25,16 +25,15 @@
     "use strict";
 
     /**
-        Storage for vertex data.
+        Tranform feedback object.
 
         @class
         @prop {WebGLRenderingContext} gl The WebGL context.
-        @prop {WebGLBuffer} buffer Allocated buffer storage.
-        @prop {GLEnum} type The type of data stored in the buffer.
-        @prop {number} itemSize Number of array elements per vertex.
-        @prop {number} numItems Number of vertices represented.
-        @prop {boolean} indexArray Whether this is an index array.
-        @prop {GLEnum} binding GL binding point (ARRAY_BUFFER or ELEMENT_ARRAY_BUFFER).
+        @prop {WebGLTransformFeedback} transformFeedback Transform feedback object.
+        @prop {VertexArray} inputVertexArray Vertex array to use as input to the next pass.
+        @prop {array} inputBuffers Transform feedback buffers bound to the input vertex array.
+        @prop {VertexArray} outputVertexArray Vertex array to store output from the next pass.
+        @prop {array} outputBuffers Transform feedback buffers bound to the output vertex array.
     */
     PicoGL.TransformFeedback = function TransformFeedback(gl, vertexArray1, vertexArray2, varyingBufferIndices) {
         this.gl = gl;
@@ -50,6 +49,12 @@
         }
     };
 
+    /**
+        Bind this transform feedback.
+
+        @method
+        @param {GLenum} primitive Primitive being drawn.
+    */
     PicoGL.TransformFeedback.prototype.bind = function(primitive) {
         this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedback);
         
@@ -62,6 +67,11 @@
         return this;
     };
 
+     /**
+        Swap the input and output buffers.
+
+        @method
+    */
     PicoGL.TransformFeedback.prototype.swapBuffers = function() {
         var va = this.inputVertexArray;
         this.inputVertexArray = this.outputVertexArray;
@@ -74,6 +84,11 @@
         return this;
     };
 
+     /**
+        Unbind this transform feedback.
+
+        @method
+    */
     PicoGL.TransformFeedback.prototype.unbind = function() {
         this.gl.endTransformFeedback();    
         this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, null);

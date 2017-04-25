@@ -33,7 +33,7 @@
         @prop {Float32Array} floatView Floating point view of the buffer data.
         @prop {Int32Array} intView Integer view of the buffer data.
         @prop {Array} offsets Offsets into the array for each item in the buffer.
-        @prop {Array} sizes Size of the item of the item at the given offset.
+        @prop {Array} sizes Size of the item at the given offset.
         @prop {Array} integer Whether or not the item at the given offset is an integer.
         @prop {number} size The size of the buffer (in 4-byte items).
         @prop {GLEnum} usage Usage pattern of the buffer.
@@ -105,7 +105,7 @@
     };
 
     /**
-        Update data associated with the buffer. NOTE: Data is not 
+        Update data for a given item in the buffer. NOTE: Data is not 
         sent the the GPU until the update() method is called!
 
         @method

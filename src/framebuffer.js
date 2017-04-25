@@ -34,8 +34,7 @@
         @prop {number} height The height of the framebuffer.
         @prop {Array} colorTextures Array of color texture targets. 
         @prop {number} numColorTargets Number of color texture targets. 
-        @prop {Texture} depthTexture Depth texture target (only available if depthTextures is enabled). 
-        @prop {WebGLRenderbuffer} depthBuffer Depth renderbuffer (only available if depthTextures is not enabled). 
+        @prop {Texture} depthTexture Depth texture target. 
         @prop {WebGLDrawBuffers} drawBuffersExtension Hold the draw buffers extension object when enabled.
         @prop {Array} colorAttachments Array of color attachment enums. 
     */
@@ -56,19 +55,21 @@
         this.colorTextures = [];
         this.colorAttachments = [];
         this.depthTexture = null;
-        this.depthBuffer =  null;
-
-        
-        for (var i = 0; i < this.numColorTargets; ++i) {
-            this.colorAttachments[i] = this.gl["COLOR_ATTACHMENT" + i];
-            
-        }
 
         gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer);
         this.gl.drawBuffers(this.colorAttachments);
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     }; 
 
+    /**
+        Add a color target to this framebuffer.
+
+        @method
+        @param {number} [index=0] Color attachment index.
+        @param {GLenum} [type=UNSIGNED_BYTE] Texture data type.
+        @param {GLenum} [format=RGBA] Texture data format.
+        @param {GLenum} [internalFormat=FRAMEBUFFER_INTERNAL_FORMAT[type]] Texture data internal format.
+    */
     PicoGL.Framebuffer.prototype.colorTarget = function(index, type, format, internalFormat) {
         index = index || 0;
         type = type || this.gl.UNSIGNED_BYTE;
@@ -101,6 +102,13 @@
         return this;
     };
 
+    /**
+        Add a depth target to this framebuffer.
+
+        @method
+        @param {GLenum} [type=UNSIGNED_SHORT] Texture data type.
+        @param {GLenum} [internalFormat=FRAMEBUFFER_INTERNAL_FORMAT[type]] Texture data internal format.
+    */
     PicoGL.Framebuffer.prototype.depthTarget = function(type, internalFormat) {
         var format = this.gl.DEPTH_COMPONENT;  
         type = type || this.gl.UNSIGNED_SHORT;
@@ -133,8 +141,8 @@
         Bind a new texture as a color target.
 
         @method
-        @param {Texture} texture New texture to bind.
         @param {number} [index=0] Color attachment to bind the texture to.
+        @param {Texture} texture New texture to bind.
     */
     PicoGL.Framebuffer.prototype.replaceTexture = function(index, texture) {
         index = index || 0;
