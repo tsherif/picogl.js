@@ -79,8 +79,8 @@
         this.colorAttachments[index] = this.gl["COLOR_ATTACHMENT" + index];
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.framebuffer);
 
-        this.colorTextures[index] = new PicoGL.Texture(this.gl, null, {
-            array: true,
+        this.colorTextures[index] = new PicoGL.Texture(this.gl, this.gl.TEXTURE_2D, null, {
+            buffer: true,
             type: type,
             format: format,
             internalFormat: internalFormat,
@@ -116,8 +116,8 @@
 
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.framebuffer);
 
-        this.depthTexture = new PicoGL.Texture(this.gl, null, {
-            array: true,
+        this.depthTexture = new PicoGL.Texture(this.gl, this.gl.TEXTURE_2D, null, {
+            buffer: true,
             format: format,
             internalFormat: internalFormat,
             type: type,

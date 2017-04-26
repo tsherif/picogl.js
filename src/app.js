@@ -546,8 +546,16 @@
         @param {GLEnum} [options.wrapT=REPEAT] Vertical wrap mode.
         @param {boolean} [options.generateMipmaps] Should mip maps be generated.
     */
-    PicoGL.App.prototype.createTexture = function(image, options) {
-        return new PicoGL.Texture(this.gl, image, options);
+    PicoGL.App.prototype.createTexture2D = function(image, options) {
+        return new PicoGL.Texture(this.gl, this.gl.TEXTURE_2D, image, options);
+    };
+
+    PicoGL.App.prototype.createTexture3D = function(image, options) {
+        return new PicoGL.Texture(this.gl, this.gl.TEXTURE_3D, image, options);
+    };
+
+    PicoGL.App.prototype.createTexture2DArray = function(image, options) {
+        return new PicoGL.Texture(this.gl, this.gl.TEXTURE_2D_ARRAY, image, options);
     };
 
     /**
