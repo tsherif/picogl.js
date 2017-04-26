@@ -1,7 +1,7 @@
 PicoGL.js
 ========
 
-PicoGL.js is minimal WebGL 2-only rendering library. It's meant for developers who understand the GPU rendering pipeline and want to use it, but with a more convenient API. Typical usage of PicoGL.js will involve creating programs, array buffers, vertex arrays, uniform buffers, framebuffers, textures, transform feedbacks, and combining them into draw calls.
+PicoGL.js is minimal WebGL 2-only rendering library. It's meant for developers who understand the WebGL 2 rendering pipeline and want to use it, but with a more convenient API. Typical usage of PicoGL.js will involve creating programs, array buffers, vertex arrays, uniform buffers, framebuffers, textures, transform feedbacks, and combining them into draw calls.
 
 ```JavaScript
     var app = PicoGL.createApp(canvas)
