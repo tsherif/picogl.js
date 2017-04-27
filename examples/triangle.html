@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<!--
+  The MIT License (MIT)
+
+  Copyright (c) 2017 Tarek Sherif
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy of
+  this software and associated documentation files (the "Software"), to deal in
+  the Software without restriction, including without limitation the rights to
+  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+  the Software, and to permit persons to whom the Software is furnished to do so,
+  subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+  FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+  COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+  IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+<html>
+<head>
+    <title>PicoGL.js: Triangle</title>
+    <script src="../build/picogl.js"></script>
+    <link rel="stylesheet" href="../site/css/picogl-example.css"> 
+</head>
+<body>
+    <div id="example-title">
+        PicoGL.js Example: Triangle
+        <div>
+            <a href="https://github.com/tsherif/picogl.js/blob/master/examples/triangle.html">Source code</a>
+        </div>
+    </div>
+    <canvas id="gl-canvas"></canvas>
+    <script type="shader/vs" id="vs">
+        #version 300 es
+        
+        layout(location=0) in vec4 position;
+        layout(location=1) in vec3 color;
+        
+        out vec3 vColor; 
+        void main() {
+            vColor = color;
+            gl_Position = position;
+        }
+    </script>
+    <script type="shader/fs" id="fs">
+        #version 300 es
+        precision highp float;
+        
+        in vec3 vColor;
+        
+        out vec4 fragColor;
+        void main() {
+            fragColor = vec4(vColor, 1.0);
+        }
+    </script>
+    
+    <script type="text/javascript">
+        var canvas = document.getElementById("gl-canvas");
+
+        if (!canvas.getContext("webgl2")) {
+            console.error("WebGL 2 not available");
+            document.body.innerHTML = "This example requires WebGL 2 which is unavailable on this system."
+        }
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        var app = PicoGL.createApp(canvas)
+        .clearColor(0.0, 0.0, 0.0, 1.0);
+
+        window.onresize = function() {
+            app.resize(window.innerWidth, window.innerHeight);
+        }
+
+        var vsSource =  document.getElementById("vs").text.trim();
+        var fsSource =  document.getElementById("fs").text.trim();
+              
+        // Create program          
+        var program = app.createProgram(vsSource, fsSource);
+
+        // Create array buffers
+        var positions = app.createArrayBuffer(PicoGL.FLOAT, 2, new Float32Array([
+            -0.5, -0.5,
+             0.5, -0.5,
+             0.0, 0.5, 
+        ]));
+
+        var colors = app.createArrayBuffer(PicoGL.FLOAT, 3, new Float32Array([
+            1.0, 0.0, 0.0,
+            0.0, 1.0, 0.0,
+            0.0, 0.0, 1.0
+        ]));
+
+        // Combine array buffers into vertex array
+        var triangleArray = app.createVertexArray()
+        .attributeBuffer(0, positions)
+        .attributeBuffer(1, colors);
+
+        // Create draw call from program and vertex array
+        var drawCall = app.createDrawCall(program, triangleArray);
+
+        // Draw
+        app.drawCalls([drawCall])
+        .clear()
+        .draw();
+
+    </script>
+    <a href="https://github.com/tsherif/picogl.js" id="github-ribbon"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"></a>
+    <script src="../site/js/iframe.js"></script>
+</body>
+</html>

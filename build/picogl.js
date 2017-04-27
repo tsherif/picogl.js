@@ -1415,6 +1415,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
                     this.size += 2;
                     break;
+                case PicoGL.FLOAT_VEC3:
+                case PicoGL.INT_VEC3:
+                case PicoGL.BOOL_VEC3:
                 case PicoGL.FLOAT_VEC4:
                 case PicoGL.INT_VEC4:
                 case PicoGL.BOOL_VEC4:
