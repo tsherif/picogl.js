@@ -547,15 +547,15 @@
         @param {boolean} [options.generateMipmaps] Should mip maps be generated.
     */
     PicoGL.App.prototype.createTexture2D = function(image, options) {
-        return new PicoGL.Texture(this.gl, this.gl.TEXTURE_2D, image, options);
+        return new PicoGL.Texture(this.gl, this.gl.TEXTURE_2D, image, null, null, null, options);
     };
 
-    PicoGL.App.prototype.createTexture3D = function(image, options) {
-        return new PicoGL.Texture(this.gl, this.gl.TEXTURE_3D, image, options);
+    PicoGL.App.prototype.createTexture3D = function(image, width, height, depth, options) {
+        return new PicoGL.Texture(this.gl, this.gl.TEXTURE_3D, image, width, height, depth, options);
     };
 
-    PicoGL.App.prototype.createTexture2DArray = function(image, options) {
-        return new PicoGL.Texture(this.gl, this.gl.TEXTURE_2D_ARRAY, image, options);
+    PicoGL.App.prototype.createTexture2DArray = function(image, width, height, depth, options) {
+        return new PicoGL.Texture(this.gl, this.gl.TEXTURE_2D_ARRAY, image, width, height, depth, options);
     };
 
     /**

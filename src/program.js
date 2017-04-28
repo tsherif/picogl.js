@@ -83,8 +83,21 @@
             switch (uniformInfo.type) {
                 case gl.INT: 
                 case gl.BOOL: 
-                case gl.SAMPLER_2D: 
-                case gl.SAMPLER_CUBE: 
+                case gl.SAMPLER_2D:
+                case gl.SAMPLER_2D_ARRAY:
+                case gl.SAMPLER_3D:
+                case gl.SAMPLER_CUBE:
+                case gl.SAMPLER_2D_SHADOW:
+                case gl.SAMPLER_2D_ARRAY_SHADOW:
+                case gl.SAMPLER_CUBE_SHADOW:
+                case gl.INT_SAMPLER_2D:
+                case gl.INT_SAMPLER_3D:
+                case gl.INT_SAMPLER_CUBE:
+                case gl.INT_SAMPLER_2D_ARRAY:
+                case gl.UNSIGNED_INT_SAMPLER_2D:
+                case gl.UNSIGNED_INT_SAMPLER_3D:
+                case gl.UNSIGNED_INT_SAMPLER_CUBE:
+                case gl.UNSIGNED_INT_SAMPLER_2D_ARRAY:
                     UniformClass = PicoGL.IntUniform;
                     break;
                 case gl.FLOAT: 

@@ -31,7 +31,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         
         @namespace PicoGL
         @prop {string} version Current PicoGL version.
-        @prop {object} FRAMEBUFFER_INTERNAL_FORMAT Map of framebuffer texture formats to internal formats.
+        @prop {object} TEXTURE_INTERNAL_FORMAT Map of framebuffer texture formats to internal formats.
         @prop {object} TYPE_SIZE Map of data types to sizes in bytes.
     */
     var PicoGL = window.PicoGL = {
@@ -53,16 +53,17 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             }
         }
 
-        PicoGL.FRAMEBUFFER_INTERNAL_FORMAT = {};
-        var UNSIGNED_BYTE = PicoGL.FRAMEBUFFER_INTERNAL_FORMAT[gl.UNSIGNED_BYTE] = {};
+        PicoGL.TEXTURE_INTERNAL_FORMAT = {};
+        var UNSIGNED_BYTE = PicoGL.TEXTURE_INTERNAL_FORMAT[gl.UNSIGNED_BYTE] = {};
         UNSIGNED_BYTE[gl.RED] = gl.R8;
         UNSIGNED_BYTE[gl.RG] = gl.RG8;
         UNSIGNED_BYTE[gl.RGBA] = gl.RGBA;
 
-        var UNSIGNED_SHORT = PicoGL.FRAMEBUFFER_INTERNAL_FORMAT[gl.UNSIGNED_SHORT] = {};
+        var UNSIGNED_SHORT = PicoGL.TEXTURE_INTERNAL_FORMAT[gl.UNSIGNED_SHORT] = {};
         UNSIGNED_SHORT[gl.DEPTH_COMPONENT] = gl.DEPTH_COMPONENT16;
 
-        var FLOAT = PicoGL.FRAMEBUFFER_INTERNAL_FORMAT[gl.FLOAT] = {};
+        // TODO(Tarek): Add other format combinations
+        var FLOAT = PicoGL.TEXTURE_INTERNAL_FORMAT[gl.FLOAT] = {};
         FLOAT[gl.RED] = gl.R16F;
         FLOAT[gl.RG] = gl.RG16F;
         FLOAT[gl.RGBA] = gl.RGBA16F;
@@ -648,15 +649,15 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {boolean} [options.generateMipmaps] Should mip maps be generated.
     */
     PicoGL.App.prototype.createTexture2D = function(image, options) {
-        return new PicoGL.Texture(this.gl, this.gl.TEXTURE_2D, image, options);
+        return new PicoGL.Texture(this.gl, this.gl.TEXTURE_2D, image, null, null, null, options);
     };
 
-    PicoGL.App.prototype.createTexture3D = function(image, options) {
-        return new PicoGL.Texture(this.gl, this.gl.TEXTURE_3D, image, options);
+    PicoGL.App.prototype.createTexture3D = function(image, width, height, depth, options) {
+        return new PicoGL.Texture(this.gl, this.gl.TEXTURE_3D, image, width, height, depth, options);
     };
 
-    PicoGL.App.prototype.createTexture2DArray = function(image, options) {
-        return new PicoGL.Texture(this.gl, this.gl.TEXTURE_2D_ARRAY, image, options);
+    PicoGL.App.prototype.createTexture2DArray = function(image, width, height, depth, options) {
+        return new PicoGL.Texture(this.gl, this.gl.TEXTURE_2D_ARRAY, image, width, height, depth, options);
     };
 
     /**
@@ -788,8 +789,21 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             switch (uniformInfo.type) {
                 case gl.INT: 
                 case gl.BOOL: 
-                case gl.SAMPLER_2D: 
-                case gl.SAMPLER_CUBE: 
+                case gl.SAMPLER_2D:
+                case gl.SAMPLER_2D_ARRAY:
+                case gl.SAMPLER_3D:
+                case gl.SAMPLER_CUBE:
+                case gl.SAMPLER_2D_SHADOW:
+                case gl.SAMPLER_2D_ARRAY_SHADOW:
+                case gl.SAMPLER_CUBE_SHADOW:
+                case gl.INT_SAMPLER_2D:
+                case gl.INT_SAMPLER_3D:
+                case gl.INT_SAMPLER_CUBE:
+                case gl.INT_SAMPLER_2D_ARRAY:
+                case gl.UNSIGNED_INT_SAMPLER_2D:
+                case gl.UNSIGNED_INT_SAMPLER_3D:
+                case gl.UNSIGNED_INT_SAMPLER_CUBE:
+                case gl.UNSIGNED_INT_SAMPLER_2D_ARRAY:
                     UniformClass = PicoGL.IntUniform;
                     break;
                 case gl.FLOAT: 
@@ -1518,21 +1532,21 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @prop {GLEnum} internalFormat Internal arrangement of the texture data.
         @prop {GLEnum} type Type of data stored in the texture.
     */
-    PicoGL.Texture = function Texture(gl, binding, image, options) {
+    PicoGL.Texture = function Texture(gl, binding, image, width, height, depth, options) {
         options = options || PicoGL.DUMMY_OBJECT;
+        width = width || options.width || 0;
+        height = height || options.height || 0;
+        depth = depth || options.depth || 0;
 
         this.gl = gl;
         this.binding = binding;
         this.is3D = this.binding === gl.TEXTURE_3D || this.binding === gl.TEXTURE_2D_ARRAY;
         this.texture = gl.createTexture();
         this.format = options.format || gl.RGBA;
-        this.internalFormat = options.internalFormat || gl.RGBA;
         this.type = options.type || gl.UNSIGNED_BYTE;
+        this.internalFormat = options.internalFormat || PicoGL.TEXTURE_INTERNAL_FORMAT[this.type][this.format];
 
         var buffer = options.buffer || false;
-        var width = options.width || 0;
-        var height = options.height || 0;
-        var depth = options.depth || 0;
         var flipY = options.flipY !== undefined ? options.flipY : true;
         var minFilter = options.minFilter || gl.LINEAR_MIPMAP_NEAREST;
         var magFilter = options.magFilter || gl.LINEAR;
@@ -1738,13 +1752,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {number} [index=0] Color attachment index.
         @param {GLenum} [type=UNSIGNED_BYTE] Texture data type.
         @param {GLenum} [format=RGBA] Texture data format.
-        @param {GLenum} [internalFormat=FRAMEBUFFER_INTERNAL_FORMAT[type]] Texture data internal format.
+        @param {GLenum} [internalFormat=TEXTURE_INTERNAL_FORMAT[type]] Texture data internal format.
     */
     PicoGL.Framebuffer.prototype.colorTarget = function(index, type, format, internalFormat) {
         index = index || 0;
         type = type || this.gl.UNSIGNED_BYTE;
         format = format || this.gl.RGBA;
-        internalFormat = internalFormat || PicoGL.FRAMEBUFFER_INTERNAL_FORMAT[type][format];
+        internalFormat = internalFormat || PicoGL.TEXTURE_INTERNAL_FORMAT[type][format];
 
         this.colorAttachments[index] = this.gl["COLOR_ATTACHMENT" + index];
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.framebuffer);
@@ -1777,12 +1791,12 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
         @method
         @param {GLenum} [type=UNSIGNED_SHORT] Texture data type.
-        @param {GLenum} [internalFormat=FRAMEBUFFER_INTERNAL_FORMAT[type]] Texture data internal format.
+        @param {GLenum} [internalFormat=TEXTURE_INTERNAL_FORMAT[type]] Texture data internal format.
     */
     PicoGL.Framebuffer.prototype.depthTarget = function(type, internalFormat) {
         var format = this.gl.DEPTH_COMPONENT;  
         type = type || this.gl.UNSIGNED_SHORT;
-        internalFormat = internalFormat || PicoGL.FRAMEBUFFER_INTERNAL_FORMAT[type][format];
+        internalFormat = internalFormat || PicoGL.TEXTURE_INTERNAL_FORMAT[type][format];
 
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.framebuffer);
 

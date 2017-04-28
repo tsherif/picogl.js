@@ -68,13 +68,13 @@
         @param {number} [index=0] Color attachment index.
         @param {GLenum} [type=UNSIGNED_BYTE] Texture data type.
         @param {GLenum} [format=RGBA] Texture data format.
-        @param {GLenum} [internalFormat=FRAMEBUFFER_INTERNAL_FORMAT[type]] Texture data internal format.
+        @param {GLenum} [internalFormat=TEXTURE_INTERNAL_FORMAT[type]] Texture data internal format.
     */
     PicoGL.Framebuffer.prototype.colorTarget = function(index, type, format, internalFormat) {
         index = index || 0;
         type = type || this.gl.UNSIGNED_BYTE;
         format = format || this.gl.RGBA;
-        internalFormat = internalFormat || PicoGL.FRAMEBUFFER_INTERNAL_FORMAT[type][format];
+        internalFormat = internalFormat || PicoGL.TEXTURE_INTERNAL_FORMAT[type][format];
 
         this.colorAttachments[index] = this.gl["COLOR_ATTACHMENT" + index];
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.framebuffer);
@@ -107,12 +107,12 @@
 
         @method
         @param {GLenum} [type=UNSIGNED_SHORT] Texture data type.
-        @param {GLenum} [internalFormat=FRAMEBUFFER_INTERNAL_FORMAT[type]] Texture data internal format.
+        @param {GLenum} [internalFormat=TEXTURE_INTERNAL_FORMAT[type]] Texture data internal format.
     */
     PicoGL.Framebuffer.prototype.depthTarget = function(type, internalFormat) {
         var format = this.gl.DEPTH_COMPONENT;  
         type = type || this.gl.UNSIGNED_SHORT;
-        internalFormat = internalFormat || PicoGL.FRAMEBUFFER_INTERNAL_FORMAT[type][format];
+        internalFormat = internalFormat || PicoGL.TEXTURE_INTERNAL_FORMAT[type][format];
 
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.framebuffer);
 

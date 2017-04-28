@@ -24,9 +24,9 @@
 <html>
 <head>
     <title>PicoGL.js: Phong Cube</title>
-    <script src="../utils/gl-matrix.js"></script>
+    <script src="utils/gl-matrix.js"></script>
     <script src="../build/picogl.js"></script>
-    <script src="../utils/utils.js"></script>
+    <script src="utils/utils.js"></script>
     <link rel="stylesheet" href="../site/css/picogl-example.css"> 
 </head>
 <body>
@@ -43,8 +43,7 @@
         layout(std140, column_major) uniform;
 
         layout(location=0) in vec4 position;
-        layout(location=1) in vec2 uv;
-        layout(location=2) in vec4 normal;
+        layout(location=1) in vec3 uv;
         
         uniform SceneUniforms {
             mat4 viewProj;

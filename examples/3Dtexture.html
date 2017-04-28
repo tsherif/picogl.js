@@ -23,78 +23,48 @@
 -->
 <html>
 <head>
-    <title>PicoGL.js: Render to Texture</title>
+    <title>PicoGL.js: 3D Texture</title>
     <script src="utils/gl-matrix.js"></script>
     <script src="../build/picogl.js"></script>
     <script src="utils/utils.js"></script>
+    <script src="utils/noise3D.js"></script>
     <link rel="stylesheet" href="../site/css/picogl-example.css"> 
 </head>
 <body>
     <div id="example-title">
-        PicoGL.js Example: Render to Texture
+        PicoGL.js Example: 3D Texture
         <div>
-            <a href="https://github.com/tsherif/picogl.js/blob/master/examples/rtt.html">Source code</a>
+            <a href="https://github.com/tsherif/picogl.js/blob/master/examples/3Dtexture.html">Source code</a>
         </div>
     </div>
     <canvas id="gl-canvas"></canvas>
     <script type="x-shader/vs" id="vertex-draw">
         #version 300 es
-        
-        layout(std140, column_major) uniform;
 
         layout(location=0) in vec4 position;
-        layout(location=1) in vec2 uv;
-        layout(location=2) in vec4 normal;
         
-        uniform SceneUniforms {
-            mat4 uViewProj;
-            vec4 uEyePosition;
-            vec4 uLightPosition;
-        };
-
-        uniform mat4 uModel;
+        uniform mat4 uMVP;
         
-        out vec3 vPosition;
-        out vec2 vUV;
-        out vec3 vNormal;
+        out vec3 vUV;
         void main() {
-            vec4 worldPosition = uModel * position;
-            vPosition = worldPosition.xyz;
-            vUV = uv;
-            vNormal = (uModel * normal).xyz;
-            gl_Position = uViewProj * worldPosition;
+            vUV = position.xyz + 0.5;
+            gl_Position = uMVP * position;
+            gl_PointSize = 2.0;
         }
     </script>
     <script type="x-shader/vf" id="fragment-draw">
         #version 300 es
         precision highp float;
+        precision lowp sampler3D;
 
-        layout(std140, column_major) uniform;
-        
-        uniform SceneUniforms {
-            mat4 uViewProj;
-            vec4 uEyePosition;
-            vec4 uLightPosition;
-        };
+        in vec3 vUV;
 
-        uniform sampler2D tex;
-        
-        in vec3 vPosition;
-        in vec2 vUV;
-        in vec3 vNormal;
+        uniform sampler3D tex;
 
         out vec4 fragColor;
         void main() {
-            vec3 color = texture(tex, vUV).rgb;
-
-            vec3 normal = normalize(vNormal);
-            vec3 eyeVec = normalize(uEyePosition.xyz - vPosition);
-            vec3 incidentVec = normalize(vPosition - uLightPosition.xyz);
-            vec3 lightVec = -incidentVec;
-            float diffuse = max(dot(lightVec, normal), 0.0);
-            float highlight = pow(max(dot(eyeVec, reflect(incidentVec, normal)), 0.0), 100.0);
-            float ambient = 0.1;
-            fragColor = vec4(color * (diffuse + highlight + ambient), 1.0);
+            float alpha = texture(tex, vUV).r * 0.15;
+            fragColor = vec4(vUV * alpha, alpha);
         }
     </script>
     <script type="text/javascript">
@@ -105,29 +75,67 @@
             document.body.innerHTML = "This example requires WebGL 2 which is unavailable on this system."
         }
 
+
+        if (!canvas.getContext("webgl2")) {
+            console.error("WebGL 2 not available");
+            document.body.innerHTML = "This example requires WebGL 2 which is unavailable on this system."
+        }
+
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         
         var app = PicoGL.createApp(canvas)
-        .depthTest();
+        .clearColor(0.0, 0.0, 0.0, 1.0)
+        .blend()
+        .blendFunc(PicoGL.ONE, PicoGL.ONE_MINUS_SRC_ALPHA);
 
         var vsSource =  document.getElementById("vertex-draw").text.trim();
         var fsSource =  document.getElementById("fragment-draw").text.trim();
         var program = app.createProgram(vsSource, fsSource);
-        var rttBuffer = app.createFramebuffer().colorTarget().depthTarget();
 
-        // Geometry
-        var box = utils.createBox({dimensions: [1.0, 1.0, 1.0]})
-        var positions = app.createArrayBuffer(PicoGL.FLOAT, 3, box.positions);
-        var uv = app.createArrayBuffer(PicoGL.FLOAT, 2, box.uvs);
-        var normals = app.createArrayBuffer(PicoGL.FLOAT, 3, box.normals);
+        var DIMENSIONS = 128;
+        var INCREMENT = 1 / DIMENSIONS;
 
-        var boxArray = app.createVertexArray()
-        .attributeBuffer(0, positions)
-        .attributeBuffer(1, uv)
-        .attributeBuffer(2, normals);
+        var positionData = new Float32Array(DIMENSIONS * DIMENSIONS * DIMENSIONS * 3);
 
-        // Camera stuff
+        var positionIndex = 0;
+        var x = -0.5;
+        for (var i = 0; i < DIMENSIONS; ++i) {
+            var y = -0.5;
+            for (var j = 0; j < DIMENSIONS; ++j) {
+                var z = -0.5;
+                for (var k = 0; k < DIMENSIONS; ++k) {
+                    positionData[positionIndex++] = x;
+                    positionData[positionIndex++] = y;
+                    positionData[positionIndex++] = z;
+                    z += INCREMENT;
+                }
+                y += INCREMENT;
+            }
+            x += INCREMENT;
+        }
+
+        var TEXTURE_DIMENSIONS = 8;
+        var textureData = new Uint8Array(TEXTURE_DIMENSIONS * TEXTURE_DIMENSIONS * DIMENSIONS);
+        var textureIndex = 0;
+        for (var i = 0; i < TEXTURE_DIMENSIONS; ++i) {
+            for (var j = 0; j < TEXTURE_DIMENSIONS; ++j) {
+                for (var k = 0; k < TEXTURE_DIMENSIONS; ++k) {
+                    var val = snoise([i, j, k]) * 255
+                    textureData[textureIndex++] = val;
+                }
+            }
+        }
+
+        var positions = app.createArrayBuffer(PicoGL.FLOAT, 3, positionData)
+
+        var pointArray = app.createVertexArray()
+        .attributeBuffer(0, positions);
+
+        var texture = app.createTexture3D(textureData, TEXTURE_DIMENSIONS, TEXTURE_DIMENSIONS, TEXTURE_DIMENSIONS, {
+            format: PicoGL.RED
+        });
+
         var projMatrix = mat4.create();
         mat4.perspective(projMatrix, Math.PI / 2, canvas.width / canvas.height, 0.1, 10.0);
 
@@ -140,69 +148,45 @@
 
         var lightPosition = vec3.fromValues(1, 1, 0.5);
 
-        var sceneUniformBuffer = app.createUniformBuffer([
-            PicoGL.FLOAT_MAT4,
-            PicoGL.FLOAT_VEC4,
-            PicoGL.FLOAT_VEC4
-        ])
-        .set(0, viewProjMatrix)
-        .set(1, eyePosition)
-        .set(2, lightPosition)
-        .update();
-
+        var mvpMatrix = mat4.create();
         var modelMatrix = mat4.create();
         var rotateXMatrix = mat4.create();
         var rotateYMatrix = mat4.create();
 
+        var angleX = 0;
+        var angleY = 0;
+
         window.onresize = function() {
             app.resize(window.innerWidth, window.innerHeight);
-            rttBuffer.resize();
 
             mat4.perspective(projMatrix, Math.PI / 2, app.width / app.height, 0.1, 10.0);
-            mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
-
-            sceneUniformBuffer.set(0, viewProjMatrix).update();
-        };
-
-        var image = new Image();
-
-        image.onload = function() {
-            var texture = app.createTexture2D(image);
-
-            var drawCall = app.createDrawCall(program, boxArray)
-            .uniformBlock("SceneUniforms", sceneUniformBuffer);
-
-            app.drawCalls([drawCall]);
-
-            var angleX = 0;
-            var angleY = 0;
-
-            function draw() {
-                angleX += 0.01;
-                angleY += 0.02;
-
-                mat4.fromXRotation(rotateXMatrix, angleX);
-                mat4.fromYRotation(rotateYMatrix, angleY);
-                mat4.multiply(modelMatrix, rotateXMatrix, rotateYMatrix);
-
-                drawCall.uniform("uModel", modelMatrix);
-
-                // Render to offscreen texture
-                drawCall.texture("tex", texture);
-                app.framebuffer(rttBuffer).clearColor(0.4, 0.4, 0.4, 1.0).clear().draw();
-                
-                // Render to screen
-                drawCall.texture("tex", rttBuffer.colorTextures[0]);
-                app.defaultFramebuffer().clearColor(0.0, 0.0, 0.0, 1.0).clear().draw();
-
-                requestAnimationFrame(draw);
-            }
-
-            requestAnimationFrame(draw);
-            
+            mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);            
         }
 
-        image.src = "img/khronos_webgl.png";
+        var drawCall = app.createDrawCall(program, pointArray, PicoGL.POINTS)
+        .texture("tex", texture);
+
+        app.drawCalls([drawCall]);
+
+        function draw() {
+            angleX += 0.01;
+            angleY += 0.02;
+
+            mat4.fromXRotation(rotateXMatrix, angleX);
+            mat4.fromYRotation(rotateYMatrix, angleY);
+            mat4.multiply(modelMatrix, rotateXMatrix, rotateYMatrix);
+            mat4.multiply(mvpMatrix, viewProjMatrix, modelMatrix);
+
+            drawCall.uniform("uMVP", mvpMatrix);
+
+            app.clear().draw();
+
+            requestAnimationFrame(draw);
+        }
+
+        requestAnimationFrame(draw);
+            
+
     </script>
     <a href="https://github.com/tsherif/picogl.js" id="github-ribbon"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"></a>
     <script src="../site/js/iframe.js"></script>
