@@ -54,10 +54,11 @@
         }
         
         this.uniforms = {};
-        this.uniformBuffers = {};
+        this.uniformBuffers = new Array(PicoGL.WEBGL_INFO.MAX_UNIFORM_BUFFERS);
+        this.uniformBlockNames = new Array(PicoGL.WEBGL_INFO.MAX_UNIFORM_BUFFERS);
         this.uniformBlockBases = {};
         this.uniformBlockCount = 0;
-        this.textures = {};
+        this.textures = new Array(PicoGL.WEBGL_INFO.MAX_TEXTURE_UNITS);
         this.textureCount = 0;
         this.primitive = primitive !== undefined ? primitive : PicoGL.TRIANGLES;
     };
@@ -89,8 +90,7 @@
             this.uniforms[name] = unit;
         }
         
-        var textureUnit = this.gl["TEXTURE" + unit];   
-        this.textures[textureUnit] = texture;
+        this.textures[unit] = texture;
         
         return this;
     };
@@ -107,6 +107,7 @@
         if (base === undefined) {
             base = this.uniformBlockCount++;
             this.uniformBlockBases[name] = base;
+            this.uniformBlockNames[base] = name;
         }
         
         this.uniformBuffers[base] = buffer;
@@ -123,7 +124,7 @@
     PicoGL.DrawCall.prototype.draw = function(state) {
         var uniforms = this.uniforms;
         var uniformBuffers = this.uniformBuffers;
-        var uniformBlockBases = this.uniformBlockBases;
+        var uniformBlockNames = this.uniformBlockNames;
         var textures = this.textures;
 
         if (state.program !== this.currentProgram) {
@@ -135,13 +136,12 @@
             this.currentProgram.uniform(uName, uniforms[uName]);
         }
 
-        for (var ubName in uniformBlockBases) {
-            var base = uniformBlockBases[ubName];
-            this.currentProgram.uniformBlock(ubName, base);
+        for (var base = 0; base < this.uniformBlockCount; ++base) {
+            this.currentProgram.uniformBlock(uniformBlockNames[base], base);
             uniformBuffers[base].bind(base);
         }
 
-        for (var unit in textures) {
+        for (var unit = 0; unit < this.textureCount; ++unit) {
             textures[unit].bind(unit);
         }
 

@@ -120,7 +120,7 @@
         @param {number} unit The texture unit to bind to.
     */
     PicoGL.Texture.prototype.bind = function(unit) {
-        this.gl.activeTexture(unit);
+        this.gl.activeTexture(PicoGL.TEXTURE_UNIT_MAP[unit]);
         this.gl.bindTexture(this.binding, this.texture);
 
         return this;

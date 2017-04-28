@@ -59,7 +59,7 @@
         this.floatRenderTargetsEnabled = false;
         this.linearFloatTexturesEnabled = false;
 
-        this.debugEnabled = false;
+        this.debugEnabled = true;
     };
 
     /**
@@ -389,12 +389,12 @@
     };
 
     /**
-        Enable debug logging.
+        Disable debug logging.
 
         @method
     */
-    PicoGL.App.prototype.debug = function() {
-        this.debugEnabled = true; 
+    PicoGL.App.prototype.noDebug = function() {
+        this.debugEnabled = false; 
 
         return this;
     };

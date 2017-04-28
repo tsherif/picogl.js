@@ -77,6 +77,16 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         PicoGL.TYPE_SIZE[gl.UNSIGNED_INT]      = 4;
         PicoGL.TYPE_SIZE[gl.FLOAT]             = 4;
 
+        PicoGL.WEBGL_INFO = {};
+        PicoGL.WEBGL_INFO.MAX_TEXTURE_UNITS = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
+        PicoGL.WEBGL_INFO.MAX_UNIFORM_BUFFERS = gl.getParameter(gl.MAX_UNIFORM_BUFFER_BINDINGS);
+
+        PicoGL.TEXTURE_UNIT_MAP = new Array(PicoGL.WEBGL_INFO.MAX_TEXTURE_UNITS);
+
+        for (var i = 0, len = PicoGL.TEXTURE_UNIT_MAP.length; i < len; ++i) {
+            PicoGL.TEXTURE_UNIT_MAP[i] = gl["TEXTURE" + i];
+        }
+
     })();
 
 
@@ -150,7 +160,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         this.floatRenderTargetsEnabled = false;
         this.linearFloatTexturesEnabled = false;
 
-        this.debugEnabled = false;
+        this.debugEnabled = true;
     };
 
     /**
@@ -480,12 +490,12 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     };
 
     /**
-        Enable debug logging.
+        Disable debug logging.
 
         @method
     */
-    PicoGL.App.prototype.debug = function() {
-        this.debugEnabled = true; 
+    PicoGL.App.prototype.noDebug = function() {
+        this.debugEnabled = false; 
 
         return this;
     };
@@ -1595,7 +1605,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {number} unit The texture unit to bind to.
     */
     PicoGL.Texture.prototype.bind = function(unit) {
-        this.gl.activeTexture(unit);
+        this.gl.activeTexture(PicoGL.TEXTURE_UNIT_MAP[unit]);
         this.gl.bindTexture(this.binding, this.texture);
 
         return this;
@@ -1882,10 +1892,11 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         }
         
         this.uniforms = {};
-        this.uniformBuffers = {};
+        this.uniformBuffers = new Array(PicoGL.WEBGL_INFO.MAX_UNIFORM_BUFFERS);
+        this.uniformBlockNames = new Array(PicoGL.WEBGL_INFO.MAX_UNIFORM_BUFFERS);
         this.uniformBlockBases = {};
         this.uniformBlockCount = 0;
-        this.textures = {};
+        this.textures = new Array(PicoGL.WEBGL_INFO.MAX_TEXTURE_UNITS);
         this.textureCount = 0;
         this.primitive = primitive !== undefined ? primitive : PicoGL.TRIANGLES;
     };
@@ -1917,8 +1928,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             this.uniforms[name] = unit;
         }
         
-        var textureUnit = this.gl["TEXTURE" + unit];   
-        this.textures[textureUnit] = texture;
+        this.textures[unit] = texture;
         
         return this;
     };
@@ -1935,6 +1945,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         if (base === undefined) {
             base = this.uniformBlockCount++;
             this.uniformBlockBases[name] = base;
+            this.uniformBlockNames[base] = name;
         }
         
         this.uniformBuffers[base] = buffer;
@@ -1951,7 +1962,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     PicoGL.DrawCall.prototype.draw = function(state) {
         var uniforms = this.uniforms;
         var uniformBuffers = this.uniformBuffers;
-        var uniformBlockBases = this.uniformBlockBases;
+        var uniformBlockNames = this.uniformBlockNames;
         var textures = this.textures;
 
         if (state.program !== this.currentProgram) {
@@ -1963,13 +1974,12 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             this.currentProgram.uniform(uName, uniforms[uName]);
         }
 
-        for (var ubName in uniformBlockBases) {
-            var base = uniformBlockBases[ubName];
-            this.currentProgram.uniformBlock(ubName, base);
+        for (var base = 0; base < this.uniformBlockCount; ++base) {
+            this.currentProgram.uniformBlock(uniformBlockNames[base], base);
             uniformBuffers[base].bind(base);
         }
 
-        for (var unit in textures) {
+        for (var unit = 0; unit < this.textureCount; ++unit) {
             textures[unit].bind(unit);
         }
 

@@ -76,6 +76,16 @@
         PicoGL.TYPE_SIZE[gl.UNSIGNED_INT]      = 4;
         PicoGL.TYPE_SIZE[gl.FLOAT]             = 4;
 
+        PicoGL.WEBGL_INFO = {};
+        PicoGL.WEBGL_INFO.MAX_TEXTURE_UNITS = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
+        PicoGL.WEBGL_INFO.MAX_UNIFORM_BUFFERS = gl.getParameter(gl.MAX_UNIFORM_BUFFER_BINDINGS);
+
+        PicoGL.TEXTURE_UNIT_MAP = new Array(PicoGL.WEBGL_INFO.MAX_TEXTURE_UNITS);
+
+        for (var i = 0, len = PicoGL.TEXTURE_UNIT_MAP.length; i < len; ++i) {
+            PicoGL.TEXTURE_UNIT_MAP[i] = gl["TEXTURE" + i];
+        }
+
     })();
 
 
