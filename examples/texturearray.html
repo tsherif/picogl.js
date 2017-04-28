@@ -22,8 +22,11 @@
   CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -->
 <html>
+<!-- 
+    Octopus sprite from: https://github.com/jeremypetrequin/jsMovieclip
+ -->
 <head>
-    <title>PicoGL.js: Phong Cube</title>
+    <title>PicoGL.js: Texture Array</title>
     <script src="utils/gl-matrix.js"></script>
     <script src="../build/picogl.js"></script>
     <script src="utils/utils.js"></script>
@@ -31,9 +34,9 @@
 </head>
 <body>
     <div id="example-title">
-        PicoGL.js Example: Phong-shaded Cube
+        PicoGL.js Example: Texture Array
         <div>
-            <a href="https://github.com/tsherif/picogl.js/blob/master/examples/cube.html">Source code</a>
+            <a href="https://github.com/tsherif/picogl.js/blob/master/examples/texturearray.html">Source code</a>
         </div>
     </div>
     <canvas id="gl-canvas"></canvas>
@@ -62,6 +65,7 @@
             vec4 worldPosition = uModel * position;
             vPosition = worldPosition.xyz;
             vUV = uv;
+            vUV.y -= 0.13;
             vNormal = (uModel * normal).xyz;
             gl_Position = viewProj * worldPosition;
         }
@@ -69,6 +73,7 @@
     <script type="x-shader/vf" id="fragment-draw">
         #version 300 es
         precision highp float;
+        precision lowp sampler2DArray;
 
         layout(std140, column_major) uniform;
 
@@ -78,7 +83,8 @@
             vec4 lightPosition;
         };
 
-        uniform sampler2D tex;
+        uniform float arrayIndex;
+        uniform sampler2DArray tex;
         
         in vec3 vPosition;
         in vec2 vUV;
@@ -86,7 +92,7 @@
 
         out vec4 fragColor;
         void main() {
-            vec3 color = texture(tex, vUV).rgb;
+            vec3 color = texture(tex, vec3(vUV, arrayIndex)).rgb + 0.5;
 
             vec3 normal = normalize(vNormal);
             vec3 eyeVec = normalize(eyePosition.xyz - vPosition);
@@ -180,14 +186,14 @@
 
             var ctx = canvas.getContext("2d");
             ctx.drawImage(image, 0, 0);
-            var imageData = ctx.getImageData(0, 0, image.width * image.height);
+            var imageData = ctx.getImageData(0, 2, image.width,  image.height);
             var pixels = new Uint8Array(imageData.data.buffer);
 
             var textureWidth = image.width;
-            var textureHeight = image.width;
-            var numTextures = image.height / image.width;
+            var textureHeight = 103;
+            var numTextures = image.height / textureHeight;
 
-            var texture = app.createTextureArray(image);
+            var texture = app.createTexture2DArray(image, textureWidth, textureHeight, numTextures);
 
             var drawCall = app.createDrawCall(program, boxArray)
             .uniformBlock("SceneUniforms", sceneUniformBuffer)
@@ -195,6 +201,8 @@
 
             app.drawCalls([drawCall]);
 
+            var frameCount = 0;
+            var arrayIndex = 0;
             function draw() {
                 angleX += 0.01;
                 angleY += 0.02;
@@ -203,7 +211,11 @@
                 mat4.fromYRotation(rotateYMatrix, angleY);
                 mat4.multiply(modelMatrix, rotateXMatrix, rotateYMatrix);
 
-                drawCall.uniform("uModel", modelMatrix);
+                drawCall.uniform("uModel", modelMatrix)
+                .uniform("arrayIndex", arrayIndex);
+
+                frameCount++;
+                arrayIndex = Math.floor(frameCount / 3) % numTextures;
 
                 app.clear().draw();
 
@@ -214,7 +226,7 @@
             
         }
 
-        image.src = "img/khronos_webgl.png";
+        image.src = "img/poulpe_1.png";
 
     </script>
     <a href="https://github.com/tsherif/picogl.js" id="github-ribbon"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"></a>
