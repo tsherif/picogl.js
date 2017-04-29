@@ -112,11 +112,16 @@ Transform Feedback
     // Last argument is transform feedback varyings.
     var program = app.createProgram(vertexShaderSource, fragmentShaderSource, ["vPosition"]);
 
-    var positions1 = app.createArrayBuffer(PicoGL.FLOAT, 2, new Float32Array(6));
+    var positions1 = app.createArrayBuffer(PicoGL.FLOAT, 2, new Float32Array([
+        -0.5, -0.5,
+         0.5, -0.5,
+         0.0,  0.5
+    ]));
     var vertexArray1 = app.createVertexArray()
     .attributeBuffer(0, positions1);
 
-    var positions2 = app.createArrayBuffer(PicoGL.FLOAT, 2, new Float32Array(6));
+    // Empty destination buffer of 6 floats
+    var positions2 = app.createArrayBuffer(PicoGL.FLOAT, 2, 6);  
     var vertexArray2 = app.createVertexArray()
     .attributeBuffer(0, positions2);
 
