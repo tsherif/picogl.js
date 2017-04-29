@@ -27,9 +27,9 @@
 <html>
 <head>
     <title>PicoGL.js: Screen Space Ambient Occlusion</title>
-    <script src="../utils/gl-matrix.js"></script>
+    <script src="utils/gl-matrix.js"></script>
     <script src="../build/picogl.js"></script>
-    <script src="../utils/utils.js"></script>
+    <script src="utils/utils.js"></script>
     <link rel="stylesheet" href="../site/css/picogl-example.css"> 
     <style>
         #ssao-controls {
@@ -51,53 +51,71 @@
         Enable SSAO: <input id="ssao-toggle" type="checkbox" checked>
     </div>
     <canvas id="gl-canvas"></canvas>
-    <script id="colorgeo-vs" type="x-shader/vs">
-      
-      attribute vec4 aPosition;
-      attribute vec3 aNormal;
-      attribute vec2 aUV;
-      
-      uniform mat4 uModelMatrix;
-      uniform mat4 uViewMatrix;
-      uniform mat4 uProjection;
-      
-      varying vec4 vPosition;
-      varying vec4 vNormal;
-      varying vec2 vUV;
-      varying vec4 vViewPosition;
-      varying vec4 vViewNormal;
-      
-      void main() {
-        vPosition = uModelMatrix * aPosition;
-        vNormal = uModelMatrix * vec4(aNormal, 0.0);
-        vUV = aUV;
-        vViewPosition = uViewMatrix * vPosition;
-        vViewNormal = uViewMatrix * vNormal;
-        gl_Position = uProjection * vViewPosition;
-      }
+    <script type="x-shader/vs" id="vertex-colorgeo">
+        #version 300 es
+
+        layout(std140, column_major) uniform;
+        
+        layout(location=0) in vec4 position;
+        layout(location=1) in vec2 uv;
+        layout(location=2) in vec3 normal;
+        layout(location=3) in mat4 modelMatrix;
+        
+        uniform SceneUniforms {
+            mat4 uViewMatrix;
+            mat4 uProjection;
+            vec4 uEyePosition;
+            vec4 uLightPosition;
+        };       
+        
+        out vec4 vPosition;
+        out vec2 vUV;
+        out vec4 vNormal;
+        out vec4 vViewPosition;
+        out vec4 vViewNormal;
+
+        void main() {
+            vPosition = modelMatrix * position;
+            vNormal = modelMatrix * vec4(normal, 0.0);
+            vUV = uv;
+            vViewPosition = uViewMatrix * vPosition;
+            vViewNormal = uViewMatrix * vNormal;
+            gl_Position = uProjection * vViewPosition;
+          }
     </script>
-    <script id="colorgeo-fs" type="x-shader/fs">
-        #extension GL_EXT_draw_buffers : require
+    <script type="x-shader/fs" id="fragment-colorgeo">
+        #version 300 es
         precision highp float;
 
-        uniform vec3 uLightPosition;
-        uniform vec3 uEyePosition;
-        uniform sampler2D uTexture;
+        layout(std140, column_major) uniform;
 
-        varying vec4 vPosition;
-        varying vec4 vNormal;
-        varying vec2 vUV;
-        varying vec4 vViewPosition;
-        varying vec4 vViewNormal;
+        uniform SceneUniforms {
+            mat4 uViewMatrix;
+            mat4 uProjection;
+            vec4 uEyePosition;
+            vec4 uLightPosition;
+        };
+
+        uniform sampler2D uTexture;
         
+        in vec4 vPosition;
+        in vec2 vUV;
+        in vec4 vNormal;
+        in vec4 vViewPosition;
+        in vec4 vViewNormal;
+
+        layout(location=0) out vec4 color;
+        layout(location=1) out vec4 viewPosition;
+        layout(location=2) out vec4 viewNormal;
+
         void main() {
             vec3 position = vPosition.xyz;
             vec3 normal = normalize(vNormal.xyz);
             vec2 uv = vUV;
 
-            vec4 baseColor = texture2D(uTexture, uv);
-            vec3 eyeDirection = normalize(uEyePosition - position);
-            vec3 lightVec = uLightPosition - position;
+            vec4 baseColor = texture(uTexture, uv);
+            vec3 eyeDirection = normalize(uEyePosition.xyz - position);
+            vec3 lightVec = uLightPosition.xyz - position;
             vec3 lightDirection = normalize(lightVec);
             vec3 reflectionDirection = reflect(-lightDirection, normal);
             float nDotL = max(dot(lightDirection, normal), 0.0);
@@ -105,37 +123,44 @@
             float ambient = 0.2;
             float specular = pow(max(dot(reflectionDirection, eyeDirection), 0.0), 20.0);
 
-            gl_FragData[0] = vec4((ambient + diffuse + specular) * baseColor.rgb, baseColor.a);
-            gl_FragData[1] = vViewPosition;
-            gl_FragData[2] = normalize(vViewNormal);
-        }
-    </script> 
-    <script id="quad-vs" type="x-shader/vs">
-        attribute vec4 aPosition;
-        varying vec2 vScreenUV;
-        void main() {
-            vScreenUV = aPosition.xy * 0.5 + 0.5;
-            gl_Position = aPosition;
+            color = vec4((ambient + diffuse + specular) * baseColor.rgb, 1.0);
+            viewPosition = vViewPosition;
+            viewNormal = vViewNormal;
         }
     </script>
-    <script id="ssao-fs" type="x-shader/fs">
+    <script type="x-shader/vs" id="vertex-quad">
+        #version 300 es
+
+        layout(location=0) in vec4 position;
+        
+        void main() {
+            gl_Position = position;
+        }
+    </script>
+
+    <script type="x-shader/fs" id="fragment-ssao">
+        #version 300 es
         precision highp float;
+
+        layout(std140, column_major) uniform;
 
         #define SIN45 0.707107
 
-        varying vec2 vScreenUV;
+        uniform SSAOUniforms {
+            float uSampleRadius;
+            float uBias;
+            vec2 uAttenuation;
+            vec2 uDepthRange;
+        };
 
-        uniform float uSampleRadius;
-        uniform float uBias;
-        uniform vec2 uAttenuation;
-        uniform vec2 uTexelOffset;
-        uniform vec2 uDepthRange;
         uniform sampler2D uPositionBuffer;
         uniform sampler2D uNormalBuffer;
         uniform sampler2D uNoiseBuffer;
+        
+        out float occlusion;
 
-        float getOcclusion(vec3 position, vec3 normal, vec2 uv) {
-            vec3 occluderPosition = texture2D(uPositionBuffer, uv).xyz;
+        float getOcclusion(vec3 position, vec3 normal, ivec2 fragCoord) {
+            vec3 occluderPosition = texelFetch(uPositionBuffer, fragCoord, 0).xyz;
             vec3 positionVec = occluderPosition - position;
             float intensity = max(dot(normal, normalize(positionVec)) - uBias, 0.0);
         
@@ -145,9 +170,10 @@
         }
 
         void main() {
-            vec3 position = texture2D(uPositionBuffer, vScreenUV).xyz;
-            vec3 normal = texture2D(uNormalBuffer, vScreenUV).xyz;
-            vec2 rand = normalize(texture2D(uNoiseBuffer, vScreenUV).xy);
+            ivec2 fragCoord = ivec2(gl_FragCoord.xy);
+            vec3 position = texelFetch(uPositionBuffer, fragCoord, 0).xyz;
+            vec3 normal = texelFetch(uNormalBuffer, fragCoord, 0).xyz;
+            vec2 rand = normalize(texelFetch(uNoiseBuffer, fragCoord, 0).xy);
             float depth = (length(position) - uDepthRange.x) / (uDepthRange.y - uDepthRange.x);
 
             float kernelRadius = uSampleRadius * (1.0 - depth);
@@ -158,43 +184,46 @@
             kernel[2] = vec2(0.0, -1.0);
             kernel[3] = vec2(-1.0, 0.0);
 
-            float occlusion = 0.0;
+            occlusion = 0.0;
             for (int i = 0; i < 4; ++i) {
                 vec2 k1 = reflect(kernel[i], rand);
                 vec2 k2 = vec2(k1.x * SIN45 - k1.y * SIN45, k1.x * SIN45 + k1.y * SIN45);
 
-                k1 *= uTexelOffset * kernelRadius;
-                k2 *= uTexelOffset * kernelRadius;
+                k1 *= kernelRadius;
+                k2 *= kernelRadius;
 
-                occlusion += getOcclusion(position, normal, vScreenUV + k1);
-                occlusion += getOcclusion(position, normal, vScreenUV + k2 * 0.75);
-                occlusion += getOcclusion(position, normal, vScreenUV + k1 * 0.5);
-                occlusion += getOcclusion(position, normal, vScreenUV + k2 * 0.25);
+                occlusion += getOcclusion(position, normal, fragCoord + ivec2(k1));
+                occlusion += getOcclusion(position, normal, fragCoord + ivec2(k2 * 0.75));
+                occlusion += getOcclusion(position, normal, fragCoord + ivec2(k1 * 0.5));
+                occlusion += getOcclusion(position, normal, fragCoord + ivec2(k2 * 0.25));
             }
 
             occlusion = clamp(occlusion / 16.0, 0.0, 1.0);
-
-            gl_FragColor.r = occlusion;
         }
     </script>
-    <script id="aoblend-fs" type="x-shader/fs">
+    <script type="x-shader/fs" id="fragment-aoblend">
+        #version 300 es
         precision highp float;
 
-        varying vec2 vScreenUV;
         uniform sampler2D uColorBuffer;
         uniform sampler2D uOcclusionBuffer;
+
+        out vec4 color;
         void main() {
-            vec4 color = texture2D(uColorBuffer, vScreenUV);
-            gl_FragColor = vec4(clamp(color.rgb - texture2D(uOcclusionBuffer, vScreenUV).r, 0.0, 1.0), color.a);
+            ivec2 fragCoord = ivec2(gl_FragCoord.xy);
+            color = vec4(clamp(texelFetch(uColorBuffer, fragCoord, 0).rgb - texelFetch(uOcclusionBuffer, fragCoord, 0).r, 0.0, 1.0), 1.0);
         }
     </script>
-    <script id="texture-fs" type="x-shader/fs">
+     <script type="x-shader/fs" id="fragment-color">
+        #version 300 es
         precision highp float;
 
-        varying vec2 vScreenUV;
-        uniform sampler2D uTexture;
+        uniform sampler2D uColorBuffer;
+
+        out vec4 color;
+
         void main() {
-            gl_FragColor = texture2D(uTexture, vScreenUV);
+            color = vec4(texelFetch(uColorBuffer, ivec2(gl_FragCoord.xy), 0).rgb, 1.0);
         }
     </script>
     <script type="text/javascript">
@@ -206,43 +235,75 @@
 
         var NEAR = 0.1;
         var FAR = 10.0;
+        var SAMPLE_RADIUS = 16.0; // sample radius
+        var BIAS = 0.04; // bias
+        var ATTENUATION = vec2.fromValues(1, 1); // attenuation
+        var DEPTH_RANGE = vec2.fromValues(NEAR, FAR);
+
+        var NUM_SPHERES = 32;
+        var NUM_PER_ROW = 8;
+        var SPHERE_RADIUS = 0.6;
 
         var canvas = document.getElementById("gl-canvas");
+
+        if (!canvas.getContext("webgl2")) {
+            console.error("WebGL 2 not available");
+            document.body.innerHTML = "This example requires WebGL 2 which is unavailable on this system."
+        }
+
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
-        var screenTexelSize = vec2.fromValues(1.0 / canvas.width, 1.0 / canvas.height);
+        var spheres = new Array(NUM_SPHERES);
+        var modelMatrixData = new Float32Array(NUM_SPHERES * 16);
+
+        for (var i = 0; i < NUM_SPHERES; ++i) {
+            var angle = 2 * Math.PI * (i % NUM_PER_ROW) / NUM_PER_ROW;
+            var x = Math.sin(angle) * SPHERE_RADIUS;
+            var y = Math.floor(i / NUM_PER_ROW) / (NUM_PER_ROW / 4) - 0.75;
+            var z = Math.cos(angle) * SPHERE_RADIUS;
+            spheres[i] = {
+                scale: [0.8, 0.8, 0.8],
+                rotate: [0, 0, 0], // Will be used for global rotation
+                translate: [x, y, z],
+                modelMatrix: mat4.create()
+            };
+        }
 
         var app = PicoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0)
         .depthTest()
         .depthFunc(PicoGL.LEQUAL)
-        .drawBuffers()
-        .floatTextures()
-        .linearFloatTextures();
+        .floatRenderTargets();
 
-        var depthRange = vec2.fromValues(NEAR, FAR);
+        if (!app.floatRenderTargetsEnabled) {
+            document.body.innerHTML = "This example requires extension EXT_color_buffer_float which is not supported on this system."
+        }
 
         // Set up color/geo program
-        var colorGeoVsSource =  document.getElementById("colorgeo-vs").text;
-        var colorGeoFsSource =  document.getElementById("colorgeo-fs").text;
+        var colorGeoVsSource =  document.getElementById("vertex-colorgeo").text.trim();
+        var colorGeoFsSource =  document.getElementById("fragment-colorgeo").text.trim();
         var colorGeoProgram = app.createProgram(colorGeoVsSource, colorGeoFsSource);
-        var colorGeoBuffer = app.createFramebuffer(3, PicoGL.FLOAT);
+        var colorGeoBuffer = app.createFramebuffer()
+        .colorTarget(0)
+        .colorTarget(1, PicoGL.FLOAT, PicoGL.RGBA)
+        .colorTarget(2, PicoGL.FLOAT, PicoGL.RGBA)
+        .depthTarget();
 
-        var quadVsSource =  document.getElementById("quad-vs").text;
+        var quadVsSource =  document.getElementById("vertex-quad").text.trim();
         var quadShader = app.createShader(PicoGL.VERTEX_SHADER, quadVsSource);
 
         // Set up ssao program
-        var ssaoFsSource =  document.getElementById("ssao-fs").text;
+        var ssaoFsSource =  document.getElementById("fragment-ssao").text.trim();
         var ssaoProgram = app.createProgram(quadShader, ssaoFsSource);
-        var ssaoBuffer = app.createFramebuffer(1, PicoGL.FLOAT);
+        var ssaoBuffer = app.createFramebuffer().colorTarget(0, PicoGL.FLOAT);
 
         // Set up ao blend program
-        var aoBlendFsSource =  document.getElementById("aoblend-fs").text;
+        var aoBlendFsSource =  document.getElementById("fragment-aoblend").text.trim();
         var aoBlendProgram = app.createProgram(quadShader, aoBlendFsSource);
 
-        // Only draw the
-        var noSSAOFsSource =  document.getElementById("texture-fs").text;
+        // Draw without SSAO
+        var noSSAOFsSource =  document.getElementById("fragment-color").text.trim();
         var noSSAOProgram = app.createProgram(quadShader, noSSAOFsSource);
 
         // Geometry
@@ -250,7 +311,15 @@
         var positions = app.createArrayBuffer(PicoGL.FLOAT, 3, sphere.positions);
         var uv = app.createArrayBuffer(PicoGL.FLOAT, 2, sphere.uvs);
         var normals = app.createArrayBuffer(PicoGL.FLOAT, 3, sphere.normals);
+        var modelMatrices = app.createInstancedMatrixBuffer(PicoGL.FLOAT_MAT4, modelMatrixData);
         var indices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, sphere.indices);
+
+        var sphereArray = app.createVertexArray()
+        .attributeBuffer(0, positions)
+        .attributeBuffer(1, uv)
+        .attributeBuffer(2, normals)
+        .attributeBuffer(3, modelMatrices)
+        .indexBuffer(indices);
 
         var quadPositions = app.createArrayBuffer(PicoGL.FLOAT, 2, new Float32Array([
             -1, 1,
@@ -260,6 +329,9 @@
             1, -1,
             1, 1,
         ]));
+
+        var quadArray = app.createVertexArray()
+        .attributeBuffer(0, quadPositions);
 
         // Camera stuff
         var projMatrix = mat4.create();
@@ -273,97 +345,102 @@
         // Light
         var lightPosition = vec3.fromValues(0.5, 1, 2); 
 
+        var sceneUniforms = app.createUniformBuffer([
+            PicoGL.FLOAT_MAT4,
+            PicoGL.FLOAT_MAT4,
+            PicoGL.FLOAT_VEC4,
+            PicoGL.FLOAT_VEC4
+        ])
+        .set(0, viewMatrix)
+        .set(1, projMatrix)
+        .set(2, eyePosition)
+        .set(3, lightPosition)
+        .update();
+
+        var ssaoUniforms = app.createUniformBuffer([
+            PicoGL.FLOAT,
+            PicoGL.FLOAT,
+            PicoGL.FLOAT_VEC2,
+            PicoGL.FLOAT_VEC2
+        ])
+        .set(0, SAMPLE_RADIUS)
+        .set(1, BIAS)
+        .set(2, ATTENUATION)
+        .set(3, DEPTH_RANGE)
+        .update();
+
+        var numNoisePixels = app.gl.drawingBufferWidth * app.gl.drawingBufferHeight;
+        var noiseTextureData = new Float32Array(numNoisePixels * 2);
+
+        for (var i = 0; i < numNoisePixels; ++i) {
+            var index = i * 2;
+            noiseTextureData[index]     = Math.random() * 2.0 - 1.0;
+            noiseTextureData[index + 1] = Math.random() * 2.0 - 1.0;
+        }
+
+        var noiseTexture = app.createTexture2D(
+            noiseTextureData, 
+            app.gl.drawingBufferWidth,
+            app.gl.drawingBufferHeight,
+            {
+                format: PicoGL.RG,
+                internalFormat: PicoGL.RG16F,
+                type: PicoGL.FLOAT,
+                minFilter: PicoGL.LINEAR,
+                magFilter: PicoGL.LINEAR,
+                wrapS: PicoGL.CLAMP_TO_EDGE,
+                wrapT: PicoGL.CLAMP_TO_EDGE,
+                generateMipmaps: false
+            }
+        );
+
         window.onresize = function() {
             app.resize(window.innerWidth, window.innerHeight);
             colorGeoBuffer.resize();
             ssaoBuffer.resize();
 
+            numNoisePixels = app.gl.drawingBufferWidth * app.gl.drawingBufferHeight;
+            noiseTextureData = new Float32Array(numNoisePixels * 2);
+
+            for (var i = 0; i < numNoisePixels; ++i) {
+                var index = i * 2;
+                noiseTextureData[index]     = Math.random() * 2.0 - 1.0;
+                noiseTextureData[index + 1] = Math.random() * 2.0 - 1.0;
+            }
+
+            noiseTexture.image(noiseTextureData, app.gl.drawingBufferWidth, app.gl.drawingBufferHeight);
+
             mat4.perspective(projMatrix, Math.PI / 2, app.width / app.height, 0.1, 10.0);
+            sceneUniforms.set(1, projMatrix).update();
         };
 
         var image = new Image();
 
         image.onload = function() {
-            if (!app.drawBuffersEnabled || !app.floatTexturesEnabled || !app.linearFloatTexturesEnabled) {
-                document.body.innerHTML = "This example requires extensions WEBGL_draw_buffers, OES_texture_float and OES_texture_float_linear which are not supported on this system."
-                return;
-            }
-            
-            var noiseTextureDim = 1024;
-            var numNoisePixels = noiseTextureDim * noiseTextureDim;
-            var noiseTextureData = new Float32Array(numNoisePixels * 3);
+            var texture = app.createTexture2D(image);
 
-            for (var i = 0; i < numNoisePixels; ++i) {
-                var index = i * 3;
-                noiseTextureData[index]     = Math.random() * 2.0 - 1.0;
-                noiseTextureData[index + 1] = Math.random() * 2.0 - 1.0;
-            }
+            var colorGeoDrawcall = app.createDrawCall(colorGeoProgram, sphereArray)
+            .uniformBlock("SceneUniforms", sceneUniforms)
+            .texture("uTexture", texture);
 
-            var texture = app.createTexture(image);
-            var noiseTexture = app.createTexture(noiseTextureData, {
-                array: true,
-                internalFormat: PicoGL.RGB,
-                type: PicoGL.FLOAT,
-                width: noiseTextureDim,
-                height: noiseTextureDim
-            });
+            var colorGeoDrawcalls = [colorGeoDrawcall];
 
-            var NUM_SPHERES = 32;
-            var NUM_PER_ROW = 8;
-            var RADIUS = 0.8;
-            var spheres = new Array(NUM_SPHERES);
-            var sphereDrawCalls = new Array(NUM_SPHERES);
-
-            for (var i = 0; i < NUM_SPHERES; ++i) {
-                var angle = 2 * Math.PI * (i % NUM_PER_ROW) / NUM_PER_ROW;
-                var x = Math.sin(angle) * RADIUS;
-                var y = Math.floor(i / NUM_PER_ROW) / (NUM_PER_ROW / 4) - 0.75;
-                var z = Math.cos(angle) * RADIUS;
-                spheres[i] = {
-                    scale: [0.8, 0.8, 0.8],
-                    rotate: [0, 0, 0], // Will be used for global rotation
-                    translate: [x, y, z],
-                    modelMatrix: mat4.create(),
-                    mvpMatrix: mat4.create(),
-                    drawCall: app.createDrawCall(colorGeoProgram)
-                };
-
-                spheres[i].drawCall.attribute("aPosition", positions)
-                .attribute("aNormal", normals)
-                .attribute("aUV", uv)
-                .indices(indices)
-                .uniform("uProjection", projMatrix)
-                .uniform("uViewMatrix", viewMatrix)
-                .uniform("uEyePosition", eyePosition)
-                .uniform("uLightPosition", lightPosition)
-                .texture("uTexture", texture);
-
-                sphereDrawCalls[i] = spheres[i].drawCall;
-            }
-
-            var ssaoDrawCall = app.createDrawCall(ssaoProgram)
-            .attribute("aPosition", quadPositions)
-            .uniform("uSampleRadius", 8.0)
-            .uniform("uBias", 0.01)
-            .uniform("uAttenuation", vec2.fromValues(1, 1))
-            .uniform("uTexelOffset", screenTexelSize)
-            .uniform("uDepthRange", depthRange)
+            var ssaoDrawCall = app.createDrawCall(ssaoProgram, quadArray)
+            .uniformBlock("SSAOUniforms", ssaoUniforms)
             .texture("uPositionBuffer", colorGeoBuffer.colorTextures[1])
             .texture("uNormalBuffer", colorGeoBuffer.colorTextures[2])
             .texture("uNoiseBuffer", noiseTexture);
 
             var ssaoDrawCalls = [ssaoDrawCall];
 
-            var aoBlendDrawCall = app.createDrawCall(aoBlendProgram)
-            .attribute("aPosition", quadPositions)
+            var aoBlendDrawCall = app.createDrawCall(aoBlendProgram, quadArray)
             .texture("uColorBuffer", colorGeoBuffer.colorTextures[0])
             .texture("uOcclusionBuffer", ssaoBuffer.colorTextures[0]);
 
             var aoBlendDrawCalls = [aoBlendDrawCall];
 
-            var noSSAODrawCall = app.createDrawCall(noSSAOProgram)
-            .attribute("aPosition", quadPositions)
-            .texture("uTexture", colorGeoBuffer.colorTextures[0]);
+            var noSSAODrawCall = app.createDrawCall(noSSAOProgram, quadArray)
+            .texture("uColorBuffer", colorGeoBuffer.colorTextures[0]);
 
             var noSSAODrawCalls = [noSSAODrawCall];
 
@@ -380,11 +457,12 @@
                     mat4.fromYRotation(rotationMatrix, spheres[i].rotate[1]);
                     mat4.multiply(spheres[i].modelMatrix, rotationMatrix, spheres[i].modelMatrix)
 
-                    spheres[i].drawCall.uniform("uModelMatrix", spheres[i].modelMatrix);
+                    modelMatrixData.set(spheres[i].modelMatrix, i * 16);
+                    modelMatrices.data(modelMatrixData);
                 }
 
                 app.framebuffer(colorGeoBuffer)
-                .drawCalls(sphereDrawCalls)
+                .drawCalls(colorGeoDrawcalls)
                 .clear()
                 .draw();
 

@@ -24,9 +24,9 @@
 <html>
 <head>
     <title>PicoGL.js: Shadow Mapping</title>
-    <script src="../utils/gl-matrix.js"></script>
+    <script src="utils/gl-matrix.js"></script>
     <script src="../build/picogl.js"></script>
-    <script src="../utils/utils.js"></script>
+    <script src="utils/utils.js"></script>
     <link rel="stylesheet" href="../site/css/picogl-example.css"> 
 </head>
 <body>
@@ -38,13 +38,17 @@
     </div>
     <canvas id="gl-canvas"></canvas>
     <script id="shadow-vs" type="x-vertex-shader">
-      attribute vec4 aPosition;
-      uniform mat4 uMVP;
-      void main() {
-        gl_Position = uMVP * aPosition;
-      }
+        #version 300 es
+
+        layout(location=0) in vec4 aPosition;
+
+        uniform mat4 uMVP;
+        void main() {
+            gl_Position = uMVP * aPosition;
+        }
     </script>
     <script id="shadow-fs" type="x-fragment-shader">
+        #version 300 es
         precision highp float;
 
         void main() {
@@ -52,18 +56,21 @@
         }
     </script> 
     <script id="main-vs" type="x-vertex-shader">
-        attribute vec4 aPosition;
-        attribute vec3 aNormal;
-        attribute vec2 aTexCoord;
+        #version 300 es
+
+        layout(location=0) in vec4 aPosition;
+        layout(location=1) in vec3 aNormal;
+        layout(location=2) in vec2 aTexCoord;
+
         uniform mat4 uModelMatrix;
         uniform mat4 uMVP;
         uniform mat4 uMVPFromLight;
-        varying vec3 vPosition;
-        varying vec3 vNormal;
-        varying vec2 vTexCoord;
-        varying vec4 vPositionFromLight;
-        varying vec3 vModelPosition;
-
+        
+        out vec3 vPosition;
+        out vec3 vNormal;
+        out vec2 vTexCoord;
+        out vec4 vPositionFromLight;
+        out vec3 vModelPosition;
         void main() {
             gl_Position = uMVP * aPosition;
 
@@ -76,24 +83,26 @@
         }
     </script>
     <script id="main-fs" type="x-fragment-shader">
+        #version 300 es
         precision highp float;
         uniform vec3 uLightPosition;
         uniform vec3 uEyePosition;
         uniform sampler2D uShadowMap;
         uniform sampler2D uTextureMap;
 
-        varying vec3 vPosition;
-        varying vec3 vNormal;
-        varying vec2 vTexCoord;
-        varying vec4 vPositionFromLight;
-        varying vec3 vModelPosition;
+        in vec3 vPosition;
+        in vec3 vNormal;
+        in vec2 vTexCoord;
+        in vec4 vPositionFromLight;
+        in vec3 vModelPosition;
 
+        out vec4 fragColor;
         void main() {
             vec3 shadowCoord = (vPositionFromLight.xyz / vPositionFromLight.w) / 2.0 + 0.5;
-            vec4 rgbaDepth = texture2D(uShadowMap, shadowCoord.xy);
+            vec4 rgbaDepth = texture(uShadowMap, shadowCoord.xy);
             float depth = rgbaDepth.r;
 
-            vec4 baseColor = texture2D(uTextureMap, vTexCoord);
+            vec4 baseColor = texture(uTextureMap, vTexCoord);
 
             vec3 normal = normalize(vNormal);
             vec3 eyeDirection = normalize(uEyePosition - vPosition);
@@ -105,36 +114,46 @@
             float specular = pow(max(dot(reflectionDirection, eyeDirection), 0.0), 20.0);
             float visibility = shadowCoord.z > depth + 0.02 ? 1.0 - 0.4 * nDotL : 1.0;
 
-            gl_FragColor = vec4(visibility * (ambient + diffuse + specular) * baseColor.rgb, baseColor.a);
+            fragColor = vec4(visibility * (ambient + diffuse + specular) * baseColor.rgb, baseColor.a);
         }
     </script> 
     <script type="text/javascript">
         var canvas = document.getElementById("gl-canvas");
+
+        if (!canvas.getContext("webgl2")) {
+            console.error("WebGL 2 not available");
+            document.body.innerHTML = "This example requires WebGL 2 which is unavailable on this system."
+        }
+
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         
         var app = PicoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0)
         .depthTest()
-        .cullBackfaces()
-        .depthTextures();
+        .cullBackfaces();
 
         // Set up shadow program
-        var shadowVsSource =  document.getElementById("shadow-vs").text;
-        var shadowFsSource =  document.getElementById("shadow-fs").text;
+        var shadowVsSource =  document.getElementById("shadow-vs").text.trim();
+        var shadowFsSource =  document.getElementById("shadow-fs").text.trim();
         var shadowProgram = app.createProgram(shadowVsSource, shadowFsSource);
-        var shadowBuffer = app.createFramebuffer(0);
+        var shadowBuffer = app.createFramebuffer().depthTarget();
 
         // Set up main program
-        var vsSource =  document.getElementById("main-vs").text;
-        var fsSource =  document.getElementById("main-fs").text;
+        var vsSource =  document.getElementById("main-vs").text.trim();
+        var fsSource =  document.getElementById("main-fs").text.trim();
         var mainProgram = app.createProgram(vsSource, fsSource);
 
         // Geometry
         var box = utils.createBox({dimensions: [1.0, 1.0, 1.0]})
         var positions = app.createArrayBuffer(PicoGL.FLOAT, 3, box.positions);
-        var uv = app.createArrayBuffer(PicoGL.FLOAT, 2, box.uvs);
         var normals = app.createArrayBuffer(PicoGL.FLOAT, 3, box.normals);
+        var uv = app.createArrayBuffer(PicoGL.FLOAT, 2, box.uvs);
+
+        var boxArray = app.createVertexArray()
+        .attributeBuffer(0, positions)
+        .attributeBuffer(1, normals)
+        .attributeBuffer(2, uv);
 
         // Camera stuff
         var projMatrix = mat4.create();
@@ -165,12 +184,7 @@
         var image = new Image();
 
         image.onload = function() {
-            if (!app.depthTexturesEnabled) {
-                document.body.innerHTML = "This example requires extension WEBGL_depth_texture which is not supported on this system."
-                return;
-            }
-
-            var texture = app.createTexture(image);
+            var texture = app.createTexture2D(image);
 
             var boxes = [
                 {
@@ -199,13 +213,9 @@
             var mainDrawCalls = new Array(boxes.length);
 
             for (var i = 0, len = boxes.length; i < len; ++i) {
-                shadowDrawCalls[i] = app.createDrawCall(shadowProgram);
-                shadowDrawCalls[i].attribute("aPosition", positions);
+                shadowDrawCalls[i] = app.createDrawCall(shadowProgram, boxArray)
 
-                mainDrawCalls[i] = app.createDrawCall(mainProgram)
-                .attribute("aPosition", positions)
-                .attribute("aTexCoord", uv)
-                .attribute("aNormal", normals)
+                mainDrawCalls[i] = app.createDrawCall(mainProgram, boxArray)
                 .uniform("uLightPosition", lightPosition)
                 .uniform("uEyePosition", eyePosition)
                 .texture("uTextureMap", texture)

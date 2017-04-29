@@ -29,45 +29,37 @@
         state and manage draw calls.
 
         @class
-        @param {DOMElement} canvas The canvas on which to create the WebGL context.
-        @param {Object} [contextAttributes] Context attributes to pass when calling getContext().
         @prop {DOMElement} canvas The canvas on which this app drawing.
         @prop {WebGLRenderingContext} gl The WebGL context.
         @prop {number} width The width of the drawing surface.
         @prop {number} height The height of the drawing surface.
-        @prop {number} maxDrawBuffers The maximum number of available draw buffers.
-        @prop {boolean} drawBuffersEnabled Whether the WEBGL_draw_buffers extension is enabled.
-        @prop {boolean} depthTexturesEnabled Whether the WEBGL_depth_texture extension is enabled.
-        @prop {boolean} floatTexturesEnabled Whether the OES_texture_float extension is enabled.
+        @prop {boolean} floatRenderTargetsEnabled Whether the EXT_color_buffer_float extension is enabled.
         @prop {boolean} linearFloatTexturesEnabled Whether the OES_texture_float_linear extension is enabled.
+        @prop {boolean} debugEnabled Whether debug logging is enabled.
         @prop {Object} currentState Tracked GL state.
         @prop {GLEnum} clearBits Current clear mask to use with clear().
-        @prop {WebGLDrawBuffers} drawBuffersExtension Hold the draw buffers extension object when enabled.
     */
     PicoGL.App = function App(canvas, contextAttributes) {
         this.canvas = canvas;
-        this.gl = canvas.getContext("webgl", contextAttributes) || canvas.getContext("experimental-webgl", contextAttributes);
+        this.gl = canvas.getContext("webgl2", contextAttributes);
         this.width = this.gl.drawingBufferWidth;
         this.height = this.gl.drawingBufferHeight;
         this.currentDrawCalls = null;
+        this.emptyFragmentShader = null;
 
         this.currentState = {
-            program: null
+            program: null,
+            vertexArray: null
         };
 
         this.clearBits = this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT;
         
         this.gl.viewport(0, 0, this.width, this.height);    
         
-        this.drawBuffersExtension = null;
-        
-        this.maxDrawBuffers = 1;
-        this.drawBuffersEnabled = false;
-        this.depthTexturesEnabled = false;
-        this.floatTexturesEnabled = false;
+        this.floatRenderTargetsEnabled = false;
         this.linearFloatTexturesEnabled = false;
 
-        this.debugEnabled = false;
+        this.debugEnabled = true;
     };
 
     /**
@@ -228,6 +220,28 @@
     };
 
     /**
+        Enable rasterization step.
+
+        @method
+    */
+    PicoGL.App.prototype.rasterize = function() {
+        this.gl.disable(this.gl.RASTERIZER_DISCARD);
+
+        return this;
+    };
+
+    /**
+        Disable rasterization step.
+
+        @method
+    */
+    PicoGL.App.prototype.noRasterize = function() {
+        this.gl.enable(this.gl.RASTERIZER_DISCARD);
+
+        return this;
+    };
+
+    /**
         Set the depth test function. E.g. app.depthFunc(PicoGL.LEQUAL).
 
         @method
@@ -291,27 +305,6 @@
     };
 
     /**
-        Enable the WEBGL_draw_buffers extension. Allows multiple render targets
-        to be drawn in a single draw call, which will be stored in the colorTextures
-        array of a Framebuffer object.
-
-        @method
-        @see Framebuffer
-    */
-    PicoGL.App.prototype.drawBuffers = function() {
-        this.drawBuffersExtension = this.gl.getExtension("WEBGL_draw_buffers");
-        
-        if (this.drawBuffersExtension) {
-            this.maxDrawBuffers = this.gl.getParameter(this.drawBuffersExtension.MAX_DRAW_BUFFERS_WEBGL);
-            this.drawBuffersEnabled = true;
-        } else {
-            console.warn("Extension WEBGL_draw_buffers unavailable. Cannot enable draw buffers.");
-        }
-        
-        return this;
-    };
-
-    /**
         Enable the WEBGL_depth_texture extension. Allows for writing depth values
         to a texture, which will be stored in the depthTexture property of a Framebuffer
         object.
@@ -330,17 +323,17 @@
     };
 
     /**
-        Enable the OES_texture_float extension. Allows for creating float textures as
-        render targets on FrameBuffer objects. E.g. app.createFramebuffer(1, PicoGL.FLOAT).
+        Enable the EXT_color_buffer_float extension. Allows for creating float textures as
+        render targets on FrameBuffer objects. E.g. app.createFramebuffer().colorTarget(0, PicoGL.FLOAT).
 
         @method
         @see Framebuffer
     */
-    PicoGL.App.prototype.floatTextures = function() {
-        this.floatTexturesEnabled = !!this.gl.getExtension("OES_texture_float");
+    PicoGL.App.prototype.floatRenderTargets = function() {
+        this.floatRenderTargetsEnabled = !!this.gl.getExtension("EXT_color_buffer_float");
         
-        if (!this.floatTexturesEnabled) {
-            console.warn("Extension OES_texture_float unavailable. Cannot enable float textures.");
+        if (!this.floatRenderTargetsEnabled) {
+            console.warn("Extension EXT_color_buffer_float unavailable. Cannot enable float textures.");
         }
         
         return this;
@@ -396,29 +389,20 @@
     };
 
     /**
-        Enable debug logging.
-
-        @method
-    */
-    PicoGL.App.prototype.debug = function() {
-        this.debugEnabled = true; 
-
-        return this;
-    };
-
-    /**
         Create a program.
 
         @method
         @param {WebGLShader|string} vertexShader Vertex shader object or source code.
         @param {WebGLShader|string} fragmentShader Fragment shader object or source code.
+        @param {Array} [xformFeedbackVars] Transform feedback varyings.
     */
-    PicoGL.App.prototype.createProgram = function(vsSource, fsSource) {
-        return new PicoGL.Program(this.gl, vsSource, fsSource, this.debugEnabled);
+    PicoGL.App.prototype.createProgram = function(vsSource, fsSource, xformFeedbackVars) {
+        return new PicoGL.Program(this.gl, vsSource, fsSource, xformFeedbackVars, this.debugEnabled);
     };
 
     /**
-        Create a shader.
+        Create a shader. Creating a shader separately from a program allows for 
+        shader reuse.
 
         @method
         @param {GLEnum} type Shader type.
@@ -432,15 +416,94 @@
     };
 
     /**
+        Create a vertex array.
+
+        @method
+    */
+    PicoGL.App.prototype.createVertexArray = function() {
+        return new PicoGL.VertexArray(this.gl);
+    };
+
+    /**
+        Create a transform feedback object.
+
+        @method
+        @param {VertexArray} vertexArray1 Vertex array containing first set of transform feedback buffers.
+        @param {VertexArray} vertexArray2 Vertex array containing second set of transform feedback buffers.
+        @param {Array} varryingBufferIndices Locations in the vertex arrays of buffers to use for transform feedback.
+    */
+    PicoGL.App.prototype.createTransformFeedback = function(vertexArray1, vertexArray2, varyingBufferIndices) {
+        return new PicoGL.TransformFeedback(this.gl, vertexArray1, vertexArray2, varyingBufferIndices);
+    };
+
+    /**
         Create an array buffer.
 
         @method
         @param {GLEnum} type The data type stored in the array buffer.
         @param {number} itemSize Number of elements per vertex.
         @param {ArrayBufferView} data Array buffer data.
+        @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
     */
-    PicoGL.App.prototype.createArrayBuffer = function(type, itemSize, data) {
-        return new PicoGL.ArrayBuffer(this.gl, type, itemSize, data);
+    PicoGL.App.prototype.createArrayBuffer = function(type, itemSize, data, usage) {
+        return new PicoGL.ArrayBuffer(this.gl, type, itemSize, data, usage);
+    };
+
+    /**
+        Create an instanced array buffer. Array items will be per-instance
+        rather than per-vertex.
+
+        @method
+        @param {GLEnum} type The data type stored in the array buffer.
+        @param {number} itemSize Number of elements per vertex.
+        @param {ArrayBufferView} data Array buffer data.
+        @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
+    */
+    PicoGL.App.prototype.createInstancedArrayBuffer = function(type, itemSize, data, usage) {
+        return new PicoGL.ArrayBuffer(this.gl, type, itemSize, data, usage, false, true);
+    };
+
+    /**
+        Create an matrix array buffer. Matrix buffers ensure that columns
+        are correctly split across attribute locations.
+
+        @method
+        @param {GLEnum} type The data type stored in the array buffer. Valid types
+        are FLOAT_MAT4, FLOAT_MAT3, FLOAT_MAT2.
+        @param {ArrayBufferView} data Array buffer data.
+        @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
+    */
+    PicoGL.App.prototype.createMatrixBuffer = function(type, data, usage) {
+        return new PicoGL.ArrayBuffer(this.gl, type, null, data, usage);
+    };
+
+    /**
+        Create an matrix array buffer. Matrix buffers ensure that columns
+        are correctly split across attribute locations. Array items will be per-instance
+        rather than per-vertex.
+
+        @method
+        @param {GLEnum} type The data type stored in the array buffer. Valid types
+        are FLOAT_MAT4, FLOAT_MAT3, FLOAT_MAT2.
+        @param {ArrayBufferView} data Array buffer data.
+        @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
+    */
+    PicoGL.App.prototype.createInstancedMatrixBuffer = function(type, data, usage) {
+        return new PicoGL.ArrayBuffer(this.gl, type, null, data, usage, false, true);
+    };
+
+    /**
+        Create a uniform buffer in std140 layout. NOTE: FLOAT_MAT2 and FLOAT_MAT3
+        are supported, but must be manually padded to 4-float column alignment by
+        the application!
+
+        @method
+        @param {Array} layout Array indicating the order and types of items to 
+                        be stored in the buffer.
+        @param {GLEnum} [usage=DYNAMIC_DRAW] Buffer usage.
+    */
+    PicoGL.App.prototype.createUniformBuffer = function(layout, usage) {
+        return new PicoGL.UniformBuffer(this.gl, layout, usage);
     };
 
     /**
@@ -452,20 +515,21 @@
         @param {ArrayBufferView} data Index array buffer data.
     */
     PicoGL.App.prototype.createIndexBuffer = function(type, itemSize, data) {
-        return new PicoGL.ArrayBuffer(this.gl, type, itemSize, data, true);
+        return new PicoGL.ArrayBuffer(this.gl, type, itemSize, data, null, true);
     };
 
     /**
-        Create a texture.
+        Create a 2D texture.
 
         @method
-        @param {ImageElement|ArrayBufferView} image The image data. Can be any format that would be accepted by texImage2D.
+        @param {DOMElement|ArrayBufferView} image Image data. Can be any format that would be accepted 
+                by texImage2D. 
+        @param {number} [width] Texture width. Required for array data.
+        @param {number} [height] Texture height. Required for array data.
         @param {Object} [options] Texture options.
         @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
-        @param {GLEnum} [options.internalFormat=RGBA] Texture data format.
-        @param {boolean} [options.array=false] Whether the texture is being passed as an ArrayBufferView.
-        @param {number} [options.width] Width of the texture (only valid when passing array texture data).
-        @param {number} [options.height] Height of the texture (only valid when passing array texture data).
+        @param {GLEnum} [options.format=RGBA] Texture data format.
+        @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
         @param {boolean} [options.flipY=true] Whether th y-axis be flipped when reading the texture.
         @param {GLEnum} [options.minFilter=LINEAR_MIPMAP_NEAREST] Minification filter.
         @param {GLEnum} [options.magFilter=LINEAR] Magnification filter.
@@ -473,26 +537,81 @@
         @param {GLEnum} [options.wrapT=REPEAT] Vertical wrap mode.
         @param {boolean} [options.generateMipmaps] Should mip maps be generated.
     */
-    PicoGL.App.prototype.createTexture = function(image, options) {
-        return new PicoGL.Texture(this.gl, image, options);
+    PicoGL.App.prototype.createTexture2D = function(image, width, height, options) {
+        if (height === undefined) {
+            // Passing in a DOM element. Height/width not required.
+            options = width;
+        }
+
+        return new PicoGL.Texture(this.gl, this.gl.TEXTURE_2D, image, width, height, null, false, options);
     };
 
     /**
-        Create a texture.
+        Create a 2D texture array.
 
         @method
+        @param {ArrayBufferView} image Typed array containing pixel data.
+        @param {number} width Texture width.
+        @param {number} height Texture height.
+        @param {number} size Number of images in the array.
         @param {Object} [options] Texture options.
-        @param {ImageElement|ArrayBufferView} options.negX The image data for the negative X direction. Can be any format that would be accepted by texImage2D.
-        @param {ImageElement|ArrayBufferView} options.posX The image data for the positive X direction. Can be any format that would be accepted by texImage2D.
-        @param {ImageElement|ArrayBufferView} options.negY The image data for the negative Y direction. Can be any format that would be accepted by texImage2D.
-        @param {ImageElement|ArrayBufferView} options.posY The image data for the positive Y direction. Can be any format that would be accepted by texImage2D.
-        @param {ImageElement|ArrayBufferView} options.negZ The image data for the negative Z direction. Can be any format that would be accepted by texImage2D.
-        @param {ImageElement|ArrayBufferView} options.posZ The image data for the positive Z direction. Can be any format that would be accepted by texImage2D.
         @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
-        @param {GLEnum} [options.internalFormat=RGBA] Texture data format.
-        @param {boolean} [options.array=false] Whether the texture is being passed as an ArrayBufferView.
-        @param {number} [options.width] Width of the texture (only valid when passing array texture data).
-        @param {number} [options.height] Height of the texture (only valid when passing array texture data).
+        @param {GLEnum} [options.format=RGBA] Texture data format.
+        @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
+        @param {GLEnum} [options.minFilter=LINEAR_MIPMAP_NEAREST] Minification filter.
+        @param {GLEnum} [options.magFilter=LINEAR] Magnification filter.
+        @param {GLEnum} [options.wrapS=REPEAT] Horizontal wrap mode.
+        @param {GLEnum} [options.wrapT=REPEAT] Vertical wrap mode.
+        @param {boolean} [options.generateMipmaps] Should mip maps be generated.
+    */
+    PicoGL.App.prototype.createTextureArray = function(image, width, height, depth, options) {
+        return new PicoGL.Texture(this.gl, this.gl.TEXTURE_2D_ARRAY, image, width, height, depth, true, options);
+    };
+
+    /**
+        Create a 3D texture.
+
+        @method
+        @param {ArrayBufferView} image Typed array containing pixel data.
+        @param {number} width Texture width.
+        @param {number} height Texture height.
+        @param {number} depth Texture depth.
+        @param {Object} [options] Texture options.
+        @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
+        @param {GLEnum} [options.format=RGBA] Texture data format.
+        @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
+        @param {GLEnum} [options.minFilter=LINEAR_MIPMAP_NEAREST] Minification filter.
+        @param {GLEnum} [options.magFilter=LINEAR] Magnification filter.
+        @param {GLEnum} [options.wrapS=REPEAT] Horizontal wrap mode.
+        @param {GLEnum} [options.wrapT=REPEAT] Vertical wrap mode.
+        @param {boolean} [options.generateMipmaps] Should mip maps be generated.
+    */
+    PicoGL.App.prototype.createTexture3D = function(image, width, height, depth, options) {
+        return new PicoGL.Texture(this.gl, this.gl.TEXTURE_3D, image, width, height, depth, true, options);
+    };
+
+    /**
+        Create a cubemap.
+
+        @method
+        @param {Object} options Texture options.
+        @param {DOMElement|ArrayBufferView} options.negX The image data for the negative X direction.
+                Can be any format that would be accepted by texImage2D.
+        @param {DOMElement|ArrayBufferView} options.posX The image data for the positive X direction.
+                Can be any format that would be accepted by texImage2D.
+        @param {DOMElement|ArrayBufferView} options.negY The image data for the negative Y direction.
+                Can be any format that would be accepted by texImage2D.
+        @param {DOMElement|ArrayBufferView} options.posY The image data for the positive Y direction.
+                Can be any format that would be accepted by texImage2D.
+        @param {DOMElement|ArrayBufferView} options.negZ The image data for the negative Z direction.
+                Can be any format that would be accepted by texImage2D.
+        @param {DOMElement|ArrayBufferView} options.posZ The image data for the positive Z direction.
+                Can be any format that would be accepted by texImage2D.
+        @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
+        @param {GLEnum} [options.format=RGBA] Texture data format.
+        @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
+        @param {number} [options.width] Texture width. Required when passing array data.
+        @param {number} [options.height] Texture height. Required when passing array data.
         @param {boolean} [options.flipY=false] Whether th y-axis be flipped when reading the texture.
         @param {GLEnum} [options.minFilter=LINEAR_MIPMAP_NEAREST] Minification filter.
         @param {GLEnum} [options.magFilter=LINEAR] Magnification filter.
@@ -508,26 +627,25 @@
         Create a framebuffer.
 
         @method
-        @param {number} numColorTextures The number of color draw targets to create (requires enabled drawBuffers to be greater than 1).
-        @param {GLEnum} [colorTargetType=UNSIGNED_BYTE] Type of data stored in the color targets.
         @param {number} [width=app.width] Width of the framebuffer.
         @param {number} [height=app.height] Height of the framebuffer.
     */
-    PicoGL.App.prototype.createFramebuffer = function(numColorTextures, colorTargetType, width, height) {
-        return new PicoGL.Framebuffer(this.gl, this.drawBuffersExtension, numColorTextures, colorTargetType, this.depthTexturesEnabled, width, height);
+    PicoGL.App.prototype.createFramebuffer = function(width, height) {
+        return new PicoGL.Framebuffer(this.gl, width, height);
     };
 
     /**
         Create a DrawCall. A DrawCall manages the state associated with 
-        a WebGL draw call including a program and associated attributes, textures and
-        uniforms.
+        a WebGL draw call including a program and associated vertex data, textures, 
+        uniforms and uniform blocks.
 
         @method
         @param {Program} program The program to use for this DrawCall.
+        @param {VertexArray|TransformFeedback} geometry Vertex data to use for drawing.
         @param {GLEnum} [primitive=TRIANGLES] Type of primitive to draw.
     */
-    PicoGL.App.prototype.createDrawCall = function(program, primitive) {
-        return new PicoGL.DrawCall(this.gl, program, primitive);
+    PicoGL.App.prototype.createDrawCall = function(program, geometry, primitive) {
+        return new PicoGL.DrawCall(this.gl, program, geometry, primitive);
     };
 
     /** 

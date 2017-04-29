@@ -60,24 +60,25 @@
         @class
         @prop {WebGLRenderingContext} gl The WebGL context.
         @prop {WebGLProgram} program The WebGL program.
-        @prop {Object} attributes Map of attribute names to handles. 
+        @prop {boolean} transformFeedback Whether this program is set up for transform feedback. 
         @prop {Object} uniforms Map of uniform names to handles. 
+        @prop {Object} uniformBlocks Map of uniform block names to handles. 
     */
-    PicoGL.Program = function Program(gl, vsSource, fsSource, debug) {
+    PicoGL.Program = function Program(gl, vsSource, fsSource, xformFeebackVars) {
         var i;
 
         var vshader, fshader; 
 
         if (typeof vsSource === "string") {
             vshader = gl.createShader(gl.VERTEX_SHADER);
-            PicoGL.compileShader(gl, vshader, vsSource, debug);
+            PicoGL.compileShader(gl, vshader, vsSource);
         } else {
             vshader = vsSource;
         }
 
         if (typeof fsSource === "string") {
             fshader = gl.createShader(gl.FRAGMENT_SHADER);
-            PicoGL.compileShader(gl, fshader, fsSource, debug);
+            PicoGL.compileShader(gl, fshader, fsSource);
         } else {
             fshader = fsSource;
         }
@@ -85,25 +86,22 @@
         var program = gl.createProgram();
         gl.attachShader(program, vshader);
         gl.attachShader(program, fshader);
+        if (xformFeebackVars) {
+            gl.transformFeedbackVaryings(program, xformFeebackVars, gl.SEPARATE_ATTRIBS);
+        }
         gl.linkProgram(program);
 
-        if (debug &amp;&amp; !gl.getProgramParameter(program, gl.LINK_STATUS)) {
+        if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
           console.error(gl.getProgramInfoLog(program));
         }
 
         this.gl = gl;
         this.program = program;
-        this.attributes = {};
+        this.transformFeedback = !!xformFeebackVars;
         this.uniforms = {};
+        this.uniformBlocks = {};
 
-        var numAttributes = gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES);
         var numUniforms = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
-
-        for (i = 0; i &lt; numAttributes; ++i) {
-            var attributeInfo = gl.getActiveAttrib(program, i);
-            var attributeHandle = this.gl.getAttribLocation(this.program, attributeInfo.name);
-            this.attributes[attributeInfo.name] = attributeHandle;
-        }
 
         for (i = 0; i &lt; numUniforms; ++i) {
             var uniformInfo = gl.getActiveUniform(program, i);
@@ -112,9 +110,22 @@
 
             switch (uniformInfo.type) {
                 case gl.INT: 
-                case gl.BOOL: 
-                case gl.SAMPLER_2D: 
-                case gl.SAMPLER_CUBE: 
+                case gl.BOOL:
+                case gl.SAMPLER_2D:
+                case gl.INT_SAMPLER_2D:
+                case gl.UNSIGNED_INT_SAMPLER_2D:
+                case gl.SAMPLER_2D_SHADOW:
+                case gl.SAMPLER_2D_ARRAY:
+                case gl.INT_SAMPLER_2D_ARRAY:
+                case gl.UNSIGNED_INT_SAMPLER_2D_ARRAY:
+                case gl.SAMPLER_2D_ARRAY_SHADOW:
+                case gl.SAMPLER_CUBE:
+                case gl.INT_SAMPLER_CUBE:
+                case gl.UNSIGNED_INT_SAMPLER_CUBE:
+                case gl.SAMPLER_CUBE_SHADOW:
+                case gl.SAMPLER_3D:
+                case gl.INT_SAMPLER_3D:
+                case gl.UNSIGNED_INT_SAMPLER_3D:
                     UniformClass = PicoGL.IntUniform;
                     break;
                 case gl.FLOAT: 
@@ -163,17 +174,15 @@
 
             this.uniforms[uniformInfo.name] = new UniformClass(gl, uniformHandle);
         }
-    };
 
-    /**
-        Bind an Arraybuffer to a program attribute.
+        var numUniformBlocks = gl.getProgramParameter(program, gl.ACTIVE_UNIFORM_BLOCKS);
 
-        @method
-        @param {string} name Attribute name.
-        @param {Arraybuffer} buffer Arraybuffer to bind.
-    */
-    PicoGL.Program.prototype.attribute = function(name, buffer) {
-        buffer.bind(this.attributes[name]);
+        for (i = 0; i &lt; numUniformBlocks; ++i) {
+            var blockName = gl.getActiveUniformBlockName(this.program, i);
+            var blockIndex = gl.getUniformBlockIndex(this.program, blockName);
+
+            this.uniformBlocks[blockName] = blockIndex;
+        }
     };
 
     /**
@@ -185,6 +194,17 @@
     */
     PicoGL.Program.prototype.uniform = function(name, value) {
         this.uniforms[name].set(value);
+    };
+
+    /**
+        Bind a uniform block to a uniform buffer base.
+
+        @method
+        @param {string} name Uniform block name.
+        @param {number} base Uniform buffer base to bind the block to.
+    */
+    PicoGL.Program.prototype.uniformBlock = function(name, base) {
+        this.gl.uniformBlockBinding(this.program, this.uniformBlocks[name], base);
     };
 
 })();
@@ -199,13 +219,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="PicoGL.App.html">App</a></li><li><a href="PicoGL.ArrayBuffer.html">ArrayBuffer</a></li><li><a href="PicoGL.Cubemap.html">Cubemap</a></li><li><a href="PicoGL.DrawCall.html">DrawCall</a></li><li><a href="PicoGL.Framebuffer.html">Framebuffer</a></li><li><a href="PicoGL.Program.html">Program</a></li><li><a href="PicoGL.Texture.html">Texture</a></li></ul><h3>Namespaces</h3><ul><li><a href="PicoGL.html">PicoGL</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="PicoGL.App.html">App</a></li><li><a href="PicoGL.ArrayBuffer.html">ArrayBuffer</a></li><li><a href="PicoGL.Cubemap.html">Cubemap</a></li><li><a href="PicoGL.DrawCall.html">DrawCall</a></li><li><a href="PicoGL.Framebuffer.html">Framebuffer</a></li><li><a href="PicoGL.Program.html">Program</a></li><li><a href="PicoGL.Texture.html">Texture</a></li><li><a href="PicoGL.TransformFeedback.html">TransformFeedback</a></li><li><a href="PicoGL.UniformBuffer.html">UniformBuffer</a></li><li><a href="PicoGL.VertexArray.html">VertexArray</a></li></ul><h3>Namespaces</h3><ul><li><a href="PicoGL.html">PicoGL</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue Mar 14 2017 06:38:25 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sat Apr 29 2017 19:02:39 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

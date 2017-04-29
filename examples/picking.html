@@ -24,9 +24,9 @@
 <html>
 <head>
     <title>PicoGL.js: Picking</title>
-    <script src="../utils/gl-matrix.js"></script>
+    <script src="utils/gl-matrix.js"></script>
     <script src="../build/picogl.js"></script>
-    <script src="../utils/utils.js"></script>
+    <script src="utils/utils.js"></script>
     <link rel="stylesheet" href="../site/css/picogl-example.css"> 
 </head>
 <body>
@@ -38,7 +38,10 @@
     </div>
     <canvas id="gl-canvas"></canvas> 
     <script id="picking-vs" type="x-vertex-shader">
-        attribute vec4 aPosition;
+        #version 300 es
+
+        layout(location=0) in vec4 aPosition;
+        
         uniform mat4 uMVP;
 
         void main() {
@@ -46,23 +49,34 @@
         }
     </script>
     <script id="picking-fs" type="x-fragment-shader">
+        #version 300 es
         precision highp float;
+
         uniform vec3 uPickColor;
 
+        out vec4 fragColor;
         void main() {
-            gl_FragColor = vec4(uPickColor, 1.0);
+            fragColor = vec4(uPickColor, 1.0);
         }
     </script>
     <script id="main-vs" type="x-vertex-shader">
-        attribute vec4 aPosition;
-        attribute vec3 aNormal;
-        attribute vec2 aTexCoord;
-        uniform mat4 uModelMatrix;
-        uniform mat4 uMVP;
-        varying vec3 vPosition;
-        varying vec3 vNormal;
-        varying vec2 vTexCoord;
+        #version 300 es
+        
+        layout(std140, column_major) uniform;
 
+        layout(location=0) in vec4 aPosition;
+        layout(location=1) in vec3 aNormal;
+        layout(location=2) in vec2 aTexCoord;
+
+        uniform FrameUniforms {
+            mat4 uMVP;
+            mat4 uModelMatrix;
+            vec4 uHighlightColor;
+        };
+        
+        out vec3 vPosition;
+        out vec3 vNormal;
+        out vec2 vTexCoord;
         void main() {
             gl_Position = uMVP * aPosition;
 
@@ -72,33 +86,52 @@
         }
     </script>
     <script id="main-fs" type="x-fragment-shader">
+        #version 300 es
         precision highp float;
-        uniform vec3 uLightPosition;
-        uniform vec3 uEyePosition;
+
+        layout(std140, column_major) uniform;
+
+        uniform SceneUniforms {
+            vec4 uLightPosition;
+            vec4 uEyePosition;
+        };
+
+        uniform FrameUniforms {
+            mat4 uMVP;
+            mat4 uModelMatrix;
+            vec4 uHighlightColor;
+        };
+
         uniform sampler2D uTextureMap;
-        uniform vec3 uHighlightColor;
 
-        varying vec3 vPosition;
-        varying vec3 vNormal;
-        varying vec2 vTexCoord;
+        in vec3 vPosition;
+        in vec3 vNormal;
+        in vec2 vTexCoord;
 
+        out vec4 fragColor;
         void main() {
-            vec4 baseColor = texture2D(uTextureMap, vTexCoord);
+            vec4 baseColor = texture(uTextureMap, vTexCoord);
 
             vec3 normal = normalize(vNormal);
-            vec3 eyeDirection = normalize(uEyePosition - vPosition);
-            vec3 lightDirection = normalize(uLightPosition - vPosition);
+            vec3 eyeDirection = normalize(uEyePosition.xyz - vPosition);
+            vec3 lightDirection = normalize(uLightPosition.xyz - vPosition);
             vec3 reflectionDirection = reflect(-lightDirection, normal);
             float nDotL = max(dot(lightDirection, normal), 0.0);
             float diffuse = nDotL;
             float ambient = 0.1;
             float specular = pow(max(dot(reflectionDirection, eyeDirection), 0.0), 20.0);
 
-            gl_FragColor = vec4(uHighlightColor * (ambient + diffuse + specular) * baseColor.rgb, baseColor.a);
+            fragColor = vec4(uHighlightColor.rgb * (ambient + diffuse + specular) * baseColor.rgb, baseColor.a);
         }
     </script>
     <script type="text/javascript">
         var canvas = document.getElementById("gl-canvas");
+
+        if (!canvas.getContext("webgl2")) {
+            console.error("WebGL 2 not available");
+            document.body.innerHTML = "This example requires WebGL 2 which is unavailable on this system."
+        }
+
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         
@@ -108,14 +141,14 @@
         .cullBackfaces();
 
         // Set up picking program
-        var pickingVsSource = document.getElementById("picking-vs").text;
-        var pickingFsSource = document.getElementById("picking-fs").text;
+        var pickingVsSource = document.getElementById("picking-vs").text.trim();
+        var pickingFsSource = document.getElementById("picking-fs").text.trim();
         var pickingProgram = app.createProgram(pickingVsSource, pickingFsSource);
-        var pickingBuffer = app.createFramebuffer();
+        var pickingBuffer = app.createFramebuffer().colorTarget().depthTarget();
 
         // Set up main program
-        var vsSource = document.getElementById("main-vs").text;
-        var fsSource = document.getElementById("main-fs").text;
+        var vsSource = document.getElementById("main-vs").text.trim();
+        var fsSource = document.getElementById("main-fs").text.trim();
         var mainProgram = app.createProgram(vsSource, fsSource);
 
         // Geometry
@@ -123,6 +156,11 @@
         var positions = app.createArrayBuffer(PicoGL.FLOAT, 3, box.positions);
         var uv = app.createArrayBuffer(PicoGL.FLOAT, 2, box.uvs);
         var normals = app.createArrayBuffer(PicoGL.FLOAT, 3, box.normals);
+
+        var boxArray = app.createVertexArray()
+        .attributeBuffer(0, positions)
+        .attributeBuffer(1, normals)
+        .attributeBuffer(2, uv);
 
         // Camera stuff
         var projMatrix = mat4.create();
@@ -143,6 +181,13 @@
         var highlightColor = vec3.fromValues(1.5, 1.5, 0.5);
         var unhighlightColor = vec3.fromValues(1.0, 1.0, 1.0);
 
+        var sceneUniforms = app.createUniformBuffer([
+            PicoGL.FLOAT_VEC4,
+            PicoGL.FLOAT_VEC4
+        ]).set(0, lightPosition)
+        .set(1, eyePosition)
+        .update();
+
         window.onresize = function() {
             app.resize(window.innerWidth, window.innerHeight);
             pickingBuffer.resize();
@@ -155,7 +200,7 @@
 
         image.onload = function() {
 
-            var texture = app.createTexture(image);
+            var texture = app.createTexture2D(image);
 
             var boxes = [
                 {
@@ -165,6 +210,11 @@
                     mvpMatrix: mat4.create(),
                     modelMatrix: mat4.create(),
                     pickColor: vec3.fromValues(1.0, 0.0, 0.0),
+                    frameUniforms: app.createUniformBuffer([
+                        PicoGL.FLOAT_MAT4,
+                        PicoGL.FLOAT_MAT4,
+                        PicoGL.FLOAT_VEC4
+                    ]).set(2, unhighlightColor),
                     mainDrawCall: null,
                     pickingDrawCall: null
                 },
@@ -175,6 +225,11 @@
                     mvpMatrix: mat4.create(),
                     modelMatrix: mat4.create(),
                     pickColor: vec3.fromValues(0.0, 1.0, 0.0),
+                    frameUniforms: app.createUniformBuffer([
+                        PicoGL.FLOAT_MAT4,
+                        PicoGL.FLOAT_MAT4,
+                        PicoGL.FLOAT_VEC4
+                    ]).set(2, unhighlightColor),
                     mainDrawCall: null,
                     pickingDrawCall: null
                 }
@@ -184,16 +239,12 @@
             var mainDrawCalls = new Array(boxes.length);
 
             for (var i = 0, len = boxes.length; i < len; ++i) {
-                pickingDrawCalls[i] = app.createDrawCall(pickingProgram);
-                pickingDrawCalls[i].attribute("aPosition", positions);
+                pickingDrawCalls[i] = app.createDrawCall(pickingProgram, boxArray)
+                .uniform("uPickColor", boxes[i].pickColor);
 
-                mainDrawCalls[i] = app.createDrawCall(mainProgram)
-                .attribute("aPosition", positions)
-                .attribute("aTexCoord", uv)
-                .attribute("aNormal", normals)
-                .uniform("uLightPosition", lightPosition)
-                .uniform("uEyePosition", eyePosition)
-                .uniform("uHighlightColor", unhighlightColor)
+                mainDrawCalls[i] = app.createDrawCall(mainProgram, boxArray)
+                .uniformBlock("SceneUniforms", sceneUniforms)
+                .uniformBlock("FrameUniforms", boxes[i].frameUniforms)
                 .texture("uTextureMap", texture);
 
                 boxes[i].mainDrawCall = mainDrawCalls[i];
@@ -220,11 +271,10 @@
                     utils.xformMatrix(boxes[i].modelMatrix, boxes[i].translate, boxes[i].rotate, boxes[i].scale);
                     mat4.multiply(boxes[i].mvpMatrix, viewProjMatrix, boxes[i].modelMatrix);
                     
-                    boxes[i].pickingDrawCall.uniform("uMVP", boxes[i].mvpMatrix)
-                    .uniform("uPickColor", boxes[i].pickColor);
+                    boxes[i].pickingDrawCall.uniform("uMVP", boxes[i].mvpMatrix);
                     
-                    boxes[i].mainDrawCall.uniform("uMVP", boxes[i].mvpMatrix)
-                    .uniform("uModelMatrix", boxes[i].modelMatrix);
+                    boxes[i].frameUniforms.set(0, boxes[i].mvpMatrix)
+                    .set(1, boxes[i].modelMatrix);
                 }
 
                 // Draw to picking buffer
@@ -236,19 +286,23 @@
                     .readPixel(mouseX, canvas.height - mouseY, pickedColor)
                     .defaultFramebuffer();
                     
-                    boxes[0].mainDrawCall.uniform("uHighlightColor", unhighlightColor);
-                    boxes[1].mainDrawCall.uniform("uHighlightColor", unhighlightColor);
-                    
                     if (pickedColor[0] === 255) {
-                        boxes[0].mainDrawCall.uniform("uHighlightColor", highlightColor);
+                        boxes[0].frameUniforms.set(2, highlightColor);
+                    } else {
+                        boxes[0].frameUniforms.set(2, unhighlightColor);
                     }
 
                     if (pickedColor[1] === 255) {
-                        boxes[1].mainDrawCall.uniform("uHighlightColor", highlightColor);
+                        boxes[1].frameUniforms.set(2, highlightColor);
+                    } else {
+                        boxes[1].frameUniforms.set(2, unhighlightColor);
                     }
 
                     picked = false;
                 }
+
+                boxes[0].frameUniforms.update();
+                boxes[1].frameUniforms.update();
 
                 // Main draw
                 app.drawCalls(mainDrawCalls)

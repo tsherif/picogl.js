@@ -10,7 +10,7 @@
     <a href="https://github.com/tsherif/picogl.js"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"></a>
     <h1>PicoGL.js</h1>
     <div class="description">
-        PicoGL.js is minimal WebGL library. It's meant for developers who understand the GPU rendering pipeline and want to use it, but with a more convenient API. Typical usage of PicoGL.js will involve creating programs, array buffers, framebuffers, textures, and combining them into draw calls.
+        PicoGL.js is minimal WebGL 2-only rendering library. It's meant for developers who understand WebGL 2 rendering pipeline and want to use it, but with a more convenient API. Typical usage of PicoGL.js will involve creating programs, array buffers, vertex arrays, uniform buffers, framebuffers, textures, transform feedbacks, and combining them into draw calls.
     </div>
     <pre><code class="javascript">
     var app = PicoGL.createApp(canvas)
@@ -24,9 +24,19 @@
          0.0,  0.5
     ]));
 
-    var drawCall = app.createDrawCall(program)
-    .attribute("aPosition", positions)
-    .uniform("uColor", new Float32Array([1.0, 0.0, 0.0]));
+    var vertexArray = app.createVertexArray()
+    .attributeBuffer(0, positions);
+
+    var uniformBuffer = app.createUniformBuffer([
+        PicoGL.FLOAT_VEC4,
+        PicoGL.FLOAT_VEC4
+    ])
+    .set(0, new Float32Array([1.0, 0.0, 0.0, 0.3]))
+    .set(1, new Float32Array([0.0, 0.0, 1.0, 0.7]))
+    .update();
+
+    var drawCall = app.createDrawCall(program, vertexArray)
+    .uniformBlock("ColorUniforms", uniformBuffer);
 
     app.drawCalls([drawCall])
     .clear()
@@ -34,16 +44,23 @@
     </code></pre>
     
     <div class="description">
-        Note that PicoGL.js is <strong>not</strong> a scene graph library. There are no objects, hierarchies, transforms, materials, etc. It has been designed only to make management of GPU state more convenient. Its conceptual model maps fairly directly to the constructs one deals with when writing directly with WebGL. The only higher-level construct is the draw call, which manages sets of related lower-level constructs.    
+        Note that PicoGL.js is <strong>not</strong> a scene graph library. There are no objects, hierarchies, transforms, materials, etc. It has been designed only to make management of GPU state more convenient. Its conceptual model maps fairly directly to the constructs one deals with when writing directly with the WebGL 2 API. The only higher-level construct is the draw call, which manages sets of related lower-level constructs.    
     </div>
     
     <div>Visit the <a href="docs/">API docs</a> for more details.</div>
 
-    <h2>Examples</h2>
-    <a href="#" class="example-menu-button" id="triangles">Basic Triangles</a>
+    <h2>Basic Examples</h2>
+    <a href="#" class="example-menu-button" id="triangle">Triangle</a>
+    <a href="#" class="example-menu-button" id="ubo">Uniform Buffers</a>
+    <a href="#" class="example-menu-button" id="instanced">Instanced Drawing</a>
+    <a href="#" class="example-menu-button" id="transformfeedback">Transform Feedback</a>
     <a href="#" class="example-menu-button" id="cube">Phong-shaded Cube</a>
     <a href="#" class="example-menu-button" id="cubemap">Cubemap</a>
     <a href="#" class="example-menu-button" id="rtt">Render to Texture</a>
+    <a href="#" class="example-menu-button" id="texturearray">Texture Arrays</a>
+    <a href="#" class="example-menu-button" id="3Dtexture">3D Textures</a>
+
+    <h2>Advanced Examples</h2>
     <a href="#" class="example-menu-button" id="picking">Picking</a>
     <a href="#" class="example-menu-button" id="shadow">Shadow Mapping</a>
     <a href="#" class="example-menu-button" id="dof">Depth of Field</a>
@@ -79,30 +96,30 @@
         });
 
         var canvas = document.createElement("canvas");
-        var gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+        var gl = canvas.getContext("webgl2");
 
         if (gl) {
-            if (gl.getExtension("WEBGL_draw_buffers") && gl.getExtension("OES_texture_float") && 
-                gl.getExtension("OES_texture_float_linear") && gl.getExtension("WEBGL_depth_texture")) {
-                
-                var showcase = [
-                    "shadow",
-                    "dof",
+            var showcase = [
+                "cubemap",
+                "shadow",
+                "dof",
+                "particles"
+            ];
+
+            if (gl.getExtension("EXT_color_buffer_float")) {
+                showcase.push(
                     "ssao",
                     "deferred",
                     "oit",
-                    "particles",
                     "bloom"
-                ];
-                var showcaseId = showcase[Math.floor(Math.random() * showcase.length)];
-                
-                document.getElementById(showcaseId).click();
-            } else {
-                document.getElementById("cubemap").click();
+                );
             }
 
+            var showcaseId = showcase[Math.floor(Math.random() * showcase.length)];
+            document.getElementById(showcaseId).click();
+
         } else {
-            document.getElementById("example-div").innerHTML = "Sorry your browser does not support WebGL.";
+            document.getElementById("example-div").innerHTML = "Sorry your browser does not support WebGL 2.";
         }
 
         hljs.initHighlightingOnLoad();        

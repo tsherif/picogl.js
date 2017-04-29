@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<!--
+  The MIT License (MIT)
+
+  Copyright (c) 2017 Tarek Sherif
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy of
+  this software and associated documentation files (the "Software"), to deal in
+  the Software without restriction, including without limitation the rights to
+  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+  the Software, and to permit persons to whom the Software is furnished to do so,
+  subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+  FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+  COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+  IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+<html>
+<head>
+    <title>PicoGL.js: Transform Feedback</title>
+    <script src="../build/picogl.js"></script>
+    <link rel="stylesheet" href="../site/css/picogl-example.css"> 
+</head>
+<body>
+    <div id="example-title">
+        PicoGL.js Example: Transform Feedback
+        <div>
+            <a href="https://github.com/tsherif/picogl.js/blob/master/examples/transformfeedback.html">Source code</a>
+        </div>
+    </div>
+    <canvas id="gl-canvas"></canvas>
+    <script type="shader/vs" id="vs">
+        #version 300 es
+
+        #define SIN2 0.03489949
+        #define COS2 0.99939082
+        
+        layout(location=0) in vec2 position;
+        layout(location=1) in vec3 color;
+        
+        out vec2 vPosition;
+        out vec3 vColor; 
+        void main() {
+            mat2 rotation = mat2(
+                COS2, SIN2,
+                -SIN2, COS2
+            );
+
+            vPosition = rotation * position;
+            vColor = color;
+            gl_Position = vec4(vPosition, 0.0, 1.0);
+        }
+    </script>
+    <script type="shader/fs" id="fs">
+        #version 300 es
+        precision highp float;
+        
+        in vec3 vColor;
+        
+        out vec4 fragColor;
+        void main() {
+            fragColor = vec4(vColor, 1.0);
+        }
+    </script>
+    
+    <script type="text/javascript">
+        var canvas = document.getElementById("gl-canvas");
+
+        if (!canvas.getContext("webgl2")) {
+            console.error("WebGL 2 not available");
+            document.body.innerHTML = "This example requires WebGL 2 which is unavailable on this system."
+        }
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        var app = PicoGL.createApp(canvas)
+        .clearColor(0.0, 0.0, 0.0, 1.0);
+
+        window.onresize = function() {
+            app.resize(window.innerWidth, window.innerHeight);
+        }
+
+        var vsSource =  document.getElementById("vs").text.trim();
+        var fsSource =  document.getElementById("fs").text.trim();
+              
+        // Create transform feedback program
+        // Final argument is the transform feedback varyings
+        var program = app.createProgram(vsSource, fsSource, ["vPosition"]);
+
+        // Create input and output array buffers
+        var positions1 = app.createArrayBuffer(PicoGL.FLOAT, 2, new Float32Array([
+            -0.3, -0.3,
+             0.3, -0.3,
+             0.0, 0.3 
+        ]));
+
+        var positions2 = app.createArrayBuffer(PicoGL.FLOAT, 2, 6);
+
+        // Just one color buffer because it won't be part of transform feedback
+        var colors = app.createArrayBuffer(PicoGL.FLOAT, 3, new Float32Array([
+            1.0, 0.0, 0.0,
+            0.0, 1.0, 0.0,
+            0.0, 0.0, 1.0
+        ]));
+
+        // Combine array buffers into input and output vertex arrays
+        var triangleArray1 = app.createVertexArray()
+        .attributeBuffer(0, positions1)
+        .attributeBuffer(1, colors);
+
+        var triangleArray2 = app.createVertexArray()
+        .attributeBuffer(0, positions2)
+        .attributeBuffer(1, colors);
+
+        // Create transform feedback from input and output vertex arrays
+        var transformFeedback = app.createTransformFeedback(triangleArray1, triangleArray2, [0]);
+
+        // Create draw call from program and transformfeedback
+        var drawCall = app.createDrawCall(program, transformFeedback);
+
+        app.drawCalls([drawCall]);
+
+        function draw() {
+            // Draw
+            app.clear()
+            .draw();
+
+            // Swap input and output buffers
+            transformFeedback.swapBuffers();
+
+            requestAnimationFrame(draw);
+        }
+
+        requestAnimationFrame(draw);
+
+    </script>
+    <a href="https://github.com/tsherif/picogl.js" id="github-ribbon"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"></a>
+    <script src="../site/js/iframe.js"></script>
+</body>
+</html>

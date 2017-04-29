@@ -33,36 +33,74 @@
         @prop {GLEnum} type The type of data stored in the buffer.
         @prop {number} itemSize Number of array elements per vertex.
         @prop {number} numItems Number of vertices represented.
+        @prop {GLEnum} usage The usage pattern of the buffer.
         @prop {boolean} indexArray Whether this is an index array.
+        @prop {boolean} instanced Whether this is an instanced array.
         @prop {GLEnum} binding GL binding point (ARRAY_BUFFER or ELEMENT_ARRAY_BUFFER).
     */
-    PicoGL.ArrayBuffer = function ArrayBuffer(gl, type, itemSize, data, indexArray) {
+    PicoGL.ArrayBuffer = function ArrayBuffer(gl, type, itemSize, data, usage, indexArray, instanced) {
+        var numRows = 1;
+        if (type === PicoGL.FLOAT_MAT4) {
+            type = PicoGL.FLOAT;
+            itemSize = 4;
+            numRows = 4;
+        } else if (type === PicoGL.FLOAT_MAT3) {
+            type = PicoGL.FLOAT;
+            itemSize = 3;
+            numRows = 3;
+        }  else if (type === PicoGL.FLOAT_MAT2) {
+            type = PicoGL.FLOAT;
+            itemSize = 2;
+            numRows = 2;
+        }
+
+        var dataLength;
+        if (typeof data === "number") {
+            dataLength = data;
+            data *= PicoGL.TYPE_SIZE[type];
+        } else {
+            dataLength = data.length;
+        }
+
         this.gl = gl;
         this.buffer = gl.createBuffer();
         this.type = type;
         this.itemSize = itemSize;
-        this.numItems = data.length / itemSize;
+        this.numItems = dataLength / (itemSize * numRows);
+        this.numRows = numRows;
+        this.usage = usage || gl.STATIC_DRAW;
         this.indexArray = !!indexArray;
+        this.instanced = !!instanced;
         this.binding = this.indexArray ? gl.ELEMENT_ARRAY_BUFFER : gl.ARRAY_BUFFER;
 
         gl.bindBuffer(this.binding, this.buffer);
-        gl.bufferData(this.binding, data, gl.STATIC_DRAW);
+        gl.bufferData(this.binding, data, this.usage);
         gl.bindBuffer(this.binding, null);
     };
 
     /**
-        Bind this array buffer to a program attribute.
+        Update data in this buffer.
 
         @method
-        @param {number} attribute The attribute handle to bind to.
+        @param {ArrayBufferView} data Data to store in the buffer.
     */
-    PicoGL.ArrayBuffer.prototype.bind = function(attribute) {
+    PicoGL.ArrayBuffer.prototype.data = function(data) {
+        this.gl.bindBuffer(this.binding, this.buffer);
+        this.gl.bufferSubData(this.binding, 0, data);
+        this.gl.bindBuffer(this.binding, null);
+
+        return this;
+    };
+
+    /**
+        Bind this array buffer.
+
+        @method
+    */
+    PicoGL.ArrayBuffer.prototype.bind = function() {
         this.gl.bindBuffer(this.binding, this.buffer);
 
-        if (!this.indexArray) {
-            this.gl.vertexAttribPointer(attribute, this.itemSize, this.type, false, 0, 0);
-            this.gl.enableVertexAttribArray(attribute); 
-        }
+        return this;
     };
 
 })();

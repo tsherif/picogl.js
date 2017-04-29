@@ -22,8 +22,11 @@
   CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -->
 <html>
+<!-- 
+    Octopus sprite from: https://github.com/jeremypetrequin/jsMovieclip
+ -->
 <head>
-    <title>PicoGL.js: Cubemap</title>
+    <title>PicoGL.js: Texture Array</title>
     <script src="utils/gl-matrix.js"></script>
     <script src="../build/picogl.js"></script>
     <script src="utils/utils.js"></script>
@@ -31,9 +34,9 @@
 </head>
 <body>
     <div id="example-title">
-        PicoGL.js Example: Cubemap
+        PicoGL.js Example: Texture Array
         <div>
-            <a href="https://github.com/tsherif/picogl.js/blob/master/examples/cubemap.html">Source code</a>
+            <a href="https://github.com/tsherif/picogl.js/blob/master/examples/texturearray.html">Source code</a>
         </div>
     </div>
     <canvas id="gl-canvas"></canvas>
@@ -47,37 +50,41 @@
         layout(location=2) in vec4 normal;
         
         uniform SceneUniforms {
-            mat4 uViewProj;
-            vec4 uEyePosition;
+            mat4 viewProj;
+            vec4 eyePosition;
+            vec4 lightPosition;
         };
 
         uniform mat4 uModel;
-
+        
         out vec3 vPosition;
         out vec2 vUV;
         out vec3 vNormal;
+
         void main() {
             vec4 worldPosition = uModel * position;
             vPosition = worldPosition.xyz;
             vUV = uv;
+            vUV.y -= 0.13;
             vNormal = (uModel * normal).xyz;
-            gl_Position = uViewProj * worldPosition;
+            gl_Position = viewProj * worldPosition;
         }
     </script>
     <script type="x-shader/vf" id="fragment-draw">
         #version 300 es
-
         precision highp float;
+        precision lowp sampler2DArray;
 
         layout(std140, column_major) uniform;
 
         uniform SceneUniforms {
-            mat4 uViewProj;
-            vec4 uEyePosition;
+            mat4 viewProj;
+            vec4 eyePosition;
+            vec4 lightPosition;
         };
 
-        uniform sampler2D tex;
-        uniform samplerCube cubemap;
+        uniform float arrayIndex;
+        uniform sampler2DArray tex;
         
         in vec3 vPosition;
         in vec2 vUV;
@@ -85,56 +92,26 @@
 
         out vec4 fragColor;
         void main() {
-            vec3 color = texture(tex, vUV).rgb;
+            vec3 color = texture(tex, vec3(vUV, arrayIndex)).rgb + 0.5;
+
             vec3 normal = normalize(vNormal);
-            vec3 viewVec = normalize(vPosition - uEyePosition.xyz);
-            color *= texture(cubemap, reflect(viewVec, normal)).rgb;
-            fragColor = vec4(color, 1.0);
-        }
-    </script>
-    <script type="x-shader/vs" id="vertex-skybox">
-        #version 300 es
-        
-        layout(std140, column_major) uniform;
-
-        layout(location=0) in vec4 position;
-        
-        uniform SceneUniforms {
-            mat4 uViewProj;
-            vec4 uEyePosition;
-        };
-        
-        out vec3 vPosition;
-        void main() {
-            vec4 worldPosition = vec4(position.xyz * 5.0, 1.0);            
-            vPosition = worldPosition.xyz;
-            gl_Position = uViewProj * worldPosition;
-        }
-    </script>
-    <script type="x-shader/vf" id="fragment-skybox">
-        #version 300 es
-        precision highp float;
-        
-        layout(std140, column_major) uniform;
-
-        
-        uniform SceneUniforms {
-            mat4 uViewProj;
-            vec4 uEyePosition;
-        };
-
-        uniform samplerCube cubemap;
-        
-        in vec3 vPosition;
-        out vec4 fragColor;
-        void main() {
-            vec3 viewDir = vPosition - uEyePosition.xyz;
-            vec3 color = texture(cubemap, normalize(viewDir)).rgb;
-            fragColor = vec4(color, 1.0);
+            vec3 eyeVec = normalize(eyePosition.xyz - vPosition);
+            vec3 incidentVec = normalize(vPosition - lightPosition.xyz);
+            vec3 lightVec = -incidentVec;
+            float diffuse = max(dot(lightVec, normal), 0.0);
+            float highlight = pow(max(dot(eyeVec, reflect(incidentVec, normal)), 0.0), 100.0);
+            float ambient = 0.1;
+            fragColor = vec4(color * (diffuse + highlight + ambient), 1.0);
         }
     </script>
     <script type="text/javascript">
         var canvas = document.getElementById("gl-canvas");
+
+        if (!canvas.getContext("webgl2")) {
+            console.error("WebGL 2 not available");
+            document.body.innerHTML = "This example requires WebGL 2 which is unavailable on this system."
+        }
+
 
         if (!canvas.getContext("webgl2")) {
             console.error("WebGL 2 not available");
@@ -152,10 +129,6 @@
         var fsSource =  document.getElementById("fragment-draw").text.trim();
         var program = app.createProgram(vsSource, fsSource);
 
-        var skyboxVsSource =  document.getElementById("vertex-skybox").text.trim();
-        var skyboxFsSource =  document.getElementById("fragment-skybox").text.trim();
-        var skyboxProgram = app.createProgram(skyboxVsSource, skyboxFsSource);
-
         var box = utils.createBox({dimensions: [1.0, 1.0, 1.0]})
         var positions = app.createArrayBuffer(PicoGL.FLOAT, 3, box.positions);
         var uv = app.createArrayBuffer(PicoGL.FLOAT, 2, box.uvs);
@@ -170,47 +143,23 @@
         mat4.perspective(projMatrix, Math.PI / 2, canvas.width / canvas.height, 0.1, 10.0);
 
         var viewMatrix = mat4.create();
-        var eyePosition = vec3.fromValues(1.5, 0, 1.5);
+        var eyePosition = vec3.fromValues(1, 1, 1);
         mat4.lookAt(viewMatrix, eyePosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
-
-        var skyboxViewMatrix = mat4.create();
-        skyboxViewMatrix.set(viewMatrix);
-        skyboxViewMatrix[12] = 0;
-        skyboxViewMatrix[13] = 0;
-        skyboxViewMatrix[14] = 0;
 
         var viewProjMatrix = mat4.create();
         mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
 
-        var skyboxViewProjMatrix = mat4.create();
-        mat4.multiply(skyboxViewProjMatrix, projMatrix, skyboxViewMatrix);
+        var lightPosition = vec3.fromValues(1, 1, 0.5);
 
-        var sceneUniforms = app.createUniformBuffer([
+        var sceneUniformBuffer = app.createUniformBuffer([
             PicoGL.FLOAT_MAT4,
+            PicoGL.FLOAT_VEC4,
             PicoGL.FLOAT_VEC4
         ])
         .set(0, viewProjMatrix)
         .set(1, eyePosition)
+        .set(2, lightPosition)
         .update();
-
-        var skyboxSceneUniforms = app.createUniformBuffer([
-            PicoGL.FLOAT_MAT4,
-            PicoGL.FLOAT_VEC4
-        ])
-        .set(0, skyboxViewProjMatrix)
-        .set(1, eyePosition)
-        .update();
-
-        window.onresize = function() {
-            app.resize(window.innerWidth, window.innerHeight);
-
-            mat4.perspective(projMatrix, Math.PI / 2, app.width / app.height, 0.1, 10.0);
-            mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
-            mat4.multiply(skyboxViewProjMatrix, projMatrix, skyboxViewMatrix);
-
-            sceneUniforms.set(0, viewProjMatrix).update();
-            skyboxSceneUniforms.set(0, skyboxViewProjMatrix).update();
-        }
 
         var modelMatrix = mat4.create();
         var rotateXMatrix = mat4.create();
@@ -219,60 +168,65 @@
         var angleX = 0;
         var angleY = 0;
 
+        window.onresize = function() {
+            app.resize(window.innerWidth, window.innerHeight);
+
+            mat4.perspective(projMatrix, Math.PI / 2, app.width / app.height, 0.1, 10.0);
+            mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
+            
+            sceneUniformBuffer.set(0, viewProjMatrix).update();
+        }
+
         var image = new Image();
 
         image.onload = function() {
-            utils.loadCubemapImages({
-                negX: "img/sky-negx.png",
-                posX: "img/sky-posx.png",
-                negY: "img/sky-negy.png",
-                posY: "img/sky-posy.png",
-                negZ: "img/sky-negz.png",
-                posZ: "img/sky-posz.png"
-            }, function(negX, posX, negY, posY, negZ, posZ) {
-                var texture = app.createTexture2D(image);
-                var cubemap = app.createCubemap({
-                    negX: negX,
-                    posX: posX,
-                    negY: negY,
-                    posY: posY,
-                    negZ: negZ,
-                    posZ: posZ
-                })
+            var canvas = document.createElement('canvas');
+            canvas.width = image.width;
+            canvas.height = image.height;
 
-                var skyboxDrawcall = app.createDrawCall(skyboxProgram, boxArray)
-                .uniformBlock("SceneUniforms", skyboxSceneUniforms)
-                .texture("cubemap", cubemap);
+            var ctx = canvas.getContext("2d");
+            ctx.drawImage(image, 0, 0);
+            var imageData = ctx.getImageData(0, 2, image.width,  image.height);
+            var pixels = new Uint8Array(imageData.data.buffer);
 
-                var drawCall = app.createDrawCall(program, boxArray)
-                .uniformBlock("SceneUniforms", sceneUniforms)
-                .texture("tex", texture)
-                .texture("cubemap", cubemap);
+            var textureWidth = image.width;
+            var textureHeight = 103;
+            var numTextures = image.height / textureHeight;
 
-                app.drawCalls([skyboxDrawcall, drawCall]);
+            var texture = app.createTextureArray(image, textureWidth, textureHeight, numTextures);
 
-                function draw() {
-                    angleX += 0.01;
-                    angleY += 0.02;
+            var drawCall = app.createDrawCall(program, boxArray)
+            .uniformBlock("SceneUniforms", sceneUniformBuffer)
+            .texture("tex", texture);
 
-                    mat4.fromXRotation(rotateXMatrix, angleX);
-                    mat4.fromYRotation(rotateYMatrix, angleY);
-                    mat4.multiply(modelMatrix, rotateXMatrix, rotateYMatrix);
+            app.drawCalls([drawCall]);
 
-                    drawCall.uniform("uModel", modelMatrix);
+            var frameCount = 0;
+            var arrayIndex = 0;
+            function draw() {
+                angleX += 0.01;
+                angleY += 0.02;
 
-                    app.clear().draw();
+                mat4.fromXRotation(rotateXMatrix, angleX);
+                mat4.fromYRotation(rotateYMatrix, angleY);
+                mat4.multiply(modelMatrix, rotateXMatrix, rotateYMatrix);
 
-                    requestAnimationFrame(draw);
-                }
+                drawCall.uniform("uModel", modelMatrix)
+                .uniform("arrayIndex", arrayIndex);
+
+                frameCount++;
+                arrayIndex = Math.floor(frameCount / 3) % numTextures;
+
+                app.clear().draw();
 
                 requestAnimationFrame(draw);
-            });
-            
+            }
+
+            requestAnimationFrame(draw);
             
         }
 
-        image.src = "img/khronos_webgl.png";
+        image.src = "img/poulpe_1.png";
 
     </script>
     <a href="https://github.com/tsherif/picogl.js" id="github-ribbon"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"></a>

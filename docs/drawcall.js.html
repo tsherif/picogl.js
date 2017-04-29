@@ -58,54 +58,37 @@
 
         @class
         @prop {WebGLRenderingContext} gl The WebGL context.
-        @prop {WebGLProgram} program Handle to the program to use for this drawcall.
-        @prop {Object} attributes Map of attribute handles to ArrayBuffers.
-        @prop {Object} uniform Map of uniform handles to values.
+        @prop {Program} currentProgram The program to use for this draw call.
+        @prop {VertexArray} currentVertexArray Vertex array to use for this draw call.
+        @prop {TransformFeedback} currentTransformFeedback Transform feedback to use for this draw call.
+        @prop {Object} uniformBuffers Map of uniform buffer bases to uniform buffers.
+        @prop {Object} uniformBlockBases Map of uniform blocks to uniform buffer bases.
+        @prop {Number} uniformBlockCount Number of active uniform blocks for this draw call.
+        @prop {Object} uniforms Map of uniform handles to values.
         @prop {Object} textures Map of texture units to Textures.
         @prop {number} textureCount The number of active textures for this draw call. 
-        @prop {ArrayBuffer} indexArray Index array to use for indexed drawing.
-        @prop {number} numItems The number of items that will be drawn.
         @prop {GLEnum} primitive The primitive type being drawn. 
     */
-    PicoGL.DrawCall = function DrawCall(gl, program, primitive) {
+    PicoGL.DrawCall = function DrawCall(gl, program, geometry, primitive) {
         this.gl = gl;
-        this.program = program || null;
-        this.attributes = {};
-        this.uniforms = {};
-        this.textures = {};
-        this.textureCount = 0;
-        this.indexArray = null;
-        this.numItems = 0;
-        this.primitive = primitive !== undefined ? primitive : PicoGL.TRIANGLES;
-    };
-
-    /**
-        Set the Arraybuffer to bind to an attribute.
-
-        @method
-        @param {string} name Attribute name.
-        @param {Arraybuffer} buffer Arraybuffer to bind.
-    */
-    PicoGL.DrawCall.prototype.attribute = function(name, buffer) {
-        this.attributes[name] = buffer;
-        if (this.numItems === 0) {
-            this.numItems = buffer.numItems;
-        }
-
-        return this;
-    };
-
-    /**
-        Set the index ArrayBuffer.
-
-        @method
-        @param {Arraybuffer} buffer Index Arraybuffer.
-    */
-    PicoGL.DrawCall.prototype.indices = function(buffer) {
-        this.indexArray = buffer;
-        this.numItems = buffer.numItems;
+        this.currentProgram = program;
         
-        return this;
+        if (program.transformFeedback) {
+            this.currentVertexArray = null;
+            this.currentTransformFeedback = geometry;
+        } else {
+            this.currentVertexArray = geometry;
+            this.currentTransformFeedback = null;    
+        }
+        
+        this.uniforms = {};
+        this.uniformBuffers = new Array(PicoGL.WEBGL_INFO.MAX_UNIFORM_BUFFERS);
+        this.uniformBlockNames = new Array(PicoGL.WEBGL_INFO.MAX_UNIFORM_BUFFERS);
+        this.uniformBlockBases = {};
+        this.uniformBlockCount = 0;
+        this.textures = new Array(PicoGL.WEBGL_INFO.MAX_TEXTURE_UNITS);
+        this.textureCount = 0;
+        this.primitive = primitive !== undefined ? primitive : PicoGL.TRIANGLES;
     };
 
     /**
@@ -135,8 +118,27 @@
             this.uniforms[name] = unit;
         }
         
-        var textureUnit = this.gl["TEXTURE" + unit];   
-        this.textures[textureUnit] = texture;
+        this.textures[unit] = texture;
+        
+        return this;
+    };
+
+    /**
+        Set uniform buffer to bind to a uniform block.
+
+        @method
+        @param {string} name Uniform block name.
+        @param {UniformBuffer} buffer Uniform buffer to bind.
+    */
+    PicoGL.DrawCall.prototype.uniformBlock = function(name, buffer) {
+        var base = this.uniformBlockBases[name];
+        if (base === undefined) {
+            base = this.uniformBlockCount++;
+            this.uniformBlockBases[name] = base;
+            this.uniformBlockNames[base] = name;
+        }
+        
+        this.uniformBuffers[base] = buffer;
         
         return this;
     };
@@ -149,32 +151,57 @@
     */
     PicoGL.DrawCall.prototype.draw = function(state) {
         var uniforms = this.uniforms;
-        var attributes = this.attributes;
+        var uniformBuffers = this.uniformBuffers;
+        var uniformBlockNames = this.uniformBlockNames;
         var textures = this.textures;
 
-        if (state.program !== this.program) {
-            this.gl.useProgram(this.program.program);
-            state.program = this.program;
+        if (state.program !== this.currentProgram) {
+            this.gl.useProgram(this.currentProgram.program);
+            state.program = this.currentProgram;
         }
 
         for (var uName in uniforms) {
-            this.program.uniform(uName, uniforms[uName]);
+            this.currentProgram.uniform(uName, uniforms[uName]);
         }
 
-        for (var aName in attributes) {
-            this.program.attribute(aName, attributes[aName]);
+        for (var base = 0; base &lt; this.uniformBlockCount; ++base) {
+            this.currentProgram.uniformBlock(uniformBlockNames[base], base);
+            uniformBuffers[base].bind(base);
         }
 
-        for (var unit in textures) {
+        for (var unit = 0; unit &lt; this.textureCount; ++unit) {
             textures[unit].bind(unit);
         }
 
-        if (this.indexArray) {
-            this.indexArray.bind();
-            this.gl.drawElements(this.primitive, this.numItems * 3, this.indexArray.type, 0);
-        } else {
-            this.gl.drawArrays(this.primitive, 0, this.numItems);
+        if (this.currentTransformFeedback) {
+            this.currentTransformFeedback.bind(this.primitive);
+            this.currentVertexArray = this.currentTransformFeedback.inputVertexArray;
         }
+
+        if (state.vertexArray !== this.currentVertexArray) {
+            this.currentVertexArray.bind();
+            state.vertexArray = this.currentVertexArray;
+        }
+
+
+        if (this.currentVertexArray.instanced) {
+            if (this.currentVertexArray.indexed) {
+                this.gl.drawElementsInstanced(this.primitive, this.currentVertexArray.numElements, this.currentVertexArray.indexType, 0, this.currentVertexArray.numInstances);
+            } else {
+                this.gl.drawArraysInstanced(this.primitive, 0, this.currentVertexArray.numElements, this.currentVertexArray.numInstances);
+            }
+        } else {
+            if (this.currentVertexArray.indexed) {
+                this.gl.drawElements(this.primitive, this.currentVertexArray.numElements, this.currentVertexArray.indexType, 0);
+            } else {
+                this.gl.drawArrays(this.primitive, 0, this.currentVertexArray.numElements);
+            }
+        }
+
+        if (this.currentTransformFeedback) {
+            this.currentTransformFeedback.unbind();
+        }
+
     };
 
 })();
@@ -190,13 +217,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="PicoGL.App.html">App</a></li><li><a href="PicoGL.ArrayBuffer.html">ArrayBuffer</a></li><li><a href="PicoGL.Cubemap.html">Cubemap</a></li><li><a href="PicoGL.DrawCall.html">DrawCall</a></li><li><a href="PicoGL.Framebuffer.html">Framebuffer</a></li><li><a href="PicoGL.Program.html">Program</a></li><li><a href="PicoGL.Texture.html">Texture</a></li></ul><h3>Namespaces</h3><ul><li><a href="PicoGL.html">PicoGL</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="PicoGL.App.html">App</a></li><li><a href="PicoGL.ArrayBuffer.html">ArrayBuffer</a></li><li><a href="PicoGL.Cubemap.html">Cubemap</a></li><li><a href="PicoGL.DrawCall.html">DrawCall</a></li><li><a href="PicoGL.Framebuffer.html">Framebuffer</a></li><li><a href="PicoGL.Program.html">Program</a></li><li><a href="PicoGL.Texture.html">Texture</a></li><li><a href="PicoGL.TransformFeedback.html">TransformFeedback</a></li><li><a href="PicoGL.UniformBuffer.html">UniformBuffer</a></li><li><a href="PicoGL.VertexArray.html">VertexArray</a></li></ul><h3>Namespaces</h3><ul><li><a href="PicoGL.html">PicoGL</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue Mar 14 2017 06:38:25 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sat Apr 29 2017 19:02:39 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

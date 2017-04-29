@@ -25,12 +25,15 @@
     "use strict";
 
     /**
-        
         Global PicoGL module. For convenience, all WebGL enums are stored
         as properties of PicoGL (e.g. PicoGL.FLOAT, PicoGL.ONE_MINUS_SRC_ALPHA).
         
         @namespace PicoGL
         @prop {string} version Current PicoGL version.
+        @prop {object} TEXTURE_INTERNAL_FORMAT Map of framebuffer texture formats to internal formats.
+        @prop {object} TYPE_SIZE Map of data types to sizes in bytes.
+        @prop {object} WEBGL_INFO WebGL context information.
+        @prop {object} TEXTURE_UNIT_MAP Map of texture unit indices to GL enums, e.g. 0 => gl.TEXTURE0.
     */
     var PicoGL = window.PicoGL = {
         version: "<%= VERSION %>"
@@ -39,19 +42,57 @@
     (function() {
         // Absorb all GL enums for convenience
         var canvas = document.createElement("canvas");
-        var gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+        var gl = canvas.getContext("webgl2");
         
         if (!gl) {
             return;
         }
 
         for (var enumName in gl) {
-            if (enumName.match(/^[A-Z_]+$/) && typeof(gl[enumName]) === "number") {
+            if (enumName.match(/^[A-Z0-9_]+$/) && typeof(gl[enumName]) === "number") {
                 PicoGL[enumName] = gl[enumName];
             }
         }
 
+        PicoGL.TEXTURE_INTERNAL_FORMAT = {};
+        var UNSIGNED_BYTE = PicoGL.TEXTURE_INTERNAL_FORMAT[gl.UNSIGNED_BYTE] = {};
+        UNSIGNED_BYTE[gl.RED] = gl.R8;
+        UNSIGNED_BYTE[gl.RG] = gl.RG8;
+        UNSIGNED_BYTE[gl.RGB] = gl.RGB;
+        UNSIGNED_BYTE[gl.RGBA] = gl.RGBA;
+
+        var UNSIGNED_SHORT = PicoGL.TEXTURE_INTERNAL_FORMAT[gl.UNSIGNED_SHORT] = {};
+        UNSIGNED_SHORT[gl.DEPTH_COMPONENT] = gl.DEPTH_COMPONENT16;
+
+        var FLOAT = PicoGL.TEXTURE_INTERNAL_FORMAT[gl.FLOAT] = {};
+        FLOAT[gl.RED] = gl.R16F;
+        FLOAT[gl.RG] = gl.RG16F;
+        FLOAT[gl.RGB] = gl.RGB16F;
+        FLOAT[gl.RGBA] = gl.RGBA16F;
+        FLOAT[gl.DEPTH_COMPONENT] = gl.DEPTH_COMPONENT32F;
+
+        PicoGL.TYPE_SIZE = {};
+        PicoGL.TYPE_SIZE[gl.BYTE]              = 1;
+        PicoGL.TYPE_SIZE[gl.UNSIGNED_BYTE]     = 1;
+        PicoGL.TYPE_SIZE[gl.SHORT]             = 2;
+        PicoGL.TYPE_SIZE[gl.UNSIGNED_SHORT]    = 2;
+        PicoGL.TYPE_SIZE[gl.INT]               = 4;
+        PicoGL.TYPE_SIZE[gl.UNSIGNED_INT]      = 4;
+        PicoGL.TYPE_SIZE[gl.FLOAT]             = 4;
+
+        PicoGL.WEBGL_INFO = {};
+        PicoGL.WEBGL_INFO.MAX_TEXTURE_UNITS = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
+        PicoGL.WEBGL_INFO.MAX_UNIFORM_BUFFERS = gl.getParameter(gl.MAX_UNIFORM_BUFFER_BINDINGS);
+
+        PicoGL.TEXTURE_UNIT_MAP = new Array(PicoGL.WEBGL_INFO.MAX_TEXTURE_UNITS);
+
+        for (var i = 0, len = PicoGL.TEXTURE_UNIT_MAP.length; i < len; ++i) {
+            PicoGL.TEXTURE_UNIT_MAP[i] = gl["TEXTURE" + i];
+        }
+
     })();
+
+
 
     PicoGL.DUMMY_OBJECT = {};
 
@@ -67,11 +108,11 @@
         return new PicoGL.App(canvas, contextAttributes);
     };
 
-    PicoGL.compileShader = function(gl, shader, source, debug) {
+    PicoGL.compileShader = function(gl, shader, source) {
         gl.shaderSource(shader, source);
         gl.compileShader(shader);
 
-        if (debug && !gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
             var i, lines;
 
             console.error(gl.getShaderInfoLog(shader));
