@@ -36,9 +36,9 @@ PicoGL.js is minimal WebGL 2-only rendering library. It's meant for developers w
 ``` 
 
 
-Note that PicoGL.js is **not** a scene graph library. There are no objects, hierarchies, transforms, materials, etc. It has been designed only to make management of GPU state more convenient. Its conceptual model maps fairly directly to the constructs one deals with when writing directly with WebGL. The only higher-level construct is the **draw call**, which manages sets of related lower-level constructs. 
+Note that PicoGL.js is **not** a scene graph library. There are no objects, hierarchies, transforms, materials, etc. It has been designed only to make management of GPU state more convenient. Its conceptual model maps fairly directly to the constructs one deals with when writing directly with the WebGL 2 API. The only higher-level construct is the **draw call**, which manages sets of related lower-level constructs. 
 
-PicoGL.js simplifies usage of some more complex WebGL 2 features, such as multiple render targets, uniform buffers and transform feedback.
+PicoGL.js simplifies usage of some more complex WebGL 2 features, such as multiple render targets, uniform buffers, transform feedback and instanced drawing.
 
 Multiple Render Targets
 -----------------------
@@ -96,7 +96,7 @@ Uniform Buffers
     .set(1, float32Vector)
     .set(2, int32Vector)
     .set(3, scalar)
-    .update();      // Data only sent to GPU when update() is called.
+    .update();      // Data only sent to GPU when update() is called
 
     var drawCall = app.createDrawCall(program, vertexArray)
     .uniformBlock("UniformBlock", uniformBuffer);
@@ -109,7 +109,7 @@ Transform Feedback
     var app = PicoGL.createApp(canvas)
     .clearColor(0.0, 0.0, 0.0, 1.0);
 
-    // Last argument is transform feedback varyings.
+    // Last argument is transform feedback varyings
     var program = app.createProgram(vertexShaderSource, fragmentShaderSource, ["vPosition"]);
 
     var positions1 = app.createArrayBuffer(PicoGL.FLOAT, 2, new Float32Array([
@@ -138,3 +138,35 @@ Transform Feedback
     // Swap input and output buffers
     transformFeedback.swapBuffers();
 ``` 
+
+Instanced Drawing
+-----------------
+
+```JavaScript
+    var app = PicoGL.createApp(canvas)
+    .clearColor(0.0, 0.0, 0.0, 1.0);
+
+    var program = app.createProgram(vertexShaderSource, fragmentShaderSource);
+
+    // The starting positions of the triangle. Each pair of coordinates
+    // will be passed per-vertex
+    var positions = app.createArrayBuffer(PicoGL.FLOAT, 2, new Float32Array([
+        -0.3, -0.3,
+         0.3, -0.3,
+         0.0,  0.3
+    ]));
+
+    // This is an instanced buffer meaning each pair of numbers will be passed
+    // per-instance, rather than per-vertex
+    var offsets = app.createInstancedArrayBuffer(PicoGL.FLOAT, 2, new Float32Array([
+        -0.5, 0.0,
+         0.0, 0.2,
+         0.5, 0.0
+    ]));
+
+    // This vertex array now represents 3 instanced triangles 
+    // with the offsets given above
+    var vertexArray = app.createVertexArray()
+    .attributeBuffer(0, positions);
+    .attributeBuffer(1, offset);
+```
