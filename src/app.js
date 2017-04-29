@@ -494,7 +494,7 @@
 
     /**
         Create a uniform buffer in std140 layout. NOTE: FLOAT_MAT2 and FLOAT_MAT3
-        are supported, but must be manually padded to 4-byte column alignment by
+        are supported, but must be manually padded to 4-float column alignment by
         the application!
 
         @method
