@@ -36,21 +36,21 @@
         @prop {Object} uniforms Map of uniform names to handles. 
         @prop {Object} uniformBlockss Map of uniform block names to handles. 
     */
-    PicoGL.Program = function Program(gl, vsSource, fsSource, xformFeebackVars, debug) {
+    PicoGL.Program = function Program(gl, vsSource, fsSource, xformFeebackVars) {
         var i;
 
         var vshader, fshader; 
 
         if (typeof vsSource === "string") {
             vshader = gl.createShader(gl.VERTEX_SHADER);
-            PicoGL.compileShader(gl, vshader, vsSource, debug);
+            PicoGL.compileShader(gl, vshader, vsSource);
         } else {
             vshader = vsSource;
         }
 
         if (typeof fsSource === "string") {
             fshader = gl.createShader(gl.FRAGMENT_SHADER);
-            PicoGL.compileShader(gl, fshader, fsSource, debug);
+            PicoGL.compileShader(gl, fshader, fsSource);
         } else {
             fshader = fsSource;
         }
@@ -63,7 +63,7 @@
         }
         gl.linkProgram(program);
 
-        if (debug && !gl.getProgramParameter(program, gl.LINK_STATUS)) {
+        if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
           console.error(gl.getProgramInfoLog(program));
         }
 
@@ -82,22 +82,22 @@
 
             switch (uniformInfo.type) {
                 case gl.INT: 
-                case gl.BOOL: 
+                case gl.BOOL:
                 case gl.SAMPLER_2D:
-                case gl.SAMPLER_2D_ARRAY:
-                case gl.SAMPLER_3D:
-                case gl.SAMPLER_CUBE:
-                case gl.SAMPLER_2D_SHADOW:
-                case gl.SAMPLER_2D_ARRAY_SHADOW:
-                case gl.SAMPLER_CUBE_SHADOW:
                 case gl.INT_SAMPLER_2D:
-                case gl.INT_SAMPLER_3D:
-                case gl.INT_SAMPLER_CUBE:
-                case gl.INT_SAMPLER_2D_ARRAY:
                 case gl.UNSIGNED_INT_SAMPLER_2D:
-                case gl.UNSIGNED_INT_SAMPLER_3D:
-                case gl.UNSIGNED_INT_SAMPLER_CUBE:
+                case gl.SAMPLER_2D_SHADOW:
+                case gl.SAMPLER_2D_ARRAY:
+                case gl.INT_SAMPLER_2D_ARRAY:
                 case gl.UNSIGNED_INT_SAMPLER_2D_ARRAY:
+                case gl.SAMPLER_2D_ARRAY_SHADOW:
+                case gl.SAMPLER_CUBE:
+                case gl.INT_SAMPLER_CUBE:
+                case gl.UNSIGNED_INT_SAMPLER_CUBE:
+                case gl.SAMPLER_CUBE_SHADOW:
+                case gl.SAMPLER_3D:
+                case gl.INT_SAMPLER_3D:
+                case gl.UNSIGNED_INT_SAMPLER_3D:
                     UniformClass = PicoGL.IntUniform;
                     break;
                 case gl.FLOAT: 

@@ -296,7 +296,7 @@
 
         image.onload = function() {
 
-            var texture = app.createDOMTexture(image);
+            var texture = app.createTexture2D(image);
             
             var boxes = new Array(NUM_BOXES);
             var boxesDrawCall = app.createDrawCall(boxProgram, boxArray)

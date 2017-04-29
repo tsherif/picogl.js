@@ -132,7 +132,7 @@
         var pointArray = app.createVertexArray()
         .attributeBuffer(0, positions);
 
-        var texture = app.createDataTexture3D(PicoGL.TEXTURE_3D, textureData, TEXTURE_DIMENSIONS, TEXTURE_DIMENSIONS, TEXTURE_DIMENSIONS, {
+        var texture = app.createTexture3D(textureData, TEXTURE_DIMENSIONS, TEXTURE_DIMENSIONS, TEXTURE_DIMENSIONS, {
             format: PicoGL.RED
         });
 

@@ -106,11 +106,11 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         return new PicoGL.App(canvas, contextAttributes);
     };
 
-    PicoGL.compileShader = function(gl, shader, source, debug) {
+    PicoGL.compileShader = function(gl, shader, source) {
         gl.shaderSource(shader, source);
         gl.compileShader(shader);
 
-        if (debug && !gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
             var i, lines;
 
             console.error(gl.getShaderInfoLog(shader));
@@ -491,17 +491,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     };
 
     /**
-        Disable debug logging.
-
-        @method
-    */
-    PicoGL.App.prototype.noDebug = function() {
-        this.debugEnabled = false; 
-
-        return this;
-    };
-
-    /**
         Create a program.
 
         @method
@@ -514,7 +503,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     };
 
     /**
-        Create a shader.
+        Create a shader. Creating a shader separately from a program allows for 
+        shader reuse.
 
         @method
         @param {GLEnum} type Shader type.
@@ -543,7 +533,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {VertexArray} vertexArray1 Vertex array containing first set of transform feedback buffers.
         @param {VertexArray} vertexArray2 Vertex array containing second set of transform feedback buffers.
         @param {Array} varryingBufferIndices Locations in the vertex arrays of buffers to use for transform feedback.
-
     */
     PicoGL.App.prototype.createTransformFeedback = function(vertexArray1, vertexArray2, varyingBufferIndices) {
         return new PicoGL.TransformFeedback(this.gl, vertexArray1, vertexArray2, varyingBufferIndices);
@@ -610,7 +599,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
         @method
         @param {Array} layout Array indicating the order and types of items to 
-        be stored in the buffer.
+                        be stored in the buffer.
         @param {GLEnum} [usage=DYNAMIC_DRAW] Buffer usage.
     */
     PicoGL.App.prototype.createUniformBuffer = function(layout, usage) {
@@ -630,16 +619,17 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     };
 
     /**
-        Create a texture.
+        Create a 2D texture.
 
         @method
-        @param {ImageElement|ArrayBufferView} image The image data. Can be any format that would be accepted by texImage2D.
+        @param {DOMElement|ArrayBufferView} image Image data. Can be any format that would be accepted 
+                by texImage2D. 
+        @param {number} [width] Texture width. Required if passing array data.
+        @param {number} [height] Texture height. Required if passing array data.
         @param {Object} [options] Texture options.
         @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
         @param {GLEnum} [options.format=RGBA] Texture data format.
         @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
-        @param {number} [options.width] Width of the texture (only valid when passing array texture data).
-        @param {number} [options.height] Height of the texture (only valid when passing array texture data).
         @param {boolean} [options.flipY=true] Whether th y-axis be flipped when reading the texture.
         @param {GLEnum} [options.minFilter=LINEAR_MIPMAP_NEAREST] Minification filter.
         @param {GLEnum} [options.magFilter=LINEAR] Magnification filter.
@@ -647,29 +637,80 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {GLEnum} [options.wrapT=REPEAT] Vertical wrap mode.
         @param {boolean} [options.generateMipmaps] Should mip maps be generated.
     */
-    PicoGL.App.prototype.createDOMTexture = function(image, options) {
-        return new PicoGL.Texture(this.gl, this.gl.TEXTURE_2D, image, null, null, null, false, false, options);
-    };
+    PicoGL.App.prototype.createTexture2D = function(image, width, height, options) {
+        var buffer = true;
+        if (height === undefined) {
+            // Passing in a DOM element. Height/width not required.
+            options = width;
+            buffer = false;
+        }
 
-    PicoGL.App.prototype.createDataTexture2D = function(binding, image, width, height, options) {
-        return new PicoGL.Texture(this.gl, binding, image, width, height, null, true, false, options);
-    };
-
-    PicoGL.App.prototype.createDataTexture3D = function(binding, image, width, height, depth, options) {
-        return new PicoGL.Texture(this.gl, binding, image, width, height, depth, true, true, options);
+        return new PicoGL.Texture(this.gl, this.gl.TEXTURE_2D, image, width, height, null, buffer, false, options);
     };
 
     /**
-        Create a texture.
+        Create a 2D texture array.
+
+        @method
+        @param {ArrayBufferView} image Typed array containing pixel data.
+        @param {number} width Texture width.
+        @param {number} height Texture height.
+        @param {number} size Number of images in the array.
+        @param {Object} [options] Texture options.
+        @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
+        @param {GLEnum} [options.format=RGBA] Texture data format.
+        @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
+        @param {boolean} [options.flipY=true] Whether th y-axis be flipped when reading the texture.
+        @param {GLEnum} [options.minFilter=LINEAR_MIPMAP_NEAREST] Minification filter.
+        @param {GLEnum} [options.magFilter=LINEAR] Magnification filter.
+        @param {GLEnum} [options.wrapS=REPEAT] Horizontal wrap mode.
+        @param {GLEnum} [options.wrapT=REPEAT] Vertical wrap mode.
+        @param {boolean} [options.generateMipmaps] Should mip maps be generated.
+    */
+    PicoGL.App.prototype.createTextureArray = function(image, width, height, depth, options) {
+        return new PicoGL.Texture(this.gl, this.gl.TEXTURE_2D_ARRAY, image, width, height, depth, true, true, options);
+    };
+
+    /**
+        Create a 3D texture.
+
+        @method
+        @param {ArrayBufferView} image Typed array containing pixel data.
+        @param {number} width Texture width.
+        @param {number} height Texture height.
+        @param {number} depth Texture depth.
+        @param {Object} [options] Texture options.
+        @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
+        @param {GLEnum} [options.format=RGBA] Texture data format.
+        @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
+        @param {boolean} [options.flipY=true] Whether th y-axis be flipped when reading the texture.
+        @param {GLEnum} [options.minFilter=LINEAR_MIPMAP_NEAREST] Minification filter.
+        @param {GLEnum} [options.magFilter=LINEAR] Magnification filter.
+        @param {GLEnum} [options.wrapS=REPEAT] Horizontal wrap mode.
+        @param {GLEnum} [options.wrapT=REPEAT] Vertical wrap mode.
+        @param {boolean} [options.generateMipmaps] Should mip maps be generated.
+    */
+    PicoGL.App.prototype.createTexture3D = function(image, width, height, depth, options) {
+        return new PicoGL.Texture(this.gl, this.gl.TEXTURE_3D, image, width, height, depth, true, true, options);
+    };
+
+    /**
+        Create a cubemap.
 
         @method
         @param {Object} options Texture options.
-        @param {ImageElement|ArrayBufferView} options.negX The image data for the negative X direction. Can be any format that would be accepted by texImage2D.
-        @param {ImageElement|ArrayBufferView} options.posX The image data for the positive X direction. Can be any format that would be accepted by texImage2D.
-        @param {ImageElement|ArrayBufferView} options.negY The image data for the negative Y direction. Can be any format that would be accepted by texImage2D.
-        @param {ImageElement|ArrayBufferView} options.posY The image data for the positive Y direction. Can be any format that would be accepted by texImage2D.
-        @param {ImageElement|ArrayBufferView} options.negZ The image data for the negative Z direction. Can be any format that would be accepted by texImage2D.
-        @param {ImageElement|ArrayBufferView} options.posZ The image data for the positive Z direction. Can be any format that would be accepted by texImage2D.
+        @param {DOMElement|ArrayBufferView} options.negX The image data for the negative X direction.
+                Can be any format that would be accepted by texImage2D.
+        @param {DOMElement|ArrayBufferView} options.posX The image data for the positive X direction.
+                Can be any format that would be accepted by texImage2D.
+        @param {DOMElement|ArrayBufferView} options.negY The image data for the negative Y direction.
+                Can be any format that would be accepted by texImage2D.
+        @param {DOMElement|ArrayBufferView} options.posY The image data for the positive Y direction.
+                Can be any format that would be accepted by texImage2D.
+        @param {DOMElement|ArrayBufferView} options.negZ The image data for the negative Z direction.
+                Can be any format that would be accepted by texImage2D.
+        @param {DOMElement|ArrayBufferView} options.posZ The image data for the positive Z direction.
+                Can be any format that would be accepted by texImage2D.
         @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
         @param {GLEnum} [options.format=RGBA] Texture data format.
         @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
@@ -741,21 +782,21 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @prop {Object} uniforms Map of uniform names to handles. 
         @prop {Object} uniformBlockss Map of uniform block names to handles. 
     */
-    PicoGL.Program = function Program(gl, vsSource, fsSource, xformFeebackVars, debug) {
+    PicoGL.Program = function Program(gl, vsSource, fsSource, xformFeebackVars) {
         var i;
 
         var vshader, fshader; 
 
         if (typeof vsSource === "string") {
             vshader = gl.createShader(gl.VERTEX_SHADER);
-            PicoGL.compileShader(gl, vshader, vsSource, debug);
+            PicoGL.compileShader(gl, vshader, vsSource);
         } else {
             vshader = vsSource;
         }
 
         if (typeof fsSource === "string") {
             fshader = gl.createShader(gl.FRAGMENT_SHADER);
-            PicoGL.compileShader(gl, fshader, fsSource, debug);
+            PicoGL.compileShader(gl, fshader, fsSource);
         } else {
             fshader = fsSource;
         }
@@ -768,7 +809,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         }
         gl.linkProgram(program);
 
-        if (debug && !gl.getProgramParameter(program, gl.LINK_STATUS)) {
+        if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
           console.error(gl.getProgramInfoLog(program));
         }
 
@@ -787,22 +828,22 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
             switch (uniformInfo.type) {
                 case gl.INT: 
-                case gl.BOOL: 
+                case gl.BOOL:
                 case gl.SAMPLER_2D:
-                case gl.SAMPLER_2D_ARRAY:
-                case gl.SAMPLER_3D:
-                case gl.SAMPLER_CUBE:
-                case gl.SAMPLER_2D_SHADOW:
-                case gl.SAMPLER_2D_ARRAY_SHADOW:
-                case gl.SAMPLER_CUBE_SHADOW:
                 case gl.INT_SAMPLER_2D:
-                case gl.INT_SAMPLER_3D:
-                case gl.INT_SAMPLER_CUBE:
-                case gl.INT_SAMPLER_2D_ARRAY:
                 case gl.UNSIGNED_INT_SAMPLER_2D:
-                case gl.UNSIGNED_INT_SAMPLER_3D:
-                case gl.UNSIGNED_INT_SAMPLER_CUBE:
+                case gl.SAMPLER_2D_SHADOW:
+                case gl.SAMPLER_2D_ARRAY:
+                case gl.INT_SAMPLER_2D_ARRAY:
                 case gl.UNSIGNED_INT_SAMPLER_2D_ARRAY:
+                case gl.SAMPLER_2D_ARRAY_SHADOW:
+                case gl.SAMPLER_CUBE:
+                case gl.INT_SAMPLER_CUBE:
+                case gl.UNSIGNED_INT_SAMPLER_CUBE:
+                case gl.SAMPLER_CUBE_SHADOW:
+                case gl.SAMPLER_3D:
+                case gl.INT_SAMPLER_3D:
+                case gl.UNSIGNED_INT_SAMPLER_3D:
                     UniformClass = PicoGL.IntUniform;
                     break;
                 case gl.FLOAT: 
@@ -1635,10 +1676,14 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @prop {WebGLTexture} texture Handle to the texture.
     */
     PicoGL.Cubemap = function Texture(gl, options) {
+        options = options || PicoGL.DUMMY_OBJECT;
+
         this.gl = gl;
         this.texture = gl.createTexture();
+        this.format = options.format || gl.RGBA;
+        this.type = options.type || gl.UNSIGNED_BYTE;
+        this.internalFormat = options.internalFormat || PicoGL.TEXTURE_INTERNAL_FORMAT[this.type][this.format];
 
-        options = options || PicoGL.DUMMY_OBJECT;
         var negX = options.negX;
         var posX = options.posX;
         var negY = options.negY;
@@ -1646,7 +1691,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         var negZ = options.negZ;
         var posZ = options.posZ;
         
-        var array = options.array || false;
+        var buffer = options.buffer || false;
         var width = options.width || 0;
         var height = options.height || 0;
         var flipY = options.flipY !== undefined ? options.flipY : false;
@@ -1657,9 +1702,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         var generateMipmaps = options.generateMipmaps !== false && 
                             (minFilter === gl.LINEAR_MIPMAP_NEAREST || minFilter === gl.LINEAR_MIPMAP_LINEAR);
 
-        var internalFormat = options.internalFormat || gl.RGBA;
-        var type = options.type || gl.UNSIGNED_BYTE;
-
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.texture);
         
@@ -1669,20 +1711,20 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, wrapS);
         gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, wrapT);
 
-        if (array) {
-            gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_X, 0, internalFormat, width, height, 0, internalFormat, type, negX);
-            gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X, 0, internalFormat, width, height, 0, internalFormat, type, posX);
-            gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, internalFormat, width, height, 0, internalFormat, type, negY);
-            gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Y, 0, internalFormat, width, height, 0, internalFormat, type, posY);
-            gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, internalFormat, width, height, 0, internalFormat, type, negZ);
-            gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Z, 0, internalFormat, width, height, 0, internalFormat, type, posZ);
+        if (buffer) {
+            gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_X, 0, this.internalFormat, width, height, 0, this.format, this.type, negX);
+            gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X, 0, this.internalFormat, width, height, 0, this.format, this.type, posX);
+            gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, this.internalFormat, width, height, 0, this.format, this.type, negY);
+            gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Y, 0, this.internalFormat, width, height, 0, this.format, this.type, posY);
+            gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, this.internalFormat, width, height, 0, this.format, this.type, negZ);
+            gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Z, 0, this.internalFormat, width, height, 0, this.format, this.type, posZ);
         } else {
-            gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_X, 0, internalFormat, internalFormat, type, negX);
-            gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X, 0, internalFormat, internalFormat, type, posX);
-            gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, internalFormat, internalFormat, type, negY);
-            gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Y, 0, internalFormat, internalFormat, type, posY);
-            gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, internalFormat, internalFormat, type, negZ);
-            gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Z, 0, internalFormat, internalFormat, type, posZ);
+            gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_X, 0, this.internalFormat, this.format, this.type, negX);
+            gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X, 0, this.internalFormat, this.format, this.type, posX);
+            gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, this.internalFormat, this.format, this.type, negY);
+            gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Y, 0, this.internalFormat, this.format, this.type, posY);
+            gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, this.internalFormat, this.format, this.type, negZ);
+            gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Z, 0, this.internalFormat, this.format, this.type, posZ);
         }
 
         if (generateMipmaps) {

@@ -105,11 +105,11 @@
         return new PicoGL.App(canvas, contextAttributes);
     };
 
-    PicoGL.compileShader = function(gl, shader, source, debug) {
+    PicoGL.compileShader = function(gl, shader, source) {
         gl.shaderSource(shader, source);
         gl.compileShader(shader);
 
-        if (debug && !gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
             var i, lines;
 
             console.error(gl.getShaderInfoLog(shader));

@@ -282,7 +282,7 @@
                 return;
             }
 
-            var texture = app.createDOMTexture(image);
+            var texture = app.createTexture2D(image);
 
             var sphereDrawCall = app.createDrawCall(accumProgram, sphereArray)
             .uniformBlock("SceneUniforms", sceneUniforms)

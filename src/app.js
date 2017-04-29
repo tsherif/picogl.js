@@ -389,17 +389,6 @@
     };
 
     /**
-        Disable debug logging.
-
-        @method
-    */
-    PicoGL.App.prototype.noDebug = function() {
-        this.debugEnabled = false; 
-
-        return this;
-    };
-
-    /**
         Create a program.
 
         @method
@@ -412,7 +401,8 @@
     };
 
     /**
-        Create a shader.
+        Create a shader. Creating a shader separately from a program allows for 
+        shader reuse.
 
         @method
         @param {GLEnum} type Shader type.
@@ -441,7 +431,6 @@
         @param {VertexArray} vertexArray1 Vertex array containing first set of transform feedback buffers.
         @param {VertexArray} vertexArray2 Vertex array containing second set of transform feedback buffers.
         @param {Array} varryingBufferIndices Locations in the vertex arrays of buffers to use for transform feedback.
-
     */
     PicoGL.App.prototype.createTransformFeedback = function(vertexArray1, vertexArray2, varyingBufferIndices) {
         return new PicoGL.TransformFeedback(this.gl, vertexArray1, vertexArray2, varyingBufferIndices);
@@ -508,7 +497,7 @@
 
         @method
         @param {Array} layout Array indicating the order and types of items to 
-        be stored in the buffer.
+                        be stored in the buffer.
         @param {GLEnum} [usage=DYNAMIC_DRAW] Buffer usage.
     */
     PicoGL.App.prototype.createUniformBuffer = function(layout, usage) {
@@ -528,16 +517,17 @@
     };
 
     /**
-        Create a texture.
+        Create a 2D texture.
 
         @method
-        @param {ImageElement|ArrayBufferView} image The image data. Can be any format that would be accepted by texImage2D.
+        @param {DOMElement|ArrayBufferView} image Image data. Can be any format that would be accepted 
+                by texImage2D. 
+        @param {number} [width] Texture width. Required if passing array data.
+        @param {number} [height] Texture height. Required if passing array data.
         @param {Object} [options] Texture options.
         @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
         @param {GLEnum} [options.format=RGBA] Texture data format.
         @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
-        @param {number} [options.width] Width of the texture (only valid when passing array texture data).
-        @param {number} [options.height] Height of the texture (only valid when passing array texture data).
         @param {boolean} [options.flipY=true] Whether th y-axis be flipped when reading the texture.
         @param {GLEnum} [options.minFilter=LINEAR_MIPMAP_NEAREST] Minification filter.
         @param {GLEnum} [options.magFilter=LINEAR] Magnification filter.
@@ -545,29 +535,80 @@
         @param {GLEnum} [options.wrapT=REPEAT] Vertical wrap mode.
         @param {boolean} [options.generateMipmaps] Should mip maps be generated.
     */
-    PicoGL.App.prototype.createDOMTexture = function(image, options) {
-        return new PicoGL.Texture(this.gl, this.gl.TEXTURE_2D, image, null, null, null, false, false, options);
-    };
+    PicoGL.App.prototype.createTexture2D = function(image, width, height, options) {
+        var buffer = true;
+        if (height === undefined) {
+            // Passing in a DOM element. Height/width not required.
+            options = width;
+            buffer = false;
+        }
 
-    PicoGL.App.prototype.createDataTexture2D = function(binding, image, width, height, options) {
-        return new PicoGL.Texture(this.gl, binding, image, width, height, null, true, false, options);
-    };
-
-    PicoGL.App.prototype.createDataTexture3D = function(binding, image, width, height, depth, options) {
-        return new PicoGL.Texture(this.gl, binding, image, width, height, depth, true, true, options);
+        return new PicoGL.Texture(this.gl, this.gl.TEXTURE_2D, image, width, height, null, buffer, false, options);
     };
 
     /**
-        Create a texture.
+        Create a 2D texture array.
+
+        @method
+        @param {ArrayBufferView} image Typed array containing pixel data.
+        @param {number} width Texture width.
+        @param {number} height Texture height.
+        @param {number} size Number of images in the array.
+        @param {Object} [options] Texture options.
+        @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
+        @param {GLEnum} [options.format=RGBA] Texture data format.
+        @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
+        @param {boolean} [options.flipY=true] Whether th y-axis be flipped when reading the texture.
+        @param {GLEnum} [options.minFilter=LINEAR_MIPMAP_NEAREST] Minification filter.
+        @param {GLEnum} [options.magFilter=LINEAR] Magnification filter.
+        @param {GLEnum} [options.wrapS=REPEAT] Horizontal wrap mode.
+        @param {GLEnum} [options.wrapT=REPEAT] Vertical wrap mode.
+        @param {boolean} [options.generateMipmaps] Should mip maps be generated.
+    */
+    PicoGL.App.prototype.createTextureArray = function(image, width, height, depth, options) {
+        return new PicoGL.Texture(this.gl, this.gl.TEXTURE_2D_ARRAY, image, width, height, depth, true, true, options);
+    };
+
+    /**
+        Create a 3D texture.
+
+        @method
+        @param {ArrayBufferView} image Typed array containing pixel data.
+        @param {number} width Texture width.
+        @param {number} height Texture height.
+        @param {number} depth Texture depth.
+        @param {Object} [options] Texture options.
+        @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
+        @param {GLEnum} [options.format=RGBA] Texture data format.
+        @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
+        @param {boolean} [options.flipY=true] Whether th y-axis be flipped when reading the texture.
+        @param {GLEnum} [options.minFilter=LINEAR_MIPMAP_NEAREST] Minification filter.
+        @param {GLEnum} [options.magFilter=LINEAR] Magnification filter.
+        @param {GLEnum} [options.wrapS=REPEAT] Horizontal wrap mode.
+        @param {GLEnum} [options.wrapT=REPEAT] Vertical wrap mode.
+        @param {boolean} [options.generateMipmaps] Should mip maps be generated.
+    */
+    PicoGL.App.prototype.createTexture3D = function(image, width, height, depth, options) {
+        return new PicoGL.Texture(this.gl, this.gl.TEXTURE_3D, image, width, height, depth, true, true, options);
+    };
+
+    /**
+        Create a cubemap.
 
         @method
         @param {Object} options Texture options.
-        @param {ImageElement|ArrayBufferView} options.negX The image data for the negative X direction. Can be any format that would be accepted by texImage2D.
-        @param {ImageElement|ArrayBufferView} options.posX The image data for the positive X direction. Can be any format that would be accepted by texImage2D.
-        @param {ImageElement|ArrayBufferView} options.negY The image data for the negative Y direction. Can be any format that would be accepted by texImage2D.
-        @param {ImageElement|ArrayBufferView} options.posY The image data for the positive Y direction. Can be any format that would be accepted by texImage2D.
-        @param {ImageElement|ArrayBufferView} options.negZ The image data for the negative Z direction. Can be any format that would be accepted by texImage2D.
-        @param {ImageElement|ArrayBufferView} options.posZ The image data for the positive Z direction. Can be any format that would be accepted by texImage2D.
+        @param {DOMElement|ArrayBufferView} options.negX The image data for the negative X direction.
+                Can be any format that would be accepted by texImage2D.
+        @param {DOMElement|ArrayBufferView} options.posX The image data for the positive X direction.
+                Can be any format that would be accepted by texImage2D.
+        @param {DOMElement|ArrayBufferView} options.negY The image data for the negative Y direction.
+                Can be any format that would be accepted by texImage2D.
+        @param {DOMElement|ArrayBufferView} options.posY The image data for the positive Y direction.
+                Can be any format that would be accepted by texImage2D.
+        @param {DOMElement|ArrayBufferView} options.negZ The image data for the negative Z direction.
+                Can be any format that would be accepted by texImage2D.
+        @param {DOMElement|ArrayBufferView} options.posZ The image data for the positive Z direction.
+                Can be any format that would be accepted by texImage2D.
         @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
         @param {GLEnum} [options.format=RGBA] Texture data format.
         @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.

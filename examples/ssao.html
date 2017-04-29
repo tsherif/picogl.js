@@ -378,8 +378,7 @@
             noiseTextureData[index + 1] = Math.random() * 2.0 - 1.0;
         }
 
-        var noiseTexture = app.createDataTexture2D(
-            PicoGL.TEXTURE_2D,
+        var noiseTexture = app.createTexture2D(
             noiseTextureData, 
             app.gl.drawingBufferWidth,
             app.gl.drawingBufferHeight,
@@ -418,7 +417,7 @@
         var image = new Image();
 
         image.onload = function() {
-            var texture = app.createDOMTexture(image);
+            var texture = app.createTexture2D(image);
 
             var colorGeoDrawcall = app.createDrawCall(colorGeoProgram, sphereArray)
             .uniformBlock("SceneUniforms", sceneUniforms)
