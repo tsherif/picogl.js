@@ -49,7 +49,6 @@
         this.size = 0;
         this.usage = usage || gl.DYNAMIC_DRAW;
 
-        // TODO(Tarek): MAT2/MAT3?
         for (var i = 0, len = layout.length; i < len; ++i) {
             var type = layout[i];
             switch(type) { 
@@ -84,6 +83,20 @@
                     this.integer[i] = type === PicoGL.INT_VEC4;
 
                     this.size += 4;
+                    break;
+                case PicoGL.FLOAT_MAT2:
+                    this.size += (4 - this.size % 4) % 4;
+                    this.offsets[i] = this.size;
+                    this.sizes[i] = 8;
+
+                    this.size += 8;
+                    break;
+                case PicoGL.FLOAT_MAT3:
+                    this.size += (4 - this.size % 4) % 4;
+                    this.offsets[i] = this.size;
+                    this.sizes[i] = 12;
+
+                    this.size += 12;
                     break;
                 case PicoGL.FLOAT_MAT4:
                     this.size += (4 - this.size % 4) % 4;

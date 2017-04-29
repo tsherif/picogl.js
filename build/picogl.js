@@ -59,15 +59,16 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         var UNSIGNED_BYTE = PicoGL.TEXTURE_INTERNAL_FORMAT[gl.UNSIGNED_BYTE] = {};
         UNSIGNED_BYTE[gl.RED] = gl.R8;
         UNSIGNED_BYTE[gl.RG] = gl.RG8;
+        UNSIGNED_BYTE[gl.RGB] = gl.RGB;
         UNSIGNED_BYTE[gl.RGBA] = gl.RGBA;
 
         var UNSIGNED_SHORT = PicoGL.TEXTURE_INTERNAL_FORMAT[gl.UNSIGNED_SHORT] = {};
         UNSIGNED_SHORT[gl.DEPTH_COMPONENT] = gl.DEPTH_COMPONENT16;
 
-        // TODO(Tarek): Add other format combinations
         var FLOAT = PicoGL.TEXTURE_INTERNAL_FORMAT[gl.FLOAT] = {};
         FLOAT[gl.RED] = gl.R16F;
         FLOAT[gl.RG] = gl.RG16F;
+        FLOAT[gl.RGB] = gl.RGB16F;
         FLOAT[gl.RGBA] = gl.RGBA16F;
         FLOAT[gl.DEPTH_COMPONENT] = gl.DEPTH_COMPONENT32F;
 
@@ -1136,7 +1137,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             type = PicoGL.FLOAT;
             itemSize = 4;
             numRows = 4;
-        // TODO(Tarek): Make sure MAT3/MAT2 work!
         } else if (type === PicoGL.FLOAT_MAT3) {
             type = PicoGL.FLOAT;
             itemSize = 3;
@@ -1497,6 +1497,20 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                     this.integer[i] = type === PicoGL.INT_VEC4;
 
                     this.size += 4;
+                    break;
+                case PicoGL.FLOAT_MAT2:
+                    this.size += (4 - this.size % 4) % 4;
+                    this.offsets[i] = this.size;
+                    this.sizes[i] = 8;
+
+                    this.size += 8;
+                    break;
+                case PicoGL.FLOAT_MAT3:
+                    this.size += (4 - this.size % 4) % 4;
+                    this.offsets[i] = this.size;
+                    this.sizes[i] = 12;
+
+                    this.size += 12;
                     break;
                 case PicoGL.FLOAT_MAT4:
                     this.size += (4 - this.size % 4) % 4;
