@@ -95,7 +95,7 @@
         @param {number} unit The texture unit to bind to.
     */
     PicoGL.Cubemap.prototype.bind = function(unit) {
-        this.gl.activeTexture(unit);
+        this.gl.activeTexture(PicoGL.TEXTURE_UNIT_MAP[unit]);
         this.gl.bindTexture(this.gl.TEXTURE_CUBE_MAP, this.texture);
     };    
 

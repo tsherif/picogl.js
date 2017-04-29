@@ -378,19 +378,22 @@
             noiseTextureData[index + 1] = Math.random() * 2.0 - 1.0;
         }
 
-        var noiseTexture = app.createTexture2D(noiseTextureData, {
-            buffer: true,
-            width: app.gl.drawingBufferWidth,
-            height: app.gl.drawingBufferHeight,
-            format: PicoGL.RG,
-            internalFormat: PicoGL.RG16F,
-            type: PicoGL.FLOAT,
-            minFilter: PicoGL.LINEAR,
-            magFilter: PicoGL.LINEAR,
-            wrapS: PicoGL.CLAMP_TO_EDGE,
-            wrapT: PicoGL.CLAMP_TO_EDGE,
-            generateMipmaps: false
-        });
+        var noiseTexture = app.createDataTexture2D(
+            PicoGL.TEXTURE_2D,
+            noiseTextureData, 
+            app.gl.drawingBufferWidth,
+            app.gl.drawingBufferHeight,
+            {
+                format: PicoGL.RG,
+                internalFormat: PicoGL.RG16F,
+                type: PicoGL.FLOAT,
+                minFilter: PicoGL.LINEAR,
+                magFilter: PicoGL.LINEAR,
+                wrapS: PicoGL.CLAMP_TO_EDGE,
+                wrapT: PicoGL.CLAMP_TO_EDGE,
+                generateMipmaps: false
+            }
+        );
 
         window.onresize = function() {
             app.resize(window.innerWidth, window.innerHeight);
@@ -415,7 +418,7 @@
         var image = new Image();
 
         image.onload = function() {
-            var texture = app.createTexture2D(image);
+            var texture = app.createDOMTexture(image);
 
             var colorGeoDrawcall = app.createDrawCall(colorGeoProgram, sphereArray)
             .uniformBlock("SceneUniforms", sceneUniforms)

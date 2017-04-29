@@ -193,7 +193,7 @@
             var textureHeight = 103;
             var numTextures = image.height / textureHeight;
 
-            var texture = app.createTexture2DArray(image, textureWidth, textureHeight, numTextures);
+            var texture = app.createDataTexture3D(PicoGL.TEXTURE_2D_ARRAY, image, textureWidth, textureHeight, numTextures);
 
             var drawCall = app.createDrawCall(program, boxArray)
             .uniformBlock("SceneUniforms", sceneUniformBuffer)

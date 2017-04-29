@@ -230,7 +230,7 @@
                 negZ: "img/sky-negz.png",
                 posZ: "img/sky-posz.png"
             }, function(negX, posX, negY, posY, negZ, posZ) {
-                var texture = app.createTexture2D(image);
+                var texture = app.createDOMTexture(image);
                 var cubemap = app.createCubemap({
                     negX: negX,
                     posX: posX,

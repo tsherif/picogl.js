@@ -276,11 +276,7 @@
         var bloomBuffer = app.createFramebuffer()
         .colorTarget(0, PicoGL.FLOAT);
 
-        var blankTexture = app.createTexture2D(null, {
-            buffer: true,
-            width: 1,
-            height: 1
-        });
+        var blankTexture = app.createDataTexture2D(PicoGL.TEXTURE_2D, null, 1, 1);
 
 
         // SET UP GEOMETRY
@@ -411,7 +407,7 @@
         var image = new Image();
 
         image.onload = function() {
-            var texture = app.createTexture2D(image);
+            var texture = app.createDOMTexture(image);
 
             // PREPARE DRAW CALLS
             var drawCall = app.createDrawCall(cubeProgram, cubeArray)

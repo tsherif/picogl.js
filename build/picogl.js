@@ -638,7 +638,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
         @param {GLEnum} [options.format=RGBA] Texture data format.
         @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
-        @param {boolean} [options.array=false] Whether the texture is being passed as an ArrayBufferView.
         @param {number} [options.width] Width of the texture (only valid when passing array texture data).
         @param {number} [options.height] Height of the texture (only valid when passing array texture data).
         @param {boolean} [options.flipY=true] Whether th y-axis be flipped when reading the texture.
@@ -648,16 +647,16 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {GLEnum} [options.wrapT=REPEAT] Vertical wrap mode.
         @param {boolean} [options.generateMipmaps] Should mip maps be generated.
     */
-    PicoGL.App.prototype.createTexture2D = function(image, options) {
-        return new PicoGL.Texture(this.gl, this.gl.TEXTURE_2D, image, null, null, null, options);
+    PicoGL.App.prototype.createDOMTexture = function(image, options) {
+        return new PicoGL.Texture(this.gl, this.gl.TEXTURE_2D, image, null, null, null, false, false, options);
     };
 
-    PicoGL.App.prototype.createTexture3D = function(image, width, height, depth, options) {
-        return new PicoGL.Texture(this.gl, this.gl.TEXTURE_3D, image, width, height, depth, options);
+    PicoGL.App.prototype.createDataTexture2D = function(binding, image, width, height, options) {
+        return new PicoGL.Texture(this.gl, binding, image, width, height, null, true, false, options);
     };
 
-    PicoGL.App.prototype.createTexture2DArray = function(image, width, height, depth, options) {
-        return new PicoGL.Texture(this.gl, this.gl.TEXTURE_2D_ARRAY, image, width, height, depth, options);
+    PicoGL.App.prototype.createDataTexture3D = function(binding, image, width, height, depth, options) {
+        return new PicoGL.Texture(this.gl, binding, image, width, height, depth, true, true, options);
     };
 
     /**
@@ -1532,7 +1531,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @prop {GLEnum} internalFormat Internal arrangement of the texture data.
         @prop {GLEnum} type Type of data stored in the texture.
     */
-    PicoGL.Texture = function Texture(gl, binding, image, width, height, depth, options) {
+    PicoGL.Texture = function Texture(gl, binding, image, width, height, depth, buffer, is3D, options) {
         options = options || PicoGL.DUMMY_OBJECT;
         width = width || options.width || 0;
         height = height || options.height || 0;
@@ -1540,13 +1539,12 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
         this.gl = gl;
         this.binding = binding;
-        this.is3D = this.binding === gl.TEXTURE_3D || this.binding === gl.TEXTURE_2D_ARRAY;
+        this.is3D = is3D;
         this.texture = gl.createTexture();
         this.format = options.format || gl.RGBA;
         this.type = options.type || gl.UNSIGNED_BYTE;
         this.internalFormat = options.internalFormat || PicoGL.TEXTURE_INTERNAL_FORMAT[this.type][this.format];
 
-        var buffer = options.buffer || false;
         var flipY = options.flipY !== undefined ? options.flipY : true;
         var minFilter = options.minFilter || gl.LINEAR_MIPMAP_NEAREST;
         var magFilter = options.magFilter || gl.LINEAR;
@@ -1700,7 +1698,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {number} unit The texture unit to bind to.
     */
     PicoGL.Cubemap.prototype.bind = function(unit) {
-        this.gl.activeTexture(unit);
+        this.gl.activeTexture(PicoGL.TEXTURE_UNIT_MAP[unit]);
         this.gl.bindTexture(this.gl.TEXTURE_CUBE_MAP, this.texture);
     };    
 
@@ -1763,19 +1761,26 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         this.colorAttachments[index] = this.gl["COLOR_ATTACHMENT" + index];
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.framebuffer);
 
-        this.colorTextures[index] = new PicoGL.Texture(this.gl, this.gl.TEXTURE_2D, null, {
-            buffer: true,
-            type: type,
-            format: format,
-            internalFormat: internalFormat,
-            width: this.width,
-            height: this.height,
-            minFilter: this.gl.NEAREST,
-            magFilter: this.gl.NEAREST,
-            wrapS: this.gl.CLAMP_TO_EDGE,
-            wrapT: this.gl.CLAMP_TO_EDGE,
-            generateMipmaps: false
-        });
+        this.colorTextures[index] = new PicoGL.Texture(
+            this.gl,
+            this.gl.TEXTURE_2D,
+            null, 
+            this.width, 
+            this.height, 
+            null,
+            true,
+            false,
+            {
+                type: type,
+                format: format,
+                internalFormat: internalFormat,
+                minFilter: this.gl.NEAREST,
+                magFilter: this.gl.NEAREST,
+                wrapS: this.gl.CLAMP_TO_EDGE,
+                wrapT: this.gl.CLAMP_TO_EDGE,
+                generateMipmaps: false
+            }
+        );
 
         this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.colorAttachments[index], this.gl.TEXTURE_2D, this.colorTextures[index].texture, 0);
         this.gl.drawBuffers(this.colorAttachments);
@@ -1800,19 +1805,26 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.framebuffer);
 
-        this.depthTexture = new PicoGL.Texture(this.gl, this.gl.TEXTURE_2D, null, {
-            buffer: true,
-            format: format,
-            internalFormat: internalFormat,
-            type: type,
-            width: this.width,
-            height: this.height,
-            minFilter: this.gl.NEAREST,
-            magFilter: this.gl.NEAREST,
-            wrapS: this.gl.CLAMP_TO_EDGE,
-            wrapT: this.gl.CLAMP_TO_EDGE,
-            generateMipmaps: false
-        });
+        this.depthTexture = new PicoGL.Texture(
+            this.gl,
+            this.gl.TEXTURE_2D,
+            null, 
+            this.width, 
+            this.height, 
+            null,
+            true,
+            false,
+            {
+                type: type,
+                format: format,
+                internalFormat: internalFormat,
+                minFilter: this.gl.NEAREST,
+                magFilter: this.gl.NEAREST,
+                wrapS: this.gl.CLAMP_TO_EDGE,
+                wrapT: this.gl.CLAMP_TO_EDGE,
+                generateMipmaps: false
+            }
+        );
 
         this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.gl.DEPTH_ATTACHMENT, this.gl.TEXTURE_2D, this.depthTexture.texture, 0);
 

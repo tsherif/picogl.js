@@ -174,20 +174,7 @@
         var image = new Image();
 
         image.onload = function() {
-            var canvas = document.createElement('canvas');
-            canvas.width = image.width;
-            canvas.height = image.height;
-
-            var ctx = canvas.getContext("2d");
-            ctx.drawImage(image, 0, 0);
-            var imageData = ctx.getImageData(0, 0, image.width * image.height);
-            var pixels = new Uint8Array(imageData.data.buffer);
-
-            var textureWidth = image.width;
-            var textureHeight = image.width;
-            var numTextures = image.height / image.width;
-
-            var texture = app.createTextureArray(image);
+            var texture = app.createDOMTexture(image);
 
             var drawCall = app.createDrawCall(program, boxArray)
             .uniformBlock("SceneUniforms", sceneUniformBuffer)

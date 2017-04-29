@@ -536,7 +536,6 @@
         @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
         @param {GLEnum} [options.format=RGBA] Texture data format.
         @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
-        @param {boolean} [options.array=false] Whether the texture is being passed as an ArrayBufferView.
         @param {number} [options.width] Width of the texture (only valid when passing array texture data).
         @param {number} [options.height] Height of the texture (only valid when passing array texture data).
         @param {boolean} [options.flipY=true] Whether th y-axis be flipped when reading the texture.
@@ -546,16 +545,16 @@
         @param {GLEnum} [options.wrapT=REPEAT] Vertical wrap mode.
         @param {boolean} [options.generateMipmaps] Should mip maps be generated.
     */
-    PicoGL.App.prototype.createTexture2D = function(image, options) {
-        return new PicoGL.Texture(this.gl, this.gl.TEXTURE_2D, image, null, null, null, options);
+    PicoGL.App.prototype.createDOMTexture = function(image, options) {
+        return new PicoGL.Texture(this.gl, this.gl.TEXTURE_2D, image, null, null, null, false, false, options);
     };
 
-    PicoGL.App.prototype.createTexture3D = function(image, width, height, depth, options) {
-        return new PicoGL.Texture(this.gl, this.gl.TEXTURE_3D, image, width, height, depth, options);
+    PicoGL.App.prototype.createDataTexture2D = function(binding, image, width, height, options) {
+        return new PicoGL.Texture(this.gl, binding, image, width, height, null, true, false, options);
     };
 
-    PicoGL.App.prototype.createTexture2DArray = function(image, width, height, depth, options) {
-        return new PicoGL.Texture(this.gl, this.gl.TEXTURE_2D_ARRAY, image, width, height, depth, options);
+    PicoGL.App.prototype.createDataTexture3D = function(binding, image, width, height, depth, options) {
+        return new PicoGL.Texture(this.gl, binding, image, width, height, depth, true, true, options);
     };
 
     /**

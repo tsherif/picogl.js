@@ -79,19 +79,26 @@
         this.colorAttachments[index] = this.gl["COLOR_ATTACHMENT" + index];
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.framebuffer);
 
-        this.colorTextures[index] = new PicoGL.Texture(this.gl, this.gl.TEXTURE_2D, null, {
-            buffer: true,
-            type: type,
-            format: format,
-            internalFormat: internalFormat,
-            width: this.width,
-            height: this.height,
-            minFilter: this.gl.NEAREST,
-            magFilter: this.gl.NEAREST,
-            wrapS: this.gl.CLAMP_TO_EDGE,
-            wrapT: this.gl.CLAMP_TO_EDGE,
-            generateMipmaps: false
-        });
+        this.colorTextures[index] = new PicoGL.Texture(
+            this.gl,
+            this.gl.TEXTURE_2D,
+            null, 
+            this.width, 
+            this.height, 
+            null,
+            true,
+            false,
+            {
+                type: type,
+                format: format,
+                internalFormat: internalFormat,
+                minFilter: this.gl.NEAREST,
+                magFilter: this.gl.NEAREST,
+                wrapS: this.gl.CLAMP_TO_EDGE,
+                wrapT: this.gl.CLAMP_TO_EDGE,
+                generateMipmaps: false
+            }
+        );
 
         this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.colorAttachments[index], this.gl.TEXTURE_2D, this.colorTextures[index].texture, 0);
         this.gl.drawBuffers(this.colorAttachments);
@@ -116,19 +123,26 @@
 
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.framebuffer);
 
-        this.depthTexture = new PicoGL.Texture(this.gl, this.gl.TEXTURE_2D, null, {
-            buffer: true,
-            format: format,
-            internalFormat: internalFormat,
-            type: type,
-            width: this.width,
-            height: this.height,
-            minFilter: this.gl.NEAREST,
-            magFilter: this.gl.NEAREST,
-            wrapS: this.gl.CLAMP_TO_EDGE,
-            wrapT: this.gl.CLAMP_TO_EDGE,
-            generateMipmaps: false
-        });
+        this.depthTexture = new PicoGL.Texture(
+            this.gl,
+            this.gl.TEXTURE_2D,
+            null, 
+            this.width, 
+            this.height, 
+            null,
+            true,
+            false,
+            {
+                type: type,
+                format: format,
+                internalFormat: internalFormat,
+                minFilter: this.gl.NEAREST,
+                magFilter: this.gl.NEAREST,
+                wrapS: this.gl.CLAMP_TO_EDGE,
+                wrapT: this.gl.CLAMP_TO_EDGE,
+                generateMipmaps: false
+            }
+        );
 
         this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.gl.DEPTH_ATTACHMENT, this.gl.TEXTURE_2D, this.depthTexture.texture, 0);
 

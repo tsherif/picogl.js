@@ -33,7 +33,7 @@
         @prop {GLEnum} internalFormat Internal arrangement of the texture data.
         @prop {GLEnum} type Type of data stored in the texture.
     */
-    PicoGL.Texture = function Texture(gl, binding, image, width, height, depth, options) {
+    PicoGL.Texture = function Texture(gl, binding, image, width, height, depth, buffer, is3D, options) {
         options = options || PicoGL.DUMMY_OBJECT;
         width = width || options.width || 0;
         height = height || options.height || 0;
@@ -41,13 +41,12 @@
 
         this.gl = gl;
         this.binding = binding;
-        this.is3D = this.binding === gl.TEXTURE_3D || this.binding === gl.TEXTURE_2D_ARRAY;
+        this.is3D = is3D;
         this.texture = gl.createTexture();
         this.format = options.format || gl.RGBA;
         this.type = options.type || gl.UNSIGNED_BYTE;
         this.internalFormat = options.internalFormat || PicoGL.TEXTURE_INTERNAL_FORMAT[this.type][this.format];
 
-        var buffer = options.buffer || false;
         var flipY = options.flipY !== undefined ? options.flipY : true;
         var minFilter = options.minFilter || gl.LINEAR_MIPMAP_NEAREST;
         var magFilter = options.magFilter || gl.LINEAR;
