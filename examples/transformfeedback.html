@@ -101,11 +101,7 @@
              0.0, 0.3 
         ]));
 
-        var positions2 = app.createArrayBuffer(PicoGL.FLOAT, 2, new Float32Array([
-            -0.3, -0.3,
-             0.3, -0.3,
-             0.0, 0.3 
-        ]));
+        var positions2 = app.createArrayBuffer(PicoGL.FLOAT, 2, 6);
 
         // Just one color buffer because it won't be part of transform feedback
         var colors = app.createArrayBuffer(PicoGL.FLOAT, 3, new Float32Array([

@@ -38,7 +38,6 @@
         @prop {boolean} instanced Whether this is an instanced array.
         @prop {GLEnum} binding GL binding point (ARRAY_BUFFER or ELEMENT_ARRAY_BUFFER).
     */
-    // TODO(Tarek): Allow buffer to be initialized with size
     PicoGL.ArrayBuffer = function ArrayBuffer(gl, type, itemSize, data, usage, indexArray, instanced) {
         var numRows = 1;
         if (type === PicoGL.FLOAT_MAT4) {
@@ -56,11 +55,19 @@
             numRows = 2;
         }
 
+        var dataLength;
+        if (typeof data === "number") {
+            dataLength = data;
+            data *= PicoGL.TYPE_SIZE[type];
+        } else {
+            dataLength = data.length;
+        }
+
         this.gl = gl;
         this.buffer = gl.createBuffer();
         this.type = type;
         this.itemSize = itemSize;
-        this.numItems = data.length / (itemSize * numRows);
+        this.numItems = dataLength / (itemSize * numRows);
         this.numRows = numRows;
         this.usage = usage || gl.STATIC_DRAW;
         this.indexArray = !!indexArray;
@@ -78,7 +85,7 @@
         @method
         @param {ArrayBufferView} data Data to store in the buffer.
     */
-    PicoGL.ArrayBuffer.prototype.update = function(data) {
+    PicoGL.ArrayBuffer.prototype.data = function(data) {
         this.gl.bindBuffer(this.binding, this.buffer);
         this.gl.bufferSubData(this.binding, 0, data);
         this.gl.bindBuffer(this.binding, null);

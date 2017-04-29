@@ -308,7 +308,7 @@
                     mat4.multiply(spheres[i].modelMatrix, rotationMatrix, spheres[i].modelMatrix)
 
                     modelMatrixData.set(spheres[i].modelMatrix, i * 16);
-                    modelMatrices.update(modelMatrixData);
+                    modelMatrices.data(modelMatrixData);
                 }
 
                 // Accumulation pass

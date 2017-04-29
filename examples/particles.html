@@ -136,9 +136,9 @@
         }
 
         var positions1 = app.createArrayBuffer(PicoGL.FLOAT, 3, positionData);
-        var velocities1 = app.createArrayBuffer(PicoGL.FLOAT, 3, new Float32Array(positionData.length));
-        var positions2 = app.createArrayBuffer(PicoGL.FLOAT, 3, positionData);
-        var velocities2 = app.createArrayBuffer(PicoGL.FLOAT, 3, new Float32Array(positionData.length));
+        var velocities1 = app.createArrayBuffer(PicoGL.FLOAT, 3, positionData.length);
+        var positions2 = app.createArrayBuffer(PicoGL.FLOAT, 3, positionData.length);
+        var velocities2 = app.createArrayBuffer(PicoGL.FLOAT, 3, positionData.length);
         var colors = app.createArrayBuffer(PicoGL.FLOAT, 3, colorData);
 
         var vertexArray1 = app.createVertexArray()

@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.1.0 
+PicoGL.js v0.1.1 
 
 The MIT License (MIT)
 
@@ -33,9 +33,11 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @prop {string} version Current PicoGL version.
         @prop {object} TEXTURE_INTERNAL_FORMAT Map of framebuffer texture formats to internal formats.
         @prop {object} TYPE_SIZE Map of data types to sizes in bytes.
+        @prop {object} WEBGL_INFO WebGL context information.
+        @prop {object} TEXTURE_UNIT_MAP Map of texture unit indices to GL enums, e.g. 0 => gl.TEXTURE0.
     */
     var PicoGL = window.PicoGL = {
-        version: "0.1.0"
+        version: "0.1.1"
     };
 
     (function() {
@@ -775,7 +777,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @prop {WebGLProgram} program The WebGL program.
         @prop {boolean} transformFeedback Whether this program is set up for transform feedback. 
         @prop {Object} uniforms Map of uniform names to handles. 
-        @prop {Object} uniformBlockss Map of uniform block names to handles. 
+        @prop {Object} uniformBlocks Map of uniform block names to handles. 
     */
     PicoGL.Program = function Program(gl, vsSource, fsSource, xformFeebackVars) {
         var i;
@@ -933,8 +935,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @prop {WebGLVertexArrayObject} vertexArray Vertex array object.
         @prop {array} attributeBuffers The attribute ArrayBuffers associated with this vertex array.
         @prop {number} numElements Number of elements in the vertex array.
-        @prop {Glenum} indexType Data type of the indices.
         @prop {boolean} indexed Whether this vertex array is set up for indexed drawing.
+        @prop {GLenum} indexType Data type of the indices.
+        @prop {boolean} instanced Whether this vertex array is set up for instanced drawing.
         @prop {number} numInstances Number of instances to draw with this vertex array.
     */
     PicoGL.VertexArray = function VertexArray(gl) {
@@ -943,6 +946,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         this.attributeBuffers = [];
         this.numElements = 0;
         this.indexType = null;
+        this.instanced = false;
         this.indexed = false;
         this.numInstances = 0;
     };
@@ -1126,7 +1130,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @prop {boolean} instanced Whether this is an instanced array.
         @prop {GLEnum} binding GL binding point (ARRAY_BUFFER or ELEMENT_ARRAY_BUFFER).
     */
-    // TODO(Tarek): Allow buffer to be initialized with size
     PicoGL.ArrayBuffer = function ArrayBuffer(gl, type, itemSize, data, usage, indexArray, instanced) {
         var numRows = 1;
         if (type === PicoGL.FLOAT_MAT4) {
@@ -1144,11 +1147,19 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             numRows = 2;
         }
 
+        var dataLength;
+        if (typeof data === "number") {
+            dataLength = data;
+            data *= PicoGL.TYPE_SIZE[type];
+        } else {
+            dataLength = data.length;
+        }
+
         this.gl = gl;
         this.buffer = gl.createBuffer();
         this.type = type;
         this.itemSize = itemSize;
-        this.numItems = data.length / (itemSize * numRows);
+        this.numItems = dataLength / (itemSize * numRows);
         this.numRows = numRows;
         this.usage = usage || gl.STATIC_DRAW;
         this.indexArray = !!indexArray;
@@ -1166,7 +1177,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @method
         @param {ArrayBufferView} data Data to store in the buffer.
     */
-    PicoGL.ArrayBuffer.prototype.update = function(data) {
+    PicoGL.ArrayBuffer.prototype.data = function(data) {
         this.gl.bindBuffer(this.binding, this.buffer);
         this.gl.bufferSubData(this.binding, 0, data);
         this.gl.bindBuffer(this.binding, null);
@@ -1543,7 +1554,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     };
 
     /**
-        Bind this array buffer.
+        Bind this uniform buffer to the given base.
 
         @method
         @param {number} base Buffer base to bind to.
@@ -1630,7 +1641,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {ImageElement|ArrayBufferView} image Image data.
         @param {number} [width] Image width. Required when passing array data.
         @param {number} [height] Image height. Required when passing array data.
-        @param {number} [depth] Image depth or number of image. Required when passing 3D or texture array data.
+        @param {number} [depth] Image depth or number of images. Required when passing 3D or texture array data.
     */
     PicoGL.Texture.prototype.image = function(image, width, height, depth) {
         this.gl.activeTexture(this.gl.TEXTURE0);
