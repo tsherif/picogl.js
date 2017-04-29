@@ -63,7 +63,7 @@
 
         out vec4 fragColor;
         void main() {
-            float alpha = texture(tex, vUV).r * 0.15;
+            float alpha = texture(tex, vUV).r * 0.03;
             fragColor = vec4(vUV * alpha, alpha);
         }
     </script>
@@ -115,7 +115,7 @@
             x += INCREMENT;
         }
 
-        var TEXTURE_DIMENSIONS = 8;
+        var TEXTURE_DIMENSIONS = 16;
         var textureData = new Uint8Array(TEXTURE_DIMENSIONS * TEXTURE_DIMENSIONS * DIMENSIONS);
         var textureIndex = 0;
         for (var i = 0; i < TEXTURE_DIMENSIONS; ++i) {
@@ -132,7 +132,7 @@
         var pointArray = app.createVertexArray()
         .attributeBuffer(0, positions);
 
-        var texture = app.createTexture3D(textureData, TEXTURE_DIMENSIONS, TEXTURE_DIMENSIONS, TEXTURE_DIMENSIONS, {
+        var texture = app.createDataTexture3D(PicoGL.TEXTURE_3D, textureData, TEXTURE_DIMENSIONS, TEXTURE_DIMENSIONS, TEXTURE_DIMENSIONS, {
             format: PicoGL.RED
         });
 
