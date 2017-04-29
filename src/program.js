@@ -34,7 +34,7 @@
         @prop {WebGLProgram} program The WebGL program.
         @prop {boolean} transformFeedback Whether this program is set up for transform feedback. 
         @prop {Object} uniforms Map of uniform names to handles. 
-        @prop {Object} uniformBlockss Map of uniform block names to handles. 
+        @prop {Object} uniformBlocks Map of uniform block names to handles. 
     */
     PicoGL.Program = function Program(gl, vsSource, fsSource, xformFeebackVars) {
         var i;

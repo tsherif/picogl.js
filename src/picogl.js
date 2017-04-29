@@ -32,6 +32,8 @@
         @prop {string} version Current PicoGL version.
         @prop {object} TEXTURE_INTERNAL_FORMAT Map of framebuffer texture formats to internal formats.
         @prop {object} TYPE_SIZE Map of data types to sizes in bytes.
+        @prop {object} WEBGL_INFO WebGL context information.
+        @prop {object} TEXTURE_UNIT_MAP Map of texture unit indices to GL enums, e.g. 0 => gl.TEXTURE0.
     */
     var PicoGL = window.PicoGL = {
         version: "<%= VERSION %>"

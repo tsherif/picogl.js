@@ -30,10 +30,13 @@
         @class
         @prop {WebGLRenderingContext} gl The WebGL context.
         @prop {WebGLTexture} texture Handle to the texture.
-        @prop {GLEnum} internalFormat Internal arrangement of the texture data.
+        @prop {GLEnum} binding Binding point for the texture.
         @prop {GLEnum} type Type of data stored in the texture.
+        @prop {GLEnum} format Layout of texture data.
+        @prop {GLEnum} internalFormat Internal arrangement of the texture data.
+        @prop {boolean} is3D Whether this texture contains 3D data.
     */
-    PicoGL.Texture = function Texture(gl, binding, image, width, height, depth, buffer, is3D, options) {
+    PicoGL.Texture = function Texture(gl, binding, image, width, height, depth, is3D, options) {
         options = options || PicoGL.DUMMY_OBJECT;
         width = width || options.width || 0;
         height = height || options.height || 0;
@@ -41,12 +44,13 @@
 
         this.gl = gl;
         this.binding = binding;
-        this.is3D = is3D;
         this.texture = gl.createTexture();
         this.format = options.format || gl.RGBA;
         this.type = options.type || gl.UNSIGNED_BYTE;
         this.internalFormat = options.internalFormat || PicoGL.TEXTURE_INTERNAL_FORMAT[this.type][this.format];
+        this.is3D = is3D;
 
+        var buffer = !image || !!image.BYTES_PER_ELEMENT;
         var flipY = options.flipY !== undefined ? options.flipY : true;
         var minFilter = options.minFilter || gl.LINEAR_MIPMAP_NEAREST;
         var magFilter = options.magFilter || gl.LINEAR;
@@ -90,8 +94,9 @@
     
         @method
         @param {ImageElement|ArrayBufferView} image Image data.
-        @param {number} [width] Image width (should only be passed for ArrayBufferView data).
-        @param {number} [height] Image height (should only be passed for ArrayBufferView data).
+        @param {number} [width] Image width. Required when passing array data.
+        @param {number} [height] Image height. Required when passing array data.
+        @param {number} [depth] Image depth or number of images. Required when passing 3D or texture array data.
     */
     PicoGL.Texture.prototype.image = function(image, width, height, depth) {
         this.gl.activeTexture(this.gl.TEXTURE0);
@@ -100,7 +105,7 @@
         if (this.is3D) {
             this.gl.texImage3D(this.binding, 0, this.internalFormat, width, height, depth, 0, this.format, this.type, image);
         } else {
-            if (width && height) {
+            if (!image || !!image.BYTES_PER_ELEMENT) {
                 this.gl.texImage2D(this.binding, 0, this.internalFormat, width, height, 0, this.format, this.type, image);
             } else {
                 this.gl.texImage2D(this.binding, 0, this.internalFormat, this.format, this.type, image);

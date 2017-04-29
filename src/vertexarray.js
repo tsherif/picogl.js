@@ -32,8 +32,9 @@
         @prop {WebGLVertexArrayObject} vertexArray Vertex array object.
         @prop {array} attributeBuffers The attribute ArrayBuffers associated with this vertex array.
         @prop {number} numElements Number of elements in the vertex array.
-        @prop {Glenum} indexType Data type of the indices.
         @prop {boolean} indexed Whether this vertex array is set up for indexed drawing.
+        @prop {GLenum} indexType Data type of the indices.
+        @prop {boolean} instanced Whether this vertex array is set up for instanced drawing.
         @prop {number} numInstances Number of instances to draw with this vertex array.
     */
     PicoGL.VertexArray = function VertexArray(gl) {
@@ -42,6 +43,7 @@
         this.attributeBuffers = [];
         this.numElements = 0;
         this.indexType = null;
+        this.instanced = false;
         this.indexed = false;
         this.numInstances = 0;
     };

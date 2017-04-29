@@ -522,8 +522,8 @@
         @method
         @param {DOMElement|ArrayBufferView} image Image data. Can be any format that would be accepted 
                 by texImage2D. 
-        @param {number} [width] Texture width. Required if passing array data.
-        @param {number} [height] Texture height. Required if passing array data.
+        @param {number} [width] Texture width. Required for array data.
+        @param {number} [height] Texture height. Required for array data.
         @param {Object} [options] Texture options.
         @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
         @param {GLEnum} [options.format=RGBA] Texture data format.
@@ -536,14 +536,12 @@
         @param {boolean} [options.generateMipmaps] Should mip maps be generated.
     */
     PicoGL.App.prototype.createTexture2D = function(image, width, height, options) {
-        var buffer = true;
         if (height === undefined) {
             // Passing in a DOM element. Height/width not required.
             options = width;
-            buffer = false;
         }
 
-        return new PicoGL.Texture(this.gl, this.gl.TEXTURE_2D, image, width, height, null, buffer, false, options);
+        return new PicoGL.Texture(this.gl, this.gl.TEXTURE_2D, image, width, height, null, false, options);
     };
 
     /**
@@ -558,7 +556,6 @@
         @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
         @param {GLEnum} [options.format=RGBA] Texture data format.
         @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
-        @param {boolean} [options.flipY=true] Whether th y-axis be flipped when reading the texture.
         @param {GLEnum} [options.minFilter=LINEAR_MIPMAP_NEAREST] Minification filter.
         @param {GLEnum} [options.magFilter=LINEAR] Magnification filter.
         @param {GLEnum} [options.wrapS=REPEAT] Horizontal wrap mode.
@@ -566,7 +563,7 @@
         @param {boolean} [options.generateMipmaps] Should mip maps be generated.
     */
     PicoGL.App.prototype.createTextureArray = function(image, width, height, depth, options) {
-        return new PicoGL.Texture(this.gl, this.gl.TEXTURE_2D_ARRAY, image, width, height, depth, true, true, options);
+        return new PicoGL.Texture(this.gl, this.gl.TEXTURE_2D_ARRAY, image, width, height, depth, true, options);
     };
 
     /**
@@ -581,7 +578,6 @@
         @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
         @param {GLEnum} [options.format=RGBA] Texture data format.
         @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
-        @param {boolean} [options.flipY=true] Whether th y-axis be flipped when reading the texture.
         @param {GLEnum} [options.minFilter=LINEAR_MIPMAP_NEAREST] Minification filter.
         @param {GLEnum} [options.magFilter=LINEAR] Magnification filter.
         @param {GLEnum} [options.wrapS=REPEAT] Horizontal wrap mode.
@@ -589,7 +585,7 @@
         @param {boolean} [options.generateMipmaps] Should mip maps be generated.
     */
     PicoGL.App.prototype.createTexture3D = function(image, width, height, depth, options) {
-        return new PicoGL.Texture(this.gl, this.gl.TEXTURE_3D, image, width, height, depth, true, true, options);
+        return new PicoGL.Texture(this.gl, this.gl.TEXTURE_3D, image, width, height, depth, true, options);
     };
 
     /**
@@ -612,9 +608,8 @@
         @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
         @param {GLEnum} [options.format=RGBA] Texture data format.
         @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
-        @param {boolean} [options.array=false] Whether the texture is being passed as an ArrayBufferView.
-        @param {number} [options.width] Width of the texture (only valid when passing array texture data).
-        @param {number} [options.height] Height of the texture (only valid when passing array texture data).
+        @param {number} [options.width] Texture width. Required when passing array data.
+        @param {number} [options.height] Texture height. Required when passing array data.
         @param {boolean} [options.flipY=false] Whether th y-axis be flipped when reading the texture.
         @param {GLEnum} [options.minFilter=LINEAR_MIPMAP_NEAREST] Minification filter.
         @param {GLEnum} [options.magFilter=LINEAR] Magnification filter.

@@ -35,7 +35,6 @@
         @prop {Array} colorTextures Array of color texture targets. 
         @prop {number} numColorTargets Number of color texture targets. 
         @prop {Texture} depthTexture Depth texture target. 
-        @prop {WebGLDrawBuffers} drawBuffersExtension Hold the draw buffers extension object when enabled.
         @prop {Array} colorAttachments Array of color attachment enums. 
     */
     PicoGL.Framebuffer = function Framebuffer(gl, width, height) {
@@ -55,10 +54,6 @@
         this.colorTextures = [];
         this.colorAttachments = [];
         this.depthTexture = null;
-
-        gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer);
-        this.gl.drawBuffers(this.colorAttachments);
-        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     }; 
 
     /**
@@ -86,7 +81,6 @@
             this.width, 
             this.height, 
             null,
-            true,
             false,
             {
                 type: type,
@@ -130,7 +124,6 @@
             this.width, 
             this.height, 
             null,
-            true,
             false,
             {
                 type: type,
@@ -155,11 +148,10 @@
         Bind a new texture as a color target.
 
         @method
-        @param {number} [index=0] Color attachment to bind the texture to.
+        @param {number} index Color attachment to bind the texture to.
         @param {Texture} texture New texture to bind.
     */
     PicoGL.Framebuffer.prototype.replaceTexture = function(index, texture) {
-        index = index || 0;
         this.colorTextures[index] = texture;
 
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.framebuffer);

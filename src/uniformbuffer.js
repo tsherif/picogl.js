@@ -141,7 +141,7 @@
     };
 
     /**
-        Bind this array buffer.
+        Bind this uniform buffer to the given base.
 
         @method
         @param {number} base Buffer base to bind to.

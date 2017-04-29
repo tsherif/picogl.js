@@ -624,8 +624,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @method
         @param {DOMElement|ArrayBufferView} image Image data. Can be any format that would be accepted 
                 by texImage2D. 
-        @param {number} [width] Texture width. Required if passing array data.
-        @param {number} [height] Texture height. Required if passing array data.
+        @param {number} [width] Texture width. Required for array data.
+        @param {number} [height] Texture height. Required for array data.
         @param {Object} [options] Texture options.
         @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
         @param {GLEnum} [options.format=RGBA] Texture data format.
@@ -638,14 +638,12 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {boolean} [options.generateMipmaps] Should mip maps be generated.
     */
     PicoGL.App.prototype.createTexture2D = function(image, width, height, options) {
-        var buffer = true;
         if (height === undefined) {
             // Passing in a DOM element. Height/width not required.
             options = width;
-            buffer = false;
         }
 
-        return new PicoGL.Texture(this.gl, this.gl.TEXTURE_2D, image, width, height, null, buffer, false, options);
+        return new PicoGL.Texture(this.gl, this.gl.TEXTURE_2D, image, width, height, null, false, options);
     };
 
     /**
@@ -660,7 +658,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
         @param {GLEnum} [options.format=RGBA] Texture data format.
         @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
-        @param {boolean} [options.flipY=true] Whether th y-axis be flipped when reading the texture.
         @param {GLEnum} [options.minFilter=LINEAR_MIPMAP_NEAREST] Minification filter.
         @param {GLEnum} [options.magFilter=LINEAR] Magnification filter.
         @param {GLEnum} [options.wrapS=REPEAT] Horizontal wrap mode.
@@ -668,7 +665,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {boolean} [options.generateMipmaps] Should mip maps be generated.
     */
     PicoGL.App.prototype.createTextureArray = function(image, width, height, depth, options) {
-        return new PicoGL.Texture(this.gl, this.gl.TEXTURE_2D_ARRAY, image, width, height, depth, true, true, options);
+        return new PicoGL.Texture(this.gl, this.gl.TEXTURE_2D_ARRAY, image, width, height, depth, true, options);
     };
 
     /**
@@ -683,7 +680,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
         @param {GLEnum} [options.format=RGBA] Texture data format.
         @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
-        @param {boolean} [options.flipY=true] Whether th y-axis be flipped when reading the texture.
         @param {GLEnum} [options.minFilter=LINEAR_MIPMAP_NEAREST] Minification filter.
         @param {GLEnum} [options.magFilter=LINEAR] Magnification filter.
         @param {GLEnum} [options.wrapS=REPEAT] Horizontal wrap mode.
@@ -691,7 +687,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {boolean} [options.generateMipmaps] Should mip maps be generated.
     */
     PicoGL.App.prototype.createTexture3D = function(image, width, height, depth, options) {
-        return new PicoGL.Texture(this.gl, this.gl.TEXTURE_3D, image, width, height, depth, true, true, options);
+        return new PicoGL.Texture(this.gl, this.gl.TEXTURE_3D, image, width, height, depth, true, options);
     };
 
     /**
@@ -714,9 +710,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
         @param {GLEnum} [options.format=RGBA] Texture data format.
         @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
-        @param {boolean} [options.array=false] Whether the texture is being passed as an ArrayBufferView.
-        @param {number} [options.width] Width of the texture (only valid when passing array texture data).
-        @param {number} [options.height] Height of the texture (only valid when passing array texture data).
+        @param {number} [options.width] Texture width. Required when passing array data.
+        @param {number} [options.height] Texture height. Required when passing array data.
         @param {boolean} [options.flipY=false] Whether th y-axis be flipped when reading the texture.
         @param {GLEnum} [options.minFilter=LINEAR_MIPMAP_NEAREST] Minification filter.
         @param {GLEnum} [options.magFilter=LINEAR] Magnification filter.
@@ -1569,10 +1564,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @class
         @prop {WebGLRenderingContext} gl The WebGL context.
         @prop {WebGLTexture} texture Handle to the texture.
-        @prop {GLEnum} internalFormat Internal arrangement of the texture data.
+        @prop {GLEnum} binding Binding point for the texture.
         @prop {GLEnum} type Type of data stored in the texture.
+        @prop {GLEnum} format Layout of texture data.
+        @prop {GLEnum} internalFormat Internal arrangement of the texture data.
+        @prop {boolean} is3D Whether this texture contains 3D data.
     */
-    PicoGL.Texture = function Texture(gl, binding, image, width, height, depth, buffer, is3D, options) {
+    PicoGL.Texture = function Texture(gl, binding, image, width, height, depth, is3D, options) {
         options = options || PicoGL.DUMMY_OBJECT;
         width = width || options.width || 0;
         height = height || options.height || 0;
@@ -1580,12 +1578,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
         this.gl = gl;
         this.binding = binding;
-        this.is3D = is3D;
         this.texture = gl.createTexture();
         this.format = options.format || gl.RGBA;
         this.type = options.type || gl.UNSIGNED_BYTE;
         this.internalFormat = options.internalFormat || PicoGL.TEXTURE_INTERNAL_FORMAT[this.type][this.format];
+        this.is3D = is3D;
 
+        var buffer = !image || !!image.BYTES_PER_ELEMENT;
         var flipY = options.flipY !== undefined ? options.flipY : true;
         var minFilter = options.minFilter || gl.LINEAR_MIPMAP_NEAREST;
         var magFilter = options.magFilter || gl.LINEAR;
@@ -1629,8 +1628,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     
         @method
         @param {ImageElement|ArrayBufferView} image Image data.
-        @param {number} [width] Image width (should only be passed for ArrayBufferView data).
-        @param {number} [height] Image height (should only be passed for ArrayBufferView data).
+        @param {number} [width] Image width. Required when passing array data.
+        @param {number} [height] Image height. Required when passing array data.
+        @param {number} [depth] Image depth or number of image. Required when passing 3D or texture array data.
     */
     PicoGL.Texture.prototype.image = function(image, width, height, depth) {
         this.gl.activeTexture(this.gl.TEXTURE0);
@@ -1639,7 +1639,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         if (this.is3D) {
             this.gl.texImage3D(this.binding, 0, this.internalFormat, width, height, depth, 0, this.format, this.type, image);
         } else {
-            if (width && height) {
+            if (!image || !!image.BYTES_PER_ELEMENT) {
                 this.gl.texImage2D(this.binding, 0, this.internalFormat, width, height, 0, this.format, this.type, image);
             } else {
                 this.gl.texImage2D(this.binding, 0, this.internalFormat, this.format, this.type, image);
@@ -1674,6 +1674,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @class
         @prop {WebGLRenderingContext} gl The WebGL context.
         @prop {WebGLTexture} texture Handle to the texture.
+        @prop {GLEnum} type Type of data stored in the texture.
+        @prop {GLEnum} format Layout of texture data.
+        @prop {GLEnum} internalFormat Internal arrangement of the texture data.
     */
     PicoGL.Cubemap = function Texture(gl, options) {
         options = options || PicoGL.DUMMY_OBJECT;
@@ -1691,7 +1694,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         var negZ = options.negZ;
         var posZ = options.posZ;
         
-        var buffer = options.buffer || false;
+        var buffer = !negX || !!negX.BYTES_PER_ELEMENT;
         var width = options.width || 0;
         var height = options.height || 0;
         var flipY = options.flipY !== undefined ? options.flipY : false;
@@ -1759,7 +1762,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @prop {Array} colorTextures Array of color texture targets. 
         @prop {number} numColorTargets Number of color texture targets. 
         @prop {Texture} depthTexture Depth texture target. 
-        @prop {WebGLDrawBuffers} drawBuffersExtension Hold the draw buffers extension object when enabled.
         @prop {Array} colorAttachments Array of color attachment enums. 
     */
     PicoGL.Framebuffer = function Framebuffer(gl, width, height) {
@@ -1779,10 +1781,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         this.colorTextures = [];
         this.colorAttachments = [];
         this.depthTexture = null;
-
-        gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer);
-        this.gl.drawBuffers(this.colorAttachments);
-        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     }; 
 
     /**
@@ -1810,7 +1808,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             this.width, 
             this.height, 
             null,
-            true,
             false,
             {
                 type: type,
@@ -1854,7 +1851,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             this.width, 
             this.height, 
             null,
-            true,
             false,
             {
                 type: type,
@@ -1879,11 +1875,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         Bind a new texture as a color target.
 
         @method
-        @param {number} [index=0] Color attachment to bind the texture to.
+        @param {number} index Color attachment to bind the texture to.
         @param {Texture} texture New texture to bind.
     */
     PicoGL.Framebuffer.prototype.replaceTexture = function(index, texture) {
-        index = index || 0;
         this.colorTextures[index] = texture;
 
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.framebuffer);
@@ -1942,7 +1937,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @prop {Object} uniformBuffers Map of uniform buffer bases to uniform buffers.
         @prop {Object} uniformBlockBases Map of uniform blocks to uniform buffer bases.
         @prop {Number} uniformBlockCount Number of active uniform blocks for this draw call.
-        @prop {Object} uniform Map of uniform handles to values.
+        @prop {Object} uniforms Map of uniform handles to values.
         @prop {Object} textures Map of texture units to Textures.
         @prop {number} textureCount The number of active textures for this draw call. 
         @prop {GLEnum} primitive The primitive type being drawn. 

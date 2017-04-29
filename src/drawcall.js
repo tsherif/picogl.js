@@ -36,7 +36,7 @@
         @prop {Object} uniformBuffers Map of uniform buffer bases to uniform buffers.
         @prop {Object} uniformBlockBases Map of uniform blocks to uniform buffer bases.
         @prop {Number} uniformBlockCount Number of active uniform blocks for this draw call.
-        @prop {Object} uniform Map of uniform handles to values.
+        @prop {Object} uniforms Map of uniform handles to values.
         @prop {Object} textures Map of texture units to Textures.
         @prop {number} textureCount The number of active textures for this draw call. 
         @prop {GLEnum} primitive The primitive type being drawn. 

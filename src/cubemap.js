@@ -30,6 +30,9 @@
         @class
         @prop {WebGLRenderingContext} gl The WebGL context.
         @prop {WebGLTexture} texture Handle to the texture.
+        @prop {GLEnum} type Type of data stored in the texture.
+        @prop {GLEnum} format Layout of texture data.
+        @prop {GLEnum} internalFormat Internal arrangement of the texture data.
     */
     PicoGL.Cubemap = function Texture(gl, options) {
         options = options || PicoGL.DUMMY_OBJECT;
@@ -47,7 +50,7 @@
         var negZ = options.negZ;
         var posZ = options.posZ;
         
-        var buffer = options.buffer || false;
+        var buffer = !negX || !!negX.BYTES_PER_ELEMENT;
         var width = options.width || 0;
         var height = options.height || 0;
         var flipY = options.flipY !== undefined ? options.flipY : false;
