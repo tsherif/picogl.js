@@ -44,7 +44,6 @@
             type = PicoGL.FLOAT;
             itemSize = 4;
             numRows = 4;
-        // TODO(Tarek): Make sure MAT3/MAT2 work!
         } else if (type === PicoGL.FLOAT_MAT3) {
             type = PicoGL.FLOAT;
             itemSize = 3;
