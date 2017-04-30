@@ -598,7 +598,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     };
 
     /**
-        Create a uniform buffer. Layout is std140.
+        Create a uniform buffer in std140 layout. NOTE: FLOAT_MAT2 and FLOAT_MAT3
+        are supported, but must be manually padded to 4-float column alignment by
+        the application!
 
         @method
         @param {Array} layout Array indicating the order and types of items to 
@@ -1462,7 +1464,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         this.size = 0;
         this.usage = usage || gl.DYNAMIC_DRAW;
 
-        // TODO(Tarek): MAT2/MAT3?
         for (var i = 0, len = layout.length; i < len; ++i) {
             var type = layout[i];
             switch(type) { 
@@ -1979,8 +1980,11 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             this.currentTransformFeedback = null;    
         }
         
-        this.uniforms = {};
+        this.uniformIndices = {};
+        this.uniformNames = new Array(PicoGL.WEBGL_INFO.MAX_UNIFORMS);
+        this.uniformValues = new Array(PicoGL.WEBGL_INFO.MAX_UNIFORMS);
         this.uniformBuffers = new Array(PicoGL.WEBGL_INFO.MAX_UNIFORM_BUFFERS);
+        this.uniformCount = 0;
         this.uniformBlockNames = new Array(PicoGL.WEBGL_INFO.MAX_UNIFORM_BUFFERS);
         this.uniformBlockBases = {};
         this.uniformBlockCount = 0;
@@ -1997,7 +2001,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {any} value Uniform value.
     */
     PicoGL.DrawCall.prototype.uniform = function(name, value) {
-        this.uniforms[name] = value;
+        var index = this.uniformIndices[name];
+        if (index === undefined) {
+            index = this.uniformCount++;
+            this.uniformIndices[name] = index;
+            this.uniformNames[index] = name;
+        }
+        this.uniformValues[index] = value;
 
         return this;
     };
@@ -2010,10 +2020,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {Texture} texture Texture to bind.
     */
     PicoGL.DrawCall.prototype.texture = function(name, texture) {
-        var unit = this.uniforms[name];
-        if (unit === undefined) {
+        var unit;
+        var index = this.uniformIndices[name];
+        if (index === undefined) {
             unit = this.textureCount++;
-            this.uniforms[name] = unit;
+            this.uniform(name, unit);
+        } else {
+            unit = this.uniformValues[index];
         }
         
         this.textures[unit] = texture;
@@ -2048,7 +2061,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {Object} state Current app state.
     */
     PicoGL.DrawCall.prototype.draw = function(state) {
-        var uniforms = this.uniforms;
+        var uniformNames = this.uniformNames;
+        var uniformValues = this.uniformValues;
         var uniformBuffers = this.uniformBuffers;
         var uniformBlockNames = this.uniformBlockNames;
         var textures = this.textures;
@@ -2058,8 +2072,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             state.program = this.currentProgram;
         }
 
-        for (var uName in uniforms) {
-            this.currentProgram.uniform(uName, uniforms[uName]);
+        for (var uIndex = 0; uIndex < this.uniformCount; ++uIndex) {
+            this.currentProgram.uniform(uniformNames[uIndex], uniformValues[uIndex]);
         }
 
         for (var base = 0; base < this.uniformBlockCount; ++base) {

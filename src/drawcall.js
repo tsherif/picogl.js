@@ -33,11 +33,15 @@
         @prop {Program} currentProgram The program to use for this draw call.
         @prop {VertexArray} currentVertexArray Vertex array to use for this draw call.
         @prop {TransformFeedback} currentTransformFeedback Transform feedback to use for this draw call.
-        @prop {Object} uniformBuffers Map of uniform buffer bases to uniform buffers.
+        @prop {Array} uniformBuffers Ordered list of active uniform buffers.
+        @prop {Array} uniformBlockNames Ordered list of uniform block names.
         @prop {Object} uniformBlockBases Map of uniform blocks to uniform buffer bases.
         @prop {Number} uniformBlockCount Number of active uniform blocks for this draw call.
-        @prop {Object} uniforms Map of uniform handles to values.
-        @prop {Object} textures Map of texture units to Textures.
+        @prop {Object} uniformIndices Map of uniform names to indices in the uniform arrays.
+        @prop {Array} uniformNames Ordered list of uniform names.
+        @prop {Array} uniformValue Ordered list of uniform values.
+        @prop {number} uniformCount The number of active uniforms for this draw call.
+        @prop {Array} textures Array of active textures.
         @prop {number} textureCount The number of active textures for this draw call. 
         @prop {GLEnum} primitive The primitive type being drawn. 
     */
@@ -53,7 +57,10 @@
             this.currentTransformFeedback = null;    
         }
         
-        this.uniforms = {};
+        this.uniformIndices = {};
+        this.uniformNames = new Array(PicoGL.WEBGL_INFO.MAX_UNIFORMS);
+        this.uniformValues = new Array(PicoGL.WEBGL_INFO.MAX_UNIFORMS);
+        this.uniformCount = 0;
         this.uniformBuffers = new Array(PicoGL.WEBGL_INFO.MAX_UNIFORM_BUFFERS);
         this.uniformBlockNames = new Array(PicoGL.WEBGL_INFO.MAX_UNIFORM_BUFFERS);
         this.uniformBlockBases = {};
@@ -71,7 +78,13 @@
         @param {any} value Uniform value.
     */
     PicoGL.DrawCall.prototype.uniform = function(name, value) {
-        this.uniforms[name] = value;
+        var index = this.uniformIndices[name];
+        if (index === undefined) {
+            index = this.uniformCount++;
+            this.uniformIndices[name] = index;
+            this.uniformNames[index] = name;
+        }
+        this.uniformValues[index] = value;
 
         return this;
     };
@@ -84,10 +97,13 @@
         @param {Texture} texture Texture to bind.
     */
     PicoGL.DrawCall.prototype.texture = function(name, texture) {
-        var unit = this.uniforms[name];
-        if (unit === undefined) {
+        var unit;
+        var index = this.uniformIndices[name];
+        if (index === undefined) {
             unit = this.textureCount++;
-            this.uniforms[name] = unit;
+            this.uniform(name, unit);
+        } else {
+            unit = this.uniformValues[index];
         }
         
         this.textures[unit] = texture;
@@ -122,7 +138,8 @@
         @param {Object} state Current app state.
     */
     PicoGL.DrawCall.prototype.draw = function(state) {
-        var uniforms = this.uniforms;
+        var uniformNames = this.uniformNames;
+        var uniformValues = this.uniformValues;
         var uniformBuffers = this.uniformBuffers;
         var uniformBlockNames = this.uniformBlockNames;
         var textures = this.textures;
@@ -132,8 +149,8 @@
             state.program = this.currentProgram;
         }
 
-        for (var uName in uniforms) {
-            this.currentProgram.uniform(uName, uniforms[uName]);
+        for (var uIndex = 0; uIndex < this.uniformCount; ++uIndex) {
+            this.currentProgram.uniform(uniformNames[uIndex], uniformValues[uIndex]);
         }
 
         for (var base = 0; base < this.uniformBlockCount; ++base) {
