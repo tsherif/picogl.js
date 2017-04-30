@@ -63,6 +63,7 @@ module.exports = function(grunt) {
                   "src/picogl.js",
                   "src/app.js",
                   "src/program.js",
+                  "src/shader.js",
                   "src/vertexarray.js",
                   "src/transformfeedback.js",
                   "src/arraybuffer.js",
@@ -71,8 +72,7 @@ module.exports = function(grunt) {
                   "src/texture.js",
                   "src/cubemap.js",
                   "src/framebuffer.js",
-                  "src/drawcall.js",
-
+                  "src/drawcall.js"
                 ],
                 dest: "build/<%= packageName %>.js"
             }

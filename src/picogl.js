@@ -108,20 +108,5 @@
         return new PicoGL.App(canvas, contextAttributes);
     };
 
-    PicoGL.compileShader = function(gl, shader, source) {
-        gl.shaderSource(shader, source);
-        gl.compileShader(shader);
-
-        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-            var i, lines;
-
-            console.error(gl.getShaderInfoLog(shader));
-            lines = source.split("\n");
-            for (i = 0; i < lines.length; ++i) {
-                console.error((i + 1) + ":", lines[i]);
-            }
-        }
-    };
-
 })();
 

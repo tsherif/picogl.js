@@ -39,29 +39,27 @@
     PicoGL.Program = function Program(gl, vsSource, fsSource, xformFeebackVars) {
         var i;
 
-        var vshader, fshader; 
+        var vShader, fShader; 
 
         var ownVertexShader = false;
         var ownFragmentShader = false;
         if (typeof vsSource === "string") {
-            vshader = gl.createShader(gl.VERTEX_SHADER);
-            PicoGL.compileShader(gl, vshader, vsSource);
+            vShader = new PicoGL.Shader(gl, gl.VERTEX_SHADER, vsSource);
             ownVertexShader = true;
         } else {
-            vshader = vsSource;
+            vShader = vsSource;
         }
 
         if (typeof fsSource === "string") {
-            fshader = gl.createShader(gl.FRAGMENT_SHADER);
-            PicoGL.compileShader(gl, fshader, fsSource);
+            fShader = new PicoGL.Shader(gl, gl.FRAGMENT_SHADER, fsSource);
             ownFragmentShader = true;
         } else {
-            fshader = fsSource;
+            fShader = fsSource;
         }
 
         var program = gl.createProgram();
-        gl.attachShader(program, vshader);
-        gl.attachShader(program, fshader);
+        gl.attachShader(program, vShader.shader);
+        gl.attachShader(program, fShader.shader);
         if (xformFeebackVars) {
             gl.transformFeedbackVaryings(program, xformFeebackVars, gl.SEPARATE_ATTRIBS);
         }
@@ -72,11 +70,11 @@
         }
 
         if (ownVertexShader) {
-            gl.deleteShader(vshader);
+            vShader.delete();
         }
 
         if (ownFragmentShader) {
-            gl.deleteShader(fshader);
+           fShader.delete();
         }
 
         this.gl = gl;

@@ -262,6 +262,7 @@
         var blendFsSource =  document.getElementById("fragment-blend").text.trim();
         var blendProgram = app.createProgram(quadVertexShader, blendFsSource);
 
+        quadVertexShader.delete();
 
         // SET UP FRAMEBUFFERS AND TEXTURES
 

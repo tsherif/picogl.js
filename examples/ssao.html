@@ -306,6 +306,8 @@
         var noSSAOFsSource =  document.getElementById("fragment-color").text.trim();
         var noSSAOProgram = app.createProgram(quadShader, noSSAOFsSource);
 
+        quadShader.delete();
+
         // Geometry
         var sphere = utils.createSphere({radius: 0.5});
         var positions = app.createArrayBuffer(PicoGL.FLOAT, 3, sphere.positions);

@@ -35,7 +35,6 @@
         @prop {number} height The height of the drawing surface.
         @prop {boolean} floatRenderTargetsEnabled Whether the EXT_color_buffer_float extension is enabled.
         @prop {boolean} linearFloatTexturesEnabled Whether the OES_texture_float_linear extension is enabled.
-        @prop {boolean} debugEnabled Whether debug logging is enabled.
         @prop {Object} currentState Tracked GL state.
         @prop {GLEnum} clearBits Current clear mask to use with clear().
     */
@@ -58,8 +57,6 @@
         
         this.floatRenderTargetsEnabled = false;
         this.linearFloatTexturesEnabled = false;
-
-        this.debugEnabled = true;
     };
 
     /**
@@ -392,12 +389,12 @@
         Create a program.
 
         @method
-        @param {WebGLShader|string} vertexShader Vertex shader object or source code.
-        @param {WebGLShader|string} fragmentShader Fragment shader object or source code.
+        @param {Shader|string} vertexShader Vertex shader object or source code.
+        @param {Shader|string} fragmentShader Fragment shader object or source code.
         @param {Array} [xformFeedbackVars] Transform feedback varyings.
     */
     PicoGL.App.prototype.createProgram = function(vsSource, fsSource, xformFeedbackVars) {
-        return new PicoGL.Program(this.gl, vsSource, fsSource, xformFeedbackVars, this.debugEnabled);
+        return new PicoGL.Program(this.gl, vsSource, fsSource, xformFeedbackVars);
     };
 
     /**
@@ -409,10 +406,7 @@
         @param {string} source Shader source.
     */
     PicoGL.App.prototype.createShader = function(type, source) {
-        var shader = this.gl.createShader(type);
-        PicoGL.compileShader(this.gl, shader, source, this.debugEnabled);
-        
-        return shader;
+        return new PicoGL.Shader(this.gl, type, source);
     };
 
     /**

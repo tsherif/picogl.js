@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: arraybuffer.js</title>
+    <title>JSDoc: Source: shader.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: arraybuffer.js</h1>
+    <h1 class="page-title">Source: shader.js</h1>
 
     
 
@@ -53,93 +53,38 @@
     "use strict";
 
     /**
-        Storage for vertex data.
+        WebGL shader.
 
         @class
         @prop {WebGLRenderingContext} gl The WebGL context.
-        @prop {WebGLBuffer} buffer Allocated buffer storage.
-        @prop {GLEnum} type The type of data stored in the buffer.
-        @prop {number} itemSize Number of array elements per vertex.
-        @prop {number} numItems Number of vertices represented.
-        @prop {GLEnum} usage The usage pattern of the buffer.
-        @prop {boolean} indexArray Whether this is an index array.
-        @prop {boolean} instanced Whether this is an instanced array.
-        @prop {GLEnum} binding GL binding point (ARRAY_BUFFER or ELEMENT_ARRAY_BUFFER).
+        @prop {WebGLShader} shader The shader.
     */
-    PicoGL.ArrayBuffer = function ArrayBuffer(gl, type, itemSize, data, usage, indexArray, instanced) {
-        var numRows = 1;
-        if (type === PicoGL.FLOAT_MAT4) {
-            type = PicoGL.FLOAT;
-            itemSize = 4;
-            numRows = 4;
-        } else if (type === PicoGL.FLOAT_MAT3) {
-            type = PicoGL.FLOAT;
-            itemSize = 3;
-            numRows = 3;
-        }  else if (type === PicoGL.FLOAT_MAT2) {
-            type = PicoGL.FLOAT;
-            itemSize = 2;
-            numRows = 2;
-        }
-
-        var dataLength;
-        if (typeof data === "number") {
-            dataLength = data;
-            data *= PicoGL.TYPE_SIZE[type];
-        } else {
-            dataLength = data.length;
-        }
-
+    PicoGL.Shader = function(gl, type, source) {
         this.gl = gl;
-        this.buffer = gl.createBuffer();
-        this.type = type;
-        this.itemSize = itemSize;
-        this.numItems = dataLength / (itemSize * numRows);
-        this.numRows = numRows;
-        this.usage = usage || gl.STATIC_DRAW;
-        this.indexArray = !!indexArray;
-        this.instanced = !!instanced;
-        this.binding = this.indexArray ? gl.ELEMENT_ARRAY_BUFFER : gl.ARRAY_BUFFER;
+        this.shader = gl.createShader(type);
+        gl.shaderSource(this.shader, source);
+        gl.compileShader(this.shader);
 
-        gl.bindBuffer(this.binding, this.buffer);
-        gl.bufferData(this.binding, data, this.usage);
-        gl.bindBuffer(this.binding, null);
+        if (!gl.getShaderParameter(this.shader, gl.COMPILE_STATUS)) {
+            var i, lines;
+
+            console.error(gl.getShaderInfoLog(this.shader));
+            lines = source.split("\n");
+            for (i = 0; i &lt; lines.length; ++i) {
+                console.error((i + 1) + ":", lines[i]);
+            }
+        }
     };
 
     /**
-        Update data in this buffer.
-
-        @method
-        @param {ArrayBufferView} data Data to store in the buffer.
-    */
-    PicoGL.ArrayBuffer.prototype.data = function(data) {
-        this.gl.bindBuffer(this.binding, this.buffer);
-        this.gl.bufferSubData(this.binding, 0, data);
-        this.gl.bindBuffer(this.binding, null);
-
-        return this;
-    };
-
-    /**
-        Bind this array buffer.
+        Delete this shader.
 
         @method
     */
-    PicoGL.ArrayBuffer.prototype.bind = function() {
-        this.gl.bindBuffer(this.binding, this.buffer);
-
-        return this;
-    };
-
-    /**
-        Delete this array buffer.
-
-        @method
-    */
-    PicoGL.ArrayBuffer.prototype.delete = function() {
-        if (this.buffer) {
-            this.gl.deleteBuffer(this.buffer);
-            this.buffer = null;    
+    PicoGL.Shader.prototype.delete = function() {
+        if (this.shader) {
+            this.gl.deleteShader(this.shader);
+            this.shader = null;
         }
     };
 

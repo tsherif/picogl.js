@@ -109,21 +109,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         return new PicoGL.App(canvas, contextAttributes);
     };
 
-    PicoGL.compileShader = function(gl, shader, source) {
-        gl.shaderSource(shader, source);
-        gl.compileShader(shader);
-
-        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-            var i, lines;
-
-            console.error(gl.getShaderInfoLog(shader));
-            lines = source.split("\n");
-            for (i = 0; i < lines.length; ++i) {
-                console.error((i + 1) + ":", lines[i]);
-            }
-        }
-    };
-
 })();
 
 ;(function() {
@@ -140,7 +125,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @prop {number} height The height of the drawing surface.
         @prop {boolean} floatRenderTargetsEnabled Whether the EXT_color_buffer_float extension is enabled.
         @prop {boolean} linearFloatTexturesEnabled Whether the OES_texture_float_linear extension is enabled.
-        @prop {boolean} debugEnabled Whether debug logging is enabled.
         @prop {Object} currentState Tracked GL state.
         @prop {GLEnum} clearBits Current clear mask to use with clear().
     */
@@ -163,8 +147,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         
         this.floatRenderTargetsEnabled = false;
         this.linearFloatTexturesEnabled = false;
-
-        this.debugEnabled = true;
     };
 
     /**
@@ -502,7 +484,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {Array} [xformFeedbackVars] Transform feedback varyings.
     */
     PicoGL.App.prototype.createProgram = function(vsSource, fsSource, xformFeedbackVars) {
-        return new PicoGL.Program(this.gl, vsSource, fsSource, xformFeedbackVars, this.debugEnabled);
+        return new PicoGL.Program(this.gl, vsSource, fsSource, xformFeedbackVars);
     };
 
     /**
@@ -514,10 +496,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {string} source Shader source.
     */
     PicoGL.App.prototype.createShader = function(type, source) {
-        var shader = this.gl.createShader(type);
-        PicoGL.compileShader(this.gl, shader, source, this.debugEnabled);
-        
-        return shader;
+        return new PicoGL.Shader(this.gl, type, source);
     };
 
     /**
@@ -785,29 +764,27 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     PicoGL.Program = function Program(gl, vsSource, fsSource, xformFeebackVars) {
         var i;
 
-        var vshader, fshader; 
+        var vShader, fShader; 
 
         var ownVertexShader = false;
         var ownFragmentShader = false;
         if (typeof vsSource === "string") {
-            vshader = gl.createShader(gl.VERTEX_SHADER);
-            PicoGL.compileShader(gl, vshader, vsSource);
+            vShader = new PicoGL.Shader(gl, gl.VERTEX_SHADER, vsSource);
             ownVertexShader = true;
         } else {
-            vshader = vsSource;
+            vShader = vsSource;
         }
 
         if (typeof fsSource === "string") {
-            fshader = gl.createShader(gl.FRAGMENT_SHADER);
-            PicoGL.compileShader(gl, fshader, fsSource);
+            fShader = new PicoGL.Shader(gl, gl.FRAGMENT_SHADER, fsSource);
             ownFragmentShader = true;
         } else {
-            fshader = fsSource;
+            fShader = fsSource;
         }
 
         var program = gl.createProgram();
-        gl.attachShader(program, vshader);
-        gl.attachShader(program, fshader);
+        gl.attachShader(program, vShader.shader);
+        gl.attachShader(program, fShader.shader);
         if (xformFeebackVars) {
             gl.transformFeedbackVaryings(program, xformFeebackVars, gl.SEPARATE_ATTRIBS);
         }
@@ -818,11 +795,11 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         }
 
         if (ownVertexShader) {
-            gl.deleteShader(vshader);
+            vShader.delete();
         }
 
         if (ownFragmentShader) {
-            gl.deleteShader(fshader);
+           fShader.delete();
         }
 
         this.gl = gl;
@@ -951,6 +928,46 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 })();
 
+;(function() {
+    "use strict";
+
+    /**
+        WebGL shader.
+
+        @class
+        @prop {WebGLRenderingContext} gl The WebGL context.
+        @prop {WebGLShader} shader Vertex array object.
+    */
+    PicoGL.Shader = function(gl, type, source) {
+        this.gl = gl;
+        this.shader = gl.createShader(type);
+        gl.shaderSource(this.shader, source);
+        gl.compileShader(this.shader);
+
+        if (!gl.getShaderParameter(this.shader, gl.COMPILE_STATUS)) {
+            var i, lines;
+
+            console.error(gl.getShaderInfoLog(this.shader));
+            lines = source.split("\n");
+            for (i = 0; i < lines.length; ++i) {
+                console.error((i + 1) + ":", lines[i]);
+            }
+        }
+    };
+
+    /**
+        Delete this shader.
+
+        @method
+    */
+    PicoGL.Shader.prototype.delete = function() {
+        if (this.shader) {
+            this.gl.deleteShader(this.shader);
+            this.shader = null;
+        }
+    };
+
+})();
 ;(function() {
     "use strict";
 
