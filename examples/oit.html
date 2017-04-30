@@ -147,6 +147,8 @@
         }
     </script>
     <script type="text/javascript">
+        utils.addTimerElement();
+
         var NEAR = 0.1;
         var FAR = 10.0;
         var NUM_SPHERES = 32;
@@ -299,6 +301,11 @@
             var rotationMatrix = mat4.create();
 
             function draw() {
+                if (app.timerReady()) {
+                    utils.updateTimerElement(app.cpuTime, app.gpuTime);
+                }
+
+                app.timerStart();
 
                 for (var i = 0, len = spheres.length; i < len; ++i) {
                     spheres[i].rotate[1] += 0.002;
@@ -322,7 +329,9 @@
                 .drawCalls(accumDrawCalls)
                 .blendFunc(PicoGL.ONE, PicoGL.ONE_MINUS_SRC_ALPHA)
                 .clear()
-                .draw(); 
+                .draw();
+                
+                app.timerEnd(); 
                                 
                 requestAnimationFrame(draw);
             }

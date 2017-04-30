@@ -16,6 +16,13 @@ body {
     display: none;
 }
 
+#timer {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    color: white;
+}
+
 #github-ribbon {
     display: none;
 }

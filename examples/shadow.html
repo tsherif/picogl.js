@@ -118,6 +118,8 @@
         }
     </script> 
     <script type="text/javascript">
+        utils.addTimerElement();
+
         var canvas = document.getElementById("gl-canvas");
 
         if (!canvas.getContext("webgl2")) {
@@ -227,6 +229,11 @@
 
 
             function draw() {
+                if (app.timerReady()) {
+                    utils.updateTimerElement(app.cpuTime, app.gpuTime);
+                }
+
+                app.timerStart();
 
                 for (var i = 0, len = boxes.length; i < len; ++i) {
                     boxes[i].rotate[0] += 0.01;
@@ -252,6 +259,8 @@
                 .drawCalls(mainDrawCalls)
                 .clear()
                 .draw();
+
+                app.timerEnd();
 
                 requestAnimationFrame(draw);
             }

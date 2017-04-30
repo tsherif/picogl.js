@@ -213,6 +213,8 @@
         }
     </script>
     <script>
+        utils.addTimerElement();   
+        
         var bloomEnabled = true;
 
         document.getElementById("bloom-toggle").addEventListener("change", function() {
@@ -444,6 +446,12 @@
             var blurWriteTexture = blurTextureB;
 
             function draw() {
+                if (app.timerReady()) {
+                    utils.updateTimerElement(app.cpuTime, app.gpuTime);
+                }
+
+                app.timerStart();
+
                 cube.rotation[0] += 0.01;
                 cube.rotation[1] += 0.02;
 
@@ -491,6 +499,8 @@
                 .drawCalls(blendDrawCalls)
                 .clear()
                 .draw();
+                
+                app.timerEnd();
 
                 requestAnimationFrame(draw);
             }

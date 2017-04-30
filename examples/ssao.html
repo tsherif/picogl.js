@@ -227,6 +227,8 @@
         }
     </script>
     <script type="text/javascript">
+        utils.addTimerElement();
+
         var ssaoEnabled = true;
 
         document.getElementById("ssao-toggle").addEventListener("change", function() {
@@ -449,9 +451,13 @@
             var rotationMatrix = mat4.create();
 
             function draw() {
+                if (app.timerReady()) {
+                    utils.updateTimerElement(app.cpuTime, app.gpuTime);
+                }
+
+                app.timerStart();
 
                 // Draw to colorGeoBuffer
-
                 for (var i = 0, len = spheres.length; i < len; ++i) {
                     spheres[i].rotate[1] += 0.002;
 
@@ -483,7 +489,9 @@
                     .clear()
                     .draw();
                 }
-                                
+                
+                app.timerEnd();
+
                 requestAnimationFrame(draw);
             }
 

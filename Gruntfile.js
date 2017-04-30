@@ -72,7 +72,8 @@ module.exports = function(grunt) {
                   "src/texture.js",
                   "src/cubemap.js",
                   "src/framebuffer.js",
-                  "src/drawcall.js"
+                  "src/drawcall.js",
+                  "src/timer.js"
                 ],
                 dest: "build/<%= packageName %>.js"
             }

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Class: Cubemap</title>
+    <title>JSDoc: Class: Timer</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Class: Cubemap</h1>
+    <h1 class="page-title">Class: Timer</h1>
 
     
 
@@ -29,7 +29,7 @@
 <header>
     
         <h2>
-            <span class="ancestors"><a href="PicoGL.html">PicoGL</a>.</span>Cubemap</h2>
+            <span class="ancestors"><a href="PicoGL.html">PicoGL</a>.</span>Timer</h2>
         
     
 </header>
@@ -41,14 +41,14 @@
 
     
 
-    <h4 class="name" id="Cubemap"><span class="type-signature"></span>new Cubemap<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="Timer"><span class="type-signature"></span>new Timer<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
 
 
 <div class="description">
-    Cubemap for environment mapping.
+    Rendering timer.
 </div>
 
 
@@ -112,13 +112,13 @@
 
         <tr>
             
-                <td class="name"><code>texture</code></td>
+                <td class="name"><code>cpuTimer</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">WebGLTexture</span>
+<span class="param-type">Object</span>
 
 
             
@@ -128,20 +128,20 @@
 
             
 
-            <td class="description last">Handle to the texture.</td>
+            <td class="description last">Timer for CPU. Will be window.performance, if available, or window.Date.</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>type</code></td>
+                <td class="name"><code>gpuTimer</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">GLEnum</span>
+<span class="param-type">EXTDisjointTimerQueryWebGL2</span>
 
 
             
@@ -151,20 +151,21 @@
 
             
 
-            <td class="description last">Type of data stored in the texture.</td>
+            <td class="description last">Timer for GPU. Only available if 
+                EXT_disjoint_timer_query_webgl2 is supported.</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>format</code></td>
+                <td class="name"><code>gpuTimerQuery</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">GLEnum</span>
+<span class="param-type">WebGLQuery</span>
 
 
             
@@ -174,20 +175,21 @@
 
             
 
-            <td class="description last">Layout of texture data.</td>
+            <td class="description last">Timer query object for GPU. Only available if 
+                EXT_disjoint_timer_query_webgl2 is supported.</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>internalFormat</code></td>
+                <td class="name"><code>gpuTimerQueryInProgress</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">GLEnum</span>
+<span class="param-type">boolean</span>
 
 
             
@@ -197,7 +199,76 @@
 
             
 
-            <td class="description last">Internal arrangement of the texture data.</td>
+            <td class="description last">Whether a gpu timer query is currently in progress.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>cpuStartTime</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">When the last CPU timing started.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>cpuTime</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Time spent on the CPU during the last timing. Only valid if ready() returns true.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>gpuTime</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Time spent on the GPU during the last timing. Only valid if ready() returns true.</td>
         </tr>
 
     
@@ -236,7 +307,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="cubemap.js.html">cubemap.js</a>, <a href="cubemap.js.html#line37">line 37</a>
+        <a href="timer.js.html">timer.js</a>, <a href="timer.js.html#line42">line 42</a>
     </li></ul></dd>
     
 
@@ -285,14 +356,14 @@
 
     
 
-    <h4 class="name" id="bind"><span class="type-signature"></span>bind<span class="signature">(unit)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="end"><span class="type-signature"></span>end<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
 
 
 <div class="description">
-    Bind this cubemap to a texture unit.
+    Stop the rendering timer.
 </div>
 
 
@@ -301,55 +372,6 @@
 
 
 
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>unit</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The texture unit to bind to.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
 
 
 
@@ -385,7 +407,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="cubemap.js.html">cubemap.js</a>, <a href="cubemap.js.html#line101">line 101</a>
+        <a href="timer.js.html">timer.js</a>, <a href="timer.js.html#line77">line 77</a>
     </li></ul></dd>
     
 
@@ -416,14 +438,17 @@
 
     
 
-    <h4 class="name" id="delete"><span class="type-signature"></span>delete<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="ready"><span class="type-signature"></span>ready<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
 
 
 <div class="description">
-    Delete this cubemap.
+    Check if the rendering time is available. If
+        this method returns true, the cpuTime and
+        gpuTime properties will be set to valid 
+        values.
 </div>
 
 
@@ -467,7 +492,89 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="cubemap.js.html">cubemap.js</a>, <a href="cubemap.js.html#line113">line 113</a>
+        <a href="timer.js.html">timer.js</a>, <a href="timer.js.html#line97">line 97</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="start"><span class="type-signature"></span>start<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Start the rendering timer.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="timer.js.html">timer.js</a>, <a href="timer.js.html#line61">line 61</a>
     </li></ul></dd>
     
 

@@ -105,6 +105,8 @@
         }
     </script>
     <script type="text/javascript">
+        utils.addTimerElement();
+
         var canvas = document.getElementById("gl-canvas");
 
         if (!canvas.getContext("webgl2")) {
@@ -204,6 +206,12 @@
             var frameCount = 0;
             var arrayIndex = 0;
             function draw() {
+                if (app.timerReady()) {
+                    utils.updateTimerElement(app.cpuTime, app.gpuTime);
+                }
+
+                app.timerStart();
+
                 angleX += 0.01;
                 angleY += 0.02;
 
@@ -218,6 +226,8 @@
                 arrayIndex = Math.floor(frameCount / 3) % numTextures;
 
                 app.clear().draw();
+
+                app.timerEnd();
 
                 requestAnimationFrame(draw);
             }

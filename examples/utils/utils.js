@@ -335,6 +335,26 @@
             uvs: uvs,
             indices: indices
           };
+        },
+
+        addTimerElement: function() {
+            this.timerDiv = document.createElement("div")
+            this.timerDiv.id = "timer";
+            this.cpuTimeElement = document.createElement("div");
+            this.gpuTimeElement = document.createElement("div");
+            this.timerDiv.appendChild(this.cpuTimeElement);
+            this.timerDiv.appendChild(this.gpuTimeElement);
+            document.body.appendChild(this.timerDiv);
+        },
+
+        updateTimerElement(cpuTime, gpuTime) {
+            this.cpuTimeElement.innerText = "CPU time: " + cpuTime.toFixed(3) + "ms";
+            if (gpuTime > 0) {
+                this.gpuTimeElement.innerText = "GPU time: " + gpuTime.toFixed(3) + "ms";
+            } else {
+                this.gpuTimeElement.innerText = "GPU time: (Unavailable)";
+            }
+          
         }
     }
 

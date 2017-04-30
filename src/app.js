@@ -37,6 +37,10 @@
         @prop {boolean} linearFloatTexturesEnabled Whether the OES_texture_float_linear extension is enabled.
         @prop {Object} currentState Tracked GL state.
         @prop {GLEnum} clearBits Current clear mask to use with clear().
+        @prop {Timer} timer Rendering timer.
+        @prop {number} cpuTime Time spent on CPU during last timing. Only valid if timerReady() returns true.
+        @prop {number} gpuTime Time spent on GPU during last timing. Only valid if timerReady() returns true.
+                Will remain 0 if extension EXT_disjoint_timer_query_webgl2 is unavailable.
     */
     PicoGL.App = function App(canvas, contextAttributes) {
         this.canvas = canvas;
@@ -53,10 +57,14 @@
 
         this.clearBits = this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT;
         
-        this.gl.viewport(0, 0, this.width, this.height);    
-        
+        this.timer = new PicoGL.Timer(this.gl);
+        this.cpuTime = 0;
+        this.gpuTime = 0;
+
         this.floatRenderTargetsEnabled = false;
         this.linearFloatTexturesEnabled = false;
+        
+        this.gl.viewport(0, 0, this.width, this.height);
     };
 
     /**
@@ -654,5 +662,47 @@
 
         return this;
     };
+
+    /** 
+        Start the rendering timer.
+
+        @method
+    */
+    PicoGL.App.prototype.timerStart = function() {
+        this.timer.start();
+
+        return this;
+    };
+
+    /** 
+        Stop the rendering timer.
+
+        @method
+    */
+    PicoGL.App.prototype.timerEnd = function() {
+        this.timer.end();
+
+        return this;
+    };
+
+    /** 
+        Check if the rendering time is available. If
+        this method returns true, the cpuTime and
+        gpuTime properties will be set to valid 
+        values.
+
+        @method
+    */
+    PicoGL.App.prototype.timerReady = function() {
+        if (this.timer.ready()) {
+            this.cpuTime = this.timer.cpuTime;
+            this.gpuTime = this.timer.gpuTime;
+            return true;
+        } else {
+            return false;
+        }
+    };
+
+
 
 })();

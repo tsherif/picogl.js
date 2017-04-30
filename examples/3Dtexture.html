@@ -68,6 +68,8 @@
         }
     </script>
     <script type="text/javascript">
+        utils.addTimerElement();
+        
         var canvas = document.getElementById("gl-canvas");
 
         if (!canvas.getContext("webgl2")) {
@@ -169,6 +171,12 @@
         app.drawCalls([drawCall]);
 
         function draw() {
+            if (app.timerReady()) {
+                utils.updateTimerElement(app.cpuTime, app.gpuTime);
+            }
+
+            app.timerStart();
+
             angleX += 0.01;
             angleY += 0.02;
 
@@ -180,6 +188,8 @@
             drawCall.uniform("uMVP", mvpMatrix);
 
             app.clear().draw();
+            
+            app.timerEnd();
 
             requestAnimationFrame(draw);
         }

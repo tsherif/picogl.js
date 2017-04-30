@@ -134,6 +134,9 @@
         }
     </script>
     <script type="text/javascript">
+        utils.addTimerElement();
+        utils.timerDiv.style.color = "black";
+
         var canvas = document.getElementById("gl-canvas");
 
         if (!canvas.getContext("webgl2")) {
@@ -252,6 +255,12 @@
                 app.drawCalls([skyboxDrawcall, drawCall]);
 
                 function draw() {
+                    if (app.timerReady()) {
+                        utils.updateTimerElement(app.cpuTime, app.gpuTime);
+                    }
+
+                    app.timerStart();
+
                     angleX += 0.01;
                     angleY += 0.02;
 
@@ -261,7 +270,9 @@
 
                     drawCall.uniform("uModel", modelMatrix);
 
-                    app.clear().draw();
+                    app.clear().draw()
+                    
+                    app.timerEnd();
 
                     requestAnimationFrame(draw);
                 }

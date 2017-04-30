@@ -25,6 +25,8 @@
 <head>
     <title>PicoGL.js: Transform Feedback</title>
     <script src="../build/picogl.js"></script>
+    <script src="utils/gl-matrix.js"></script>
+    <script src="utils/utils.js"></script>
     <link rel="stylesheet" href="../site/css/picogl-example.css"> 
 </head>
 <body>
@@ -70,6 +72,8 @@
     </script>
     
     <script type="text/javascript">
+        utils.addTimerElement();
+
         var canvas = document.getElementById("gl-canvas");
 
         if (!canvas.getContext("webgl2")) {
@@ -128,12 +132,20 @@
         app.drawCalls([drawCall]);
 
         function draw() {
+            if (app.timerReady()) {
+                utils.updateTimerElement(app.cpuTime, app.gpuTime);
+            }
+
+            app.timerStart();
+
             // Draw
             app.clear()
             .draw();
 
             // Swap input and output buffers
             transformFeedback.swapBuffers();
+
+            app.timerEnd();
 
             requestAnimationFrame(draw);
         }
