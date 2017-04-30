@@ -194,4 +194,24 @@
         return this;
     };
 
+    /**
+        Delete this framebuffer.
+
+        @method
+    */
+    PicoGL.Framebuffer.prototype.delete = function() {
+        for (var i = 0; i < this.numColorTargets; ++i) {
+            this.colorTextures[i].delete();
+        }
+
+        if (this.depthTexture) {
+            this.depthTexture.delete();
+        }
+
+        if (this.framebuffer) {
+            this.gl.deleteFramebuffer(this.framebuffer);
+            this.framebuffer = null;
+        }
+    };
+
 })();

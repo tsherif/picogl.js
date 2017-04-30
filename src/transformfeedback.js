@@ -49,6 +49,23 @@
         }
     };
 
+     /**
+        Swap the input and output buffers.
+
+        @method
+    */
+    PicoGL.TransformFeedback.prototype.swapBuffers = function() {
+        var va = this.inputVertexArray;
+        this.inputVertexArray = this.outputVertexArray;
+        this.outputVertexArray = va;
+
+        var vb = this.inputBuffers;
+        this.inputBuffers = this.outputBuffers;
+        this.outputBuffers = vb;
+
+        return this;
+    };
+
     /**
         Bind this transform feedback.
 
@@ -67,24 +84,7 @@
         return this;
     };
 
-     /**
-        Swap the input and output buffers.
-
-        @method
-    */
-    PicoGL.TransformFeedback.prototype.swapBuffers = function() {
-        var va = this.inputVertexArray;
-        this.inputVertexArray = this.outputVertexArray;
-        this.outputVertexArray = va;
-
-        var vb = this.inputBuffers;
-        this.inputBuffers = this.outputBuffers;
-        this.outputBuffers = vb;
-
-        return this;
-    };
-
-     /**
+    /**
         Unbind this transform feedback.
 
         @method
@@ -95,5 +95,17 @@
 
         return this;
     };
+
+    /**
+        Delete this transform feedback.
+
+        @method
+    */
+    PicoGL.TransformFeedback.prototype.delete = function() {
+        if (this.transformFeedback) {
+            this.gl.deleteTransformFeedback(this.transformFeedback);
+            this.transformFeedback = null;
+        }
+    }; 
 
 })();

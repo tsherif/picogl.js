@@ -130,4 +130,16 @@
         return this;
     };   
 
+    /**
+        Delete this texture.
+
+        @method
+    */
+    PicoGL.Texture.prototype.delete = function() {
+        if (this.texture) {
+            this.gl.deleteTexture(this.texture);
+            this.texture = null;
+        }
+    }; 
+
 })();

@@ -101,6 +101,20 @@
     PicoGL.Cubemap.prototype.bind = function(unit) {
         this.gl.activeTexture(PicoGL.TEXTURE_UNIT_MAP[unit]);
         this.gl.bindTexture(this.gl.TEXTURE_CUBE_MAP, this.texture);
-    };    
+
+        return this;
+    };
+
+    /**
+        Delete this cubemap.
+
+        @method
+    */
+    PicoGL.Cubemap.prototype.delete = function() {
+        if (this.texture) {
+            this.gl.deleteTexture(this.texture);
+            this.texture = null;
+        }
+    }; 
 
 })();

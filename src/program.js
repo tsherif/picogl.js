@@ -41,9 +41,12 @@
 
         var vshader, fshader; 
 
+        var ownVertexShader = false;
+        var ownFragmentShader = false;
         if (typeof vsSource === "string") {
             vshader = gl.createShader(gl.VERTEX_SHADER);
             PicoGL.compileShader(gl, vshader, vsSource);
+            ownVertexShader = true;
         } else {
             vshader = vsSource;
         }
@@ -51,6 +54,7 @@
         if (typeof fsSource === "string") {
             fshader = gl.createShader(gl.FRAGMENT_SHADER);
             PicoGL.compileShader(gl, fshader, fsSource);
+            ownFragmentShader = true;
         } else {
             fshader = fsSource;
         }
@@ -65,6 +69,14 @@
 
         if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
           console.error(gl.getProgramInfoLog(program));
+        }
+
+        if (ownVertexShader) {
+            gl.deleteShader(vshader);
+        }
+
+        if (ownFragmentShader) {
+            gl.deleteShader(fshader);
         }
 
         this.gl = gl;
@@ -177,6 +189,18 @@
     */
     PicoGL.Program.prototype.uniformBlock = function(name, base) {
         this.gl.uniformBlockBinding(this.program, this.uniformBlocks[name], base);
+    };
+
+    /**
+        Delete this program.
+
+        @method
+    */
+    PicoGL.Program.prototype.delete = function() {
+        if (this.program) {
+            this.gl.deleteProgram(this.program);
+            this.program = null;
+        }
     };
 
 })();

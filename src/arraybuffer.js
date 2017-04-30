@@ -103,4 +103,16 @@
         return this;
     };
 
+    /**
+        Delete this array buffer.
+
+        @method
+    */
+    PicoGL.ArrayBuffer.prototype.delete = function() {
+        if (this.buffer) {
+            this.gl.deleteBuffer(this.buffer);
+            this.buffer = null;    
+        }
+    };
+
 })();

@@ -133,4 +133,16 @@
         return this;
     };
 
+    /**
+        Delete this vertex array.
+
+        @method
+    */
+    PicoGL.VertexArray.prototype.delete = function() {
+        if (this.vertexArray) {
+            this.gl.deleteVertexArray(this.vertexArray);
+            this.vertexArray = null;
+        }
+    };
+
 })();

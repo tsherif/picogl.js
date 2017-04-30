@@ -165,4 +165,16 @@
         return this;
     };
 
+    /**
+        Delete this uniform buffer.
+
+        @method
+    */
+    PicoGL.UniformBuffer.prototype.delete = function() {
+        if (this.buffer) {
+            this.gl.deleteBuffer(this.buffer);
+            this.buffer = null;
+        }
+    };
+
 })();

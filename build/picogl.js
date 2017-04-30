@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.1.1 
+PicoGL.js v0.1.2 
 
 The MIT License (MIT)
 
@@ -37,7 +37,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @prop {object} TEXTURE_UNIT_MAP Map of texture unit indices to GL enums, e.g. 0 => gl.TEXTURE0.
     */
     var PicoGL = window.PicoGL = {
-        version: "0.1.1"
+        version: "0.1.2"
     };
 
     (function() {
@@ -787,9 +787,12 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
         var vshader, fshader; 
 
+        var ownVertexShader = false;
+        var ownFragmentShader = false;
         if (typeof vsSource === "string") {
             vshader = gl.createShader(gl.VERTEX_SHADER);
             PicoGL.compileShader(gl, vshader, vsSource);
+            ownVertexShader = true;
         } else {
             vshader = vsSource;
         }
@@ -797,6 +800,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         if (typeof fsSource === "string") {
             fshader = gl.createShader(gl.FRAGMENT_SHADER);
             PicoGL.compileShader(gl, fshader, fsSource);
+            ownFragmentShader = true;
         } else {
             fshader = fsSource;
         }
@@ -811,6 +815,14 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
         if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
           console.error(gl.getProgramInfoLog(program));
+        }
+
+        if (ownVertexShader) {
+            gl.deleteShader(vshader);
+        }
+
+        if (ownFragmentShader) {
+            gl.deleteShader(fshader);
         }
 
         this.gl = gl;
@@ -923,6 +935,18 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     */
     PicoGL.Program.prototype.uniformBlock = function(name, base) {
         this.gl.uniformBlockBinding(this.program, this.uniformBlocks[name], base);
+    };
+
+    /**
+        Delete this program.
+
+        @method
+    */
+    PicoGL.Program.prototype.delete = function() {
+        if (this.program) {
+            this.gl.deleteProgram(this.program);
+            this.program = null;
+        }
     };
 
 })();
@@ -1039,6 +1063,18 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         return this;
     };
 
+    /**
+        Delete this vertex array.
+
+        @method
+    */
+    PicoGL.VertexArray.prototype.delete = function() {
+        if (this.vertexArray) {
+            this.gl.deleteVertexArray(this.vertexArray);
+            this.vertexArray = null;
+        }
+    };
+
 })();
 ;(function() {
     "use strict";
@@ -1068,6 +1104,23 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         }
     };
 
+     /**
+        Swap the input and output buffers.
+
+        @method
+    */
+    PicoGL.TransformFeedback.prototype.swapBuffers = function() {
+        var va = this.inputVertexArray;
+        this.inputVertexArray = this.outputVertexArray;
+        this.outputVertexArray = va;
+
+        var vb = this.inputBuffers;
+        this.inputBuffers = this.outputBuffers;
+        this.outputBuffers = vb;
+
+        return this;
+    };
+
     /**
         Bind this transform feedback.
 
@@ -1086,24 +1139,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         return this;
     };
 
-     /**
-        Swap the input and output buffers.
-
-        @method
-    */
-    PicoGL.TransformFeedback.prototype.swapBuffers = function() {
-        var va = this.inputVertexArray;
-        this.inputVertexArray = this.outputVertexArray;
-        this.outputVertexArray = va;
-
-        var vb = this.inputBuffers;
-        this.inputBuffers = this.outputBuffers;
-        this.outputBuffers = vb;
-
-        return this;
-    };
-
-     /**
+    /**
         Unbind this transform feedback.
 
         @method
@@ -1114,6 +1150,18 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
         return this;
     };
+
+    /**
+        Delete this transform feedback.
+
+        @method
+    */
+    PicoGL.TransformFeedback.prototype.delete = function() {
+        if (this.transformFeedback) {
+            this.gl.deleteTransformFeedback(this.transformFeedback);
+            this.transformFeedback = null;
+        }
+    }; 
 
 })();
 ;(function() {
@@ -1196,6 +1244,18 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         this.gl.bindBuffer(this.binding, this.buffer);
 
         return this;
+    };
+
+    /**
+        Delete this array buffer.
+
+        @method
+    */
+    PicoGL.ArrayBuffer.prototype.delete = function() {
+        if (this.buffer) {
+            this.gl.deleteBuffer(this.buffer);
+            this.buffer = null;    
+        }
     };
 
 })();
@@ -1580,6 +1640,18 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         return this;
     };
 
+    /**
+        Delete this uniform buffer.
+
+        @method
+    */
+    PicoGL.UniformBuffer.prototype.delete = function() {
+        if (this.buffer) {
+            this.gl.deleteBuffer(this.buffer);
+            this.buffer = null;
+        }
+    };
+
 })();
 ;(function() {
     "use strict";
@@ -1690,6 +1762,18 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         return this;
     };   
 
+    /**
+        Delete this texture.
+
+        @method
+    */
+    PicoGL.Texture.prototype.delete = function() {
+        if (this.texture) {
+            this.gl.deleteTexture(this.texture);
+            this.texture = null;
+        }
+    }; 
+
 })();
 ;(function() {
     "use strict";
@@ -1771,7 +1855,21 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     PicoGL.Cubemap.prototype.bind = function(unit) {
         this.gl.activeTexture(PicoGL.TEXTURE_UNIT_MAP[unit]);
         this.gl.bindTexture(this.gl.TEXTURE_CUBE_MAP, this.texture);
-    };    
+
+        return this;
+    };
+
+    /**
+        Delete this cubemap.
+
+        @method
+    */
+    PicoGL.Cubemap.prototype.delete = function() {
+        if (this.texture) {
+            this.gl.deleteTexture(this.texture);
+            this.texture = null;
+        }
+    }; 
 
 })();
 ;(function() {
@@ -1947,6 +2045,26 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         return this;
     };
 
+    /**
+        Delete this framebuffer.
+
+        @method
+    */
+    PicoGL.Framebuffer.prototype.delete = function() {
+        for (var i = 0; i < this.numColorTargets; ++i) {
+            this.colorTextures[i].delete();
+        }
+
+        if (this.depthTexture) {
+            this.depthTexture.delete();
+        }
+
+        if (this.framebuffer) {
+            this.gl.deleteFramebuffer(this.framebuffer);
+            this.framebuffer = null;
+        }
+    };
+
 })();
 ;(function() {
     "use strict";
@@ -1960,11 +2078,15 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @prop {Program} currentProgram The program to use for this draw call.
         @prop {VertexArray} currentVertexArray Vertex array to use for this draw call.
         @prop {TransformFeedback} currentTransformFeedback Transform feedback to use for this draw call.
-        @prop {Object} uniformBuffers Map of uniform buffer bases to uniform buffers.
+        @prop {Array} uniformBuffers Ordered list of active uniform buffers.
+        @prop {Array} uniformBlockNames Ordered list of uniform block names.
         @prop {Object} uniformBlockBases Map of uniform blocks to uniform buffer bases.
         @prop {Number} uniformBlockCount Number of active uniform blocks for this draw call.
-        @prop {Object} uniforms Map of uniform handles to values.
-        @prop {Object} textures Map of texture units to Textures.
+        @prop {Object} uniformIndices Map of uniform names to indices in the uniform arrays.
+        @prop {Array} uniformNames Ordered list of uniform names.
+        @prop {Array} uniformValue Ordered list of uniform values.
+        @prop {number} uniformCount The number of active uniforms for this draw call.
+        @prop {Array} textures Array of active textures.
         @prop {number} textureCount The number of active textures for this draw call. 
         @prop {GLEnum} primitive The primitive type being drawn. 
     */
@@ -1983,8 +2105,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         this.uniformIndices = {};
         this.uniformNames = new Array(PicoGL.WEBGL_INFO.MAX_UNIFORMS);
         this.uniformValues = new Array(PicoGL.WEBGL_INFO.MAX_UNIFORMS);
-        this.uniformBuffers = new Array(PicoGL.WEBGL_INFO.MAX_UNIFORM_BUFFERS);
         this.uniformCount = 0;
+        this.uniformBuffers = new Array(PicoGL.WEBGL_INFO.MAX_UNIFORM_BUFFERS);
         this.uniformBlockNames = new Array(PicoGL.WEBGL_INFO.MAX_UNIFORM_BUFFERS);
         this.uniformBlockBases = {};
         this.uniformBlockCount = 0;
