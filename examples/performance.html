@@ -225,7 +225,6 @@
                     mat4.rotate(box.rotationMatrix, box.rotationMatrix, 0.02, rotationAxis);
                     mat4.multiply(box.modelMatrix, box.translationMatrix, box.rotationMatrix)
                 }
-
                 modelMatrices.data(modelMatrixData);
 
                 app.clear().draw()

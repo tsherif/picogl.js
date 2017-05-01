@@ -359,9 +359,8 @@
                     utils.xformMatrix(boxes[i].modelMatrix, boxes[i].translate, boxes[i].rotate, boxes[i].scale);
                 
                     modelMatrixData.set(boxes[i].modelMatrix, i * 16);
-
-                    modelMatrices.data(modelMatrixData);
                 }
+                modelMatrices.data(modelMatrixData);
 
                 // COLOR AND DEPTH
                 app.framebuffer(boxBuffer)
