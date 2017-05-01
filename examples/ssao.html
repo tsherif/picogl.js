@@ -237,9 +237,9 @@
 
         var NEAR = 0.1;
         var FAR = 10.0;
-        var SAMPLE_RADIUS = 16.0; // sample radius
-        var BIAS = 0.04; // bias
-        var ATTENUATION = vec2.fromValues(1, 1); // attenuation
+        var SAMPLE_RADIUS = 16.0;
+        var BIAS = 0.04;
+        var ATTENUATION = vec2.fromValues(1, 1);
         var DEPTH_RANGE = vec2.fromValues(NEAR, FAR);
 
         var NUM_SPHERES = 32;
@@ -282,7 +282,7 @@
             document.body.innerHTML = "This example requires extension EXT_color_buffer_float which is not supported on this system."
         }
 
-        // Set up color/geo program
+        // SET UP COLOR/GEO PROGRAM
         var colorGeoVsSource =  document.getElementById("vertex-colorgeo").text.trim();
         var colorGeoFsSource =  document.getElementById("fragment-colorgeo").text.trim();
         var colorGeoProgram = app.createProgram(colorGeoVsSource, colorGeoFsSource);
@@ -292,31 +292,34 @@
         .colorTarget(2, PicoGL.FLOAT, PicoGL.RGBA)
         .depthTarget();
 
+        // QUAD VERTEX SHADER
         var quadVsSource =  document.getElementById("vertex-quad").text.trim();
         var quadShader = app.createShader(PicoGL.VERTEX_SHADER, quadVsSource);
 
-        // Set up ssao program
+        // SET UP SSAO PROGRAM
         var ssaoFsSource =  document.getElementById("fragment-ssao").text.trim();
         var ssaoProgram = app.createProgram(quadShader, ssaoFsSource);
         var ssaoBuffer = app.createFramebuffer().colorTarget(0, PicoGL.FLOAT);
 
-        // Set up ao blend program
+        // SET UP AO BLEND PROGRAM
         var aoBlendFsSource =  document.getElementById("fragment-aoblend").text.trim();
         var aoBlendProgram = app.createProgram(quadShader, aoBlendFsSource);
 
-        // Draw without SSAO
+        // DRAW WITHOUT SSAO
         var noSSAOFsSource =  document.getElementById("fragment-color").text.trim();
         var noSSAOProgram = app.createProgram(quadShader, noSSAOFsSource);
 
         quadShader.delete();
 
-        // Geometry
+        // INSTANCED SPHERE GEOMETRY
         var sphere = utils.createSphere({radius: 0.5});
         var positions = app.createArrayBuffer(PicoGL.FLOAT, 3, sphere.positions);
         var uv = app.createArrayBuffer(PicoGL.FLOAT, 2, sphere.uvs);
         var normals = app.createArrayBuffer(PicoGL.FLOAT, 3, sphere.normals);
-        var modelMatrices = app.createInstancedMatrixBuffer(PicoGL.FLOAT_MAT4, modelMatrixData);
         var indices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, sphere.indices);
+
+        // PER-INSTANCE MODEL MATRICES
+        var modelMatrices = app.createInstancedMatrixBuffer(PicoGL.FLOAT_MAT4, modelMatrixData);
 
         var sphereArray = app.createVertexArray()
         .attributeBuffer(0, positions)
@@ -325,6 +328,7 @@
         .attributeBuffer(3, modelMatrices)
         .indexBuffer(indices);
 
+        // QUAD GEOMETRY
         var quadPositions = app.createArrayBuffer(PicoGL.FLOAT, 2, new Float32Array([
             -1, 1,
             -1, -1,
@@ -337,7 +341,7 @@
         var quadArray = app.createVertexArray()
         .attributeBuffer(0, quadPositions);
 
-        // Camera stuff
+        // UNIFORM DATA
         var projMatrix = mat4.create();
         mat4.perspective(projMatrix, Math.PI / 2, canvas.width / canvas.height, NEAR, FAR);
 
@@ -345,10 +349,9 @@
         var eyePosition = vec3.fromValues(0, 0.8, 2);
         mat4.lookAt(viewMatrix, eyePosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
 
-
-        // Light
         var lightPosition = vec3.fromValues(0.5, 1, 2); 
 
+        // UNIFORM BUFFERS
         var sceneUniforms = app.createUniformBuffer([
             PicoGL.FLOAT_MAT4,
             PicoGL.FLOAT_MAT4,
@@ -373,6 +376,7 @@
         .set(3, DEPTH_RANGE)
         .update();
 
+        // NOISE TEXTURE TO RADOMIZE SSAO SAMPLING
         var numNoisePixels = app.gl.drawingBufferWidth * app.gl.drawingBufferHeight;
         var noiseTextureData = new Float32Array(numNoisePixels * 2);
 
@@ -423,6 +427,7 @@
         image.onload = function() {
             var texture = app.createTexture2D(image);
 
+            // DRAW CALLS
             var colorGeoDrawcall = app.createDrawCall(colorGeoProgram, sphereArray)
             .uniformBlock("SceneUniforms", sceneUniforms)
             .texture("uTexture", texture);
@@ -457,7 +462,7 @@
 
                 app.timerStart();
 
-                // Draw to colorGeoBuffer
+                // UPDATE TRANSFORMS
                 for (var i = 0, len = spheres.length; i < len; ++i) {
                     spheres[i].rotate[1] += 0.002;
 
@@ -469,21 +474,25 @@
                     modelMatrices.data(modelMatrixData);
                 }
 
+                // DRAW TO COLORGEOBUFFER
                 app.framebuffer(colorGeoBuffer)
                 .drawCalls(colorGeoDrawcalls)
                 .clear()
                 .draw();
 
                 if (ssaoEnabled) {
+                    // OCCLUSION PASS
                     app.framebuffer(ssaoBuffer)
                     .drawCalls(ssaoDrawCalls)
                     .clear()
                     .draw()
+                    // OCCLUSION BLEND PASS
                     .defaultFramebuffer()
                     .drawCalls(aoBlendDrawCalls)
                     .clear()
                     .draw();
                 } else {
+                    // DRAW WITHOUT SSAO
                     app.defaultFramebuffer()
                     .drawCalls(noSSAODrawCalls)
                     .clear()

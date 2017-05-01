@@ -83,11 +83,12 @@
             app.resize(window.innerWidth, window.innerHeight);
         }
 
+        // PROGRAM
         var vsSource =  document.getElementById("vs").text.trim();
-        var fsSource =  document.getElementById("fs").text.trim();
-                        
+        var fsSource =  document.getElementById("fs").text.trim();                        
         var program = app.createProgram(vsSource, fsSource);
 
+        // GEOMETRY
         var positions = app.createArrayBuffer(PicoGL.FLOAT, 2, new Float32Array([
             -0.4, -0.5,
              0.4, -0.5,
@@ -97,6 +98,7 @@
         var triangleArray = app.createVertexArray()
         .attributeBuffer(0, positions);
         
+        // UNIFORM BUFFERS IN STD140 LAYOUT
         var uniformBuffer1 = app.createUniformBuffer([
             PicoGL.FLOAT_VEC4,
             PicoGL.FLOAT_VEC2
@@ -113,16 +115,19 @@
         .set(1, new Float32Array([0.5, 0.0]))
         .update();
 
+        // DRAW CALLS WITH DIFFERENT UNIFORM BUFFERS
         var drawCall1 = app.createDrawCall(program, triangleArray)
         .uniformBlock("TriangleUniforms", uniformBuffer1);
 
         var drawCall2 = app.createDrawCall(program, triangleArray)
         .uniformBlock("TriangleUniforms", uniformBuffer2);
 
+        // DRAW
         app.drawCalls([drawCall1, drawCall2])
         .clear()
         .draw();
 
+        // CLEANUP
         program.delete();
         positions.delete();
         triangleArray.delete();

@@ -127,10 +127,12 @@
         .clearColor(0.0, 0.0, 0.0, 1.0)
         .depthTest();
 
+        // PROGRAM
         var vsSource =  document.getElementById("vertex-draw").text.trim();
         var fsSource =  document.getElementById("fragment-draw").text.trim();
         var program = app.createProgram(vsSource, fsSource);
 
+        // GEOMETRY
         var box = utils.createBox({dimensions: [1.0, 1.0, 1.0]})
         var positions = app.createArrayBuffer(PicoGL.FLOAT, 3, box.positions);
         var uv = app.createArrayBuffer(PicoGL.FLOAT, 2, box.uvs);
@@ -141,6 +143,7 @@
         .attributeBuffer(1, uv)
         .attributeBuffer(2, normals)
 
+        // UNIFORM DATA
         var projMatrix = mat4.create();
         mat4.perspective(projMatrix, Math.PI / 2, canvas.width / canvas.height, 0.1, 10.0);
 
@@ -153,6 +156,7 @@
 
         var lightPosition = vec3.fromValues(1, 1, 0.5);
 
+        // UNIFORM BUFFER
         var sceneUniformBuffer = app.createUniformBuffer([
             PicoGL.FLOAT_MAT4,
             PicoGL.FLOAT_VEC4,
@@ -186,6 +190,7 @@
             canvas.width = image.width;
             canvas.height = image.height;
 
+            // GET IMAGE DATA AS TYPED ARRAY
             var ctx = canvas.getContext("2d");
             ctx.drawImage(image, 0, 0);
             var imageData = ctx.getImageData(0, 2, image.width,  image.height);
@@ -195,8 +200,10 @@
             var textureHeight = 103;
             var numTextures = image.height / textureHeight;
 
+            // CREATE TEXTURE ARRAY
             var texture = app.createTextureArray(image, textureWidth, textureHeight, numTextures);
 
+            // DRAW CALL
             var drawCall = app.createDrawCall(program, boxArray)
             .uniformBlock("SceneUniforms", sceneUniformBuffer)
             .texture("tex", texture);
@@ -215,6 +222,7 @@
                 angleX += 0.01;
                 angleY += 0.02;
 
+                // UPDATE TRANSFORM
                 mat4.fromXRotation(rotateXMatrix, angleX);
                 mat4.fromYRotation(rotateYMatrix, angleY);
                 mat4.multiply(modelMatrix, rotateXMatrix, rotateYMatrix);
@@ -222,10 +230,13 @@
                 drawCall.uniform("uModel", modelMatrix)
                 .uniform("arrayIndex", arrayIndex);
 
+                // DRAW
+                app.clear().draw();
+
+                // UPDATE ARRAY INDEX
                 frameCount++;
                 arrayIndex = Math.floor(frameCount / 3) % numTextures;
 
-                app.clear().draw();
 
                 app.timerEnd();
 

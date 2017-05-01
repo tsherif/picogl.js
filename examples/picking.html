@@ -142,18 +142,18 @@
         .depthTest()
         .cullBackfaces();
 
-        // Set up picking program
+        // SET UP PICKING PROGRAM
         var pickingVsSource = document.getElementById("picking-vs").text.trim();
         var pickingFsSource = document.getElementById("picking-fs").text.trim();
         var pickingProgram = app.createProgram(pickingVsSource, pickingFsSource);
         var pickingBuffer = app.createFramebuffer().colorTarget().depthTarget();
 
-        // Set up main program
+        // SET UP MAIN PROGRAM
         var vsSource = document.getElementById("main-vs").text.trim();
         var fsSource = document.getElementById("main-fs").text.trim();
         var mainProgram = app.createProgram(vsSource, fsSource);
 
-        // Geometry
+        // GEOMETRY
         var box = utils.createBox({dimensions: [1.0, 1.0, 1.0]})
         var positions = app.createArrayBuffer(PicoGL.FLOAT, 3, box.positions);
         var uv = app.createArrayBuffer(PicoGL.FLOAT, 2, box.uvs);
@@ -164,7 +164,7 @@
         .attributeBuffer(1, normals)
         .attributeBuffer(2, uv);
 
-        // Camera stuff
+        // UNIFORMS
         var projMatrix = mat4.create();
         mat4.perspective(projMatrix, Math.PI / 2, canvas.width / canvas.height, 0.1, 2.0);
 
@@ -175,14 +175,12 @@
         var viewProjMatrix = mat4.create();
         mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
 
-        // Light
         var lightPosition = vec3.fromValues(1, 1, 0.5);  
 
-
-        // Highlight
         var highlightColor = vec3.fromValues(1.5, 1.5, 0.5);
         var unhighlightColor = vec3.fromValues(1.0, 1.0, 1.0);
 
+        // UNIFORM BUFFER
         var sceneUniforms = app.createUniformBuffer([
             PicoGL.FLOAT_VEC4,
             PicoGL.FLOAT_VEC4
@@ -198,44 +196,45 @@
             mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
         };
 
+        // OBJECT DESCRIPTIONS
+        var boxes = [
+            {
+                translate: [0, 0, 0],
+                rotate: [0, 0, 0],
+                scale: [1, 1, 1],
+                mvpMatrix: mat4.create(),
+                modelMatrix: mat4.create(),
+                pickColor: vec3.fromValues(1.0, 0.0, 0.0),
+                frameUniforms: app.createUniformBuffer([
+                    PicoGL.FLOAT_MAT4,
+                    PicoGL.FLOAT_MAT4,
+                    PicoGL.FLOAT_VEC4
+                ]).set(2, unhighlightColor),
+                mainDrawCall: null,
+                pickingDrawCall: null
+            },
+            {
+                translate: [0.8, 0.8, 0.4],
+                rotate: [0, 0, Math.PI / 6],
+                scale: [0.1, 0.1, 0.1],
+                mvpMatrix: mat4.create(),
+                modelMatrix: mat4.create(),
+                pickColor: vec3.fromValues(0.0, 1.0, 0.0),
+                frameUniforms: app.createUniformBuffer([
+                    PicoGL.FLOAT_MAT4,
+                    PicoGL.FLOAT_MAT4,
+                    PicoGL.FLOAT_VEC4
+                ]).set(2, unhighlightColor),
+                mainDrawCall: null,
+                pickingDrawCall: null
+            }
+        ];
+
         var image = new Image();
 
         image.onload = function() {
 
             var texture = app.createTexture2D(image);
-
-            var boxes = [
-                {
-                    translate: [0, 0, 0],
-                    rotate: [0, 0, 0],
-                    scale: [1, 1, 1],
-                    mvpMatrix: mat4.create(),
-                    modelMatrix: mat4.create(),
-                    pickColor: vec3.fromValues(1.0, 0.0, 0.0),
-                    frameUniforms: app.createUniformBuffer([
-                        PicoGL.FLOAT_MAT4,
-                        PicoGL.FLOAT_MAT4,
-                        PicoGL.FLOAT_VEC4
-                    ]).set(2, unhighlightColor),
-                    mainDrawCall: null,
-                    pickingDrawCall: null
-                },
-                {
-                    translate: [0.8, 0.8, 0.4],
-                    rotate: [0, 0, Math.PI / 6],
-                    scale: [0.1, 0.1, 0.1],
-                    mvpMatrix: mat4.create(),
-                    modelMatrix: mat4.create(),
-                    pickColor: vec3.fromValues(0.0, 1.0, 0.0),
-                    frameUniforms: app.createUniformBuffer([
-                        PicoGL.FLOAT_MAT4,
-                        PicoGL.FLOAT_MAT4,
-                        PicoGL.FLOAT_VEC4
-                    ]).set(2, unhighlightColor),
-                    mainDrawCall: null,
-                    pickingDrawCall: null
-                }
-            ];
 
             var pickingDrawCalls = new Array(boxes.length);
             var mainDrawCalls = new Array(boxes.length);
@@ -253,6 +252,7 @@
                 boxes[i].pickingDrawCall = pickingDrawCalls[i];
             }
 
+            // MOUSE HANDLER FOR PICKING
             var mouseX = 0;
             var mouseY = 0;
             var picked = false;
@@ -284,8 +284,8 @@
 
                 app.timerStart();
 
-                // Draw to picking buffer
                 if (picked) {
+                    // DRAW TO PICKING BUFFER
                     app.framebuffer(pickingBuffer)
                     .drawCalls(pickingDrawCalls)        
                     .clear()
@@ -311,7 +311,7 @@
                 boxes[0].frameUniforms.update();
                 boxes[1].frameUniforms.update();
 
-                // Main draw
+                // MAIN DRAW
                 app.drawCalls(mainDrawCalls)
                 .clear()
                 .draw();

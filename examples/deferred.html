@@ -155,7 +155,7 @@
             document.body.innerHTML = "This example requires extension EXT_color_buffer_float which is not supported on this system."
         }
 
-        // Set up gbuffer program
+        // SET UP GBUFFER PROGRAM
         var geoVsSource =  document.getElementById("geo-vs").text.trim();
         var geoFsSource =  document.getElementById("geo-fs").text.trim();
         var geoProgram = app.createProgram(geoVsSource, geoFsSource);
@@ -165,12 +165,12 @@
         .colorTarget(2, PicoGL.FLOAT, PicoGL.RG)
         .depthTarget();
 
-        // Set up main program
+        // SET UP MAIN PROGRAM
         var vsSource =  document.getElementById("main-vs").text.trim();
         var fsSource =  document.getElementById("main-fs").text.trim();
         var mainProgram = app.createProgram(vsSource, fsSource);
 
-        // Geometry
+        // GEOMETRY
         var box = utils.createBox();
         var positions = app.createArrayBuffer(PicoGL.FLOAT, 3, box.positions);
         var normals = app.createArrayBuffer(PicoGL.FLOAT, 3, box.normals);
@@ -189,7 +189,7 @@
         .attributeBuffer(0, lightPositions)
         .indexBuffer(lightIndices);
 
-        // Camera stuff
+        // CAMERA STUFF
         var projMatrix = mat4.create();
         mat4.perspective(projMatrix, Math.PI / 2, canvas.width / canvas.height, 0.1, 10.0);
 
@@ -200,74 +200,88 @@
         var viewProjMatrix = mat4.create();
         mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
 
+        // BOX DESCRIPTIONS FOR GEO PASS
+        var boxes = [
+            {
+                scale: [1, 1, 1],
+                rotate: [0, 0, 0],
+                translate: [0, 0, 0],
+                modelMatrix: mat4.create(),
+                mvpMatrix: mat4.create(),
+                matrixUniforms: app.createUniformBuffer([
+                    PicoGL.FLOAT_MAT4,
+                    PicoGL.FLOAT_MAT4
+                ]),
+                drawCall: null
+            },
+            {
+                scale: [0.1, 0.1, 0.1],
+                rotate: [0, 0, Math.PI / 3],
+                translate: [0.8, 0.8, 0.4],
+                modelMatrix: mat4.create(),
+                mvpMatrix: mat4.create(),
+                matrixUniforms: app.createUniformBuffer([
+                    PicoGL.FLOAT_MAT4,
+                    PicoGL.FLOAT_MAT4
+                ]),
+                drawCall: null
+            }
+        ];
+
+        var geoDrawCalls = new Array(boxes.length);
+
+        for (var i = 0, len = boxes.length; i < len; ++i) {
+            geoDrawCalls[i] = boxes[i].drawCall = app.createDrawCall(geoProgram, boxArray)
+            .uniformBlock("BoxUniforms", boxes[i].matrixUniforms);
+        }
+
+        // LIGHT DESCRIPTIONS FOR DRAW PASS
+        var lights = [
+            {
+                position: vec3.fromValues(0, 1, 0.5),
+                color:    vec3.fromValues(0.8, 0.0, 0.0),
+                uniforms: null
+            },
+            {
+                position: vec3.fromValues(1, 1, 0.5),
+                color:    vec3.fromValues(0.0, 0.0, 0.8),
+                uniforms: null
+            },
+            {
+                position: vec3.fromValues(1, 0, 0.5),
+                color:    vec3.fromValues(0.0, 0.8, 0.0),
+                uniforms: null
+            },
+            {
+                position: vec3.fromValues(0.5, 0, 1),
+                color:    vec3.fromValues(0.0, 0.8, 0.8),
+                uniforms: null
+            }
+        ];
+
+        window.onresize = function() {
+            app.resize(window.innerWidth, window.innerHeight);
+            gBuffer.resize();
+
+            mat4.perspective(projMatrix, Math.PI / 2, app.canvas.width / app.canvas.height, 0.1, 10.0);
+            mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
+
+            for (var i = 0, len = lights.length; i < len; ++i) {
+                lightMatrix = mat4.create();
+                utils.xformMatrix(lightMatrix, lights[i].position);
+                mat4.multiply(lightMatrix, viewProjMatrix, lightMatrix);
+
+
+                lights[i].uniforms.set(0, lightMatrix).update();
+            }
+        }
+
         var image = new Image();
 
         image.onload = function() {
-            if (!app.floatRenderTargetsEnabled) {
-                document.body.innerHTML = "This example requires extensions EXT_color_buffer_float which are not supported on this system."
-                return;
-            }
-
             var texture = app.createTexture2D(image);
-
-            var boxes = [
-                {
-                    scale: [1, 1, 1],
-                    rotate: [0, 0, 0],
-                    translate: [0, 0, 0],
-                    modelMatrix: mat4.create(),
-                    mvpMatrix: mat4.create(),
-                    matrixUniforms: app.createUniformBuffer([
-                        PicoGL.FLOAT_MAT4,
-                        PicoGL.FLOAT_MAT4
-                    ]),
-                    drawCall: null
-                },
-                {
-                    scale: [0.1, 0.1, 0.1],
-                    rotate: [0, 0, Math.PI / 3],
-                    translate: [0.8, 0.8, 0.4],
-                    modelMatrix: mat4.create(),
-                    mvpMatrix: mat4.create(),
-                    matrixUniforms: app.createUniformBuffer([
-                        PicoGL.FLOAT_MAT4,
-                        PicoGL.FLOAT_MAT4
-                    ]),
-                    drawCall: null
-                }
-            ];
-
-            var geoDrawCalls = new Array(boxes.length);
-
-            for (var i = 0, len = boxes.length; i < len; ++i) {
-                geoDrawCalls[i] = boxes[i].drawCall = app.createDrawCall(geoProgram, boxArray)
-                .uniformBlock("BoxUniforms", boxes[i].matrixUniforms);
-            }
-
-
-            var lights = [
-                {
-                    position: vec3.fromValues(0, 1, 0.5),
-                    color:    vec3.fromValues(0.8, 0.0, 0.0),
-                    uniforms: null
-                },
-                {
-                    position: vec3.fromValues(1, 1, 0.5),
-                    color:    vec3.fromValues(0.0, 0.0, 0.8),
-                    uniforms: null
-                },
-                {
-                    position: vec3.fromValues(1, 0, 0.5),
-                    color:    vec3.fromValues(0.0, 0.8, 0.0),
-                    uniforms: null
-                },
-                {
-                    position: vec3.fromValues(0.5, 0, 1),
-                    color:    vec3.fromValues(0.0, 0.8, 0.8),
-                    uniforms: null
-                }
-            ];
-                
+            
+            // LIGHT UNIFORMS AND DRAW CALLS    
             var lightMatrix;
             var lightDrawCalls = new Array(lights.length);
 
@@ -295,23 +309,6 @@
                 .texture("uUVBuffer", gBuffer.colorTextures[2]);
             }
 
-            window.onresize = function() {
-                app.resize(window.innerWidth, window.innerHeight);
-                gBuffer.resize();
-
-                mat4.perspective(projMatrix, Math.PI / 2, app.canvas.width / app.canvas.height, 0.1, 10.0);
-                mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
-
-                for (var i = 0, len = lights.length; i < len; ++i) {
-                    lightMatrix = mat4.create();
-                    utils.xformMatrix(lightMatrix, lights[i].position);
-                    mat4.multiply(lightMatrix, viewProjMatrix, lightMatrix);
-
-
-                    lights[i].uniforms.set(0, lightMatrix).update();
-                }
-            }
-
             function draw() {
                 if (app.timerReady()) {
                     utils.updateTimerElement(app.cpuTime, app.gpuTime);
@@ -331,7 +328,7 @@
                     .update();
                 }
 
-                // Draw to gBuffer
+                // DRAW TO GBUFFER
                 app.framebuffer(gBuffer)
                 .drawCalls(geoDrawCalls)
                 .depthMask()
@@ -339,7 +336,7 @@
                 .clear()
                 .draw()
 
-                // Draw lights
+                // DRAW LIGHTS
                 .defaultFramebuffer()
                 .drawCalls(lightDrawCalls)
                 .blend()

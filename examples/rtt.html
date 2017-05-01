@@ -113,12 +113,15 @@
         var app = PicoGL.createApp(canvas)
         .depthTest();
 
+        // PROGRAM
         var vsSource =  document.getElementById("vertex-draw").text.trim();
         var fsSource =  document.getElementById("fragment-draw").text.trim();
         var program = app.createProgram(vsSource, fsSource);
+
+        // FRAMEBUFFER
         var rttBuffer = app.createFramebuffer().colorTarget().depthTarget();
 
-        // Geometry
+        // GEOMETRY
         var box = utils.createBox({dimensions: [1.0, 1.0, 1.0]})
         var positions = app.createArrayBuffer(PicoGL.FLOAT, 3, box.positions);
         var uv = app.createArrayBuffer(PicoGL.FLOAT, 2, box.uvs);
@@ -129,7 +132,7 @@
         .attributeBuffer(1, uv)
         .attributeBuffer(2, normals);
 
-        // Camera stuff
+        // UNIFORMS
         var projMatrix = mat4.create();
         mat4.perspective(projMatrix, Math.PI / 2, canvas.width / canvas.height, 0.1, 10.0);
 
@@ -142,6 +145,7 @@
 
         var lightPosition = vec3.fromValues(1, 1, 0.5);
 
+        // UNIFORM BUFFER
         var sceneUniformBuffer = app.createUniformBuffer([
             PicoGL.FLOAT_MAT4,
             PicoGL.FLOAT_VEC4,
@@ -195,11 +199,11 @@
 
                 drawCall.uniform("uModel", modelMatrix);
 
-                // Render to offscreen texture
+                // RENDER TO OFFSCREEN TEXTURE
                 drawCall.texture("tex", texture);
                 app.framebuffer(rttBuffer).clearColor(0.4, 0.4, 0.4, 1.0).clear().draw();
                 
-                // Render to screen
+                // RENDER TO SCREEN
                 drawCall.texture("tex", rttBuffer.colorTextures[0]);
                 app.defaultFramebuffer().clearColor(0.0, 0.0, 0.0, 1.0).clear().draw();
 

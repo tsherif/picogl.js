@@ -131,7 +131,7 @@
         }
     </script>
 
-    <script type="x-shader/fs" id="fragment-draw">
+    <script type="x-shader/fs" id="fragment-blend">
         #version 300 es
         precision highp float;
 
@@ -199,7 +199,7 @@
             ), i * 4);
         }
 
-        // Set up accum program
+        // ACCUMULATION PROGRAM
         var accumVsSource = document.getElementById("vertex-accum").text.trim();
         var accumFsSource = document.getElementById("fragment-accum").text.trim();
         var accumProgram = app.createProgram(accumVsSource, accumFsSource);
@@ -207,18 +207,19 @@
         .colorTarget(0, PicoGL.FLOAT)
         .colorTarget(1, PicoGL.FLOAT);
 
+        // BLEND PROGRAM
+        var blendVsSource = document.getElementById("vertex-quad").text.trim();
+        var blendFsSource = document.getElementById("fragment-blend").text.trim();
+        var blendProgram = app.createProgram(blendVsSource, blendFsSource);
 
-        var drawVsSource = document.getElementById("vertex-quad").text.trim();
-        var drawFsSource = document.getElementById("fragment-draw").text.trim();
-        var drawProgram = app.createProgram(drawVsSource, drawFsSource);
-
-        // Geometry
+        // INSTANCED SPHERE GEOMETRY
         var sphere = utils.createSphere({radius: 0.5});
         var positions = app.createArrayBuffer(PicoGL.FLOAT, 3, sphere.positions);
         var uv = app.createArrayBuffer(PicoGL.FLOAT, 2, sphere.uvs);
         var normals = app.createArrayBuffer(PicoGL.FLOAT, 3, sphere.normals);
         var indices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, sphere.indices);
 
+        // PER-INSTANCE COLORS AND MODEL MATRICES
         var colors = app.createInstancedArrayBuffer(PicoGL.FLOAT, 4, sphereColorData);
         var modelMatrices = app.createInstancedMatrixBuffer(PicoGL.FLOAT_MAT4, modelMatrixData);
 
@@ -230,6 +231,7 @@
         .attributeBuffer(4, modelMatrices)
         .indexBuffer(indices);
 
+        // QUAD GEOMETRY
         var quadPositions = app.createArrayBuffer(PicoGL.FLOAT, 2, new Float32Array([
             -1, 1,
             -1, -1,
@@ -242,7 +244,7 @@
         var quadArray = app.createVertexArray()
         .attributeBuffer(0, quadPositions);
 
-        // Camera stuff
+        // UNIFORM DATA
         var projMatrix = mat4.create();
         mat4.perspective(projMatrix, Math.PI / 2, canvas.width / canvas.height, NEAR, FAR);
 
@@ -253,9 +255,9 @@
         var viewProjMatrix = mat4.create();
         mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
 
-        // Light
         var lightPosition = vec3.fromValues(0.5, 1, 2); 
 
+        // UNIFORM BUFFER
         var sceneUniforms = app.createUniformBuffer([
             PicoGL.FLOAT_MAT4,
             PicoGL.FLOAT_VEC4,
@@ -279,24 +281,20 @@
         var image = new Image();
 
         image.onload = function() {
-            if (!app.floatRenderTargetsEnabled) {
-                document.body.innerHTML = "This example requires extensions EXT_color_buffer_float which are not supported on this system."
-                return;
-            }
 
             var texture = app.createTexture2D(image);
 
-            var sphereDrawCall = app.createDrawCall(accumProgram, sphereArray)
+            var accumDrawCall = app.createDrawCall(accumProgram, sphereArray)
             .uniformBlock("SceneUniforms", sceneUniforms)
             .texture("uTexture", texture);
 
-            var sphereDrawCalls = [sphereDrawCall];
+            var accumDrawCalls = [accumDrawCall];
 
-            var accumDrawCall = app.createDrawCall(drawProgram, quadArray)
+            var blendDrawCall = app.createDrawCall(blendProgram, quadArray)
             .texture("uAccumulate", accumBuffer.colorTextures[0])
             .texture("uAccumulateAlpha", accumBuffer.colorTextures[1]);
 
-            var accumDrawCalls = [accumDrawCall];
+            var blendDrawCalls = [blendDrawCall];
 
             var rotationMatrix = mat4.create();
 
@@ -318,15 +316,15 @@
                     modelMatrices.data(modelMatrixData);
                 }
 
-                // Accumulation pass
+                // ACCUMULATION
                 app.framebuffer(accumBuffer)
-                .drawCalls(sphereDrawCalls)
+                .drawCalls(accumDrawCalls)
                 .blendFuncSeparate(PicoGL.ONE, PicoGL.ONE, PicoGL.ZERO, PicoGL.ONE_MINUS_SRC_ALPHA)
                 .clear()
                 .draw()
-                // Blend
+                // BLEND
                 .defaultFramebuffer()
-                .drawCalls(accumDrawCalls)
+                .drawCalls(blendDrawCalls)
                 .blendFunc(PicoGL.ONE, PicoGL.ONE_MINUS_SRC_ALPHA)
                 .clear()
                 .draw();

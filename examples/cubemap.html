@@ -151,6 +151,7 @@
         .clearColor(0.0, 0.0, 0.0, 1.0)
         .depthTest();
 
+        // SET UP PROGRAMS
         var vsSource =  document.getElementById("vertex-draw").text.trim();
         var fsSource =  document.getElementById("fragment-draw").text.trim();
         var program = app.createProgram(vsSource, fsSource);
@@ -159,6 +160,7 @@
         var skyboxFsSource =  document.getElementById("fragment-skybox").text.trim();
         var skyboxProgram = app.createProgram(skyboxVsSource, skyboxFsSource);
 
+        // SET UP GEOMETRY
         var box = utils.createBox({dimensions: [1.0, 1.0, 1.0]})
         var positions = app.createArrayBuffer(PicoGL.FLOAT, 3, box.positions);
         var uv = app.createArrayBuffer(PicoGL.FLOAT, 2, box.uvs);
@@ -169,6 +171,7 @@
         .attributeBuffer(1, uv)
         .attributeBuffer(2, normals)
 
+        // SET UP UNIFORMS
         var projMatrix = mat4.create();
         mat4.perspective(projMatrix, Math.PI / 2, canvas.width / canvas.height, 0.1, 10.0);
 
@@ -233,6 +236,7 @@
                 negZ: "img/sky-negz.png",
                 posZ: "img/sky-posz.png"
             }, function(negX, posX, negY, posY, negZ, posZ) {
+                // CREATE TEXTURE AND CUBEMAP
                 var texture = app.createTexture2D(image);
                 var cubemap = app.createCubemap({
                     negX: negX,
@@ -243,6 +247,7 @@
                     posZ: posZ
                 })
 
+                // CREATE DRAWCALLS FOR SKYBOX AND REFLECTIVE CUBE
                 var skyboxDrawcall = app.createDrawCall(skyboxProgram, boxArray)
                 .uniformBlock("SceneUniforms", skyboxSceneUniforms)
                 .texture("cubemap", cubemap);

@@ -91,14 +91,14 @@
             app.resize(window.innerWidth, window.innerHeight);
         }
 
+        // TRANSFORM FEEDBACK PROGRAM
         var vsSource =  document.getElementById("vs").text.trim();
         var fsSource =  document.getElementById("fs").text.trim();
               
-        // Create transform feedback program
-        // Final argument is the transform feedback varyings
+        // FINAL ARGUMENT IS TRANSFORM FEEDBACK VARYINGS
         var program = app.createProgram(vsSource, fsSource, ["vPosition"]);
 
-        // Create input and output array buffers
+        // INPUT AND OUTPUT ARRAY BUFFERS
         var positions1 = app.createArrayBuffer(PicoGL.FLOAT, 2, new Float32Array([
             -0.3, -0.3,
              0.3, -0.3,
@@ -107,14 +107,14 @@
 
         var positions2 = app.createArrayBuffer(PicoGL.FLOAT, 2, 6);
 
-        // Just one color buffer because it won't be part of transform feedback
+        // COLOR BUFFER BECAUSE IT WON'T BE PART OF TRANSFORM FEEDBACK
         var colors = app.createArrayBuffer(PicoGL.FLOAT, 3, new Float32Array([
             1.0, 0.0, 0.0,
             0.0, 1.0, 0.0,
             0.0, 0.0, 1.0
         ]));
 
-        // Combine array buffers into input and output vertex arrays
+        // COMBINE ARRAY BUFFERS INTO INPUT AND OUTPUT VERTEX ARRAYS
         var triangleArray1 = app.createVertexArray()
         .attributeBuffer(0, positions1)
         .attributeBuffer(1, colors);
@@ -123,10 +123,10 @@
         .attributeBuffer(0, positions2)
         .attributeBuffer(1, colors);
 
-        // Create transform feedback from input and output vertex arrays
+        // CREATE TRANSFORM FEEDBACK FROM INPUT AND OUTPUT VERTEX ARRAYS
         var transformFeedback = app.createTransformFeedback(triangleArray1, triangleArray2, [0]);
 
-        // Create draw call from program and transformfeedback
+        // CREATE DRAW CALL FROM PROGRAM AND TRANSFORMFEEDBACK
         var drawCall = app.createDrawCall(program, transformFeedback);
 
         app.drawCalls([drawCall]);
@@ -138,7 +138,7 @@
 
             app.timerStart();
 
-            // Draw
+            // DRAW
             app.clear()
             .draw();
 

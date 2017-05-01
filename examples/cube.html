@@ -121,10 +121,12 @@
         .clearColor(0.0, 0.0, 0.0, 1.0)
         .depthTest();
 
+        // SET UP PROGRAM
         var vsSource =  document.getElementById("vertex-draw").text.trim();
         var fsSource =  document.getElementById("fragment-draw").text.trim();
         var program = app.createProgram(vsSource, fsSource);
 
+        // SET UP GEOMETRY
         var box = utils.createBox({dimensions: [1.0, 1.0, 1.0]})
         var positions = app.createArrayBuffer(PicoGL.FLOAT, 3, box.positions);
         var uv = app.createArrayBuffer(PicoGL.FLOAT, 2, box.uvs);
@@ -135,6 +137,7 @@
         .attributeBuffer(1, uv)
         .attributeBuffer(2, normals)
 
+        // SET UP UNIFORM BUFFER
         var projMatrix = mat4.create();
         mat4.perspective(projMatrix, Math.PI / 2, canvas.width / canvas.height, 0.1, 10.0);
 
@@ -176,8 +179,10 @@
         var image = new Image();
 
         image.onload = function() {
+            // CREATE TEXTURE
             var texture = app.createTexture2D(image);
 
+            // SET UP DRAW CALL
             var drawCall = app.createDrawCall(program, boxArray)
             .uniformBlock("SceneUniforms", sceneUniformBuffer)
             .texture("tex", texture);

@@ -116,14 +116,15 @@
         .blend()
         .blendFunc(PicoGL.ONE, PicoGL.ONE_MINUS_SRC_ALPHA);
 
-        var NUM_PARTICLES = 500000;
-        var positionData = new Float32Array(NUM_PARTICLES * 3);
-        var colorData = new Float32Array(NUM_PARTICLES * 3);
-
-        // Set up main program
+        // PROGRAM
         var vsSource = document.getElementById("main-vs").text.trim();
         var fsSource = document.getElementById("main-fs").text.trim();
         var program = app.createProgram(vsSource, fsSource, ["vPosition", "vVelocity"]);
+
+        // GEOMETRY DATA
+        var NUM_PARTICLES = 500000;
+        var positionData = new Float32Array(NUM_PARTICLES * 3);
+        var colorData = new Float32Array(NUM_PARTICLES * 3);
 
         for (var i = 0; i < NUM_PARTICLES; ++i) {
             var vec3i = i * 3;
@@ -137,12 +138,16 @@
             colorData[vec3i + 2] = Math.random();
         }
 
+        // INPUT AND OUTPUT POSITION AND VELOCITY BUFFERS
         var positions1 = app.createArrayBuffer(PicoGL.FLOAT, 3, positionData);
         var velocities1 = app.createArrayBuffer(PicoGL.FLOAT, 3, positionData.length);
         var positions2 = app.createArrayBuffer(PicoGL.FLOAT, 3, positionData.length);
         var velocities2 = app.createArrayBuffer(PicoGL.FLOAT, 3, positionData.length);
+        
+        // COLOR BUFFER NOT INVOLVED IN TRANSFORM FEEDBACK
         var colors = app.createArrayBuffer(PicoGL.FLOAT, 3, colorData);
 
+        // INPUT AND OUTPUT VERTEX ARRAYS
         var vertexArray1 = app.createVertexArray()
         .attributeBuffer(0, positions1)
         .attributeBuffer(1, velocities1)
@@ -153,8 +158,10 @@
         .attributeBuffer(1, velocities2)
         .attributeBuffer(2, colors);
 
+        // TRANSFORM FEEDBACK OBJECT
         var transformFeedback = app.createTransformFeedback(vertexArray1, vertexArray2, [0, 1]);
 
+        // UNIFORM BUFFER FOR SIMULATION PARAMETERS
         var massUniforms = app.createUniformBuffer([
             PicoGL.FLOAT_VEC4,
             PicoGL.FLOAT_VEC4,
@@ -200,11 +207,12 @@
 
             app.timerStart();
 
-            // Main draw
+            // DRAW
             app.drawCalls(drawCalls)
             .clear()
             .draw();
 
+            // SWAP INPUT AND OUTPUT BUFFERS
             transformFeedback.swapBuffers();
 
             app.timerEnd();

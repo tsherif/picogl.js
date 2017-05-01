@@ -91,10 +91,12 @@
         .blend()
         .blendFunc(PicoGL.ONE, PicoGL.ONE_MINUS_SRC_ALPHA);
 
+        // SET UP PROGRAM
         var vsSource =  document.getElementById("vertex-draw").text.trim();
         var fsSource =  document.getElementById("fragment-draw").text.trim();
         var program = app.createProgram(vsSource, fsSource);
 
+        // CREATE POINT CLOUD
         var DIMENSIONS = 128;
         var INCREMENT = 1 / DIMENSIONS;
 
@@ -117,6 +119,12 @@
             x += INCREMENT;
         }
 
+        var positions = app.createArrayBuffer(PicoGL.FLOAT, 3, positionData)
+
+        var pointArray = app.createVertexArray()
+        .attributeBuffer(0, positions);
+
+        // CREATE 3D TEXTURE
         var TEXTURE_DIMENSIONS = 16;
         var textureData = new Uint8Array(TEXTURE_DIMENSIONS * TEXTURE_DIMENSIONS * DIMENSIONS);
         var textureIndex = 0;
@@ -129,15 +137,11 @@
             }
         }
 
-        var positions = app.createArrayBuffer(PicoGL.FLOAT, 3, positionData)
-
-        var pointArray = app.createVertexArray()
-        .attributeBuffer(0, positions);
-
         var texture = app.createTexture3D(textureData, TEXTURE_DIMENSIONS, TEXTURE_DIMENSIONS, TEXTURE_DIMENSIONS, {
             format: PicoGL.RED
         });
 
+        // UNIFORM DATA
         var projMatrix = mat4.create();
         mat4.perspective(projMatrix, Math.PI / 2, canvas.width / canvas.height, 0.1, 10.0);
 
@@ -165,6 +169,7 @@
             mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);            
         }
 
+        // SET UP DRAW CALL
         var drawCall = app.createDrawCall(program, pointArray, PicoGL.POINTS)
         .texture("tex", texture);
 

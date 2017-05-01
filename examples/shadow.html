@@ -135,18 +135,18 @@
         .depthTest()
         .cullBackfaces();
 
-        // Set up shadow program
+        // SET UP SHADOW PROGRAM
         var shadowVsSource =  document.getElementById("shadow-vs").text.trim();
         var shadowFsSource =  document.getElementById("shadow-fs").text.trim();
         var shadowProgram = app.createProgram(shadowVsSource, shadowFsSource);
         var shadowBuffer = app.createFramebuffer().depthTarget();
 
-        // Set up main program
+        // SET UP MAIN PROGRAM
         var vsSource =  document.getElementById("main-vs").text.trim();
         var fsSource =  document.getElementById("main-fs").text.trim();
         var mainProgram = app.createProgram(vsSource, fsSource);
 
-        // Geometry
+        // GEOMETRY
         var box = utils.createBox({dimensions: [1.0, 1.0, 1.0]})
         var positions = app.createArrayBuffer(PicoGL.FLOAT, 3, box.positions);
         var normals = app.createArrayBuffer(PicoGL.FLOAT, 3, box.normals);
@@ -157,7 +157,7 @@
         .attributeBuffer(1, normals)
         .attributeBuffer(2, uv);
 
-        // Camera stuff
+        // UNIFORMS
         var projMatrix = mat4.create();
         mat4.perspective(projMatrix, Math.PI / 2, canvas.width / canvas.height, 0.1, 2.0);
 
@@ -168,12 +168,35 @@
         var viewProjMatrix = mat4.create();
         mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
 
-        // Light
         var lightPosition = vec3.fromValues(1, 1, 0.5);        
         var lightViewMatrix = mat4.create();
         var lightViewProjMatrix = mat4.create();
         mat4.lookAt(lightViewMatrix, lightPosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
         mat4.multiply(lightViewProjMatrix, projMatrix, lightViewMatrix);
+
+        // OBJECT DESCRIPTIONS
+        var boxes = [
+            {
+                translate: [0, 0, 0],
+                rotate: [0, 0, 0],
+                scale: [1, 1, 1],
+                mvpMatrix: mat4.create(),
+                modelMatrix: mat4.create(),
+                lightMvpMatrix: mat4.create(),
+                mainDrawCall: null,
+                shadowDrawCall: null
+            },
+            {
+                translate: [0.8, 0.8, 0.4],
+                rotate: [0, 0, Math.PI / 6],
+                scale: [0.1, 0.1, 0.1],
+                mvpMatrix: mat4.create(),
+                modelMatrix: mat4.create(),
+                lightMvpMatrix: mat4.create(),
+                mainDrawCall: null,
+                shadowDrawCall: null
+            }
+        ];
 
         window.onresize = function() {
             app.resize(window.innerWidth, window.innerHeight);
@@ -188,29 +211,7 @@
         image.onload = function() {
             var texture = app.createTexture2D(image);
 
-            var boxes = [
-                {
-                    translate: [0, 0, 0],
-                    rotate: [0, 0, 0],
-                    scale: [1, 1, 1],
-                    mvpMatrix: mat4.create(),
-                    modelMatrix: mat4.create(),
-                    lightMvpMatrix: mat4.create(),
-                    mainDrawCall: null,
-                    shadowDrawCall: null
-                },
-                {
-                    translate: [0.8, 0.8, 0.4],
-                    rotate: [0, 0, Math.PI / 6],
-                    scale: [0.1, 0.1, 0.1],
-                    mvpMatrix: mat4.create(),
-                    modelMatrix: mat4.create(),
-                    lightMvpMatrix: mat4.create(),
-                    mainDrawCall: null,
-                    shadowDrawCall: null
-                }
-            ];
-
+            // DRAW CALLS
             var shadowDrawCalls = new Array(boxes.length);
             var mainDrawCalls = new Array(boxes.length);
 
@@ -235,6 +236,7 @@
 
                 app.timerStart();
 
+                // UPDATE TRANSFORMS
                 for (var i = 0, len = boxes.length; i < len; ++i) {
                     boxes[i].rotate[0] += 0.01;
                     boxes[i].rotate[1] += 0.02;
@@ -249,12 +251,12 @@
                     boxes[i].shadowDrawCall.uniform("uMVP", boxes[i].lightMvpMatrix);
                 }
 
-                // Draw to shadow buffer
+                // DRAW TO SHADOW BUFFER
                 app.framebuffer(shadowBuffer) 
                 .drawCalls(shadowDrawCalls)        
                 .clear()
                 .draw()
-                // Draw to screen                
+                // DRAW TO SCREEN     
                 .defaultFramebuffer()   
                 .drawCalls(mainDrawCalls)
                 .clear()

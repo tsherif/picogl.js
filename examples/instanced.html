@@ -79,17 +79,20 @@
             app.resize(window.innerWidth, window.innerHeight);
         }
 
+        // PROGRAM
         var vsSource =  document.getElementById("vs").text.trim();
         var fsSource =  document.getElementById("fs").text.trim();
                         
         var program = app.createProgram(vsSource, fsSource);
 
+        // PER-VERTEX POSITIONS
         var positions = app.createArrayBuffer(PicoGL.FLOAT, 2, new Float32Array([
             -0.3, -0.3,
              0.3, -0.3,
              0.0, 0.3
         ]));
 
+        // PER-INSTANCE OFFSETS AND COLORS
         var offsets = app.createInstancedArrayBuffer(PicoGL.FLOAT, 2, new Float32Array([
             -0.4, -0.4,
              0.4, -0.4,
@@ -115,6 +118,7 @@
         .clear()
         .draw();
 
+        // CLEANUP
         program.delete();
         positions.delete();
         offsets.delete();
