@@ -117,12 +117,7 @@
         return this;
     };  
 
-    /**
-        Bind this texture to a texture unit.
-
-        @method
-        @param {number} unit The texture unit to bind to.
-    */
+    // Bind this texture to a texture unit.
     PicoGL.Texture.prototype.bind = function(unit) {
         this.gl.activeTexture(PicoGL.TEXTURE_UNIT_MAP[unit]);
         this.gl.bindTexture(this.binding, this.texture);

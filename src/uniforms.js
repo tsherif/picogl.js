@@ -24,7 +24,6 @@
 (function() {
     "use strict";
 
-
     PicoGL.FloatUniform = function FloatUniform(gl, handle) {
         this.gl = gl;
         this.handle = handle;

@@ -53,11 +53,7 @@
         this.gpuTime = 0;
     };
 
-    /** 
-        Start the rendering timer.
-
-        @method
-    */
+    // Start the rendering timer.
     PicoGL.Timer.prototype.start = function() {
         if (this.gpuTimer) {
             if (!this.gpuTimerQueryInProgress) {
@@ -69,11 +65,7 @@
         }
     };
 
-    /** 
-        Stop the rendering timer.
-
-        @method
-    */
+    // Stop the rendering timer.
     PicoGL.Timer.prototype.end = function() {
         if (this.gpuTimer) {
             if (!this.gpuTimerQueryInProgress) {
@@ -86,14 +78,10 @@
         }
     };
 
-    /** 
-        Check if the rendering time is available. If
-        this method returns true, the cpuTime and
-        gpuTime properties will be set to valid 
-        values.
-
-        @method
-    */
+    // Check if the rendering time is available. If
+    // this method returns true, the cpuTime and
+    // gpuTime properties will be set to valid 
+    // values.
     PicoGL.Timer.prototype.ready = function() {
         if (this.gpuTimer) {
             if (!this.gpuTimerQueryInProgress) {

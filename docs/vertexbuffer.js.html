@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: timer.js</title>
+    <title>JSDoc: Source: vertexbuffer.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: timer.js</h1>
+    <h1 class="page-title">Source: vertexbuffer.js</h1>
 
     
 
@@ -53,84 +53,89 @@
     "use strict";
 
     /**
-        Rendering timer.
+        Storage for vertex data.
 
         @class
         @prop {WebGLRenderingContext} gl The WebGL context.
-        @prop {Object} cpuTimer Timer for CPU. Will be window.performance, if available, or window.Date.
-        @prop {EXTDisjointTimerQueryWebGL2} gpuTimer Timer for GPU. Only available if 
-                EXT_disjoint_timer_query_webgl2 is supported.
-        @prop {WebGLQuery} gpuTimerQuery Timer query object for GPU. Only available if 
-                EXT_disjoint_timer_query_webgl2 is supported. 
-        @prop {boolean} gpuTimerQueryInProgress Whether a gpu timer query is currently in progress.    
-        @prop {number} cpuStartTime When the last CPU timing started.
-        @prop {number} cpuTime Time spent on the CPU during the last timing. Only valid if ready() returns true.
-        @prop {number} gpuTime Time spent on the GPU during the last timing. Only valid if ready() returns true.
+        @prop {WebGLBuffer} buffer Allocated buffer storage.
+        @prop {GLEnum} type The type of data stored in the buffer.
+        @prop {number} itemSize Number of array elements per vertex.
+        @prop {number} numItems Number of vertices represented.
+        @prop {GLEnum} usage The usage pattern of the buffer.
+        @prop {boolean} indexArray Whether this is an index array.
+        @prop {boolean} instanced Whether this is an instanced array.
+        @prop {GLEnum} binding GL binding point (ARRAY_BUFFER or ELEMENT_ARRAY_BUFFER).
     */
-    PicoGL.Timer = function(gl) {
+    PicoGL.VertexBuffer = function VertexBuffer(gl, type, itemSize, data, usage, indexArray, instanced) {
+        var numRows = 1;
+        if (type === PicoGL.FLOAT_MAT4) {
+            type = PicoGL.FLOAT;
+            itemSize = 4;
+            numRows = 4;
+        } else if (type === PicoGL.FLOAT_MAT3) {
+            type = PicoGL.FLOAT;
+            itemSize = 3;
+            numRows = 3;
+        }  else if (type === PicoGL.FLOAT_MAT2) {
+            type = PicoGL.FLOAT;
+            itemSize = 2;
+            numRows = 2;
+        }
+
+        var dataLength;
+        if (typeof data === "number") {
+            dataLength = data;
+            data *= PicoGL.TYPE_SIZE[type];
+        } else {
+            dataLength = data.length;
+        }
+
         this.gl = gl;
-        this.cpuTimer = window.performance || window.Date;
-        this.gpuTimer = this.gl.getExtension("EXT_disjoint_timer_query_webgl2") || null;
-        this.gpuTimerQuery = null;
-        if (this.gpuTimer) {
-            this.gpuTimerQuery = this.gl.createQuery();
-        }
-        this.gpuTimerQueryInProgress = false;
-        this.cpuStartTime = 0;
-        this.cpuTime = 0;
-        this.gpuTime = 0;
+        this.buffer = gl.createBuffer();
+        this.type = type;
+        this.itemSize = itemSize;
+        this.numItems = dataLength / (itemSize * numRows);
+        this.numRows = numRows;
+        this.usage = usage || gl.STATIC_DRAW;
+        this.indexArray = !!indexArray;
+        this.instanced = !!instanced;
+        this.binding = this.indexArray ? gl.ELEMENT_ARRAY_BUFFER : gl.ARRAY_BUFFER;
+
+        gl.bindBuffer(this.binding, this.buffer);
+        gl.bufferData(this.binding, data, this.usage);
+        gl.bindBuffer(this.binding, null);
     };
 
-    // Start the rendering timer.
-    PicoGL.Timer.prototype.start = function() {
-        if (this.gpuTimer) {
-            if (!this.gpuTimerQueryInProgress) {
-                this.gl.beginQuery(this.gpuTimer.TIME_ELAPSED_EXT, this.gpuTimerQuery);
-                this.cpuStartTime = this.cpuTimer.now();
-            }
-        } else {
-            this.cpuStartTime = this.cpuTimer.now();
-        }
+    /**
+        Update data in this buffer.
+
+        @method
+        @param {VertexBufferView} data Data to store in the buffer.
+    */
+    PicoGL.VertexBuffer.prototype.data = function(data) {
+        this.gl.bindBuffer(this.binding, this.buffer);
+        this.gl.bufferSubData(this.binding, 0, data);
+        this.gl.bindBuffer(this.binding, null);
+
+        return this;
     };
 
-    // Stop the rendering timer.
-    PicoGL.Timer.prototype.end = function() {
-        if (this.gpuTimer) {
-            if (!this.gpuTimerQueryInProgress) {
-                this.gl.endQuery(this.gpuTimer.TIME_ELAPSED_EXT);
-                this.cpuTime = this.cpuTimer.now() - this.cpuStartTime;
-                this.gpuTimerQueryInProgress = true;
-            }
-        } else {
-            this.cpuTime = this.cpuTimer.now() - this.cpuStartTime;
-        }
+    // Bind this array buffer.
+    PicoGL.VertexBuffer.prototype.bind = function() {
+        this.gl.bindBuffer(this.binding, this.buffer);
+
+        return this;
     };
 
-    // Check if the rendering time is available. If
-    // this method returns true, the cpuTime and
-    // gpuTime properties will be set to valid 
-    // values.
-    PicoGL.Timer.prototype.ready = function() {
-        if (this.gpuTimer) {
-            if (!this.gpuTimerQueryInProgress) {
-                return false;
-            }
+    /**
+        Delete this array buffer.
 
-            var gpuTimerAvailable = this.gl.getQueryParameter(this.gpuTimerQuery, this.gl.QUERY_RESULT_AVAILABLE);
-            var gpuTimerDisjoint = this.gl.getParameter(this.gpuTimer.GPU_DISJOINT_EXT);
-
-            if (gpuTimerAvailable) {
-                this.gpuTimerQueryInProgress = false;
-            }
-
-            if (gpuTimerAvailable &amp;&amp; !gpuTimerDisjoint) {
-                this.gpuTime = this.gl.getQueryParameter(this.gpuTimerQuery, this.gl.QUERY_RESULT)  / 1000000;
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            return !!this.cpuStartTime;
+        @method
+    */
+    PicoGL.VertexBuffer.prototype.delete = function() {
+        if (this.buffer) {
+            this.gl.deleteBuffer(this.buffer);
+            this.buffer = null;    
         }
     };
 

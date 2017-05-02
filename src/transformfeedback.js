@@ -66,12 +66,7 @@
         return this;
     };
 
-    /**
-        Bind this transform feedback.
-
-        @method
-        @param {GLenum} primitive Primitive being drawn.
-    */
+    // Bind this transform feedback.
     PicoGL.TransformFeedback.prototype.bind = function(primitive) {
         this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedback);
         
@@ -84,11 +79,7 @@
         return this;
     };
 
-    /**
-        Unbind this transform feedback.
-
-        @method
-    */
+    // Unbind this transform feedback.
     PicoGL.TransformFeedback.prototype.unbind = function() {
         this.gl.endTransformFeedback();    
         this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, null);

@@ -153,12 +153,7 @@
         return this;
     };
 
-    /**
-        Bind this uniform buffer to the given base.
-
-        @method
-        @param {number} base Buffer base to bind to.
-    */
+    // Bind this uniform buffer to the given base.
     PicoGL.UniformBuffer.prototype.bind = function(base) {
         this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, base, this.buffer);
 

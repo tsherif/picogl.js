@@ -30,7 +30,7 @@
         @class
         @prop {WebGLRenderingContext} gl The WebGL context.
         @prop {WebGLVertexArrayObject} vertexArray Vertex array object.
-        @prop {array} attributeBuffers The attribute ArrayBuffers associated with this vertex array.
+        @prop {array} attributeBuffers The attribute VertexBuffers associated with this vertex array.
         @prop {number} numElements Number of elements in the vertex array.
         @prop {boolean} indexed Whether this vertex array is set up for indexed drawing.
         @prop {GLenum} indexType Data type of the indices.
@@ -53,38 +53,38 @@
 
         @method
         @param {number} attributeIndex The attribute location to bind to.
-        @param {VertexBuffer} arrayBuffer The VertexBuffer to bind.
+        @param {VertexBuffer} vertexBuffer The VertexBuffer to bind.
     */
-    PicoGL.VertexArray.prototype.attributeBuffer = function(attributeIndex, arrayBuffer) {
+    PicoGL.VertexArray.prototype.attributeBuffer = function(attributeIndex, vertexBuffer) {
         this.gl.bindVertexArray(this.vertexArray);
 
-        this.attributeBuffers[attributeIndex] = arrayBuffer;
-        var numRows = arrayBuffer.numRows;
+        this.attributeBuffers[attributeIndex] = vertexBuffer;
+        var numRows = vertexBuffer.numRows;
         
-        arrayBuffer.bind();
+        vertexBuffer.bind();
 
         for (var i = 0; i < numRows; ++i) {
             this.gl.vertexAttribPointer(
                 attributeIndex + i, 
-                arrayBuffer.itemSize, 
-                arrayBuffer.type, 
+                vertexBuffer.itemSize, 
+                vertexBuffer.type, 
                 false, 
-                numRows * arrayBuffer.itemSize * PicoGL.TYPE_SIZE[arrayBuffer.type], 
-                i * arrayBuffer.itemSize * PicoGL.TYPE_SIZE[arrayBuffer.type]);
+                numRows * vertexBuffer.itemSize * PicoGL.TYPE_SIZE[vertexBuffer.type], 
+                i * vertexBuffer.itemSize * PicoGL.TYPE_SIZE[vertexBuffer.type]);
 
-            if (arrayBuffer.instanced) {
+            if (vertexBuffer.instanced) {
                 this.gl.vertexAttribDivisor(attributeIndex + i, 1);
             }
 
             this.gl.enableVertexAttribArray(attributeIndex + i);
         }
         
-        this.instanced = this.instanced || arrayBuffer.instanced;
+        this.instanced = this.instanced || vertexBuffer.instanced;
 
-        if (arrayBuffer.instanced) {
-            this.numInstances = arrayBuffer.numItems; 
+        if (vertexBuffer.instanced) {
+            this.numInstances = vertexBuffer.numItems; 
         } else {
-            this.numElements = this.numElements || arrayBuffer.numItems; 
+            this.numElements = this.numElements || vertexBuffer.numItems; 
         }
 
         this.gl.bindVertexArray(null);
@@ -96,14 +96,14 @@
         Bind an index buffer to this vertex array.
 
         @method
-        @param {VertexBuffer} arrayBuffer The VertexBuffer to bind.
+        @param {VertexBuffer} vertexBuffer The VertexBuffer to bind.
     */
-    PicoGL.VertexArray.prototype.indexBuffer = function(arrayBuffer) {
+    PicoGL.VertexArray.prototype.indexBuffer = function(vertexBuffer) {
         this.gl.bindVertexArray(this.vertexArray);
-        arrayBuffer.bind();
+        vertexBuffer.bind();
 
-        this.numElements = arrayBuffer.numItems * 3;
-        this.indexType = arrayBuffer.type;
+        this.numElements = vertexBuffer.numItems * 3;
+        this.indexType = vertexBuffer.type;
         this.indexed = true;
 
         this.gl.bindVertexArray(null);
@@ -111,22 +111,14 @@
         return this;
     };
 
-    /**
-        Bind this vertex array.
-
-        @method
-    */
+    // Bind this vertex array.
     PicoGL.VertexArray.prototype.bind = function() {
         this.gl.bindVertexArray(this.vertexArray);
 
         return this;
     };
 
-    /**
-        Unbind this vertex array.
-
-        @method
-    */
+    // Unbind this vertex array.
     PicoGL.VertexArray.prototype.unbind = function() {
         this.gl.bindVertexArray(null);
 

@@ -131,12 +131,7 @@
         return this;
     };
 
-    /**
-        Draw something.
-
-        @method
-        @param {Object} state Current app state.
-    */
+    // Draw something.
     PicoGL.DrawCall.prototype.draw = function(state) {
         var uniformNames = this.uniformNames;
         var uniformValues = this.uniformValues;

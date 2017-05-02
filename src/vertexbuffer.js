@@ -92,11 +92,7 @@
         return this;
     };
 
-    /**
-        Bind this array buffer.
-
-        @method
-    */
+    // Bind this array buffer.
     PicoGL.VertexBuffer.prototype.bind = function() {
         this.gl.bindBuffer(this.binding, this.buffer);
 
