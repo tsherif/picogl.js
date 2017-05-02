@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.1.3 
+PicoGL.js v0.2.0 
 
 The MIT License (MIT)
 
@@ -37,7 +37,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @prop {object} TEXTURE_UNIT_MAP Map of texture unit indices to GL enums, e.g. 0 => gl.TEXTURE0.
     */
     var PicoGL = window.PicoGL = {
-        version: "0.1.3"
+        version: "0.2.0"
     };
 
     (function() {
