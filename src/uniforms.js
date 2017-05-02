@@ -24,6 +24,9 @@
 (function() {
     "use strict";
 
+    // Classes to manage uniform value updates, including
+    // caching current values.
+
     PicoGL.FloatUniform = function FloatUniform(gl, handle) {
         this.gl = gl;
         this.handle = handle;

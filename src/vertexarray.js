@@ -111,6 +111,18 @@
         return this;
     };
 
+    /**
+        Delete this vertex array.
+
+        @method
+    */
+    PicoGL.VertexArray.prototype.delete = function() {
+        if (this.vertexArray) {
+            this.gl.deleteVertexArray(this.vertexArray);
+            this.vertexArray = null;
+        }
+    };
+
     // Bind this vertex array.
     PicoGL.VertexArray.prototype.bind = function() {
         this.gl.bindVertexArray(this.vertexArray);
@@ -123,18 +135,6 @@
         this.gl.bindVertexArray(null);
 
         return this;
-    };
-
-    /**
-        Delete this vertex array.
-
-        @method
-    */
-    PicoGL.VertexArray.prototype.delete = function() {
-        if (this.vertexArray) {
-            this.gl.deleteVertexArray(this.vertexArray);
-            this.vertexArray = null;
-        }
     };
 
 })();

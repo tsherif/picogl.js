@@ -400,24 +400,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     };
 
     /**
-        Enable the WEBGL_depth_texture extension. Allows for writing depth values
-        to a texture, which will be stored in the depthTexture property of a Framebuffer
-        object.
-
-        @method
-        @see Framebuffer
-    */
-    PicoGL.App.prototype.depthTextures = function() {
-        this.depthTexturesEnabled = !!this.gl.getExtension("WEBGL_depth_texture");
-        
-        if (!this.depthTexturesEnabled) {
-            console.warn("Extension WEBGL_depth_texture unavailable. Cannot enable depth textures.");
-        }
-        
-        return this;
-    };
-
-    /**
         Enable the EXT_color_buffer_float extension. Allows for creating float textures as
         render targets on FrameBuffer objects. E.g. app.createFramebuffer().colorTarget(0, PicoGL.FLOAT).
 
@@ -943,28 +925,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     };
 
     /**
-        Set the value of a uniform.
-
-        @method
-        @param {string} name Uniform name.
-        @param {any} value Uniform value.
-    */
-    PicoGL.Program.prototype.uniform = function(name, value) {
-        this.uniforms[name].set(value);
-    };
-
-    /**
-        Bind a uniform block to a uniform buffer base.
-
-        @method
-        @param {string} name Uniform block name.
-        @param {number} base Uniform buffer base to bind the block to.
-    */
-    PicoGL.Program.prototype.uniformBlock = function(name, base) {
-        this.gl.uniformBlockBinding(this.program, this.uniformBlocks[name], base);
-    };
-
-    /**
         Delete this program.
 
         @method
@@ -974,6 +934,16 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             this.gl.deleteProgram(this.program);
             this.program = null;
         }
+    };
+
+    // Set the value of a uniform.
+    PicoGL.Program.prototype.uniform = function(name, value) {
+        this.uniforms[name].set(value);
+    };
+
+    // Bind a uniform block to a uniform buffer base.
+    PicoGL.Program.prototype.uniformBlock = function(name, base) {
+        this.gl.uniformBlockBinding(this.program, this.uniformBlocks[name], base);
     };
 
 })();
@@ -1027,7 +997,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @class
         @prop {WebGLRenderingContext} gl The WebGL context.
         @prop {WebGLVertexArrayObject} vertexArray Vertex array object.
-        @prop {array} attributeBuffers The attribute ArrayBuffers associated with this vertex array.
+        @prop {array} attributeBuffers The attribute VertexBuffers associated with this vertex array.
         @prop {number} numElements Number of elements in the vertex array.
         @prop {boolean} indexed Whether this vertex array is set up for indexed drawing.
         @prop {GLenum} indexType Data type of the indices.
@@ -1050,38 +1020,38 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
         @method
         @param {number} attributeIndex The attribute location to bind to.
-        @param {VertexBuffer} arrayBuffer The VertexBuffer to bind.
+        @param {VertexBuffer} vertexBuffer The VertexBuffer to bind.
     */
-    PicoGL.VertexArray.prototype.attributeBuffer = function(attributeIndex, arrayBuffer) {
+    PicoGL.VertexArray.prototype.attributeBuffer = function(attributeIndex, vertexBuffer) {
         this.gl.bindVertexArray(this.vertexArray);
 
-        this.attributeBuffers[attributeIndex] = arrayBuffer;
-        var numRows = arrayBuffer.numRows;
+        this.attributeBuffers[attributeIndex] = vertexBuffer;
+        var numRows = vertexBuffer.numRows;
         
-        arrayBuffer.bind();
+        vertexBuffer.bind();
 
         for (var i = 0; i < numRows; ++i) {
             this.gl.vertexAttribPointer(
                 attributeIndex + i, 
-                arrayBuffer.itemSize, 
-                arrayBuffer.type, 
+                vertexBuffer.itemSize, 
+                vertexBuffer.type, 
                 false, 
-                numRows * arrayBuffer.itemSize * PicoGL.TYPE_SIZE[arrayBuffer.type], 
-                i * arrayBuffer.itemSize * PicoGL.TYPE_SIZE[arrayBuffer.type]);
+                numRows * vertexBuffer.itemSize * PicoGL.TYPE_SIZE[vertexBuffer.type], 
+                i * vertexBuffer.itemSize * PicoGL.TYPE_SIZE[vertexBuffer.type]);
 
-            if (arrayBuffer.instanced) {
+            if (vertexBuffer.instanced) {
                 this.gl.vertexAttribDivisor(attributeIndex + i, 1);
             }
 
             this.gl.enableVertexAttribArray(attributeIndex + i);
         }
         
-        this.instanced = this.instanced || arrayBuffer.instanced;
+        this.instanced = this.instanced || vertexBuffer.instanced;
 
-        if (arrayBuffer.instanced) {
-            this.numInstances = arrayBuffer.numItems; 
+        if (vertexBuffer.instanced) {
+            this.numInstances = vertexBuffer.numItems; 
         } else {
-            this.numElements = this.numElements || arrayBuffer.numItems; 
+            this.numElements = this.numElements || vertexBuffer.numItems; 
         }
 
         this.gl.bindVertexArray(null);
@@ -1093,38 +1063,16 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         Bind an index buffer to this vertex array.
 
         @method
-        @param {VertexBuffer} arrayBuffer The VertexBuffer to bind.
+        @param {VertexBuffer} vertexBuffer The VertexBuffer to bind.
     */
-    PicoGL.VertexArray.prototype.indexBuffer = function(arrayBuffer) {
+    PicoGL.VertexArray.prototype.indexBuffer = function(vertexBuffer) {
         this.gl.bindVertexArray(this.vertexArray);
-        arrayBuffer.bind();
+        vertexBuffer.bind();
 
-        this.numElements = arrayBuffer.numItems * 3;
-        this.indexType = arrayBuffer.type;
+        this.numElements = vertexBuffer.numItems * 3;
+        this.indexType = vertexBuffer.type;
         this.indexed = true;
 
-        this.gl.bindVertexArray(null);
-
-        return this;
-    };
-
-    /**
-        Bind this vertex array.
-
-        @method
-    */
-    PicoGL.VertexArray.prototype.bind = function() {
-        this.gl.bindVertexArray(this.vertexArray);
-
-        return this;
-    };
-
-    /**
-        Unbind this vertex array.
-
-        @method
-    */
-    PicoGL.VertexArray.prototype.unbind = function() {
         this.gl.bindVertexArray(null);
 
         return this;
@@ -1140,6 +1088,20 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             this.gl.deleteVertexArray(this.vertexArray);
             this.vertexArray = null;
         }
+    };
+
+    // Bind this vertex array.
+    PicoGL.VertexArray.prototype.bind = function() {
+        this.gl.bindVertexArray(this.vertexArray);
+
+        return this;
+    };
+
+    // Unbind this vertex array.
+    PicoGL.VertexArray.prototype.unbind = function() {
+        this.gl.bindVertexArray(null);
+
+        return this;
     };
 
 })();
@@ -1189,11 +1151,18 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     };
 
     /**
-        Bind this transform feedback.
+        Delete this transform feedback.
 
         @method
-        @param {GLenum} primitive Primitive being drawn.
     */
+    PicoGL.TransformFeedback.prototype.delete = function() {
+        if (this.transformFeedback) {
+            this.gl.deleteTransformFeedback(this.transformFeedback);
+            this.transformFeedback = null;
+        }
+    }; 
+
+    // Bind this transform feedback.
     PicoGL.TransformFeedback.prototype.bind = function(primitive) {
         this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedback);
         
@@ -1206,29 +1175,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         return this;
     };
 
-    /**
-        Unbind this transform feedback.
-
-        @method
-    */
+    // Unbind this transform feedback.
     PicoGL.TransformFeedback.prototype.unbind = function() {
         this.gl.endTransformFeedback();    
         this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, null);
 
         return this;
     };
-
-    /**
-        Delete this transform feedback.
-
-        @method
-    */
-    PicoGL.TransformFeedback.prototype.delete = function() {
-        if (this.transformFeedback) {
-            this.gl.deleteTransformFeedback(this.transformFeedback);
-            this.transformFeedback = null;
-        }
-    }; 
 
 })();
 ;(function() {
@@ -1303,17 +1256,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     };
 
     /**
-        Bind this array buffer.
-
-        @method
-    */
-    PicoGL.VertexBuffer.prototype.bind = function() {
-        this.gl.bindBuffer(this.binding, this.buffer);
-
-        return this;
-    };
-
-    /**
         Delete this array buffer.
 
         @method
@@ -1325,10 +1267,19 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         }
     };
 
+    // Bind this array buffer.
+    PicoGL.VertexBuffer.prototype.bind = function() {
+        this.gl.bindBuffer(this.binding, this.buffer);
+
+        return this;
+    };
+
 })();
 ;(function() {
     "use strict";
 
+    // Classes to manage uniform value updates, including
+    // caching current values.
 
     PicoGL.FloatUniform = function FloatUniform(gl, handle) {
         this.gl = gl;
@@ -1696,18 +1647,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     };
 
     /**
-        Bind this uniform buffer to the given base.
-
-        @method
-        @param {number} base Buffer base to bind to.
-    */
-    PicoGL.UniformBuffer.prototype.bind = function(base) {
-        this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, base, this.buffer);
-
-        return this;
-    };
-
-    /**
         Delete this uniform buffer.
 
         @method
@@ -1717,6 +1656,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             this.gl.deleteBuffer(this.buffer);
             this.buffer = null;
         }
+    };
+
+    // Bind this uniform buffer to the given base.
+    PicoGL.UniformBuffer.prototype.bind = function(base) {
+        this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, base, this.buffer);
+
+        return this;
     };
 
 })();
@@ -1788,13 +1734,12 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     };
 
     /**
-        Set the image data for the texture. Width and height should only
-        be passed for ArrayBufferView data.
+        Set the image data for the texture.
     
         @method
         @param {ImageElement|ArrayBufferView} image Image data.
-        @param {number} [width] Image width. Required when passing array data.
-        @param {number} [height] Image height. Required when passing array data.
+        @param {number} [width] Image width. Required when passing ArrayBufferView data.
+        @param {number} [height] Image height. Required when passing ArrayBufferView data.
         @param {number} [depth] Image depth or number of images. Required when passing 3D or texture array data.
     */
     PicoGL.Texture.prototype.image = function(image, width, height, depth) {
@@ -1804,7 +1749,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         if (this.is3D) {
             this.gl.texImage3D(this.binding, 0, this.internalFormat, width, height, depth, 0, this.format, this.type, image);
         } else {
-            if (!image || !!image.BYTES_PER_ELEMENT) {
+            if (!image || image.BYTES_PER_ELEMENT !== undefined) {
                 this.gl.texImage2D(this.binding, 0, this.internalFormat, width, height, 0, this.format, this.type, image);
             } else {
                 this.gl.texImage2D(this.binding, 0, this.internalFormat, this.format, this.type, image);
@@ -1817,19 +1762,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     };  
 
     /**
-        Bind this texture to a texture unit.
-
-        @method
-        @param {number} unit The texture unit to bind to.
-    */
-    PicoGL.Texture.prototype.bind = function(unit) {
-        this.gl.activeTexture(PicoGL.TEXTURE_UNIT_MAP[unit]);
-        this.gl.bindTexture(this.binding, this.texture);
-
-        return this;
-    };   
-
-    /**
         Delete this texture.
 
         @method
@@ -1840,6 +1772,14 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             this.texture = null;
         }
     }; 
+
+    // Bind this texture to a texture unit.
+    PicoGL.Texture.prototype.bind = function(unit) {
+        this.gl.activeTexture(PicoGL.TEXTURE_UNIT_MAP[unit]);
+        this.gl.bindTexture(this.binding, this.texture);
+
+        return this;
+    };   
 
 })();
 ;(function() {
@@ -1914,19 +1854,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     };
 
     /**
-        Bind this cubemap to a texture unit.
-
-        @method
-        @param {number} unit The texture unit to bind to.
-    */
-    PicoGL.Cubemap.prototype.bind = function(unit) {
-        this.gl.activeTexture(PicoGL.TEXTURE_UNIT_MAP[unit]);
-        this.gl.bindTexture(this.gl.TEXTURE_CUBE_MAP, this.texture);
-
-        return this;
-    };
-
-    /**
         Delete this cubemap.
 
         @method
@@ -1936,7 +1863,15 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             this.gl.deleteTexture(this.texture);
             this.texture = null;
         }
-    }; 
+    };
+
+    // Bind this cubemap to a texture unit.
+    PicoGL.Cubemap.prototype.bind = function(unit) {
+        this.gl.activeTexture(PicoGL.TEXTURE_UNIT_MAP[unit]);
+        this.gl.bindTexture(this.gl.TEXTURE_CUBE_MAP, this.texture);
+
+        return this;
+    };
 
 })();
 ;(function() {
@@ -2243,12 +2178,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         return this;
     };
 
-    /**
-        Draw something.
-
-        @method
-        @param {Object} state Current app state.
-    */
+    // Draw something.
     PicoGL.DrawCall.prototype.draw = function(state) {
         var uniformNames = this.uniformNames;
         var uniformValues = this.uniformValues;
@@ -2323,8 +2253,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                 EXT_disjoint_timer_query_webgl2 is supported. 
         @prop {boolean} gpuTimerQueryInProgress Whether a gpu timer query is currently in progress.    
         @prop {number} cpuStartTime When the last CPU timing started.
-        @prop {number} cpuTime Time spent on the CPU during the last timing. Only valid if ready() returns true.
-        @prop {number} gpuTime Time spent on the GPU during the last timing. Only valid if ready() returns true.
+        @prop {number} cpuTime Time spent on the CPU during the last timing. Only valid if App.timerReady() returns true.
+        @prop {number} gpuTime Time spent on the GPU during the last timing. Only valid if App.timerReady() returns true.
     */
     PicoGL.Timer = function(gl) {
         this.gl = gl;
@@ -2340,11 +2270,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         this.gpuTime = 0;
     };
 
-    /** 
-        Start the rendering timer.
-
-        @method
-    */
+    // Start the rendering timer.
     PicoGL.Timer.prototype.start = function() {
         if (this.gpuTimer) {
             if (!this.gpuTimerQueryInProgress) {
@@ -2356,11 +2282,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         }
     };
 
-    /** 
-        Stop the rendering timer.
-
-        @method
-    */
+    // Stop the rendering timer.
     PicoGL.Timer.prototype.end = function() {
         if (this.gpuTimer) {
             if (!this.gpuTimerQueryInProgress) {
@@ -2373,14 +2295,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         }
     };
 
-    /** 
-        Check if the rendering time is available. If
-        this method returns true, the cpuTime and
-        gpuTime properties will be set to valid 
-        values.
-
-        @method
-    */
+    // Check if the rendering time is available. If
+    // this method returns true, the cpuTime and
+    // gpuTime properties will be set to valid 
+    // values.
     PicoGL.Timer.prototype.ready = function() {
         if (this.gpuTimer) {
             if (!this.gpuTimerQueryInProgress) {

@@ -66,6 +66,18 @@
         return this;
     };
 
+    /**
+        Delete this transform feedback.
+
+        @method
+    */
+    PicoGL.TransformFeedback.prototype.delete = function() {
+        if (this.transformFeedback) {
+            this.gl.deleteTransformFeedback(this.transformFeedback);
+            this.transformFeedback = null;
+        }
+    }; 
+
     // Bind this transform feedback.
     PicoGL.TransformFeedback.prototype.bind = function(primitive) {
         this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedback);
@@ -86,17 +98,5 @@
 
         return this;
     };
-
-    /**
-        Delete this transform feedback.
-
-        @method
-    */
-    PicoGL.TransformFeedback.prototype.delete = function() {
-        if (this.transformFeedback) {
-            this.gl.deleteTransformFeedback(this.transformFeedback);
-            this.transformFeedback = null;
-        }
-    }; 
 
 })();

@@ -92,13 +92,6 @@
         return this;
     };
 
-    // Bind this array buffer.
-    PicoGL.VertexBuffer.prototype.bind = function() {
-        this.gl.bindBuffer(this.binding, this.buffer);
-
-        return this;
-    };
-
     /**
         Delete this array buffer.
 
@@ -109,6 +102,13 @@
             this.gl.deleteBuffer(this.buffer);
             this.buffer = null;    
         }
+    };
+
+    // Bind this array buffer.
+    PicoGL.VertexBuffer.prototype.bind = function() {
+        this.gl.bindBuffer(this.binding, this.buffer);
+
+        return this;
     };
 
 })();

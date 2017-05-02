@@ -89,13 +89,12 @@
     };
 
     /**
-        Set the image data for the texture. Width and height should only
-        be passed for ArrayBufferView data.
+        Set the image data for the texture.
     
         @method
         @param {ImageElement|ArrayBufferView} image Image data.
-        @param {number} [width] Image width. Required when passing array data.
-        @param {number} [height] Image height. Required when passing array data.
+        @param {number} [width] Image width. Required when passing ArrayBufferView data.
+        @param {number} [height] Image height. Required when passing ArrayBufferView data.
         @param {number} [depth] Image depth or number of images. Required when passing 3D or texture array data.
     */
     PicoGL.Texture.prototype.image = function(image, width, height, depth) {
@@ -105,7 +104,7 @@
         if (this.is3D) {
             this.gl.texImage3D(this.binding, 0, this.internalFormat, width, height, depth, 0, this.format, this.type, image);
         } else {
-            if (!image || !!image.BYTES_PER_ELEMENT) {
+            if (!image || image.BYTES_PER_ELEMENT !== undefined) {
                 this.gl.texImage2D(this.binding, 0, this.internalFormat, width, height, 0, this.format, this.type, image);
             } else {
                 this.gl.texImage2D(this.binding, 0, this.internalFormat, this.format, this.type, image);
@@ -116,14 +115,6 @@
 
         return this;
     };  
-
-    // Bind this texture to a texture unit.
-    PicoGL.Texture.prototype.bind = function(unit) {
-        this.gl.activeTexture(PicoGL.TEXTURE_UNIT_MAP[unit]);
-        this.gl.bindTexture(this.binding, this.texture);
-
-        return this;
-    };   
 
     /**
         Delete this texture.
@@ -136,5 +127,13 @@
             this.texture = null;
         }
     }; 
+
+    // Bind this texture to a texture unit.
+    PicoGL.Texture.prototype.bind = function(unit) {
+        this.gl.activeTexture(PicoGL.TEXTURE_UNIT_MAP[unit]);
+        this.gl.bindTexture(this.binding, this.texture);
+
+        return this;
+    };   
 
 })();

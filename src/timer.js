@@ -36,8 +36,8 @@
                 EXT_disjoint_timer_query_webgl2 is supported. 
         @prop {boolean} gpuTimerQueryInProgress Whether a gpu timer query is currently in progress.    
         @prop {number} cpuStartTime When the last CPU timing started.
-        @prop {number} cpuTime Time spent on the CPU during the last timing. Only valid if ready() returns true.
-        @prop {number} gpuTime Time spent on the GPU during the last timing. Only valid if ready() returns true.
+        @prop {number} cpuTime Time spent on the CPU during the last timing. Only valid if App.timerReady() returns true.
+        @prop {number} gpuTime Time spent on the GPU during the last timing. Only valid if App.timerReady() returns true.
     */
     PicoGL.Timer = function(gl) {
         this.gl = gl;

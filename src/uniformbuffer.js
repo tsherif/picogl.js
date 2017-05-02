@@ -153,13 +153,6 @@
         return this;
     };
 
-    // Bind this uniform buffer to the given base.
-    PicoGL.UniformBuffer.prototype.bind = function(base) {
-        this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, base, this.buffer);
-
-        return this;
-    };
-
     /**
         Delete this uniform buffer.
 
@@ -170,6 +163,13 @@
             this.gl.deleteBuffer(this.buffer);
             this.buffer = null;
         }
+    };
+
+    // Bind this uniform buffer to the given base.
+    PicoGL.UniformBuffer.prototype.bind = function(base) {
+        this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, base, this.buffer);
+
+        return this;
     };
 
 })();

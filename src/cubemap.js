@@ -92,14 +92,6 @@
 
     };
 
-    // Bind this cubemap to a texture unit.
-    PicoGL.Cubemap.prototype.bind = function(unit) {
-        this.gl.activeTexture(PicoGL.TEXTURE_UNIT_MAP[unit]);
-        this.gl.bindTexture(this.gl.TEXTURE_CUBE_MAP, this.texture);
-
-        return this;
-    };
-
     /**
         Delete this cubemap.
 
@@ -110,6 +102,14 @@
             this.gl.deleteTexture(this.texture);
             this.texture = null;
         }
-    }; 
+    };
+
+    // Bind this cubemap to a texture unit.
+    PicoGL.Cubemap.prototype.bind = function(unit) {
+        this.gl.activeTexture(PicoGL.TEXTURE_UNIT_MAP[unit]);
+        this.gl.bindTexture(this.gl.TEXTURE_CUBE_MAP, this.texture);
+
+        return this;
+    };
 
 })();

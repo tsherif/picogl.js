@@ -98,7 +98,7 @@
         // FINAL ARGUMENT IS TRANSFORM FEEDBACK VARYINGS
         var program = app.createProgram(vsSource, fsSource, ["vPosition"]);
 
-        // INPUT AND OUTPUT ARRAY BUFFERS
+        // INPUT AND OUTPUT VERTEX BUFFERS
         var positions1 = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
             -0.3, -0.3,
              0.3, -0.3,
@@ -114,7 +114,7 @@
             0.0, 0.0, 1.0
         ]));
 
-        // COMBINE ARRAY BUFFERS INTO INPUT AND OUTPUT VERTEX ARRAYS
+        // COMBINE VERTEX BUFFERS INTO INPUT AND OUTPUT VERTEX ARRAYS
         var triangleArray1 = app.createVertexArray()
         .attributeBuffer(0, positions1)
         .attributeBuffer(1, colors);

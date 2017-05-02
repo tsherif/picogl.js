@@ -167,16 +167,6 @@
         }
     };
 
-    // Set the value of a uniform.
-    PicoGL.Program.prototype.uniform = function(name, value) {
-        this.uniforms[name].set(value);
-    };
-
-    // Bind a uniform block to a uniform buffer base.
-    PicoGL.Program.prototype.uniformBlock = function(name, base) {
-        this.gl.uniformBlockBinding(this.program, this.uniformBlocks[name], base);
-    };
-
     /**
         Delete this program.
 
@@ -187,6 +177,16 @@
             this.gl.deleteProgram(this.program);
             this.program = null;
         }
+    };
+
+    // Set the value of a uniform.
+    PicoGL.Program.prototype.uniform = function(name, value) {
+        this.uniforms[name].set(value);
+    };
+
+    // Bind a uniform block to a uniform buffer base.
+    PicoGL.Program.prototype.uniformBlock = function(name, base) {
+        this.gl.uniformBlockBinding(this.program, this.uniformBlocks[name], base);
     };
 
 })();

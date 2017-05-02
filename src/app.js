@@ -310,24 +310,6 @@
     };
 
     /**
-        Enable the WEBGL_depth_texture extension. Allows for writing depth values
-        to a texture, which will be stored in the depthTexture property of a Framebuffer
-        object.
-
-        @method
-        @see Framebuffer
-    */
-    PicoGL.App.prototype.depthTextures = function() {
-        this.depthTexturesEnabled = !!this.gl.getExtension("WEBGL_depth_texture");
-        
-        if (!this.depthTexturesEnabled) {
-            console.warn("Extension WEBGL_depth_texture unavailable. Cannot enable depth textures.");
-        }
-        
-        return this;
-    };
-
-    /**
         Enable the EXT_color_buffer_float extension. Allows for creating float textures as
         render targets on FrameBuffer objects. E.g. app.createFramebuffer().colorTarget(0, PicoGL.FLOAT).
 
