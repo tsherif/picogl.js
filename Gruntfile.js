@@ -66,7 +66,7 @@ module.exports = function(grunt) {
                   "src/shader.js",
                   "src/vertexarray.js",
                   "src/transformfeedback.js",
-                  "src/arraybuffer.js",
+                  "src/vertexbuffer.js",
                   "src/uniforms.js",
                   "src/uniformbuffer.js",
                   "src/texture.js",

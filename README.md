@@ -1,7 +1,7 @@
 PicoGL.js
 ========
 
-PicoGL.js is minimal WebGL 2-only rendering library. It's meant for developers who understand the WebGL 2 rendering pipeline and want to use it, but with a more convenient API. Typical usage of PicoGL.js will involve creating programs, array buffers, vertex arrays, uniform buffers, framebuffers, textures, transform feedbacks, and combining them into draw calls.
+PicoGL.js is minimal WebGL 2-only rendering library. It's meant for developers who understand the WebGL 2 rendering pipeline and want to use it, but with a more convenient API. Typical usage of PicoGL.js will involve creating programs, vertex buffers, vertex arrays, uniform buffers, framebuffers, textures, transform feedbacks, and combining them into draw calls.
 
 ```JavaScript
     var app = PicoGL.createApp(canvas)
@@ -9,7 +9,7 @@ PicoGL.js is minimal WebGL 2-only rendering library. It's meant for developers w
 
     var program = app.createProgram(vertexShaderSource, fragmentShaderSource);
 
-    var positions = app.createArrayBuffer(PicoGL.FLOAT, 2, new Float32Array([
+    var positions = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
         -0.5, -0.5,
          0.5, -0.5,
          0.0,  0.5
@@ -112,7 +112,7 @@ Transform Feedback
     // Last argument is transform feedback varyings
     var program = app.createProgram(vertexShaderSource, fragmentShaderSource, ["vPosition"]);
 
-    var positions1 = app.createArrayBuffer(PicoGL.FLOAT, 2, new Float32Array([
+    var positions1 = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
         -0.5, -0.5,
          0.5, -0.5,
          0.0,  0.5
@@ -121,7 +121,7 @@ Transform Feedback
     .attributeBuffer(0, positions1);
 
     // Empty destination buffer of 6 floats
-    var positions2 = app.createArrayBuffer(PicoGL.FLOAT, 2, 6);  
+    var positions2 = app.createVertexBuffer(PicoGL.FLOAT, 2, 6);  
     var vertexArray2 = app.createVertexArray()
     .attributeBuffer(0, positions2);
 
@@ -150,7 +150,7 @@ Instanced Drawing
 
     // The starting positions of the triangle. Each pair of coordinates
     // will be passed per-vertex
-    var positions = app.createArrayBuffer(PicoGL.FLOAT, 2, new Float32Array([
+    var positions = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
         -0.3, -0.3,
          0.3, -0.3,
          0.0,  0.3
@@ -158,7 +158,7 @@ Instanced Drawing
 
     // This is an instanced buffer meaning each pair of numbers will be passed
     // per-instance, rather than per-vertex
-    var offsets = app.createInstancedArrayBuffer(PicoGL.FLOAT, 2, new Float32Array([
+    var offsets = app.createInstancedVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
         -0.5, 0.0,
          0.0, 0.2,
          0.5, 0.0

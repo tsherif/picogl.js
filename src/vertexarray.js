@@ -53,7 +53,7 @@
 
         @method
         @param {number} attributeIndex The attribute location to bind to.
-        @param {ArrayBuffer} arrayBuffer The ArrayBuffer to bind.
+        @param {VertexBuffer} arrayBuffer The VertexBuffer to bind.
     */
     PicoGL.VertexArray.prototype.attributeBuffer = function(attributeIndex, arrayBuffer) {
         this.gl.bindVertexArray(this.vertexArray);
@@ -96,7 +96,7 @@
         Bind an index buffer to this vertex array.
 
         @method
-        @param {ArrayBuffer} arrayBuffer The ArrayBuffer to bind.
+        @param {VertexBuffer} arrayBuffer The VertexBuffer to bind.
     */
     PicoGL.VertexArray.prototype.indexBuffer = function(arrayBuffer) {
         this.gl.bindVertexArray(this.vertexArray);

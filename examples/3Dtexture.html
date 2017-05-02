@@ -113,7 +113,7 @@
             x += INCREMENT;
         }
 
-        var positions = app.createArrayBuffer(PicoGL.FLOAT, 3, positionData)
+        var positions = app.createVertexBuffer(PicoGL.FLOAT, 3, positionData)
 
         var pointArray = app.createVertexArray()
         .attributeBuffer(0, positions);

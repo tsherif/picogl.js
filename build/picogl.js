@@ -537,8 +537,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {ArrayBufferView} data Array buffer data.
         @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
     */
-    PicoGL.App.prototype.createArrayBuffer = function(type, itemSize, data, usage) {
-        return new PicoGL.ArrayBuffer(this.gl, type, itemSize, data, usage);
+    PicoGL.App.prototype.createVertexBuffer = function(type, itemSize, data, usage) {
+        return new PicoGL.VertexBuffer(this.gl, type, itemSize, data, usage);
     };
 
     /**
@@ -551,8 +551,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {ArrayBufferView} data Array buffer data.
         @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
     */
-    PicoGL.App.prototype.createInstancedArrayBuffer = function(type, itemSize, data, usage) {
-        return new PicoGL.ArrayBuffer(this.gl, type, itemSize, data, usage, false, true);
+    PicoGL.App.prototype.createInstancedVertexBuffer = function(type, itemSize, data, usage) {
+        return new PicoGL.VertexBuffer(this.gl, type, itemSize, data, usage, false, true);
     };
 
     /**
@@ -566,7 +566,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
     */
     PicoGL.App.prototype.createMatrixBuffer = function(type, data, usage) {
-        return new PicoGL.ArrayBuffer(this.gl, type, null, data, usage);
+        return new PicoGL.VertexBuffer(this.gl, type, null, data, usage);
     };
 
     /**
@@ -581,7 +581,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
     */
     PicoGL.App.prototype.createInstancedMatrixBuffer = function(type, data, usage) {
-        return new PicoGL.ArrayBuffer(this.gl, type, null, data, usage, false, true);
+        return new PicoGL.VertexBuffer(this.gl, type, null, data, usage, false, true);
     };
 
     /**
@@ -607,7 +607,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {ArrayBufferView} data Index array buffer data.
     */
     PicoGL.App.prototype.createIndexBuffer = function(type, itemSize, data) {
-        return new PicoGL.ArrayBuffer(this.gl, type, itemSize, data, null, true);
+        return new PicoGL.VertexBuffer(this.gl, type, itemSize, data, null, true);
     };
 
     /**
@@ -1050,7 +1050,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
         @method
         @param {number} attributeIndex The attribute location to bind to.
-        @param {ArrayBuffer} arrayBuffer The ArrayBuffer to bind.
+        @param {VertexBuffer} arrayBuffer The VertexBuffer to bind.
     */
     PicoGL.VertexArray.prototype.attributeBuffer = function(attributeIndex, arrayBuffer) {
         this.gl.bindVertexArray(this.vertexArray);
@@ -1093,7 +1093,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         Bind an index buffer to this vertex array.
 
         @method
-        @param {ArrayBuffer} arrayBuffer The ArrayBuffer to bind.
+        @param {VertexBuffer} arrayBuffer The VertexBuffer to bind.
     */
     PicoGL.VertexArray.prototype.indexBuffer = function(arrayBuffer) {
         this.gl.bindVertexArray(this.vertexArray);
@@ -1248,7 +1248,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @prop {boolean} instanced Whether this is an instanced array.
         @prop {GLEnum} binding GL binding point (ARRAY_BUFFER or ELEMENT_ARRAY_BUFFER).
     */
-    PicoGL.ArrayBuffer = function ArrayBuffer(gl, type, itemSize, data, usage, indexArray, instanced) {
+    PicoGL.VertexBuffer = function VertexBuffer(gl, type, itemSize, data, usage, indexArray, instanced) {
         var numRows = 1;
         if (type === PicoGL.FLOAT_MAT4) {
             type = PicoGL.FLOAT;
@@ -1292,9 +1292,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         Update data in this buffer.
 
         @method
-        @param {ArrayBufferView} data Data to store in the buffer.
+        @param {VertexBufferView} data Data to store in the buffer.
     */
-    PicoGL.ArrayBuffer.prototype.data = function(data) {
+    PicoGL.VertexBuffer.prototype.data = function(data) {
         this.gl.bindBuffer(this.binding, this.buffer);
         this.gl.bufferSubData(this.binding, 0, data);
         this.gl.bindBuffer(this.binding, null);
@@ -1307,7 +1307,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
         @method
     */
-    PicoGL.ArrayBuffer.prototype.bind = function() {
+    PicoGL.VertexBuffer.prototype.bind = function() {
         this.gl.bindBuffer(this.binding, this.buffer);
 
         return this;
@@ -1318,7 +1318,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
         @method
     */
-    PicoGL.ArrayBuffer.prototype.delete = function() {
+    PicoGL.VertexBuffer.prototype.delete = function() {
         if (this.buffer) {
             this.gl.deleteBuffer(this.buffer);
             this.buffer = null;    

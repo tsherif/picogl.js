@@ -38,7 +38,7 @@
         @prop {boolean} instanced Whether this is an instanced array.
         @prop {GLEnum} binding GL binding point (ARRAY_BUFFER or ELEMENT_ARRAY_BUFFER).
     */
-    PicoGL.ArrayBuffer = function ArrayBuffer(gl, type, itemSize, data, usage, indexArray, instanced) {
+    PicoGL.VertexBuffer = function VertexBuffer(gl, type, itemSize, data, usage, indexArray, instanced) {
         var numRows = 1;
         if (type === PicoGL.FLOAT_MAT4) {
             type = PicoGL.FLOAT;
@@ -82,9 +82,9 @@
         Update data in this buffer.
 
         @method
-        @param {ArrayBufferView} data Data to store in the buffer.
+        @param {VertexBufferView} data Data to store in the buffer.
     */
-    PicoGL.ArrayBuffer.prototype.data = function(data) {
+    PicoGL.VertexBuffer.prototype.data = function(data) {
         this.gl.bindBuffer(this.binding, this.buffer);
         this.gl.bufferSubData(this.binding, 0, data);
         this.gl.bindBuffer(this.binding, null);
@@ -97,7 +97,7 @@
 
         @method
     */
-    PicoGL.ArrayBuffer.prototype.bind = function() {
+    PicoGL.VertexBuffer.prototype.bind = function() {
         this.gl.bindBuffer(this.binding, this.buffer);
 
         return this;
@@ -108,7 +108,7 @@
 
         @method
     */
-    PicoGL.ArrayBuffer.prototype.delete = function() {
+    PicoGL.VertexBuffer.prototype.delete = function() {
         if (this.buffer) {
             this.gl.deleteBuffer(this.buffer);
             this.buffer = null;    

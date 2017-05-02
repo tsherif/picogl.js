@@ -447,8 +447,8 @@
         @param {ArrayBufferView} data Array buffer data.
         @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
     */
-    PicoGL.App.prototype.createArrayBuffer = function(type, itemSize, data, usage) {
-        return new PicoGL.ArrayBuffer(this.gl, type, itemSize, data, usage);
+    PicoGL.App.prototype.createVertexBuffer = function(type, itemSize, data, usage) {
+        return new PicoGL.VertexBuffer(this.gl, type, itemSize, data, usage);
     };
 
     /**
@@ -461,8 +461,8 @@
         @param {ArrayBufferView} data Array buffer data.
         @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
     */
-    PicoGL.App.prototype.createInstancedArrayBuffer = function(type, itemSize, data, usage) {
-        return new PicoGL.ArrayBuffer(this.gl, type, itemSize, data, usage, false, true);
+    PicoGL.App.prototype.createInstancedVertexBuffer = function(type, itemSize, data, usage) {
+        return new PicoGL.VertexBuffer(this.gl, type, itemSize, data, usage, false, true);
     };
 
     /**
@@ -476,7 +476,7 @@
         @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
     */
     PicoGL.App.prototype.createMatrixBuffer = function(type, data, usage) {
-        return new PicoGL.ArrayBuffer(this.gl, type, null, data, usage);
+        return new PicoGL.VertexBuffer(this.gl, type, null, data, usage);
     };
 
     /**
@@ -491,7 +491,7 @@
         @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
     */
     PicoGL.App.prototype.createInstancedMatrixBuffer = function(type, data, usage) {
-        return new PicoGL.ArrayBuffer(this.gl, type, null, data, usage, false, true);
+        return new PicoGL.VertexBuffer(this.gl, type, null, data, usage, false, true);
     };
 
     /**
@@ -517,7 +517,7 @@
         @param {ArrayBufferView} data Index array buffer data.
     */
     PicoGL.App.prototype.createIndexBuffer = function(type, itemSize, data) {
-        return new PicoGL.ArrayBuffer(this.gl, type, itemSize, data, null, true);
+        return new PicoGL.VertexBuffer(this.gl, type, itemSize, data, null, true);
     };
 
     /**

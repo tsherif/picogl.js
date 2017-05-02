@@ -130,9 +130,9 @@
 
         // INSTANCED CUBE GEOMETRY
         var box = utils.createBox({dimensions: [0.6, 0.6, 0.6]})
-        var positions = app.createArrayBuffer(PicoGL.FLOAT, 3, box.positions);
-        var uv = app.createArrayBuffer(PicoGL.FLOAT, 2, box.uvs);
-        var normals = app.createArrayBuffer(PicoGL.FLOAT, 3, box.normals);
+        var positions = app.createVertexBuffer(PicoGL.FLOAT, 3, box.positions);
+        var uv = app.createVertexBuffer(PicoGL.FLOAT, 2, box.uvs);
+        var normals = app.createVertexBuffer(PicoGL.FLOAT, 3, box.normals);
 
         var modelMatrixData = new Float32Array(NUM_BOXES * 16);
         var modelMatrices = app.createInstancedMatrixBuffer(PicoGL.FLOAT_MAT4, modelMatrixData);

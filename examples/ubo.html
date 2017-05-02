@@ -89,7 +89,7 @@
         var program = app.createProgram(vsSource, fsSource);
 
         // GEOMETRY
-        var positions = app.createArrayBuffer(PicoGL.FLOAT, 2, new Float32Array([
+        var positions = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
             -0.4, -0.5,
              0.4, -0.5,
              0.0, 0.5
