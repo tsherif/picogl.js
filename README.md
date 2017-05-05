@@ -34,7 +34,7 @@ PicoGL.js is minimal WebGL 2-only rendering library. It's meant for developers w
     .draw();
 
 ``` 
-
+Visit the [API docs](https://tsherif.github.io/picogl.js/docs/) for more details or the [website](https://tsherif.github.io/picogl.js/) for live examples of usage. 
 
 Note that PicoGL.js is **not** a scene graph library. There are no objects, hierarchies, transforms, materials, etc. It has been designed only to make management of GPU state more convenient. Its conceptual model maps fairly directly to the constructs one deals with when writing directly with the WebGL 2 API. The only higher-level construct is the **draw call**, which manages sets of related lower-level constructs. 
 
