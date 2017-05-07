@@ -101,6 +101,7 @@
             vec3 shadowCoord = (vPositionFromLight.xyz / vPositionFromLight.w) / 2.0 + 0.5;
             vec4 rgbaDepth = texture(uShadowMap, shadowCoord.xy);
             float depth = rgbaDepth.r;
+            bool inShadow = shadowCoord.z > depth + 0.02;
 
             vec4 baseColor = texture(uTextureMap, vTexCoord);
 
@@ -111,8 +112,8 @@
             float nDotL = max(dot(lightDirection, normal), 0.0);
             float diffuse = nDotL;
             float ambient = 0.1;
-            float specular = pow(max(dot(reflectionDirection, eyeDirection), 0.0), 20.0);
-            float visibility = shadowCoord.z > depth + 0.02 ? 1.0 - 0.4 * nDotL : 1.0;
+            float specular = inShadow ? 0.0 : pow(max(dot(reflectionDirection, eyeDirection), 0.0), 20.0);
+            float visibility = inShadow ? 0.7 : 1.0;
 
             fragColor = vec4(visibility * (ambient + diffuse + specular) * baseColor.rgb, baseColor.a);
         }
