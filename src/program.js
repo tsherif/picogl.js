@@ -91,92 +91,92 @@
             var UniformClass = null;
 
             switch (uniformInfo.type) {
-                case gl.INT: 
-                case gl.BOOL:
-                case gl.SAMPLER_2D:
-                case gl.INT_SAMPLER_2D:
-                case gl.UNSIGNED_INT_SAMPLER_2D:
-                case gl.SAMPLER_2D_SHADOW:
-                case gl.SAMPLER_2D_ARRAY:
-                case gl.INT_SAMPLER_2D_ARRAY:
-                case gl.UNSIGNED_INT_SAMPLER_2D_ARRAY:
-                case gl.SAMPLER_2D_ARRAY_SHADOW:
-                case gl.SAMPLER_CUBE:
-                case gl.INT_SAMPLER_CUBE:
-                case gl.UNSIGNED_INT_SAMPLER_CUBE:
-                case gl.SAMPLER_CUBE_SHADOW:
-                case gl.SAMPLER_3D:
-                case gl.INT_SAMPLER_3D:
-                case gl.UNSIGNED_INT_SAMPLER_3D:
+                case PicoGL.INT: 
+                case PicoGL.BOOL:
+                case PicoGL.SAMPLER_2D:
+                case PicoGL.INT_SAMPLER_2D:
+                case PicoGL.UNSIGNED_INT_SAMPLER_2D:
+                case PicoGL.SAMPLER_2D_SHADOW:
+                case PicoGL.SAMPLER_2D_ARRAY:
+                case PicoGL.INT_SAMPLER_2D_ARRAY:
+                case PicoGL.UNSIGNED_INT_SAMPLER_2D_ARRAY:
+                case PicoGL.SAMPLER_2D_ARRAY_SHADOW:
+                case PicoGL.SAMPLER_CUBE:
+                case PicoGL.INT_SAMPLER_CUBE:
+                case PicoGL.UNSIGNED_INT_SAMPLER_CUBE:
+                case PicoGL.SAMPLER_CUBE_SHADOW:
+                case PicoGL.SAMPLER_3D:
+                case PicoGL.INT_SAMPLER_3D:
+                case PicoGL.UNSIGNED_INT_SAMPLER_3D:
                     UniformClass = PicoGL.IntUniform;
                     break;
-                case gl.UNSIGNED_INT: 
+                case PicoGL.UNSIGNED_INT: 
                     UniformClass = PicoGL.UintUniform;
                     break;
-                case gl.FLOAT: 
+                case PicoGL.FLOAT: 
                     UniformClass = PicoGL.FloatUniform;
                     break;
-                case gl.FLOAT_VEC2: 
+                case PicoGL.FLOAT_VEC2: 
                     UniformClass = PicoGL.Vec2Uniform;
                     break;
-                case gl.FLOAT_VEC3: 
+                case PicoGL.FLOAT_VEC3: 
                     UniformClass = PicoGL.Vec3Uniform;
                     break;
-                case gl.FLOAT_VEC4: 
+                case PicoGL.FLOAT_VEC4: 
                     UniformClass = PicoGL.Vec4Uniform;
                     break;
-                case gl.INT_VEC2: 
+                case PicoGL.INT_VEC2: 
                     UniformClass = PicoGL.IntVec2Uniform;
                     break;
-                case gl.INT_VEC3: 
+                case PicoGL.INT_VEC3: 
                     UniformClass = PicoGL.IntVec3Uniform;
                     break;
-                case gl.INT_VEC4: 
+                case PicoGL.INT_VEC4: 
                     UniformClass = PicoGL.IntVec4Uniform;
                     break;
-                case gl.UNSIGNED_INT_VEC2: 
+                case PicoGL.UNSIGNED_INT_VEC2: 
                     UniformClass = PicoGL.UintVec2Uniform;
                     break;
-                case gl.UNSIGNED_INT_VEC3: 
+                case PicoGL.UNSIGNED_INT_VEC3: 
                     UniformClass = PicoGL.UintVec3Uniform;
                     break;
-                case gl.UNSIGNED_INT_VEC4: 
+                case PicoGL.UNSIGNED_INT_VEC4: 
                     UniformClass = PicoGL.UintVec4Uniform;
                     break;
-                case gl.BOOL_VEC2: 
+                case PicoGL.BOOL_VEC2: 
                     UniformClass = PicoGL.BoolVec2Uniform;
                     break;
-                case gl.BOOL_VEC3: 
+                case PicoGL.BOOL_VEC3: 
                     UniformClass = PicoGL.BoolVec3Uniform;
                     break;
-                case gl.BOOL_VEC4: 
+                case PicoGL.BOOL_VEC4: 
                     UniformClass = PicoGL.BoolVec4Uniform;
                     break;
-                case gl.FLOAT_MAT2: 
+                case PicoGL.FLOAT_MAT2: 
                     UniformClass = PicoGL.Mat2Uniform;
                     break;
-                case gl.FLOAT_MAT3: 
+                case PicoGL.FLOAT_MAT3: 
                     UniformClass = PicoGL.Mat3Uniform;
                     break;
-                case gl.FLOAT_MAT4: 
+                case PicoGL.FLOAT_MAT4: 
                     UniformClass = PicoGL.Mat4Uniform;
                     break;
-                case gl.FLOAT_MAT2x3: 
+                case PicoGL.FLOAT_MAT2x3: 
                     UniformClass = PicoGL.Mat2x3Uniform;
                     break;
-                case gl.FLOAT_MAT2x4: 
+                case PicoGL.FLOAT_MAT2x4: 
                     UniformClass = PicoGL.Mat2x4Uniform;
                     break;
-                case gl.FLOAT_MAT3x2: 
+                case PicoGL.FLOAT_MAT3x2: 
                     UniformClass = PicoGL.Mat3x2Uniform;
                     break;
-                case gl.FLOAT_MAT3x4: 
+                case PicoGL.FLOAT_MAT3x4: 
                     UniformClass = PicoGL.Mat3x4Uniform;
                     break;
-                case gl.FLOAT_MAT4x2: 
+                case PicoGL.FLOAT_MAT4x2: 
                     UniformClass = PicoGL.Mat4x2Uniform;
                     break;
-                case gl.FLOAT_MAT4x3: 
+                case PicoGL.FLOAT_MAT4x3: 
                     UniformClass = PicoGL.Mat4x3Uniform;
                     break;
                 default:

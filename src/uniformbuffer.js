@@ -85,6 +85,8 @@
                     this.size += 4;
                     break;
                 case PicoGL.FLOAT_MAT2:
+                case PicoGL.FLOAT_MAT2x3:
+                case PicoGL.FLOAT_MAT2x4:
                     this.size += (4 - this.size % 4) % 4;
                     this.offsets[i] = this.size;
                     this.sizes[i] = 8;
@@ -92,6 +94,8 @@
                     this.size += 8;
                     break;
                 case PicoGL.FLOAT_MAT3:
+                case PicoGL.FLOAT_MAT3x2:
+                case PicoGL.FLOAT_MAT3x4:
                     this.size += (4 - this.size % 4) % 4;
                     this.offsets[i] = this.size;
                     this.sizes[i] = 12;
@@ -99,6 +103,8 @@
                     this.size += 12;
                     break;
                 case PicoGL.FLOAT_MAT4:
+                case PicoGL.FLOAT_MAT4x2:
+                case PicoGL.FLOAT_MAT4x3:
                     this.size += (4 - this.size % 4) % 4;
                     this.offsets[i] = this.size;
                     this.sizes[i] = 16;

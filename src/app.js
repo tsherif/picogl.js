@@ -489,9 +489,9 @@
     };
 
     /**
-        Create a uniform buffer in std140 layout. NOTE: FLOAT_MAT2 and FLOAT_MAT3
-        are supported, but must be manually padded to 4-float column alignment by
-        the application!
+        Create a uniform buffer in std140 layout. NOTE: FLOAT_MAT2, FLOAT_MAT3x2, FLOAT_MAT4x2, 
+        FLOAT_MAT3, FLOAT_MAT2x3, FLOAT_MAT4x3 are supported, but must be manually padded to
+        4-float column alignment by the application!
 
         @method
         @param {Array} layout Array indicating the order and types of items to 
