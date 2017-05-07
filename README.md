@@ -156,9 +156,9 @@ Instanced Drawing
          0.0,  0.3
     ]));
 
-    // This is an instanced buffer meaning each pair of numbers will be passed
+    // This is an instance buffer meaning each pair of numbers will be passed
     // per-instance, rather than per-vertex
-    var offsets = app.createInstancedVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
+    var offsets = app.createInstanceBuffer(PicoGL.FLOAT, 2, new Float32Array([
         -0.5, 0.0,
          0.0, 0.2,
          0.5, 0.0
