@@ -135,7 +135,7 @@
         var normals = app.createVertexBuffer(PicoGL.FLOAT, 3, box.normals);
 
         var modelMatrixData = new Float32Array(NUM_BOXES * 16);
-        var modelMatrices = app.createInstancedMatrixBuffer(PicoGL.FLOAT_MAT4, modelMatrixData);
+        var modelMatrices = app.createInstanceMatrixBuffer(PicoGL.FLOAT_MAT4, modelMatrixData);
 
         var boxArray = app.createVertexArray()
         .attributeBuffer(0, positions)

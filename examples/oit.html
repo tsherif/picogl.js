@@ -220,8 +220,8 @@
         var indices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, sphere.indices);
 
         // PER-INSTANCE COLORS AND MODEL MATRICES
-        var colors = app.createInstancedVertexBuffer(PicoGL.FLOAT, 4, sphereColorData);
-        var modelMatrices = app.createInstancedMatrixBuffer(PicoGL.FLOAT_MAT4, modelMatrixData);
+        var colors = app.createInstanceBuffer(PicoGL.FLOAT, 4, sphereColorData);
+        var modelMatrices = app.createInstanceMatrixBuffer(PicoGL.FLOAT_MAT4, modelMatrixData);
 
         var sphereArray = app.createVertexArray()
         .attributeBuffer(0, positions)

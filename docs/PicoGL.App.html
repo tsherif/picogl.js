@@ -2517,7 +2517,7 @@
 
 
 <div class="description">
-    Create an index array buffer.
+    Create an index buffer.
 </div>
 
 
@@ -2569,7 +2569,7 @@
 
             
 
-            <td class="description last">The data type stored in the index array buffer.</td>
+            <td class="description last">The data type stored in the index buffer.</td>
         </tr>
 
     
@@ -2615,7 +2615,7 @@
 
             
 
-            <td class="description last">Index array buffer data.</td>
+            <td class="description last">Index buffer data.</td>
         </tr>
 
     
@@ -2656,7 +2656,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line501">line 501</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line487">line 487</a>
     </li></ul></dd>
     
 
@@ -2687,15 +2687,14 @@
 
     
 
-    <h4 class="name" id="createInstancedMatrixBuffer"><span class="type-signature"></span>createInstancedMatrixBuffer<span class="signature">(type, data, usage<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="createInstanceBuffer"><span class="type-signature"></span>createInstanceBuffer<span class="signature">(type, itemSize, data, usage<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
 
     
 
 
 
 <div class="description">
-    Create an matrix array buffer. Matrix buffers ensure that columns
-        are correctly split across attribute locations. Array items will be per-instance
+    Create an instance buffer. Data items will be per-instance
         rather than per-vertex.
 </div>
 
@@ -2764,230 +2763,7 @@
                 </td>
             
 
-            <td class="description last">The data type stored in the array buffer. Valid types
-        are FLOAT_MAT4, FLOAT_MAT3, FLOAT_MAT2.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>data</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">ArrayBufferView</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last">Array buffer data.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>usage</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">GLEnum</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    STATIC_DRAW
-                
-                </td>
-            
-
-            <td class="description last">Buffer usage.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line475">line 475</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="createInstancedVertexBuffer"><span class="type-signature"></span>createInstancedVertexBuffer<span class="signature">(type, itemSize, data, usage<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
-
-    
-
-
-
-<div class="description">
-    Create an instanced array buffer. Array items will be per-instance
-        rather than per-vertex.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Attributes</th>
-        
-
-        
-        <th>Default</th>
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>type</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">GLEnum</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last">The data type stored in the array buffer.</td>
+            <td class="description last">The data type stored in the instance buffer.</td>
         </tr>
 
     
@@ -3022,7 +2798,7 @@
                 </td>
             
 
-            <td class="description last">Number of elements per vertex.</td>
+            <td class="description last">Number of elements per instance.</td>
         </tr>
 
     
@@ -3057,7 +2833,7 @@
                 </td>
             
 
-            <td class="description last">Array buffer data.</td>
+            <td class="description last">Buffer data.</td>
         </tr>
 
     
@@ -3168,15 +2944,16 @@
 
     
 
-    <h4 class="name" id="createMatrixBuffer"><span class="type-signature"></span>createMatrixBuffer<span class="signature">(type, data, usage<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="createInstanceMatrixBuffer"><span class="type-signature"></span>createInstanceMatrixBuffer<span class="signature">(type, data, usage<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
 
     
 
 
 
 <div class="description">
-    Create an matrix array buffer. Matrix buffers ensure that columns
-        are correctly split across attribute locations.
+    Create an instanced matrix buffer. Matrix buffers ensure that columns
+        are correctly split across attribute locations. Data items will be per-instance
+        rather than per-vertex.
 </div>
 
 
@@ -3244,7 +3021,7 @@
                 </td>
             
 
-            <td class="description last">The data type stored in the array buffer. Valid types
+            <td class="description last">The data type stored in the matrix buffer. Valid types
         are FLOAT_MAT4, FLOAT_MAT3, FLOAT_MAT2.</td>
         </tr>
 
@@ -3280,7 +3057,7 @@
                 </td>
             
 
-            <td class="description last">Array buffer data.</td>
+            <td class="description last">Matrix buffer data.</td>
         </tr>
 
     
@@ -3360,7 +3137,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line460">line 460</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line475">line 475</a>
     </li></ul></dd>
     
 
@@ -5929,7 +5706,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line489">line 489</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line501">line 501</a>
     </li></ul></dd>
     
 
@@ -6049,7 +5826,7 @@
 
 
 <div class="description">
-    Create an array buffer.
+    Create a vertex buffer.
 </div>
 
 
@@ -6117,7 +5894,7 @@
                 </td>
             
 
-            <td class="description last">The data type stored in the array buffer.</td>
+            <td class="description last">The data type stored in the vertex buffer.</td>
         </tr>
 
     
@@ -6187,7 +5964,7 @@
                 </td>
             
 
-            <td class="description last">Array buffer data.</td>
+            <td class="description last">Buffer data.</td>
         </tr>
 
     
@@ -6268,6 +6045,229 @@
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
         <a href="app.js.html">app.js</a>, <a href="app.js.html#line432">line 432</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="createVertexMatrixBuffer"><span class="type-signature"></span>createVertexMatrixBuffer<span class="signature">(type, data, usage<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Create a per-vertex matrix buffer. Matrix buffers ensure that columns
+        are correctly split across attribute locations.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>type</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">GLEnum</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">The data type stored in the matrix buffer. Valid types
+        are FLOAT_MAT4, FLOAT_MAT3, FLOAT_MAT2.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">ArrayBufferView</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">Matrix buffer data.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>usage</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">GLEnum</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    STATIC_DRAW
+                
+                </td>
+            
+
+            <td class="description last">Buffer usage.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line460">line 460</a>
     </li></ul></dd>
     
 
@@ -8538,7 +8538,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue May 02 2017 04:14:09 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sun May 07 2017 11:50:55 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

@@ -319,7 +319,7 @@
         var indices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, sphere.indices);
 
         // PER-INSTANCE MODEL MATRICES
-        var modelMatrices = app.createInstancedMatrixBuffer(PicoGL.FLOAT_MAT4, modelMatrixData);
+        var modelMatrices = app.createInstanceMatrixBuffer(PicoGL.FLOAT_MAT4, modelMatrixData);
 
         var sphereArray = app.createVertexArray()
         .attributeBuffer(0, positions)

@@ -511,12 +511,12 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     };
 
     /**
-        Create an array buffer.
+        Create a vertex buffer.
 
         @method
-        @param {GLEnum} type The data type stored in the array buffer.
+        @param {GLEnum} type The data type stored in the vertex buffer.
         @param {number} itemSize Number of elements per vertex.
-        @param {ArrayBufferView} data Array buffer data.
+        @param {ArrayBufferView} data Buffer data.
         @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
     */
     PicoGL.App.prototype.createVertexBuffer = function(type, itemSize, data, usage) {
@@ -524,46 +524,58 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     };
 
     /**
-        Create an instanced array buffer. Array items will be per-instance
+        Create an instance buffer. Data items will be per-instance
         rather than per-vertex.
 
         @method
-        @param {GLEnum} type The data type stored in the array buffer.
-        @param {number} itemSize Number of elements per vertex.
-        @param {ArrayBufferView} data Array buffer data.
+        @param {GLEnum} type The data type stored in the instance buffer.
+        @param {number} itemSize Number of elements per instance.
+        @param {ArrayBufferView} data Buffer data.
         @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
     */
-    PicoGL.App.prototype.createInstancedVertexBuffer = function(type, itemSize, data, usage) {
+    PicoGL.App.prototype.createInstanceBuffer = function(type, itemSize, data, usage) {
         return new PicoGL.VertexBuffer(this.gl, type, itemSize, data, usage, false, true);
     };
 
     /**
-        Create an matrix array buffer. Matrix buffers ensure that columns
+        Create a per-vertex matrix buffer. Matrix buffers ensure that columns
         are correctly split across attribute locations.
 
         @method
-        @param {GLEnum} type The data type stored in the array buffer. Valid types
+        @param {GLEnum} type The data type stored in the matrix buffer. Valid types
         are FLOAT_MAT4, FLOAT_MAT3, FLOAT_MAT2.
-        @param {ArrayBufferView} data Array buffer data.
+        @param {ArrayBufferView} data Matrix buffer data.
         @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
     */
-    PicoGL.App.prototype.createMatrixBuffer = function(type, data, usage) {
+    PicoGL.App.prototype.createVertexMatrixBuffer = function(type, data, usage) {
         return new PicoGL.VertexBuffer(this.gl, type, null, data, usage);
     };
 
     /**
-        Create an matrix array buffer. Matrix buffers ensure that columns
-        are correctly split across attribute locations. Array items will be per-instance
+        Create an instanced matrix buffer. Matrix buffers ensure that columns
+        are correctly split across attribute locations. Data items will be per-instance
         rather than per-vertex.
 
         @method
-        @param {GLEnum} type The data type stored in the array buffer. Valid types
+        @param {GLEnum} type The data type stored in the matrix buffer. Valid types
         are FLOAT_MAT4, FLOAT_MAT3, FLOAT_MAT2.
-        @param {ArrayBufferView} data Array buffer data.
+        @param {ArrayBufferView} data Matrix buffer data.
         @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
     */
-    PicoGL.App.prototype.createInstancedMatrixBuffer = function(type, data, usage) {
+    PicoGL.App.prototype.createInstanceMatrixBuffer = function(type, data, usage) {
         return new PicoGL.VertexBuffer(this.gl, type, null, data, usage, false, true);
+    };
+
+    /**
+        Create an index buffer.
+
+        @method
+        @param {GLEnum} type The data type stored in the index buffer.
+        @param {number} itemSize Number of elements per primitive.
+        @param {ArrayBufferView} data Index buffer data.
+    */
+    PicoGL.App.prototype.createIndexBuffer = function(type, itemSize, data) {
+        return new PicoGL.VertexBuffer(this.gl, type, itemSize, data, null, true);
     };
 
     /**
@@ -578,18 +590,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     */
     PicoGL.App.prototype.createUniformBuffer = function(layout, usage) {
         return new PicoGL.UniformBuffer(this.gl, layout, usage);
-    };
-
-    /**
-        Create an index array buffer.
-
-        @method
-        @param {GLEnum} type The data type stored in the index array buffer.
-        @param {number} itemSize Number of elements per primitive.
-        @param {ArrayBufferView} data Index array buffer data.
-    */
-    PicoGL.App.prototype.createIndexBuffer = function(type, itemSize, data) {
-        return new PicoGL.VertexBuffer(this.gl, type, itemSize, data, null, true);
     };
 
     /**
