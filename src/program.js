@@ -110,6 +110,9 @@
                 case gl.UNSIGNED_INT_SAMPLER_3D:
                     UniformClass = PicoGL.IntUniform;
                     break;
+                case gl.UNSIGNED_INT: 
+                    UniformClass = PicoGL.UintUniform;
+                    break;
                 case gl.FLOAT: 
                     UniformClass = PicoGL.FloatUniform;
                     break;
@@ -130,6 +133,15 @@
                     break;
                 case gl.INT_VEC4: 
                     UniformClass = PicoGL.IntVec4Uniform;
+                    break;
+                case gl.UNSIGNED_INT_VEC2: 
+                    UniformClass = PicoGL.UintVec2Uniform;
+                    break;
+                case gl.UNSIGNED_INT_VEC3: 
+                    UniformClass = PicoGL.UintVec3Uniform;
+                    break;
+                case gl.UNSIGNED_INT_VEC4: 
+                    UniformClass = PicoGL.UintVec4Uniform;
                     break;
                 case gl.BOOL_VEC2: 
                     UniformClass = PicoGL.BoolVec2Uniform;

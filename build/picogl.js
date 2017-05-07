@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.2.1 
+PicoGL.js v0.2.2 
 
 The MIT License (MIT)
 
@@ -37,7 +37,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @prop {object} TEXTURE_UNIT_MAP Map of texture unit indices to GL enums, e.g. 0 => gl.TEXTURE0.
     */
     var PicoGL = window.PicoGL = {
-        version: "0.2.1"
+        version: "0.2.2"
     };
 
     (function() {
@@ -867,6 +867,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                 case gl.UNSIGNED_INT_SAMPLER_3D:
                     UniformClass = PicoGL.IntUniform;
                     break;
+                case gl.UNSIGNED_INT: 
+                    UniformClass = PicoGL.UintUniform;
+                    break;
                 case gl.FLOAT: 
                     UniformClass = PicoGL.FloatUniform;
                     break;
@@ -887,6 +890,15 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                     break;
                 case gl.INT_VEC4: 
                     UniformClass = PicoGL.IntVec4Uniform;
+                    break;
+                case gl.UNSIGNED_INT_VEC2: 
+                    UniformClass = PicoGL.UintVec2Uniform;
+                    break;
+                case gl.UNSIGNED_INT_VEC3: 
+                    UniformClass = PicoGL.UintVec3Uniform;
+                    break;
+                case gl.UNSIGNED_INT_VEC4: 
+                    UniformClass = PicoGL.UintVec4Uniform;
                     break;
                 case gl.BOOL_VEC2: 
                     UniformClass = PicoGL.BoolVec2Uniform;
@@ -1307,6 +1319,19 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         }
     };
 
+    PicoGL.UintUniform = function UintUniform(gl, handle) {
+        this.gl = gl;
+        this.handle = handle;
+        this.cache = 0;
+    };
+
+    PicoGL.UintUniform.prototype.set = function(value) {
+        if (this.cache !== value) {
+            this.gl.uniform1ui(this.handle, value);
+            this.cache = value;
+        }
+    };
+
     PicoGL.Vec2Uniform = function Vec2Uniform(gl, handle) {
         this.gl = gl;
         this.handle = handle;
@@ -1393,6 +1418,51 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             this.cache[2] !== value[2] ||
             this.cache[3] !== value[3]) {
             this.gl.uniform4iv(this.handle, value);
+            this.cache.set(value);
+        }
+    };
+
+    PicoGL.UintVec2Uniform = function UintVec2Uniform(gl, handle) {
+        this.gl = gl;
+        this.handle = handle;
+        this.cache = new Uint32Array(2);
+    };
+
+    PicoGL.UintVec2Uniform.prototype.set = function(value) {
+        if (this.cache[0] !== value[0] ||
+            this.cache[1] !== value[1]) {
+            this.gl.uniform2uiv(this.handle, value);
+            this.cache.set(value);
+        }
+    };
+
+    PicoGL.UintVec3Uniform = function UintVec3Uniform(gl, handle) {
+        this.gl = gl;
+        this.handle = handle;
+        this.cache = new Uint32Array(3);
+    };
+
+    PicoGL.UintVec3Uniform.prototype.set = function(value) {
+        if (this.cache[0] !== value[0] ||
+            this.cache[1] !== value[1] ||
+            this.cache[2] !== value[2]) {
+            this.gl.uniform3uiv(this.handle, value);
+            this.cache.set(value);
+        }
+    };
+
+    PicoGL.UintVec4Uniform = function UintVec4Uniform(gl, handle) {
+        this.gl = gl;
+        this.handle = handle;
+        this.cache = new Uint32Array(4);
+    };
+
+    PicoGL.UintVec4Uniform.prototype.set = function(value) {
+        if (this.cache[0] !== value[0] ||
+            this.cache[1] !== value[1] ||
+            this.cache[2] !== value[2] ||
+            this.cache[3] !== value[3]) {
+            this.gl.uniform4uiv(this.handle, value);
             this.cache.set(value);
         }
     };
