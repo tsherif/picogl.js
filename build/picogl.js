@@ -918,6 +918,24 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                 case gl.FLOAT_MAT4: 
                     UniformClass = PicoGL.Mat4Uniform;
                     break;
+                case gl.FLOAT_MAT2x3: 
+                    UniformClass = PicoGL.Mat2x3Uniform;
+                    break;
+                case gl.FLOAT_MAT2x4: 
+                    UniformClass = PicoGL.Mat2x4Uniform;
+                    break;
+                case gl.FLOAT_MAT3x2: 
+                    UniformClass = PicoGL.Mat3x2Uniform;
+                    break;
+                case gl.FLOAT_MAT3x4: 
+                    UniformClass = PicoGL.Mat3x4Uniform;
+                    break;
+                case gl.FLOAT_MAT4x2: 
+                    UniformClass = PicoGL.Mat4x2Uniform;
+                    break;
+                case gl.FLOAT_MAT4x3: 
+                    UniformClass = PicoGL.Mat4x3Uniform;
+                    break;
                 default:
                     console.error("Unrecognized type for uniform ", uniformInfo.name);
                     break;
@@ -1579,6 +1597,130 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             this.cache[14] !== value[14] ||
             this.cache[15] !== value[15]) {
             this.gl.uniformMatrix4fv(this.handle, false, value);
+            this.cache.set(value);
+        }
+    };
+
+    PicoGL.Mat2x3Uniform = function Mat2x3Uniform(gl, handle) {
+        this.gl = gl;
+        this.handle = handle;
+        this.cache = new Float32Array(6);
+    };
+
+    PicoGL.Mat2x3Uniform.prototype.set = function(value) {
+        if (this.cache[0] !== value[0] ||
+            this.cache[1] !== value[1] ||
+            this.cache[2] !== value[2] ||
+            this.cache[3] !== value[3] ||
+            this.cache[4] !== value[4] ||
+            this.cache[5] !== value[5]) {
+            this.gl.uniformMatrix2x3fv(this.handle, false, value);
+            this.cache.set(value);
+        }
+    };
+
+    PicoGL.Mat2x4Uniform = function Mat2x4Uniform(gl, handle) {
+        this.gl = gl;
+        this.handle = handle;
+        this.cache = new Float32Array(8);
+    };
+
+    PicoGL.Mat2x4Uniform.prototype.set = function(value) {
+        if (this.cache[0] !== value[0] ||
+            this.cache[1] !== value[1] ||
+            this.cache[2] !== value[2] ||
+            this.cache[3] !== value[3] ||
+            this.cache[4] !== value[4] ||
+            this.cache[5] !== value[5] ||
+            this.cache[6] !== value[6] ||
+            this.cache[7] !== value[7]) {
+            this.gl.uniformMatrix2x4fv(this.handle, false, value);
+            this.cache.set(value);
+        }
+    };
+
+    PicoGL.Mat3x2Uniform = function Mat3x2Uniform(gl, handle) {
+        this.gl = gl;
+        this.handle = handle;
+        this.cache = new Float32Array(6);
+    };
+
+    PicoGL.Mat3x2Uniform.prototype.set = function(value) {
+        if (this.cache[0] !== value[0] ||
+            this.cache[1] !== value[1] ||
+            this.cache[2] !== value[2] ||
+            this.cache[3] !== value[3] ||
+            this.cache[4] !== value[4] ||
+            this.cache[5] !== value[5]) {
+            this.gl.uniformMatrix3x2fv(this.handle, false, value);
+            this.cache.set(value);
+        }
+    };
+
+    PicoGL.Mat3x4Uniform = function Mat3x4Uniform(gl, handle) {
+        this.gl = gl;
+        this.handle = handle;
+        this.cache = new Float32Array(12);
+    };
+
+    PicoGL.Mat3x4Uniform.prototype.set = function(value) {
+        if (this.cache[0] !== value[0] ||
+            this.cache[1] !== value[1] ||
+            this.cache[2] !== value[2] ||
+            this.cache[3] !== value[3] ||
+            this.cache[4] !== value[4] ||
+            this.cache[5] !== value[5] ||
+            this.cache[6] !== value[6] ||
+            this.cache[7] !== value[7] ||
+            this.cache[8] !== value[8] ||
+            this.cache[9] !== value[9] ||
+            this.cache[10] !== value[10] ||
+            this.cache[11] !== value[11]) {
+            this.gl.uniformMatrix3x4fv(this.handle, false, value);
+            this.cache.set(value);
+        }
+    };
+
+    PicoGL.Mat4x2Uniform = function Mat4x2Uniform(gl, handle) {
+        this.gl = gl;
+        this.handle = handle;
+        this.cache = new Float32Array(8);
+    };
+
+    PicoGL.Mat4x2Uniform.prototype.set = function(value) {
+        if (this.cache[0] !== value[0] ||
+            this.cache[1] !== value[1] ||
+            this.cache[2] !== value[2] ||
+            this.cache[3] !== value[3] ||
+            this.cache[4] !== value[4] ||
+            this.cache[5] !== value[5] ||
+            this.cache[6] !== value[6] ||
+            this.cache[7] !== value[7]) {
+            this.gl.uniformMatrix4x2fv(this.handle, false, value);
+            this.cache.set(value);
+        }
+    };
+
+    PicoGL.Mat4x3Uniform = function Mat4x3Uniform(gl, handle) {
+        this.gl = gl;
+        this.handle = handle;
+        this.cache = new Float32Array(12);
+    };
+
+    PicoGL.Mat4x3Uniform.prototype.set = function(value) {
+        if (this.cache[0] !== value[0] ||
+            this.cache[1] !== value[1] ||
+            this.cache[2] !== value[2] ||
+            this.cache[3] !== value[3] ||
+            this.cache[4] !== value[4] ||
+            this.cache[5] !== value[5] ||
+            this.cache[6] !== value[6] ||
+            this.cache[7] !== value[7] ||
+            this.cache[8] !== value[8] ||
+            this.cache[9] !== value[9] ||
+            this.cache[10] !== value[10] ||
+            this.cache[11] !== value[11]) {
+            this.gl.uniformMatrix4x3fv(this.handle, false, value);
             this.cache.set(value);
         }
     };

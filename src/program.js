@@ -161,6 +161,24 @@
                 case gl.FLOAT_MAT4: 
                     UniformClass = PicoGL.Mat4Uniform;
                     break;
+                case gl.FLOAT_MAT2x3: 
+                    UniformClass = PicoGL.Mat2x3Uniform;
+                    break;
+                case gl.FLOAT_MAT2x4: 
+                    UniformClass = PicoGL.Mat2x4Uniform;
+                    break;
+                case gl.FLOAT_MAT3x2: 
+                    UniformClass = PicoGL.Mat3x2Uniform;
+                    break;
+                case gl.FLOAT_MAT3x4: 
+                    UniformClass = PicoGL.Mat3x4Uniform;
+                    break;
+                case gl.FLOAT_MAT4x2: 
+                    UniformClass = PicoGL.Mat4x2Uniform;
+                    break;
+                case gl.FLOAT_MAT4x3: 
+                    UniformClass = PicoGL.Mat4x3Uniform;
+                    break;
                 default:
                     console.error("Unrecognized type for uniform ", uniformInfo.name);
                     break;
