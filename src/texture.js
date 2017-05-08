@@ -64,7 +64,7 @@
 
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(this.binding, this.texture);
-        
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY);
         gl.texParameteri(this.binding, gl.TEXTURE_MAG_FILTER, magFilter);
         gl.texParameteri(this.binding, gl.TEXTURE_MIN_FILTER, minFilter);
         gl.texParameteri(this.binding, gl.TEXTURE_WRAP_S, wrapS);
@@ -88,7 +88,6 @@
             gl.texParameteri(this.binding, gl.TEXTURE_WRAP_R, wrapR);
             gl.texImage3D(this.binding, 0, this.internalFormat, width, height, depth, 0, this.format, this.type, image);
         } else {
-            gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY);
             if (buffer) {
                 gl.texImage2D(this.binding, 0, this.internalFormat, width, height, 0, this.format, this.type, image);
             } else {

@@ -65,7 +65,7 @@
             vec4 worldPosition = uModel * position;
             vPosition = worldPosition.xyz;
             vUV = uv;
-            vUV.y -= 0.13;
+            vUV.y += 0.30;
             vNormal = (uModel * normal).xyz;
             gl_Position = viewProj * worldPosition;
         }
