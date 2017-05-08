@@ -122,10 +122,10 @@
         @param {GLEnum} [options.format=RGBA] Texture data format.
         @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
         @param {boolean} [options.flipY=true] Whether th y-axis be flipped when reading the texture.
-        @param {GLEnum} [options.minFilter=LINEAR_MIPMAP_NEAREST] Minification filter.
-        @param {GLEnum} [options.magFilter=LINEAR] Magnification filter.
-        @param {GLEnum} [options.wrapS=REPEAT] Horizontal wrap mode.
-        @param {GLEnum} [options.wrapT=REPEAT] Vertical wrap mode.
+        @param {GLEnum} [options.minFilter=NEAREST] Minification filter.
+        @param {GLEnum} [options.magFilter=NEAREST] Magnification filter.
+        @param {GLEnum} [options.wrapS=CLAMP_TO_EDGE] Horizontal wrap mode.
+        @param {GLEnum} [options.wrapT=CLAMP_TO_EDGE] Vertical wrap mode.
         @param {GLEnum} [options.compareMode=NONE] Comparison mode.
         @param {GLEnum} [options.compareFunc=LEQUAL] Comparison function.
         @param {GLEnum} options.baseLevel Base mipmap level. 
