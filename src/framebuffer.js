@@ -65,11 +65,17 @@
         @param {GLenum} [format=RGBA] Texture data format.
         @param {GLenum} [internalFormat=TEXTURE_INTERNAL_FORMAT[type]] Texture data internal format.
     */
-    PicoGL.Framebuffer.prototype.colorTarget = function(index, type, format, internalFormat) {
+    PicoGL.Framebuffer.prototype.colorTarget = function(index, options) {
         index = index || 0;
-        type = type || this.gl.UNSIGNED_BYTE;
-        format = format || this.gl.RGBA;
-        internalFormat = internalFormat || PicoGL.TEXTURE_INTERNAL_FORMAT[type][format];
+        options = options || {};
+        options.type = options.type || this.gl.UNSIGNED_BYTE;
+        options.format = options.format || this.gl.RGBA;
+        options.internalFormat = options.internalFormat || PicoGL.TEXTURE_INTERNAL_FORMAT[options.type][options.format];
+        options.minFilter = options.minFilter || this.gl.NEAREST;
+        options.magFilter = options.magFilter || this.gl.NEAREST;
+        options.wrapS = options.wrapS || this.gl.CLAMP_TO_EDGE;
+        options.wrapT = options.wrapT || this.gl.CLAMP_TO_EDGE;
+        options.generateMipmaps = options.generateMipmaps === undefined ? false : options.generateMipmaps;
 
         this.colorAttachments[index] = this.gl["COLOR_ATTACHMENT" + index];
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.framebuffer);
@@ -82,16 +88,7 @@
             this.height, 
             null,
             false,
-            {
-                type: type,
-                format: format,
-                internalFormat: internalFormat,
-                minFilter: this.gl.NEAREST,
-                magFilter: this.gl.NEAREST,
-                wrapS: this.gl.CLAMP_TO_EDGE,
-                wrapT: this.gl.CLAMP_TO_EDGE,
-                generateMipmaps: false
-            }
+            options
         );
 
         this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.colorAttachments[index], this.gl.TEXTURE_2D, this.colorTextures[index].texture, 0);
@@ -110,10 +107,16 @@
         @param {GLenum} [type=UNSIGNED_SHORT] Texture data type.
         @param {GLenum} [internalFormat=TEXTURE_INTERNAL_FORMAT[type]] Texture data internal format.
     */
-    PicoGL.Framebuffer.prototype.depthTarget = function(type, internalFormat) {
-        var format = this.gl.DEPTH_COMPONENT;  
-        type = type || this.gl.UNSIGNED_SHORT;
-        internalFormat = internalFormat || PicoGL.TEXTURE_INTERNAL_FORMAT[type][format];
+    PicoGL.Framebuffer.prototype.depthTarget = function(options) {
+        options = options || {};
+        options.format = this.gl.DEPTH_COMPONENT;
+        options.type = options.type || this.gl.UNSIGNED_SHORT;
+        options.internalFormat = options.internalFormat || PicoGL.TEXTURE_INTERNAL_FORMAT[options.type][options.format];
+        options.minFilter = options.minFilter || this.gl.NEAREST;
+        options.magFilter = options.magFilter || this.gl.NEAREST;
+        options.wrapS = options.wrapS || this.gl.CLAMP_TO_EDGE;
+        options.wrapT = options.wrapT || this.gl.CLAMP_TO_EDGE;
+        options.generateMipmaps = options.generateMipmaps === undefined ? false : options.generateMipmaps;
 
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.framebuffer);
 
@@ -125,16 +128,7 @@
             this.height, 
             null,
             false,
-            {
-                type: type,
-                format: format,
-                internalFormat: internalFormat,
-                minFilter: this.gl.NEAREST,
-                magFilter: this.gl.NEAREST,
-                wrapS: this.gl.CLAMP_TO_EDGE,
-                wrapT: this.gl.CLAMP_TO_EDGE,
-                generateMipmaps: false
-            }
+            options
         );
 
         this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.gl.DEPTH_ATTACHMENT, this.gl.TEXTURE_2D, this.depthTexture.texture, 0);

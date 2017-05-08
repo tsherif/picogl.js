@@ -204,8 +204,8 @@
         var accumFsSource = document.getElementById("fragment-accum").text.trim();
         var accumProgram = app.createProgram(accumVsSource, accumFsSource);
         var accumBuffer = app.createFramebuffer()
-        .colorTarget(0, PicoGL.FLOAT)
-        .colorTarget(1, PicoGL.FLOAT);
+        .colorTarget(0, { type: PicoGL.FLOAT })
+        .colorTarget(1, { type: PicoGL.FLOAT });
 
         // BLEND PROGRAM
         var blendVsSource = document.getElementById("vertex-quad").text.trim();

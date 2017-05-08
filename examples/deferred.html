@@ -160,9 +160,9 @@
         var geoFsSource =  document.getElementById("geo-fs").text.trim();
         var geoProgram = app.createProgram(geoVsSource, geoFsSource);
         var gBuffer = app.createFramebuffer()
-        .colorTarget(0, PicoGL.FLOAT)
-        .colorTarget(1, PicoGL.FLOAT)
-        .colorTarget(2, PicoGL.FLOAT, PicoGL.RG)
+        .colorTarget(0, { type: PicoGL.FLOAT })
+        .colorTarget(1, { type: PicoGL.FLOAT })
+        .colorTarget(2, { type: PicoGL.FLOAT, format: PicoGL.RG })
         .depthTarget();
 
         // SET UP MAIN PROGRAM

@@ -57,6 +57,8 @@
         var wrapS = options.wrapS || gl.REPEAT;
         var wrapT = options.wrapT || gl.REPEAT;
         var wrapR = options.wrapR || gl.REPEAT;
+        var compareMode = options.compareMode || gl.NONE;
+        var compareFunc = options.compareFunc || gl.LEQUAL;
         var generateMipmaps = options.generateMipmaps !== false && 
                             (minFilter === gl.LINEAR_MIPMAP_NEAREST || minFilter === gl.LINEAR_MIPMAP_LINEAR);
 
@@ -67,9 +69,23 @@
         gl.texParameteri(this.binding, gl.TEXTURE_MIN_FILTER, minFilter);
         gl.texParameteri(this.binding, gl.TEXTURE_WRAP_S, wrapS);
         gl.texParameteri(this.binding, gl.TEXTURE_WRAP_T, wrapT);
+        gl.texParameteri(this.binding, gl.TEXTURE_WRAP_R, wrapR);
+        gl.texParameteri(this.binding, gl.TEXTURE_COMPARE_FUNC, compareFunc);
+        gl.texParameteri(this.binding, gl.TEXTURE_COMPARE_MODE, compareMode);
+        if (options.baseLevel !== undefined) {
+            gl.texParameteri(this.binding, gl.TEXTURE_BASE_LEVEL, options.baseLevel);
+        }
+        if (options.maxLevel !== undefined) {
+            gl.texParameteri(this.binding, gl.TEXTURE_MAX_LEVEL, options.maxLevel);
+        }
+        if (options.minLOD !== undefined) {
+            gl.texParameteri(this.binding, gl.TEXTURE_MIN_LOD, options.minLOD);
+        }
+        if (options.maxLOD !== undefined) {
+            gl.texParameteri(this.binding, gl.TEXTURE_MAX_LOD, options.maxLOD);
+        }
 
         if (this.is3D) {
-            gl.texParameteri(this.binding, gl.TEXTURE_WRAP_R, wrapR);
             gl.texImage3D(this.binding, 0, this.internalFormat, width, height, depth, 0, this.format, this.type, image);
         } else {
             gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY);

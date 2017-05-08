@@ -85,10 +85,12 @@
     <script id="main-fs" type="x-fragment-shader">
         #version 300 es
         precision highp float;
+        precision highp sampler2DShadow;
+
         uniform vec3 uLightPosition;
         uniform vec3 uEyePosition;
-        uniform sampler2D uShadowMap;
         uniform sampler2D uTextureMap;
+        uniform sampler2DShadow uShadowMap;
 
         in vec3 vPosition;
         in vec3 vNormal;
@@ -99,9 +101,8 @@
         out vec4 fragColor;
         void main() {
             vec3 shadowCoord = (vPositionFromLight.xyz / vPositionFromLight.w) / 2.0 + 0.5;
-            vec4 rgbaDepth = texture(uShadowMap, shadowCoord.xy);
-            float depth = rgbaDepth.r;
-            bool inShadow = shadowCoord.z > depth + 0.02;
+            shadowCoord.z -= 0.01;
+            float shadow = texture(uShadowMap, shadowCoord);
 
             vec4 baseColor = texture(uTextureMap, vTexCoord);
 
@@ -109,13 +110,11 @@
             vec3 eyeDirection = normalize(uEyePosition - vPosition);
             vec3 lightDirection = normalize(uLightPosition - vPosition);
             vec3 reflectionDirection = reflect(-lightDirection, normal);
-            float nDotL = max(dot(lightDirection, normal), 0.0);
-            float diffuse = nDotL;
-            float ambient = 0.1;
-            float specular = inShadow ? 0.0 : pow(max(dot(reflectionDirection, eyeDirection), 0.0), 20.0);
-            float visibility = inShadow ? 0.7 : 1.0;
+            float diffuse = shadow * max(dot(lightDirection, normal), 0.0) * 0.7;
+            float ambient = 0.2;
+            float specular = shadow * pow(max(dot(reflectionDirection, eyeDirection), 0.0), 20.0) * 0.7;
 
-            fragColor = vec4(visibility * (ambient + diffuse + specular) * baseColor.rgb, baseColor.a);
+            fragColor = vec4((ambient + diffuse + specular) * baseColor.rgb, baseColor.a);
         }
     </script> 
     <script type="text/javascript">
@@ -140,7 +139,7 @@
         var shadowVsSource =  document.getElementById("shadow-vs").text.trim();
         var shadowFsSource =  document.getElementById("shadow-fs").text.trim();
         var shadowProgram = app.createProgram(shadowVsSource, shadowFsSource);
-        var shadowBuffer = app.createFramebuffer().depthTarget();
+        var shadowBuffer = app.createFramebuffer().depthTarget({compareMode: PicoGL.COMPARE_REF_TO_TEXTURE});
 
         // SET UP MAIN PROGRAM
         var vsSource =  document.getElementById("main-vs").text.trim();
