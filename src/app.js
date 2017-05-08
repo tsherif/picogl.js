@@ -519,7 +519,13 @@
         @param {GLEnum} [options.magFilter=LINEAR] Magnification filter.
         @param {GLEnum} [options.wrapS=REPEAT] Horizontal wrap mode.
         @param {GLEnum} [options.wrapT=REPEAT] Vertical wrap mode.
-        @param {boolean} [options.generateMipmaps] Should mip maps be generated.
+        @param {GLEnum} [options.compareMode=NONE] Comparison mode.
+        @param {GLEnum} [options.compareFunc=LEQUAL] Comparison function.
+        @param {GLEnum} options.baseLevel Base mipmap level. 
+        @param {GLEnum} options.maxLevel Maximum mipmap level.
+        @param {GLEnum} options.minLOD Mimimum level of detail.
+        @param {GLEnum} options.maxLOD Maximum level of detail.
+        @param {boolean} [options.generateMipmaps] Should mipmaps be generated.
     */
     PicoGL.App.prototype.createTexture2D = function(image, width, height, options) {
         if (height === undefined) {
@@ -546,7 +552,13 @@
         @param {GLEnum} [options.magFilter=LINEAR] Magnification filter.
         @param {GLEnum} [options.wrapS=REPEAT] Horizontal wrap mode.
         @param {GLEnum} [options.wrapT=REPEAT] Vertical wrap mode.
-        @param {boolean} [options.generateMipmaps] Should mip maps be generated.
+        @param {GLEnum} [options.compareMode=NONE] Comparison mode.
+        @param {GLEnum} [options.compareFunc=LEQUAL] Comparison function.
+        @param {GLEnum} options.baseLevel Base mipmap level. 
+        @param {GLEnum} options.maxLevel Maximum mipmap level.
+        @param {GLEnum} options.minLOD Mimimum level of detail.
+        @param {GLEnum} options.maxLOD Maximum level of detail.
+        @param {boolean} [options.generateMipmaps] Should mipmaps be generated.
     */
     PicoGL.App.prototype.createTextureArray = function(image, width, height, depth, options) {
         return new PicoGL.Texture(this.gl, this.gl.TEXTURE_2D_ARRAY, image, width, height, depth, true, options);
@@ -568,7 +580,14 @@
         @param {GLEnum} [options.magFilter=LINEAR] Magnification filter.
         @param {GLEnum} [options.wrapS=REPEAT] Horizontal wrap mode.
         @param {GLEnum} [options.wrapT=REPEAT] Vertical wrap mode.
-        @param {boolean} [options.generateMipmaps] Should mip maps be generated.
+        @param {GLEnum} [options.wrapR=REPEAT] Depth wrap mode.
+        @param {GLEnum} [options.compareMode=NONE] Comparison mode.
+        @param {GLEnum} [options.compareFunc=LEQUAL] Comparison function.
+        @param {GLEnum} options.baseLevel Base mipmap level. 
+        @param {GLEnum} options.maxLevel Maximum mipmap level.
+        @param {GLEnum} options.minLOD Mimimum level of detail.
+        @param {GLEnum} options.maxLOD Maximum level of detail.
+        @param {boolean} [options.generateMipmaps] Should mipmaps be generated.
     */
     PicoGL.App.prototype.createTexture3D = function(image, width, height, depth, options) {
         return new PicoGL.Texture(this.gl, this.gl.TEXTURE_3D, image, width, height, depth, true, options);
@@ -601,7 +620,7 @@
         @param {GLEnum} [options.magFilter=LINEAR] Magnification filter.
         @param {GLEnum} [options.wrapS=REPEAT] Horizontal wrap mode.
         @param {GLEnum} [options.wrapT=REPEAT] Vertical wrap mode.
-        @param {boolean} [options.generateMipmaps] Should mip maps be generated.
+        @param {boolean} [options.generateMipmaps] Should mipmaps be generated.
     */
     PicoGL.App.prototype.createCubemap = function(options) {
         return new PicoGL.Cubemap(this.gl, options);

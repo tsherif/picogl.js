@@ -61,9 +61,22 @@
 
         @method
         @param {number} [index=0] Color attachment index.
-        @param {GLenum} [type=UNSIGNED_BYTE] Texture data type.
-        @param {GLenum} [format=RGBA] Texture data format.
-        @param {GLenum} [internalFormat=TEXTURE_INTERNAL_FORMAT[type]] Texture data internal format.
+        @param {Object} options Texture options.
+        @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
+        @param {GLEnum} [options.format=RGBA] Texture data format.
+        @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
+        @param {boolean} [options.flipY=true] Whether th y-axis be flipped when reading the texture.
+        @param {GLEnum} [options.minFilter=NEAREST] Minification filter.
+        @param {GLEnum} [options.magFilter=NEAREST] Magnification filter.
+        @param {GLEnum} [options.wrapS=CLAMP_TO_EDGE] Horizontal wrap mode.
+        @param {GLEnum} [options.wrapT=CLAMP_TO_EDGE] Vertical wrap mode.
+        @param {GLEnum} [options.compareMode=NONE] Comparison mode.
+        @param {GLEnum} [options.compareFunc=LEQUAL] Comparison function.
+        @param {GLEnum} options.baseLevel Base mipmap level. 
+        @param {GLEnum} options.maxLevel Maximum mipmap level.
+        @param {GLEnum} options.minLOD Mimimum level of detail.
+        @param {GLEnum} options.maxLOD Maximum level of detail.
+        @param {boolean} [options.generateMipmaps=false] Should mipmaps be generated.
     */
     PicoGL.Framebuffer.prototype.colorTarget = function(index, options) {
         index = index || 0;
@@ -104,8 +117,22 @@
         Add a depth target to this framebuffer.
 
         @method
-        @param {GLenum} [type=UNSIGNED_SHORT] Texture data type.
-        @param {GLenum} [internalFormat=TEXTURE_INTERNAL_FORMAT[type]] Texture data internal format.
+        @param {Object} options Texture options.
+        @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
+        @param {GLEnum} [options.format=RGBA] Texture data format.
+        @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
+        @param {boolean} [options.flipY=true] Whether th y-axis be flipped when reading the texture.
+        @param {GLEnum} [options.minFilter=LINEAR_MIPMAP_NEAREST] Minification filter.
+        @param {GLEnum} [options.magFilter=LINEAR] Magnification filter.
+        @param {GLEnum} [options.wrapS=REPEAT] Horizontal wrap mode.
+        @param {GLEnum} [options.wrapT=REPEAT] Vertical wrap mode.
+        @param {GLEnum} [options.compareMode=NONE] Comparison mode.
+        @param {GLEnum} [options.compareFunc=LEQUAL] Comparison function.
+        @param {GLEnum} options.baseLevel Base mipmap level. 
+        @param {GLEnum} options.maxLevel Maximum mipmap level.
+        @param {GLEnum} options.minLOD Mimimum level of detail.
+        @param {GLEnum} options.maxLOD Maximum level of detail.
+        @param {boolean} [options.generateMipmaps=false] Should mipmaps be generated.
     */
     PicoGL.Framebuffer.prototype.depthTarget = function(options) {
         options = options || {};
