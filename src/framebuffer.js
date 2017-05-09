@@ -72,10 +72,10 @@
         @param {GLEnum} [options.wrapT=CLAMP_TO_EDGE] Vertical wrap mode.
         @param {GLEnum} [options.compareMode=NONE] Comparison mode.
         @param {GLEnum} [options.compareFunc=LEQUAL] Comparison function.
-        @param {GLEnum} options.baseLevel Base mipmap level. 
-        @param {GLEnum} options.maxLevel Maximum mipmap level.
-        @param {GLEnum} options.minLOD Mimimum level of detail.
-        @param {GLEnum} options.maxLOD Maximum level of detail.
+        @param {GLEnum} [options.baseLevel] Base mipmap level. 
+        @param {GLEnum} [options.maxLevel] Maximum mipmap level.
+        @param {GLEnum} [options.minLOD] Mimimum level of detail.
+        @param {GLEnum} [options.maxLOD] Maximum level of detail.
         @param {boolean} [options.generateMipmaps=false] Should mipmaps be generated.
     */
     PicoGL.Framebuffer.prototype.colorTarget = function(index, options) {
@@ -128,10 +128,10 @@
         @param {GLEnum} [options.wrapT=CLAMP_TO_EDGE] Vertical wrap mode.
         @param {GLEnum} [options.compareMode=NONE] Comparison mode.
         @param {GLEnum} [options.compareFunc=LEQUAL] Comparison function.
-        @param {GLEnum} options.baseLevel Base mipmap level. 
-        @param {GLEnum} options.maxLevel Maximum mipmap level.
-        @param {GLEnum} options.minLOD Mimimum level of detail.
-        @param {GLEnum} options.maxLOD Maximum level of detail.
+        @param {GLEnum} [options.baseLevel] Base mipmap level. 
+        @param {GLEnum} [options.maxLevel] Maximum mipmap level.
+        @param {GLEnum} [options.minLOD] Mimimum level of detail.
+        @param {GLEnum} [options.maxLOD] Maximum level of detail.
         @param {boolean} [options.generateMipmaps=false] Should mipmaps be generated.
     */
     PicoGL.Framebuffer.prototype.depthTarget = function(options) {

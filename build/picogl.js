@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.2.4 
+PicoGL.js v0.2.5 
 
 The MIT License (MIT)
 
@@ -37,7 +37,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @prop {object} TEXTURE_UNIT_MAP Map of texture unit indices to GL enums, e.g. 0 => gl.TEXTURE0.
     */
     var PicoGL = window.PicoGL = {
-        version: "0.2.4"
+        version: "0.2.5"
     };
 
     (function() {
@@ -604,17 +604,17 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
         @param {GLEnum} [options.format=RGBA] Texture data format.
         @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
-        @param {boolean} [options.flipY=true] Whether th y-axis be flipped when reading the texture.
+        @param {boolean} [options.flipY=true] Whether the y-axis be flipped when unpacking the texture.
         @param {GLEnum} [options.minFilter=LINEAR_MIPMAP_NEAREST] Minification filter.
         @param {GLEnum} [options.magFilter=LINEAR] Magnification filter.
         @param {GLEnum} [options.wrapS=REPEAT] Horizontal wrap mode.
         @param {GLEnum} [options.wrapT=REPEAT] Vertical wrap mode.
         @param {GLEnum} [options.compareMode=NONE] Comparison mode.
         @param {GLEnum} [options.compareFunc=LEQUAL] Comparison function.
-        @param {GLEnum} options.baseLevel Base mipmap level. 
-        @param {GLEnum} options.maxLevel Maximum mipmap level.
-        @param {GLEnum} options.minLOD Mimimum level of detail.
-        @param {GLEnum} options.maxLOD Maximum level of detail.
+        @param {GLEnum} [options.baseLevel] Base mipmap level. 
+        @param {GLEnum} [options.maxLevel] Maximum mipmap level.
+        @param {GLEnum} [options.minLOD] Mimimum level of detail.
+        @param {GLEnum} [options.maxLOD] Maximum level of detail.
         @param {boolean} [options.generateMipmaps] Should mipmaps be generated.
     */
     PicoGL.App.prototype.createTexture2D = function(image, width, height, options) {
@@ -638,17 +638,17 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
         @param {GLEnum} [options.format=RGBA] Texture data format.
         @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
-        @param {boolean} [options.flipY=true] Whether th y-axis be flipped when reading the texture.
+        @param {boolean} [options.flipY=true] Whether the y-axis be flipped when unpacking the texture.
         @param {GLEnum} [options.minFilter=LINEAR_MIPMAP_NEAREST] Minification filter.
         @param {GLEnum} [options.magFilter=LINEAR] Magnification filter.
         @param {GLEnum} [options.wrapS=REPEAT] Horizontal wrap mode.
         @param {GLEnum} [options.wrapT=REPEAT] Vertical wrap mode.
         @param {GLEnum} [options.compareMode=NONE] Comparison mode.
         @param {GLEnum} [options.compareFunc=LEQUAL] Comparison function.
-        @param {GLEnum} options.baseLevel Base mipmap level. 
-        @param {GLEnum} options.maxLevel Maximum mipmap level.
-        @param {GLEnum} options.minLOD Mimimum level of detail.
-        @param {GLEnum} options.maxLOD Maximum level of detail.
+        @param {GLEnum} [options.baseLevel] Base mipmap level. 
+        @param {GLEnum} [options.maxLevel] Maximum mipmap level.
+        @param {GLEnum} [options.minLOD] Mimimum level of detail.
+        @param {GLEnum} [options.maxLOD] Maximum level of detail.
         @param {boolean} [options.generateMipmaps] Should mipmaps be generated.
     */
     PicoGL.App.prototype.createTextureArray = function(image, width, height, depth, options) {
@@ -667,7 +667,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
         @param {GLEnum} [options.format=RGBA] Texture data format.
         @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
-        @param {boolean} [options.flipY=true] Whether th y-axis be flipped when reading the texture.
+        @param {boolean} [options.flipY=true] Whether the y-axis be flipped when unpacking the texture.
         @param {GLEnum} [options.minFilter=LINEAR_MIPMAP_NEAREST] Minification filter.
         @param {GLEnum} [options.magFilter=LINEAR] Magnification filter.
         @param {GLEnum} [options.wrapS=REPEAT] Horizontal wrap mode.
@@ -675,10 +675,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {GLEnum} [options.wrapR=REPEAT] Depth wrap mode.
         @param {GLEnum} [options.compareMode=NONE] Comparison mode.
         @param {GLEnum} [options.compareFunc=LEQUAL] Comparison function.
-        @param {GLEnum} options.baseLevel Base mipmap level. 
-        @param {GLEnum} options.maxLevel Maximum mipmap level.
-        @param {GLEnum} options.minLOD Mimimum level of detail.
-        @param {GLEnum} options.maxLOD Maximum level of detail.
+        @param {GLEnum} [options.baseLevel] Base mipmap level. 
+        @param {GLEnum} [options.maxLevel] Maximum mipmap level.
+        @param {GLEnum} [options.minLOD] Mimimum level of detail.
+        @param {GLEnum} [options.maxLOD] Maximum level of detail.
         @param {boolean} [options.generateMipmaps] Should mipmaps be generated.
     */
     PicoGL.App.prototype.createTexture3D = function(image, width, height, depth, options) {
@@ -707,11 +707,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
         @param {number} [options.width] Texture width. Required when passing array data.
         @param {number} [options.height] Texture height. Required when passing array data.
-        @param {boolean} [options.flipY=false] Whether th y-axis be flipped when reading the texture.
+        @param {boolean} [options.flipY=false] Whether the y-axis be flipped when unpacking the texture.
         @param {GLEnum} [options.minFilter=LINEAR_MIPMAP_NEAREST] Minification filter.
         @param {GLEnum} [options.magFilter=LINEAR] Magnification filter.
         @param {GLEnum} [options.wrapS=REPEAT] Horizontal wrap mode.
         @param {GLEnum} [options.wrapT=REPEAT] Vertical wrap mode.
+        @param {GLEnum} [options.compareMode=NONE] Comparison mode.
+        @param {GLEnum} [options.compareFunc=LEQUAL] Comparison function.
         @param {boolean} [options.generateMipmaps] Should mipmaps be generated.
     */
     PicoGL.App.prototype.createCubemap = function(options) {
@@ -2102,6 +2104,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         var magFilter = options.magFilter || gl.LINEAR;
         var wrapS = options.wrapS || gl.REPEAT;
         var wrapT = options.wrapT || gl.REPEAT;
+        var compareMode = options.compareMode || gl.NONE;
+        var compareFunc = options.compareFunc || gl.LEQUAL;
         var generateMipmaps = options.generateMipmaps !== false && 
                             (minFilter === gl.LINEAR_MIPMAP_NEAREST || minFilter === gl.LINEAR_MIPMAP_LINEAR);
 
@@ -2113,6 +2117,20 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, minFilter);
         gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, wrapS);
         gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, wrapT);
+        gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_COMPARE_FUNC, compareFunc);
+        gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_COMPARE_MODE, compareMode);
+        if (options.baseLevel !== undefined) {
+            gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_BASE_LEVEL, options.baseLevel);
+        }
+        if (options.maxLevel !== undefined) {
+            gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAX_LEVEL, options.maxLevel);
+        }
+        if (options.minLOD !== undefined) {
+            gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_LOD, options.minLOD);
+        }
+        if (options.maxLOD !== undefined) {
+            gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAX_LOD, options.maxLOD);
+        }
 
         if (buffer) {
             gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_X, 0, this.internalFormat, width, height, 0, this.format, this.type, negX);
@@ -2208,10 +2226,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {GLEnum} [options.wrapT=CLAMP_TO_EDGE] Vertical wrap mode.
         @param {GLEnum} [options.compareMode=NONE] Comparison mode.
         @param {GLEnum} [options.compareFunc=LEQUAL] Comparison function.
-        @param {GLEnum} options.baseLevel Base mipmap level. 
-        @param {GLEnum} options.maxLevel Maximum mipmap level.
-        @param {GLEnum} options.minLOD Mimimum level of detail.
-        @param {GLEnum} options.maxLOD Maximum level of detail.
+        @param {GLEnum} [options.baseLevel] Base mipmap level. 
+        @param {GLEnum} [options.maxLevel] Maximum mipmap level.
+        @param {GLEnum} [options.minLOD] Mimimum level of detail.
+        @param {GLEnum} [options.maxLOD] Maximum level of detail.
         @param {boolean} [options.generateMipmaps=false] Should mipmaps be generated.
     */
     PicoGL.Framebuffer.prototype.colorTarget = function(index, options) {
@@ -2258,16 +2276,16 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {GLEnum} [options.format=RGBA] Texture data format.
         @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
         @param {boolean} [options.flipY=true] Whether th y-axis be flipped when reading the texture.
-        @param {GLEnum} [options.minFilter=LINEAR_MIPMAP_NEAREST] Minification filter.
-        @param {GLEnum} [options.magFilter=LINEAR] Magnification filter.
-        @param {GLEnum} [options.wrapS=REPEAT] Horizontal wrap mode.
-        @param {GLEnum} [options.wrapT=REPEAT] Vertical wrap mode.
+        @param {GLEnum} [options.minFilter=NEAREST] Minification filter.
+        @param {GLEnum} [options.magFilter=NEAREST] Magnification filter.
+        @param {GLEnum} [options.wrapS=CLAMP_TO_EDGE] Horizontal wrap mode.
+        @param {GLEnum} [options.wrapT=CLAMP_TO_EDGE] Vertical wrap mode.
         @param {GLEnum} [options.compareMode=NONE] Comparison mode.
         @param {GLEnum} [options.compareFunc=LEQUAL] Comparison function.
-        @param {GLEnum} options.baseLevel Base mipmap level. 
-        @param {GLEnum} options.maxLevel Maximum mipmap level.
-        @param {GLEnum} options.minLOD Mimimum level of detail.
-        @param {GLEnum} options.maxLOD Maximum level of detail.
+        @param {GLEnum} [options.baseLevel] Base mipmap level. 
+        @param {GLEnum} [options.maxLevel] Maximum mipmap level.
+        @param {GLEnum} [options.minLOD] Mimimum level of detail.
+        @param {GLEnum} [options.maxLOD] Maximum level of detail.
         @param {boolean} [options.generateMipmaps=false] Should mipmaps be generated.
     */
     PicoGL.Framebuffer.prototype.depthTarget = function(options) {

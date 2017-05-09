@@ -58,6 +58,8 @@
         var magFilter = options.magFilter || gl.LINEAR;
         var wrapS = options.wrapS || gl.REPEAT;
         var wrapT = options.wrapT || gl.REPEAT;
+        var compareMode = options.compareMode || gl.NONE;
+        var compareFunc = options.compareFunc || gl.LEQUAL;
         var generateMipmaps = options.generateMipmaps !== false && 
                             (minFilter === gl.LINEAR_MIPMAP_NEAREST || minFilter === gl.LINEAR_MIPMAP_LINEAR);
 
@@ -69,6 +71,20 @@
         gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, minFilter);
         gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, wrapS);
         gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, wrapT);
+        gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_COMPARE_FUNC, compareFunc);
+        gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_COMPARE_MODE, compareMode);
+        if (options.baseLevel !== undefined) {
+            gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_BASE_LEVEL, options.baseLevel);
+        }
+        if (options.maxLevel !== undefined) {
+            gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAX_LEVEL, options.maxLevel);
+        }
+        if (options.minLOD !== undefined) {
+            gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_LOD, options.minLOD);
+        }
+        if (options.maxLOD !== undefined) {
+            gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAX_LOD, options.maxLOD);
+        }
 
         if (buffer) {
             gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_X, 0, this.internalFormat, width, height, 0, this.format, this.type, negX);
