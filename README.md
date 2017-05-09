@@ -49,8 +49,8 @@ Multiple Render Targets
     .floatRenderTargets();  // EXT_color_buffer_float 
 
     var framebuffer = app.createFramebuffer()
-    .colorTarget(0, PicoGL.FLOAT)
-    .colorTarget(1, PicoGL.FLOAT)
+    .colorTarget(0, { type: PicoGL.FLOAT })
+    .colorTarget(1, { type: PicoGL.FLOAT })
     .depthTarget();
     
     // ... set up programs and vertex arrays for offscreen and
