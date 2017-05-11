@@ -160,7 +160,7 @@
         sent the the GPU until the update() method is called!
 
         @method
-        @param {number} index Location in the layout to update.
+        @param {number} index Index in the layout of item to set.
         @param {ArrayBufferView} value Value to store at the layout location.
     */
     PicoGL.UniformBuffer.prototype.set = function(index, value) {
@@ -178,6 +178,7 @@
     /**
         Send stored buffer data to the GPU.
 
+        @param {number} [index] Index in the layout of item to send to the GPU. If ommited, entire buffer is sent.
         @method
     */
     PicoGL.UniformBuffer.prototype.update = function(index) {
