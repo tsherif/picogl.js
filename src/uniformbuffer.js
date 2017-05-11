@@ -180,9 +180,21 @@
 
         @method
     */
-    PicoGL.UniformBuffer.prototype.update = function() {
+    PicoGL.UniformBuffer.prototype.update = function(index) {
+        var data;
+        var offset;
+        if (index === undefined) {
+            data = this.data;
+            offset = 0;
+        } else {
+            var begin = this.offsets[index];
+            var end = begin + this.sizes[index];
+            data = this.data.subarray(begin, end);
+            offset = begin * 4;
+        }
+
         this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, 0, this.buffer);
-        this.gl.bufferSubData(this.gl.UNIFORM_BUFFER, 0, this.data);
+        this.gl.bufferSubData(this.gl.UNIFORM_BUFFER, offset, data);
         this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, 0, null);
 
         return this;

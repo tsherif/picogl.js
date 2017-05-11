@@ -1908,9 +1908,21 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
         @method
     */
-    PicoGL.UniformBuffer.prototype.update = function() {
+    PicoGL.UniformBuffer.prototype.update = function(index) {
+        var data;
+        var offset;
+        if (index === undefined) {
+            data = this.data;
+            offset = 0;
+        } else {
+            var begin = this.offsets[index];
+            var end = begin + this.sizes[index];
+            data = this.data.subarray(begin, end);
+            offset = begin * 4;
+        }
+
         this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, 0, this.buffer);
-        this.gl.bufferSubData(this.gl.UNIFORM_BUFFER, 0, this.data);
+        this.gl.bufferSubData(this.gl.UNIFORM_BUFFER, offset, data);
         this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, 0, null);
 
         return this;
@@ -2359,6 +2371,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         for (var i = 0; i < this.numColorTargets; ++i) {
             this.colorTextures[i].image(null, this.width, this.height);
         }
+
+        this.gl.drawBuffers(this.colorAttachments);
 
         if (this.depthTexture) {
             this.depthTexture.image(null, this.width, this.height);

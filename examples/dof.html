@@ -115,7 +115,6 @@
 
         uniform DOFUniforms {
             vec2  uDepthRange; 
-            vec2  uResolution;
             float uFocusDistance;
             float uBlurCoefficient;
             float uPPM;
@@ -130,7 +129,7 @@
 
         void main() {
             ivec2 fragCoord = ivec2(gl_FragCoord.xy);
-            ivec2 resolution = ivec2(uResolution) - 1;
+            ivec2 resolution = textureSize(uColor, 0) - 1;
 
             // Convert to linear depth
             float ndc = 2.0 * texelFetch(uDepth, fragCoord, 0).r - 1.0;
@@ -198,7 +197,6 @@
         .clearColor(0.0, 0.0, 0.0, 1.0);
 
         var depthRange = vec2.fromValues(NEAR, FAR);
-        var resolution = vec2.fromValues(app.width, app.height);
 
         // SET UP PROGRAMS
         var boxVsSource =  document.getElementById("vertex-boxes").text.trim();
@@ -269,9 +267,6 @@
             mat4.perspective(projMatrix, Math.PI / 2, app.canvas.width / app.canvas.height, 0.1, 10.0);
             mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
             sceneUniforms.set(0, viewProjMatrix).update();
-
-            resolution = vec2.fromValues(app.width, app.height);
-            dofUniforms.set(1, resolution).update();
         };
 
         // UNIFORM BUFFERS
@@ -287,16 +282,14 @@
 
         var dofUniforms = app.createUniformBuffer([
             PicoGL.FLOAT_VEC2,
-            PicoGL.FLOAT_VEC2,
             PicoGL.FLOAT,
             PicoGL.FLOAT,
             PicoGL.FLOAT
         ])
         .set(0, depthRange)
-        .set(1, resolution)
-        .set(2, FOCUS_DISTANCE)
-        .set(3, BLUR_COEFFICIENT)
-        .set(4, PPM)
+        .set(1, FOCUS_DISTANCE)
+        .set(2, BLUR_COEFFICIENT)
+        .set(3, PPM)
         .update();
 
         var image = new Image();
