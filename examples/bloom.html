@@ -381,23 +381,6 @@
         .set(5, suns[1].color)
         .update();
 
-        window.onresize = function() {
-            app.resize(window.innerWidth, window.innerHeight);
-            colorBuffer.resize();
-            blurBuffer.resize();
-            bloomBuffer.resize();
-
-            mat4.perspective(projMatrix, Math.PI / 2, app.width / app.height, 0.1, 10.0);
-            mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
-            sceneUniforms.set(0, viewProjMatrix).update(0);
-
-            mat4.multiply(suns[0].mvpMatrix, viewProjMatrix, suns[0].modelMatrix);
-            suns[0].uniforms.set(0, suns[0].mvpMatrix).update(0);
-
-            mat4.multiply(suns[1].mvpMatrix, viewProjMatrix, suns[1].modelMatrix);
-            suns[1].uniforms.set(0, suns[1].mvpMatrix).update(0);
-        }
-
         var image = new Image();
 
         image.onload = function() {
@@ -436,6 +419,27 @@
             var blurTextureB = bloomBuffer.colorTextures[0];
             var blurReadTexture = blurTextureA;
             var blurWriteTexture = blurTextureB;
+
+            window.onresize = function() {
+                app.resize(window.innerWidth, window.innerHeight);
+                colorBuffer.resize();
+                blurBuffer.resize();
+                bloomBuffer.resize();
+
+                // Make sure both targets are correct size.
+                blurTextureA.image(null, app.width, app.height);
+                blurTextureB.image(null, app.width, app.height);
+
+                mat4.perspective(projMatrix, Math.PI / 2, app.width / app.height, 0.1, 10.0);
+                mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
+                sceneUniforms.set(0, viewProjMatrix).update(0);
+
+                mat4.multiply(suns[0].mvpMatrix, viewProjMatrix, suns[0].modelMatrix);
+                suns[0].uniforms.set(0, suns[0].mvpMatrix).update(0);
+
+                mat4.multiply(suns[1].mvpMatrix, viewProjMatrix, suns[1].modelMatrix);
+                suns[1].uniforms.set(0, suns[1].mvpMatrix).update(0);
+            }
 
             function draw() {
                 if (app.timerReady()) {
