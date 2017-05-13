@@ -150,8 +150,11 @@
 
     // Bind this texture to a texture unit.
     PicoGL.Texture.prototype.bind = function() {
-        if (this.appState.textures[this.unit] !== this) {
+        if (this.appState.activeTexture !== this.unit) {
             this.gl.activeTexture(this.unitEnum);
+            this.appState.activeTexture = this.unit;
+        }
+        if (this.appState.textures[this.unit] !== this) {  
             this.gl.bindTexture(this.binding, this.texture);
             this.appState.textures[this.unit] = this;
         }

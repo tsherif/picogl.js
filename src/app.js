@@ -53,6 +53,7 @@
         this.currentState = {
             program: null,
             vertexArray: null,
+            activeTexture: -1,
             textures: new Array(PicoGL.WEBGL_INFO.MAX_TEXTURE_UNITS),
             textureCount: 0,
             freeTextureUnits: [],

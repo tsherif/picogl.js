@@ -143,6 +143,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         this.currentState = {
             program: null,
             vertexArray: null,
+            activeTexture: -1,
             textures: new Array(PicoGL.WEBGL_INFO.MAX_TEXTURE_UNITS),
             textureCount: 0,
             freeTextureUnits: [],
@@ -1897,7 +1898,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         this.dataViews[PicoGL.INT] = new Int32Array(this.data.buffer);
         this.dataViews[PicoGL.UNSIGNED_INT] = new Uint32Array(this.data.buffer);
 
-        this.bind();
+        this.bind(true);
         this.gl.bufferData(this.gl.UNIFORM_BUFFER, this.size * 4, this.usage);
     };
 
@@ -1940,7 +1941,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             offset = begin * 4;
         }
 
-        this.bind();
+        this.bind(true);
         this.gl.bufferSubData(this.gl.UNIFORM_BUFFER, offset, data);
 
         return this;
@@ -1962,8 +1963,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     };
 
     // Bind this uniform buffer to the given base.
-    PicoGL.UniformBuffer.prototype.bind = function() {
-        if (this.appState.uniformBuffers[this.bindingIndex] !== this) {
+    PicoGL.UniformBuffer.prototype.bind = function(force) {
+        if (force || this.appState.uniformBuffers[this.bindingIndex] !== this) {
             this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, this.bindingIndex, this.buffer);
             this.appState.uniformBuffers[this.bindingIndex] = this;
         }
@@ -2101,8 +2102,11 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
     // Bind this texture to a texture unit.
     PicoGL.Texture.prototype.bind = function() {
-        if (this.appState.textures[this.unit] !== this) {
+        if (this.appState.activeTexture !== this.unit) {
             this.gl.activeTexture(this.unitEnum);
+            this.appState.activeTexture = this.unit;
+        }
+        if (this.appState.textures[this.unit] !== this) {  
             this.gl.bindTexture(this.binding, this.texture);
             this.appState.textures[this.unit] = this;
         }

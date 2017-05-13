@@ -158,7 +158,7 @@
         this.dataViews[PicoGL.INT] = new Int32Array(this.data.buffer);
         this.dataViews[PicoGL.UNSIGNED_INT] = new Uint32Array(this.data.buffer);
 
-        this.bind();
+        this.bind(true);
         this.gl.bufferData(this.gl.UNIFORM_BUFFER, this.size * 4, this.usage);
     };
 
@@ -201,7 +201,7 @@
             offset = begin * 4;
         }
 
-        this.bind();
+        this.bind(true);
         this.gl.bufferSubData(this.gl.UNIFORM_BUFFER, offset, data);
 
         return this;
@@ -223,8 +223,8 @@
     };
 
     // Bind this uniform buffer to the given base.
-    PicoGL.UniformBuffer.prototype.bind = function() {
-        if (this.appState.uniformBuffers[this.bindingIndex] !== this) {
+    PicoGL.UniformBuffer.prototype.bind = function(force) {
+        if (force || this.appState.uniformBuffers[this.bindingIndex] !== this) {
             this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, this.bindingIndex, this.buffer);
             this.appState.uniformBuffers[this.bindingIndex] = this;
         }
