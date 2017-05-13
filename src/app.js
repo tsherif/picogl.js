@@ -52,7 +52,13 @@
 
         this.currentState = {
             program: null,
-            vertexArray: null
+            vertexArray: null,
+            textures: new Array(PicoGL.WEBGL_INFO.MAX_TEXTURE_UNITS),
+            textureCount: 0,
+            freeTextureUnits: [],
+            uniformBuffers: new Array(PicoGL.WEBGL_INFO.MAX_UNIFORM_BUFFERS),
+            uniformBufferCount: 0,
+            freeUniformBuffers: []
         };
 
         this.clearBits = this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT;
@@ -499,7 +505,7 @@
         @param {GLEnum} [usage=DYNAMIC_DRAW] Buffer usage.
     */
     PicoGL.App.prototype.createUniformBuffer = function(layout, usage) {
-        return new PicoGL.UniformBuffer(this.gl, layout, usage);
+        return new PicoGL.UniformBuffer(this.gl, this.currentState, layout, usage);
     };
 
     /**

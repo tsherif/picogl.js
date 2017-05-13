@@ -119,14 +119,14 @@
         @param {UniformBuffer} buffer Uniform buffer to bind.
     */
     PicoGL.DrawCall.prototype.uniformBlock = function(name, buffer) {
-        var base = this.uniformBlockBases[name];
-        if (base === undefined) {
-            base = this.uniformBlockCount++;
-            this.uniformBlockBases[name] = base;
-            this.uniformBlockNames[base] = name;
+        var index = this.uniformBlockBases[name];
+        if (index === undefined) {
+            index = this.uniformBlockCount++;
+            this.uniformBlockBases[name] = index;
+            this.uniformBlockNames[index] = name;
         }
         
-        this.uniformBuffers[base] = buffer;
+        this.uniformBuffers[index] = buffer;
         
         return this;
     };
@@ -148,9 +148,10 @@
             this.currentProgram.uniform(uniformNames[uIndex], uniformValues[uIndex]);
         }
 
-        for (var base = 0; base < this.uniformBlockCount; ++base) {
-            this.currentProgram.uniformBlock(uniformBlockNames[base], base);
-            uniformBuffers[base].bind(base);
+        for (var ubIndex = 0; ubIndex < this.uniformBlockCount; ++ubIndex) {
+            var uniformBuffer = uniformBuffers[ubIndex];
+            uniformBuffer.bind();
+            this.currentProgram.uniformBlock(uniformBlockNames[ubIndex], uniformBuffer.bindingIndex);
         }
 
         for (var unit = 0; unit < this.textureCount; ++unit) {

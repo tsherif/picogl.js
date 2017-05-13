@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.2.5 
+PicoGL.js v0.2.6 
 
 The MIT License (MIT)
 
@@ -37,7 +37,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @prop {object} TEXTURE_UNIT_MAP Map of texture unit indices to GL enums, e.g. 0 => gl.TEXTURE0.
     */
     var PicoGL = window.PicoGL = {
-        version: "0.2.5"
+        version: "0.2.6"
     };
 
     (function() {
@@ -142,7 +142,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
         this.currentState = {
             program: null,
-            vertexArray: null
+            vertexArray: null,
+            textures: new Array(PicoGL.WEBGL_INFO.MAX_TEXTURE_UNITS),
+            textureCount: 0,
+            freeTextureUnits: [],
+            uniformBuffers: new Array(PicoGL.WEBGL_INFO.MAX_UNIFORM_BUFFERS),
+            uniformBufferCount: 0,
+            freeUniformBuffers: []
         };
 
         this.clearBits = this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT;
@@ -589,7 +595,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {GLEnum} [usage=DYNAMIC_DRAW] Buffer usage.
     */
     PicoGL.App.prototype.createUniformBuffer = function(layout, usage) {
-        return new PicoGL.UniformBuffer(this.gl, layout, usage);
+        return new PicoGL.UniformBuffer(this.gl, this.currentState, layout, usage);
     };
 
     /**
@@ -862,6 +868,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         this.transformFeedback = !!xformFeebackVars;
         this.uniforms = {};
         this.uniformBlocks = {};
+        this.uniformBlockBindings = {};
 
         var numUniforms = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
 
@@ -996,7 +1003,11 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
     // Bind a uniform block to a uniform buffer base.
     PicoGL.Program.prototype.uniformBlock = function(name, base) {
-        this.gl.uniformBlockBinding(this.program, this.uniformBlocks[name], base);
+        if (this.uniformBlockBindings[name] !== base) {
+            this.gl.uniformBlockBinding(this.program, this.uniformBlocks[name], base);
+            this.uniformBlockBindings[name] = base;
+        }
+        
     };
 
 })();
@@ -1766,7 +1777,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @prop {number} size The size of the buffer (in 4-byte items).
         @prop {GLEnum} usage Usage pattern of the buffer.
     */
-    PicoGL.UniformBuffer = function UniformBuffer(gl, layout, usage) {
+    PicoGL.UniformBuffer = function UniformBuffer(gl, appState, layout, usage) {
         this.gl = gl;
         this.buffer = gl.createBuffer();
         this.dataViews = {};
@@ -1775,6 +1786,14 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         this.types = new Array(layout.length);
         this.size = 0;
         this.usage = usage || gl.DYNAMIC_DRAW;
+        this.appState = appState;
+        if (appState.freeUniformBuffers.length > 0) {
+            this.bindingIndex = appState.freeUniformBuffers.pop();
+        } else {
+            this.bindingIndex = appState.uniformBufferCount % appState.uniformBuffers.length;
+            ++appState.uniformBufferCount;
+        }
+
 
         for (var i = 0, len = layout.length; i < len; ++i) {
             var type = layout[i];
@@ -1878,9 +1897,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         this.dataViews[PicoGL.INT] = new Int32Array(this.data.buffer);
         this.dataViews[PicoGL.UNSIGNED_INT] = new Uint32Array(this.data.buffer);
 
-        this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, 0, this.buffer);
+        this.bind();
         this.gl.bufferData(this.gl.UNIFORM_BUFFER, this.size * 4, this.usage);
-        this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, 0, null);
     };
 
     /**
@@ -1888,7 +1906,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         sent the the GPU until the update() method is called!
 
         @method
-        @param {number} index Location in the layout to update.
+        @param {number} index Index in the layout of item to set.
         @param {ArrayBufferView} value Value to store at the layout location.
     */
     PicoGL.UniformBuffer.prototype.set = function(index, value) {
@@ -1906,6 +1924,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     /**
         Send stored buffer data to the GPU.
 
+        @param {number} [index] Index in the layout of item to send to the GPU. If ommited, entire buffer is sent.
         @method
     */
     PicoGL.UniformBuffer.prototype.update = function(index) {
@@ -1921,9 +1940,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             offset = begin * 4;
         }
 
-        this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, 0, this.buffer);
+        this.bind();
         this.gl.bufferSubData(this.gl.UNIFORM_BUFFER, offset, data);
-        this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, 0, null);
 
         return this;
     };
@@ -1937,12 +1955,17 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         if (this.buffer) {
             this.gl.deleteBuffer(this.buffer);
             this.buffer = null;
+            this.appState.freeUniformBuffers.push(this.bindingIndex);
+            this.appState.uniformBuffers[this.bindingIndex] = null;
         }
     };
 
     // Bind this uniform buffer to the given base.
-    PicoGL.UniformBuffer.prototype.bind = function(base) {
-        this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, base, this.buffer);
+    PicoGL.UniformBuffer.prototype.bind = function() {
+        if (this.appState.uniformBuffers[this.bindingIndex] !== this) {
+            this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, this.bindingIndex, this.buffer);
+            this.appState.uniformBuffers[this.bindingIndex] = this;
+        }
 
         return this;
     };
@@ -2372,8 +2395,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             this.colorTextures[i].image(null, this.width, this.height);
         }
 
-        this.gl.drawBuffers(this.colorAttachments);
-
         if (this.depthTexture) {
             this.depthTexture.image(null, this.width, this.height);
         }
@@ -2502,14 +2523,14 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {UniformBuffer} buffer Uniform buffer to bind.
     */
     PicoGL.DrawCall.prototype.uniformBlock = function(name, buffer) {
-        var base = this.uniformBlockBases[name];
-        if (base === undefined) {
-            base = this.uniformBlockCount++;
-            this.uniformBlockBases[name] = base;
-            this.uniformBlockNames[base] = name;
+        var index = this.uniformBlockBases[name];
+        if (index === undefined) {
+            index = this.uniformBlockCount++;
+            this.uniformBlockBases[name] = index;
+            this.uniformBlockNames[index] = name;
         }
         
-        this.uniformBuffers[base] = buffer;
+        this.uniformBuffers[index] = buffer;
         
         return this;
     };
@@ -2531,9 +2552,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             this.currentProgram.uniform(uniformNames[uIndex], uniformValues[uIndex]);
         }
 
-        for (var base = 0; base < this.uniformBlockCount; ++base) {
-            this.currentProgram.uniformBlock(uniformBlockNames[base], base);
-            uniformBuffers[base].bind(base);
+        for (var ubIndex = 0; ubIndex < this.uniformBlockCount; ++ubIndex) {
+            var uniformBuffer = uniformBuffers[ubIndex];
+            uniformBuffer.bind();
+            this.currentProgram.uniformBlock(uniformBlockNames[ubIndex], uniformBuffer.bindingIndex);
         }
 
         for (var unit = 0; unit < this.textureCount; ++unit) {
