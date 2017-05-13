@@ -569,7 +569,7 @@
         @param {boolean} [options.generateMipmaps] Should mipmaps be generated.
     */
     PicoGL.App.prototype.createTextureArray = function(image, width, height, depth, options) {
-        return new PicoGL.Texture(this.gl, this.currentState, this.currentState, this.gl.TEXTURE_2D_ARRAY, image, width, height, depth, true, options);
+        return new PicoGL.Texture(this.gl, this.currentState, this.gl.TEXTURE_2D_ARRAY, image, width, height, depth, true, options);
     };
 
     /**
@@ -634,7 +634,7 @@
         @param {boolean} [options.generateMipmaps] Should mipmaps be generated.
     */
     PicoGL.App.prototype.createCubemap = function(options) {
-        return new PicoGL.Cubemap(this.gl, options);
+        return new PicoGL.Cubemap(this.gl, this.currentState, options);
     };
 
     /**

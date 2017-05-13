@@ -34,7 +34,7 @@
         @prop {GLEnum} format Layout of texture data.
         @prop {GLEnum} internalFormat Internal arrangement of the texture data.
     */
-    PicoGL.Cubemap = function Texture(gl, options) {
+    PicoGL.Cubemap = function Cubemap(gl, appState, options) {
         options = options || PicoGL.DUMMY_OBJECT;
 
         this.gl = gl;
@@ -42,6 +42,14 @@
         this.format = options.format || gl.RGBA;
         this.type = options.type || gl.UNSIGNED_BYTE;
         this.internalFormat = options.internalFormat || PicoGL.TEXTURE_INTERNAL_FORMAT[this.type][this.format];
+        this.appState = appState;
+        if (appState.freeTextureUnits.length > 0) {
+            this.unit = appState.freeTextureUnits.pop();
+        } else {
+            this.unit = appState.textureCount % appState.textures.length;
+            ++appState.textureCount;
+        }
+        this.unitEnum = PicoGL.TEXTURE_UNIT_MAP[this.unit];
 
         var negX = options.negX;
         var posX = options.posX;
@@ -63,9 +71,7 @@
         var generateMipmaps = options.generateMipmaps !== false && 
                             (minFilter === gl.LINEAR_MIPMAP_NEAREST || minFilter === gl.LINEAR_MIPMAP_LINEAR);
 
-        gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.texture);
-        
+        this.bind();
         gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY);
         gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, magFilter);
         gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, minFilter);
@@ -117,15 +123,25 @@
         if (this.texture) {
             this.gl.deleteTexture(this.texture);
             this.texture = null;
+            this.appState.freeTextureUnits.push(this.unit);
+            this.appState.textures[this.unit] = null;
+            this.unit = -1;
+            this.unitEnum = -1;
         }
-    };
+    }; 
 
     // Bind this cubemap to a texture unit.
-    PicoGL.Cubemap.prototype.bind = function(unit) {
-        this.gl.activeTexture(PicoGL.TEXTURE_UNIT_MAP[unit]);
-        this.gl.bindTexture(this.gl.TEXTURE_CUBE_MAP, this.texture);
-
+    PicoGL.Cubemap.prototype.bind = function() {
+        if (this.appState.activeTexture !== this.unit) {
+            this.gl.activeTexture(this.unitEnum);
+            this.appState.activeTexture = this.unit;
+        }
+        if (this.appState.textures[this.unit] !== this) {  
+            this.gl.bindTexture(this.gl.TEXTURE_CUBE_MAP, this.texture);
+            this.appState.textures[this.unit] = this;
+        }
+        
         return this;
-    };
+    };   
 
 })();
