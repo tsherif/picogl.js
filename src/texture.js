@@ -36,7 +36,7 @@
         @prop {GLEnum} internalFormat Internal arrangement of the texture data.
         @prop {boolean} is3D Whether this texture contains 3D data.
     */
-    PicoGL.Texture = function Texture(gl, binding, image, width, height, depth, is3D, options) {
+    PicoGL.Texture = function Texture(gl, appState, binding, image, width, height, depth, is3D, options) {
         options = options || PicoGL.DUMMY_OBJECT;
         width = width || options.width || 0;
         height = height || options.height || 0;
@@ -49,6 +49,14 @@
         this.type = options.type || gl.UNSIGNED_BYTE;
         this.internalFormat = options.internalFormat || PicoGL.TEXTURE_INTERNAL_FORMAT[this.type][this.format];
         this.is3D = is3D;
+        this.appState = appState;
+        if (appState.freeTextureUnits.length > 0) {
+            this.unit = appState.freeTextureUnits.pop();
+        } else {
+            this.unit = appState.textureCount % appState.textures.length;
+            ++appState.textureCount;
+        }
+        this.unitEnum = PicoGL.TEXTURE_UNIT_MAP[this.unit];
 
         var buffer = !image || !!image.BYTES_PER_ELEMENT;
         var flipY = options.flipY !== undefined ? options.flipY : true;
@@ -62,8 +70,7 @@
         var generateMipmaps = options.generateMipmaps !== false && 
                             (minFilter === gl.LINEAR_MIPMAP_NEAREST || minFilter === gl.LINEAR_MIPMAP_LINEAR);
 
-        gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(this.binding, this.texture);
+        this.bind();
         gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY);
         gl.texParameteri(this.binding, gl.TEXTURE_MAG_FILTER, magFilter);
         gl.texParameteri(this.binding, gl.TEXTURE_MIN_FILTER, minFilter);
@@ -98,9 +105,6 @@
         if (generateMipmaps) {
             gl.generateMipmap(this.binding);
         }
-
-        gl.bindTexture(this.binding, null);
-
     };
 
     /**
@@ -113,8 +117,7 @@
         @param {number} [depth] Image depth or number of images. Required when passing 3D or texture array data.
     */
     PicoGL.Texture.prototype.image = function(image, width, height, depth) {
-        this.gl.activeTexture(this.gl.TEXTURE0);
-        this.gl.bindTexture(this.binding, this.texture);
+        this.bind();
 
         if (this.is3D) {
             this.gl.texImage3D(this.binding, 0, this.internalFormat, width, height, depth, 0, this.format, this.type, image);
@@ -125,8 +128,6 @@
                 this.gl.texImage2D(this.binding, 0, this.internalFormat, this.format, this.type, image);
             }
         }
-
-        this.gl.bindTexture(this.binding, null);
 
         return this;
     };  
@@ -140,14 +141,21 @@
         if (this.texture) {
             this.gl.deleteTexture(this.texture);
             this.texture = null;
+            this.appState.freeTextureUnits.push(this.unit);
+            this.appState.textures[this.unit] = null;
+            this.unit = -1;
+            this.unitEnum = -1;
         }
     }; 
 
     // Bind this texture to a texture unit.
-    PicoGL.Texture.prototype.bind = function(unit) {
-        this.gl.activeTexture(PicoGL.TEXTURE_UNIT_MAP[unit]);
-        this.gl.bindTexture(this.binding, this.texture);
-
+    PicoGL.Texture.prototype.bind = function() {
+        if (this.appState.textures[this.unit] !== this) {
+            this.gl.activeTexture(this.unitEnum);
+            this.gl.bindTexture(this.binding, this.texture);
+            this.appState.textures[this.unit] = this;
+        }
+        
         return this;
     };   
 

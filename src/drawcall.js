@@ -65,6 +65,7 @@
         this.uniformBlockNames = new Array(PicoGL.WEBGL_INFO.MAX_UNIFORM_BUFFERS);
         this.uniformBlockBases = {};
         this.uniformBlockCount = 0;
+        this.samplerIndices = {};
         this.textures = new Array(PicoGL.WEBGL_INFO.MAX_TEXTURE_UNITS);
         this.textureCount = 0;
         this.primitive = primitive !== undefined ? primitive : PicoGL.TRIANGLES;
@@ -97,16 +98,14 @@
         @param {Texture} texture Texture to bind.
     */
     PicoGL.DrawCall.prototype.texture = function(name, texture) {
-        var unit;
-        var index = this.uniformIndices[name];
-        if (index === undefined) {
-            unit = this.textureCount++;
-            this.uniform(name, unit);
-        } else {
-            unit = this.uniformValues[index];
+        var textureIndex = this.samplerIndices[name];
+        if (textureIndex === undefined) {
+            textureIndex = this.textureCount++;
+            this.samplerIndices[name] = textureIndex;
         }
         
-        this.textures[unit] = texture;
+        this.uniform(name, texture.unit);
+        this.textures[textureIndex] = texture;
         
         return this;
     };
@@ -154,8 +153,8 @@
             this.currentProgram.uniformBlock(uniformBlockNames[ubIndex], uniformBuffer.bindingIndex);
         }
 
-        for (var unit = 0; unit < this.textureCount; ++unit) {
-            textures[unit].bind(unit);
+        for (var tIndex = 0; tIndex < this.textureCount; ++tIndex) {
+            textures[tIndex].bind();
         }
 
         if (this.currentTransformFeedback) {

@@ -48,8 +48,8 @@
         this.size = 0;
         this.usage = usage || gl.DYNAMIC_DRAW;
         this.appState = appState;
-        if (appState.freeUniformBuffers.length > 0) {
-            this.bindingIndex = appState.freeUniformBuffers.pop();
+        if (appState.freeUniformBufferBases.length > 0) {
+            this.bindingIndex = appState.freeUniformBufferBases.pop();
         } else {
             this.bindingIndex = appState.uniformBufferCount % appState.uniformBuffers.length;
             ++appState.uniformBufferCount;
@@ -216,8 +216,9 @@
         if (this.buffer) {
             this.gl.deleteBuffer(this.buffer);
             this.buffer = null;
-            this.appState.freeUniformBuffers.push(this.bindingIndex);
+            this.appState.freeUniformBufferBases.push(this.bindingIndex);
             this.appState.uniformBuffers[this.bindingIndex] = null;
+            this.bindingIndex = -1;
         }
     };
 

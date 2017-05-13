@@ -148,7 +148,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             freeTextureUnits: [],
             uniformBuffers: new Array(PicoGL.WEBGL_INFO.MAX_UNIFORM_BUFFERS),
             uniformBufferCount: 0,
-            freeUniformBuffers: []
+            freeUniformBufferBases: []
         };
 
         this.clearBits = this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT;
@@ -629,7 +629,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             options = width;
         }
 
-        return new PicoGL.Texture(this.gl, this.gl.TEXTURE_2D, image, width, height, null, false, options);
+        return new PicoGL.Texture(this.gl, this.currentState, this.gl.TEXTURE_2D, image, width, height, null, false, options);
     };
 
     /**
@@ -658,7 +658,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {boolean} [options.generateMipmaps] Should mipmaps be generated.
     */
     PicoGL.App.prototype.createTextureArray = function(image, width, height, depth, options) {
-        return new PicoGL.Texture(this.gl, this.gl.TEXTURE_2D_ARRAY, image, width, height, depth, true, options);
+        return new PicoGL.Texture(this.gl, this.currentState, this.currentState, this.gl.TEXTURE_2D_ARRAY, image, width, height, depth, true, options);
     };
 
     /**
@@ -688,7 +688,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {boolean} [options.generateMipmaps] Should mipmaps be generated.
     */
     PicoGL.App.prototype.createTexture3D = function(image, width, height, depth, options) {
-        return new PicoGL.Texture(this.gl, this.gl.TEXTURE_3D, image, width, height, depth, true, options);
+        return new PicoGL.Texture(this.gl, this.currentState, this.gl.TEXTURE_3D, image, width, height, depth, true, options);
     };
 
     /**
@@ -734,7 +734,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {number} [height=app.height] Height of the framebuffer.
     */
     PicoGL.App.prototype.createFramebuffer = function(width, height) {
-        return new PicoGL.Framebuffer(this.gl, width, height);
+        return new PicoGL.Framebuffer(this.gl, this.currentState, width, height);
     };
 
     /**
@@ -1787,8 +1787,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         this.size = 0;
         this.usage = usage || gl.DYNAMIC_DRAW;
         this.appState = appState;
-        if (appState.freeUniformBuffers.length > 0) {
-            this.bindingIndex = appState.freeUniformBuffers.pop();
+        if (appState.freeUniformBufferBases.length > 0) {
+            this.bindingIndex = appState.freeUniformBufferBases.pop();
         } else {
             this.bindingIndex = appState.uniformBufferCount % appState.uniformBuffers.length;
             ++appState.uniformBufferCount;
@@ -1955,8 +1955,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         if (this.buffer) {
             this.gl.deleteBuffer(this.buffer);
             this.buffer = null;
-            this.appState.freeUniformBuffers.push(this.bindingIndex);
+            this.appState.freeUniformBufferBases.push(this.bindingIndex);
             this.appState.uniformBuffers[this.bindingIndex] = null;
+            this.bindingIndex = -1;
         }
     };
 
@@ -1986,7 +1987,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @prop {GLEnum} internalFormat Internal arrangement of the texture data.
         @prop {boolean} is3D Whether this texture contains 3D data.
     */
-    PicoGL.Texture = function Texture(gl, binding, image, width, height, depth, is3D, options) {
+    PicoGL.Texture = function Texture(gl, appState, binding, image, width, height, depth, is3D, options) {
         options = options || PicoGL.DUMMY_OBJECT;
         width = width || options.width || 0;
         height = height || options.height || 0;
@@ -1999,6 +2000,14 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         this.type = options.type || gl.UNSIGNED_BYTE;
         this.internalFormat = options.internalFormat || PicoGL.TEXTURE_INTERNAL_FORMAT[this.type][this.format];
         this.is3D = is3D;
+        this.appState = appState;
+        if (appState.freeTextureUnits.length > 0) {
+            this.unit = appState.freeTextureUnits.pop();
+        } else {
+            this.unit = appState.textureCount % appState.textures.length;
+            ++appState.textureCount;
+        }
+        this.unitEnum = PicoGL.TEXTURE_UNIT_MAP[this.unit];
 
         var buffer = !image || !!image.BYTES_PER_ELEMENT;
         var flipY = options.flipY !== undefined ? options.flipY : true;
@@ -2012,8 +2021,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         var generateMipmaps = options.generateMipmaps !== false && 
                             (minFilter === gl.LINEAR_MIPMAP_NEAREST || minFilter === gl.LINEAR_MIPMAP_LINEAR);
 
-        gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(this.binding, this.texture);
+        this.bind();
         gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY);
         gl.texParameteri(this.binding, gl.TEXTURE_MAG_FILTER, magFilter);
         gl.texParameteri(this.binding, gl.TEXTURE_MIN_FILTER, minFilter);
@@ -2048,9 +2056,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         if (generateMipmaps) {
             gl.generateMipmap(this.binding);
         }
-
-        gl.bindTexture(this.binding, null);
-
     };
 
     /**
@@ -2063,8 +2068,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {number} [depth] Image depth or number of images. Required when passing 3D or texture array data.
     */
     PicoGL.Texture.prototype.image = function(image, width, height, depth) {
-        this.gl.activeTexture(this.gl.TEXTURE0);
-        this.gl.bindTexture(this.binding, this.texture);
+        this.bind();
 
         if (this.is3D) {
             this.gl.texImage3D(this.binding, 0, this.internalFormat, width, height, depth, 0, this.format, this.type, image);
@@ -2075,8 +2079,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                 this.gl.texImage2D(this.binding, 0, this.internalFormat, this.format, this.type, image);
             }
         }
-
-        this.gl.bindTexture(this.binding, null);
 
         return this;
     };  
@@ -2090,14 +2092,21 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         if (this.texture) {
             this.gl.deleteTexture(this.texture);
             this.texture = null;
+            this.appState.freeTextureUnits.push(this.unit);
+            this.appState.textures[this.unit] = null;
+            this.unit = -1;
+            this.unitEnum = -1;
         }
     }; 
 
     // Bind this texture to a texture unit.
-    PicoGL.Texture.prototype.bind = function(unit) {
-        this.gl.activeTexture(PicoGL.TEXTURE_UNIT_MAP[unit]);
-        this.gl.bindTexture(this.binding, this.texture);
-
+    PicoGL.Texture.prototype.bind = function() {
+        if (this.appState.textures[this.unit] !== this) {
+            this.gl.activeTexture(this.unitEnum);
+            this.gl.bindTexture(this.binding, this.texture);
+            this.appState.textures[this.unit] = this;
+        }
+        
         return this;
     };   
 
@@ -2226,9 +2235,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @prop {Texture} depthTexture Depth texture target. 
         @prop {Array} colorAttachments Array of color attachment enums. 
     */
-    PicoGL.Framebuffer = function Framebuffer(gl, width, height) {
+    PicoGL.Framebuffer = function Framebuffer(gl, appState, width, height) {
         this.gl = gl;
         this.framebuffer = gl.createFramebuffer();
+        this.appState = appState;
 
         if (width && height) {
             this.width = width;
@@ -2284,6 +2294,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
         this.colorTextures[index] = new PicoGL.Texture(
             this.gl,
+            this.appState,
             this.gl.TEXTURE_2D,
             null, 
             this.width, 
@@ -2338,6 +2349,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
         this.depthTexture = new PicoGL.Texture(
             this.gl,
+            this.appState,
             this.gl.TEXTURE_2D,
             null, 
             this.width, 
@@ -2469,6 +2481,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         this.uniformBlockNames = new Array(PicoGL.WEBGL_INFO.MAX_UNIFORM_BUFFERS);
         this.uniformBlockBases = {};
         this.uniformBlockCount = 0;
+        this.samplerIndices = {};
         this.textures = new Array(PicoGL.WEBGL_INFO.MAX_TEXTURE_UNITS);
         this.textureCount = 0;
         this.primitive = primitive !== undefined ? primitive : PicoGL.TRIANGLES;
@@ -2501,16 +2514,14 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {Texture} texture Texture to bind.
     */
     PicoGL.DrawCall.prototype.texture = function(name, texture) {
-        var unit;
-        var index = this.uniformIndices[name];
-        if (index === undefined) {
-            unit = this.textureCount++;
-            this.uniform(name, unit);
-        } else {
-            unit = this.uniformValues[index];
+        var textureIndex = this.samplerIndices[name];
+        if (textureIndex === undefined) {
+            textureIndex = this.textureCount++;
+            this.samplerIndices[name] = textureIndex;
         }
         
-        this.textures[unit] = texture;
+        this.uniform(name, texture.unit);
+        this.textures[textureIndex] = texture;
         
         return this;
     };
@@ -2558,8 +2569,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             this.currentProgram.uniformBlock(uniformBlockNames[ubIndex], uniformBuffer.bindingIndex);
         }
 
-        for (var unit = 0; unit < this.textureCount; ++unit) {
-            textures[unit].bind(unit);
+        for (var tIndex = 0; tIndex < this.textureCount; ++tIndex) {
+            textures[tIndex].bind();
         }
 
         if (this.currentTransformFeedback) {

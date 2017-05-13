@@ -58,7 +58,7 @@
             freeTextureUnits: [],
             uniformBuffers: new Array(PicoGL.WEBGL_INFO.MAX_UNIFORM_BUFFERS),
             uniformBufferCount: 0,
-            freeUniformBuffers: []
+            freeUniformBufferBases: []
         };
 
         this.clearBits = this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT;
@@ -539,7 +539,7 @@
             options = width;
         }
 
-        return new PicoGL.Texture(this.gl, this.gl.TEXTURE_2D, image, width, height, null, false, options);
+        return new PicoGL.Texture(this.gl, this.currentState, this.gl.TEXTURE_2D, image, width, height, null, false, options);
     };
 
     /**
@@ -568,7 +568,7 @@
         @param {boolean} [options.generateMipmaps] Should mipmaps be generated.
     */
     PicoGL.App.prototype.createTextureArray = function(image, width, height, depth, options) {
-        return new PicoGL.Texture(this.gl, this.gl.TEXTURE_2D_ARRAY, image, width, height, depth, true, options);
+        return new PicoGL.Texture(this.gl, this.currentState, this.currentState, this.gl.TEXTURE_2D_ARRAY, image, width, height, depth, true, options);
     };
 
     /**
@@ -598,7 +598,7 @@
         @param {boolean} [options.generateMipmaps] Should mipmaps be generated.
     */
     PicoGL.App.prototype.createTexture3D = function(image, width, height, depth, options) {
-        return new PicoGL.Texture(this.gl, this.gl.TEXTURE_3D, image, width, height, depth, true, options);
+        return new PicoGL.Texture(this.gl, this.currentState, this.gl.TEXTURE_3D, image, width, height, depth, true, options);
     };
 
     /**
@@ -644,7 +644,7 @@
         @param {number} [height=app.height] Height of the framebuffer.
     */
     PicoGL.App.prototype.createFramebuffer = function(width, height) {
-        return new PicoGL.Framebuffer(this.gl, width, height);
+        return new PicoGL.Framebuffer(this.gl, this.currentState, width, height);
     };
 
     /**
