@@ -57,6 +57,10 @@
             textures: new Array(PicoGL.WEBGL_INFO.MAX_TEXTURE_UNITS),
             textureCount: 0,
             freeTextureUnits: [],
+            // TODO(Tarek): UBO state currently not tracked, due bug
+            // with UBO state becoming corrupted between frames in Chrome
+            // https://bugs.chromium.org/p/chromium/issues/detail?id=722060
+            // Enable UBO state tracking when that's fixed.
             uniformBuffers: new Array(PicoGL.WEBGL_INFO.MAX_UNIFORM_BUFFERS),
             uniformBufferCount: 0,
             freeUniformBufferBases: []
@@ -506,7 +510,7 @@
         @param {GLEnum} [usage=DYNAMIC_DRAW] Buffer usage.
     */
     PicoGL.App.prototype.createUniformBuffer = function(layout, usage) {
-        return new PicoGL.UniformBuffer(this.gl, this.currentState, layout, usage);
+        return new PicoGL.UniformBuffer(this.gl, layout, usage);
     };
 
     /**

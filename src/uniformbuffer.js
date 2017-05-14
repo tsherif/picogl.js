@@ -38,7 +38,7 @@
         @prop {number} size The size of the buffer (in 4-byte items).
         @prop {GLEnum} usage Usage pattern of the buffer.
     */
-    PicoGL.UniformBuffer = function UniformBuffer(gl, appState, layout, usage) {
+    PicoGL.UniformBuffer = function UniformBuffer(gl, layout, usage) {
         this.gl = gl;
         this.buffer = gl.createBuffer();
         this.dataViews = {};
@@ -47,14 +47,6 @@
         this.types = new Array(layout.length);
         this.size = 0;
         this.usage = usage || gl.DYNAMIC_DRAW;
-        this.appState = appState;
-        if (appState.freeUniformBufferBases.length > 0) {
-            this.bindingIndex = appState.freeUniformBufferBases.pop();
-        } else {
-            this.bindingIndex = appState.uniformBufferCount % appState.uniformBuffers.length;
-            ++appState.uniformBufferCount;
-        }
-
 
         for (var i = 0, len = layout.length; i < len; ++i) {
             var type = layout[i];
@@ -158,8 +150,9 @@
         this.dataViews[PicoGL.INT] = new Int32Array(this.data.buffer);
         this.dataViews[PicoGL.UNSIGNED_INT] = new Uint32Array(this.data.buffer);
 
-        this.bind(true);
+        this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, 0, this.buffer);
         this.gl.bufferData(this.gl.UNIFORM_BUFFER, this.size * 4, this.usage);
+        this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, 0, null);
     };
 
     /**
@@ -201,8 +194,9 @@
             offset = begin * 4;
         }
 
-        this.bind(true);
+        this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, 0, this.buffer);
         this.gl.bufferSubData(this.gl.UNIFORM_BUFFER, offset, data);
+        this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, 0, null);
 
         return this;
     };
@@ -216,18 +210,12 @@
         if (this.buffer) {
             this.gl.deleteBuffer(this.buffer);
             this.buffer = null;
-            this.appState.freeUniformBufferBases.push(this.bindingIndex);
-            this.appState.uniformBuffers[this.bindingIndex] = null;
-            this.bindingIndex = -1;
         }
     };
 
     // Bind this uniform buffer to the given base.
-    PicoGL.UniformBuffer.prototype.bind = function(force) {
-        if (force || this.appState.uniformBuffers[this.bindingIndex] !== this) {
-            this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, this.bindingIndex, this.buffer);
-            this.appState.uniformBuffers[this.bindingIndex] = this;
-        }
+    PicoGL.UniformBuffer.prototype.bind = function(base) {
+        this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, base, this.buffer);
 
         return this;
     };

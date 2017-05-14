@@ -596,7 +596,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {GLEnum} [usage=DYNAMIC_DRAW] Buffer usage.
     */
     PicoGL.App.prototype.createUniformBuffer = function(layout, usage) {
-        return new PicoGL.UniformBuffer(this.gl, this.currentState, layout, usage);
+        return new PicoGL.UniformBuffer(this.gl, layout, usage);
     };
 
     /**
@@ -1778,7 +1778,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @prop {number} size The size of the buffer (in 4-byte items).
         @prop {GLEnum} usage Usage pattern of the buffer.
     */
-    PicoGL.UniformBuffer = function UniformBuffer(gl, appState, layout, usage) {
+    PicoGL.UniformBuffer = function UniformBuffer(gl, layout, usage) {
         this.gl = gl;
         this.buffer = gl.createBuffer();
         this.dataViews = {};
@@ -1787,14 +1787,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         this.types = new Array(layout.length);
         this.size = 0;
         this.usage = usage || gl.DYNAMIC_DRAW;
-        this.appState = appState;
-        if (appState.freeUniformBufferBases.length > 0) {
-            this.bindingIndex = appState.freeUniformBufferBases.pop();
-        } else {
-            this.bindingIndex = appState.uniformBufferCount % appState.uniformBuffers.length;
-            ++appState.uniformBufferCount;
-        }
-
 
         for (var i = 0, len = layout.length; i < len; ++i) {
             var type = layout[i];
@@ -1898,8 +1890,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         this.dataViews[PicoGL.INT] = new Int32Array(this.data.buffer);
         this.dataViews[PicoGL.UNSIGNED_INT] = new Uint32Array(this.data.buffer);
 
-        this.bind(true);
+        this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, 0, this.buffer);
         this.gl.bufferData(this.gl.UNIFORM_BUFFER, this.size * 4, this.usage);
+        this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, 0, null);
     };
 
     /**
@@ -1941,8 +1934,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             offset = begin * 4;
         }
 
-        this.bind(true);
+        this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, 0, this.buffer);
         this.gl.bufferSubData(this.gl.UNIFORM_BUFFER, offset, data);
+        this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, 0, null);
 
         return this;
     };
@@ -1956,18 +1950,12 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         if (this.buffer) {
             this.gl.deleteBuffer(this.buffer);
             this.buffer = null;
-            this.appState.freeUniformBufferBases.push(this.bindingIndex);
-            this.appState.uniformBuffers[this.bindingIndex] = null;
-            this.bindingIndex = -1;
         }
     };
 
     // Bind this uniform buffer to the given base.
-    PicoGL.UniformBuffer.prototype.bind = function(force) {
-        if (force || this.appState.uniformBuffers[this.bindingIndex] !== this) {
-            this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, this.bindingIndex, this.buffer);
-            this.appState.uniformBuffers[this.bindingIndex] = this;
-        }
+    PicoGL.UniformBuffer.prototype.bind = function(base) {
+        this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, base, this.buffer);
 
         return this;
     };
@@ -2128,7 +2116,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @prop {GLEnum} format Layout of texture data.
         @prop {GLEnum} internalFormat Internal arrangement of the texture data.
     */
-    PicoGL.Cubemap = function Texture(gl, appState, options) {
+    PicoGL.Cubemap = function Cubemap(gl, appState, options) {
         options = options || PicoGL.DUMMY_OBJECT;
 
         this.gl = gl;
@@ -2209,7 +2197,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     };
 
     /**
-        Delete this texture.
+        Delete this cubemap.
 
         @method
     */
@@ -2224,7 +2212,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         }
     }; 
 
-    // Bind this texture to a texture unit.
+    // Bind this cubemap to a texture unit.
     PicoGL.Cubemap.prototype.bind = function() {
         if (this.appState.activeTexture !== this.unit) {
             this.gl.activeTexture(this.unitEnum);
@@ -2554,14 +2542,14 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {UniformBuffer} buffer Uniform buffer to bind.
     */
     PicoGL.DrawCall.prototype.uniformBlock = function(name, buffer) {
-        var index = this.uniformBlockBases[name];
-        if (index === undefined) {
-            index = this.uniformBlockCount++;
-            this.uniformBlockBases[name] = index;
-            this.uniformBlockNames[index] = name;
+        var base = this.uniformBlockBases[name];
+        if (base === undefined) {
+            base = this.uniformBlockCount++;
+            this.uniformBlockBases[name] = base;
+            this.uniformBlockNames[base] = name;
         }
         
-        this.uniformBuffers[index] = buffer;
+        this.uniformBuffers[base] = buffer;
         
         return this;
     };
@@ -2583,10 +2571,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             this.currentProgram.uniform(uniformNames[uIndex], uniformValues[uIndex]);
         }
 
-        for (var ubIndex = 0; ubIndex < this.uniformBlockCount; ++ubIndex) {
-            var uniformBuffer = uniformBuffers[ubIndex];
-            uniformBuffer.bind();
-            this.currentProgram.uniformBlock(uniformBlockNames[ubIndex], uniformBuffer.bindingIndex);
+        for (var base = 0; base < this.uniformBlockCount; ++base) {
+            this.currentProgram.uniformBlock(uniformBlockNames[base], base);
+            uniformBuffers[base].bind(base);
         }
 
         for (var tIndex = 0; tIndex < this.textureCount; ++tIndex) {
