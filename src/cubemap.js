@@ -52,7 +52,7 @@
             this.unit = appState.textureCount % appState.textures.length;
             ++appState.textureCount;
         }
-        this.unitEnum = PicoGL.TEXTURE_UNIT_MAP[this.unit];
+        this.unitEnum = gl.TEXTURE0 + this.unit;
 
         var negX = options.negX;
         var posX = options.posX;

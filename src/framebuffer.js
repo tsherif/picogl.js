@@ -92,7 +92,7 @@
         options.wrapT = options.wrapT || this.gl.CLAMP_TO_EDGE;
         options.generateMipmaps = options.generateMipmaps === undefined ? false : options.generateMipmaps;
 
-        this.colorAttachments[index] = this.gl["COLOR_ATTACHMENT" + index];
+        this.colorAttachments[index] = this.gl.COLOR_ATTACHMENT0 + index;
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.framebuffer);
 
         this.colorTextures[index] = new PicoGL.Texture(
