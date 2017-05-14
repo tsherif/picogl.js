@@ -34,6 +34,8 @@
         @prop {GLEnum} type Type of data stored in the texture.
         @prop {GLEnum} format Layout of texture data.
         @prop {GLEnum} internalFormat Internal arrangement of the texture data.
+        @prop {Number} unit The texture unit this texture is bound to.
+        @prop {GLEnum} unitEnum The GLEnum of texture unit this texture is bound to.
         @prop {boolean} is3D Whether this texture contains 3D data.
     */
     PicoGL.Texture = function Texture(gl, appState, binding, image, width, height, depth, is3D, options) {
@@ -117,6 +119,7 @@
         @param {number} [depth] Image depth or number of images. Required when passing 3D or texture array data.
     */
     PicoGL.Texture.prototype.image = function(image, width, height, depth) {
+        this.activate();
         this.bind();
 
         if (this.is3D) {
@@ -148,13 +151,20 @@
         }
     }; 
 
-    // Bind this texture to a texture unit.
-    PicoGL.Texture.prototype.bind = function() {
+    // Activate this texture's texture unit.
+    PicoGL.Texture.prototype.activate = function() {
         if (this.appState.activeTexture !== this.unit) {
             this.gl.activeTexture(this.unitEnum);
             this.appState.activeTexture = this.unit;
         }
-        if (this.appState.textures[this.unit] !== this) {  
+        
+        return this;
+    }; 
+
+    // Bind this texture to a texture unit.
+    PicoGL.Texture.prototype.bind = function() {
+        if (this.appState.textures[this.unit] !== this) {
+            this.activate();
             this.gl.bindTexture(this.binding, this.texture);
             this.appState.textures[this.unit] = this;
         }

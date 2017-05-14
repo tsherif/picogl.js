@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.2.6 
+PicoGL.js v0.2.7 
 
 The MIT License (MIT)
 
@@ -37,7 +37,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @prop {object} TEXTURE_UNIT_MAP Map of texture unit indices to GL enums, e.g. 0 => gl.TEXTURE0.
     */
     var PicoGL = window.PicoGL = {
-        version: "0.2.6"
+        version: "0.2.7"
     };
 
     (function() {
@@ -125,7 +125,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @prop {number} height The height of the drawing surface.
         @prop {boolean} floatRenderTargetsEnabled Whether the EXT_color_buffer_float extension is enabled.
         @prop {boolean} linearFloatTexturesEnabled Whether the OES_texture_float_linear extension is enabled.
-        @prop {Object} currentState Tracked GL state.
+        @prop {Object} state Tracked GL state.
         @prop {GLEnum} clearBits Current clear mask to use with clear().
         @prop {Timer} timer Rendering timer.
         @prop {number} cpuTime Time spent on CPU during last timing. Only valid if timerReady() returns true.
@@ -140,13 +140,17 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         this.currentDrawCalls = null;
         this.emptyFragmentShader = null;
 
-        this.currentState = {
+        this.state = {
             program: null,
             vertexArray: null,
             activeTexture: -1,
             textures: new Array(PicoGL.WEBGL_INFO.MAX_TEXTURE_UNITS),
             textureCount: 0,
             freeTextureUnits: [],
+            // TODO(Tarek): UBO state currently not tracked, due bug
+            // with UBO state becoming corrupted between frames in Chrome
+            // https://bugs.chromium.org/p/chromium/issues/detail?id=722060
+            // Enable UBO state tracking when that's fixed.
             uniformBuffers: new Array(PicoGL.WEBGL_INFO.MAX_UNIFORM_BUFFERS),
             uniformBufferCount: 0,
             freeUniformBufferBases: []
@@ -630,7 +634,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             options = width;
         }
 
-        return new PicoGL.Texture(this.gl, this.currentState, this.gl.TEXTURE_2D, image, width, height, null, false, options);
+        return new PicoGL.Texture(this.gl, this.state, this.gl.TEXTURE_2D, image, width, height, null, false, options);
     };
 
     /**
@@ -659,7 +663,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {boolean} [options.generateMipmaps] Should mipmaps be generated.
     */
     PicoGL.App.prototype.createTextureArray = function(image, width, height, depth, options) {
-        return new PicoGL.Texture(this.gl, this.currentState, this.gl.TEXTURE_2D_ARRAY, image, width, height, depth, true, options);
+        return new PicoGL.Texture(this.gl, this.state, this.gl.TEXTURE_2D_ARRAY, image, width, height, depth, true, options);
     };
 
     /**
@@ -689,7 +693,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {boolean} [options.generateMipmaps] Should mipmaps be generated.
     */
     PicoGL.App.prototype.createTexture3D = function(image, width, height, depth, options) {
-        return new PicoGL.Texture(this.gl, this.currentState, this.gl.TEXTURE_3D, image, width, height, depth, true, options);
+        return new PicoGL.Texture(this.gl, this.state, this.gl.TEXTURE_3D, image, width, height, depth, true, options);
     };
 
     /**
@@ -724,7 +728,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {boolean} [options.generateMipmaps] Should mipmaps be generated.
     */
     PicoGL.App.prototype.createCubemap = function(options) {
-        return new PicoGL.Cubemap(this.gl, this.currentState, options);
+        return new PicoGL.Cubemap(this.gl, this.state, options);
     };
 
     /**
@@ -735,7 +739,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {number} [height=app.height] Height of the framebuffer.
     */
     PicoGL.App.prototype.createFramebuffer = function(width, height) {
-        return new PicoGL.Framebuffer(this.gl, this.currentState, width, height);
+        return new PicoGL.Framebuffer(this.gl, this.state, width, height);
     };
 
     /**
@@ -759,7 +763,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     */
     PicoGL.App.prototype.draw = function() {
         for (var i = 0, len = this.currentDrawCalls.length; i < len; i++) {
-            this.currentDrawCalls[i].draw(this.currentState);
+            this.currentDrawCalls[i].draw(this.state);
         }
 
         return this;
@@ -1974,6 +1978,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @prop {GLEnum} type Type of data stored in the texture.
         @prop {GLEnum} format Layout of texture data.
         @prop {GLEnum} internalFormat Internal arrangement of the texture data.
+        @prop {Number} unit The texture unit this texture is bound to.
+        @prop {GLEnum} unitEnum The GLEnum of texture unit this texture is bound to.
         @prop {boolean} is3D Whether this texture contains 3D data.
     */
     PicoGL.Texture = function Texture(gl, appState, binding, image, width, height, depth, is3D, options) {
@@ -2057,6 +2063,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {number} [depth] Image depth or number of images. Required when passing 3D or texture array data.
     */
     PicoGL.Texture.prototype.image = function(image, width, height, depth) {
+        this.activate();
         this.bind();
 
         if (this.is3D) {
@@ -2088,13 +2095,20 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         }
     }; 
 
-    // Bind this texture to a texture unit.
-    PicoGL.Texture.prototype.bind = function() {
+    // Activate this texture's texture unit.
+    PicoGL.Texture.prototype.activate = function() {
         if (this.appState.activeTexture !== this.unit) {
             this.gl.activeTexture(this.unitEnum);
             this.appState.activeTexture = this.unit;
         }
-        if (this.appState.textures[this.unit] !== this) {  
+        
+        return this;
+    }; 
+
+    // Bind this texture to a texture unit.
+    PicoGL.Texture.prototype.bind = function() {
+        if (this.appState.textures[this.unit] !== this) {
+            this.activate();
             this.gl.bindTexture(this.binding, this.texture);
             this.appState.textures[this.unit] = this;
         }

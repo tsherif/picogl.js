@@ -35,7 +35,7 @@
         @prop {number} height The height of the drawing surface.
         @prop {boolean} floatRenderTargetsEnabled Whether the EXT_color_buffer_float extension is enabled.
         @prop {boolean} linearFloatTexturesEnabled Whether the OES_texture_float_linear extension is enabled.
-        @prop {Object} currentState Tracked GL state.
+        @prop {Object} state Tracked GL state.
         @prop {GLEnum} clearBits Current clear mask to use with clear().
         @prop {Timer} timer Rendering timer.
         @prop {number} cpuTime Time spent on CPU during last timing. Only valid if timerReady() returns true.
@@ -50,7 +50,7 @@
         this.currentDrawCalls = null;
         this.emptyFragmentShader = null;
 
-        this.currentState = {
+        this.state = {
             program: null,
             vertexArray: null,
             activeTexture: -1,
@@ -544,7 +544,7 @@
             options = width;
         }
 
-        return new PicoGL.Texture(this.gl, this.currentState, this.gl.TEXTURE_2D, image, width, height, null, false, options);
+        return new PicoGL.Texture(this.gl, this.state, this.gl.TEXTURE_2D, image, width, height, null, false, options);
     };
 
     /**
@@ -573,7 +573,7 @@
         @param {boolean} [options.generateMipmaps] Should mipmaps be generated.
     */
     PicoGL.App.prototype.createTextureArray = function(image, width, height, depth, options) {
-        return new PicoGL.Texture(this.gl, this.currentState, this.gl.TEXTURE_2D_ARRAY, image, width, height, depth, true, options);
+        return new PicoGL.Texture(this.gl, this.state, this.gl.TEXTURE_2D_ARRAY, image, width, height, depth, true, options);
     };
 
     /**
@@ -603,7 +603,7 @@
         @param {boolean} [options.generateMipmaps] Should mipmaps be generated.
     */
     PicoGL.App.prototype.createTexture3D = function(image, width, height, depth, options) {
-        return new PicoGL.Texture(this.gl, this.currentState, this.gl.TEXTURE_3D, image, width, height, depth, true, options);
+        return new PicoGL.Texture(this.gl, this.state, this.gl.TEXTURE_3D, image, width, height, depth, true, options);
     };
 
     /**
@@ -638,7 +638,7 @@
         @param {boolean} [options.generateMipmaps] Should mipmaps be generated.
     */
     PicoGL.App.prototype.createCubemap = function(options) {
-        return new PicoGL.Cubemap(this.gl, this.currentState, options);
+        return new PicoGL.Cubemap(this.gl, this.state, options);
     };
 
     /**
@@ -649,7 +649,7 @@
         @param {number} [height=app.height] Height of the framebuffer.
     */
     PicoGL.App.prototype.createFramebuffer = function(width, height) {
-        return new PicoGL.Framebuffer(this.gl, this.currentState, width, height);
+        return new PicoGL.Framebuffer(this.gl, this.state, width, height);
     };
 
     /**
@@ -673,7 +673,7 @@
     */
     PicoGL.App.prototype.draw = function() {
         for (var i = 0, len = this.currentDrawCalls.length; i < len; i++) {
-            this.currentDrawCalls[i].draw(this.currentState);
+            this.currentDrawCalls[i].draw(this.state);
         }
 
         return this;
