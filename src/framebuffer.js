@@ -36,6 +36,7 @@
         @prop {number} numColorTargets Number of color texture targets. 
         @prop {Texture} depthTexture Depth texture target. 
         @prop {Array} colorAttachments Array of color attachment enums. 
+        @prop {Object} appState Tracked GL state.
     */
     PicoGL.Framebuffer = function Framebuffer(gl, appState, width, height) {
         this.gl = gl;

@@ -33,6 +33,9 @@
         @prop {GLEnum} type Type of data stored in the texture.
         @prop {GLEnum} format Layout of texture data.
         @prop {GLEnum} internalFormat Internal arrangement of the texture data.
+        @prop {Number} unit The texture unit this texture is bound to.
+        @prop {GLEnum} unitEnum The GLEnum of texture unit this texture is bound to.
+        @prop {Object} appState Tracked GL state.
     */
     PicoGL.Cubemap = function Cubemap(gl, appState, options) {
         options = options || PicoGL.DUMMY_OBJECT;

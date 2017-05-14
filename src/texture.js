@@ -37,6 +37,7 @@
         @prop {Number} unit The texture unit this texture is bound to.
         @prop {GLEnum} unitEnum The GLEnum of texture unit this texture is bound to.
         @prop {boolean} is3D Whether this texture contains 3D data.
+        @prop {Object} appState Tracked GL state.
     */
     PicoGL.Texture = function Texture(gl, appState, binding, image, width, height, depth, is3D, options) {
         options = options || PicoGL.DUMMY_OBJECT;
