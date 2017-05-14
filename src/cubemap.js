@@ -67,8 +67,6 @@
         var flipY = options.flipY !== undefined ? options.flipY : false;
         var minFilter = options.minFilter || gl.LINEAR_MIPMAP_NEAREST;
         var magFilter = options.magFilter || gl.LINEAR;
-        var wrapS = options.wrapS || gl.REPEAT;
-        var wrapT = options.wrapT || gl.REPEAT;
         var compareMode = options.compareMode || gl.NONE;
         var compareFunc = options.compareFunc || gl.LEQUAL;
         var generateMipmaps = options.generateMipmaps !== false && 
@@ -78,8 +76,6 @@
         gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY);
         gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, magFilter);
         gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, minFilter);
-        gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, wrapS);
-        gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, wrapT);
         gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_COMPARE_FUNC, compareFunc);
         gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_COMPARE_MODE, compareMode);
         if (options.baseLevel !== undefined) {

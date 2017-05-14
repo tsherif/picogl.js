@@ -58,8 +58,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         var UNSIGNED_BYTE = PicoGL.TEXTURE_INTERNAL_FORMAT[gl.UNSIGNED_BYTE] = {};
         UNSIGNED_BYTE[gl.RED] = gl.R8;
         UNSIGNED_BYTE[gl.RG] = gl.RG8;
-        UNSIGNED_BYTE[gl.RGB] = gl.RGB;
-        UNSIGNED_BYTE[gl.RGBA] = gl.RGBA;
+        UNSIGNED_BYTE[gl.RGB] = gl.RGB8;
+        UNSIGNED_BYTE[gl.RGBA] = gl.RGBA8;
 
         var UNSIGNED_SHORT = PicoGL.TEXTURE_INTERNAL_FORMAT[gl.UNSIGNED_SHORT] = {};
         UNSIGNED_SHORT[gl.DEPTH_COMPONENT] = gl.DEPTH_COMPONENT16;
@@ -625,6 +625,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         if (height === undefined) {
             // Passing in a DOM element. Height/width not required.
             options = width;
+            width = image.width;
+            height = image.height;
         }
 
         return new PicoGL.Texture(this.gl, this.state, this.gl.TEXTURE_2D, image, width, height, null, false, options);
@@ -1978,13 +1980,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     */
     PicoGL.Texture = function Texture(gl, appState, binding, image, width, height, depth, is3D, options) {
         options = options || PicoGL.DUMMY_OBJECT;
-        width = width || options.width || 0;
-        height = height || options.height || 0;
-        depth = depth || options.depth || 0;
 
         this.gl = gl;
         this.binding = binding;
         this.texture = gl.createTexture();
+        this.width = width || 0;
+        this.height = height || 0;
+        this.depth = depth || 0;
         this.format = options.format || gl.RGBA;
         this.type = options.type || gl.UNSIGNED_BYTE;
         this.internalFormat = options.internalFormat || PicoGL.TEXTURE_INTERNAL_FORMAT[this.type][this.format];
@@ -1998,52 +2000,61 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         }
         this.unitEnum = gl.TEXTURE0 + this.unit;
 
-        var buffer = !image || !!image.BYTES_PER_ELEMENT;
-        var flipY = options.flipY !== undefined ? options.flipY : true;
-        var minFilter = options.minFilter || gl.LINEAR_MIPMAP_NEAREST;
-        var magFilter = options.magFilter || gl.LINEAR;
-        var wrapS = options.wrapS || gl.REPEAT;
-        var wrapT = options.wrapT || gl.REPEAT;
-        var wrapR = options.wrapR || gl.REPEAT;
-        var compareMode = options.compareMode || gl.NONE;
-        var compareFunc = options.compareFunc || gl.LEQUAL;
-        var generateMipmaps = options.generateMipmaps !== false && 
-                            (minFilter === gl.LINEAR_MIPMAP_NEAREST || minFilter === gl.LINEAR_MIPMAP_LINEAR);
+        this.flipY = options.flipY !== undefined ? options.flipY : true;
+        this.minFilter = options.minFilter || gl.LINEAR_MIPMAP_NEAREST;
+        this.magFilter = options.magFilter || gl.LINEAR;
+        this.wrapS = options.wrapS || gl.REPEAT;
+        this.wrapT = options.wrapT || gl.REPEAT;
+        this.wrapR = options.wrapR || gl.REPEAT;
+        this.compareMode = options.compareMode || gl.NONE;
+        this.compareFunc = options.compareFunc || gl.LEQUAL;
+        this.baseLevel = options.baseLevel || null;
+        this.maxLevel = options.maxLevel || null;
+        this.minLOD = options.minLOD || null;
+        this.maxLOD = options.maxLOD || null;
+        this.generateMipmaps = options.generateMipmaps !== false && 
+                            (this.minFilter === gl.LINEAR_MIPMAP_NEAREST || this.minFilter === gl.LINEAR_MIPMAP_LINEAR);
 
         this.bind();
-        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY);
-        gl.texParameteri(this.binding, gl.TEXTURE_MAG_FILTER, magFilter);
-        gl.texParameteri(this.binding, gl.TEXTURE_MIN_FILTER, minFilter);
-        gl.texParameteri(this.binding, gl.TEXTURE_WRAP_S, wrapS);
-        gl.texParameteri(this.binding, gl.TEXTURE_WRAP_T, wrapT);
-        gl.texParameteri(this.binding, gl.TEXTURE_COMPARE_FUNC, compareFunc);
-        gl.texParameteri(this.binding, gl.TEXTURE_COMPARE_MODE, compareMode);
-        if (options.baseLevel !== undefined) {
-            gl.texParameteri(this.binding, gl.TEXTURE_BASE_LEVEL, options.baseLevel);
+        this.build(image);
+    };
+
+    PicoGL.Texture.prototype.build = function(image) {
+        this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, this.flipY);
+        this.gl.texParameteri(this.binding, this.gl.TEXTURE_MAG_FILTER, this.magFilter);
+        this.gl.texParameteri(this.binding, this.gl.TEXTURE_MIN_FILTER, this.minFilter);
+        this.gl.texParameteri(this.binding, this.gl.TEXTURE_WRAP_S, this.wrapS);
+        this.gl.texParameteri(this.binding, this.gl.TEXTURE_WRAP_T, this.wrapT);
+        this.gl.texParameteri(this.binding, this.gl.TEXTURE_COMPARE_FUNC, this.compareFunc);
+        this.gl.texParameteri(this.binding, this.gl.TEXTURE_COMPARE_MODE, this.compareMode);
+        if (this.baseLevel !== null) {
+            this.gl.texParameteri(this.binding, this.gl.TEXTURE_BASE_LEVEL, this.baseLevel);
         }
-        if (options.maxLevel !== undefined) {
-            gl.texParameteri(this.binding, gl.TEXTURE_MAX_LEVEL, options.maxLevel);
+        if (this.maxLevel !== null) {
+            this.gl.texParameteri(this.binding, this.gl.TEXTURE_MAX_LEVEL, this.maxLevel);
         }
-        if (options.minLOD !== undefined) {
-            gl.texParameteri(this.binding, gl.TEXTURE_MIN_LOD, options.minLOD);
+        if (this.minLOD !== null) {
+            this.gl.texParameteri(this.binding, this.gl.TEXTURE_MIN_LOD, this.minLOD);
         }
-        if (options.maxLOD !== undefined) {
-            gl.texParameteri(this.binding, gl.TEXTURE_MAX_LOD, options.maxLOD);
+        if (this.maxLOD !== null) {
+            this.gl.texParameteri(this.binding, this.gl.TEXTURE_MAX_LOD, this.maxLOD);
         }
 
         if (this.is3D) {
-            gl.texParameteri(this.binding, gl.TEXTURE_WRAP_R, wrapR);
-            gl.texImage3D(this.binding, 0, this.internalFormat, width, height, depth, 0, this.format, this.type, image);
+            this.gl.texParameteri(this.binding, this.gl.TEXTURE_WRAP_R, this.wrapR);
+            this.gl.texStorage3D(this.binding, 1, this.internalFormat, this.width, this.height, this.depth);
+            if (image) {
+                this.gl.texSubImage3D(this.binding, 0, 0, 0, 0, this.width, this.height, this.depth, this.format, this.type, image);
+            }
         } else {
-            if (buffer) {
-                gl.texImage2D(this.binding, 0, this.internalFormat, width, height, 0, this.format, this.type, image);
-            } else {
-                gl.texImage2D(this.binding, 0, this.internalFormat, this.format, this.type, image);
+            this.gl.texStorage2D(this.binding, 1, this.internalFormat, this.width, this.height);
+            if (image) {
+                this.gl.texSubImage2D(this.binding, 0, 0, 0, this.width, this.height, this.format, this.type, image);
             }
         }
 
-        if (generateMipmaps) {
-            gl.generateMipmap(this.binding);
+        if (this.generateMipmaps) {
+            this.gl.generateMipmap(this.binding);
         }
     };
 
@@ -2057,18 +2068,24 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {number} [depth] Image depth or number of images. Required when passing 3D or texture array data.
     */
     PicoGL.Texture.prototype.image = function(image, width, height, depth) {
-        this.activate();
-        this.bind();
+        width = width || image.width;
+        height = height || image.height;
+        depth = depth || 0;
 
-        if (this.is3D) {
-            this.gl.texImage3D(this.binding, 0, this.internalFormat, width, height, depth, 0, this.format, this.type, image);
-        } else {
-            if (!image || image.BYTES_PER_ELEMENT !== undefined) {
-                this.gl.texImage2D(this.binding, 0, this.internalFormat, width, height, 0, this.format, this.type, image);
-            } else {
-                this.gl.texImage2D(this.binding, 0, this.internalFormat, this.format, this.type, image);
-            }
+        if (width === this.width && height === this.height && depth === this.depth) {
+            return this;
         }
+        
+        this.gl.deleteTexture(this.texture);
+        this.texture = this.gl.createTexture();
+
+        this.bind(true);
+
+        this.width = width || image.width;
+        this.height = height || image.height;
+        this.depth = depth || 0;
+
+        this.build(image);
 
         return this;
     };  
@@ -2090,8 +2107,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     }; 
 
     // Activate this texture's texture unit.
-    PicoGL.Texture.prototype.activate = function() {
-        if (this.appState.activeTexture !== this.unit) {
+    PicoGL.Texture.prototype.activate = function(force) {
+        if (force || this.appState.activeTexture !== this.unit) {
             this.gl.activeTexture(this.unitEnum);
             this.appState.activeTexture = this.unit;
         }
@@ -2100,9 +2117,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     }; 
 
     // Bind this texture to a texture unit.
-    PicoGL.Texture.prototype.bind = function() {
-        if (this.appState.textures[this.unit] !== this) {
-            this.activate();
+    PicoGL.Texture.prototype.bind = function(force) {
+        if (force || this.appState.textures[this.unit] !== this) {
+            this.activate(force);
             this.gl.bindTexture(this.binding, this.texture);
             this.appState.textures[this.unit] = this;
         }
@@ -2157,8 +2174,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         var flipY = options.flipY !== undefined ? options.flipY : false;
         var minFilter = options.minFilter || gl.LINEAR_MIPMAP_NEAREST;
         var magFilter = options.magFilter || gl.LINEAR;
-        var wrapS = options.wrapS || gl.REPEAT;
-        var wrapT = options.wrapT || gl.REPEAT;
         var compareMode = options.compareMode || gl.NONE;
         var compareFunc = options.compareFunc || gl.LEQUAL;
         var generateMipmaps = options.generateMipmaps !== false && 
@@ -2168,8 +2183,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY);
         gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, magFilter);
         gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, minFilter);
-        gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, wrapS);
-        gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, wrapT);
         gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_COMPARE_FUNC, compareFunc);
         gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_COMPARE_MODE, compareMode);
         if (options.baseLevel !== undefined) {
@@ -2425,10 +2438,12 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
         for (var i = 0; i < this.numColorTargets; ++i) {
             this.colorTextures[i].image(null, this.width, this.height);
+            this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.colorAttachments[i], this.gl.TEXTURE_2D, this.colorTextures[i].texture, 0);
         }
 
         if (this.depthTexture) {
             this.depthTexture.image(null, this.width, this.height);
+            this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.gl.DEPTH_ATTACHMENT, this.gl.TEXTURE_2D, this.depthTexture.texture, 0);
         }
 
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);

@@ -542,6 +542,8 @@
         if (height === undefined) {
             // Passing in a DOM element. Height/width not required.
             options = width;
+            width = image.width;
+            height = image.height;
         }
 
         return new PicoGL.Texture(this.gl, this.state, this.gl.TEXTURE_2D, image, width, height, null, false, options);
