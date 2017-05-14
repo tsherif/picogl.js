@@ -61,9 +61,8 @@
         var negZ = options.negZ;
         var posZ = options.posZ;
         
-        var buffer = !negX || !!negX.BYTES_PER_ELEMENT;
-        var width = options.width || 0;
-        var height = options.height || 0;
+        var width = options.width || negX.width;
+        var height = options.height || negX.height;
         var flipY = options.flipY !== undefined ? options.flipY : false;
         var minFilter = options.minFilter || gl.LINEAR_MIPMAP_NEAREST;
         var magFilter = options.magFilter || gl.LINEAR;
@@ -90,22 +89,15 @@
         if (options.maxLOD !== undefined) {
             gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAX_LOD, options.maxLOD);
         }
+          
+        gl.texStorage2D(gl.TEXTURE_CUBE_MAP, 1, this.internalFormat, width, height);
 
-        if (buffer) {
-            gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_X, 0, this.internalFormat, width, height, 0, this.format, this.type, negX);
-            gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X, 0, this.internalFormat, width, height, 0, this.format, this.type, posX);
-            gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, this.internalFormat, width, height, 0, this.format, this.type, negY);
-            gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Y, 0, this.internalFormat, width, height, 0, this.format, this.type, posY);
-            gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, this.internalFormat, width, height, 0, this.format, this.type, negZ);
-            gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Z, 0, this.internalFormat, width, height, 0, this.format, this.type, posZ);
-        } else {
-            gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_X, 0, this.internalFormat, this.format, this.type, negX);
-            gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X, 0, this.internalFormat, this.format, this.type, posX);
-            gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, this.internalFormat, this.format, this.type, negY);
-            gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Y, 0, this.internalFormat, this.format, this.type, posY);
-            gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, this.internalFormat, this.format, this.type, negZ);
-            gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Z, 0, this.internalFormat, this.format, this.type, posZ);
-        }
+        gl.texSubImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_X, 0, 0, 0, width, height, this.format, this.type, negX);
+        gl.texSubImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X, 0, 0, 0, width, height, this.format, this.type, posX);
+        gl.texSubImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, 0, 0, width, height, this.format, this.type, negY);
+        gl.texSubImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Y, 0, 0, 0, width, height, this.format, this.type, posY);
+        gl.texSubImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, 0, 0, width, height, this.format, this.type, negZ);
+        gl.texSubImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Z, 0, 0, 0, width, height, this.format, this.type, posZ);
 
         if (generateMipmaps) {
             gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
