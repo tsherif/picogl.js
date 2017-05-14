@@ -34,7 +34,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @prop {object} TEXTURE_INTERNAL_FORMAT Map of framebuffer texture formats to internal formats.
         @prop {object} TYPE_SIZE Map of data types to sizes in bytes.
         @prop {object} WEBGL_INFO WebGL context information.
-        @prop {object} TEXTURE_UNIT_MAP Map of texture unit indices to GL enums, e.g. 0 => gl.TEXTURE0.
     */
     var PicoGL = window.PicoGL = {
         version: "0.2.7"
@@ -84,12 +83,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         PicoGL.WEBGL_INFO = {};
         PicoGL.WEBGL_INFO.MAX_TEXTURE_UNITS = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
         PicoGL.WEBGL_INFO.MAX_UNIFORM_BUFFERS = gl.getParameter(gl.MAX_UNIFORM_BUFFER_BINDINGS);
-
-        PicoGL.TEXTURE_UNIT_MAP = new Array(PicoGL.WEBGL_INFO.MAX_TEXTURE_UNITS);
-
-        for (var i = 0, len = PicoGL.TEXTURE_UNIT_MAP.length; i < len; ++i) {
-            PicoGL.TEXTURE_UNIT_MAP[i] = gl["TEXTURE" + i];
-        }
 
     })();
 
@@ -1981,6 +1974,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @prop {Number} unit The texture unit this texture is bound to.
         @prop {GLEnum} unitEnum The GLEnum of texture unit this texture is bound to.
         @prop {boolean} is3D Whether this texture contains 3D data.
+        @prop {Object} appState Tracked GL state.
     */
     PicoGL.Texture = function Texture(gl, appState, binding, image, width, height, depth, is3D, options) {
         options = options || PicoGL.DUMMY_OBJECT;
@@ -2002,7 +1996,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             this.unit = appState.textureCount % appState.textures.length;
             ++appState.textureCount;
         }
-        this.unitEnum = PicoGL.TEXTURE_UNIT_MAP[this.unit];
+        this.unitEnum = gl.TEXTURE0 + this.unit;
 
         var buffer = !image || !!image.BYTES_PER_ELEMENT;
         var flipY = options.flipY !== undefined ? options.flipY : true;
@@ -2129,6 +2123,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @prop {GLEnum} type Type of data stored in the texture.
         @prop {GLEnum} format Layout of texture data.
         @prop {GLEnum} internalFormat Internal arrangement of the texture data.
+        @prop {Number} unit The texture unit this texture is bound to.
+        @prop {GLEnum} unitEnum The GLEnum of texture unit this texture is bound to.
+        @prop {Object} appState Tracked GL state.
     */
     PicoGL.Cubemap = function Cubemap(gl, appState, options) {
         options = options || PicoGL.DUMMY_OBJECT;
@@ -2145,7 +2142,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             this.unit = appState.textureCount % appState.textures.length;
             ++appState.textureCount;
         }
-        this.unitEnum = PicoGL.TEXTURE_UNIT_MAP[this.unit];
+        this.unitEnum = gl.TEXTURE0 + this.unit;
 
         var negX = options.negX;
         var posX = options.posX;
@@ -2256,6 +2253,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @prop {number} numColorTargets Number of color texture targets. 
         @prop {Texture} depthTexture Depth texture target. 
         @prop {Array} colorAttachments Array of color attachment enums. 
+        @prop {Object} appState Tracked GL state.
     */
     PicoGL.Framebuffer = function Framebuffer(gl, appState, width, height) {
         this.gl = gl;
@@ -2311,7 +2309,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         options.wrapT = options.wrapT || this.gl.CLAMP_TO_EDGE;
         options.generateMipmaps = options.generateMipmaps === undefined ? false : options.generateMipmaps;
 
-        this.colorAttachments[index] = this.gl["COLOR_ATTACHMENT" + index];
+        this.colorAttachments[index] = this.gl.COLOR_ATTACHMENT0 + index;
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.framebuffer);
 
         this.colorTextures[index] = new PicoGL.Texture(
