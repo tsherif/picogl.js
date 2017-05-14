@@ -31,6 +31,12 @@
     var zeros = [0, 0, 0];
     var ones = [1, 1, 1];
 
+    var NUM_TIMING_SAMPLES = 60;
+
+    var cpuTimeSum = 0;
+    var gpuTimeSum = 0;
+    var timeSampleCount = NUM_TIMING_SAMPLES - 1;
+
     window.utils = {
         xformMatrix: function xformMatrix(xform, translate, rotate, scale) {
             translate = translate || zeros;
@@ -348,13 +354,24 @@
         },
 
         updateTimerElement(cpuTime, gpuTime) {
-            this.cpuTimeElement.innerText = "CPU time: " + cpuTime.toFixed(3) + "ms";
-            if (gpuTime > 0) {
-                this.gpuTimeElement.innerText = "GPU time: " + gpuTime.toFixed(3) + "ms";
-            } else {
-                this.gpuTimeElement.innerText = "GPU time: (Unavailable)";
+            cpuTimeSum += cpuTime;
+            gpuTimeSum += gpuTime;
+            ++timeSampleCount;
+
+            if (timeSampleCount === NUM_TIMING_SAMPLES) {
+                var cpuTimeAve = cpuTimeSum / NUM_TIMING_SAMPLES;
+                var gpuTimeAve = gpuTimeSum / NUM_TIMING_SAMPLES;
+                this.cpuTimeElement.innerText = "CPU time: " + cpuTimeAve.toFixed(3) + "ms";
+                if (gpuTimeAve > 0) {
+                    this.gpuTimeElement.innerText = "GPU time: " + gpuTimeAve.toFixed(3) + "ms";
+                } else {
+                    this.gpuTimeElement.innerText = "GPU time: (Unavailable)";
+                }
+
+                cpuTimeSum = 0;
+                gpuTimeSum = 0;
+                timeSampleCount = 0;
             }
-          
         }
     }
 

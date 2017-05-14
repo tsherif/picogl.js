@@ -82,6 +82,7 @@
         this.transformFeedback = !!xformFeebackVars;
         this.uniforms = {};
         this.uniformBlocks = {};
+        this.uniformBlockBindings = {};
 
         var numUniforms = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
 
@@ -216,7 +217,11 @@
 
     // Bind a uniform block to a uniform buffer base.
     PicoGL.Program.prototype.uniformBlock = function(name, base) {
-        this.gl.uniformBlockBinding(this.program, this.uniformBlocks[name], base);
+        if (this.uniformBlockBindings[name] !== base) {
+            this.gl.uniformBlockBinding(this.program, this.uniformBlocks[name], base);
+            this.uniformBlockBindings[name] = base;
+        }
+        
     };
 
 })();

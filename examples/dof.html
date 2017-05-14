@@ -192,6 +192,12 @@
         var BOXES_PER_ROW = 20;
         var NUM_BOXES = BOXES_PER_ROW * NUM_ROWS;
 
+        var resized = false;
+
+        window.onresize = function() {
+            resized = true;
+        };
+
         var app = PicoGL.createApp(canvas)
         .depthTest()
         .clearColor(0.0, 0.0, 0.0, 1.0);
@@ -257,17 +263,6 @@
         var modelMatrix = mat4.create();
         var rotateXMatrix = mat4.create();
         var rotateYMatrix = mat4.create();
-
-        window.onresize = function() {
-            app.resize(window.innerWidth, window.innerHeight);
-            boxBuffer.resize();
-            hblurBuffer.resize();
-            blurBuffer.resize();
-
-            mat4.perspective(projMatrix, Math.PI / 2, app.canvas.width / app.canvas.height, 0.1, 10.0);
-            mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
-            sceneUniforms.set(0, viewProjMatrix).update();
-        };
 
         // UNIFORM BUFFERS
         var sceneUniforms = app.createUniformBuffer([
@@ -339,6 +334,19 @@
             var finalDrawCalls = [finalDrawCall];
 
             function draw() {
+                if (resized) {
+                    app.resize(window.innerWidth, window.innerHeight);
+                    boxBuffer.resize();
+                    hblurBuffer.resize();
+                    blurBuffer.resize();
+
+                    mat4.perspective(projMatrix, Math.PI / 2, app.canvas.width / app.canvas.height, 0.1, 10.0);
+                    mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
+                    sceneUniforms.set(0, viewProjMatrix).update();
+
+                    resized = false;
+                }
+
                 if (app.timerReady()) {
                     utils.updateTimerElement(app.cpuTime, app.gpuTime);
                 }

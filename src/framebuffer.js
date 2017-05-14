@@ -36,10 +36,12 @@
         @prop {number} numColorTargets Number of color texture targets. 
         @prop {Texture} depthTexture Depth texture target. 
         @prop {Array} colorAttachments Array of color attachment enums. 
+        @prop {Object} appState Tracked GL state.
     */
-    PicoGL.Framebuffer = function Framebuffer(gl, width, height) {
+    PicoGL.Framebuffer = function Framebuffer(gl, appState, width, height) {
         this.gl = gl;
         this.framebuffer = gl.createFramebuffer();
+        this.appState = appState;
 
         if (width && height) {
             this.width = width;
@@ -95,6 +97,7 @@
 
         this.colorTextures[index] = new PicoGL.Texture(
             this.gl,
+            this.appState,
             this.gl.TEXTURE_2D,
             null, 
             this.width, 
@@ -149,6 +152,7 @@
 
         this.depthTexture = new PicoGL.Texture(
             this.gl,
+            this.appState,
             this.gl.TEXTURE_2D,
             null, 
             this.width, 
