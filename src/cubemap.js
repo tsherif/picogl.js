@@ -49,7 +49,14 @@
         if (appState.freeTextureUnits.length > 0) {
             this.unit = appState.freeTextureUnits.pop();
         } else {
-            this.unit = appState.textureCount % appState.textures.length;
+            /////////////////////////////////////////////////////////////////////////////////
+            // TODO(Tarek):
+            // Workaround for https://bugs.chromium.org/p/chromium/issues/detail?id=722288
+            // Use full array when that's fixed
+            /////////////////////////////////////////////////////////////////////////////////
+            this.unit = appState.textureCount % (appState.textures.length - 1);
+            this.unit += 1;
+            
             ++appState.textureCount;
         }
         this.unitEnum = gl.TEXTURE0 + this.unit;

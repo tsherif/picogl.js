@@ -2127,14 +2127,14 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         if (this.is3D) {
             this.gl.texParameteri(this.binding, this.gl.TEXTURE_WRAP_R, this.wrapR);
             if (this.generateMipmaps) {
-                levels = Math.floor(Math.log2(Math.min(Math.min(this.width, this.height), this.depth))) + 1;
+                levels = Math.floor(Math.log2(Math.max(Math.max(this.width, this.height), this.depth))) + 1;
             } else {
                 levels = 1;
             }
             this.gl.texStorage3D(this.binding, levels, this.internalFormat, this.width, this.height, this.depth);
         } else {
             if (this.generateMipmaps) {
-                levels = Math.floor(Math.log2(Math.min(this.width, this.height))) + 1;
+                levels = Math.floor(Math.log2(Math.max(this.width, this.height))) + 1;
             } else {
                 levels = 1;
             }
@@ -2192,7 +2192,14 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         if (appState.freeTextureUnits.length > 0) {
             this.unit = appState.freeTextureUnits.pop();
         } else {
-            this.unit = appState.textureCount % appState.textures.length;
+            /////////////////////////////////////////////////////////////////////////////////
+            // TODO(Tarek):
+            // Workaround for https://bugs.chromium.org/p/chromium/issues/detail?id=722288
+            // Use full array when that's fixed
+            /////////////////////////////////////////////////////////////////////////////////
+            this.unit = appState.textureCount % (appState.textures.length - 1);
+            this.unit += 1;
+            
             ++appState.textureCount;
         }
         this.unitEnum = gl.TEXTURE0 + this.unit;

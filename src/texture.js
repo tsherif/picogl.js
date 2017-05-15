@@ -176,14 +176,14 @@
         if (this.is3D) {
             this.gl.texParameteri(this.binding, this.gl.TEXTURE_WRAP_R, this.wrapR);
             if (this.generateMipmaps) {
-                levels = Math.floor(Math.log2(Math.min(Math.min(this.width, this.height), this.depth))) + 1;
+                levels = Math.floor(Math.log2(Math.max(Math.max(this.width, this.height), this.depth))) + 1;
             } else {
                 levels = 1;
             }
             this.gl.texStorage3D(this.binding, levels, this.internalFormat, this.width, this.height, this.depth);
         } else {
             if (this.generateMipmaps) {
-                levels = Math.floor(Math.log2(Math.min(this.width, this.height))) + 1;
+                levels = Math.floor(Math.log2(Math.max(this.width, this.height))) + 1;
             } else {
                 levels = 1;
             }
