@@ -143,9 +143,9 @@
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, framebuffer.framebuffer);
 
         if (this.viewportWidth !== framebuffer.width || this.viewportHeight !== framebuffer.height) {
-            this.gl.viewport(0, 0, framebuffer.width, framebuffer.height);
             this.viewportWidth = framebuffer.width;
             this.viewportHeight = framebuffer.height;
+            this.gl.viewport(0, 0, this.viewportWidth, this.viewportHeight);
         }      
 
         return this;
@@ -159,9 +159,9 @@
     PicoGL.App.prototype.defaultFramebuffer = function() {
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
         if (this.viewportWidth !== this.width || this.viewportHeight !== this.height) {
-            this.gl.viewport(0, 0, this.width, this.height);
             this.viewportWidth = this.width;
             this.viewportHeight = this.height;
+            this.gl.viewport(0, 0, this.viewportWidth, this.viewportHeight);
         } 
 
         return this;
@@ -392,9 +392,9 @@
 
         this.width = this.gl.drawingBufferWidth;
         this.height = this.gl.drawingBufferHeight;
-        this.gl.viewport(0, 0, this.width, this.height);
         this.viewportWidth = this.width;
         this.viewportHeight = this.height;
+        this.gl.viewport(0, 0, this.viewportWidth, this.viewportHeight);
         
         return this;
     };
