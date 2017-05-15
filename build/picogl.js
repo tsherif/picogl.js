@@ -2007,7 +2007,14 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         if (appState.freeTextureUnits.length > 0) {
             this.unit = appState.freeTextureUnits.pop();
         } else {
-            this.unit = appState.textureCount % appState.textures.length;
+            /////////////////////////////////////////////////////////////////////////////////
+            // TODO(Tarek):
+            // Workaround for https://bugs.chromium.org/p/chromium/issues/detail?id=722288
+            // Use full array when that's fixed
+            /////////////////////////////////////////////////////////////////////////////////
+            this.unit = appState.textureCount % (appState.textures.length - 1);
+            this.unit += 1;
+
             ++appState.textureCount;
         }
         this.unitEnum = gl.TEXTURE0 + this.unit;
@@ -2027,7 +2034,22 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         this.generateMipmaps = options.generateMipmaps !== false && 
                             (this.minFilter === gl.LINEAR_MIPMAP_NEAREST || this.minFilter === gl.LINEAR_MIPMAP_LINEAR);
 
+        this.sampler = gl.createSampler();
+        gl.samplerParameteri(this.sampler, gl.TEXTURE_MAG_FILTER, this.magFilter);
+        gl.samplerParameteri(this.sampler, gl.TEXTURE_MIN_FILTER, this.minFilter);
+        gl.samplerParameteri(this.sampler, gl.TEXTURE_WRAP_S, this.wrapS);
+        gl.samplerParameteri(this.sampler, gl.TEXTURE_WRAP_T, this.wrapT);
+        gl.samplerParameteri(this.sampler, gl.TEXTURE_COMPARE_FUNC, this.compareFunc);
+        gl.samplerParameteri(this.sampler, gl.TEXTURE_COMPARE_MODE, this.compareMode);
+        if (this.minLOD !== null) {
+            gl.samplerParameterf(this.sampler, gl.TEXTURE_MIN_LOD, this.minLOD);
+        }
+        if (this.maxLOD !== null) {
+            gl.samplerParameterf(this.sampler, gl.TEXTURE_MAX_LOD, this.maxLOD);
+        }
+
         this.bind(true);
+        gl.bindSampler(this.unit, this.sampler);
         this.image(image, width, height, depth);
     };
 
@@ -2081,7 +2103,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     PicoGL.Texture.prototype.delete = function() {
         if (this.texture) {
             this.gl.deleteTexture(this.texture);
+            this.gl.deleteSampler(this.sampler);
             this.texture = null;
+            this.sampler = null;
             this.appState.freeTextureUnits.push(this.unit);
             this.appState.textures[this.unit] = null;
             this.unit = -1;
@@ -2091,23 +2115,12 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
     PicoGL.Texture.prototype.init = function() {
         this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, this.flipY);
-        this.gl.texParameteri(this.binding, this.gl.TEXTURE_MAG_FILTER, this.magFilter);
-        this.gl.texParameteri(this.binding, this.gl.TEXTURE_MIN_FILTER, this.minFilter);
-        this.gl.texParameteri(this.binding, this.gl.TEXTURE_WRAP_S, this.wrapS);
-        this.gl.texParameteri(this.binding, this.gl.TEXTURE_WRAP_T, this.wrapT);
-        this.gl.texParameteri(this.binding, this.gl.TEXTURE_COMPARE_FUNC, this.compareFunc);
-        this.gl.texParameteri(this.binding, this.gl.TEXTURE_COMPARE_MODE, this.compareMode);
+        
         if (this.baseLevel !== null) {
             this.gl.texParameteri(this.binding, this.gl.TEXTURE_BASE_LEVEL, this.baseLevel);
         }
         if (this.maxLevel !== null) {
             this.gl.texParameteri(this.binding, this.gl.TEXTURE_MAX_LEVEL, this.maxLevel);
-        }
-        if (this.minLOD !== null) {
-            this.gl.texParameteri(this.binding, this.gl.TEXTURE_MIN_LOD, this.minLOD);
-        }
-        if (this.maxLOD !== null) {
-            this.gl.texParameteri(this.binding, this.gl.TEXTURE_MAX_LOD, this.maxLOD);
         }
 
         var levels;
