@@ -30,6 +30,7 @@
         @class
         @prop {WebGLRenderingContext} gl The WebGL context.
         @prop {WebGLTexture} texture Handle to the texture.
+        @prop {WebGLSamler} sampler Sampler object.
         @prop {GLEnum} binding Binding point for the texture.
         @prop {GLEnum} type Type of data stored in the texture.
         @prop {GLEnum} format Layout of texture data.
@@ -48,9 +49,9 @@
         this.width = -1;
         this.height = -1;
         this.depth = -1;
-        this.format = options.format || gl.RGBA;
-        this.type = options.type || gl.UNSIGNED_BYTE;
-        this.internalFormat = options.internalFormat || PicoGL.TEXTURE_INTERNAL_FORMAT[this.type][this.format];
+        this.format = options.format !== undefined ? options.format : gl.RGBA;
+        this.type = options.type !== undefined ? options.type : gl.UNSIGNED_BYTE;
+        this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : PicoGL.TEXTURE_INTERNAL_FORMAT[this.type][this.format];
         this.is3D = is3D;
         this.appState = appState;
         if (appState.freeTextureUnits.length > 0) {
@@ -68,34 +69,38 @@
         }
         this.unitEnum = gl.TEXTURE0 + this.unit;
 
-        this.flipY = options.flipY !== undefined ? options.flipY : true;
-        this.minFilter = options.minFilter || gl.LINEAR_MIPMAP_NEAREST;
-        this.magFilter = options.magFilter || gl.LINEAR;
-        this.wrapS = options.wrapS || gl.REPEAT;
-        this.wrapT = options.wrapT || gl.REPEAT;
-        this.wrapR = options.wrapR || gl.REPEAT;
-        this.compareMode = options.compareMode || gl.NONE;
-        this.compareFunc = options.compareFunc || gl.LEQUAL;
-        this.baseLevel = options.baseLevel || null;
-        this.maxLevel = options.maxLevel || null;
-        this.minLOD = options.minLOD || null;
-        this.maxLOD = options.maxLOD || null;
-        this.generateMipmaps = options.generateMipmaps !== false && 
-                            (this.minFilter === gl.LINEAR_MIPMAP_NEAREST || this.minFilter === gl.LINEAR_MIPMAP_LINEAR);
+        // Sampler parameters
+        var minFilter = options.minFilter !== undefined ? options.minFilter : gl.LINEAR_MIPMAP_NEAREST;
+        var magFilter = options.magFilter !== undefined ? options.magFilter : gl.LINEAR;
+        var wrapS = options.wrapS !== undefined ? options.wrapS : gl.REPEAT;
+        var wrapT = options.wrapT !== undefined ? options.wrapT : gl.REPEAT;
+        var wrapR = options.wrapR !== undefined ? options.wrapR : gl.REPEAT;
+        var compareMode = options.compareMode !== undefined ? options.compareMode : gl.NONE;
+        var compareFunc = options.compareFunc !== undefined ? options.compareFunc : gl.LEQUAL;
+        var minLOD = options.minLOD !== undefined ? options.minLOD : null;
+        var maxLOD = options.maxLOD !== undefined ? options.maxLOD : null;
 
         this.sampler = gl.createSampler();
-        gl.samplerParameteri(this.sampler, gl.TEXTURE_MAG_FILTER, this.magFilter);
-        gl.samplerParameteri(this.sampler, gl.TEXTURE_MIN_FILTER, this.minFilter);
-        gl.samplerParameteri(this.sampler, gl.TEXTURE_WRAP_S, this.wrapS);
-        gl.samplerParameteri(this.sampler, gl.TEXTURE_WRAP_T, this.wrapT);
-        gl.samplerParameteri(this.sampler, gl.TEXTURE_COMPARE_FUNC, this.compareFunc);
-        gl.samplerParameteri(this.sampler, gl.TEXTURE_COMPARE_MODE, this.compareMode);
-        if (this.minLOD !== null) {
-            gl.samplerParameterf(this.sampler, gl.TEXTURE_MIN_LOD, this.minLOD);
+        gl.samplerParameteri(this.sampler, gl.TEXTURE_MIN_FILTER, minFilter);
+        gl.samplerParameteri(this.sampler, gl.TEXTURE_MAG_FILTER, magFilter);
+        gl.samplerParameteri(this.sampler, gl.TEXTURE_WRAP_S, wrapS);
+        gl.samplerParameteri(this.sampler, gl.TEXTURE_WRAP_T, wrapT);
+        gl.samplerParameteri(this.sampler, gl.TEXTURE_WRAP_R, wrapR);
+        gl.samplerParameteri(this.sampler, gl.TEXTURE_COMPARE_FUNC, compareFunc);
+        gl.samplerParameteri(this.sampler, gl.TEXTURE_COMPARE_MODE, compareMode);
+        if (minLOD !== null) {
+            gl.samplerParameterf(this.sampler, gl.TEXTURE_MIN_LOD, minLOD);
         }
-        if (this.maxLOD !== null) {
-            gl.samplerParameterf(this.sampler, gl.TEXTURE_MAX_LOD, this.maxLOD);
+        if (maxLOD !== null) {
+            gl.samplerParameterf(this.sampler, gl.TEXTURE_MAX_LOD, maxLOD);
         }
+
+        // Texture parameters
+        this.flipY = options.flipY !== undefined ? options.flipY : true;
+        this.baseLevel = options.baseLevel !== undefined ? options.baseLevel : null;
+        this.maxLevel = options.maxLevel !== undefined ? options.maxLevel : null;
+        this.generateMipmaps = options.generateMipmaps !== false && 
+                            (minFilter === gl.LINEAR_MIPMAP_NEAREST || minFilter === gl.LINEAR_MIPMAP_LINEAR);
 
         this.bind(true);
         gl.bindSampler(this.unit, this.sampler);
@@ -162,6 +167,7 @@
         }
     }; 
 
+    // Initialize storage
     PicoGL.Texture.prototype.init = function() {
         this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, this.flipY);
         
@@ -174,7 +180,6 @@
 
         var levels;
         if (this.is3D) {
-            this.gl.texParameteri(this.binding, this.gl.TEXTURE_WRAP_R, this.wrapR);
             if (this.generateMipmaps) {
                 levels = Math.floor(Math.log2(Math.max(Math.max(this.width, this.height), this.depth))) + 1;
             } else {

@@ -42,9 +42,9 @@
 
         this.gl = gl;
         this.texture = gl.createTexture();
-        this.format = options.format || gl.RGBA;
-        this.type = options.type || gl.UNSIGNED_BYTE;
-        this.internalFormat = options.internalFormat || PicoGL.TEXTURE_INTERNAL_FORMAT[this.type][this.format];
+        this.format = options.format !== undefined ? options.format : gl.RGBA;
+        this.type = options.type !== undefined ? options.type : gl.UNSIGNED_BYTE;
+        this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : PicoGL.TEXTURE_INTERNAL_FORMAT[this.type][this.format];
         this.appState = appState;
         if (appState.freeTextureUnits.length > 0) {
             this.unit = appState.freeTextureUnits.pop();
@@ -56,7 +56,7 @@
             /////////////////////////////////////////////////////////////////////////////////
             this.unit = appState.textureCount % (appState.textures.length - 1);
             this.unit += 1;
-            
+
             ++appState.textureCount;
         }
         this.unitEnum = gl.TEXTURE0 + this.unit;
@@ -71,10 +71,10 @@
         var width = options.width || negX.width;
         var height = options.height || negX.height;
         var flipY = options.flipY !== undefined ? options.flipY : false;
-        var minFilter = options.minFilter || gl.LINEAR_MIPMAP_NEAREST;
-        var magFilter = options.magFilter || gl.LINEAR;
-        var compareMode = options.compareMode || gl.NONE;
-        var compareFunc = options.compareFunc || gl.LEQUAL;
+        var minFilter = options.minFilter !== undefined ? options.minFilter : gl.LINEAR_MIPMAP_NEAREST;
+        var magFilter = options.magFilter !== undefined ? options.magFilter : gl.LINEAR;
+        var compareMode = options.compareMode !== undefined ? options.compareMode : gl.NONE;
+        var compareFunc = options.compareFunc !== undefined ? options.compareFunc : gl.LEQUAL;
         var generateMipmaps = options.generateMipmaps !== false && 
                             (minFilter === gl.LINEAR_MIPMAP_NEAREST || minFilter === gl.LINEAR_MIPMAP_LINEAR);
 
