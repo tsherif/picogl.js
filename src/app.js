@@ -47,6 +47,8 @@
         this.gl = canvas.getContext("webgl2", contextAttributes);
         this.width = this.gl.drawingBufferWidth;
         this.height = this.gl.drawingBufferHeight;
+        this.viewportWidth = this.width;
+        this.viewportHeight = this.height;
         this.currentDrawCalls = null;
         this.emptyFragmentShader = null;
 
@@ -75,7 +77,7 @@
         this.floatRenderTargetsEnabled = false;
         this.linearFloatTexturesEnabled = false;
         
-        this.gl.viewport(0, 0, this.width, this.height);
+        this.gl.viewport(0, 0, this.viewportWidth, this.viewportHeight);
     };
 
     /**
@@ -139,7 +141,12 @@
     */
     PicoGL.App.prototype.framebuffer = function(framebuffer) {
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, framebuffer.framebuffer);
-        this.gl.viewport(0, 0, framebuffer.width, framebuffer.height);
+
+        if (this.viewportWidth !== framebuffer.width || this.viewportHeight !== framebuffer.height) {
+            this.gl.viewport(0, 0, framebuffer.width, framebuffer.height);
+            this.viewportWidth = framebuffer.width;
+            this.viewportHeight = framebuffer.height;
+        }      
 
         return this;
     };
@@ -151,7 +158,11 @@
     */
     PicoGL.App.prototype.defaultFramebuffer = function() {
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
-        this.gl.viewport(0, 0, this.width, this.height);
+        if (this.viewportWidth !== this.width || this.viewportHeight !== this.height) {
+            this.gl.viewport(0, 0, this.width, this.height);
+            this.viewportWidth = this.width;
+            this.viewportHeight = this.height;
+        } 
 
         return this;
     };
@@ -381,11 +392,12 @@
 
         this.width = this.gl.drawingBufferWidth;
         this.height = this.gl.drawingBufferHeight;
-        this.gl.viewport(0, 0, this.width, this.height);    
-
+        this.gl.viewport(0, 0, this.width, this.height);
+        this.viewportWidth = this.width;
+        this.viewportHeight = this.height;
+        
         return this;
     };
-
     /**
         Create a program.
 
