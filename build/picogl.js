@@ -1984,9 +1984,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         this.gl = gl;
         this.binding = binding;
         this.texture = gl.createTexture();
-        this.width = width || 0;
-        this.height = height || 0;
-        this.depth = depth || 0;
+        this.width = -1;
+        this.height = -1;
+        this.depth = -1;
         this.format = options.format || gl.RGBA;
         this.type = options.type || gl.UNSIGNED_BYTE;
         this.internalFormat = options.internalFormat || PicoGL.TEXTURE_INTERNAL_FORMAT[this.type][this.format];
@@ -2015,11 +2015,69 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         this.generateMipmaps = options.generateMipmaps !== false && 
                             (this.minFilter === gl.LINEAR_MIPMAP_NEAREST || this.minFilter === gl.LINEAR_MIPMAP_LINEAR);
 
-        this.bind();
-        this.build(image);
+        this.bind(true);
+        this.image(image, width, height, depth);
     };
 
-    PicoGL.Texture.prototype.build = function(image) {
+    /**
+        Set the image data for the texture.
+    
+        @method
+        @param {ImageElement|ArrayBufferView} image Image data.
+        @param {number} [width] Image width. Required when passing ArrayBufferView data.
+        @param {number} [height] Image height. Required when passing ArrayBufferView data.
+        @param {number} [depth] Image depth or number of images. Required when passing 3D or texture array data.
+    */
+    PicoGL.Texture.prototype.image = function(image, width, height, depth) {
+        width = width || image.width;
+        height = height || image.height;
+        depth = depth || 0;
+
+        if (width !== this.width || height !== this.height || depth !== this.depth) {
+            this.gl.deleteTexture(this.texture);
+            this.texture = this.gl.createTexture();
+
+            this.bind(true);
+
+            this.width = width || image.width;
+            this.height = height || image.height;
+            this.depth = depth || 0;
+
+            this.init();
+        }
+
+        if (image) {
+            if (this.is3D) {
+                this.gl.texSubImage3D(this.binding, 0, 0, 0, 0, this.width, this.height, this.depth, this.format, this.type, image);
+            } else {
+                this.gl.texSubImage2D(this.binding, 0, 0, 0, this.width, this.height, this.format, this.type, image);
+            }
+
+            if (this.generateMipmaps) {
+                this.gl.generateMipmap(this.binding);
+            }
+        }
+
+        return this;
+    };  
+
+    /**
+        Delete this texture.
+
+        @method
+    */
+    PicoGL.Texture.prototype.delete = function() {
+        if (this.texture) {
+            this.gl.deleteTexture(this.texture);
+            this.texture = null;
+            this.appState.freeTextureUnits.push(this.unit);
+            this.appState.textures[this.unit] = null;
+            this.unit = -1;
+            this.unitEnum = -1;
+        }
+    }; 
+
+    PicoGL.Texture.prototype.init = function() {
         this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, this.flipY);
         this.gl.texParameteri(this.binding, this.gl.TEXTURE_MAG_FILTER, this.magFilter);
         this.gl.texParameteri(this.binding, this.gl.TEXTURE_MIN_FILTER, this.minFilter);
@@ -2040,71 +2098,24 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             this.gl.texParameteri(this.binding, this.gl.TEXTURE_MAX_LOD, this.maxLOD);
         }
 
+        var levels;
         if (this.is3D) {
             this.gl.texParameteri(this.binding, this.gl.TEXTURE_WRAP_R, this.wrapR);
-            this.gl.texStorage3D(this.binding, 1, this.internalFormat, this.width, this.height, this.depth);
-            if (image) {
-                this.gl.texSubImage3D(this.binding, 0, 0, 0, 0, this.width, this.height, this.depth, this.format, this.type, image);
+            if (this.generateMipmaps) {
+                levels = Math.floor(Math.log2(Math.min(Math.min(this.width, this.height), this.depth))) + 1;
+            } else {
+                levels = 1;
             }
+            this.gl.texStorage3D(this.binding, levels, this.internalFormat, this.width, this.height, this.depth);
         } else {
-            this.gl.texStorage2D(this.binding, 1, this.internalFormat, this.width, this.height);
-            if (image) {
-                this.gl.texSubImage2D(this.binding, 0, 0, 0, this.width, this.height, this.format, this.type, image);
+            if (this.generateMipmaps) {
+                levels = Math.floor(Math.log2(Math.min(this.width, this.height))) + 1;
+            } else {
+                levels = 1;
             }
-        }
-
-        if (this.generateMipmaps) {
-            this.gl.generateMipmap(this.binding);
+            this.gl.texStorage2D(this.binding, levels, this.internalFormat, this.width, this.height);
         }
     };
-
-    /**
-        Set the image data for the texture.
-    
-        @method
-        @param {ImageElement|ArrayBufferView} image Image data.
-        @param {number} [width] Image width. Required when passing ArrayBufferView data.
-        @param {number} [height] Image height. Required when passing ArrayBufferView data.
-        @param {number} [depth] Image depth or number of images. Required when passing 3D or texture array data.
-    */
-    PicoGL.Texture.prototype.image = function(image, width, height, depth) {
-        width = width || image.width;
-        height = height || image.height;
-        depth = depth || 0;
-
-        if (width === this.width && height === this.height && depth === this.depth) {
-            return this;
-        }
-        
-        this.gl.deleteTexture(this.texture);
-        this.texture = this.gl.createTexture();
-
-        this.bind(true);
-
-        this.width = width || image.width;
-        this.height = height || image.height;
-        this.depth = depth || 0;
-
-        this.build(image);
-
-        return this;
-    };  
-
-    /**
-        Delete this texture.
-
-        @method
-    */
-    PicoGL.Texture.prototype.delete = function() {
-        if (this.texture) {
-            this.gl.deleteTexture(this.texture);
-            this.texture = null;
-            this.appState.freeTextureUnits.push(this.unit);
-            this.appState.textures[this.unit] = null;
-            this.unit = -1;
-            this.unitEnum = -1;
-        }
-    }; 
 
     // Activate this texture's texture unit.
     PicoGL.Texture.prototype.activate = function(force) {
@@ -2196,8 +2207,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         if (options.maxLOD !== undefined) {
             gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAX_LOD, options.maxLOD);
         }
-          
-        gl.texStorage2D(gl.TEXTURE_CUBE_MAP, 1, this.internalFormat, width, height);
+        
+        var levels = generateMipmaps ? Math.floor(Math.log2(Math.min(width, height))) + 1 : 1;
+        gl.texStorage2D(gl.TEXTURE_CUBE_MAP, levels, this.internalFormat, width, height);
 
         gl.texSubImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_X, 0, 0, 0, width, height, this.format, this.type, negX);
         gl.texSubImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X, 0, 0, 0, width, height, this.format, this.type, posX);

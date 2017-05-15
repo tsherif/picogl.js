@@ -89,8 +89,9 @@
         if (options.maxLOD !== undefined) {
             gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAX_LOD, options.maxLOD);
         }
-          
-        gl.texStorage2D(gl.TEXTURE_CUBE_MAP, 1, this.internalFormat, width, height);
+        
+        var levels = generateMipmaps ? Math.floor(Math.log2(Math.min(width, height))) + 1 : 1;
+        gl.texStorage2D(gl.TEXTURE_CUBE_MAP, levels, this.internalFormat, width, height);
 
         gl.texSubImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_X, 0, 0, 0, width, height, this.format, this.type, negX);
         gl.texSubImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X, 0, 0, 0, width, height, this.format, this.type, posX);
