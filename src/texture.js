@@ -131,7 +131,7 @@
             this.height = height || image.height;
             this.depth = depth || 0;
 
-            this.init();
+            this.allocateStorage();
         }
 
         if (image) {
@@ -168,7 +168,7 @@
     }; 
 
     // Initialize storage
-    PicoGL.Texture.prototype.init = function() {
+    PicoGL.Texture.prototype.allocateStorage = function() {
         this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, this.flipY);
         
         if (this.baseLevel !== null) {
@@ -197,8 +197,8 @@
     };
 
     // Activate this texture's texture unit.
-    PicoGL.Texture.prototype.activate = function(force) {
-        if (force || this.appState.activeTexture !== this.unit) {
+    PicoGL.Texture.prototype.activateUnit = function() {
+        if (this.appState.activeTexture !== this.unit) {
             this.gl.activeTexture(this.unitEnum);
             this.appState.activeTexture = this.unit;
         }
@@ -209,7 +209,7 @@
     // Bind this texture to a texture unit.
     PicoGL.Texture.prototype.bind = function(force) {
         if (force || this.appState.textures[this.unit] !== this) {
-            this.activate(force);
+            this.activateUnit();
             this.gl.bindTexture(this.binding, this.texture);
             this.appState.textures[this.unit] = this;
         }

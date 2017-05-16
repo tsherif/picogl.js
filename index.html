@@ -125,6 +125,15 @@
             var showcaseId = showcase[Math.floor(Math.random() * showcase.length)];
             document.getElementById(showcaseId).click();
 
+            function testAll() {
+                var buttons = document.getElementsByClassName("example-menu-button");
+                var index = 0;
+                setInterval(function() {
+                    buttons[index].click();
+                    index = (index + 1) % buttons.length;
+                }, 2000);
+            }
+
         } else {
             document.getElementById("example-div").innerHTML = "Sorry your browser does not support WebGL 2.";
         }
