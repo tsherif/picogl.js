@@ -59,17 +59,17 @@
         this.gl.bindVertexArray(this.vertexArray);
 
         this.attributeBuffers[attributeIndex] = vertexBuffer;
-        var numRows = vertexBuffer.numRows;
+        var numColumns = vertexBuffer.numColumns;
         
         vertexBuffer.bind();
 
-        for (var i = 0; i < numRows; ++i) {
+        for (var i = 0; i < numColumns; ++i) {
             this.gl.vertexAttribPointer(
                 attributeIndex + i, 
                 vertexBuffer.itemSize, 
                 vertexBuffer.type, 
                 false, 
-                numRows * vertexBuffer.itemSize * PicoGL.TYPE_SIZE[vertexBuffer.type], 
+                numColumns * vertexBuffer.itemSize * PicoGL.TYPE_SIZE[vertexBuffer.type], 
                 i * vertexBuffer.itemSize * PicoGL.TYPE_SIZE[vertexBuffer.type]);
 
             if (vertexBuffer.instanced) {

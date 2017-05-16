@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.2.8 
+PicoGL.js v0.2.9 
 
 The MIT License (MIT)
 
@@ -36,7 +36,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @prop {object} WEBGL_INFO WebGL context information.
     */
     var PicoGL = window.PicoGL = {
-        version: "0.2.8"
+        version: "0.2.9"
     };
 
     (function() {
@@ -559,7 +559,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
         @method
         @param {GLEnum} type The data type stored in the matrix buffer. Valid types
-        are FLOAT_MAT4, FLOAT_MAT3, FLOAT_MAT2.
+        are FLOAT_MAT4, FLOAT_MAT4x2, FLOAT_MAT4x3, FLOAT_MAT3, FLOAT_MAT3x2, 
+        FLOAT_MAT3x4, FLOAT_MAT2, FLOAT_MAT2x3, FLOAT_MAT2x4.
         @param {ArrayBufferView} data Matrix buffer data.
         @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
     */
@@ -574,7 +575,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
         @method
         @param {GLEnum} type The data type stored in the matrix buffer. Valid types
-        are FLOAT_MAT4, FLOAT_MAT3, FLOAT_MAT2.
+        are FLOAT_MAT4, FLOAT_MAT4x2, FLOAT_MAT4x3, FLOAT_MAT3, FLOAT_MAT3x2, 
+        FLOAT_MAT3x4, FLOAT_MAT2, FLOAT_MAT2x3, FLOAT_MAT2x4.
         @param {ArrayBufferView} data Matrix buffer data.
         @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
     */
@@ -1102,17 +1104,17 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         this.gl.bindVertexArray(this.vertexArray);
 
         this.attributeBuffers[attributeIndex] = vertexBuffer;
-        var numRows = vertexBuffer.numRows;
+        var numColumns = vertexBuffer.numColumns;
         
         vertexBuffer.bind();
 
-        for (var i = 0; i < numRows; ++i) {
+        for (var i = 0; i < numColumns; ++i) {
             this.gl.vertexAttribPointer(
                 attributeIndex + i, 
                 vertexBuffer.itemSize, 
                 vertexBuffer.type, 
                 false, 
-                numRows * vertexBuffer.itemSize * PicoGL.TYPE_SIZE[vertexBuffer.type], 
+                numColumns * vertexBuffer.itemSize * PicoGL.TYPE_SIZE[vertexBuffer.type], 
                 i * vertexBuffer.itemSize * PicoGL.TYPE_SIZE[vertexBuffer.type]);
 
             if (vertexBuffer.instanced) {
@@ -1278,19 +1280,46 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @prop {GLEnum} binding GL binding point (ARRAY_BUFFER or ELEMENT_ARRAY_BUFFER).
     */
     PicoGL.VertexBuffer = function VertexBuffer(gl, type, itemSize, data, usage, indexArray, instanced) {
-        var numRows = 1;
-        if (type === PicoGL.FLOAT_MAT4) {
-            type = PicoGL.FLOAT;
-            itemSize = 4;
-            numRows = 4;
-        } else if (type === PicoGL.FLOAT_MAT3) {
-            type = PicoGL.FLOAT;
-            itemSize = 3;
-            numRows = 3;
-        }  else if (type === PicoGL.FLOAT_MAT2) {
-            type = PicoGL.FLOAT;
-            itemSize = 2;
-            numRows = 2;
+        var numColumns;
+        switch(type) {
+            case PicoGL.FLOAT_MAT4:
+            case PicoGL.FLOAT_MAT4x2:
+            case PicoGL.FLOAT_MAT4x3:
+                numColumns = 4;
+                break;
+            case PicoGL.FLOAT_MAT3:
+            case PicoGL.FLOAT_MAT3x2:
+            case PicoGL.FLOAT_MAT3x4:
+                numColumns = 3;
+                break;
+            case PicoGL.FLOAT_MAT2:
+            case PicoGL.FLOAT_MAT2x3:
+            case PicoGL.FLOAT_MAT2x4:
+                numColumns = 2;
+                break;
+            default:
+                numColumns = 1;
+        }
+
+        switch(type) {
+            case PicoGL.FLOAT_MAT4:
+            case PicoGL.FLOAT_MAT3x4:
+            case PicoGL.FLOAT_MAT2x4:
+                itemSize = 4;
+                type = PicoGL.FLOAT;
+                break;
+            case PicoGL.FLOAT_MAT3:
+            case PicoGL.FLOAT_MAT4x3:
+            case PicoGL.FLOAT_MAT2x3:
+                itemSize = 3;
+                type = PicoGL.FLOAT;
+                break;
+            case PicoGL.FLOAT_MAT2:
+            case PicoGL.FLOAT_MAT3x2:
+            case PicoGL.FLOAT_MAT4x2:
+                itemSize = 2;
+                type = PicoGL.FLOAT;
+                break;
         }
 
         var dataLength;
@@ -1305,8 +1334,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         this.buffer = gl.createBuffer();
         this.type = type;
         this.itemSize = itemSize;
-        this.numItems = dataLength / (itemSize * numRows);
-        this.numRows = numRows;
+        this.numItems = dataLength / (itemSize * numColumns);
+        this.numColumns = numColumns;
         this.usage = usage || gl.STATIC_DRAW;
         this.indexArray = !!indexArray;
         this.instanced = !!instanced;

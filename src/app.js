@@ -476,7 +476,8 @@
 
         @method
         @param {GLEnum} type The data type stored in the matrix buffer. Valid types
-        are FLOAT_MAT4, FLOAT_MAT3, FLOAT_MAT2.
+        are FLOAT_MAT4, FLOAT_MAT4x2, FLOAT_MAT4x3, FLOAT_MAT3, FLOAT_MAT3x2, 
+        FLOAT_MAT3x4, FLOAT_MAT2, FLOAT_MAT2x3, FLOAT_MAT2x4.
         @param {ArrayBufferView} data Matrix buffer data.
         @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
     */
@@ -491,7 +492,8 @@
 
         @method
         @param {GLEnum} type The data type stored in the matrix buffer. Valid types
-        are FLOAT_MAT4, FLOAT_MAT3, FLOAT_MAT2.
+        are FLOAT_MAT4, FLOAT_MAT4x2, FLOAT_MAT4x3, FLOAT_MAT3, FLOAT_MAT3x2, 
+        FLOAT_MAT3x4, FLOAT_MAT2, FLOAT_MAT2x3, FLOAT_MAT2x4.
         @param {ArrayBufferView} data Matrix buffer data.
         @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
     */

@@ -39,19 +39,46 @@
         @prop {GLEnum} binding GL binding point (ARRAY_BUFFER or ELEMENT_ARRAY_BUFFER).
     */
     PicoGL.VertexBuffer = function VertexBuffer(gl, type, itemSize, data, usage, indexArray, instanced) {
-        var numRows = 1;
-        if (type === PicoGL.FLOAT_MAT4) {
-            type = PicoGL.FLOAT;
-            itemSize = 4;
-            numRows = 4;
-        } else if (type === PicoGL.FLOAT_MAT3) {
-            type = PicoGL.FLOAT;
-            itemSize = 3;
-            numRows = 3;
-        }  else if (type === PicoGL.FLOAT_MAT2) {
-            type = PicoGL.FLOAT;
-            itemSize = 2;
-            numRows = 2;
+        var numColumns;
+        switch(type) {
+            case PicoGL.FLOAT_MAT4:
+            case PicoGL.FLOAT_MAT4x2:
+            case PicoGL.FLOAT_MAT4x3:
+                numColumns = 4;
+                break;
+            case PicoGL.FLOAT_MAT3:
+            case PicoGL.FLOAT_MAT3x2:
+            case PicoGL.FLOAT_MAT3x4:
+                numColumns = 3;
+                break;
+            case PicoGL.FLOAT_MAT2:
+            case PicoGL.FLOAT_MAT2x3:
+            case PicoGL.FLOAT_MAT2x4:
+                numColumns = 2;
+                break;
+            default:
+                numColumns = 1;
+        }
+
+        switch(type) {
+            case PicoGL.FLOAT_MAT4:
+            case PicoGL.FLOAT_MAT3x4:
+            case PicoGL.FLOAT_MAT2x4:
+                itemSize = 4;
+                type = PicoGL.FLOAT;
+                break;
+            case PicoGL.FLOAT_MAT3:
+            case PicoGL.FLOAT_MAT4x3:
+            case PicoGL.FLOAT_MAT2x3:
+                itemSize = 3;
+                type = PicoGL.FLOAT;
+                break;
+            case PicoGL.FLOAT_MAT2:
+            case PicoGL.FLOAT_MAT3x2:
+            case PicoGL.FLOAT_MAT4x2:
+                itemSize = 2;
+                type = PicoGL.FLOAT;
+                break;
         }
 
         var dataLength;
@@ -66,8 +93,8 @@
         this.buffer = gl.createBuffer();
         this.type = type;
         this.itemSize = itemSize;
-        this.numItems = dataLength / (itemSize * numRows);
-        this.numRows = numRows;
+        this.numItems = dataLength / (itemSize * numColumns);
+        this.numColumns = numColumns;
         this.usage = usage || gl.STATIC_DRAW;
         this.indexArray = !!indexArray;
         this.instanced = !!instanced;
