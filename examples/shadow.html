@@ -252,12 +252,12 @@
                 }
 
                 // DRAW TO SHADOW BUFFER
-                app.framebuffer(shadowBuffer) 
+                app.drawFramebuffer(shadowBuffer) 
                 .drawCalls(shadowDrawCalls)        
                 .clear()
                 .draw()
                 // DRAW TO SCREEN     
-                .defaultFramebuffer()   
+                .defaultDrawFramebuffer()   
                 .drawCalls(mainDrawCalls)
                 .clear()
                 .draw();

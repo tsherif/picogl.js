@@ -201,11 +201,11 @@
 
                 // RENDER TO OFFSCREEN TEXTURE
                 drawCall.texture("tex", texture);
-                app.framebuffer(rttBuffer).clearColor(0.4, 0.4, 0.4, 1.0).clear().draw();
+                app.drawFramebuffer(rttBuffer).clearColor(0.4, 0.4, 0.4, 1.0).clear().draw();
                 
                 // RENDER TO SCREEN
                 drawCall.texture("tex", rttBuffer.colorTextures[0]);
-                app.defaultFramebuffer().clearColor(0.0, 0.0, 0.0, 1.0).clear().draw();
+                app.defaultDrawFramebuffer().clearColor(0.0, 0.0, 0.0, 1.0).clear().draw();
 
                 app.timerEnd(); 
 

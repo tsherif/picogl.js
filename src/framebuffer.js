@@ -93,7 +93,8 @@
         options.generateMipmaps = options.generateMipmaps === undefined ? false : options.generateMipmaps;
 
         this.colorAttachments[index] = this.gl.COLOR_ATTACHMENT0 + index;
-        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.framebuffer);
+        
+        var currentFramebuffer = this.bindAndCaptureState();
 
         this.colorTextures[index] = new PicoGL.Texture(
             this.gl,
@@ -111,7 +112,7 @@
         this.gl.drawBuffers(this.colorAttachments);
         this.numColorTargets++;
 
-        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
+        this.restoreState(currentFramebuffer);
 
         return this;
     };
@@ -148,7 +149,7 @@
         options.wrapT = options.wrapT || this.gl.CLAMP_TO_EDGE;
         options.generateMipmaps = options.generateMipmaps === undefined ? false : options.generateMipmaps;
 
-        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.framebuffer);
+        var currentFramebuffer = this.bindAndCaptureState();
 
         this.depthTexture = new PicoGL.Texture(
             this.gl,
@@ -162,9 +163,9 @@
             options
         );
 
-        this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.gl.DEPTH_ATTACHMENT, this.gl.TEXTURE_2D, this.depthTexture.texture, 0);
+        this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, this.gl.DEPTH_ATTACHMENT, this.gl.TEXTURE_2D, this.depthTexture.texture, 0);
 
-        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
+        this.restoreState(currentFramebuffer);
         
         return this;
     };
@@ -179,9 +180,9 @@
     PicoGL.Framebuffer.prototype.replaceTexture = function(index, texture) {
         this.colorTextures[index] = texture;
 
-        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.framebuffer);
-        this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.colorAttachments[index], this.gl.TEXTURE_2D, this.colorTextures[index].texture, 0);
-        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
+        var currentFramebuffer = this.bindAndCaptureState();
+        this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, this.colorAttachments[index], this.gl.TEXTURE_2D, this.colorTextures[index].texture, 0);
+        this.restoreState(currentFramebuffer);
       
         return this;
     };
@@ -204,25 +205,26 @@
             this.height = this.gl.drawingBufferHeight;
         }
 
-        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.framebuffer);
+        var currentFramebuffer = this.bindAndCaptureState();
 
         for (var i = 0; i < this.numColorTargets; ++i) {
             this.colorTextures[i].image(null, this.width, this.height);
-            this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.colorAttachments[i], this.gl.TEXTURE_2D, this.colorTextures[i].texture, 0);
+            this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, this.colorAttachments[i], this.gl.TEXTURE_2D, this.colorTextures[i].texture, 0);
         }
 
         if (this.depthTexture) {
             this.depthTexture.image(null, this.width, this.height);
-            this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.gl.DEPTH_ATTACHMENT, this.gl.TEXTURE_2D, this.depthTexture.texture, 0);
+            this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, this.gl.DEPTH_ATTACHMENT, this.gl.TEXTURE_2D, this.depthTexture.texture, 0);
         }
 
-        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
+        this.restoreState(currentFramebuffer);
       
         return this;
     };
 
     /**
-        Delete this framebuffer.
+        Delete this framebuffer. NOTE: will delete any currently
+        attached textures.
 
         @method
     */
@@ -238,6 +240,41 @@
         if (this.framebuffer) {
             this.gl.deleteFramebuffer(this.framebuffer);
             this.framebuffer = null;
+        }
+    };
+
+    // Bind as the draw framebuffer
+    PicoGL.Framebuffer.prototype.bindForDraw = function() {
+        if (this.appState.drawFramebuffer !== this) {
+            this.gl.bindFramebuffer(this.gl.DRAW_FRAMEBUFFER, this.framebuffer);
+            this.appState.drawFramebuffer = this;
+        }
+    };
+
+    // Bind as the read framebuffer 
+    PicoGL.Framebuffer.prototype.bindForRead = function() {
+        if (this.appState.readFramebuffer !== this) {
+            this.gl.bindFramebuffer(this.gl.READ_FRAMEBUFFER, this.framebuffer);
+            this.appState.readFramebuffer = this;
+        }
+    };
+
+    // Bind for a framebuffer state update.
+    // Capture current binding so we can restore it later.
+    PicoGL.Framebuffer.prototype.bindAndCaptureState = function() {
+        var currentFramebuffer = this.appState.drawFramebuffer;
+        
+        if (currentFramebuffer !== this) {
+            this.gl.bindFramebuffer(this.gl.DRAW_FRAMEBUFFER, this.framebuffer);
+        }
+
+        return currentFramebuffer;
+    };
+
+    // Bind restore previous binding after state update
+    PicoGL.Framebuffer.prototype.restoreState = function(framebuffer) {        
+        if (framebuffer !== this) {
+            this.gl.bindFramebuffer(this.gl.DRAW_FRAMEBUFFER, framebuffer ? framebuffer.framebuffer : null);
         }
     };
 

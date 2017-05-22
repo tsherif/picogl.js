@@ -65,7 +65,9 @@
             // Enable UBO state tracking when that's fixed.
             uniformBuffers: new Array(PicoGL.WEBGL_INFO.MAX_UNIFORM_BUFFERS),
             uniformBufferCount: 0,
-            freeUniformBufferBases: []
+            freeUniformBufferBases: [],
+            drawFramebuffer: null,
+            readFramebuffer: null
         };
 
         this.clearBits = this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT;
@@ -133,14 +135,14 @@
     };
 
     /**
-        Bind a framebuffer to the WebGL context.
+        Bind a draw framebuffer to the WebGL context.
 
         @method
         @param {Framebuffer} framebuffer The Framebuffer object to bind.
         @see Framebuffer
     */
-    PicoGL.App.prototype.framebuffer = function(framebuffer) {
-        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, framebuffer.framebuffer);
+    PicoGL.App.prototype.drawFramebuffer = function(framebuffer) {
+        framebuffer.bindForDraw();
 
         if (this.viewportWidth !== framebuffer.width || this.viewportHeight !== framebuffer.height) {
             this.viewportWidth = framebuffer.width;
@@ -152,17 +154,48 @@
     };
 
     /**
-        Switch back to the default framebuffer (i.e. draw to the screen).
+        Bind a read framebuffer to the WebGL context.
+
+        @method
+        @param {Framebuffer} framebuffer The Framebuffer object to bind.
+        @see Framebuffer
+    */
+    PicoGL.App.prototype.readFramebuffer = function(framebuffer) {
+        framebuffer.bindForRead();
+
+        return this;
+    };
+
+    /**
+        Switch back to the default framebuffer for drawing (i.e. draw to the screen).
 
         @method
     */
-    PicoGL.App.prototype.defaultFramebuffer = function() {
-        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
-        if (this.viewportWidth !== this.width || this.viewportHeight !== this.height) {
-            this.viewportWidth = this.width;
-            this.viewportHeight = this.height;
-            this.gl.viewport(0, 0, this.viewportWidth, this.viewportHeight);
-        } 
+    PicoGL.App.prototype.defaultDrawFramebuffer = function() {
+        if (this.state.drawFramebuffer !== null) {
+            this.gl.bindFramebuffer(this.gl.DRAW_FRAMEBUFFER, null);
+            this.state.drawFramebuffer = null;
+            
+            if (this.viewportWidth !== this.width || this.viewportHeight !== this.height) {
+                this.viewportWidth = this.width;
+                this.viewportHeight = this.height;
+                this.gl.viewport(0, 0, this.viewportWidth, this.viewportHeight);
+            } 
+        }
+    
+        return this;
+    };
+
+    /**
+        Switch back to the default framebuffer for reading (i.e. read from the screen).
+
+        @method
+    */
+    PicoGL.App.prototype.defaultReadFramebuffer = function() {
+        if (this.state.readFramebuffer !== null) {
+            this.gl.bindFramebuffer(this.gl.READ_FRAMEBUFFER, null);
+            this.state.readFramebuffer = null;
+        }
 
         return this;
     };

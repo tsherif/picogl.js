@@ -364,17 +364,17 @@
                 modelMatrices.data(modelMatrixData);
 
                 // COLOR AND DEPTH
-                app.framebuffer(boxBuffer)
+                app.drawFramebuffer(boxBuffer)
                 .drawCalls([boxesDrawCall])
                 .clear()
                 .draw()
                 // HORIZONTAL BLUR
-                .framebuffer(hblurBuffer)
+                .drawFramebuffer(hblurBuffer)
                 .drawCalls(hBlurDrawCalls)
                 .clear()
                 .draw()
                 // VERTICAL BLUR
-                .defaultFramebuffer()
+                .defaultDrawFramebuffer()
                 .drawCalls(finalDrawCalls)
                 .clear()
                 .draw();

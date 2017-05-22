@@ -286,12 +286,13 @@
 
                 if (picked) {
                     // DRAW TO PICKING BUFFER
-                    app.framebuffer(pickingBuffer)
+                    app.drawFramebuffer(pickingBuffer)
                     .drawCalls(pickingDrawCalls)        
                     .clear()
                     .draw()
-                    .readPixel(mouseX, canvas.height - mouseY, pickedColor)
-                    .defaultFramebuffer();
+                    .defaultDrawFramebuffer()
+                    .readFramebuffer(pickingBuffer)
+                    .readPixel(mouseX, canvas.height - mouseY, pickedColor);
                     
                     if (pickedColor[0] === 255) {
                         boxes[0].frameUniforms.set(2, highlightColor);

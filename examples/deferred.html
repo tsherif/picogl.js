@@ -329,7 +329,7 @@
                 }
 
                 // DRAW TO GBUFFER
-                app.framebuffer(gBuffer)
+                app.drawFramebuffer(gBuffer)
                 .drawCalls(geoDrawCalls)
                 .depthMask()
                 .noBlend()
@@ -337,7 +337,7 @@
                 .draw()
 
                 // DRAW LIGHTS
-                .defaultFramebuffer()
+                .defaultDrawFramebuffer()
                 .drawCalls(lightDrawCalls)
                 .blend()
                 .noDepthMask()

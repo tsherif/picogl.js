@@ -317,13 +317,13 @@
                 modelMatrices.data(modelMatrixData);
 
                 // ACCUMULATION
-                app.framebuffer(accumBuffer)
+                app.drawFramebuffer(accumBuffer)
                 .drawCalls(accumDrawCalls)
                 .blendFuncSeparate(PicoGL.ONE, PicoGL.ONE, PicoGL.ZERO, PicoGL.ONE_MINUS_SRC_ALPHA)
                 .clear()
                 .draw()
                 // BLEND
-                .defaultFramebuffer()
+                .defaultDrawFramebuffer()
                 .drawCalls(blendDrawCalls)
                 .blendFunc(PicoGL.ONE, PicoGL.ONE_MINUS_SRC_ALPHA)
                 .clear()

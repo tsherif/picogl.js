@@ -475,25 +475,25 @@
                 modelMatrices.data(modelMatrixData);
 
                 // DRAW TO COLORGEOBUFFER
-                app.framebuffer(colorGeoBuffer)
+                app.drawFramebuffer(colorGeoBuffer)
                 .drawCalls(colorGeoDrawcalls)
                 .clear()
                 .draw();
 
                 if (ssaoEnabled) {
                     // OCCLUSION PASS
-                    app.framebuffer(ssaoBuffer)
+                    app.drawFramebuffer(ssaoBuffer)
                     .drawCalls(ssaoDrawCalls)
                     .clear()
                     .draw()
                     // OCCLUSION BLEND PASS
-                    .defaultFramebuffer()
+                    .defaultDrawFramebuffer()
                     .drawCalls(aoBlendDrawCalls)
                     .clear()
                     .draw();
                 } else {
                     // DRAW WITHOUT SSAO
-                    app.defaultFramebuffer()
+                    app.defaultDrawFramebuffer()
                     .drawCalls(noSSAODrawCalls)
                     .clear()
                     .draw();

@@ -456,7 +456,7 @@
 
                 colorBuffer.replaceTexture(1, blurReadTexture);
 
-                app.framebuffer(colorBuffer)
+                app.drawFramebuffer(colorBuffer)
                 .drawCalls(colorDrawCalls)
                 .clear()
                 .draw();
@@ -466,11 +466,11 @@
                         hBlurDrawCall.texture("uTexture", blurReadTexture);
                         bloomBuffer.replaceTexture(0, blurWriteTexture);
 
-                        app.framebuffer(blurBuffer)
+                        app.drawFramebuffer(blurBuffer)
                         .drawCalls(hBlurDrawCalls)
                         .clear()
                         .draw()
-                        .framebuffer(bloomBuffer)
+                        .drawFramebuffer(bloomBuffer)
                         .drawCalls(vBlurDrawCalls)
                         .clear()
                         .draw();
@@ -491,7 +491,7 @@
 
                 
 
-                app.defaultFramebuffer()
+                app.defaultDrawFramebuffer()
                 .drawCalls(blendDrawCalls)
                 .clear()
                 .draw();
