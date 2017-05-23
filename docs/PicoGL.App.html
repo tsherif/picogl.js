@@ -2141,7 +2141,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line689">line 689</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line659">line 659</a>
     </li></ul></dd>
     
 
@@ -2367,7 +2367,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line714">line 714</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line684">line 684</a>
     </li></ul></dd>
     
 
@@ -2557,7 +2557,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line700">line 700</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line670">line 670</a>
     </li></ul></dd>
     
 
@@ -2734,7 +2734,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line545">line 545</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line515">line 515</a>
     </li></ul></dd>
     
 
@@ -2765,273 +2765,15 @@
 
     
 
-    <h4 class="name" id="createInstanceBuffer"><span class="type-signature"></span>createInstanceBuffer<span class="signature">(type, itemSize, data, usage<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="createMatrixBuffer"><span class="type-signature"></span>createMatrixBuffer<span class="signature">(type, data, usage<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
 
     
 
 
 
 <div class="description">
-    Create an instance buffer. Data items will be per-instance
-        rather than per-vertex.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Attributes</th>
-        
-
-        
-        <th>Default</th>
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>type</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">GLEnum</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last">The data type stored in the instance buffer.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>itemSize</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last">Number of elements per instance.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>data</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">ArrayBufferView</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last">Buffer data.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>usage</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">GLEnum</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    STATIC_DRAW
-                
-                </td>
-            
-
-            <td class="description last">Buffer usage.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line502">line 502</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="createInstanceMatrixBuffer"><span class="type-signature"></span>createInstanceMatrixBuffer<span class="signature">(type, data, usage<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
-
-    
-
-
-
-<div class="description">
-    Create an instanced matrix buffer. Matrix buffers ensure that columns
-        are correctly split across attribute locations. Data items will be per-instance
-        rather than per-vertex.
+    Create a per-vertex matrix buffer. Matrix buffers ensure that columns
+        are correctly split across attribute locations.
 </div>
 
 
@@ -3216,7 +2958,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line533">line 533</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line503">line 503</a>
     </li></ul></dd>
     
 
@@ -4431,7 +4173,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line588">line 588</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line558">line 558</a>
     </li></ul></dd>
     
 
@@ -5342,7 +5084,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line654">line 654</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line624">line 624</a>
     </li></ul></dd>
     
 
@@ -6214,7 +5956,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line624">line 624</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line594">line 594</a>
     </li></ul></dd>
     
 
@@ -6580,7 +6322,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line559">line 559</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line529">line 529</a>
     </li></ul></dd>
     
 
@@ -6919,230 +6661,6 @@
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
         <a href="app.js.html">app.js</a>, <a href="app.js.html#line488">line 488</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="createVertexMatrixBuffer"><span class="type-signature"></span>createVertexMatrixBuffer<span class="signature">(type, data, usage<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
-
-    
-
-
-
-<div class="description">
-    Create a per-vertex matrix buffer. Matrix buffers ensure that columns
-        are correctly split across attribute locations.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Attributes</th>
-        
-
-        
-        <th>Default</th>
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>type</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">GLEnum</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last">The data type stored in the matrix buffer. Valid types
-        are FLOAT_MAT4, FLOAT_MAT4x2, FLOAT_MAT4x3, FLOAT_MAT3, FLOAT_MAT3x2, 
-        FLOAT_MAT3x4, FLOAT_MAT2, FLOAT_MAT2x3, FLOAT_MAT2x4.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>data</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">ArrayBufferView</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last">Matrix buffer data.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>usage</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">GLEnum</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    STATIC_DRAW
-                
-                </td>
-            
-
-            <td class="description last">Buffer usage.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line517">line 517</a>
     </li></ul></dd>
     
 
@@ -7919,7 +7437,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line723">line 723</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line693">line 693</a>
     </li></ul></dd>
     
 
@@ -9418,7 +8936,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line747">line 747</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line717">line 717</a>
     </li></ul></dd>
     
 
@@ -9503,7 +9021,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line761">line 761</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line731">line 731</a>
     </li></ul></dd>
     
 
@@ -9585,7 +9103,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line736">line 736</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line706">line 706</a>
     </li></ul></dd>
     
 
@@ -9633,7 +9151,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon May 22 2017 09:29:34 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue May 23 2017 07:33:54 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

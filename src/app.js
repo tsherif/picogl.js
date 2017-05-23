@@ -490,20 +490,6 @@
     };
 
     /**
-        Create an instance buffer. Data items will be per-instance
-        rather than per-vertex.
-
-        @method
-        @param {GLEnum} type The data type stored in the instance buffer.
-        @param {number} itemSize Number of elements per instance.
-        @param {ArrayBufferView} data Buffer data.
-        @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
-    */
-    PicoGL.App.prototype.createInstanceBuffer = function(type, itemSize, data, usage) {
-        return new PicoGL.VertexBuffer(this.gl, type, itemSize, data, usage, false, true);
-    };
-
-    /**
         Create a per-vertex matrix buffer. Matrix buffers ensure that columns
         are correctly split across attribute locations.
 
@@ -514,24 +500,8 @@
         @param {ArrayBufferView} data Matrix buffer data.
         @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
     */
-    PicoGL.App.prototype.createVertexMatrixBuffer = function(type, data, usage) {
+    PicoGL.App.prototype.createMatrixBuffer = function(type, data, usage) {
         return new PicoGL.VertexBuffer(this.gl, type, null, data, usage);
-    };
-
-    /**
-        Create an instanced matrix buffer. Matrix buffers ensure that columns
-        are correctly split across attribute locations. Data items will be per-instance
-        rather than per-vertex.
-
-        @method
-        @param {GLEnum} type The data type stored in the matrix buffer. Valid types
-        are FLOAT_MAT4, FLOAT_MAT4x2, FLOAT_MAT4x3, FLOAT_MAT3, FLOAT_MAT3x2, 
-        FLOAT_MAT3x4, FLOAT_MAT2, FLOAT_MAT2x3, FLOAT_MAT2x4.
-        @param {ArrayBufferView} data Matrix buffer data.
-        @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
-    */
-    PicoGL.App.prototype.createInstanceMatrixBuffer = function(type, data, usage) {
-        return new PicoGL.VertexBuffer(this.gl, type, null, data, usage, false, true);
     };
 
     /**

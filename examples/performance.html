@@ -135,13 +135,13 @@
         var normals = app.createVertexBuffer(PicoGL.FLOAT, 3, box.normals);
 
         var modelMatrixData = new Float32Array(NUM_BOXES * 16);
-        var modelMatrices = app.createInstanceMatrixBuffer(PicoGL.FLOAT_MAT4, modelMatrixData);
+        var modelMatrices = app.createMatrixBuffer(PicoGL.FLOAT_MAT4, modelMatrixData);
 
         var boxArray = app.createVertexArray()
-        .attributeBuffer(0, positions)
-        .attributeBuffer(1, uv)
-        .attributeBuffer(2, normals)
-        .attributeBuffer(3, modelMatrices)
+        .vertexAttributeBuffer(0, positions)
+        .vertexAttributeBuffer(1, uv)
+        .vertexAttributeBuffer(2, normals)
+        .instanceAttributeBuffer(3, modelMatrices)
 
         // SET UP UNIFORM BUFFER
         var projMatrix = mat4.create();

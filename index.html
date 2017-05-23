@@ -25,7 +25,7 @@
     ]));
 
     var vertexArray = app.createVertexArray()
-    .attributeBuffer(0, positions);
+    .vertexAttributeBuffer(0, positions);
 
     var uniformBuffer = app.createUniformBuffer([
         PicoGL.FLOAT_VEC4,
@@ -72,6 +72,7 @@
     <a href="#" class="example-menu-button" id="oit">Order-independent Transparency</a>
     <a href="#" class="example-menu-button" id="particles">Particles</a>
     <a href="#" class="example-menu-button" id="bloom">Bloom</a>
+    <a href="#" class="example-menu-button" id="wandering-triangles">Wandering Triangles</a>
     <div id="example-div">
         <div id="example-title"></div>
         <iframe id="examples"></iframe>
@@ -90,6 +91,9 @@
             var title = link.text;
             if (title === "Performance") {
                 title += "<BR>64,000 Phong-shaded, Independently-transformed Cubes";
+            }
+            if (title === "Wandering Triangles") {
+                title += "<BR>(Transform Feedback and Instanced Drawing)";
             }
             var src = "examples/" + event.target.id + ".html";
             var sourceCodeURL = "https://github.com/tsherif/picogl.js/blob/master/" + src;
@@ -110,7 +114,8 @@
                 "shadow",
                 "dof",
                 "particles",
-                "performance"
+                "performance",
+                "wandering-triangles"
             ];
 
             if (gl.getExtension("EXT_color_buffer_float")) {

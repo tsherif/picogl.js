@@ -16,7 +16,7 @@ PicoGL.js is minimal WebGL 2-only rendering library. It's meant for developers w
     ]));
 
     var vertexArray = app.createVertexArray()
-    .attributeBuffer(0, positions);
+    .vertexAttributeBuffer(0, positions);
 
     var uniformBuffer = app.createUniformBuffer([
         PicoGL.FLOAT_VEC4,
@@ -65,12 +65,12 @@ Multiple Render Targets
     .texture("depthTexture", frameBuffer.depthTexture);
 
     // Offscreen pass
-    app.framebuffer(framebuffer)
+    app.drawFramebuffer(framebuffer)
     .drawCalls([offscreenDrawCall])
     .clear()
     .draw()
     // Main draw pass
-    .defaultFramebuffer()
+    .defaultDrawFramebuffer()
     .drawCalls([mainDrawCall])
     .clear()
     .draw();
@@ -118,12 +118,12 @@ Transform Feedback
          0.0,  0.5
     ]));
     var vertexArray1 = app.createVertexArray()
-    .attributeBuffer(0, positions1);
+    .vertexAttributeBuffer(0, positions1);
 
     // Empty destination buffer of 6 floats
     var positions2 = app.createVertexBuffer(PicoGL.FLOAT, 2, 6);  
     var vertexArray2 = app.createVertexArray()
-    .attributeBuffer(0, positions2);
+    .vertexAttributeBuffer(0, positions2);
 
     // Last argument indices of buffers in the vertex arrays that will be used
     // for transform feedback
@@ -158,15 +158,15 @@ Instanced Drawing
 
     // This is an instance buffer meaning each pair of numbers will be passed
     // per-instance, rather than per-vertex
-    var offsets = app.createInstanceBuffer(PicoGL.FLOAT, 2, new Float32Array([
+    var offsets = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
         -0.5, 0.0,
          0.0, 0.2,
          0.5, 0.0
     ]));
 
-    // This vertex array now represents 3 instanced triangles 
+    // This vertex array set up to draw 3 instanced triangles 
     // with the offsets given above
     var vertexArray = app.createVertexArray()
-    .attributeBuffer(0, positions);
-    .attributeBuffer(1, offset);
+    .vertexAttributeBuffer(0, positions); // Pass positions per-vertex
+    .instanceAttributeBuffer(1, offset); // Pass offsets per-instance
 ```

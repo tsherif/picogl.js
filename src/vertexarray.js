@@ -43,51 +43,33 @@
         this.attributeBuffers = [];
         this.numElements = 0;
         this.indexType = null;
-        this.instanced = false;
+        this.instancedBuffers = 0;
         this.indexed = false;
         this.numInstances = 0;
     };
 
     /**
-        Bind an attribute buffer to this vertex array.
+        Bind an per-vertex attribute buffer to this vertex array.
 
         @method
         @param {number} attributeIndex The attribute location to bind to.
         @param {VertexBuffer} vertexBuffer The VertexBuffer to bind.
     */
-    PicoGL.VertexArray.prototype.attributeBuffer = function(attributeIndex, vertexBuffer) {
-        this.gl.bindVertexArray(this.vertexArray);
+    PicoGL.VertexArray.prototype.vertexAttributeBuffer = function(attributeIndex, vertexBuffer) {
+        this.attributeBuffer(attributeIndex, vertexBuffer, false);
 
-        this.attributeBuffers[attributeIndex] = vertexBuffer;
-        var numColumns = vertexBuffer.numColumns;
-        
-        vertexBuffer.bind();
+        return this;
+    };
 
-        for (var i = 0; i < numColumns; ++i) {
-            this.gl.vertexAttribPointer(
-                attributeIndex + i, 
-                vertexBuffer.itemSize, 
-                vertexBuffer.type, 
-                false, 
-                numColumns * vertexBuffer.itemSize * PicoGL.TYPE_SIZE[vertexBuffer.type], 
-                i * vertexBuffer.itemSize * PicoGL.TYPE_SIZE[vertexBuffer.type]);
+    /**
+        Bind an per-instance attribute buffer to this vertex array.
 
-            if (vertexBuffer.instanced) {
-                this.gl.vertexAttribDivisor(attributeIndex + i, 1);
-            }
-
-            this.gl.enableVertexAttribArray(attributeIndex + i);
-        }
-        
-        this.instanced = this.instanced || vertexBuffer.instanced;
-
-        if (vertexBuffer.instanced) {
-            this.numInstances = vertexBuffer.numItems; 
-        } else {
-            this.numElements = this.numElements || vertexBuffer.numItems; 
-        }
-
-        this.gl.bindVertexArray(null);
+        @method
+        @param {number} attributeIndex The attribute location to bind to.
+        @param {VertexBuffer} vertexBuffer The VertexBuffer to bind.
+    */
+    PicoGL.VertexArray.prototype.instanceAttributeBuffer = function(attributeIndex, vertexBuffer) {
+        this.attributeBuffer(attributeIndex, vertexBuffer, true);
 
         return this;
     };
@@ -121,6 +103,9 @@
             this.gl.deleteVertexArray(this.vertexArray);
             this.vertexArray = null;
         }
+        this.gl.bindVertexArray(null);
+
+        return this;
     };
 
     // Bind this vertex array.
@@ -132,6 +117,45 @@
 
     // Unbind this vertex array.
     PicoGL.VertexArray.prototype.unbind = function() {
+        this.gl.bindVertexArray(null);
+
+        return this;
+    };
+
+    // Attach an attribute buffer
+    PicoGL.VertexArray.prototype.attributeBuffer = function(attributeIndex, vertexBuffer, instanced) {
+        this.gl.bindVertexArray(this.vertexArray);
+
+        this.attributeBuffers[attributeIndex] = vertexBuffer;
+        var numColumns = vertexBuffer.numColumns;
+        
+        vertexBuffer.bind();
+
+        for (var i = 0; i < numColumns; ++i) {
+            this.gl.vertexAttribPointer(
+                attributeIndex + i, 
+                vertexBuffer.itemSize, 
+                vertexBuffer.type, 
+                false, 
+                numColumns * vertexBuffer.itemSize * PicoGL.TYPE_SIZE[vertexBuffer.type], 
+                i * vertexBuffer.itemSize * PicoGL.TYPE_SIZE[vertexBuffer.type]);
+
+            if (instanced) {
+                this.gl.vertexAttribDivisor(attributeIndex + i, 1);
+            }
+
+            this.gl.enableVertexAttribArray(attributeIndex + i);
+        }
+        
+        this.instanced = this.instanced || instanced;
+
+        if (instanced) {
+            this.numInstances = vertexBuffer.numItems; 
+        } else {
+            this.numElements = this.numElements || vertexBuffer.numItems; 
+        }
+
+        vertexBuffer.unbind();
         this.gl.bindVertexArray(null);
 
         return this;

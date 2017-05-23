@@ -35,10 +35,9 @@
         @prop {number} numItems Number of vertices represented.
         @prop {GLEnum} usage The usage pattern of the buffer.
         @prop {boolean} indexArray Whether this is an index array.
-        @prop {boolean} instanced Whether this is an instanced array.
         @prop {GLEnum} binding GL binding point (ARRAY_BUFFER or ELEMENT_ARRAY_BUFFER).
     */
-    PicoGL.VertexBuffer = function VertexBuffer(gl, type, itemSize, data, usage, indexArray, instanced) {
+    PicoGL.VertexBuffer = function VertexBuffer(gl, type, itemSize, data, usage, indexArray) {
         var numColumns;
         switch(type) {
             case PicoGL.FLOAT_MAT4:
@@ -97,7 +96,6 @@
         this.numColumns = numColumns;
         this.usage = usage || gl.STATIC_DRAW;
         this.indexArray = !!indexArray;
-        this.instanced = !!instanced;
         this.binding = this.indexArray ? gl.ELEMENT_ARRAY_BUFFER : gl.ARRAY_BUFFER;
 
         gl.bindBuffer(this.binding, this.buffer);
@@ -134,6 +132,12 @@
     // Bind this array buffer.
     PicoGL.VertexBuffer.prototype.bind = function() {
         this.gl.bindBuffer(this.binding, this.buffer);
+
+        return this;
+    };
+
+    PicoGL.VertexBuffer.prototype.unbind = function() {
+        this.gl.bindBuffer(this.binding, null);
 
         return this;
     };

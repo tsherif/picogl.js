@@ -220,15 +220,15 @@
         var indices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, sphere.indices);
 
         // PER-INSTANCE COLORS AND MODEL MATRICES
-        var colors = app.createInstanceBuffer(PicoGL.FLOAT, 4, sphereColorData);
-        var modelMatrices = app.createInstanceMatrixBuffer(PicoGL.FLOAT_MAT4, modelMatrixData);
+        var colors = app.createVertexBuffer(PicoGL.FLOAT, 4, sphereColorData);
+        var modelMatrices = app.createMatrixBuffer(PicoGL.FLOAT_MAT4, modelMatrixData);
 
         var sphereArray = app.createVertexArray()
-        .attributeBuffer(0, positions)
-        .attributeBuffer(1, uv)
-        .attributeBuffer(2, normals)
-        .attributeBuffer(3, colors)
-        .attributeBuffer(4, modelMatrices)
+        .vertexAttributeBuffer(0, positions)
+        .vertexAttributeBuffer(1, uv)
+        .vertexAttributeBuffer(2, normals)
+        .instanceAttributeBuffer(3, colors)
+        .instanceAttributeBuffer(4, modelMatrices)
         .indexBuffer(indices);
 
         // QUAD GEOMETRY
