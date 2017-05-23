@@ -164,7 +164,7 @@ Instanced Drawing
          0.5, 0.0
     ]));
 
-    // This vertex array set up to draw 3 instanced triangles 
+    // This vertex array is set up to draw 3 instanced triangles 
     // with the offsets given above
     var vertexArray = app.createVertexArray()
     .vertexAttributeBuffer(0, positions); // Pass positions per-vertex

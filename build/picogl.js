@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.2.10 
+PicoGL.js v0.2.11 
 
 The MIT License (MIT)
 
@@ -36,7 +36,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @prop {object} WEBGL_INFO WebGL context information.
     */
     var PicoGL = window.PicoGL = {
-        version: "0.2.10"
+        version: "0.2.11"
     };
 
     (function() {
@@ -1089,7 +1089,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         this.gl = gl;
         this.vertexArray = gl.createVertexArray();
         this.attributeBuffers = [];
-        this.numColumns = [];
         this.numElements = 0;
         this.indexType = null;
         this.instancedBuffers = 0;
@@ -1098,7 +1097,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     };
 
     /**
-        Bind an attribute buffer to this vertex array.
+        Bind an per-vertex attribute buffer to this vertex array.
 
         @method
         @param {number} attributeIndex The attribute location to bind to.
@@ -1110,6 +1109,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         return this;
     };
 
+    /**
+        Bind an per-instance attribute buffer to this vertex array.
+
+        @method
+        @param {number} attributeIndex The attribute location to bind to.
+        @param {VertexBuffer} vertexBuffer The VertexBuffer to bind.
+    */
     PicoGL.VertexArray.prototype.instanceAttributeBuffer = function(attributeIndex, vertexBuffer) {
         this.attributeBuffer(attributeIndex, vertexBuffer, true);
 
@@ -1164,12 +1170,12 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         return this;
     };
 
+    // Attach an attribute buffer
     PicoGL.VertexArray.prototype.attributeBuffer = function(attributeIndex, vertexBuffer, instanced) {
         this.gl.bindVertexArray(this.vertexArray);
 
         this.attributeBuffers[attributeIndex] = vertexBuffer;
         var numColumns = vertexBuffer.numColumns;
-        this.numColumns[attributeIndex] = numColumns;
         
         vertexBuffer.bind();
 
