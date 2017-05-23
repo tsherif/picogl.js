@@ -215,25 +215,26 @@
 
         
         // COMBINE VERTEX BUFFERS INTO INPUT AND OUTPUT VERTEX ARRAYS
-        var updateArray1 = app.createVertexArray()
+        var updateArrayA = app.createVertexArray()
         .vertexAttributeBuffer(0, offsetsA)
         .vertexAttributeBuffer(1, rotationsA);
 
-        var updateArray2 = app.createVertexArray()
+        var updateArrayB = app.createVertexArray()
         .vertexAttributeBuffer(0, offsetsB)
         .vertexAttributeBuffer(1, rotationsB);
 
         // CREATE TRANSFORM FEEDBACK FROM INPUT AND OUTPUT VERTEX ARRAYS
-        var transformFeedback = app.createTransformFeedback(updateArray1, updateArray2, [0, 1]);
+        // FIRST PASS WILL USE A BUFFERS AS INPUT, WRITE TO B BUFFERS
+        var transformFeedback = app.createTransformFeedback(updateArrayA, updateArrayB, [0, 1]);
 
         // VERTEX ARRAYS FOR DRAWING
-        var drawArray1 = app.createVertexArray()
+        var drawArrayA = app.createVertexArray()
         .vertexAttributeBuffer(0, positions)
         .instanceAttributeBuffer(1, colors)
         .instanceAttributeBuffer(2, offsetsA)
         .instanceAttributeBuffer(3, rotationsA);
 
-        var drawArray2 = app.createVertexArray()
+        var drawArrayB = app.createVertexArray()
         .vertexAttributeBuffer(0, positions)
         .instanceAttributeBuffer(1, colors)
         .instanceAttributeBuffer(2, offsetsB)
@@ -242,12 +243,16 @@
         // CREATE DRAW CALL FOR SIMULATION
         var updateDrawcall = [app.createDrawCall(updateProgram, transformFeedback, PicoGL.POINTS)];
 
-        // DRAW CALLS FOR DRAWING
-        // ONE FOR EACH BUFFER SET OF TRANSFORM FEEDBACK
-        var drawCallA = [app.createDrawCall(drawProgram, drawArray1)];
-        var drawCallB = [app.createDrawCall(drawProgram, drawArray2)];
+        // DRAW USING CONTENTS OF A BUFFERS
+        var drawCallA = [app.createDrawCall(drawProgram, drawArrayA)];
 
-        var drawA = true;
+        // DRAW USING CONTENTS OF B BUFFERS
+        var drawCallB = [app.createDrawCall(drawProgram, drawArrayB)];
+
+        // START BY DRAWING B BUFFERS THAT ARE
+        // WRITTEN TO ON FIRST TRANSFORM FEEDBACK
+        // PASS 
+        var drawA = false;
         function draw() {
             if (app.timerReady()) {
                 utils.updateTimerElement(app.cpuTime, app.gpuTime);
@@ -255,11 +260,12 @@
 
             app.timerStart();
 
-            // DRAW
+            // TRANSFORM FEEDBACK
             app.drawCalls(updateDrawcall)
             .noRasterize()
             .clear()
             .draw()
+            // DRAW
             .drawCalls(drawA ? drawCallA : drawCallB)
             .rasterize()
             .clear()
