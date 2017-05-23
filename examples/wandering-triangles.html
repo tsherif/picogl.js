@@ -41,7 +41,7 @@
         </div>
     </div>
     <canvas id="gl-canvas"></canvas>
-    <script id="vs-update" type="shader/vs" >
+    <script id="vs-update" type="shader/vs">
         #version 300 es
 
         #define M_2PI 6.28318530718
@@ -95,13 +95,13 @@
         }
     </script>
     <!-- Unsused -->
-    <script id="fs-update" type="shader/fs" ">
+    <script id="fs-update" type="shader/fs">
         #version 300 es
 
         void main() {
         }
     </script>
-    <script id="vs-draw" type="shader/vs" >
+    <script id="vs-draw" type="shader/vs">
         #version 300 es
 
         #define OFFSET_LOCATION 0
@@ -128,7 +128,7 @@
             gl_Position = vec4(rot * aPosition + aOffset, 0.0, 1.0);
         }
     </script>
-    <script id="fs-draw" type="shader/fs" >
+    <script id="fs-draw" type="shader/fs">
         #version 300 es
         precision highp float;
 
