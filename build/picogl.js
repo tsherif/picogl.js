@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.2.11 
+PicoGL.js v0.2.12 
 
 The MIT License (MIT)
 
@@ -36,7 +36,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @prop {object} WEBGL_INFO WebGL context information.
     */
     var PicoGL = window.PicoGL = {
-        version: "0.2.11"
+        version: "0.2.12"
     };
 
     (function() {
@@ -1130,13 +1130,14 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     */
     PicoGL.VertexArray.prototype.indexBuffer = function(vertexBuffer) {
         this.gl.bindVertexArray(this.vertexArray);
-        vertexBuffer.bind();
+        this.gl.bindBuffer(vertexBuffer.binding, vertexBuffer.buffer);
 
         this.numElements = vertexBuffer.numItems * 3;
         this.indexType = vertexBuffer.type;
         this.indexed = true;
 
         this.gl.bindVertexArray(null);
+        this.gl.bindBuffer(vertexBuffer.binding, null);
 
         return this;
     };
@@ -1173,11 +1174,11 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     // Attach an attribute buffer
     PicoGL.VertexArray.prototype.attributeBuffer = function(attributeIndex, vertexBuffer, instanced) {
         this.gl.bindVertexArray(this.vertexArray);
+        this.gl.bindBuffer(vertexBuffer.binding, vertexBuffer.buffer);
 
         this.attributeBuffers[attributeIndex] = vertexBuffer;
         var numColumns = vertexBuffer.numColumns;
         
-        vertexBuffer.bind();
 
         for (var i = 0; i < numColumns; ++i) {
             this.gl.vertexAttribPointer(
@@ -1203,8 +1204,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             this.numElements = this.numElements || vertexBuffer.numItems; 
         }
 
-        vertexBuffer.unbind();
         this.gl.bindVertexArray(null);
+        this.gl.bindBuffer(vertexBuffer.binding, null);
 
         return this;
     };
@@ -1395,19 +1396,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             this.gl.deleteBuffer(this.buffer);
             this.buffer = null;    
         }
-    };
-
-    // Bind this array buffer.
-    PicoGL.VertexBuffer.prototype.bind = function() {
-        this.gl.bindBuffer(this.binding, this.buffer);
-
-        return this;
-    };
-
-    PicoGL.VertexBuffer.prototype.unbind = function() {
-        this.gl.bindBuffer(this.binding, null);
-
-        return this;
     };
 
 })();

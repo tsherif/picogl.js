@@ -82,13 +82,14 @@
     */
     PicoGL.VertexArray.prototype.indexBuffer = function(vertexBuffer) {
         this.gl.bindVertexArray(this.vertexArray);
-        vertexBuffer.bind();
+        this.gl.bindBuffer(vertexBuffer.binding, vertexBuffer.buffer);
 
         this.numElements = vertexBuffer.numItems * 3;
         this.indexType = vertexBuffer.type;
         this.indexed = true;
 
         this.gl.bindVertexArray(null);
+        this.gl.bindBuffer(vertexBuffer.binding, null);
 
         return this;
     };
@@ -125,11 +126,11 @@
     // Attach an attribute buffer
     PicoGL.VertexArray.prototype.attributeBuffer = function(attributeIndex, vertexBuffer, instanced) {
         this.gl.bindVertexArray(this.vertexArray);
+        this.gl.bindBuffer(vertexBuffer.binding, vertexBuffer.buffer);
 
         this.attributeBuffers[attributeIndex] = vertexBuffer;
         var numColumns = vertexBuffer.numColumns;
         
-        vertexBuffer.bind();
 
         for (var i = 0; i < numColumns; ++i) {
             this.gl.vertexAttribPointer(
@@ -155,8 +156,8 @@
             this.numElements = this.numElements || vertexBuffer.numItems; 
         }
 
-        vertexBuffer.unbind();
         this.gl.bindVertexArray(null);
+        this.gl.bindBuffer(vertexBuffer.binding, null);
 
         return this;
     };
