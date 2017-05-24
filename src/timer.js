@@ -42,18 +42,8 @@
     PicoGL.Timer = function(gl) {
         this.gl = gl;
         this.cpuTimer = window.performance || window.Date;
-        this.gpuTimer = this.gl.getExtension("EXT_disjoint_timer_query_webgl2");
-        this.webgl2Timer = true;
-        if (!this.gpuTimer) {
-            this.gpuTimer = this.gl.getExtension("EXT_disjoint_timer_query") || null;
-            this.webgl2Timer = false;
-        }
-
-        this.gpuTimerQuery = null;
-        if (this.gpuTimer) {
-
-            this.gpuTimerQuery = this.webgl2Timer ? this.gl.createQuery() : this.gpuTimer.createQueryEXT();
-        }
+        this.gpuTimer = this.gl.getExtension("EXT_disjoint_timer_query_webgl2") || this.gl.getExtension("EXT_disjoint_timer_query") || null;
+        this.gpuTimerQuery = this.gpuTimer ? this.gl.createQuery() : null;
         this.gpuTimerQueryInProgress = false;
         this.cpuStartTime = 0;
         this.cpuTime = 0;
@@ -64,11 +54,7 @@
     PicoGL.Timer.prototype.start = function() {
         if (this.gpuTimer) {
             if (!this.gpuTimerQueryInProgress) {
-                if (this.webgl2Timer) {
-                    this.gl.beginQuery(this.gpuTimer.TIME_ELAPSED_EXT, this.gpuTimerQuery);
-                } else {
-                    this.gpuTimer.beginQueryEXT(this.gpuTimer.TIME_ELAPSED_EXT, this.gpuTimerQuery);
-                }
+                this.gl.beginQuery(this.gpuTimer.TIME_ELAPSED_EXT, this.gpuTimerQuery);
                 this.cpuStartTime = this.cpuTimer.now();
             }
         } else {
@@ -80,11 +66,7 @@
     PicoGL.Timer.prototype.end = function() {
         if (this.gpuTimer) {
             if (!this.gpuTimerQueryInProgress) {
-                if (this.webgl2Timer) {
-                    this.gl.endQuery(this.gpuTimer.TIME_ELAPSED_EXT);
-                } else {
-                    this.gpuTimer.endQueryEXT(this.gpuTimer.TIME_ELAPSED_EXT);
-                }
+                this.gl.endQuery(this.gpuTimer.TIME_ELAPSED_EXT);
                 this.cpuTime = this.cpuTimer.now() - this.cpuStartTime;
                 this.gpuTimerQueryInProgress = true;
             }
@@ -103,13 +85,7 @@
                 return false;
             }
 
-            var gpuTimerAvailable;
-            if (this.webgl2Timer) {
-                gpuTimerAvailable = this.gl.getQueryParameter(this.gpuTimerQuery, this.gl.QUERY_RESULT_AVAILABLE);
-            } else {
-                gpuTimerAvailable = this.gpuTimer.getQueryObjectEXT(this.gpuTimerQuery, this.gl.QUERY_RESULT_AVAILABLE);
-            }
-
+            var gpuTimerAvailable = this.gl.getQueryParameter(this.gpuTimerQuery, this.gl.QUERY_RESULT_AVAILABLE);
             var gpuTimerDisjoint = this.gl.getParameter(this.gpuTimer.GPU_DISJOINT_EXT);
 
             if (gpuTimerAvailable) {
@@ -117,11 +93,7 @@
             }
 
             if (gpuTimerAvailable && !gpuTimerDisjoint) {
-                if (this.webgl2Timer) {
-                    this.gpuTime = this.gl.getQueryParameter(this.gpuTimerQuery, this.gl.QUERY_RESULT)  / 1000000;
-                } else {
-                    this.gpuTime = this.gpuTimer.getQueryObjectEXT(this.gpuTimerQuery, this.gl.QUERY_RESULT)  / 1000000;
-                }
+                this.gpuTime = this.gl.getQueryParameter(this.gpuTimerQuery, this.gl.QUERY_RESULT)  / 1000000;
                 return true;
             } else {
                 return false;
