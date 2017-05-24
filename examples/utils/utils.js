@@ -31,7 +31,7 @@
     var zeros = [0, 0, 0];
     var ones = [1, 1, 1];
 
-    var NUM_TIMING_SAMPLES = 60;
+    var NUM_TIMING_SAMPLES = 10;
 
     var cpuTimeSum = 0;
     var gpuTimeSum = 0;
