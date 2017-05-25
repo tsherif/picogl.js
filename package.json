@@ -1,6 +1,6 @@
 {
   "name": "picogl.js",
-  "version": "0.2.13",
+  "version": "0.2.14",
   "description": "A minimal WebGL utility library",
   "repository": {
     "type": "git",

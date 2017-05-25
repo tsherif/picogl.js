@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.2.13 
+PicoGL.js v0.2.14 
 
 The MIT License (MIT)
 
@@ -36,7 +36,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @prop {object} WEBGL_INFO WebGL context information.
     */
     var PicoGL = window.PicoGL = {
-        version: "0.2.13"
+        version: "0.2.14"
     };
 
     (function() {
@@ -2776,10 +2776,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @class
         @prop {WebGLRenderingContext} gl The WebGL context.
         @prop {Object} cpuTimer Timer for CPU. Will be window.performance, if available, or window.Date.
-        @prop {EXTDisjointTimerQueryWebGL2} gpuTimer Timer for GPU. Only available if 
-                EXT_disjoint_timer_query_webgl2 is supported.
-        @prop {WebGLQuery} gpuTimerQuery Timer query object for GPU. Only available if 
-                EXT_disjoint_timer_query_webgl2 is supported. 
+        @prop {boolean} gpuTimer Whether the gpu timing is available (EXT_disjoint_timer_query_webgl2 or 
+                EXT_disjoint_timer_query are supported).
+        @prop {WebGLQuery} gpuTimerQuery Timer query object for GPU (if gpu timing is supported). 
         @prop {boolean} gpuTimerQueryInProgress Whether a gpu timer query is currently in progress.    
         @prop {number} cpuStartTime When the last CPU timing started.
         @prop {number} cpuTime Time spent on the CPU during the last timing. Only valid if App.timerReady() returns true.
@@ -2788,7 +2787,21 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     PicoGL.Timer = function(gl) {
         this.gl = gl;
         this.cpuTimer = window.performance || window.Date;
-        this.gpuTimer = this.gl.getExtension("EXT_disjoint_timer_query_webgl2") || this.gl.getExtension("EXT_disjoint_timer_query") || null;
+
+        // Note(Tarek): Firefox for some reason only supports EXT_disjoint_timer_query, so have to try both
+        var gpuTimerExtension = this.gl.getExtension("EXT_disjoint_timer_query_webgl2") || this.gl.getExtension("EXT_disjoint_timer_query");
+        if (gpuTimerExtension) {
+            this.gpuTimer = true;
+            this.gpuTimerQuery = this.gl.createQuery();
+            this.TIME_ELAPSED_EXT = gpuTimerExtension.TIME_ELAPSED_EXT;
+            this.GPU_DISJOINT_EXT = gpuTimerExtension.GPU_DISJOINT_EXT;
+        } else {
+            this.gpuTimer = false;
+            this.gpuTimerQuery = null;
+            this.TIME_ELAPSED_EXT = null;
+            this.GPU_DISJOINT_EXT = null;
+        }
+
         this.gpuTimerQuery = this.gpuTimer ? this.gl.createQuery() : null;
         this.gpuTimerQueryInProgress = false;
         this.cpuStartTime = 0;
@@ -2800,7 +2813,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     PicoGL.Timer.prototype.start = function() {
         if (this.gpuTimer) {
             if (!this.gpuTimerQueryInProgress) {
-                this.gl.beginQuery(this.gpuTimer.TIME_ELAPSED_EXT, this.gpuTimerQuery);
+                this.gl.beginQuery(this.TIME_ELAPSED_EXT, this.gpuTimerQuery);
                 this.cpuStartTime = this.cpuTimer.now();
             }
         } else {
@@ -2812,7 +2825,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     PicoGL.Timer.prototype.end = function() {
         if (this.gpuTimer) {
             if (!this.gpuTimerQueryInProgress) {
-                this.gl.endQuery(this.gpuTimer.TIME_ELAPSED_EXT);
+                this.gl.endQuery(this.TIME_ELAPSED_EXT);
                 this.cpuTime = this.cpuTimer.now() - this.cpuStartTime;
                 this.gpuTimerQueryInProgress = true;
             }
@@ -2832,7 +2845,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             }
 
             var gpuTimerAvailable = this.gl.getQueryParameter(this.gpuTimerQuery, this.gl.QUERY_RESULT_AVAILABLE);
-            var gpuTimerDisjoint = this.gl.getParameter(this.gpuTimer.GPU_DISJOINT_EXT);
+            var gpuTimerDisjoint = this.gl.getParameter(this.GPU_DISJOINT_EXT);
 
             if (gpuTimerAvailable) {
                 this.gpuTimerQueryInProgress = false;
