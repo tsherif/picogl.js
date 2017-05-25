@@ -56,7 +56,6 @@
             this.GPU_DISJOINT_EXT = null;
         }
 
-        this.gpuTimerQuery = this.gpuTimer ? this.gl.createQuery() : null;
         this.gpuTimerQueryInProgress = false;
         this.cpuStartTime = 0;
         this.cpuTime = 0;
