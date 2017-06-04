@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.2.14 
+PicoGL.js v0.3.0 
 
 The MIT License (MIT)
 
@@ -36,7 +36,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @prop {object} WEBGL_INFO WebGL context information.
     */
     var PicoGL = window.PicoGL = {
-        version: "0.2.14"
+        version: "0.3.0"
     };
 
     (function() {
@@ -552,9 +552,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         Create a transform feedback object.
 
         @method
-        @param {VertexArray} vertexArray1 Vertex array containing first set of transform feedback buffers.
-        @param {VertexArray} vertexArray2 Vertex array containing second set of transform feedback buffers.
-        @param {Array} varryingBufferIndices Locations in the vertex arrays of buffers to use for transform feedback.
     */
     PicoGL.App.prototype.createTransformFeedback = function() {
         return new PicoGL.TransformFeedback(this.gl);
@@ -1210,21 +1207,18 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @class
         @prop {WebGLRenderingContext} gl The WebGL context.
         @prop {WebGLTransformFeedback} transformFeedback Transform feedback object.
-        @prop {VertexArray} inputVertexArray Vertex array to use as input to the next pass.
-        @prop {array} inputBuffers Transform feedback buffers bound to the input vertex array.
-        @prop {VertexArray} outputVertexArray Vertex array to store output from the next pass.
-        @prop {array} outputBuffers Transform feedback buffers bound to the output vertex array.
     */
     PicoGL.TransformFeedback = function TransformFeedback(gl) {
         this.gl = gl;
         this.transformFeedback = gl.createTransformFeedback();
     };
 
-    //TODO(Tarek): Update transform feedback documentation
      /**
-        Swap the input and output buffers.
+        Capture transform output to given buffer.
 
         @method
+        @param {number} index Index of transform feedback varying to capture.
+        @param {VertexBuffer} buffer Buffer to record output into.
     */
     PicoGL.TransformFeedback.prototype.captureBuffer = function(index, buffer) {
         this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedback);

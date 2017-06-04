@@ -30,21 +30,18 @@
         @class
         @prop {WebGLRenderingContext} gl The WebGL context.
         @prop {WebGLTransformFeedback} transformFeedback Transform feedback object.
-        @prop {VertexArray} inputVertexArray Vertex array to use as input to the next pass.
-        @prop {array} inputBuffers Transform feedback buffers bound to the input vertex array.
-        @prop {VertexArray} outputVertexArray Vertex array to store output from the next pass.
-        @prop {array} outputBuffers Transform feedback buffers bound to the output vertex array.
     */
     PicoGL.TransformFeedback = function TransformFeedback(gl) {
         this.gl = gl;
         this.transformFeedback = gl.createTransformFeedback();
     };
 
-    //TODO(Tarek): Update transform feedback documentation
      /**
-        Swap the input and output buffers.
+        Capture transform output to given buffer.
 
         @method
+        @param {number} index Index of transform feedback varying to capture.
+        @param {VertexBuffer} buffer Buffer to record output into.
     */
     PicoGL.TransformFeedback.prototype.captureBuffer = function(index, buffer) {
         this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedback);

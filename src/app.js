@@ -469,9 +469,6 @@
         Create a transform feedback object.
 
         @method
-        @param {VertexArray} vertexArray1 Vertex array containing first set of transform feedback buffers.
-        @param {VertexArray} vertexArray2 Vertex array containing second set of transform feedback buffers.
-        @param {Array} varryingBufferIndices Locations in the vertex arrays of buffers to use for transform feedback.
     */
     PicoGL.App.prototype.createTransformFeedback = function() {
         return new PicoGL.TransformFeedback(this.gl);
