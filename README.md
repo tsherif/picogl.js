@@ -123,13 +123,11 @@ Transform Feedback
     // Empty destination buffer of 6 floats
     var positions2 = app.createVertexBuffer(PicoGL.FLOAT, 2, 6);  
 
+    // Capture transform results into positions2 buffer
     var transformFeedback = app.createTransformFeedback()
     .captureBuffer(0, positions2);
 
-    var transformFeedback2 = app.createTransformFeedback()
-    .captureBuffer(0, positions2);
-
-    var drawCall1 = app.createDrawCall(program, vertexArray)
+    var drawCall = app.createDrawCall(program, vertexArray)
     .transformFeedback(transformFeedback);
 
     app.drawCalls([drawCall])

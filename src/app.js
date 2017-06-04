@@ -676,11 +676,11 @@
 
         @method
         @param {Program} program The program to use for this DrawCall.
-        @param {VertexArray|TransformFeedback} geometry Vertex data to use for drawing.
+        @param {VertexArray} vertexArray Vertex data to use for drawing.
         @param {GLEnum} [primitive=TRIANGLES] Type of primitive to draw.
     */
-    PicoGL.App.prototype.createDrawCall = function(program, geometry, primitive) {
-        return new PicoGL.DrawCall(this.gl, program, geometry, primitive);
+    PicoGL.App.prototype.createDrawCall = function(program, vertexArray, primitive) {
+        return new PicoGL.DrawCall(this.gl, program, vertexArray, primitive);
     };
 
     /** 
