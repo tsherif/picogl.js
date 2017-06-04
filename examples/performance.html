@@ -70,7 +70,8 @@
         layout(location=1) in vec2 uv;
         layout(location=2) in vec3 normal;
         layout(location=3) in vec3 translation;
-        layout(location=4) in float rotation;
+        layout(location=4) in vec3 axis;
+        layout(location=5) in float rotation;
         
         uniform SceneUniforms {
             mat4 viewProj;
@@ -84,23 +85,26 @@
         out vec3 vNormal;
 
         void main() {
-            float s = AXIS_COMP * sin(rotation);
+            float s = sin(rotation);
             float c = cos(rotation);
-            float t = AXIS_COMP2 * (1.0 - c);
-            float tPlusC = t + c;
-            float tPlusS = t + s;
-            float tMinusS = t - s;
+            float t = 1.0 - c;
+            float xt = axis.x * t;
+            float yt = axis.y * t;
+            float zt = axis.z * t;
+            float xs = axis.x * s;
+            float ys = axis.y * s;
+            float zs = axis.z * s;
 
             mat3 rotationMat = mat3(
-                tPlusC,
-                tPlusS,
-                tMinusS,
-                tMinusS,
-                tPlusC,
-                tPlusS,
-                tPlusS,
-                tMinusS,
-                tPlusC
+                axis.x * xt + c,
+                axis.y * xt + zs,
+                axis.z * xt - ys,
+                axis.x * yt - zs,
+                axis.y * yt + c,
+                axis.z * yt + xs,
+                axis.x * zt + ys,
+                axis.y * zt - xs,
+                axis.z * zt + c
             );
 
 
@@ -178,9 +182,11 @@
 
         var rotationData = new Float32Array(NUM_BOXES);
         var translationData = new Float32Array(NUM_BOXES * 3);
+        var axisData = new Float32Array(NUM_BOXES * 3);
 
         var boxI = 0;
         var offset = -Math.floor(BOX_GRID_DIM / 2);
+        var axis = vec3.create();
         for (var i = 0; i < BOX_GRID_DIM; ++i) {
             for (var j = 0; j < BOX_GRID_DIM; ++j) {
                 for (var k = 0; k < BOX_GRID_DIM; ++k) {
@@ -190,6 +196,14 @@
                     translationData[transI]     = i + offset;
                     translationData[transI + 1] = j + offset;
                     translationData[transI + 2] = k + offset;
+
+                    axis[0] = Math.random() * 2 - 1;
+                    axis[1] = Math.random() * 2 - 1;
+                    axis[2] = Math.random() * 2 - 1;
+
+                    vec3.normalize(axis, axis);
+
+                    axisData.set(axis, transI);
 
                     ++boxI;
                 }
@@ -206,20 +220,23 @@
         var rotationsA = app.createVertexBuffer(PicoGL.FLOAT, 1, rotationData);
         var rotationsB = app.createVertexBuffer(PicoGL.FLOAT, 1, rotationData.length);
         var translations = app.createVertexBuffer(PicoGL.FLOAT, 3, translationData);
+        var axes = app.createVertexBuffer(PicoGL.FLOAT, 3, axisData);
 
         var boxArrayA = app.createVertexArray()
         .vertexAttributeBuffer(0, positions)
         .vertexAttributeBuffer(1, uv)
         .vertexAttributeBuffer(2, normals)
         .instanceAttributeBuffer(3, translations)
-        .instanceAttributeBuffer(4, rotationsA);
+        .instanceAttributeBuffer(4, axes)
+        .instanceAttributeBuffer(5, rotationsA);
 
         var boxArrayB = app.createVertexArray()
         .vertexAttributeBuffer(0, positions)
         .vertexAttributeBuffer(1, uv)
         .vertexAttributeBuffer(2, normals)
         .instanceAttributeBuffer(3, translations)
-        .instanceAttributeBuffer(4, rotationsB);
+        .instanceAttributeBuffer(4, axes)
+        .instanceAttributeBuffer(5, rotationsB);
 
         var updateVertexArrayA = app.createVertexArray()
         .vertexAttributeBuffer(0, rotationsA);
@@ -238,13 +255,13 @@
         mat4.perspective(projMatrix, Math.PI / 2, canvas.width / canvas.height, NEAR, FAR);
 
         var viewMatrix = mat4.create();
-        var eyePosition = vec3.fromValues(20, 28, 33);
+        var eyePosition = vec3.fromValues(30, 28, 30);
         mat4.lookAt(viewMatrix, eyePosition, vec3.fromValues(0, -5, 0), vec3.fromValues(0, 1, 0));
 
         var viewProjMatrix = mat4.create();
         mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
 
-        var lightPosition = vec3.fromValues(100, 100, 60);
+        var lightPosition = vec3.fromValues(50, 100, 100);
 
         var sceneUniformBuffer = app.createUniformBuffer([
             PicoGL.FLOAT_MAT4,
@@ -262,7 +279,7 @@
             mat4.perspective(projMatrix, Math.PI / 2, app.width / app.height, NEAR, FAR);
             mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
             
-            sceneUniformBuffer.set(0, viewProjMatrix).update();
+            sceneUniformBuffer.set(0, viewProjMatrix).update(0);
         }
 
         var image = new Image();
@@ -295,12 +312,30 @@
             ];
 
             var updateA = true;
+            var eyeRadius = 40;
+            var eyeRotation = 0;
             function draw() {
                 if (app.timerReady()) {
                     utils.updateTimerElement(app.cpuTime, app.gpuTime);
                 }
 
-                app.timerStart()
+                app.timerStart();
+
+                eyeRotation += 0.002;
+
+                eyePosition[0] = Math.sin(eyeRotation) * eyeRadius;
+                eyePosition[2] = Math.cos(eyeRotation) * eyeRadius;
+                lightPosition.set(eyePosition);
+                lightPosition[0] += 5;
+
+                mat4.lookAt(viewMatrix, eyePosition, vec3.fromValues(0, -5, 0), vec3.fromValues(0, 1, 0));
+                mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
+                
+                sceneUniformBuffer
+                .set(0, viewProjMatrix)
+                .set(1, eyePosition)
+                .set(2, lightPosition)
+                .update();
 
                 app.drawCalls(updateA ? updateDrawCallA : updateDrawCallB)
                 .noRasterize()
