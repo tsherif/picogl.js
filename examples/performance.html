@@ -41,7 +41,7 @@
     <script type="x-shader/vs" id="vertex-update">
         #version 300 es
 
-        #define ROTATION_SPEED 0.05
+        #define ROTATION_SPEED 0.04
 
         layout(location=0) in float rotation;
 
@@ -84,20 +84,23 @@
         out vec3 vNormal;
 
         void main() {
-            float s = sin(rotation);
+            float s = AXIS_COMP * sin(rotation);
             float c = cos(rotation);
-            float t = 1.0 - c;
+            float t = AXIS_COMP2 * (1.0 - c);
+            float tPlusC = t + c;
+            float tPlusS = t + s;
+            float tMinusS = t - s;
 
             mat3 rotationMat = mat3(
-                AXIS_COMP2 * t + c,
-                AXIS_COMP2 * t + AXIS_COMP * s,
-                AXIS_COMP2 * t - AXIS_COMP * s,
-                AXIS_COMP2 * t - AXIS_COMP * s,
-                AXIS_COMP2 * t + c,
-                AXIS_COMP2 * t + AXIS_COMP * s,
-                AXIS_COMP2 * t + AXIS_COMP * s,
-                AXIS_COMP2 * t - AXIS_COMP * s,
-                AXIS_COMP2 * t + c
+                tPlusC,
+                tPlusS,
+                tMinusS,
+                tMinusS,
+                tPlusC,
+                tPlusS,
+                tPlusS,
+                tMinusS,
+                tPlusC
             );
 
 
@@ -194,7 +197,7 @@
         }
 
         // INSTANCED CUBE GEOMETRY
-        var box = utils.createBox({dimensions: [0.6, 0.6, 0.6]})
+        var box = utils.createBox({dimensions: [0.5, 0.5, 0.5]})
         var positions = app.createVertexBuffer(PicoGL.FLOAT, 3, box.positions);
         var uv = app.createVertexBuffer(PicoGL.FLOAT, 2, box.uvs);
         var normals = app.createVertexBuffer(PicoGL.FLOAT, 3, box.normals);
@@ -235,13 +238,13 @@
         mat4.perspective(projMatrix, Math.PI / 2, canvas.width / canvas.height, NEAR, FAR);
 
         var viewMatrix = mat4.create();
-        var eyePosition = vec3.fromValues(30, 28, 33);
+        var eyePosition = vec3.fromValues(20, 28, 33);
         mat4.lookAt(viewMatrix, eyePosition, vec3.fromValues(0, -5, 0), vec3.fromValues(0, 1, 0));
 
         var viewProjMatrix = mat4.create();
         mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
 
-        var lightPosition = vec3.fromValues(100, 100, 50);
+        var lightPosition = vec3.fromValues(100, 100, 60);
 
         var sceneUniformBuffer = app.createUniformBuffer([
             PicoGL.FLOAT_MAT4,
