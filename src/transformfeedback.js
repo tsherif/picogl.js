@@ -35,38 +35,22 @@
         @prop {VertexArray} outputVertexArray Vertex array to store output from the next pass.
         @prop {array} outputBuffers Transform feedback buffers bound to the output vertex array.
     */
-    PicoGL.TransformFeedback = function TransformFeedback(gl, vertexArray1, vertexArray2, varyingBufferIndices) {
+    PicoGL.TransformFeedback = function TransformFeedback(gl) {
         this.gl = gl;
-        this.transformFeedbackA = gl.createTransformFeedback();
-        this.transformFeedbackB = gl.createTransformFeedback();
-        this.currentTransformFeedback = this.transformFeedbackB;
-        this.vertexArrayA = vertexArray1;
-        this.vertexArrayB = vertexArray2;
-        this.currentVertexArray = this.vertexArrayA;
-
-        var i, len;
-        this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedbackA);
-        for (i = 0, len = varyingBufferIndices.length; i < len; ++i) {
-            this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, i, vertexArray1.attributeBuffers[varyingBufferIndices[i]].buffer);
-        }
-        this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedbackB);
-        for (i = 0, len = varyingBufferIndices.length; i < len; ++i) {
-            this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, i, vertexArray2.attributeBuffers[varyingBufferIndices[i]].buffer);
-        }
-        this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, null);
-        for (i = 0, len = varyingBufferIndices.length; i < len; ++i) {
-            this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, i, null);
-        }
+        this.transformFeedback = gl.createTransformFeedback();
     };
 
+    //TODO(Tarek): Update transform feedback documentation
      /**
         Swap the input and output buffers.
 
         @method
     */
-    PicoGL.TransformFeedback.prototype.swapBuffers = function() {
-        this.currentTransformFeedback = this.currentTransformFeedback === this.transformFeedbackA ? this.transformFeedbackB : this.transformFeedbackA;
-        this.currentVertexArray = this.currentVertexArray === this.vertexArrayA ? this.vertexArrayB : this.vertexArrayA;
+    PicoGL.TransformFeedback.prototype.captureBuffer = function(index, buffer) {
+        this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedback);
+        this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, index, buffer.buffer);
+        this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, null);
+        this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, index, null);
 
         return this;
     };
@@ -77,24 +61,15 @@
         @method
     */
     PicoGL.TransformFeedback.prototype.delete = function() {
-        if (this.currentTransformFeedback) {
-            this.gl.deleteTransformFeedback(this.currentTransformFeedback);
-            this.currentTransformFeedback = null;
+        if (this.transformFeedback) {
+            this.gl.deleteTransformFeedback(this.transformFeedback);
+            this.transformFeedback = null;
         }
     }; 
 
     // Bind this transform feedback.
-    PicoGL.TransformFeedback.prototype.bind = function(primitive) {
-        this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.currentTransformFeedback);
-        this.gl.beginTransformFeedback(primitive);
-
-        return this;
-    };
-
-    // Unbind this transform feedback.
-    PicoGL.TransformFeedback.prototype.unbind = function() {
-        this.gl.endTransformFeedback();    
-        this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, null);
+    PicoGL.TransformFeedback.prototype.bind = function() {
+        this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedback);
 
         return this;
     };

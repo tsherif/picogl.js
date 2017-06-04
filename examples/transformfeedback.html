@@ -115,22 +115,34 @@
         ]));
 
         // COMBINE VERTEX BUFFERS INTO INPUT AND OUTPUT VERTEX ARRAYS
-        var triangleArray1 = app.createVertexArray()
+        var triangleArrayA = app.createVertexArray()
         .attributeBuffer(0, positions1)
         .attributeBuffer(1, colors);
 
-        var triangleArray2 = app.createVertexArray()
+        var triangleArrayB = app.createVertexArray()
         .attributeBuffer(0, positions2)
         .attributeBuffer(1, colors);
 
-        // CREATE TRANSFORM FEEDBACK FROM INPUT AND OUTPUT VERTEX ARRAYS
-        var transformFeedback = app.createTransformFeedback(triangleArray1, triangleArray2, [0]);
+        // CREATE TRANSFORM FEEDBACK OBJECTS AND
+        // INDICATE BUFFERS TO CAPTURE
+        var transformFeedbackA = app.createTransformFeedback()
+        .captureBuffer(0, positions1);
 
-        // CREATE DRAW CALL FROM PROGRAM AND TRANSFORMFEEDBACK
-        var drawCall = app.createDrawCall(program, transformFeedback);
+        var transformFeedbackB = app.createTransformFeedback()
+        .captureBuffer(0, positions2);
 
-        app.drawCalls([drawCall]);
+        // CREATE DRAW CALLS FROM PROGRAM AND TRANSFORMFEEDBACK.
+        // EACH DRAW CALL REPRESENTS ONE DIRECTION OF DRAW/CAPTURE
+        var drawCallA = app.createDrawCall(program, triangleArrayA)
+        .transformFeedback(transformFeedbackB);
+        
+        var drawCallB = app.createDrawCall(program, triangleArrayB)
+        .transformFeedback(transformFeedbackA);
 
+        drawCallA = [drawCallA];
+        drawCallB = [drawCallB];
+
+        var currentDrawCall = drawCallA;
         function draw() {
             if (app.timerReady()) {
                 utils.updateTimerElement(app.cpuTime, app.gpuTime);
@@ -139,13 +151,15 @@
             app.timerStart();
 
             // DRAW
-            app.clear()
+            app.drawCalls(currentDrawCall)
+            .clear()
             .draw();
-
-            // SWAP INPUT AND OUTPUT BUFFERS
-            transformFeedback.swapBuffers();
+            
+            // SWAP INPUT AND OUTPUT
+            currentDrawCall = currentDrawCall === drawCallA ? drawCallB : drawCallA;
 
             app.timerEnd();
+
 
             requestAnimationFrame(draw);
         }

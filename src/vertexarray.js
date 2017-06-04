@@ -30,7 +30,6 @@
         @class
         @prop {WebGLRenderingContext} gl The WebGL context.
         @prop {WebGLVertexArrayObject} vertexArray Vertex array object.
-        @prop {array} attributeBuffers The attribute VertexBuffers associated with this vertex array.
         @prop {number} numElements Number of elements in the vertex array.
         @prop {boolean} indexed Whether this vertex array is set up for indexed drawing.
         @prop {GLenum} indexType Data type of the indices.
@@ -40,7 +39,6 @@
     PicoGL.VertexArray = function VertexArray(gl) {
         this.gl = gl;
         this.vertexArray = gl.createVertexArray();
-        this.attributeBuffers = [];
         this.numElements = 0;
         this.indexType = null;
         this.instancedBuffers = 0;
@@ -116,21 +114,12 @@
         return this;
     };
 
-    // Unbind this vertex array.
-    PicoGL.VertexArray.prototype.unbind = function() {
-        this.gl.bindVertexArray(null);
-
-        return this;
-    };
-
     // Attach an attribute buffer
     PicoGL.VertexArray.prototype.attributeBuffer = function(attributeIndex, vertexBuffer, instanced) {
         this.gl.bindVertexArray(this.vertexArray);
         this.gl.bindBuffer(vertexBuffer.binding, vertexBuffer.buffer);
 
-        this.attributeBuffers[attributeIndex] = vertexBuffer;
         var numColumns = vertexBuffer.numColumns;
-        
 
         for (var i = 0; i < numColumns; ++i) {
             this.gl.vertexAttribPointer(

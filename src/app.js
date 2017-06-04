@@ -55,6 +55,7 @@
         this.state = {
             program: null,
             vertexArray: null,
+            transformFeedback: null,
             activeTexture: -1,
             textures: new Array(PicoGL.WEBGL_INFO.MAX_TEXTURE_UNITS),
             textureCount: 0,
@@ -67,7 +68,7 @@
             uniformBufferCount: 0,
             freeUniformBufferBases: [],
             drawFramebuffer: null,
-            readFramebuffer: null
+            readFramebuffer: null,
         };
 
         this.clearBits = this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT;
@@ -472,8 +473,8 @@
         @param {VertexArray} vertexArray2 Vertex array containing second set of transform feedback buffers.
         @param {Array} varryingBufferIndices Locations in the vertex arrays of buffers to use for transform feedback.
     */
-    PicoGL.App.prototype.createTransformFeedback = function(vertexArray1, vertexArray2, varyingBufferIndices) {
-        return new PicoGL.TransformFeedback(this.gl, vertexArray1, vertexArray2, varyingBufferIndices);
+    PicoGL.App.prototype.createTransformFeedback = function() {
+        return new PicoGL.TransformFeedback(this.gl);
     };
 
     /**

@@ -45,17 +45,11 @@
         @prop {number} textureCount The number of active textures for this draw call. 
         @prop {GLEnum} primitive The primitive type being drawn. 
     */
-    PicoGL.DrawCall = function DrawCall(gl, program, geometry, primitive) {
+    PicoGL.DrawCall = function DrawCall(gl, program, vertexArray, primitive) {
         this.gl = gl;
         this.currentProgram = program;
-        
-        if (program.transformFeedback) {
-            this.currentVertexArray = null;
-            this.currentTransformFeedback = geometry;
-        } else {
-            this.currentVertexArray = geometry;
-            this.currentTransformFeedback = null;    
-        }
+        this.currentVertexArray = vertexArray;
+        this.currentTransformFeedback = null;    
         
         this.uniformIndices = {};
         this.uniformNames = new Array(PicoGL.WEBGL_INFO.MAX_UNIFORMS);
@@ -69,6 +63,12 @@
         this.textures = new Array(PicoGL.WEBGL_INFO.MAX_TEXTURE_UNITS);
         this.textureCount = 0;
         this.primitive = primitive !== undefined ? primitive : PicoGL.TRIANGLES;
+    };
+
+    PicoGL.DrawCall.prototype.transformFeedback = function(transformFeedback) {
+        this.currentTransformFeedback = transformFeedback;    
+
+        return this;
     };
 
     /**
@@ -156,16 +156,17 @@
             textures[tIndex].bind();
         }
 
-        if (this.currentTransformFeedback) {
-            this.currentTransformFeedback.bind(this.primitive);
-            this.currentVertexArray = this.currentTransformFeedback.currentVertexArray;
-        }
-
         if (state.vertexArray !== this.currentVertexArray) {
             this.currentVertexArray.bind();
             state.vertexArray = this.currentVertexArray;
         }
 
+        if (this.currentTransformFeedback) {
+            if (state.transformFeedback !== this.currentTransformFeedback) {
+                this.currentTransformFeedback.bind();
+            }
+            this.gl.beginTransformFeedback(this.primitive);
+        }
 
         if (this.currentVertexArray.instanced) {
             if (this.currentVertexArray.indexed) {
@@ -182,7 +183,7 @@
         }
 
         if (this.currentTransformFeedback) {
-            this.currentTransformFeedback.unbind();
+            this.gl.endTransformFeedback();
         }
 
     };

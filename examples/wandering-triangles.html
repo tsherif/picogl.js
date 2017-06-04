@@ -224,8 +224,13 @@
         .vertexAttributeBuffer(1, rotationsB);
 
         // CREATE TRANSFORM FEEDBACK FROM INPUT AND OUTPUT VERTEX ARRAYS
-        // FIRST PASS WILL USE A BUFFERS AS INPUT, WRITE TO B BUFFERS
-        var transformFeedback = app.createTransformFeedback(updateArrayA, updateArrayB, [0, 1]);
+        var transformFeedbackA = app.createTransformFeedback()
+        .captureBuffer(0, offsetsA)
+        .captureBuffer(1, rotationsA);
+
+        var transformFeedbackB = app.createTransformFeedback()
+        .captureBuffer(0, offsetsB)
+        .captureBuffer(1, rotationsB);
 
         // VERTEX ARRAYS FOR DRAWING
         var drawArrayA = app.createVertexArray()
@@ -240,8 +245,18 @@
         .instanceAttributeBuffer(2, offsetsB)
         .instanceAttributeBuffer(3, rotationsB);
 
-        // CREATE DRAW CALL FOR SIMULATION
-        var updateDrawcall = [app.createDrawCall(updateProgram, transformFeedback, PicoGL.POINTS)];
+        // CREATE DRAW CALLS FOR SIMULATION
+        // A BUFFERS AS INPUT, UPDATE B BUFFERS
+        var updateDrawcallA = [
+            app.createDrawCall(updateProgram, updateArrayA, PicoGL.POINTS)
+            .transformFeedback(transformFeedbackB)
+        ];
+
+        // B BUFFERS AS INPUT, UPDATE A BUFFERS
+        var updateDrawcallB = [
+            app.createDrawCall(updateProgram, updateArrayB, PicoGL.POINTS)
+            .transformFeedback(transformFeedbackA)
+        ];
 
         // DRAW USING CONTENTS OF A BUFFERS
         var drawCallA = [app.createDrawCall(drawProgram, drawArrayA)];
@@ -261,7 +276,7 @@
             app.timerStart();
 
             // TRANSFORM FEEDBACK
-            app.drawCalls(updateDrawcall)
+            app.drawCalls(drawA ? updateDrawcallB : updateDrawcallA)
             .noRasterize()
             .draw()
             // DRAW
@@ -272,7 +287,6 @@
 
             // SWAP INPUT AND OUTPUT BUFFERS
             drawA = !drawA;
-            transformFeedback.swapBuffers();
 
             app.timerEnd();
 
