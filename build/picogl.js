@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.3.1 
+PicoGL.js v0.3.2 
 
 The MIT License (MIT)
 
@@ -36,7 +36,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @prop {object} WEBGL_INFO WebGL context information.
     */
     var PicoGL = window.PicoGL = {
-        version: "0.3.1"
+        version: "0.3.2"
     };
 
     (function() {
@@ -2729,6 +2729,11 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
         if (this.currentTransformFeedback) {
             this.gl.endTransformFeedback();
+            // TODO(Tarek): Need to rebind buffers due to bug in ANGLE.
+            // Remove this when that's fixed.
+            for (var i = 0, len = this.currentTransformFeedback.angleBugBuffers.length; i < len; ++i) {
+                this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, i, null);
+            }
         }
 
     };
