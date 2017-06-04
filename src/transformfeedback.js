@@ -34,6 +34,9 @@
     PicoGL.TransformFeedback = function TransformFeedback(gl) {
         this.gl = gl;
         this.transformFeedback = gl.createTransformFeedback();
+        // TODO(Tarek): Need to rebind buffers due to bug in ANGLE.
+        // Remove this when that's fixed.
+        this.angleBugBuffers = [];
     };
 
      /**
@@ -48,6 +51,8 @@
         this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, index, buffer.buffer);
         this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, null);
         this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, index, null);
+
+        this.angleBugBuffers[index] = buffer;
 
         return this;
     };
@@ -67,6 +72,10 @@
     // Bind this transform feedback.
     PicoGL.TransformFeedback.prototype.bind = function() {
         this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedback);
+
+        for (var i = 0, len = this.angleBugBuffers.length; i < len; ++i) {
+            this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, i, this.angleBugBuffers[i].buffer);
+        }
 
         return this;
     };

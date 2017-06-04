@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.3.0 
+PicoGL.js v0.3.1 
 
 The MIT License (MIT)
 
@@ -36,7 +36,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @prop {object} WEBGL_INFO WebGL context information.
     */
     var PicoGL = window.PicoGL = {
-        version: "0.3.0"
+        version: "0.3.1"
     };
 
     (function() {
@@ -759,11 +759,11 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
         @method
         @param {Program} program The program to use for this DrawCall.
-        @param {VertexArray|TransformFeedback} geometry Vertex data to use for drawing.
+        @param {VertexArray} vertexArray Vertex data to use for drawing.
         @param {GLEnum} [primitive=TRIANGLES] Type of primitive to draw.
     */
-    PicoGL.App.prototype.createDrawCall = function(program, geometry, primitive) {
-        return new PicoGL.DrawCall(this.gl, program, geometry, primitive);
+    PicoGL.App.prototype.createDrawCall = function(program, vertexArray, primitive) {
+        return new PicoGL.DrawCall(this.gl, program, vertexArray, primitive);
     };
 
     /** 
@@ -1211,6 +1211,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     PicoGL.TransformFeedback = function TransformFeedback(gl) {
         this.gl = gl;
         this.transformFeedback = gl.createTransformFeedback();
+        // TODO(Tarek): Need to rebind buffers due to bug in ANGLE.
+        // Remove this when that's fixed.
+        this.angleBugBuffers = [];
     };
 
      /**
@@ -1225,6 +1228,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, index, buffer.buffer);
         this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, null);
         this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, index, null);
+
+        this.angleBugBuffers[index] = buffer;
 
         return this;
     };
@@ -1244,6 +1249,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     // Bind this transform feedback.
     PicoGL.TransformFeedback.prototype.bind = function() {
         this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedback);
+
+        for (var i = 0, len = this.angleBugBuffers.length; i < len; ++i) {
+            this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, i, this.angleBugBuffers[i].buffer);
+        }
 
         return this;
     };
