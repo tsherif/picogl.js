@@ -30,38 +30,24 @@
         @class
         @prop {WebGLRenderingContext} gl The WebGL context.
         @prop {WebGLTransformFeedback} transformFeedback Transform feedback object.
-        @prop {VertexArray} inputVertexArray Vertex array to use as input to the next pass.
-        @prop {array} inputBuffers Transform feedback buffers bound to the input vertex array.
-        @prop {VertexArray} outputVertexArray Vertex array to store output from the next pass.
-        @prop {array} outputBuffers Transform feedback buffers bound to the output vertex array.
     */
-    PicoGL.TransformFeedback = function TransformFeedback(gl, vertexArray1, vertexArray2, varyingBufferIndices) {
+    PicoGL.TransformFeedback = function TransformFeedback(gl) {
         this.gl = gl;
         this.transformFeedback = gl.createTransformFeedback();
-        this.inputVertexArray = vertexArray1;
-        this.outputVertexArray = vertexArray2;
-        this.inputBuffers = new Array(varyingBufferIndices.length);
-        this.outputBuffers = new Array(varyingBufferIndices.length);
-
-        for (var i = 0, len = varyingBufferIndices.length; i < len; ++i) {
-            this.inputBuffers[i] = vertexArray1.attributeBuffers[varyingBufferIndices[i]];
-            this.outputBuffers[i] = vertexArray2.attributeBuffers[varyingBufferIndices[i]];
-        }
     };
 
      /**
-        Swap the input and output buffers.
+        Capture transform output to given buffer.
 
         @method
+        @param {number} index Index of transform feedback varying to capture.
+        @param {VertexBuffer} buffer Buffer to record output into.
     */
-    PicoGL.TransformFeedback.prototype.swapBuffers = function() {
-        var va = this.inputVertexArray;
-        this.inputVertexArray = this.outputVertexArray;
-        this.outputVertexArray = va;
-
-        var vb = this.inputBuffers;
-        this.inputBuffers = this.outputBuffers;
-        this.outputBuffers = vb;
+    PicoGL.TransformFeedback.prototype.captureBuffer = function(index, buffer) {
+        this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedback);
+        this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, index, buffer.buffer);
+        this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, null);
+        this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, index, null);
 
         return this;
     };
@@ -79,22 +65,8 @@
     }; 
 
     // Bind this transform feedback.
-    PicoGL.TransformFeedback.prototype.bind = function(primitive) {
+    PicoGL.TransformFeedback.prototype.bind = function() {
         this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedback);
-        
-        for (var i = 0, len = this.outputBuffers.length; i < len; ++i) {
-            this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, i, this.outputBuffers[i].buffer);
-        }
-
-        this.gl.beginTransformFeedback(primitive);
-
-        return this;
-    };
-
-    // Unbind this transform feedback.
-    PicoGL.TransformFeedback.prototype.unbind = function() {
-        this.gl.endTransformFeedback();    
-        this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, null);
 
         return this;
     };

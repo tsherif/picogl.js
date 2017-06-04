@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.2.14 
+PicoGL.js v0.3.0 
 
 The MIT License (MIT)
 
@@ -36,7 +36,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @prop {object} WEBGL_INFO WebGL context information.
     */
     var PicoGL = window.PicoGL = {
-        version: "0.2.14"
+        version: "0.3.0"
     };
 
     (function() {
@@ -138,6 +138,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         this.state = {
             program: null,
             vertexArray: null,
+            transformFeedback: null,
             activeTexture: -1,
             textures: new Array(PicoGL.WEBGL_INFO.MAX_TEXTURE_UNITS),
             textureCount: 0,
@@ -150,7 +151,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             uniformBufferCount: 0,
             freeUniformBufferBases: [],
             drawFramebuffer: null,
-            readFramebuffer: null
+            readFramebuffer: null,
         };
 
         this.clearBits = this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT;
@@ -551,12 +552,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         Create a transform feedback object.
 
         @method
-        @param {VertexArray} vertexArray1 Vertex array containing first set of transform feedback buffers.
-        @param {VertexArray} vertexArray2 Vertex array containing second set of transform feedback buffers.
-        @param {Array} varryingBufferIndices Locations in the vertex arrays of buffers to use for transform feedback.
     */
-    PicoGL.App.prototype.createTransformFeedback = function(vertexArray1, vertexArray2, varyingBufferIndices) {
-        return new PicoGL.TransformFeedback(this.gl, vertexArray1, vertexArray2, varyingBufferIndices);
+    PicoGL.App.prototype.createTransformFeedback = function() {
+        return new PicoGL.TransformFeedback(this.gl);
     };
 
     /**
@@ -1078,7 +1076,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @class
         @prop {WebGLRenderingContext} gl The WebGL context.
         @prop {WebGLVertexArrayObject} vertexArray Vertex array object.
-        @prop {array} attributeBuffers The attribute VertexBuffers associated with this vertex array.
         @prop {number} numElements Number of elements in the vertex array.
         @prop {boolean} indexed Whether this vertex array is set up for indexed drawing.
         @prop {GLenum} indexType Data type of the indices.
@@ -1088,7 +1085,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     PicoGL.VertexArray = function VertexArray(gl) {
         this.gl = gl;
         this.vertexArray = gl.createVertexArray();
-        this.attributeBuffers = [];
         this.numElements = 0;
         this.indexType = null;
         this.instancedBuffers = 0;
@@ -1164,21 +1160,12 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         return this;
     };
 
-    // Unbind this vertex array.
-    PicoGL.VertexArray.prototype.unbind = function() {
-        this.gl.bindVertexArray(null);
-
-        return this;
-    };
-
     // Attach an attribute buffer
     PicoGL.VertexArray.prototype.attributeBuffer = function(attributeIndex, vertexBuffer, instanced) {
         this.gl.bindVertexArray(this.vertexArray);
         this.gl.bindBuffer(vertexBuffer.binding, vertexBuffer.buffer);
 
-        this.attributeBuffers[attributeIndex] = vertexBuffer;
         var numColumns = vertexBuffer.numColumns;
-        
 
         for (var i = 0; i < numColumns; ++i) {
             this.gl.vertexAttribPointer(
@@ -1220,38 +1207,24 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @class
         @prop {WebGLRenderingContext} gl The WebGL context.
         @prop {WebGLTransformFeedback} transformFeedback Transform feedback object.
-        @prop {VertexArray} inputVertexArray Vertex array to use as input to the next pass.
-        @prop {array} inputBuffers Transform feedback buffers bound to the input vertex array.
-        @prop {VertexArray} outputVertexArray Vertex array to store output from the next pass.
-        @prop {array} outputBuffers Transform feedback buffers bound to the output vertex array.
     */
-    PicoGL.TransformFeedback = function TransformFeedback(gl, vertexArray1, vertexArray2, varyingBufferIndices) {
+    PicoGL.TransformFeedback = function TransformFeedback(gl) {
         this.gl = gl;
         this.transformFeedback = gl.createTransformFeedback();
-        this.inputVertexArray = vertexArray1;
-        this.outputVertexArray = vertexArray2;
-        this.inputBuffers = new Array(varyingBufferIndices.length);
-        this.outputBuffers = new Array(varyingBufferIndices.length);
-
-        for (var i = 0, len = varyingBufferIndices.length; i < len; ++i) {
-            this.inputBuffers[i] = vertexArray1.attributeBuffers[varyingBufferIndices[i]];
-            this.outputBuffers[i] = vertexArray2.attributeBuffers[varyingBufferIndices[i]];
-        }
     };
 
      /**
-        Swap the input and output buffers.
+        Capture transform output to given buffer.
 
         @method
+        @param {number} index Index of transform feedback varying to capture.
+        @param {VertexBuffer} buffer Buffer to record output into.
     */
-    PicoGL.TransformFeedback.prototype.swapBuffers = function() {
-        var va = this.inputVertexArray;
-        this.inputVertexArray = this.outputVertexArray;
-        this.outputVertexArray = va;
-
-        var vb = this.inputBuffers;
-        this.inputBuffers = this.outputBuffers;
-        this.outputBuffers = vb;
+    PicoGL.TransformFeedback.prototype.captureBuffer = function(index, buffer) {
+        this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedback);
+        this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, index, buffer.buffer);
+        this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, null);
+        this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, index, null);
 
         return this;
     };
@@ -1269,22 +1242,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     }; 
 
     // Bind this transform feedback.
-    PicoGL.TransformFeedback.prototype.bind = function(primitive) {
+    PicoGL.TransformFeedback.prototype.bind = function() {
         this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedback);
-        
-        for (var i = 0, len = this.outputBuffers.length; i < len; ++i) {
-            this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, i, this.outputBuffers[i].buffer);
-        }
-
-        this.gl.beginTransformFeedback(primitive);
-
-        return this;
-    };
-
-    // Unbind this transform feedback.
-    PicoGL.TransformFeedback.prototype.unbind = function() {
-        this.gl.endTransformFeedback();    
-        this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, null);
 
         return this;
     };
@@ -2622,17 +2581,11 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @prop {number} textureCount The number of active textures for this draw call. 
         @prop {GLEnum} primitive The primitive type being drawn. 
     */
-    PicoGL.DrawCall = function DrawCall(gl, program, geometry, primitive) {
+    PicoGL.DrawCall = function DrawCall(gl, program, vertexArray, primitive) {
         this.gl = gl;
         this.currentProgram = program;
-        
-        if (program.transformFeedback) {
-            this.currentVertexArray = null;
-            this.currentTransformFeedback = geometry;
-        } else {
-            this.currentVertexArray = geometry;
-            this.currentTransformFeedback = null;    
-        }
+        this.currentVertexArray = vertexArray;
+        this.currentTransformFeedback = null;    
         
         this.uniformIndices = {};
         this.uniformNames = new Array(PicoGL.WEBGL_INFO.MAX_UNIFORMS);
@@ -2646,6 +2599,12 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         this.textures = new Array(PicoGL.WEBGL_INFO.MAX_TEXTURE_UNITS);
         this.textureCount = 0;
         this.primitive = primitive !== undefined ? primitive : PicoGL.TRIANGLES;
+    };
+
+    PicoGL.DrawCall.prototype.transformFeedback = function(transformFeedback) {
+        this.currentTransformFeedback = transformFeedback;    
+
+        return this;
     };
 
     /**
@@ -2733,16 +2692,17 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             textures[tIndex].bind();
         }
 
-        if (this.currentTransformFeedback) {
-            this.currentTransformFeedback.bind(this.primitive);
-            this.currentVertexArray = this.currentTransformFeedback.inputVertexArray;
-        }
-
         if (state.vertexArray !== this.currentVertexArray) {
             this.currentVertexArray.bind();
             state.vertexArray = this.currentVertexArray;
         }
 
+        if (this.currentTransformFeedback) {
+            if (state.transformFeedback !== this.currentTransformFeedback) {
+                this.currentTransformFeedback.bind();
+            }
+            this.gl.beginTransformFeedback(this.primitive);
+        }
 
         if (this.currentVertexArray.instanced) {
             if (this.currentVertexArray.indexed) {
@@ -2759,7 +2719,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         }
 
         if (this.currentTransformFeedback) {
-            this.currentTransformFeedback.unbind();
+            this.gl.endTransformFeedback();
         }
 
     };

@@ -158,8 +158,14 @@
         .attributeBuffer(1, velocities2)
         .attributeBuffer(2, colors);
 
-        // TRANSFORM FEEDBACK OBJECT
-        var transformFeedback = app.createTransformFeedback(vertexArray1, vertexArray2, [0, 1]);
+        // TRANSFORM FEEDBACK OBJECTS
+        var transformFeedback1 = app.createTransformFeedback()
+        .captureBuffer(0, positions1)
+        .captureBuffer(1, velocities1);
+
+        var transformFeedback2 = app.createTransformFeedback()
+        .captureBuffer(0, positions2)
+        .captureBuffer(1, velocities2);
 
         // UNIFORM BUFFER FOR SIMULATION PARAMETERS
         var massUniforms = app.createUniformBuffer([
@@ -194,12 +200,20 @@
             mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
         };
 
-        var drawCalls = [
-            app.createDrawCall(program, transformFeedback, PicoGL.POINTS)
+        var drawCalls1 = [
+            app.createDrawCall(program, vertexArray1, PicoGL.POINTS)
+            .transformFeedback(transformFeedback2)
+            .uniformBlock("Mass", massUniforms)
+        ];
+
+        var drawCalls2 = [
+            app.createDrawCall(program, vertexArray2, PicoGL.POINTS)
+            .transformFeedback(transformFeedback1)
             .uniformBlock("Mass", massUniforms)
         ];
 
 
+        var draw1 = true;
         function draw() {      
             if (app.timerReady()) {
                 utils.updateTimerElement(app.cpuTime, app.gpuTime);
@@ -208,12 +222,11 @@
             app.timerStart();
 
             // DRAW
-            app.drawCalls(drawCalls)
+            app.drawCalls(draw1 ? drawCalls1 : drawCalls2)
             .clear()
             .draw();
 
-            // SWAP INPUT AND OUTPUT BUFFERS
-            transformFeedback.swapBuffers();
+            draw1 = !draw1;
 
             app.timerEnd();
 

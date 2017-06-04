@@ -117,26 +117,23 @@ Transform Feedback
          0.5, -0.5,
          0.0,  0.5
     ]));
-    var vertexArray1 = app.createVertexArray()
+    var vertexArray = app.createVertexArray()
     .vertexAttributeBuffer(0, positions1);
 
     // Empty destination buffer of 6 floats
     var positions2 = app.createVertexBuffer(PicoGL.FLOAT, 2, 6);  
-    var vertexArray2 = app.createVertexArray()
-    .vertexAttributeBuffer(0, positions2);
 
-    // Last argument indices of buffers in the vertex arrays that will be used
-    // for transform feedback
-    var transformFeedback = app.createTransformFeedback(vertexArray1, vertexArray2, [0]);
+    // Capture transform results into positions2 buffer
+    var transformFeedback = app.createTransformFeedback()
+    .captureBuffer(0, positions2);
 
-    var drawCall = app.createDrawCall(program, transformFeedback);
+    var drawCall = app.createDrawCall(program, vertexArray)
+    .transformFeedback(transformFeedback);
 
     app.drawCalls([drawCall])
     .clear()
     .draw();
 
-    // Swap input and output buffers
-    transformFeedback.swapBuffers();
 ``` 
 
 Instanced Drawing

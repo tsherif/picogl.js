@@ -132,98 +132,6 @@
         </tr>
 
     
-
-        <tr>
-            
-                <td class="name"><code>inputVertexArray</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">VertexArray</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Vertex array to use as input to the next pass.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>inputBuffers</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">array</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Transform feedback buffers bound to the input vertex array.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>outputVertexArray</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">VertexArray</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Vertex array to store output from the next pass.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>outputBuffers</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">array</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Transform feedback buffers bound to the output vertex array.</td>
-        </tr>
-
-    
     </tbody>
 </table>
 
@@ -259,7 +167,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="transformfeedback.js.html">transformfeedback.js</a>, <a href="transformfeedback.js.html#line38">line 38</a>
+        <a href="transformfeedback.js.html">transformfeedback.js</a>, <a href="transformfeedback.js.html#line34">line 34</a>
     </li></ul></dd>
     
 
@@ -302,6 +210,160 @@
 
     
         <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    <h4 class="name" id="captureBuffer"><span class="type-signature"></span>captureBuffer<span class="signature">(index, buffer)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Capture transform output to given buffer.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>index</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Index of transform feedback varying to capture.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>buffer</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">VertexBuffer</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Buffer to record output into.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="transformfeedback.js.html">transformfeedback.js</a>, <a href="transformfeedback.js.html#line46">line 46</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         
             
@@ -359,89 +421,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="transformfeedback.js.html">transformfeedback.js</a>, <a href="transformfeedback.js.html#line74">line 74</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="swapBuffers"><span class="type-signature"></span>swapBuffers<span class="signature">()</span><span class="type-signature"></span></h4>
-
-    
-
-
-
-<div class="description">
-    Swap the input and output buffers.
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="transformfeedback.js.html">transformfeedback.js</a>, <a href="transformfeedback.js.html#line57">line 57</a>
+        <a href="transformfeedback.js.html">transformfeedback.js</a>, <a href="transformfeedback.js.html#line60">line 60</a>
     </li></ul></dd>
     
 
@@ -489,7 +469,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue May 23 2017 07:33:54 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sun Jun 04 2017 11:30:28 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>
