@@ -23,7 +23,7 @@
 -->
 <html>
 <head>
-    <title>PicoGL.js: Performance</title>
+    <title>PicoGL.js: 125,000 Cubes</title>
     <script src="utils/gl-matrix.js"></script>
     <script src="../build/picogl.js"></script>
     <script src="utils/utils.js"></script>
@@ -31,8 +31,7 @@
 </head>
 <body>
     <div id="example-title">
-        PicoGL.js Example: Performance<BR> 
-        125,000 Phong-shaded, Independently-transformed Cubes
+        PicoGL.js Benchmark: 125,000 Cubes
         <div>
             <a href="https://github.com/tsherif/picogl.js/blob/master/examples/performance.html">Source code</a>
         </div>
@@ -60,9 +59,6 @@
     </script>
     <script type="x-shader/vs" id="vertex-draw">
         #version 300 es
-
-        #define AXIS_COMP  0.5773502691896258
-        #define AXIS_COMP2 0.3333333333333334
 
         layout(std140, column_major) uniform;
 
