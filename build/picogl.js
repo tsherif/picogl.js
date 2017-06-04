@@ -1227,15 +1227,25 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     */
     PicoGL.TransformFeedback = function TransformFeedback(gl, vertexArray1, vertexArray2, varyingBufferIndices) {
         this.gl = gl;
-        this.transformFeedback = gl.createTransformFeedback();
-        this.inputVertexArray = vertexArray1;
-        this.outputVertexArray = vertexArray2;
-        this.inputBuffers = new Array(varyingBufferIndices.length);
-        this.outputBuffers = new Array(varyingBufferIndices.length);
+        this.transformFeedbackA = gl.createTransformFeedback();
+        this.transformFeedbackB = gl.createTransformFeedback();
+        this.currentTransformFeedback = this.transformFeedbackB;
+        this.vertexArrayA = vertexArray1;
+        this.vertexArrayB = vertexArray2;
+        this.currentVertexArray = this.vertexArrayA;
 
-        for (var i = 0, len = varyingBufferIndices.length; i < len; ++i) {
-            this.inputBuffers[i] = vertexArray1.attributeBuffers[varyingBufferIndices[i]];
-            this.outputBuffers[i] = vertexArray2.attributeBuffers[varyingBufferIndices[i]];
+        var i, len;
+        this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedbackA);
+        for (i = 0, len = varyingBufferIndices.length; i < len; ++i) {
+            this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, i, vertexArray1.attributeBuffers[varyingBufferIndices[i]].buffer);
+        }
+        this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedbackB);
+        for (i = 0, len = varyingBufferIndices.length; i < len; ++i) {
+            this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, i, vertexArray2.attributeBuffers[varyingBufferIndices[i]].buffer);
+        }
+        this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, null);
+        for (i = 0, len = varyingBufferIndices.length; i < len; ++i) {
+            this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, i, null);
         }
     };
 
@@ -1245,13 +1255,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @method
     */
     PicoGL.TransformFeedback.prototype.swapBuffers = function() {
-        var va = this.inputVertexArray;
-        this.inputVertexArray = this.outputVertexArray;
-        this.outputVertexArray = va;
-
-        var vb = this.inputBuffers;
-        this.inputBuffers = this.outputBuffers;
-        this.outputBuffers = vb;
+        this.currentTransformFeedback = this.currentTransformFeedback === this.transformFeedbackA ? this.transformFeedbackB : this.transformFeedbackA;
+        this.currentVertexArray = this.currentVertexArray === this.vertexArrayA ? this.vertexArrayB : this.vertexArrayA;
 
         return this;
     };
@@ -1262,20 +1267,15 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @method
     */
     PicoGL.TransformFeedback.prototype.delete = function() {
-        if (this.transformFeedback) {
-            this.gl.deleteTransformFeedback(this.transformFeedback);
-            this.transformFeedback = null;
+        if (this.currentTransformFeedback) {
+            this.gl.deleteTransformFeedback(this.currentTransformFeedback);
+            this.currentTransformFeedback = null;
         }
     }; 
 
     // Bind this transform feedback.
     PicoGL.TransformFeedback.prototype.bind = function(primitive) {
-        this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedback);
-        
-        for (var i = 0, len = this.outputBuffers.length; i < len; ++i) {
-            this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, i, this.outputBuffers[i].buffer);
-        }
-
+        this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.currentTransformFeedback);
         this.gl.beginTransformFeedback(primitive);
 
         return this;
@@ -2735,7 +2735,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
         if (this.currentTransformFeedback) {
             this.currentTransformFeedback.bind(this.primitive);
-            this.currentVertexArray = this.currentTransformFeedback.inputVertexArray;
+            this.currentVertexArray = this.currentTransformFeedback.currentVertexArray;
         }
 
         if (state.vertexArray !== this.currentVertexArray) {

@@ -158,7 +158,7 @@
 
         if (this.currentTransformFeedback) {
             this.currentTransformFeedback.bind(this.primitive);
-            this.currentVertexArray = this.currentTransformFeedback.inputVertexArray;
+            this.currentVertexArray = this.currentTransformFeedback.currentVertexArray;
         }
 
         if (state.vertexArray !== this.currentVertexArray) {
