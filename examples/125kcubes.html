@@ -23,7 +23,7 @@
 -->
 <html>
 <head>
-    <title>PicoGL.js: 64,000 Cubes</title>
+    <title>PicoGL.js: 125,000 Cubes</title>
     <script src="utils/gl-matrix.js"></script>
     <script src="../build/picogl.js"></script>
     <script src="utils/utils.js"></script>
@@ -31,21 +31,43 @@
 </head>
 <body>
     <div id="example-title">
-        PicoGL.js Example: 64,000 Cubes
+        PicoGL.js Example: 125,000 Cubes
         <div>
-            <a href="https://github.com/tsherif/picogl.js/blob/master/examples/64kcubes.html">Source code</a>
+            <a href="https://github.com/tsherif/picogl.js/blob/master/examples/125kcubes.html">Source code</a>
         </div>
     </div>
     <canvas id="gl-canvas"></canvas>
+    <script type="x-shader/vs" id="vertex-update">
+        #version 300 es
+
+        #define ROTATION_SPEED 0.04
+
+        layout(location=0) in float rotation;
+
+        out float vRotation;
+
+        void main() {
+            vRotation = rotation + ROTATION_SPEED;
+        }
+    </script>
+    <script type="x-shader/fs" id="fragment-update">
+        #version 300 es
+
+        void main() {
+
+        }
+    </script>
     <script type="x-shader/vs" id="vertex-draw">
         #version 300 es
 
         layout(std140, column_major) uniform;
 
-        layout(location=0) in vec4 position;
+        layout(location=0) in vec3 position;
         layout(location=1) in vec2 uv;
-        layout(location=2) in vec4 normal;
-        layout(location=3) in mat4 model;
+        layout(location=2) in vec3 normal;
+        layout(location=3) in vec3 translation;
+        layout(location=4) in vec3 axis;
+        layout(location=5) in float rotation;
         
         uniform SceneUniforms {
             mat4 viewProj;
@@ -59,11 +81,33 @@
         out vec3 vNormal;
 
         void main() {
-            vec4 worldPosition = model * position;
-            vPosition = worldPosition.xyz;
+            float s = sin(rotation);
+            float c = cos(rotation);
+            float t = 1.0 - c;
+            float xt = axis.x * t;
+            float yt = axis.y * t;
+            float zt = axis.z * t;
+            float xs = axis.x * s;
+            float ys = axis.y * s;
+            float zs = axis.z * s;
+
+            mat3 rotationMat = mat3(
+                axis.x * xt + c,
+                axis.y * xt + zs,
+                axis.z * xt - ys,
+                axis.x * yt - zs,
+                axis.y * yt + c,
+                axis.z * yt + xs,
+                axis.x * zt + ys,
+                axis.y * zt - xs,
+                axis.z * zt + c
+            );
+
+
+            vPosition = rotationMat * position + translation;
             vUV = uv;
-            vNormal = (model * vec4(normal.xyz, 0.0)).xyz;
-            gl_Position = viewProj * worldPosition;
+            vNormal = rotationMat * normal;
+            gl_Position = viewProj * vec4(vPosition, 1.0);
         }
     </script>
     <script type="x-shader/vf" id="fragment-draw">
@@ -101,7 +145,7 @@
     <script type="text/javascript">
         utils.addTimerElement();
         
-        var BOX_GRID_DIM = 40;
+        var BOX_GRID_DIM = 50;
         var NUM_BOXES = BOX_GRID_DIM * BOX_GRID_DIM * BOX_GRID_DIM;
         var NEAR = 0.1;
         var FAR = 100.0;
@@ -122,10 +166,45 @@
         .depthFunc(PicoGL.LEQUAL)
         .cullBackfaces();
 
+        // SET UP UPDATE PROGRAM
+        var updateVsSource =  document.getElementById("vertex-update").text.trim();
+        var updateFsSource =  document.getElementById("fragment-update").text.trim();
+        var updateProgram = app.createProgram(updateVsSource, updateFsSource, ["vRotation"]);
+
         // SET UP PROGRAM
         var vsSource =  document.getElementById("vertex-draw").text.trim();
         var fsSource =  document.getElementById("fragment-draw").text.trim();
         var program = app.createProgram(vsSource, fsSource);
+
+        var rotationData = new Float32Array(NUM_BOXES);
+        var translationData = new Float32Array(NUM_BOXES * 3);
+        var axisData = new Float32Array(NUM_BOXES * 3);
+
+        var boxI = 0;
+        var offset = -Math.floor(BOX_GRID_DIM / 2);
+        var axis = vec3.create();
+        for (var i = 0; i < BOX_GRID_DIM; ++i) {
+            for (var j = 0; j < BOX_GRID_DIM; ++j) {
+                for (var k = 0; k < BOX_GRID_DIM; ++k) {
+                    var transI = boxI * 3;
+
+                    rotationData[boxI] = boxI / Math.PI;
+                    translationData[transI]     = i + offset;
+                    translationData[transI + 1] = j + offset;
+                    translationData[transI + 2] = k + offset;
+
+                    axis[0] = Math.random() * 2 - 1;
+                    axis[1] = Math.random() * 2 - 1;
+                    axis[2] = Math.random() * 2 - 1;
+
+                    vec3.normalize(axis, axis);
+
+                    axisData.set(axis, transI);
+
+                    ++boxI;
+                }
+            }
+        }
 
         // INSTANCED CUBE GEOMETRY
         var box = utils.createBox({dimensions: [0.5, 0.5, 0.5]})
@@ -133,21 +212,46 @@
         var uv = app.createVertexBuffer(PicoGL.FLOAT, 2, box.uvs);
         var normals = app.createVertexBuffer(PicoGL.FLOAT, 3, box.normals);
 
-        var modelMatrixData = new Float32Array(NUM_BOXES * 16);
-        var modelMatrices = app.createMatrixBuffer(PicoGL.FLOAT_MAT4, modelMatrixData);
+        
+        var rotationsA = app.createVertexBuffer(PicoGL.FLOAT, 1, rotationData);
+        var rotationsB = app.createVertexBuffer(PicoGL.FLOAT, 1, rotationData.length);
+        var translations = app.createVertexBuffer(PicoGL.FLOAT, 3, translationData);
+        var axes = app.createVertexBuffer(PicoGL.FLOAT, 3, axisData);
 
-        var boxArray = app.createVertexArray()
+        var boxArrayA = app.createVertexArray()
         .vertexAttributeBuffer(0, positions)
         .vertexAttributeBuffer(1, uv)
         .vertexAttributeBuffer(2, normals)
-        .instanceAttributeBuffer(3, modelMatrices)
+        .instanceAttributeBuffer(3, translations)
+        .instanceAttributeBuffer(4, axes)
+        .instanceAttributeBuffer(5, rotationsA);
+
+        var boxArrayB = app.createVertexArray()
+        .vertexAttributeBuffer(0, positions)
+        .vertexAttributeBuffer(1, uv)
+        .vertexAttributeBuffer(2, normals)
+        .instanceAttributeBuffer(3, translations)
+        .instanceAttributeBuffer(4, axes)
+        .instanceAttributeBuffer(5, rotationsB);
+
+        var updateVertexArrayA = app.createVertexArray()
+        .vertexAttributeBuffer(0, rotationsA);
+
+        var transformFeedbackA = app.createTransformFeedback()
+        .captureBuffer(0, rotationsA);
+
+        var updateVertexArrayB = app.createVertexArray()
+        .vertexAttributeBuffer(0, rotationsB);
+
+        var transformFeedbackB = app.createTransformFeedback()
+        .captureBuffer(0, rotationsB);
 
         // SET UP UNIFORM BUFFER
         var projMatrix = mat4.create();
         mat4.perspective(projMatrix, Math.PI / 2, canvas.width / canvas.height, NEAR, FAR);
 
         var viewMatrix = mat4.create();
-        var eyePosition = vec3.fromValues(0, 22, 0);
+        var eyePosition = vec3.fromValues(0, 28, 0);
         var viewProjMatrix = mat4.create();
         var lightPosition = vec3.create();
 
@@ -163,7 +267,7 @@
             mat4.perspective(projMatrix, Math.PI / 2, app.width / app.height, NEAR, FAR);
             mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
             
-            sceneUniformBuffer.set(0, viewProjMatrix).update();
+            sceneUniformBuffer.set(0, viewProjMatrix).update(0);
         }
 
         var image = new Image();
@@ -172,38 +276,31 @@
             // CREATE TEXTURE
             var texture = app.createTexture2D(image);
 
+            var updateDrawCallA = [
+                app.createDrawCall(updateProgram, updateVertexArrayA, PicoGL.POINTS)
+                .transformFeedback(transformFeedbackB)
+            ];
+
+            var updateDrawCallB = [
+                app.createDrawCall(updateProgram, updateVertexArrayB, PicoGL.POINTS)
+                .transformFeedback(transformFeedbackA)
+            ];
+
             // SINGLE DRAW CALL FOR ALL BOXES
-            var boxes = new Array(NUM_BOXES);
-            var boxesDrawCall = app.createDrawCall(program, boxArray)
-            .uniformBlock("SceneUniforms", sceneUniformBuffer)
-            .texture("uTexture", texture);
+            var boxesDrawCallA = [
+                app.createDrawCall(program, boxArrayA)
+                .uniformBlock("SceneUniforms", sceneUniformBuffer)
+                .texture("uTexture", texture)
+            ];
 
-            var rotationAxis = vec3.fromValues(1, 1, 1);
-            vec3.normalize(rotationAxis, rotationAxis);
+            var boxesDrawCallB = [
+                app.createDrawCall(program, boxArrayB)
+                .uniformBlock("SceneUniforms", sceneUniformBuffer)
+                .texture("uTexture", texture)
+            ];
 
-            var boxI = 0;
-            var offset = -Math.floor(BOX_GRID_DIM / 2);
-            for (var i = 0; i < BOX_GRID_DIM; ++i) {
-                for (var j = 0; j < BOX_GRID_DIM; ++j) {
-                    for (var k = 0; k < BOX_GRID_DIM; ++k) {
-                        boxes[boxI] = {
-                            rotate: boxI / Math.PI,
-                            rotationMatrix: mat4.create(),
-                            translationMatrix: mat4.create(),
-                            // MODEL MATRICES ARE VIEWS INTO MODEL MATRIX BUFFER DATA TO AVOID
-                            // COPYING
-                            modelMatrix: new Float32Array(modelMatrixData.buffer, boxI * 64, 16),
-                        }
-                        mat4.fromRotation(boxes[boxI].rotationMatrix, boxes[boxI].rotate, rotationAxis);
-                        mat4.fromTranslation(boxes[boxI].translationMatrix, [i + offset, j + offset, k + offset]);
-                        ++boxI;
-                    }
-                }
-            }
-
-            app.drawCalls([boxesDrawCall]);
-
-            var eyeRadius = 30;
+            var updateA = true;
+            var eyeRadius = 40;
             var eyeRotation = 0;
             function draw() {
                 if (app.timerReady()) {
@@ -228,16 +325,17 @@
                 .set(2, lightPosition)
                 .update();
 
-                for (var i = 0, len = boxes.length; i < len; ++i) {
-                    var box = boxes[i];
+                app.drawCalls(updateA ? updateDrawCallA : updateDrawCallB)
+                .noRasterize()
+                .draw();
 
-                    mat4.rotate(box.rotationMatrix, box.rotationMatrix, 0.02, rotationAxis);
-                    mat4.multiply(box.modelMatrix, box.translationMatrix, box.rotationMatrix)
-                }
-                modelMatrices.data(modelMatrixData);
-
-                app.clear().draw();
+                app.drawCalls(updateA ? boxesDrawCallB : boxesDrawCallA)
+                .rasterize()
+                .clear()
+                .draw()
                 
+                updateA = !updateA;
+
                 app.timerEnd();
 
                 requestAnimationFrame(draw);

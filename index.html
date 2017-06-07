@@ -62,7 +62,6 @@
     <a href="#" class="example-menu-button" id="texturearray">Texture Arrays</a>
     <a href="#" class="example-menu-button" id="3Dtexture">3D Textures</a>
     <a href="#" class="example-menu-button" id="rtt">Render to Texture</a>
-    <a href="#" class="example-menu-button" id="performance">Performance</a>
 
     <h2>Advanced Examples</h2>
     <a href="#" class="example-menu-button" id="picking">Picking</a>
@@ -73,6 +72,11 @@
     <a href="#" class="example-menu-button" id="oit">Order-independent Transparency</a>
     <a href="#" class="example-menu-button" id="particles">Particles</a>
     <a href="#" class="example-menu-button" id="bloom">Bloom</a>
+
+    <h2>Benchmarks</h2>
+    <a href="#" class="example-menu-button" id="64kcubes">64,000 Cubes</a>
+    <a href="#" class="example-menu-button" id="125kcubes">125,000 Cubes</a>
+
     <div id="example-div">
         <div id="example-title"></div>
         <iframe id="examples"></iframe>
@@ -89,9 +93,6 @@
 
             var link = event.target;
             var title = link.text;
-            if (title === "Performance") {
-                title += "<BR>64,000 Phong-shaded, Independently-transformed Cubes";
-            }
             if (title === "Wandering Triangles") {
                 title += "<BR>(Transform Feedback and Instanced Drawing)";
             }
@@ -114,7 +115,8 @@
                 "shadow",
                 "dof",
                 "particles",
-                "performance",
+                "64kcubes",
+                "125kcubes",
                 "wandering-triangles"
             ];
 
