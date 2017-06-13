@@ -833,14 +833,14 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @class
         @prop {WebGLRenderingContext} gl The WebGL context.
         @prop {WebGLProgram} program The WebGL program.
-        @prop {boolean} transformFeedback Whether this program is set up for transform feedback. 
-        @prop {Object} uniforms Map of uniform names to handles. 
-        @prop {Object} uniformBlocks Map of uniform block names to handles. 
+        @prop {boolean} transformFeedback Whether this program is set up for transform feedback.
+        @prop {Object} uniforms Map of uniform names to handles.
+        @prop {Object} uniformBlocks Map of uniform block names to handles.
     */
     PicoGL.Program = function Program(gl, vsSource, fsSource, xformFeebackVars) {
         var i;
 
-        var vShader, fShader; 
+        var vShader, fShader;
 
         var ownVertexShader = false;
         var ownFragmentShader = false;
@@ -892,8 +892,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             var uniformHandle = gl.getUniformLocation(this.program, uniformInfo.name);
             var UniformClass = null;
 
+            var arrayType = uniformInfo.size > 1;
+
             switch (uniformInfo.type) {
-                case PicoGL.INT: 
+                case PicoGL.INT:
                 case PicoGL.BOOL:
                 case PicoGL.SAMPLER_2D:
                 case PicoGL.INT_SAMPLER_2D:
@@ -910,83 +912,89 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                 case PicoGL.SAMPLER_3D:
                 case PicoGL.INT_SAMPLER_3D:
                 case PicoGL.UNSIGNED_INT_SAMPLER_3D:
-                    UniformClass = PicoGL.IntUniform;
+                    UniformClass = arrayType ? PicoGL.IntArrayUniform : PicoGL.IntUniform;
                     break;
-                case PicoGL.UNSIGNED_INT: 
-                    UniformClass = PicoGL.UintUniform;
+                case PicoGL.UNSIGNED_INT:
+                    UniformClass = arrayType ? PicoGL.UintArrayUniform : PicoGL.UintUniform;
                     break;
-                case PicoGL.FLOAT: 
-                    UniformClass = PicoGL.FloatUniform;
+                case PicoGL.FLOAT:
+                    UniformClass = arrayType ? PicoGL.FloatArrayUniform : PicoGL.FloatUniform;
                     break;
-                case PicoGL.FLOAT_VEC2: 
-                    UniformClass = PicoGL.Vec2Uniform;
+                case PicoGL.FLOAT_VEC2:
+                    UniformClass = arrayType ? PicoGL.Vec2ArrayUniform : PicoGL.Vec2Uniform;
                     break;
-                case PicoGL.FLOAT_VEC3: 
-                    UniformClass = PicoGL.Vec3Uniform;
+                case PicoGL.FLOAT_VEC3:
+                    UniformClass = arrayType ? PicoGL.Vec3ArrayUniform : PicoGL.Vec3Uniform;
                     break;
-                case PicoGL.FLOAT_VEC4: 
-                    UniformClass = PicoGL.Vec4Uniform;
+                case PicoGL.FLOAT_VEC4:
+                    UniformClass = arrayType ? PicoGL.Vec4ArrayUniform : PicoGL.Vec4Uniform;
                     break;
-                case PicoGL.INT_VEC2: 
-                    UniformClass = PicoGL.IntVec2Uniform;
+                case PicoGL.INT_VEC2:
+                    UniformClass = arrayType ? PicoGL.IntVec2ArrayUniform : PicoGL.IntVec2Uniform;
                     break;
-                case PicoGL.INT_VEC3: 
-                    UniformClass = PicoGL.IntVec3Uniform;
+                case PicoGL.INT_VEC3:
+                    UniformClass = arrayType ? PicoGL.IntVec3ArrayUniform : PicoGL.IntVec3Uniform;
                     break;
-                case PicoGL.INT_VEC4: 
-                    UniformClass = PicoGL.IntVec4Uniform;
+                case PicoGL.INT_VEC4:
+                    UniformClass = arrayType ? PicoGL.IntVec4ArrayUniform : PicoGL.IntVec4Uniform;
                     break;
-                case PicoGL.UNSIGNED_INT_VEC2: 
-                    UniformClass = PicoGL.UintVec2Uniform;
+                case PicoGL.UNSIGNED_INT_VEC2:
+                    UniformClass = arrayType ? PicoGL.UintVec2ArrayUniform : PicoGL.UintVec2Uniform;
                     break;
-                case PicoGL.UNSIGNED_INT_VEC3: 
-                    UniformClass = PicoGL.UintVec3Uniform;
+                case PicoGL.UNSIGNED_INT_VEC3:
+                    UniformClass = arrayType ? PicoGL.UintVec3ArrayUniform : PicoGL.UintVec3Uniform;
                     break;
-                case PicoGL.UNSIGNED_INT_VEC4: 
-                    UniformClass = PicoGL.UintVec4Uniform;
+                case PicoGL.UNSIGNED_INT_VEC4:
+                    UniformClass = arrayType ? PicoGL.UintVec4ArrayUniform : PicoGL.UintVec4Uniform;
                     break;
-                case PicoGL.BOOL_VEC2: 
-                    UniformClass = PicoGL.BoolVec2Uniform;
+                case PicoGL.BOOL_VEC2:
+                    UniformClass = arrayType ? PicoGL.BoolVec2ArrayUniform : PicoGL.BoolVec2Uniform;
                     break;
-                case PicoGL.BOOL_VEC3: 
-                    UniformClass = PicoGL.BoolVec3Uniform;
+                case PicoGL.BOOL_VEC3:
+                    UniformClass = arrayType ? PicoGL.BoolVec3ArrayUniform : PicoGL.BoolVec3Uniform;
                     break;
-                case PicoGL.BOOL_VEC4: 
-                    UniformClass = PicoGL.BoolVec4Uniform;
+                case PicoGL.BOOL_VEC4:
+                    UniformClass = arrayType ? PicoGL.BoolVec4ArrayUniform : PicoGL.BoolVec4Uniform;
                     break;
-                case PicoGL.FLOAT_MAT2: 
-                    UniformClass = PicoGL.Mat2Uniform;
+                case PicoGL.FLOAT_MAT2:
+                    UniformClass = arrayType ? PicoGL.Mat2ArrayUniform : PicoGL.Mat2Uniform;
                     break;
-                case PicoGL.FLOAT_MAT3: 
-                    UniformClass = PicoGL.Mat3Uniform;
+                case PicoGL.FLOAT_MAT3:
+                    UniformClass = arrayType ? PicoGL.Mat3ArrayUniform : PicoGL.Mat3Uniform;
                     break;
-                case PicoGL.FLOAT_MAT4: 
-                    UniformClass = PicoGL.Mat4Uniform;
+                case PicoGL.FLOAT_MAT4:
+                    UniformClass = arrayType ? PicoGL.Mat4ArrayUniform : PicoGL.Mat4Uniform;
                     break;
-                case PicoGL.FLOAT_MAT2x3: 
-                    UniformClass = PicoGL.Mat2x3Uniform;
+                case PicoGL.FLOAT_MAT2x3:
+                    UniformClass = arrayType ? PicoGL.Mat2x3ArrayUniform : PicoGL.Mat2x3Uniform;
                     break;
-                case PicoGL.FLOAT_MAT2x4: 
-                    UniformClass = PicoGL.Mat2x4Uniform;
+                case PicoGL.FLOAT_MAT2x4:
+                    UniformClass = arrayType ? PicoGL.Mat2x4ArrayUniform : PicoGL.Mat2x4Uniform;
                     break;
-                case PicoGL.FLOAT_MAT3x2: 
-                    UniformClass = PicoGL.Mat3x2Uniform;
+                case PicoGL.FLOAT_MAT3x2:
+                    UniformClass = arrayType ? PicoGL.Mat3x2ArrayUniform : PicoGL.Mat3x2Uniform;
                     break;
-                case PicoGL.FLOAT_MAT3x4: 
-                    UniformClass = PicoGL.Mat3x4Uniform;
+                case PicoGL.FLOAT_MAT3x4:
+                    UniformClass = arrayType ? PicoGL.Mat3x4ArrayUniform : PicoGL.Mat3x4Uniform;
                     break;
-                case PicoGL.FLOAT_MAT4x2: 
-                    UniformClass = PicoGL.Mat4x2Uniform;
+                case PicoGL.FLOAT_MAT4x2:
+                    UniformClass = arrayType ? PicoGL.Mat4x2ArrayUniform : PicoGL.Mat4x2Uniform;
                     break;
-                case PicoGL.FLOAT_MAT4x3: 
-                    UniformClass = PicoGL.Mat4x3Uniform;
+                case PicoGL.FLOAT_MAT4x3:
+                    UniformClass = arrayType ? PicoGL.Mat4x3ArrayUniform : PicoGL.Mat4x3Uniform;
                     break;
                 default:
                     console.error("Unrecognized type for uniform ", uniformInfo.name);
                     break;
             }
 
-            this.uniforms[uniformInfo.name] = new UniformClass(gl, uniformHandle);
+            if (arrayType) {
+                // Strip "[0]" from the type name for more intuitive usage
+                var simpleName = uniformInfo.name.substring(0, uniformInfo.name.length - 3);
+                this.uniforms[simpleName] = new UniformClass(gl, uniformHandle, uniformInfo.size);
+            } else {
+                this.uniforms[uniformInfo.name] = new UniformClass(gl, uniformHandle);
+            }
         }
 
         var numUniformBlocks = gl.getProgramParameter(program, gl.ACTIVE_UNIFORM_BLOCKS);
@@ -1022,7 +1030,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             this.gl.uniformBlockBinding(this.program, this.uniformBlocks[name], base);
             this.uniformBlockBindings[name] = base;
         }
-        
+
     };
 
 })();
@@ -1372,7 +1380,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
     // Classes to manage uniform value updates, including
     // caching current values.
-
     PicoGL.FloatUniform = function FloatUniform(gl, handle) {
         this.gl = gl;
         this.handle = handle;
@@ -1384,6 +1391,16 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             this.gl.uniform1f(this.handle, value);
             this.cache = value;
         }
+    };
+
+    PicoGL.FloatArrayUniform = function FloatArrayUniform(gl, handle, count) {
+        this.gl = gl;
+        this.handle = handle;
+        this.count = count;
+    };
+
+    PicoGL.FloatArrayUniform.prototype.set = function(value) {
+        this.gl.uniform1fv(this.handle, value);
     };
 
     PicoGL.IntUniform = function IntUniform(gl, handle) {
@@ -1399,6 +1416,16 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         }
     };
 
+    PicoGL.IntArrayUniform = function IntArrayUniform(gl, handle, count) {
+        this.gl = gl;
+        this.handle = handle;
+        this.count = count;
+    };
+
+    PicoGL.IntArrayUniform.prototype.set = function(value) {
+        this.gl.uniform1iv(this.handle, value);
+    };
+
     PicoGL.UintUniform = function UintUniform(gl, handle) {
         this.gl = gl;
         this.handle = handle;
@@ -1410,6 +1437,16 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             this.gl.uniform1ui(this.handle, value);
             this.cache = value;
         }
+    };
+
+    PicoGL.UintArrayUniform = function UintArrayUniform(gl, handle, count) {
+        this.gl = gl;
+        this.handle = handle;
+        this.count = count;
+    };
+
+    PicoGL.UintArrayUniform.prototype.set = function(value) {
+        this.gl.uniform1uiv(this.handle, value);
     };
 
     PicoGL.Vec2Uniform = function Vec2Uniform(gl, handle) {
@@ -1426,6 +1463,16 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         }
     };
 
+    PicoGL.Vec2ArrayUniform = function Vec2ArrayUniform(gl, handle, count) {
+        this.gl = gl;
+        this.handle = handle;
+        this.count = count;
+    };
+
+    PicoGL.Vec2ArrayUniform.prototype.set = function(value) {
+        this.gl.uniform2fv(this.handle, value);
+    };
+
     PicoGL.Vec3Uniform = function Vec3Uniform(gl, handle) {
         this.gl = gl;
         this.handle = handle;
@@ -1439,6 +1486,16 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             this.gl.uniform3fv(this.handle, value);
             this.cache.set(value);
         }
+    };
+
+    PicoGL.Vec3ArrayUniform = function Vec3ArrayUniform(gl, handle, count) {
+        this.gl = gl;
+        this.handle = handle;
+        this.count = count;
+    };
+
+    PicoGL.Vec3ArrayUniform.prototype.set = function(value) {
+        this.gl.uniform3fv(this.handle, value);
     };
 
     PicoGL.Vec4Uniform = function Vec4Uniform(gl, handle) {
@@ -1457,6 +1514,16 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         }
     };
 
+    PicoGL.Vec4ArrayUniform = function Vec4ArrayUniform(gl, handle, count) {
+        this.gl = gl;
+        this.handle = handle;
+        this.count = count;
+    };
+
+    PicoGL.Vec4ArrayUniform.prototype.set = function(value) {
+        this.gl.uniform4fv(this.handle, value);
+    };
+
     PicoGL.IntVec2Uniform = function IntVec2Uniform(gl, handle) {
         this.gl = gl;
         this.handle = handle;
@@ -1469,6 +1536,16 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             this.gl.uniform2iv(this.handle, value);
             this.cache.set(value);
         }
+    };
+
+    PicoGL.IntVec2ArrayUniform = function IntVec2ArrayUniform(gl, handle, count) {
+        this.gl = gl;
+        this.handle = handle;
+        this.count = count;
+    };
+
+    PicoGL.IntVec2ArrayUniform.prototype.set = function(value) {
+        this.gl.uniform2iv(this.handle, value);
     };
 
     PicoGL.IntVec3Uniform = function IntVec3Uniform(gl, handle) {
@@ -1484,6 +1561,16 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             this.gl.uniform3iv(this.handle, value);
             this.cache.set(value);
         }
+    };
+
+    PicoGL.IntVec3ArrayUniform = function IntVec3ArrayUniform(gl, handle, count) {
+        this.gl = gl;
+        this.handle = handle;
+        this.count = count;
+    };
+
+    PicoGL.IntVec3ArrayUniform.prototype.set = function(value) {
+        this.gl.uniform3iv(this.handle, value);
     };
 
     PicoGL.IntVec4Uniform = function IntVec4Uniform(gl, handle) {
@@ -1502,6 +1589,16 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         }
     };
 
+    PicoGL.IntVec4ArrayUniform = function IntVec4ArrayUniform(gl, handle, count) {
+        this.gl = gl;
+        this.handle = handle;
+        this.count = count;
+    };
+
+    PicoGL.IntVec4ArrayUniform.prototype.set = function(value) {
+        this.gl.uniform4iv(this.handle, value);
+    };
+
     PicoGL.UintVec2Uniform = function UintVec2Uniform(gl, handle) {
         this.gl = gl;
         this.handle = handle;
@@ -1514,6 +1611,16 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             this.gl.uniform2uiv(this.handle, value);
             this.cache.set(value);
         }
+    };
+
+    PicoGL.UintVec2ArrayUniform = function UintVec2ArrayUniform(gl, handle, count) {
+        this.gl = gl;
+        this.handle = handle;
+        this.count = count;
+    };
+
+    PicoGL.UintVec2ArrayUniform.prototype.set = function(value) {
+        this.gl.uniform2uiv(this.handle, value);
     };
 
     PicoGL.UintVec3Uniform = function UintVec3Uniform(gl, handle) {
@@ -1529,6 +1636,16 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             this.gl.uniform3uiv(this.handle, value);
             this.cache.set(value);
         }
+    };
+
+    PicoGL.UintVec3ArrayUniform = function UintVec3ArrayUniform(gl, handle, count) {
+        this.gl = gl;
+        this.handle = handle;
+        this.count = count;
+    };
+
+    PicoGL.UintVec3ArrayUniform.prototype.set = function(value) {
+        this.gl.uniform3uiv(this.handle, value);
     };
 
     PicoGL.UintVec4Uniform = function UintVec4Uniform(gl, handle) {
@@ -1547,6 +1664,16 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         }
     };
 
+    PicoGL.UintVec4ArrayUniform = function UintVec4ArrayUniform(gl, handle, count) {
+        this.gl = gl;
+        this.handle = handle;
+        this.count = count;
+    };
+
+    PicoGL.UintVec4ArrayUniform.prototype.set = function(value) {
+        this.gl.uniform4uiv(this.handle, value);
+    };
+
     PicoGL.BoolVec2Uniform = function BoolVec2Uniform(gl, handle) {
         this.gl = gl;
         this.handle = handle;
@@ -1560,6 +1687,16 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             this.cache[0] = value[0];
             this.cache[1] = value[1];
         }
+    };
+
+    PicoGL.BoolVec2ArrayUniform = function BoolVec2ArrayUniform(gl, handle, count) {
+        this.gl = gl;
+        this.handle = handle;
+        this.count = count;
+    };
+
+    PicoGL.BoolVec2ArrayUniform.prototype.set = function(value) {
+        this.gl.uniform2iv(this.handle, value);
     };
 
     PicoGL.BoolVec3Uniform = function BoolVec3Uniform(gl, handle) {
@@ -1577,6 +1714,16 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             this.cache[1] = value[1];
             this.cache[2] = value[2];
         }
+    };
+
+    PicoGL.BoolVec3ArrayUniform = function BoolVec3ArrayUniform(gl, handle, count) {
+        this.gl = gl;
+        this.handle = handle;
+        this.count = count;
+    };
+
+    PicoGL.BoolVec3ArrayUniform.prototype.set = function(value) {
+        this.gl.uniform3iv(this.handle, value);
     };
 
     PicoGL.BoolVec4Uniform = function BoolVec4Uniform(gl, handle) {
@@ -1598,6 +1745,16 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         }
     };
 
+    PicoGL.BoolVec3ArrayUniform = function BoolVec3ArrayUniform(gl, handle, count) {
+        this.gl = gl;
+        this.handle = handle;
+        this.count = count;
+    };
+
+    PicoGL.BoolVec3ArrayUniform.prototype.set = function(value) {
+        this.gl.uniform3iv(this.handle, value);
+    };
+
     PicoGL.Mat2Uniform = function Mat2Uniform(gl, handle) {
         this.gl = gl;
         this.handle = handle;
@@ -1612,6 +1769,16 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             this.gl.uniformMatrix2fv(this.handle, false, value);
             this.cache.set(value);
         }
+    };
+
+    PicoGL.Mat2ArrayUniform = function Mat2ArrayUniform(gl, handle, count) {
+        this.gl = gl;
+        this.handle = handle;
+        this.count = count;
+    };
+
+    PicoGL.Mat2ArrayUniform.prototype.set = function(value) {
+        this.gl.uniformMatrix2fv(this.handle, false, value);
     };
 
     PicoGL.Mat3Uniform = function Mat3Uniform(gl, handle) {
@@ -1633,6 +1800,16 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             this.gl.uniformMatrix3fv(this.handle, false, value);
             this.cache.set(value);
         }
+    };
+
+    PicoGL.Mat3ArrayUniform = function Mat3ArrayUniform(gl, handle, count) {
+        this.gl = gl;
+        this.handle = handle;
+        this.count = count;
+    };
+
+    PicoGL.Mat3ArrayUniform.prototype.set = function(value) {
+        this.gl.uniformMatrix3fv(this.handle, false, value);
     };
 
     PicoGL.Mat4Uniform = function Mat4Uniform(gl, handle) {
@@ -1663,6 +1840,16 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         }
     };
 
+    PicoGL.Mat4ArrayUniform = function Mat4ArrayUniform(gl, handle, count) {
+        this.gl = gl;
+        this.handle = handle;
+        this.count = count;
+    };
+
+    PicoGL.Mat4ArrayUniform.prototype.set = function(value) {
+        this.gl.uniformMatrix4fv(this.handle, false, value);
+    };
+
     PicoGL.Mat2x3Uniform = function Mat2x3Uniform(gl, handle) {
         this.gl = gl;
         this.handle = handle;
@@ -1679,6 +1866,16 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             this.gl.uniformMatrix2x3fv(this.handle, false, value);
             this.cache.set(value);
         }
+    };
+
+    PicoGL.Mat2x3ArrayUniform = function Mat2x3ArrayUniform(gl, handle, count) {
+        this.gl = gl;
+        this.handle = handle;
+        this.count = count;
+    };
+
+    PicoGL.Mat2x3ArrayUniform.prototype.set = function(value) {
+        this.gl.uniformMatrix2x3fv(this.handle, false, value);
     };
 
     PicoGL.Mat2x4Uniform = function Mat2x4Uniform(gl, handle) {
@@ -1701,6 +1898,16 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         }
     };
 
+    PicoGL.Mat2x4ArrayUniform = function Mat2x4ArrayUniform(gl, handle, count) {
+        this.gl = gl;
+        this.handle = handle;
+        this.count = count;
+    };
+
+    PicoGL.Mat2x4ArrayUniform.prototype.set = function(value) {
+        this.gl.uniformMatrix2x4fv(this.handle, false, value);
+    };
+
     PicoGL.Mat3x2Uniform = function Mat3x2Uniform(gl, handle) {
         this.gl = gl;
         this.handle = handle;
@@ -1717,6 +1924,16 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             this.gl.uniformMatrix3x2fv(this.handle, false, value);
             this.cache.set(value);
         }
+    };
+
+    PicoGL.Mat3x2ArrayUniform = function Mat3x2ArrayUniform(gl, handle, count) {
+        this.gl = gl;
+        this.handle = handle;
+        this.count = count;
+    };
+
+    PicoGL.Mat3x2ArrayUniform.prototype.set = function(value) {
+        this.gl.uniformMatrix3x2fv(this.handle, false, value);
     };
 
     PicoGL.Mat3x4Uniform = function Mat3x4Uniform(gl, handle) {
@@ -1743,6 +1960,16 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         }
     };
 
+    PicoGL.Mat3x4ArrayUniform = function Mat3x4ArrayUniform(gl, handle, count) {
+        this.gl = gl;
+        this.handle = handle;
+        this.count = count;
+    };
+
+    PicoGL.Mat3x4ArrayUniform.prototype.set = function(value) {
+        this.gl.uniformMatrix3x4fv(this.handle, false, value);
+    };
+
     PicoGL.Mat4x2Uniform = function Mat4x2Uniform(gl, handle) {
         this.gl = gl;
         this.handle = handle;
@@ -1761,6 +1988,16 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             this.gl.uniformMatrix4x2fv(this.handle, false, value);
             this.cache.set(value);
         }
+    };
+
+    PicoGL.Mat4x2ArrayUniform = function Mat4x2ArrayUniform(gl, handle, count) {
+        this.gl = gl;
+        this.handle = handle;
+        this.count = count;
+    };
+
+    PicoGL.Mat4x2ArrayUniform.prototype.set = function(value) {
+        this.gl.uniformMatrix4x2fv(this.handle, false, value);
     };
 
     PicoGL.Mat4x3Uniform = function Mat4x3Uniform(gl, handle) {
@@ -1785,6 +2022,16 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             this.gl.uniformMatrix4x3fv(this.handle, false, value);
             this.cache.set(value);
         }
+    };
+
+    PicoGL.Mat4x3ArrayUniform = function Mat4x3ArrayUniform(gl, handle, count) {
+        this.gl = gl;
+        this.handle = handle;
+        this.count = count;
+    };
+
+    PicoGL.Mat4x3ArrayUniform.prototype.set = function(value) {
+        this.gl.uniformMatrix4x3fv(this.handle, false, value);
     };
 
 })();

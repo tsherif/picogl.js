@@ -32,14 +32,14 @@
         @class
         @prop {WebGLRenderingContext} gl The WebGL context.
         @prop {WebGLProgram} program The WebGL program.
-        @prop {boolean} transformFeedback Whether this program is set up for transform feedback. 
-        @prop {Object} uniforms Map of uniform names to handles. 
-        @prop {Object} uniformBlocks Map of uniform block names to handles. 
+        @prop {boolean} transformFeedback Whether this program is set up for transform feedback.
+        @prop {Object} uniforms Map of uniform names to handles.
+        @prop {Object} uniformBlocks Map of uniform block names to handles.
     */
     PicoGL.Program = function Program(gl, vsSource, fsSource, xformFeebackVars) {
         var i;
 
-        var vShader, fShader; 
+        var vShader, fShader;
 
         var ownVertexShader = false;
         var ownFragmentShader = false;
@@ -91,8 +91,10 @@
             var uniformHandle = gl.getUniformLocation(this.program, uniformInfo.name);
             var UniformClass = null;
 
+            var arrayType = uniformInfo.size > 1;
+
             switch (uniformInfo.type) {
-                case PicoGL.INT: 
+                case PicoGL.INT:
                 case PicoGL.BOOL:
                 case PicoGL.SAMPLER_2D:
                 case PicoGL.INT_SAMPLER_2D:
@@ -109,83 +111,89 @@
                 case PicoGL.SAMPLER_3D:
                 case PicoGL.INT_SAMPLER_3D:
                 case PicoGL.UNSIGNED_INT_SAMPLER_3D:
-                    UniformClass = PicoGL.IntUniform;
+                    UniformClass = arrayType ? PicoGL.IntArrayUniform : PicoGL.IntUniform;
                     break;
-                case PicoGL.UNSIGNED_INT: 
-                    UniformClass = PicoGL.UintUniform;
+                case PicoGL.UNSIGNED_INT:
+                    UniformClass = arrayType ? PicoGL.UintArrayUniform : PicoGL.UintUniform;
                     break;
-                case PicoGL.FLOAT: 
-                    UniformClass = PicoGL.FloatUniform;
+                case PicoGL.FLOAT:
+                    UniformClass = arrayType ? PicoGL.FloatArrayUniform : PicoGL.FloatUniform;
                     break;
-                case PicoGL.FLOAT_VEC2: 
-                    UniformClass = PicoGL.Vec2Uniform;
+                case PicoGL.FLOAT_VEC2:
+                    UniformClass = arrayType ? PicoGL.Vec2ArrayUniform : PicoGL.Vec2Uniform;
                     break;
-                case PicoGL.FLOAT_VEC3: 
-                    UniformClass = PicoGL.Vec3Uniform;
+                case PicoGL.FLOAT_VEC3:
+                    UniformClass = arrayType ? PicoGL.Vec3ArrayUniform : PicoGL.Vec3Uniform;
                     break;
-                case PicoGL.FLOAT_VEC4: 
-                    UniformClass = PicoGL.Vec4Uniform;
+                case PicoGL.FLOAT_VEC4:
+                    UniformClass = arrayType ? PicoGL.Vec4ArrayUniform : PicoGL.Vec4Uniform;
                     break;
-                case PicoGL.INT_VEC2: 
-                    UniformClass = PicoGL.IntVec2Uniform;
+                case PicoGL.INT_VEC2:
+                    UniformClass = arrayType ? PicoGL.IntVec2ArrayUniform : PicoGL.IntVec2Uniform;
                     break;
-                case PicoGL.INT_VEC3: 
-                    UniformClass = PicoGL.IntVec3Uniform;
+                case PicoGL.INT_VEC3:
+                    UniformClass = arrayType ? PicoGL.IntVec3ArrayUniform : PicoGL.IntVec3Uniform;
                     break;
-                case PicoGL.INT_VEC4: 
-                    UniformClass = PicoGL.IntVec4Uniform;
+                case PicoGL.INT_VEC4:
+                    UniformClass = arrayType ? PicoGL.IntVec4ArrayUniform : PicoGL.IntVec4Uniform;
                     break;
-                case PicoGL.UNSIGNED_INT_VEC2: 
-                    UniformClass = PicoGL.UintVec2Uniform;
+                case PicoGL.UNSIGNED_INT_VEC2:
+                    UniformClass = arrayType ? PicoGL.UintVec2ArrayUniform : PicoGL.UintVec2Uniform;
                     break;
-                case PicoGL.UNSIGNED_INT_VEC3: 
-                    UniformClass = PicoGL.UintVec3Uniform;
+                case PicoGL.UNSIGNED_INT_VEC3:
+                    UniformClass = arrayType ? PicoGL.UintVec3ArrayUniform : PicoGL.UintVec3Uniform;
                     break;
-                case PicoGL.UNSIGNED_INT_VEC4: 
-                    UniformClass = PicoGL.UintVec4Uniform;
+                case PicoGL.UNSIGNED_INT_VEC4:
+                    UniformClass = arrayType ? PicoGL.UintVec4ArrayUniform : PicoGL.UintVec4Uniform;
                     break;
-                case PicoGL.BOOL_VEC2: 
-                    UniformClass = PicoGL.BoolVec2Uniform;
+                case PicoGL.BOOL_VEC2:
+                    UniformClass = arrayType ? PicoGL.BoolVec2ArrayUniform : PicoGL.BoolVec2Uniform;
                     break;
-                case PicoGL.BOOL_VEC3: 
-                    UniformClass = PicoGL.BoolVec3Uniform;
+                case PicoGL.BOOL_VEC3:
+                    UniformClass = arrayType ? PicoGL.BoolVec3ArrayUniform : PicoGL.BoolVec3Uniform;
                     break;
-                case PicoGL.BOOL_VEC4: 
-                    UniformClass = PicoGL.BoolVec4Uniform;
+                case PicoGL.BOOL_VEC4:
+                    UniformClass = arrayType ? PicoGL.BoolVec4ArrayUniform : PicoGL.BoolVec4Uniform;
                     break;
-                case PicoGL.FLOAT_MAT2: 
-                    UniformClass = PicoGL.Mat2Uniform;
+                case PicoGL.FLOAT_MAT2:
+                    UniformClass = arrayType ? PicoGL.Mat2ArrayUniform : PicoGL.Mat2Uniform;
                     break;
-                case PicoGL.FLOAT_MAT3: 
-                    UniformClass = PicoGL.Mat3Uniform;
+                case PicoGL.FLOAT_MAT3:
+                    UniformClass = arrayType ? PicoGL.Mat3ArrayUniform : PicoGL.Mat3Uniform;
                     break;
-                case PicoGL.FLOAT_MAT4: 
-                    UniformClass = PicoGL.Mat4Uniform;
+                case PicoGL.FLOAT_MAT4:
+                    UniformClass = arrayType ? PicoGL.Mat4ArrayUniform : PicoGL.Mat4Uniform;
                     break;
-                case PicoGL.FLOAT_MAT2x3: 
-                    UniformClass = PicoGL.Mat2x3Uniform;
+                case PicoGL.FLOAT_MAT2x3:
+                    UniformClass = arrayType ? PicoGL.Mat2x3ArrayUniform : PicoGL.Mat2x3Uniform;
                     break;
-                case PicoGL.FLOAT_MAT2x4: 
-                    UniformClass = PicoGL.Mat2x4Uniform;
+                case PicoGL.FLOAT_MAT2x4:
+                    UniformClass = arrayType ? PicoGL.Mat2x4ArrayUniform : PicoGL.Mat2x4Uniform;
                     break;
-                case PicoGL.FLOAT_MAT3x2: 
-                    UniformClass = PicoGL.Mat3x2Uniform;
+                case PicoGL.FLOAT_MAT3x2:
+                    UniformClass = arrayType ? PicoGL.Mat3x2ArrayUniform : PicoGL.Mat3x2Uniform;
                     break;
-                case PicoGL.FLOAT_MAT3x4: 
-                    UniformClass = PicoGL.Mat3x4Uniform;
+                case PicoGL.FLOAT_MAT3x4:
+                    UniformClass = arrayType ? PicoGL.Mat3x4ArrayUniform : PicoGL.Mat3x4Uniform;
                     break;
-                case PicoGL.FLOAT_MAT4x2: 
-                    UniformClass = PicoGL.Mat4x2Uniform;
+                case PicoGL.FLOAT_MAT4x2:
+                    UniformClass = arrayType ? PicoGL.Mat4x2ArrayUniform : PicoGL.Mat4x2Uniform;
                     break;
-                case PicoGL.FLOAT_MAT4x3: 
-                    UniformClass = PicoGL.Mat4x3Uniform;
+                case PicoGL.FLOAT_MAT4x3:
+                    UniformClass = arrayType ? PicoGL.Mat4x3ArrayUniform : PicoGL.Mat4x3Uniform;
                     break;
                 default:
                     console.error("Unrecognized type for uniform ", uniformInfo.name);
                     break;
             }
 
-            this.uniforms[uniformInfo.name] = new UniformClass(gl, uniformHandle);
+            if (arrayType) {
+                // Strip "[0]" from the type name for more intuitive usage
+                var simpleName = uniformInfo.name.substring(0, uniformInfo.name.length - 3);
+                this.uniforms[simpleName] = new UniformClass(gl, uniformHandle, uniformInfo.size);
+            } else {
+                this.uniforms[uniformInfo.name] = new UniformClass(gl, uniformHandle);
+            }
         }
 
         var numUniformBlocks = gl.getProgramParameter(program, gl.ACTIVE_UNIFORM_BLOCKS);
@@ -221,7 +229,7 @@
             this.gl.uniformBlockBinding(this.program, this.uniformBlocks[name], base);
             this.uniformBlockBindings[name] = base;
         }
-        
+
     };
 
 })();
