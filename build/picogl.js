@@ -1168,14 +1168,23 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         var numColumns = vertexBuffer.numColumns;
 
         for (var i = 0; i < numColumns; ++i) {
-            this.gl.vertexAttribPointer(
-                attributeIndex + i, 
-                vertexBuffer.itemSize, 
-                vertexBuffer.type, 
-                false, 
-                numColumns * vertexBuffer.itemSize * PicoGL.TYPE_SIZE[vertexBuffer.type], 
-                i * vertexBuffer.itemSize * PicoGL.TYPE_SIZE[vertexBuffer.type]);
-
+            if (vertexBuffer.type === this.gl.FLOAT) {
+                this.gl.vertexAttribPointer(
+                    attributeIndex + i, 
+                    vertexBuffer.itemSize, 
+                    vertexBuffer.type, 
+                    false, 
+                    numColumns * vertexBuffer.itemSize * PicoGL.TYPE_SIZE[vertexBuffer.type], 
+                    i * vertexBuffer.itemSize * PicoGL.TYPE_SIZE[vertexBuffer.type]);
+            } else {
+                this.gl.vertexAttribIPointer(
+                    attributeIndex + i, 
+                    vertexBuffer.itemSize, 
+                    vertexBuffer.type, 
+                    numColumns * vertexBuffer.itemSize * PicoGL.TYPE_SIZE[vertexBuffer.type], 
+                    i * vertexBuffer.itemSize * PicoGL.TYPE_SIZE[vertexBuffer.type]);
+            }
+            
             if (instanced) {
                 this.gl.vertexAttribDivisor(attributeIndex + i, 1);
             }
