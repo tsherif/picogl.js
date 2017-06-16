@@ -51,62 +51,87 @@
     <script id="update-fs" type="x-fragment-shader">
         #version 300 es   
 
+        #define GRAVITY vec3(0.0, -0.0001, 0.0)
+        #define DAMPING 0.99
+        #define MASS_FACTOR 0.1
+        #define MAX_STRUCTURAL 0.1
+
         precision highp float;
 
         in vec2 vScreenUV;
         
         uniform sampler2D uPositionBuffer;
-        uniform sampler2D uVelocityBuffer;
-
-        layout(std140) uniform Mass {
-            vec4 mass1Position;
-            vec4 mass2Position;
-            vec4 mass3Position;
-            float mass1Factor;
-            float mass2Factor;
-            float mass3Factor;
-        };
+        uniform sampler2D uOldPositionBuffer;
 
         layout(location=0) out vec3 outPosition;
-        layout(location=1) out vec3 outVelocity;
+        layout(location=1) out vec3 outOldPosition;
 
         void main() {
-            ivec2 texelCoord = ivec2(vScreenUV * vec2(textureSize(uPositionBuffer, 0)));
+            ivec2 dimensions = textureSize(uPositionBuffer, 0);
+            ivec2 maxTexelCoord = dimensions - 1;
+            ivec2 texelCoord = ivec2(vScreenUV * vec2(dimensions));
             vec3 position = texelFetch(uPositionBuffer, texelCoord, 0).xyz;
-            vec3 velocity = texelFetch(uVelocityBuffer, texelCoord, 0).xyz;
+            vec3 oldPosition = texelFetch(uOldPositionBuffer, texelCoord, 0).xyz;
 
-            vec3 massVec = mass1Position.xyz - position;
-            float massDist2 = max(0.01, dot(massVec, massVec));
-            vec3 acceleration = mass1Factor * normalize(massVec) / massDist2;
+            if (texelCoord.y > 0) {
+                vec3 velocity = (position - oldPosition) * DAMPING + GRAVITY;
 
-            massVec = mass2Position.xyz - position;
-            massDist2 = max(0.01, dot(massVec, massVec));
-            acceleration += mass2Factor * normalize(massVec) / massDist2;
+                ivec2 left = max(texelCoord - ivec2(1, 0), ivec2(0, 0));
+                ivec2 right = min(texelCoord + ivec2(1, 0), maxTexelCoord);
+                ivec2 up = max(texelCoord - ivec2(0, 1), ivec2(0, 0));
+                ivec2 down = min(texelCoord + ivec2(0, 1), maxTexelCoord);
 
-            massVec = mass3Position.xyz - position;
-            massDist2 = max(0.01, dot(massVec, massVec));
-            acceleration += mass3Factor * normalize(massVec) / massDist2;
+                vec3 leftPosition = texelFetch(uPositionBuffer, left, 0).xyz;
+                vec3 rightPosition = texelFetch(uPositionBuffer, right, 0).xyz;
+                vec3 upPosition = texelFetch(uPositionBuffer, up, 0).xyz;
+                vec3 downPosition = texelFetch(uPositionBuffer, down, 0).xyz;
 
-            velocity += acceleration;
-            velocity *= 0.9999;
+                vec3 leftVec = leftPosition - position;
+                float leftDist = length(leftVec);
+                if (leftDist > MAX_STRUCTURAL) {
+                    velocity += leftVec * (1.0 - MAX_STRUCTURAL / leftDist) * MASS_FACTOR;
+                }
 
-            outPosition = position + velocity;
-            outVelocity = velocity;
+                vec3 rightVec = rightPosition - position;
+                float rightDist = length(rightVec);
+                if (rightDist > MAX_STRUCTURAL) {
+                    velocity += rightVec * (1.0 - MAX_STRUCTURAL / rightDist) * MASS_FACTOR;
+                }
+
+                vec3 upVec = upPosition - position;
+                float upDist = length(upVec);
+                if (upDist > MAX_STRUCTURAL) {
+                    velocity += upVec * (1.0 - MAX_STRUCTURAL / upDist) * MASS_FACTOR;
+                }
+
+                vec3 downVec = downPosition - position;
+                float downDist = length(downVec);
+                if (downDist > MAX_STRUCTURAL) {
+                    velocity += downVec * (1.0 - MAX_STRUCTURAL / downDist) * MASS_FACTOR;
+                }
+
+                vec3 temp = position;
+                position += velocity;
+                oldPosition = temp;
+            }
+
+            outPosition = position;
+            outOldPosition = oldPosition;
         }
     </script>
     <script id="main-vs" type="x-vertex-shader">
         #version 300 es   
        
-        layout(location=0) in vec3 aColor;
-        layout(location=1) in ivec2 aTexelCoord;
+        layout(location=0) in ivec2 aTexelCoord;
  
         uniform sampler2D uPositionBuffer;
 
-        out vec3 vColor;
+        out vec4 vColor;
         
         void main() {
-            vColor = aColor;
-            gl_PointSize = 2.0;
+            vec2 textureDim = vec2(textureSize(uPositionBuffer, 0));
+            vColor = vec4(vec2(aTexelCoord) / textureDim, 0.0, 1.0);
+            gl_PointSize = 4.0;
             gl_Position = texelFetch(uPositionBuffer, aTexelCoord, 0);
         }
     </script>
@@ -115,12 +140,11 @@
         
         precision highp float;
 
-        in vec3 vColor;
+        in vec4 vColor;
 
         out vec4 fragColor;
         void main() {
-            float alpha = 0.2;
-            fragColor = vec4(vColor * alpha, alpha);
+            fragColor = vColor;
         }
     </script>
     <script type="text/javascript">
@@ -136,10 +160,9 @@
         .blendFunc(PicoGL.ONE, PicoGL.ONE_MINUS_SRC_ALPHA)
         .floatRenderTargets();
 
-        var DATA_TEXTURE_DIM = 700;
+        var DATA_TEXTURE_DIM = 20;
         var NUM_PARTICLES = DATA_TEXTURE_DIM * DATA_TEXTURE_DIM;
         var positionTextureData = new Float32Array(NUM_PARTICLES * 4);
-        var colorData = new Float32Array(NUM_PARTICLES * 3);
         var uvData = new Int16Array(NUM_PARTICLES * 2);
 
         // Set up main program
@@ -154,13 +177,11 @@
             var vec3i = i * 4;
             var vec2i = i * 2;
 
-            positionTextureData[vec3i] = Math.random() * 2 - 1;
-            positionTextureData[vec3i + 1] = Math.random() * 2 - 1;
-            positionTextureData[vec3i + 2] = Math.random() * 2 - 1;
+            var x = (i % DATA_TEXTURE_DIM);
+            var y = Math.floor(i / DATA_TEXTURE_DIM);
 
-            colorData[vec3i] = Math.random();
-            colorData[vec3i + 1] = Math.random();
-            colorData[vec3i + 2] = Math.random();
+            positionTextureData[vec3i] = x / DATA_TEXTURE_DIM - 0.5;
+            positionTextureData[vec3i + 1] = y / DATA_TEXTURE_DIM;
 
             uvData[vec2i] = (i % DATA_TEXTURE_DIM);
             uvData[vec2i + 1] = Math.floor(i / DATA_TEXTURE_DIM);
@@ -176,7 +197,7 @@
             wrapT: PicoGL.CLAMP_TO_EDGE
         });
 
-        var velocityTextureA = app.createTexture2D(null, DATA_TEXTURE_DIM, DATA_TEXTURE_DIM, {
+        var oldPositionTextureA = app.createTexture2D(positionTextureData, DATA_TEXTURE_DIM, DATA_TEXTURE_DIM, {
             format: PicoGL.RGBA,
             internalFormat: PicoGL.RGBA16f,
             type: PicoGL.FLOAT,
@@ -187,7 +208,7 @@
         });
 
         var positionTextureB = updateFramebuffer.colorTextures[0];
-        var velocityTextureB = updateFramebuffer.colorTextures[1];
+        var oldPositionTextureB = updateFramebuffer.colorTextures[1];
 
 
         // Set up main program
@@ -195,12 +216,10 @@
         var fsSource = document.getElementById("main-fs").text.trim();
         var mainProgram = app.createProgram(vsSource, fsSource);
 
-        var colors = app.createVertexBuffer(PicoGL.FLOAT, 3, colorData);
         var uv = app.createVertexBuffer(PicoGL.SHORT, 2, uvData);
 
         var particleArray = app.createVertexArray()
-        .attributeBuffer(0, colors)
-        .attributeBuffer(1, uv);
+        .attributeBuffer(0, uv);
 
         var quadPositions = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
             -1, 1,
@@ -233,39 +252,13 @@
         };
 
         var readPositionTexture = positionTextureA;
-        var readVelocityTexture = velocityTextureA;
+        var readVelocityTexture = oldPositionTextureA;
         var writePositionTexture = positionTextureB;
-        var writeVelocityTexture = velocityTextureB;
-
-        var massUniforms = app.createUniformBuffer([
-            PicoGL.FLOAT_VEC4,
-            PicoGL.FLOAT_VEC4,
-            PicoGL.FLOAT_VEC4,
-            PicoGL.FLOAT,
-            PicoGL.FLOAT,
-            PicoGL.FLOAT
-        ]).set(0, vec3.fromValues(
-            Math.random() * 2.0 - 1.0,
-            Math.random() * 2.0 - 1.0,
-            Math.random() * 2.0 - 1.0
-        )).set(1, vec3.fromValues(
-            Math.random() * 2.0 - 1.0,
-            Math.random() * 2.0 - 1.0,
-            Math.random() * 2.0 - 1.0
-        )).set(2, vec3.fromValues(
-            Math.random() * 2.0 - 1.0,
-            Math.random() * 2.0 - 1.0,
-            Math.random() * 2.0 - 1.0
-        ))
-        .set(3, Math.random() / 30000)
-        .set(4, Math.random() / 30000)
-        .set(5, Math.random() / 30000)
-        .update();
+        var writeVelocityTexture = oldPositionTextureB;
 
         var updateDrawCalls = [
             app.createDrawCall(updateProgram, quadArray)
             .texture("uPositionBuffer", readPositionTexture)
-            .uniformBlock("Mass", massUniforms)
         ];
 
         var mainDrawcalls = [
@@ -280,7 +273,7 @@
             app.timerStart();
 
             updateDrawCalls[0].texture("uPositionBuffer", readPositionTexture);
-            updateDrawCalls[0].texture("uVelocityBuffer", readVelocityTexture);
+            updateDrawCalls[0].texture("uOldPositionBuffer", readVelocityTexture);
             updateFramebuffer.replaceTexture(0, writePositionTexture);
             updateFramebuffer.replaceTexture(1, writeVelocityTexture);
             mainDrawcalls[0].texture("uPositionBuffer", writePositionTexture);
@@ -297,14 +290,14 @@
 
             if (readPositionTexture === positionTextureA) {
                 readPositionTexture = positionTextureB;
-                readVelocityTexture = velocityTextureB;
+                readVelocityTexture = oldPositionTextureB;
                 writePositionTexture = positionTextureA;
-                writeVelocityTexture = velocityTextureA;
+                writeVelocityTexture = oldPositionTextureA;
             } else {
                 readPositionTexture = positionTextureA;
-                readVelocityTexture = velocityTextureA;
+                readVelocityTexture = oldPositionTextureA;
                 writePositionTexture = positionTextureB;
-                writeVelocityTexture = velocityTextureB;
+                writeVelocityTexture = oldPositionTextureB;
             }
 
             app.timerEnd();

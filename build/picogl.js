@@ -2072,7 +2072,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         }
 
         // Texture parameters
-        this.flipY = options.flipY !== undefined ? options.flipY : true;
+        this.flipY = options.flipY !== undefined ? options.flipY : false;
         this.baseLevel = options.baseLevel !== undefined ? options.baseLevel : null;
         this.maxLevel = options.maxLevel !== undefined ? options.maxLevel : null;
         this.generateMipmaps = options.generateMipmaps !== false && 
