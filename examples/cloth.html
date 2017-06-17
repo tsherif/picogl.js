@@ -48,18 +48,16 @@
             gl_Position = aPosition;
         }
     </script>
-    <script id="update-fs" type="x-fragment-shader">
+    <script id="update-force-fs" type="x-fragment-shader">
         #version 300 es   
-
-        #define GRAVITY vec3(0.0, -0.0001, 0.0)
-        #define DAMPING 0.99
-        #define MASS_FACTOR 0.1
-        #define MAX_STRUCTURAL 0.1
 
         precision highp float;
 
+        #define GRAVITY vec3(0.0, -0.0005, 0.0)
+        #define DAMPING 0.99
+
         in vec2 vScreenUV;
-        
+
         uniform sampler2D uPositionBuffer;
         uniform sampler2D uOldPositionBuffer;
 
@@ -72,53 +70,61 @@
             ivec2 texelCoord = ivec2(vScreenUV * vec2(dimensions));
             vec3 position = texelFetch(uPositionBuffer, texelCoord, 0).xyz;
             vec3 oldPosition = texelFetch(uOldPositionBuffer, texelCoord, 0).xyz;
+            vec3 temp = position;
 
-            if (texelCoord.y > 0) {
-                vec3 velocity = (position - oldPosition) * DAMPING + GRAVITY;
-
-                ivec2 left = max(texelCoord - ivec2(1, 0), ivec2(0, 0));
-                ivec2 right = min(texelCoord + ivec2(1, 0), maxTexelCoord);
-                ivec2 up = max(texelCoord - ivec2(0, 1), ivec2(0, 0));
-                ivec2 down = min(texelCoord + ivec2(0, 1), maxTexelCoord);
-
-                vec3 leftPosition = texelFetch(uPositionBuffer, left, 0).xyz;
-                vec3 rightPosition = texelFetch(uPositionBuffer, right, 0).xyz;
-                vec3 upPosition = texelFetch(uPositionBuffer, up, 0).xyz;
-                vec3 downPosition = texelFetch(uPositionBuffer, down, 0).xyz;
-
-                vec3 leftVec = leftPosition - position;
-                float leftDist = length(leftVec);
-                if (leftDist > MAX_STRUCTURAL) {
-                    velocity += leftVec * (1.0 - MAX_STRUCTURAL / leftDist) * MASS_FACTOR;
-                }
-
-                vec3 rightVec = rightPosition - position;
-                float rightDist = length(rightVec);
-                if (rightDist > MAX_STRUCTURAL) {
-                    velocity += rightVec * (1.0 - MAX_STRUCTURAL / rightDist) * MASS_FACTOR;
-                }
-
-                vec3 upVec = upPosition - position;
-                float upDist = length(upVec);
-                if (upDist > MAX_STRUCTURAL) {
-                    velocity += upVec * (1.0 - MAX_STRUCTURAL / upDist) * MASS_FACTOR;
-                }
-
-                vec3 downVec = downPosition - position;
-                float downDist = length(downVec);
-                if (downDist > MAX_STRUCTURAL) {
-                    velocity += downVec * (1.0 - MAX_STRUCTURAL / downDist) * MASS_FACTOR;
-                }
-
-                vec3 temp = position;
-                position += velocity;
-                oldPosition = temp;
+            // if (!all(equal(texelCoord, ivec2(0, 0))) && !all(equal(texelCoord, ivec2(maxTexelCoord.x, 0)))) {
+            if (texelCoord.x > 0) {
+                position += (position - oldPosition) * DAMPING + GRAVITY;
             }
 
             outPosition = position;
-            outOldPosition = oldPosition;
+            outOldPosition = temp;
         }
     </script>
+    <script id="update-structural-fs" type="x-fragment-shader">
+        #version 300 es
+        
+        precision highp float;
+
+        in vec2 vScreenUV;
+
+        uniform int modVal; // 0 or 1 to skip particles
+        uniform ivec2 dir;
+        uniform float structuralRest;
+
+        uniform sampler2D uPositionBuffer;
+        uniform sampler2D uOldPositionBuffer;
+
+        out vec3 outPosition;
+
+        void main() {
+            ivec2 dimensions = textureSize(uPositionBuffer, 0);
+            ivec2 maxTexelCoord = dimensions - 1;
+            ivec2 texelCoord = ivec2(vScreenUV * vec2(dimensions));
+            vec3 position = texelFetch(uPositionBuffer, texelCoord, 0).xyz;
+
+            int iDot = abs(texelCoord.x * dir.x) + abs(texelCoord.y * dir.y);
+            int neg = iDot % 2 == modVal ? 1 : -1;
+
+            // if (
+            //     !all(equal(texelCoord, ivec2(0, 0))) && 
+            //     !all(equal(texelCoord, ivec2(maxTexelCoord.x, 0))))
+            if (texelCoord.x > 0)
+            {
+                ivec2 otherCoord = max(ivec2(0, 0), min(texelCoord + dir * neg, maxTexelCoord));
+                vec3 otherPosition = texelFetch(uPositionBuffer, otherCoord, 0).xyz;
+                
+                vec3 diffVec = otherPosition - position;
+                float dist = length(diffVec);
+                if (dist > structuralRest) {
+                    position += diffVec * (1.0 - structuralRest / dist) * 0.5;
+                }
+            }
+
+            outPosition = position;
+        }
+    </script>
+    
     <script id="main-vs" type="x-vertex-shader">
         #version 300 es   
        
@@ -130,7 +136,7 @@
         
         void main() {
             vec2 textureDim = vec2(textureSize(uPositionBuffer, 0));
-            vColor = vec4(vec2(aTexelCoord) / textureDim, 0.0, 1.0);
+            vColor = vec4(vec2(aTexelCoord) / textureDim, 1.0, 1.0);
             gl_PointSize = 4.0;
             gl_Position = texelFetch(uPositionBuffer, aTexelCoord, 0);
         }
@@ -160,28 +166,39 @@
         .blendFunc(PicoGL.ONE, PicoGL.ONE_MINUS_SRC_ALPHA)
         .floatRenderTargets();
 
-        var DATA_TEXTURE_DIM = 20;
+        var DATA_TEXTURE_DIM = 40;
         var NUM_PARTICLES = DATA_TEXTURE_DIM * DATA_TEXTURE_DIM;
         var positionTextureData = new Float32Array(NUM_PARTICLES * 4);
         var uvData = new Int16Array(NUM_PARTICLES * 2);
 
         // Set up main program
-        var updateVsSource = document.getElementById("quad-vs").text.trim();
-        var updateFsSource = document.getElementById("update-fs").text.trim();
-        var updateProgram = app.createProgram(updateVsSource, updateFsSource);
-        var updateFramebuffer = app.createFramebuffer(DATA_TEXTURE_DIM, DATA_TEXTURE_DIM)
+        var quadVsSource = document.getElementById("quad-vs").text.trim();
+        var quadShader = app.createShader(PicoGL.VERTEX_SHADER, quadVsSource);
+
+        var updateForceFsSource = document.getElementById("update-force-fs").text.trim();
+        
+        var updateForceProgram = app.createProgram(quadShader, updateForceFsSource);
+        var updateForceFramebuffer = app.createFramebuffer(DATA_TEXTURE_DIM, DATA_TEXTURE_DIM)
         .colorTarget(0, { type: PicoGL.FLOAT })
         .colorTarget(1, { type: PicoGL.FLOAT });
 
+        var updateStructuralFsSource = document.getElementById("update-structural-fs").text.trim();
+        
+        var updateStructuralProgram = app.createProgram(quadShader, updateStructuralFsSource);
+        var updateStructuralFramebuffer = app.createFramebuffer(DATA_TEXTURE_DIM, DATA_TEXTURE_DIM)
+        .colorTarget(0, { type: PicoGL.FLOAT });
+
+        var structuralRest = 1 / DATA_TEXTURE_DIM;
+
         for (var i = 0; i < NUM_PARTICLES; ++i) {
-            var vec3i = i * 4;
+            var vec4i = i * 4;
             var vec2i = i * 2;
 
             var x = (i % DATA_TEXTURE_DIM);
             var y = Math.floor(i / DATA_TEXTURE_DIM);
 
-            positionTextureData[vec3i] = x / DATA_TEXTURE_DIM - 0.5;
-            positionTextureData[vec3i + 1] = y / DATA_TEXTURE_DIM;
+            positionTextureData[vec4i] = x / DATA_TEXTURE_DIM - 0.5;
+            positionTextureData[vec4i + 1] = y / DATA_TEXTURE_DIM;
 
             uvData[vec2i] = (i % DATA_TEXTURE_DIM);
             uvData[vec2i + 1] = Math.floor(i / DATA_TEXTURE_DIM);
@@ -207,8 +224,8 @@
             wrapT: PicoGL.CLAMP_TO_EDGE
         });
 
-        var positionTextureB = updateFramebuffer.colorTextures[0];
-        var oldPositionTextureB = updateFramebuffer.colorTextures[1];
+        var positionTextureB = updateForceFramebuffer.colorTextures[0];
+        var oldPositionTextureB = updateForceFramebuffer.colorTextures[1];
 
 
         // Set up main program
@@ -252,13 +269,41 @@
         };
 
         var readPositionTexture = positionTextureA;
-        var readVelocityTexture = oldPositionTextureA;
+        var readOldPositionTexture = oldPositionTextureA;
         var writePositionTexture = positionTextureB;
-        var writeVelocityTexture = oldPositionTextureB;
+        var writeOldPositionTexture = oldPositionTextureB;
 
-        var updateDrawCalls = [
-            app.createDrawCall(updateProgram, quadArray)
+        var updateForceDrawCalls = [
+            app.createDrawCall(updateForceProgram, quadArray)
             .texture("uPositionBuffer", readPositionTexture)
+        ];
+
+        var updateHorizontal1DrawCalls = [
+            app.createDrawCall(updateStructuralProgram, quadArray)
+            .uniform("structuralRest", structuralRest)
+            .uniform("modVal", 0)
+            .uniform("dir", new Int32Array([0, 1]))
+        ];
+
+        var updateHorizontal2DrawCalls = [
+            app.createDrawCall(updateStructuralProgram, quadArray)
+            .uniform("structuralRest", structuralRest)
+            .uniform("modVal", 1)
+            .uniform("dir", new Int32Array([0, 1]))
+        ];
+
+        var updateVertical1DrawCalls = [
+            app.createDrawCall(updateStructuralProgram, quadArray)
+            .uniform("structuralRest", structuralRest)
+            .uniform("modVal", 0)
+            .uniform("dir", new Int32Array([1, 0]))
+        ];
+
+        var updateVertical2DrawCalls = [
+            app.createDrawCall(updateStructuralProgram, quadArray)
+            .uniform("structuralRest", structuralRest)
+            .uniform("modVal", 1)
+            .uniform("dir", new Int32Array([1, 0]))
         ];
 
         var mainDrawcalls = [
@@ -272,32 +317,66 @@
 
             app.timerStart();
 
-            updateDrawCalls[0].texture("uPositionBuffer", readPositionTexture);
-            updateDrawCalls[0].texture("uOldPositionBuffer", readVelocityTexture);
-            updateFramebuffer.replaceTexture(0, writePositionTexture);
-            updateFramebuffer.replaceTexture(1, writeVelocityTexture);
-            mainDrawcalls[0].texture("uPositionBuffer", writePositionTexture);
+            updateForceDrawCalls[0].texture("uPositionBuffer", readPositionTexture);
+            updateForceDrawCalls[0].texture("uOldPositionBuffer", readOldPositionTexture);
+            updateForceFramebuffer.replaceTexture(0, writePositionTexture);
+            updateForceFramebuffer.replaceTexture(1, writeOldPositionTexture);
 
             // Main draw
-            app.drawFramebuffer(updateFramebuffer)
-            .drawCalls(updateDrawCalls)
+            app.drawFramebuffer(updateForceFramebuffer)
+            .drawCalls(updateForceDrawCalls)
             .clear()
-            .draw()
-            .defaultDrawFramebuffer()
+            .draw();
+
+            updateHorizontal1DrawCalls[0].texture("uPositionBuffer", writePositionTexture);
+            updateStructuralFramebuffer.replaceTexture(0, readPositionTexture);
+
+            app.drawFramebuffer(updateStructuralFramebuffer)
+            .drawCalls(updateHorizontal1DrawCalls)
+            .clear()
+            .draw();
+
+            updateHorizontal2DrawCalls[0].texture("uPositionBuffer", readPositionTexture);
+            updateStructuralFramebuffer.replaceTexture(0, writePositionTexture);
+
+            app.drawFramebuffer(updateStructuralFramebuffer)
+            .drawCalls(updateHorizontal2DrawCalls)
+            .clear()
+            .draw();
+
+            updateVertical1DrawCalls[0].texture("uPositionBuffer", writePositionTexture);
+            updateStructuralFramebuffer.replaceTexture(0, readPositionTexture);
+
+            app.drawFramebuffer(updateStructuralFramebuffer)
+            .drawCalls(updateVertical1DrawCalls)
+            .clear()
+            .draw();
+
+            updateVertical2DrawCalls[0].texture("uPositionBuffer", readPositionTexture);
+            updateStructuralFramebuffer.replaceTexture(0, writePositionTexture);
+
+            app.drawFramebuffer(updateStructuralFramebuffer)
+            .drawCalls(updateVertical2DrawCalls)
+            .clear()
+            .draw();
+
+            mainDrawcalls[0].texture("uPositionBuffer", writePositionTexture);
+
+            app.defaultDrawFramebuffer()
             .drawCalls(mainDrawcalls)
             .clear()
             .draw();
 
-            if (readPositionTexture === positionTextureA) {
-                readPositionTexture = positionTextureB;
-                readVelocityTexture = oldPositionTextureB;
-                writePositionTexture = positionTextureA;
-                writeVelocityTexture = oldPositionTextureA;
+            var tmp = readPositionTexture;
+            readPositionTexture = writePositionTexture;
+            writePositionTexture = tmp;
+
+            if (readOldPositionTexture === oldPositionTextureA) {
+                readOldPositionTexture = oldPositionTextureB;
+                writeOldPositionTexture = oldPositionTextureA;
             } else {
-                readPositionTexture = positionTextureA;
-                readVelocityTexture = oldPositionTextureA;
-                writePositionTexture = positionTextureB;
-                writeVelocityTexture = oldPositionTextureB;
+                readOldPositionTexture = oldPositionTextureA;
+                writeOldPositionTexture = oldPositionTextureB;
             }
 
             app.timerEnd();
