@@ -53,7 +53,7 @@
 
         precision highp float;
 
-        #define GRAVITY vec3(0.0, -0.0005, 0.0)
+        #define GRAVITY vec3(0.0, -0.0001, 0.0)
         #define DAMPING 0.99
 
         in vec2 vScreenUV;
@@ -72,8 +72,7 @@
             vec3 oldPosition = texelFetch(uOldPositionBuffer, texelCoord, 0).xyz;
             vec3 temp = position;
 
-            // if (!all(equal(texelCoord, ivec2(0, 0))) && !all(equal(texelCoord, ivec2(maxTexelCoord.x, 0)))) {
-            if (texelCoord.x > 0) {
+            if (!all(equal(texelCoord, ivec2(0, 0))) && !all(equal(texelCoord, ivec2(maxTexelCoord.x, 0)))) {
                 position += (position - oldPosition) * DAMPING + GRAVITY;
             }
 
@@ -106,18 +105,20 @@
             int iDot = abs(texelCoord.x * dir.x) + abs(texelCoord.y * dir.y);
             int neg = iDot % 2 == modVal ? 1 : -1;
 
-            // if (
-            //     !all(equal(texelCoord, ivec2(0, 0))) && 
-            //     !all(equal(texelCoord, ivec2(maxTexelCoord.x, 0))))
-            if (texelCoord.x > 0)
+            if (
+                !all(equal(texelCoord, ivec2(0, 0))) && 
+                !all(equal(texelCoord, ivec2(maxTexelCoord.x, 0))))
             {
                 ivec2 otherCoord = max(ivec2(0, 0), min(texelCoord + dir * neg, maxTexelCoord));
-                vec3 otherPosition = texelFetch(uPositionBuffer, otherCoord, 0).xyz;
-                
-                vec3 diffVec = otherPosition - position;
-                float dist = length(diffVec);
-                if (dist > structuralRest) {
-                    position += diffVec * (1.0 - structuralRest / dist) * 0.5;
+
+                if (otherCoord.x >= 0 && otherCoord.y >= 0 && otherCoord.x < dimensions.x && otherCoord.y < dimensions.y) {
+                    vec3 otherPosition = texelFetch(uPositionBuffer, otherCoord, 0).xyz;
+                    
+                    vec3 diffVec = otherPosition - position;
+                    float dist = length(diffVec);
+                    if (dist > structuralRest) {
+                        position += diffVec * (1.0 - structuralRest / dist) * 0.5;
+                    }
                 }
             }
 
@@ -179,14 +180,14 @@
         
         var updateForceProgram = app.createProgram(quadShader, updateForceFsSource);
         var updateForceFramebuffer = app.createFramebuffer(DATA_TEXTURE_DIM, DATA_TEXTURE_DIM)
-        .colorTarget(0, { type: PicoGL.FLOAT })
-        .colorTarget(1, { type: PicoGL.FLOAT });
+        .colorTarget(0, { type: PicoGL.FLOAT, internalFormat: PicoGL.RGBA32F })
+        .colorTarget(1, { type: PicoGL.FLOAT, internalFormat: PicoGL.RGBA32F });
 
         var updateStructuralFsSource = document.getElementById("update-structural-fs").text.trim();
         
         var updateStructuralProgram = app.createProgram(quadShader, updateStructuralFsSource);
         var updateStructuralFramebuffer = app.createFramebuffer(DATA_TEXTURE_DIM, DATA_TEXTURE_DIM)
-        .colorTarget(0, { type: PicoGL.FLOAT });
+        .colorTarget(0, { type: PicoGL.FLOAT, internalFormat: PicoGL.RGBA32F });
 
         var structuralRest = 1 / DATA_TEXTURE_DIM;
 
@@ -198,7 +199,7 @@
             var y = Math.floor(i / DATA_TEXTURE_DIM);
 
             positionTextureData[vec4i] = x / DATA_TEXTURE_DIM - 0.5;
-            positionTextureData[vec4i + 1] = y / DATA_TEXTURE_DIM;
+            positionTextureData[vec4i + 1] = y / DATA_TEXTURE_DIM + 0.8;
 
             uvData[vec2i] = (i % DATA_TEXTURE_DIM);
             uvData[vec2i + 1] = Math.floor(i / DATA_TEXTURE_DIM);
@@ -206,7 +207,7 @@
 
         var positionTextureA = app.createTexture2D(positionTextureData, DATA_TEXTURE_DIM, DATA_TEXTURE_DIM, {
             format: PicoGL.RGBA,
-            internalFormat: PicoGL.RGBA16f,
+            internalFormat: PicoGL.RGBA32F,
             type: PicoGL.FLOAT,
             minFilter: PicoGL.NEAREST,
             magFilter: PicoGL.NEAREST,
@@ -216,7 +217,7 @@
 
         var oldPositionTextureA = app.createTexture2D(positionTextureData, DATA_TEXTURE_DIM, DATA_TEXTURE_DIM, {
             format: PicoGL.RGBA,
-            internalFormat: PicoGL.RGBA16f,
+            internalFormat: PicoGL.RGBA32F,
             type: PicoGL.FLOAT,
             minFilter: PicoGL.NEAREST,
             magFilter: PicoGL.NEAREST,
