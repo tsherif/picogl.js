@@ -195,7 +195,7 @@
             var numTextures = image.height / textureHeight;
 
             // CREATE TEXTURE ARRAY
-            var texture = app.createTextureArray(image, textureWidth, textureHeight, numTextures);
+            var texture = app.createTextureArray(image, textureWidth, textureHeight, numTextures, { flipY: true });
 
             // DRAW CALL
             var drawCall = app.createDrawCall(program, boxArray)

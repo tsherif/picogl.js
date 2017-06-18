@@ -209,7 +209,7 @@
         var image = new Image();
 
         image.onload = function() {
-            var texture = app.createTexture2D(image);
+            var texture = app.createTexture2D(image, { flipY: true });
 
             // DRAW CALLS
             var shadowDrawCalls = new Array(boxes.length);

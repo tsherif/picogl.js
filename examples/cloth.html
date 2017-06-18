@@ -280,7 +280,7 @@
         .depthTest()
         .floatRenderTargets();
 
-        var DATA_TEXTURE_DIM = 80;
+        var DATA_TEXTURE_DIM = 100;
         var NUM_PARTICLES = DATA_TEXTURE_DIM * DATA_TEXTURE_DIM;
         var positionTextureData = new Float32Array(NUM_PARTICLES * 4);
         var uvData = new Float32Array(NUM_PARTICLES * 2);
@@ -384,8 +384,8 @@
         .attributeBuffer(1, uv)
         .indexBuffer(indices);
 
-        var ballPosition = vec3.fromValues(0, 0.1, -0.8);
-        var ballRadius = 0.2;
+        var ballPosition = vec3.fromValues(0, 0.15, -0.8);
+        var ballRadius = 0.12;
         var ballGeo = utils.createSphere({radius: ballRadius});
         var ballPositions = app.createVertexBuffer(PicoGL.FLOAT, 3, ballGeo.positions);
         var ballNormals = app.createVertexBuffer(PicoGL.FLOAT, 3, ballGeo.normals);

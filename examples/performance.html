@@ -170,7 +170,7 @@
 
         image.onload = function() {
             // CREATE TEXTURE
-            var texture = app.createTexture2D(image);
+            var texture = app.createTexture2D(image, { flipY: true });
 
             // SINGLE DRAW CALL FOR ALL BOXES
             var boxes = new Array(NUM_BOXES);

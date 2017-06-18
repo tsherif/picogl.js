@@ -282,7 +282,7 @@
 
         image.onload = function() {
 
-            var texture = app.createTexture2D(image);
+            var texture = app.createTexture2D(image, { flipY: true });
 
             var accumDrawCall = app.createDrawCall(accumProgram, sphereArray)
             .uniformBlock("SceneUniforms", sceneUniforms)
