@@ -61,11 +61,13 @@
         precision highp float;
 
         #define GRAVITY vec3(0.0, -0.0002, 0.0)
+        #define WIND vec3(0.0, 0.0, 0.0001)
         #define DAMPING 0.99
 
         in vec2 vScreenUV;
 
         uniform sampler2D uPositionBuffer;
+        uniform sampler2D uNormalBuffer;
         uniform sampler2D uOldPositionBuffer;
 
         layout(location=0) out vec3 outPosition;
@@ -76,11 +78,14 @@
             ivec2 maxTexelCoord = dimensions - 1;
             ivec2 texelCoord = ivec2(vScreenUV * vec2(dimensions));
             vec3 position = texelFetch(uPositionBuffer, texelCoord, 0).xyz;
+            vec3 normal = texelFetch(uNormalBuffer, texelCoord, 0).xyz;
             vec3 oldPosition = texelFetch(uOldPositionBuffer, texelCoord, 0).xyz;
             vec3 temp = position;
 
             if (!all(equal(texelCoord, ivec2(0, 0))) && !all(equal(texelCoord, ivec2(maxTexelCoord.x, 0)))) {
                 position += (position - oldPosition) * DAMPING + GRAVITY;
+                float wDotN = dot(WIND, normal);
+                position += abs(wDotN) * sign(wDotN) * normal;
             }
 
             outPosition = position;
@@ -152,10 +157,60 @@
             vec3 diff = position - ball.position.xyz;
             float dist = length(diff);
             if (dist < ball.radius) {
-                position += (ball.radius - dist) * normalize(diff) + 0.001;
+                position += (ball.radius - dist) * normalize(diff) + 0.0015;
             }
 
             outPosition = position;
+        }
+    </script>
+
+    <script id="update-normal-fs" type="x-fragment-shader">
+        #version 300 es
+        
+        precision highp float;
+
+        in vec2 vScreenUV;
+
+        uniform sampler2D uPositionBuffer;
+
+        out vec3 outNormal;
+
+        void main() {
+            ivec2 dimensions = textureSize(uPositionBuffer, 0);
+            ivec2 texelCoord = ivec2(vScreenUV * vec2(dimensions));
+            vec3 position = texelFetch(uPositionBuffer, texelCoord, 0).xyz;
+
+            vec3 normal = vec3(0.0);
+
+            if (texelCoord.x > 0) {
+                vec3 left = texelFetch(uPositionBuffer, texelCoord - ivec2(1, 0), 0).xyz;
+
+                if (texelCoord.y > 0) {
+                    vec3 down = texelFetch(uPositionBuffer, texelCoord - ivec2(0, 1), 0).xyz;
+                    normal += normalize(cross(left - position, down - position));
+                }
+
+                if (texelCoord.y < dimensions.y - 1) {
+                    vec3 up = texelFetch(uPositionBuffer, texelCoord + ivec2(0, 1), 0).xyz;
+                    normal += normalize(cross(up - position, left - position));
+                }
+            }
+
+            if (texelCoord.x < dimensions.x - 1) {
+                vec3 right = texelFetch(uPositionBuffer, texelCoord + ivec2(1, 0), 0).xyz;
+
+                if (texelCoord.y > 0) {
+                    vec3 down = texelFetch(uPositionBuffer, texelCoord - ivec2(0, 1), 0).xyz;
+                    normal += normalize(cross(down - position, right - position));
+                }
+
+                if (texelCoord.y < dimensions.y - 1) {
+                    vec3 up = texelFetch(uPositionBuffer, texelCoord + ivec2(0, 1), 0).xyz;
+                    normal += normalize(cross(right - position, up - position));
+                }
+            }
+
+            outNormal = normalize(normal);
         }
     </script>
     
@@ -196,6 +251,7 @@
         layout(location=1) in vec2 aUV;
  
         uniform sampler2D uPositionBuffer;
+        uniform sampler2D uNormalBuffer;
 
         uniform SceneUniforms {
             mat4 viewProj;
@@ -209,39 +265,9 @@
         void main() {
             ivec2 textureDim = textureSize(uPositionBuffer, 0);
             vec3 position = texelFetch(uPositionBuffer, aTexelCoord, 0).xyz;
-            vec3 normal = vec3(0.0);
-
-            if (aTexelCoord.x > 0) {
-                vec3 left = texelFetch(uPositionBuffer, aTexelCoord - ivec2(1, 0), 0).xyz;
-
-                if (aTexelCoord.y > 0) {
-                    vec3 down = texelFetch(uPositionBuffer, aTexelCoord - ivec2(0, 1), 0).xyz;
-                    normal += normalize(cross(left - position, down - position));
-                }
-
-                if (aTexelCoord.y < textureDim.y - 1) {
-                    vec3 up = texelFetch(uPositionBuffer, aTexelCoord + ivec2(0, 1), 0).xyz;
-                    normal += normalize(cross(up - position, left - position));
-                }
-            }
-
-            if (aTexelCoord.x < textureDim.x - 1) {
-                vec3 right = texelFetch(uPositionBuffer, aTexelCoord + ivec2(1, 0), 0).xyz;
-
-                if (aTexelCoord.y > 0) {
-                    vec3 down = texelFetch(uPositionBuffer, aTexelCoord - ivec2(0, 1), 0).xyz;
-                    normal += normalize(cross(down - position, right - position));
-                }
-
-                if (aTexelCoord.y < textureDim.y - 1) {
-                    vec3 up = texelFetch(uPositionBuffer, aTexelCoord + ivec2(0, 1), 0).xyz;
-                    normal += normalize(cross(right - position, up - position));
-                }
-            }
-
 
             vPosition = position;
-            vNormal = normalize(normal);
+            vNormal = texelFetch(uNormalBuffer, aTexelCoord, 0).xyz;
             vUV = aUV;
             gl_PointSize = 4.0;
             gl_Position = viewProj * vec4(position, 1.0);
@@ -290,6 +316,7 @@
         var DATA_TEXTURE_DIM = 100;
         var NUM_PARTICLES = DATA_TEXTURE_DIM * DATA_TEXTURE_DIM;
         var positionTextureData = new Float32Array(NUM_PARTICLES * 4);
+        var normalTextureData = new Float32Array(NUM_PARTICLES * 4);
         var uvData = new Float32Array(NUM_PARTICLES * 2);
         var dataTextureIndex = new Int16Array(NUM_PARTICLES * 2);
         var indexData = new Uint16Array((DATA_TEXTURE_DIM - 1) * (DATA_TEXTURE_DIM - 1) * 6);
@@ -311,6 +338,9 @@
         var updateCollisionFsSource = document.getElementById("update-collision-fs").text.trim();
         var updateCollisionProgram = app.createProgram(quadShader, updateCollisionFsSource);
         
+        var updateNormalFsSource = document.getElementById("update-normal-fs").text.trim();
+        var updateNormalProgram = app.createProgram(quadShader, updateNormalFsSource);
+
         var updateFramebuffer = app.createFramebuffer(DATA_TEXTURE_DIM, DATA_TEXTURE_DIM)
         .colorTarget(0, { type: PicoGL.FLOAT, internalFormat: PicoGL.RGBA32F });
 
@@ -330,7 +360,8 @@
 
             positionTextureData[vec4i] = u - 0.5;
             positionTextureData[vec4i + 1] = v + 0.8;
-            positionTextureData[vec4i + 2] = Math.random() * 0.2 - 0.1;
+
+            normalTextureData[vec4i + 2] = 1;
 
             uvData[vec2i] = u;
             uvData[vec2i + 1] = v;
@@ -372,6 +403,16 @@
         var positionTextureB = updateForceFramebuffer.colorTextures[0];
         var oldPositionTextureB = updateForceFramebuffer.colorTextures[1];
 
+        var normalTexture = app.createTexture2D(normalTextureData, DATA_TEXTURE_DIM, DATA_TEXTURE_DIM, {
+            format: PicoGL.RGBA,
+            internalFormat: PicoGL.RGBA32F,
+            type: PicoGL.FLOAT,
+            minFilter: PicoGL.NEAREST,
+            magFilter: PicoGL.NEAREST,
+            wrapS: PicoGL.CLAMP_TO_EDGE,
+            wrapT: PicoGL.CLAMP_TO_EDGE
+        });
+
         // Set up main program
         var phongSource = document.getElementById("main-fs").text.trim();
         var phongShader = app.createShader(PicoGL.FRAGMENT_SHADER, phongSource);
@@ -391,7 +432,7 @@
         .attributeBuffer(1, uv)
         .indexBuffer(indices);
 
-        var ballPosition = vec3.fromValues(0, 0.15, -0.8);
+        var ballPosition = vec3.fromValues(0, 0.17, -0.8);
         var ballRadius = 0.12;
         var ballGeo = utils.createSphere({radius: ballRadius});
         var ballPositions = app.createVertexBuffer(PicoGL.FLOAT, 3, ballGeo.positions);
@@ -431,7 +472,7 @@
         mat4.perspective(projMatrix, Math.PI / 2, canvas.width / canvas.height, 0.1, 2.0);
 
         var viewMatrix = mat4.create();
-        var eyePosition = vec3.fromValues(0.7, 0.8, 0.8);
+        var eyePosition = vec3.fromValues(0.5, 0.8, 1.2);
         mat4.lookAt(viewMatrix, eyePosition, vec3.fromValues(0, 0.2, 0), vec3.fromValues(0, 1, 0));
 
         var viewProjMatrix = mat4.create();
@@ -464,6 +505,7 @@
         var updateForceDrawCalls = [
             app.createDrawCall(updateForceProgram, quadArray)
             .texture("uPositionBuffer", readPositionTexture)
+            .texture("uNormalBuffer", normalTexture)
         ];
 
         var updateHorizontal1DrawCalls = [
@@ -527,6 +569,10 @@
             .uniformBlock("BallUniforms", ballUniforms)
         ];
 
+        var updateNormalDrawCalls = [
+            app.createDrawCall(updateNormalProgram, quadArray)
+        ];
+
         var image = new Image();
 
         image.onload = function() {
@@ -535,7 +581,8 @@
             var mainDrawcalls = [
                 app.createDrawCall(mainProgram, particleArray)
                 .uniformBlock("SceneUniforms", sceneUniformBuffer)
-                .texture("tex", texture),
+                .texture("tex", texture)
+                .texture("uNormalBuffer", normalTexture),
                 app.createDrawCall(ballProgram, ballArray)
                 .uniformBlock("SceneUniforms", sceneUniformBuffer)
                 .uniformBlock("BallUniforms", ballUniforms)
@@ -623,7 +670,7 @@
 
                 ballPosition[2] += ballIncrement;
 
-                if (ballPosition[2] > 0.8 || ballPosition[2] < -0.8) {
+                if (ballPosition[2] > 0.9 || ballPosition[2] < -0.9) {
                     ballIncrement *= -1;
                 }
 
@@ -633,6 +680,13 @@
                 updateFramebuffer.replaceTexture(0, readPositionTexture);
 
                 app.drawCalls(updateCollisionDrawCalls)
+                .clear()
+                .draw();
+
+                updateNormalDrawCalls[0].texture("uPositionBuffer", readPositionTexture);
+                updateFramebuffer.replaceTexture(0, normalTexture);
+
+                app.drawCalls(updateNormalDrawCalls)
                 .clear()
                 .draw();
 
