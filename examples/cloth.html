@@ -99,9 +99,11 @@
 
         in vec2 vScreenUV;
 
-        uniform int modVal; // 0 or 1 to skip particles
-        uniform ivec2 dir;
-        uniform float restDistance;
+        // uModVal and dir used to select the direction
+        // to look for the neighbour we're going to check
+        uniform int uModVal;
+        uniform ivec2 uDir;
+        uniform float uRestDistance;
 
         uniform sampler2D uPositionBuffer;
 
@@ -112,19 +114,19 @@
             ivec2 texelCoord = ivec2(vScreenUV * vec2(dimensions));
             vec3 position = texelFetch(uPositionBuffer, texelCoord, 0).xyz;
 
-            int iDot = abs(texelCoord.x * dir.x) + abs(texelCoord.y * dir.y);
-            int neg = iDot % 2 == modVal ? 1 : -1;
+            int iDot = abs(texelCoord.x * uDir.x) + abs(texelCoord.y * uDir.y);
+            int neg = iDot % 2 == uModVal ? 1 : -1;
 
             if (!all(equal(texelCoord, ivec2(0, 0))) && !all(equal(texelCoord, ivec2(dimensions.x - 1, 0)))) {
-                ivec2 otherCoord = texelCoord + dir * neg;
+                ivec2 otherCoord = texelCoord + uDir * neg;
 
                 if (all(greaterThanEqual(otherCoord, ivec2(0, 0))) && all(lessThan(otherCoord, dimensions))) {
                     vec3 otherPosition = texelFetch(uPositionBuffer, otherCoord, 0).xyz;
                     
                     vec3 diffVec = otherPosition - position;
                     float dist = length(diffVec);
-                    if (dist > restDistance) {
-                        position += diffVec * (1.0 - restDistance / dist) * 0.5;
+                    if (dist > uRestDistance) {
+                        position += diffVec * (1.0 - uRestDistance / dist) * 0.5;
                     }
                 }
             }
@@ -217,10 +219,12 @@
     <script id="ball-vs" type="x-vertex-shader">
         #version 300 es
 
-        layout(location=0) in vec3 position;
-        layout(location=1) in vec3 normal;
+        layout(location=0) in vec3 aPosition;
+        layout(location=1) in vec3 aNormal;
 
-        layout(std140) uniform BallUniforms {
+        layout(std140) uniform; 
+
+        uniform BallUniforms {
             vec4 position;
             float radius;
         } ball;
@@ -235,9 +239,9 @@
         out vec3 vNormal;
 
         void main() {
-            vPosition = position + ball.position.xyz;
+            vPosition = aPosition + ball.position.xyz;
             vUV = vec2(0.0, 0.0);
-            vNormal = normal;
+            vNormal = aNormal;
 
             gl_Position = viewProj * vec4(vPosition, 1.0);
         }
@@ -253,7 +257,7 @@
         uniform sampler2D uPositionBuffer;
         uniform sampler2D uNormalBuffer;
 
-        uniform SceneUniforms {
+        layout(std140, column_major) uniform  SceneUniforms {
             mat4 viewProj;
             vec4 lightPosition;
         };
@@ -263,7 +267,6 @@
         out vec3 vNormal;
         
         void main() {
-            ivec2 textureDim = textureSize(uPositionBuffer, 0);
             vec3 position = texelFetch(uPositionBuffer, aTexelCoord, 0).xyz;
 
             vPosition = position;
@@ -277,14 +280,12 @@
         #version 300 es
         precision highp float;
 
-        layout(std140, column_major) uniform;
-
-        uniform SceneUniforms {
+        layout(std140, column_major) uniform SceneUniforms {
             mat4 viewProj;
             vec4 lightPosition;
         };
 
-        uniform sampler2D tex;
+        uniform sampler2D uDiffuse;
         
         in vec3 vPosition;
         in vec2 vUV;
@@ -292,7 +293,7 @@
 
         out vec4 fragColor;
         void main() {
-            vec3 color = texture(tex, vUV).rgb;
+            vec3 color = texture(uDiffuse, vUV).rgb;
 
             vec3 normal = normalize(vNormal);
             vec3 lightVec = -normalize(vPosition - lightPosition.xyz);
@@ -510,58 +511,58 @@
 
         var updateHorizontal1DrawCalls = [
             app.createDrawCall(updateConstraintProgram, quadArray)
-            .uniform("restDistance", structuralRest)
-            .uniform("modVal", 0)
-            .uniform("dir", new Int32Array([0, 1]))
+            .uniform("uRestDistance", structuralRest)
+            .uniform("uModVal", 0)
+            .uniform("uDir", new Int32Array([0, 1]))
         ];
 
         var updateHorizontal2DrawCalls = [
             app.createDrawCall(updateConstraintProgram, quadArray)
-            .uniform("restDistance", structuralRest)
-            .uniform("modVal", 1)
-            .uniform("dir", new Int32Array([0, 1]))
+            .uniform("uRestDistance", structuralRest)
+            .uniform("uModVal", 1)
+            .uniform("uDir", new Int32Array([0, 1]))
         ];
 
         var updateVertical1DrawCalls = [
             app.createDrawCall(updateConstraintProgram, quadArray)
-            .uniform("restDistance", structuralRest)
-            .uniform("modVal", 0)
-            .uniform("dir", new Int32Array([1, 0]))
+            .uniform("uRestDistance", structuralRest)
+            .uniform("uModVal", 0)
+            .uniform("uDir", new Int32Array([1, 0]))
         ];
 
         var updateVertical2DrawCalls = [
             app.createDrawCall(updateConstraintProgram, quadArray)
-            .uniform("restDistance", structuralRest)
-            .uniform("modVal", 1)
-            .uniform("dir", new Int32Array([1, 0]))
+            .uniform("uRestDistance", structuralRest)
+            .uniform("uModVal", 1)
+            .uniform("uDir", new Int32Array([1, 0]))
         ];
 
         var updateShear1DrawCalls = [
             app.createDrawCall(updateConstraintProgram, quadArray)
-            .uniform("restDistance", shearRest)
-            .uniform("modVal", 0)
-            .uniform("dir", new Int32Array([1, -1]))
+            .uniform("uRestDistance", shearRest)
+            .uniform("uModVal", 0)
+            .uniform("uDir", new Int32Array([1, -1]))
         ];
 
         var updateShear2DrawCalls = [
             app.createDrawCall(updateConstraintProgram, quadArray)
-            .uniform("restDistance", shearRest)
-            .uniform("modVal", 1)
-            .uniform("dir", new Int32Array([1, 1]))
+            .uniform("uRestDistance", shearRest)
+            .uniform("uModVal", 1)
+            .uniform("uDir", new Int32Array([1, 1]))
         ];
 
         var updateShear3DrawCalls = [
             app.createDrawCall(updateConstraintProgram, quadArray)
-            .uniform("restDistance", shearRest)
-            .uniform("modVal", 0)
-            .uniform("dir", new Int32Array([1, -1]))
+            .uniform("uRestDistance", shearRest)
+            .uniform("uModVal", 0)
+            .uniform("uDir", new Int32Array([1, -1]))
         ];
 
         var updateShear4DrawCalls = [
             app.createDrawCall(updateConstraintProgram, quadArray)
-            .uniform("restDistance", shearRest)
-            .uniform("modVal", 1)
-            .uniform("dir", new Int32Array([1, 1]))
+            .uniform("uRestDistance", shearRest)
+            .uniform("uModVal", 1)
+            .uniform("uDir", new Int32Array([1, 1]))
         ];
 
         var updateCollisionDrawCalls = [
@@ -581,12 +582,12 @@
             var mainDrawcalls = [
                 app.createDrawCall(mainProgram, particleArray)
                 .uniformBlock("SceneUniforms", sceneUniformBuffer)
-                .texture("tex", texture)
+                .texture("uDiffuse", texture)
                 .texture("uNormalBuffer", normalTexture),
                 app.createDrawCall(ballProgram, ballArray)
                 .uniformBlock("SceneUniforms", sceneUniformBuffer)
                 .uniformBlock("BallUniforms", ballUniforms)
-                .texture("tex", ballTexture)
+                .texture("uDiffuse", ballTexture)
             ];
 
             var ballIncrement = 0.005;
