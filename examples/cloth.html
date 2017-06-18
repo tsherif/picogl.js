@@ -129,13 +129,45 @@
  
         uniform sampler2D uPositionBuffer;
 
-        out vec4 vColor;
+        out vec3 vNormal;
         
         void main() {
-            vec2 textureDim = vec2(textureSize(uPositionBuffer, 0));
-            vColor = vec4(vec2(aTexelCoord) / textureDim, 1.0, 1.0);
+            ivec2 textureDim = textureSize(uPositionBuffer, 0);
+            vec3 position = texelFetch(uPositionBuffer, aTexelCoord, 0).xyz;
+
+            vec3 normal = vec3(0.0);
+
+            if (aTexelCoord.x > 0) {
+                vec3 left = texelFetch(uPositionBuffer, aTexelCoord - ivec2(1, 0), 0).xyz;
+
+                if (aTexelCoord.y > 0) {
+                    vec3 down = texelFetch(uPositionBuffer, aTexelCoord - ivec2(0, 1), 0).xyz;
+                    normal += normalize(cross(left - position, down - position));
+                }
+
+                if (aTexelCoord.y < textureDim.y - 1) {
+                    vec3 up = texelFetch(uPositionBuffer, aTexelCoord + ivec2(0, 1), 0).xyz;
+                    normal += normalize(cross(up - position, left - position));
+                }
+            }
+
+            if (aTexelCoord.x < textureDim.x - 1) {
+                vec3 right = texelFetch(uPositionBuffer, aTexelCoord + ivec2(1, 0), 0).xyz;
+
+                if (aTexelCoord.y > 0) {
+                    vec3 down = texelFetch(uPositionBuffer, aTexelCoord - ivec2(0, 1), 0).xyz;
+                    normal += normalize(cross(down - position, right - position));
+                }
+
+                if (aTexelCoord.y < textureDim.y - 1) {
+                    vec3 up = texelFetch(uPositionBuffer, aTexelCoord + ivec2(0, 1), 0).xyz;
+                    normal += normalize(cross(right - position, up - position));
+                }
+            }
+
+            vNormal = normalize(normal);
             gl_PointSize = 4.0;
-            gl_Position = texelFetch(uPositionBuffer, aTexelCoord, 0);
+            gl_Position = vec4(position, 1.0);
         }
     </script>
     <script id="main-fs" type="x-fragment-shader">
@@ -143,11 +175,11 @@
         
         precision highp float;
 
-        in vec4 vColor;
+        in vec3 vNormal;
 
         out vec4 fragColor;
         void main() {
-            fragColor = vColor;
+            fragColor = vec4(abs(vNormal), 1.0);
         }
     </script>
     <script type="text/javascript">
@@ -199,6 +231,7 @@
 
             positionTextureData[vec4i] = x / DATA_TEXTURE_DIM - 0.5;
             positionTextureData[vec4i + 1] = y / DATA_TEXTURE_DIM + 0.8;
+            positionTextureData[vec4i + 2] = Math.random() * 0.2 - 0.1;
 
             uvData[vec2i] = (i % DATA_TEXTURE_DIM);
             uvData[vec2i + 1] = Math.floor(i / DATA_TEXTURE_DIM);
