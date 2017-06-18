@@ -53,7 +53,7 @@
 
         precision highp float;
 
-        #define GRAVITY vec3(0.0, -0.0001, 0.0)
+        #define GRAVITY vec3(0.0, -0.0002, 0.0)
         #define DAMPING 0.99
 
         in vec2 vScreenUV;
@@ -129,12 +129,17 @@
  
         uniform sampler2D uPositionBuffer;
 
+        uniform SceneUniforms {
+            mat4 viewProj;
+            vec4 lightPosition;
+        };
+
+        out vec3 vPosition;
         out vec3 vNormal;
         
         void main() {
             ivec2 textureDim = textureSize(uPositionBuffer, 0);
             vec3 position = texelFetch(uPositionBuffer, aTexelCoord, 0).xyz;
-
             vec3 normal = vec3(0.0);
 
             if (aTexelCoord.x > 0) {
@@ -165,21 +170,39 @@
                 }
             }
 
+
             vNormal = normalize(normal);
+            vPosition = position;
             gl_PointSize = 4.0;
-            gl_Position = vec4(position, 1.0);
+            gl_Position = viewProj * vec4(position, 1.0);
         }
     </script>
     <script id="main-fs" type="x-fragment-shader">
-        #version 300 es   
-        
+        #version 300 es
         precision highp float;
 
+        layout(std140, column_major) uniform;
+
+        uniform SceneUniforms {
+            mat4 viewProj;
+            vec4 lightPosition;
+        };
+
+        // uniform sampler2D tex;
+        
+        in vec3 vPosition;
+        // in vec2 vUV;
         in vec3 vNormal;
 
         out vec4 fragColor;
         void main() {
-            fragColor = vec4(abs(vNormal), 1.0);
+            vec3 color = vec3(0.7);
+
+            vec3 normal = normalize(vNormal);
+            vec3 lightVec = -normalize(vPosition - lightPosition.xyz);
+            float diffuse = abs(dot(lightVec, normal));
+            float ambient = 0.1;
+            fragColor = vec4(color * (diffuse + ambient), 1.0);
         }
     </script>
     <script type="text/javascript">
@@ -195,7 +218,7 @@
         .blendFunc(PicoGL.ONE, PicoGL.ONE_MINUS_SRC_ALPHA)
         .floatRenderTargets();
 
-        var DATA_TEXTURE_DIM = 40;
+        var DATA_TEXTURE_DIM = 80;
         var NUM_PARTICLES = DATA_TEXTURE_DIM * DATA_TEXTURE_DIM;
         var positionTextureData = new Float32Array(NUM_PARTICLES * 4);
         var uvData = new Int16Array(NUM_PARTICLES * 2);
@@ -299,17 +322,29 @@
         mat4.perspective(projMatrix, Math.PI / 2, canvas.width / canvas.height, 0.1, 2.0);
 
         var viewMatrix = mat4.create();
-        var eyePosition = vec3.fromValues(1, 1, 1);
-        mat4.lookAt(viewMatrix, eyePosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
+        var eyePosition = vec3.fromValues(0.5, 0.7, 0.8);
+        mat4.lookAt(viewMatrix, eyePosition, vec3.fromValues(0, 0.2, 0), vec3.fromValues(0, 1, 0));
 
         var viewProjMatrix = mat4.create();
         mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
+
+        var lightPosition = vec3.fromValues(1, 1, 0.5);
+
+        var sceneUniformBuffer = app.createUniformBuffer([
+            PicoGL.FLOAT_MAT4,
+            PicoGL.FLOAT_VEC4
+        ])
+        .set(0, viewProjMatrix)
+        .set(1, lightPosition)
+        .update();
 
         window.onresize = function() {
             app.resize(window.innerWidth, window.innerHeight);
 
             mat4.perspective(projMatrix, Math.PI / 2, app.width / app.height, 0.1, 10.0);
             mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
+            
+            sceneUniformBuffer.set(0, viewProjMatrix).update();
         };
 
         var readPositionTexture = positionTextureA;
@@ -380,6 +415,7 @@
 
         var mainDrawcalls = [
             app.createDrawCall(mainProgram, particleArray)
+            .uniformBlock("SceneUniforms", sceneUniformBuffer)
         ];
 
         function draw() {
@@ -400,62 +436,65 @@
             .clear()
             .draw();
 
-            updateHorizontal1DrawCalls[0].texture("uPositionBuffer", writePositionTexture);
-            updateConstraintFramebuffer.replaceTexture(0, readPositionTexture);
 
-            app.drawFramebuffer(updateConstraintFramebuffer)
-            .drawCalls(updateHorizontal1DrawCalls)
-            .clear()
-            .draw();
+            for (var i = 0; i < 20; ++i) {
+                updateHorizontal1DrawCalls[0].texture("uPositionBuffer", writePositionTexture);
+                updateConstraintFramebuffer.replaceTexture(0, readPositionTexture);
 
-            updateHorizontal2DrawCalls[0].texture("uPositionBuffer", readPositionTexture);
-            updateConstraintFramebuffer.replaceTexture(0, writePositionTexture);
+                app.drawFramebuffer(updateConstraintFramebuffer)
+                .drawCalls(updateHorizontal1DrawCalls)
+                .clear()
+                .draw();
 
-            app.drawCalls(updateHorizontal2DrawCalls)
-            .clear()
-            .draw();
+                updateHorizontal2DrawCalls[0].texture("uPositionBuffer", readPositionTexture);
+                updateConstraintFramebuffer.replaceTexture(0, writePositionTexture);
 
-            updateVertical1DrawCalls[0].texture("uPositionBuffer", writePositionTexture);
-            updateConstraintFramebuffer.replaceTexture(0, readPositionTexture);
+                app.drawCalls(updateHorizontal2DrawCalls)
+                .clear()
+                .draw();
 
-            app.drawCalls(updateVertical1DrawCalls)
-            .clear()
-            .draw();
+                updateVertical1DrawCalls[0].texture("uPositionBuffer", writePositionTexture);
+                updateConstraintFramebuffer.replaceTexture(0, readPositionTexture);
 
-            updateVertical2DrawCalls[0].texture("uPositionBuffer", readPositionTexture);
-            updateConstraintFramebuffer.replaceTexture(0, writePositionTexture);
+                app.drawCalls(updateVertical1DrawCalls)
+                .clear()
+                .draw();
 
-            app.drawCalls(updateVertical2DrawCalls)
-            .clear()
-            .draw();
+                updateVertical2DrawCalls[0].texture("uPositionBuffer", readPositionTexture);
+                updateConstraintFramebuffer.replaceTexture(0, writePositionTexture);
 
-            updateShear1DrawCalls[0].texture("uPositionBuffer", writePositionTexture);
-            updateConstraintFramebuffer.replaceTexture(0, readPositionTexture);
+                app.drawCalls(updateVertical2DrawCalls)
+                .clear()
+                .draw();
 
-            app.drawCalls(updateShear1DrawCalls)
-            .clear()
-            .draw();
+                updateShear1DrawCalls[0].texture("uPositionBuffer", writePositionTexture);
+                updateConstraintFramebuffer.replaceTexture(0, readPositionTexture);
 
-            updateShear2DrawCalls[0].texture("uPositionBuffer", readPositionTexture);
-            updateConstraintFramebuffer.replaceTexture(0, writePositionTexture);
+                app.drawCalls(updateShear1DrawCalls)
+                .clear()
+                .draw();
 
-            app.drawCalls(updateShear2DrawCalls)
-            .clear()
-            .draw();
+                updateShear2DrawCalls[0].texture("uPositionBuffer", readPositionTexture);
+                updateConstraintFramebuffer.replaceTexture(0, writePositionTexture);
 
-            updateShear3DrawCalls[0].texture("uPositionBuffer", writePositionTexture);
-            updateConstraintFramebuffer.replaceTexture(0, readPositionTexture);
+                app.drawCalls(updateShear2DrawCalls)
+                .clear()
+                .draw();
 
-            app.drawCalls(updateShear3DrawCalls)
-            .clear()
-            .draw();
+                updateShear3DrawCalls[0].texture("uPositionBuffer", writePositionTexture);
+                updateConstraintFramebuffer.replaceTexture(0, readPositionTexture);
 
-            updateShear4DrawCalls[0].texture("uPositionBuffer", readPositionTexture);
-            updateConstraintFramebuffer.replaceTexture(0, writePositionTexture);
+                app.drawCalls(updateShear3DrawCalls)
+                .clear()
+                .draw();
 
-            app.drawCalls(updateShear4DrawCalls)
-            .clear()
-            .draw();
+                updateShear4DrawCalls[0].texture("uPositionBuffer", readPositionTexture);
+                updateConstraintFramebuffer.replaceTexture(0, writePositionTexture);
+
+                app.drawCalls(updateShear4DrawCalls)
+                .clear()
+                .draw();   
+            }
 
             mainDrawcalls[0].texture("uPositionBuffer", writePositionTexture);
 
