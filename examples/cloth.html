@@ -126,6 +126,7 @@
         #version 300 es   
        
         layout(location=0) in ivec2 aTexelCoord;
+        layout(location=1) in vec2 aUV;
  
         uniform sampler2D uPositionBuffer;
 
@@ -135,6 +136,7 @@
         };
 
         out vec3 vPosition;
+        out vec2 vUV;
         out vec3 vNormal;
         
         void main() {
@@ -171,8 +173,9 @@
             }
 
 
-            vNormal = normalize(normal);
             vPosition = position;
+            vNormal = normalize(normal);
+            vUV = aUV;
             gl_PointSize = 4.0;
             gl_Position = viewProj * vec4(position, 1.0);
         }
@@ -188,15 +191,15 @@
             vec4 lightPosition;
         };
 
-        // uniform sampler2D tex;
+        uniform sampler2D tex;
         
         in vec3 vPosition;
-        // in vec2 vUV;
+        in vec2 vUV;
         in vec3 vNormal;
 
         out vec4 fragColor;
         void main() {
-            vec3 color = vec3(0.7);
+            vec3 color = texture(tex, vUV).rgb;
 
             vec3 normal = normalize(vNormal);
             vec3 lightVec = -normalize(vPosition - lightPosition.xyz);
@@ -221,7 +224,8 @@
         var DATA_TEXTURE_DIM = 80;
         var NUM_PARTICLES = DATA_TEXTURE_DIM * DATA_TEXTURE_DIM;
         var positionTextureData = new Float32Array(NUM_PARTICLES * 4);
-        var uvData = new Int16Array(NUM_PARTICLES * 2);
+        var uvData = new Float32Array(NUM_PARTICLES * 2);
+        var dataTextureIndex = new Int16Array(NUM_PARTICLES * 2);
         var indexData = new Uint16Array((DATA_TEXTURE_DIM - 1) * (DATA_TEXTURE_DIM - 1) * 6);
 
         // Set up main program
@@ -252,12 +256,18 @@
             var x = (i % DATA_TEXTURE_DIM);
             var y = Math.floor(i / DATA_TEXTURE_DIM);
 
-            positionTextureData[vec4i] = x / DATA_TEXTURE_DIM - 0.5;
-            positionTextureData[vec4i + 1] = y / DATA_TEXTURE_DIM + 0.8;
+            var u = x / DATA_TEXTURE_DIM;
+            var v = y / DATA_TEXTURE_DIM;
+
+            positionTextureData[vec4i] = u - 0.5;
+            positionTextureData[vec4i + 1] = v + 0.8;
             positionTextureData[vec4i + 2] = Math.random() * 0.2 - 0.1;
 
-            uvData[vec2i] = (i % DATA_TEXTURE_DIM);
-            uvData[vec2i + 1] = Math.floor(i / DATA_TEXTURE_DIM);
+            uvData[vec2i] = u;
+            uvData[vec2i + 1] = v;
+
+            dataTextureIndex[vec2i] = (i % DATA_TEXTURE_DIM);
+            dataTextureIndex[vec2i + 1] = Math.floor(i / DATA_TEXTURE_DIM);
 
             if (x < DATA_TEXTURE_DIM - 1 && y < DATA_TEXTURE_DIM - 1) {
                 indexData[indexI]     = i;
@@ -298,11 +308,13 @@
         var fsSource = document.getElementById("main-fs").text.trim();
         var mainProgram = app.createProgram(vsSource, fsSource);
 
-        var uv = app.createVertexBuffer(PicoGL.SHORT, 2, uvData);
+        var dataIndex = app.createVertexBuffer(PicoGL.SHORT, 2, dataTextureIndex);
+        var uv = app.createVertexBuffer(PicoGL.FLOAT, 2, uvData);
         var indices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, indexData);
 
         var particleArray = app.createVertexArray()
-        .attributeBuffer(0, uv)
+        .attributeBuffer(0, dataIndex)
+        .attributeBuffer(1, uv)
         .indexBuffer(indices);
 
         var quadPositions = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
@@ -413,115 +425,123 @@
             .uniform("dir", new Int32Array([1, 1]))
         ];
 
-        var mainDrawcalls = [
-            app.createDrawCall(mainProgram, particleArray)
-            .uniformBlock("SceneUniforms", sceneUniformBuffer)
-        ];
+        var image = new Image();
 
-        function draw() {
-            if (app.timerReady()) {
-                utils.updateTimerElement(app.cpuTime, app.gpuTime);
+        image.onload = function() {
+            var texture = app.createTexture2D(image);
+
+            var mainDrawcalls = [
+                app.createDrawCall(mainProgram, particleArray)
+                .uniformBlock("SceneUniforms", sceneUniformBuffer)
+                .texture("tex", texture)
+            ];
+
+            function draw() {
+                if (app.timerReady()) {
+                    utils.updateTimerElement(app.cpuTime, app.gpuTime);
+                }
+
+                app.timerStart();
+
+                updateForceDrawCalls[0].texture("uPositionBuffer", readPositionTexture);
+                updateForceDrawCalls[0].texture("uOldPositionBuffer", readOldPositionTexture);
+                updateForceFramebuffer.replaceTexture(0, writePositionTexture);
+                updateForceFramebuffer.replaceTexture(1, writeOldPositionTexture);
+
+                // Main draw
+                app.drawFramebuffer(updateForceFramebuffer)
+                .drawCalls(updateForceDrawCalls)
+                .clear()
+                .draw();
+
+
+                for (var i = 0; i < 20; ++i) {
+                    updateHorizontal1DrawCalls[0].texture("uPositionBuffer", writePositionTexture);
+                    updateConstraintFramebuffer.replaceTexture(0, readPositionTexture);
+
+                    app.drawFramebuffer(updateConstraintFramebuffer)
+                    .drawCalls(updateHorizontal1DrawCalls)
+                    .clear()
+                    .draw();
+
+                    updateHorizontal2DrawCalls[0].texture("uPositionBuffer", readPositionTexture);
+                    updateConstraintFramebuffer.replaceTexture(0, writePositionTexture);
+
+                    app.drawCalls(updateHorizontal2DrawCalls)
+                    .clear()
+                    .draw();
+
+                    updateVertical1DrawCalls[0].texture("uPositionBuffer", writePositionTexture);
+                    updateConstraintFramebuffer.replaceTexture(0, readPositionTexture);
+
+                    app.drawCalls(updateVertical1DrawCalls)
+                    .clear()
+                    .draw();
+
+                    updateVertical2DrawCalls[0].texture("uPositionBuffer", readPositionTexture);
+                    updateConstraintFramebuffer.replaceTexture(0, writePositionTexture);
+
+                    app.drawCalls(updateVertical2DrawCalls)
+                    .clear()
+                    .draw();
+
+                    updateShear1DrawCalls[0].texture("uPositionBuffer", writePositionTexture);
+                    updateConstraintFramebuffer.replaceTexture(0, readPositionTexture);
+
+                    app.drawCalls(updateShear1DrawCalls)
+                    .clear()
+                    .draw();
+
+                    updateShear2DrawCalls[0].texture("uPositionBuffer", readPositionTexture);
+                    updateConstraintFramebuffer.replaceTexture(0, writePositionTexture);
+
+                    app.drawCalls(updateShear2DrawCalls)
+                    .clear()
+                    .draw();
+
+                    updateShear3DrawCalls[0].texture("uPositionBuffer", writePositionTexture);
+                    updateConstraintFramebuffer.replaceTexture(0, readPositionTexture);
+
+                    app.drawCalls(updateShear3DrawCalls)
+                    .clear()
+                    .draw();
+
+                    updateShear4DrawCalls[0].texture("uPositionBuffer", readPositionTexture);
+                    updateConstraintFramebuffer.replaceTexture(0, writePositionTexture);
+
+                    app.drawCalls(updateShear4DrawCalls)
+                    .clear()
+                    .draw();   
+                }
+
+                mainDrawcalls[0].texture("uPositionBuffer", writePositionTexture);
+
+                app.defaultDrawFramebuffer()
+                .drawCalls(mainDrawcalls)
+                .clear()
+                .draw();
+
+                var tmp = readPositionTexture;
+                readPositionTexture = writePositionTexture;
+                writePositionTexture = tmp;
+
+                if (readOldPositionTexture === oldPositionTextureA) {
+                    readOldPositionTexture = oldPositionTextureB;
+                    writeOldPositionTexture = oldPositionTextureA;
+                } else {
+                    readOldPositionTexture = oldPositionTextureA;
+                    writeOldPositionTexture = oldPositionTextureB;
+                }
+
+                app.timerEnd();
+
+                requestAnimationFrame(draw);
             }
-
-            app.timerStart();
-
-            updateForceDrawCalls[0].texture("uPositionBuffer", readPositionTexture);
-            updateForceDrawCalls[0].texture("uOldPositionBuffer", readOldPositionTexture);
-            updateForceFramebuffer.replaceTexture(0, writePositionTexture);
-            updateForceFramebuffer.replaceTexture(1, writeOldPositionTexture);
-
-            // Main draw
-            app.drawFramebuffer(updateForceFramebuffer)
-            .drawCalls(updateForceDrawCalls)
-            .clear()
-            .draw();
-
-
-            for (var i = 0; i < 20; ++i) {
-                updateHorizontal1DrawCalls[0].texture("uPositionBuffer", writePositionTexture);
-                updateConstraintFramebuffer.replaceTexture(0, readPositionTexture);
-
-                app.drawFramebuffer(updateConstraintFramebuffer)
-                .drawCalls(updateHorizontal1DrawCalls)
-                .clear()
-                .draw();
-
-                updateHorizontal2DrawCalls[0].texture("uPositionBuffer", readPositionTexture);
-                updateConstraintFramebuffer.replaceTexture(0, writePositionTexture);
-
-                app.drawCalls(updateHorizontal2DrawCalls)
-                .clear()
-                .draw();
-
-                updateVertical1DrawCalls[0].texture("uPositionBuffer", writePositionTexture);
-                updateConstraintFramebuffer.replaceTexture(0, readPositionTexture);
-
-                app.drawCalls(updateVertical1DrawCalls)
-                .clear()
-                .draw();
-
-                updateVertical2DrawCalls[0].texture("uPositionBuffer", readPositionTexture);
-                updateConstraintFramebuffer.replaceTexture(0, writePositionTexture);
-
-                app.drawCalls(updateVertical2DrawCalls)
-                .clear()
-                .draw();
-
-                updateShear1DrawCalls[0].texture("uPositionBuffer", writePositionTexture);
-                updateConstraintFramebuffer.replaceTexture(0, readPositionTexture);
-
-                app.drawCalls(updateShear1DrawCalls)
-                .clear()
-                .draw();
-
-                updateShear2DrawCalls[0].texture("uPositionBuffer", readPositionTexture);
-                updateConstraintFramebuffer.replaceTexture(0, writePositionTexture);
-
-                app.drawCalls(updateShear2DrawCalls)
-                .clear()
-                .draw();
-
-                updateShear3DrawCalls[0].texture("uPositionBuffer", writePositionTexture);
-                updateConstraintFramebuffer.replaceTexture(0, readPositionTexture);
-
-                app.drawCalls(updateShear3DrawCalls)
-                .clear()
-                .draw();
-
-                updateShear4DrawCalls[0].texture("uPositionBuffer", readPositionTexture);
-                updateConstraintFramebuffer.replaceTexture(0, writePositionTexture);
-
-                app.drawCalls(updateShear4DrawCalls)
-                .clear()
-                .draw();   
-            }
-
-            mainDrawcalls[0].texture("uPositionBuffer", writePositionTexture);
-
-            app.defaultDrawFramebuffer()
-            .drawCalls(mainDrawcalls)
-            .clear()
-            .draw();
-
-            var tmp = readPositionTexture;
-            readPositionTexture = writePositionTexture;
-            writePositionTexture = tmp;
-
-            if (readOldPositionTexture === oldPositionTextureA) {
-                readOldPositionTexture = oldPositionTextureB;
-                writeOldPositionTexture = oldPositionTextureA;
-            } else {
-                readOldPositionTexture = oldPositionTextureA;
-                writeOldPositionTexture = oldPositionTextureB;
-            }
-
-            app.timerEnd();
 
             requestAnimationFrame(draw);
         }
-
-        requestAnimationFrame(draw);
             
+        image.src = "img/khronos_webgl.png";
 
     </script>
     <a href="https://github.com/tsherif/picogl.js" id="github-ribbon"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"></a>
