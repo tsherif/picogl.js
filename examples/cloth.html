@@ -80,7 +80,7 @@
             outOldPosition = temp;
         }
     </script>
-    <script id="update-structural-fs" type="x-fragment-shader">
+    <script id="update-constraint-fs" type="x-fragment-shader">
         #version 300 es
         
         precision highp float;
@@ -167,6 +167,7 @@
         var NUM_PARTICLES = DATA_TEXTURE_DIM * DATA_TEXTURE_DIM;
         var positionTextureData = new Float32Array(NUM_PARTICLES * 4);
         var uvData = new Int16Array(NUM_PARTICLES * 2);
+        var indexData = new Uint16Array((DATA_TEXTURE_DIM - 1) * (DATA_TEXTURE_DIM - 1) * 6);
 
         // Set up main program
         var quadVsSource = document.getElementById("quad-vs").text.trim();
@@ -179,7 +180,7 @@
         .colorTarget(0, { type: PicoGL.FLOAT, internalFormat: PicoGL.RGBA32F })
         .colorTarget(1, { type: PicoGL.FLOAT, internalFormat: PicoGL.RGBA32F });
 
-        var updateStructuralFsSource = document.getElementById("update-structural-fs").text.trim();
+        var updateStructuralFsSource = document.getElementById("update-constraint-fs").text.trim();
         
         var updateConstraintProgram = app.createProgram(quadShader, updateStructuralFsSource);
         var updateConstraintFramebuffer = app.createFramebuffer(DATA_TEXTURE_DIM, DATA_TEXTURE_DIM)
@@ -188,6 +189,7 @@
         var structuralRest = 1 / DATA_TEXTURE_DIM;
         var shearRest = Math.sqrt(2 * structuralRest * structuralRest);
 
+        var indexI = 0;
         for (var i = 0; i < NUM_PARTICLES; ++i) {
             var vec4i = i * 4;
             var vec2i = i * 2;
@@ -200,6 +202,16 @@
 
             uvData[vec2i] = (i % DATA_TEXTURE_DIM);
             uvData[vec2i + 1] = Math.floor(i / DATA_TEXTURE_DIM);
+
+            if (x < DATA_TEXTURE_DIM - 1 && y < DATA_TEXTURE_DIM - 1) {
+                indexData[indexI]     = i;
+                indexData[indexI + 1] = i + DATA_TEXTURE_DIM;
+                indexData[indexI + 2] = i + DATA_TEXTURE_DIM + 1;
+                indexData[indexI + 3] = i;
+                indexData[indexI + 4] = i + DATA_TEXTURE_DIM + 1;
+                indexData[indexI + 5] = i + 1;
+                indexI += 6;
+            }
         }
 
         var positionTextureA = app.createTexture2D(positionTextureData, DATA_TEXTURE_DIM, DATA_TEXTURE_DIM, {
@@ -225,16 +237,17 @@
         var positionTextureB = updateForceFramebuffer.colorTextures[0];
         var oldPositionTextureB = updateForceFramebuffer.colorTextures[1];
 
-
         // Set up main program
         var vsSource = document.getElementById("main-vs").text.trim();
         var fsSource = document.getElementById("main-fs").text.trim();
         var mainProgram = app.createProgram(vsSource, fsSource);
 
         var uv = app.createVertexBuffer(PicoGL.SHORT, 2, uvData);
+        var indices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, indexData);
 
         var particleArray = app.createVertexArray()
-        .attributeBuffer(0, uv);
+        .attributeBuffer(0, uv)
+        .indexBuffer(indices);
 
         var quadPositions = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
             -1, 1,
@@ -333,7 +346,7 @@
         ];
 
         var mainDrawcalls = [
-            app.createDrawCall(mainProgram, particleArray, PicoGL.POINTS)
+            app.createDrawCall(mainProgram, particleArray)
         ];
 
         function draw() {
@@ -365,56 +378,49 @@
             updateHorizontal2DrawCalls[0].texture("uPositionBuffer", readPositionTexture);
             updateConstraintFramebuffer.replaceTexture(0, writePositionTexture);
 
-            app.drawFramebuffer(updateConstraintFramebuffer)
-            .drawCalls(updateHorizontal2DrawCalls)
+            app.drawCalls(updateHorizontal2DrawCalls)
             .clear()
             .draw();
 
             updateVertical1DrawCalls[0].texture("uPositionBuffer", writePositionTexture);
             updateConstraintFramebuffer.replaceTexture(0, readPositionTexture);
 
-            app.drawFramebuffer(updateConstraintFramebuffer)
-            .drawCalls(updateVertical1DrawCalls)
+            app.drawCalls(updateVertical1DrawCalls)
             .clear()
             .draw();
 
             updateVertical2DrawCalls[0].texture("uPositionBuffer", readPositionTexture);
             updateConstraintFramebuffer.replaceTexture(0, writePositionTexture);
 
-            app.drawFramebuffer(updateConstraintFramebuffer)
-            .drawCalls(updateVertical2DrawCalls)
+            app.drawCalls(updateVertical2DrawCalls)
             .clear()
             .draw();
 
             updateShear1DrawCalls[0].texture("uPositionBuffer", writePositionTexture);
             updateConstraintFramebuffer.replaceTexture(0, readPositionTexture);
 
-            app.drawFramebuffer(updateConstraintFramebuffer)
-            .drawCalls(updateShear1DrawCalls)
+            app.drawCalls(updateShear1DrawCalls)
             .clear()
             .draw();
 
             updateShear2DrawCalls[0].texture("uPositionBuffer", readPositionTexture);
             updateConstraintFramebuffer.replaceTexture(0, writePositionTexture);
 
-            app.drawFramebuffer(updateConstraintFramebuffer)
-            .drawCalls(updateShear2DrawCalls)
+            app.drawCalls(updateShear2DrawCalls)
             .clear()
             .draw();
 
             updateShear3DrawCalls[0].texture("uPositionBuffer", writePositionTexture);
             updateConstraintFramebuffer.replaceTexture(0, readPositionTexture);
 
-            app.drawFramebuffer(updateConstraintFramebuffer)
-            .drawCalls(updateShear3DrawCalls)
+            app.drawCalls(updateShear3DrawCalls)
             .clear()
             .draw();
 
             updateShear4DrawCalls[0].texture("uPositionBuffer", readPositionTexture);
             updateConstraintFramebuffer.replaceTexture(0, writePositionTexture);
 
-            app.drawFramebuffer(updateConstraintFramebuffer)
-            .drawCalls(updateShear4DrawCalls)
+            app.drawCalls(updateShear4DrawCalls)
             .clear()
             .draw();
 
