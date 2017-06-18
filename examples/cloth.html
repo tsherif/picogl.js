@@ -23,7 +23,7 @@
 -->
 <html>
 <head>
-    <title>PicoGL.js: Particles</title>
+    <title>PicoGL.js: Cloth</title>
     <script src="utils/gl-matrix.js"></script>
     <script src="../build/picogl.js"></script>
     <script src="utils/utils.js"></script>
@@ -31,7 +31,7 @@
 </head>
 <body>
     <div id="example-title">
-        PicoGL.js Example: Particles
+        PicoGL.js Example: Cloth
         <div>
             <a href="https://github.com/tsherif/picogl.js/blob/master/examples/particles.html">Source code</a>
         </div>
@@ -89,7 +89,7 @@
 
         uniform int modVal; // 0 or 1 to skip particles
         uniform ivec2 dir;
-        uniform float structuralRest;
+        uniform float restDistance;
 
         uniform sampler2D uPositionBuffer;
         uniform sampler2D uOldPositionBuffer;
@@ -98,26 +98,22 @@
 
         void main() {
             ivec2 dimensions = textureSize(uPositionBuffer, 0);
-            ivec2 maxTexelCoord = dimensions - 1;
             ivec2 texelCoord = ivec2(vScreenUV * vec2(dimensions));
             vec3 position = texelFetch(uPositionBuffer, texelCoord, 0).xyz;
 
             int iDot = abs(texelCoord.x * dir.x) + abs(texelCoord.y * dir.y);
             int neg = iDot % 2 == modVal ? 1 : -1;
 
-            if (
-                !all(equal(texelCoord, ivec2(0, 0))) && 
-                !all(equal(texelCoord, ivec2(maxTexelCoord.x, 0))))
-            {
-                ivec2 otherCoord = max(ivec2(0, 0), min(texelCoord + dir * neg, maxTexelCoord));
+            if (!all(equal(texelCoord, ivec2(0, 0))) && !all(equal(texelCoord, ivec2(dimensions.x - 1, 0)))) {
+                ivec2 otherCoord = texelCoord + dir * neg;
 
-                if (otherCoord.x >= 0 && otherCoord.y >= 0 && otherCoord.x < dimensions.x && otherCoord.y < dimensions.y) {
+                if (all(greaterThanEqual(otherCoord, ivec2(0, 0))) && all(lessThan(otherCoord, dimensions))) {
                     vec3 otherPosition = texelFetch(uPositionBuffer, otherCoord, 0).xyz;
                     
                     vec3 diffVec = otherPosition - position;
                     float dist = length(diffVec);
-                    if (dist > structuralRest) {
-                        position += diffVec * (1.0 - structuralRest / dist) * 0.5;
+                    if (dist > restDistance) {
+                        position += diffVec * (1.0 - restDistance / dist) * 0.5;
                     }
                 }
             }
@@ -185,11 +181,12 @@
 
         var updateStructuralFsSource = document.getElementById("update-structural-fs").text.trim();
         
-        var updateStructuralProgram = app.createProgram(quadShader, updateStructuralFsSource);
-        var updateStructuralFramebuffer = app.createFramebuffer(DATA_TEXTURE_DIM, DATA_TEXTURE_DIM)
+        var updateConstraintProgram = app.createProgram(quadShader, updateStructuralFsSource);
+        var updateConstraintFramebuffer = app.createFramebuffer(DATA_TEXTURE_DIM, DATA_TEXTURE_DIM)
         .colorTarget(0, { type: PicoGL.FLOAT, internalFormat: PicoGL.RGBA32F });
 
         var structuralRest = 1 / DATA_TEXTURE_DIM;
+        var shearRest = Math.sqrt(2 * structuralRest * structuralRest);
 
         for (var i = 0; i < NUM_PARTICLES; ++i) {
             var vec4i = i * 4;
@@ -280,31 +277,59 @@
         ];
 
         var updateHorizontal1DrawCalls = [
-            app.createDrawCall(updateStructuralProgram, quadArray)
-            .uniform("structuralRest", structuralRest)
+            app.createDrawCall(updateConstraintProgram, quadArray)
+            .uniform("restDistance", structuralRest)
             .uniform("modVal", 0)
             .uniform("dir", new Int32Array([0, 1]))
         ];
 
         var updateHorizontal2DrawCalls = [
-            app.createDrawCall(updateStructuralProgram, quadArray)
-            .uniform("structuralRest", structuralRest)
+            app.createDrawCall(updateConstraintProgram, quadArray)
+            .uniform("restDistance", structuralRest)
             .uniform("modVal", 1)
             .uniform("dir", new Int32Array([0, 1]))
         ];
 
         var updateVertical1DrawCalls = [
-            app.createDrawCall(updateStructuralProgram, quadArray)
-            .uniform("structuralRest", structuralRest)
+            app.createDrawCall(updateConstraintProgram, quadArray)
+            .uniform("restDistance", structuralRest)
             .uniform("modVal", 0)
             .uniform("dir", new Int32Array([1, 0]))
         ];
 
         var updateVertical2DrawCalls = [
-            app.createDrawCall(updateStructuralProgram, quadArray)
-            .uniform("structuralRest", structuralRest)
+            app.createDrawCall(updateConstraintProgram, quadArray)
+            .uniform("restDistance", structuralRest)
             .uniform("modVal", 1)
             .uniform("dir", new Int32Array([1, 0]))
+        ];
+
+        var updateShear1DrawCalls = [
+            app.createDrawCall(updateConstraintProgram, quadArray)
+            .uniform("restDistance", shearRest)
+            .uniform("modVal", 0)
+            .uniform("dir", new Int32Array([1, -1]))
+        ];
+
+        var updateShear2DrawCalls = [
+            app.createDrawCall(updateConstraintProgram, quadArray)
+            .uniform("restDistance", shearRest)
+            .uniform("modVal", 1)
+            .uniform("dir", new Int32Array([1, 1]))
+        ];
+
+        var updateShear3DrawCalls = [
+            app.createDrawCall(updateConstraintProgram, quadArray)
+            .uniform("restDistance", shearRest)
+            .uniform("modVal", 0)
+            .uniform("dir", new Int32Array([1, -1]))
+        ];
+
+        var updateShear4DrawCalls = [
+            app.createDrawCall(updateConstraintProgram, quadArray)
+            .uniform("restDistance", shearRest)
+            .uniform("modVal", 1)
+            .uniform("dir", new Int32Array([1, 1]))
         ];
 
         var mainDrawcalls = [
@@ -330,34 +355,66 @@
             .draw();
 
             updateHorizontal1DrawCalls[0].texture("uPositionBuffer", writePositionTexture);
-            updateStructuralFramebuffer.replaceTexture(0, readPositionTexture);
+            updateConstraintFramebuffer.replaceTexture(0, readPositionTexture);
 
-            app.drawFramebuffer(updateStructuralFramebuffer)
+            app.drawFramebuffer(updateConstraintFramebuffer)
             .drawCalls(updateHorizontal1DrawCalls)
             .clear()
             .draw();
 
             updateHorizontal2DrawCalls[0].texture("uPositionBuffer", readPositionTexture);
-            updateStructuralFramebuffer.replaceTexture(0, writePositionTexture);
+            updateConstraintFramebuffer.replaceTexture(0, writePositionTexture);
 
-            app.drawFramebuffer(updateStructuralFramebuffer)
+            app.drawFramebuffer(updateConstraintFramebuffer)
             .drawCalls(updateHorizontal2DrawCalls)
             .clear()
             .draw();
 
             updateVertical1DrawCalls[0].texture("uPositionBuffer", writePositionTexture);
-            updateStructuralFramebuffer.replaceTexture(0, readPositionTexture);
+            updateConstraintFramebuffer.replaceTexture(0, readPositionTexture);
 
-            app.drawFramebuffer(updateStructuralFramebuffer)
+            app.drawFramebuffer(updateConstraintFramebuffer)
             .drawCalls(updateVertical1DrawCalls)
             .clear()
             .draw();
 
             updateVertical2DrawCalls[0].texture("uPositionBuffer", readPositionTexture);
-            updateStructuralFramebuffer.replaceTexture(0, writePositionTexture);
+            updateConstraintFramebuffer.replaceTexture(0, writePositionTexture);
 
-            app.drawFramebuffer(updateStructuralFramebuffer)
+            app.drawFramebuffer(updateConstraintFramebuffer)
             .drawCalls(updateVertical2DrawCalls)
+            .clear()
+            .draw();
+
+            updateShear1DrawCalls[0].texture("uPositionBuffer", writePositionTexture);
+            updateConstraintFramebuffer.replaceTexture(0, readPositionTexture);
+
+            app.drawFramebuffer(updateConstraintFramebuffer)
+            .drawCalls(updateShear1DrawCalls)
+            .clear()
+            .draw();
+
+            updateShear2DrawCalls[0].texture("uPositionBuffer", readPositionTexture);
+            updateConstraintFramebuffer.replaceTexture(0, writePositionTexture);
+
+            app.drawFramebuffer(updateConstraintFramebuffer)
+            .drawCalls(updateShear2DrawCalls)
+            .clear()
+            .draw();
+
+            updateShear3DrawCalls[0].texture("uPositionBuffer", writePositionTexture);
+            updateConstraintFramebuffer.replaceTexture(0, readPositionTexture);
+
+            app.drawFramebuffer(updateConstraintFramebuffer)
+            .drawCalls(updateShear3DrawCalls)
+            .clear()
+            .draw();
+
+            updateShear4DrawCalls[0].texture("uPositionBuffer", readPositionTexture);
+            updateConstraintFramebuffer.replaceTexture(0, writePositionTexture);
+
+            app.drawFramebuffer(updateConstraintFramebuffer)
+            .drawCalls(updateShear4DrawCalls)
             .clear()
             .draw();
 
