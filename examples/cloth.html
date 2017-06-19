@@ -314,7 +314,7 @@
         .depthTest()
         .floatRenderTargets();
 
-        var DATA_TEXTURE_DIM = 120;
+        var DATA_TEXTURE_DIM = 100;
         var NUM_PARTICLES = DATA_TEXTURE_DIM * DATA_TEXTURE_DIM;
         var STRUCTURAL_REST = 1 / DATA_TEXTURE_DIM;
         var SHEAR_REST = Math.sqrt(2 * STRUCTURAL_REST * STRUCTURAL_REST);
@@ -653,7 +653,7 @@
                 .clear()
                 .draw();
 
-                for (var i = 0; i < 50; ++i) {
+                for (var i = 0; i < 40; ++i) {
                     updateHorizontal1DrawCalls[0].texture("uPositionBuffer", positionTextureB);
                     updateFramebuffer.replaceTexture(0, positionTextureA);
 
