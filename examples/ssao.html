@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+, { flipY: true }<!DOCTYPE html>
 <!--
   The MIT License (MIT)
 
@@ -425,7 +425,7 @@
         var image = new Image();
 
         image.onload = function() {
-            var texture = app.createTexture2D(image);
+            var texture = app.createTexture2D(image, { flipY: true });
 
             // DRAW CALLS
             var colorGeoDrawcall = app.createDrawCall(colorGeoProgram, sphereArray)

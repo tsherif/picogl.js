@@ -279,7 +279,7 @@
         var image = new Image();
 
         image.onload = function() {
-            var texture = app.createTexture2D(image);
+            var texture = app.createTexture2D(image, { flipY: true });
             
             // LIGHT UNIFORMS AND DRAW CALLS    
             var lightMatrix;

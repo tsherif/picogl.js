@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.3.2 
+PicoGL.js v0.3.3 
 
 The MIT License (MIT)
 
@@ -36,7 +36,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @prop {object} WEBGL_INFO WebGL context information.
     */
     var PicoGL = window.PicoGL = {
-        version: "0.3.2"
+        version: "0.3.3"
     };
 
     (function() {
@@ -623,7 +623,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
         @param {GLEnum} [options.format=RGBA] Texture data format.
         @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
-        @param {boolean} [options.flipY=true] Whether the y-axis be flipped when unpacking the texture.
+        @param {boolean} [options.flipY=false] Whether the y-axis be flipped when unpacking the texture.
         @param {GLEnum} [options.minFilter=LINEAR_MIPMAP_NEAREST] Minification filter.
         @param {GLEnum} [options.magFilter=LINEAR] Magnification filter.
         @param {GLEnum} [options.wrapS=REPEAT] Horizontal wrap mode.
@@ -659,7 +659,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
         @param {GLEnum} [options.format=RGBA] Texture data format.
         @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
-        @param {boolean} [options.flipY=true] Whether the y-axis be flipped when unpacking the texture.
+        @param {boolean} [options.flipY=false] Whether the y-axis be flipped when unpacking the texture.
         @param {GLEnum} [options.minFilter=LINEAR_MIPMAP_NEAREST] Minification filter.
         @param {GLEnum} [options.magFilter=LINEAR] Magnification filter.
         @param {GLEnum} [options.wrapS=REPEAT] Horizontal wrap mode.
@@ -688,7 +688,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
         @param {GLEnum} [options.format=RGBA] Texture data format.
         @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
-        @param {boolean} [options.flipY=true] Whether the y-axis be flipped when unpacking the texture.
+        @param {boolean} [options.flipY=false] Whether the y-axis be flipped when unpacking the texture.
         @param {GLEnum} [options.minFilter=LINEAR_MIPMAP_NEAREST] Minification filter.
         @param {GLEnum} [options.magFilter=LINEAR] Magnification filter.
         @param {GLEnum} [options.wrapS=REPEAT] Horizontal wrap mode.
@@ -1168,14 +1168,23 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         var numColumns = vertexBuffer.numColumns;
 
         for (var i = 0; i < numColumns; ++i) {
-            this.gl.vertexAttribPointer(
-                attributeIndex + i, 
-                vertexBuffer.itemSize, 
-                vertexBuffer.type, 
-                false, 
-                numColumns * vertexBuffer.itemSize * PicoGL.TYPE_SIZE[vertexBuffer.type], 
-                i * vertexBuffer.itemSize * PicoGL.TYPE_SIZE[vertexBuffer.type]);
-
+            if (vertexBuffer.type === this.gl.FLOAT) {
+                this.gl.vertexAttribPointer(
+                    attributeIndex + i, 
+                    vertexBuffer.itemSize, 
+                    vertexBuffer.type, 
+                    false, 
+                    numColumns * vertexBuffer.itemSize * PicoGL.TYPE_SIZE[vertexBuffer.type], 
+                    i * vertexBuffer.itemSize * PicoGL.TYPE_SIZE[vertexBuffer.type]);
+            } else {
+                this.gl.vertexAttribIPointer(
+                    attributeIndex + i, 
+                    vertexBuffer.itemSize, 
+                    vertexBuffer.type, 
+                    numColumns * vertexBuffer.itemSize * PicoGL.TYPE_SIZE[vertexBuffer.type], 
+                    i * vertexBuffer.itemSize * PicoGL.TYPE_SIZE[vertexBuffer.type]);
+            }
+            
             if (instanced) {
                 this.gl.vertexAttribDivisor(attributeIndex + i, 1);
             }
@@ -2063,7 +2072,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         }
 
         // Texture parameters
-        this.flipY = options.flipY !== undefined ? options.flipY : true;
+        this.flipY = options.flipY !== undefined ? options.flipY : false;
         this.baseLevel = options.baseLevel !== undefined ? options.baseLevel : null;
         this.maxLevel = options.maxLevel !== undefined ? options.maxLevel : null;
         this.generateMipmaps = options.generateMipmaps !== false && 

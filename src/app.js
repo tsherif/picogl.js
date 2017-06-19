@@ -540,7 +540,7 @@
         @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
         @param {GLEnum} [options.format=RGBA] Texture data format.
         @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
-        @param {boolean} [options.flipY=true] Whether the y-axis be flipped when unpacking the texture.
+        @param {boolean} [options.flipY=false] Whether the y-axis be flipped when unpacking the texture.
         @param {GLEnum} [options.minFilter=LINEAR_MIPMAP_NEAREST] Minification filter.
         @param {GLEnum} [options.magFilter=LINEAR] Magnification filter.
         @param {GLEnum} [options.wrapS=REPEAT] Horizontal wrap mode.
@@ -576,7 +576,7 @@
         @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
         @param {GLEnum} [options.format=RGBA] Texture data format.
         @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
-        @param {boolean} [options.flipY=true] Whether the y-axis be flipped when unpacking the texture.
+        @param {boolean} [options.flipY=false] Whether the y-axis be flipped when unpacking the texture.
         @param {GLEnum} [options.minFilter=LINEAR_MIPMAP_NEAREST] Minification filter.
         @param {GLEnum} [options.magFilter=LINEAR] Magnification filter.
         @param {GLEnum} [options.wrapS=REPEAT] Horizontal wrap mode.
@@ -605,7 +605,7 @@
         @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
         @param {GLEnum} [options.format=RGBA] Texture data format.
         @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
-        @param {boolean} [options.flipY=true] Whether the y-axis be flipped when unpacking the texture.
+        @param {boolean} [options.flipY=false] Whether the y-axis be flipped when unpacking the texture.
         @param {GLEnum} [options.minFilter=LINEAR_MIPMAP_NEAREST] Minification filter.
         @param {GLEnum} [options.magFilter=LINEAR] Magnification filter.
         @param {GLEnum} [options.wrapS=REPEAT] Horizontal wrap mode.

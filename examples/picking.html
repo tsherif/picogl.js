@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+, { flipY: true }<!DOCTYPE html>
 <!--
   The MIT License (MIT)
 
@@ -234,7 +234,7 @@
 
         image.onload = function() {
 
-            var texture = app.createTexture2D(image);
+            var texture = app.createTexture2D(image, { flipY: true });
 
             var pickingDrawCalls = new Array(boxes.length);
             var mainDrawCalls = new Array(boxes.length);
