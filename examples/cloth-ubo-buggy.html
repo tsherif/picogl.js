@@ -59,9 +59,10 @@
         #version 300 es   
 
         precision highp float;
+        precision highp int;
 
         #define GRAVITY vec3(0.0, -0.0002, 0.0)
-        #define WIND vec3(0.0, 0.0, 0.00008)
+        #define WIND vec3(0.0, 0.0, 0.0001)
         #define DAMPING 0.99
 
         in vec2 vScreenUV;
@@ -96,14 +97,18 @@
         #version 300 es
         
         precision highp float;
+        precision highp int;
 
         in vec2 vScreenUV;
 
         // uModVal and dir used to select the direction
-        // to look for the neighbour we're going to check
-        uniform int uModVal;
-        uniform ivec2 uDir;
-        uniform float uRestDistance;
+        // to look for the neighbour we're going to check.
+        // Alternates as we move in direction uDir.
+        layout(std140) uniform ConstraintUniforms {
+            ivec2 uDir;
+            int uModVal;
+            float uRestDistance;    
+        };
 
         uniform sampler2D uPositionBuffer;
 
@@ -134,11 +139,11 @@
             outPosition = position;
         }
     </script>
-
     <script id="update-collision-fs" type="x-fragment-shader">
         #version 300 es
         
         precision highp float;
+        precision highp int;
 
         in vec2 vScreenUV;
 
@@ -165,11 +170,11 @@
             outPosition = position;
         }
     </script>
-
     <script id="update-normal-fs" type="x-fragment-shader">
         #version 300 es
         
         precision highp float;
+        precision highp int;
 
         in vec2 vScreenUV;
 
@@ -215,7 +220,6 @@
             outNormal = normalize(normal);
         }
     </script>
-    
     <script id="ball-vs" type="x-vertex-shader">
         #version 300 es
 
@@ -247,7 +251,6 @@
         }
 
     </script>
-
     <script id="cloth-vs" type="x-vertex-shader">
         #version 300 es   
        
@@ -279,6 +282,7 @@
     <script id="phong-fs" type="x-fragment-shader">
         #version 300 es
         precision highp float;
+        precision highp int;
 
         layout(std140, column_major) uniform SceneUniforms {
             mat4 viewProj;
@@ -319,7 +323,7 @@
         var STRUCTURAL_REST = 1 / DATA_TEXTURE_DIM;
         var SHEAR_REST = Math.sqrt(2 * STRUCTURAL_REST * STRUCTURAL_REST);
         var BALL_RADIUS = 0.12;
-        var BALL_SPEED = 0.004;    
+        var BALL_SPEED = 0.005;    
         var BALL_RANGE = 0.9;
 
         ///////////////////
@@ -495,7 +499,87 @@
         // UNIFORMS
         ////////////////
 
-        var ballPosition = vec3.fromValues(0, 0.15, -0.8);
+        var horizontalStructure1Uniforms = app.createUniformBuffer([
+            PicoGL.INT_VEC2,
+            PicoGL.INT,
+            PicoGL.FLOAT,
+        ])
+        .set(0, new Int32Array([1, 0]))
+        .set(1, 0)
+        .set(2, STRUCTURAL_REST)
+        .update();
+
+        var horizontalStructure2Uniforms = app.createUniformBuffer([
+            PicoGL.INT_VEC2,
+            PicoGL.INT,
+            PicoGL.FLOAT,
+        ])
+        .set(0, new Int32Array([1, 0]))
+        .set(1, 1)
+        .set(2, STRUCTURAL_REST)
+        .update();
+
+        var verticalStructure1Uniforms = app.createUniformBuffer([
+            PicoGL.INT_VEC2,
+            PicoGL.INT,
+            PicoGL.FLOAT,
+        ])
+        .set(0, new Int32Array([0, 1]))
+        .set(1, 0)
+        .set(2, STRUCTURAL_REST)
+        .update();
+
+        var verticalStructure2Uniforms = app.createUniformBuffer([
+            PicoGL.INT_VEC2,
+            PicoGL.INT,
+            PicoGL.FLOAT,
+        ])
+        .set(0, new Int32Array([0, 1]))
+        .set(1, 1)
+        .set(2, STRUCTURAL_REST)
+        .update();
+
+        var shear1Uniforms = app.createUniformBuffer([
+            PicoGL.INT_VEC2,
+            PicoGL.INT,
+            PicoGL.FLOAT,
+        ])
+        .set(0, new Int32Array([1, 1]))
+        .set(1, 0)
+        .set(2, SHEAR_REST)
+        .update();
+
+        var shear2Uniforms = app.createUniformBuffer([
+            PicoGL.INT_VEC2,
+            PicoGL.INT,
+            PicoGL.FLOAT,
+        ])
+        .set(0, new Int32Array([1, 1]))
+        .set(1, 1)
+        .set(2, SHEAR_REST)
+        .update();
+
+        var shear3Uniforms = app.createUniformBuffer([
+            PicoGL.INT_VEC2,
+            PicoGL.INT,
+            PicoGL.FLOAT,
+        ])
+        .set(0, new Int32Array([1, -1]))
+        .set(1, 0)
+        .set(2, SHEAR_REST)
+        .update();
+
+        var shear4Uniforms = app.createUniformBuffer([
+            PicoGL.INT_VEC2,
+            PicoGL.INT,
+            PicoGL.FLOAT,
+        ])
+        .set(0, new Int32Array([1, -1]))
+        .set(1, 1)
+        .set(2, SHEAR_REST)
+        // .update();
+
+        var ballPosition = vec3.fromValues(0, 0.17, -0.8);
         var ballUniforms = app.createUniformBuffer([
             PicoGL.FLOAT_VEC4,
             PicoGL.FLOAT
@@ -509,11 +593,11 @@
 
         // Camera stuff
         var projMatrix = mat4.create();
-        mat4.perspective(projMatrix, Math.PI / 2, canvas.width / canvas.height, 0.1, 3.0);
+        mat4.perspective(projMatrix, Math.PI / 2, canvas.width / canvas.height, 0.1, 2.0);
 
         var viewMatrix = mat4.create();
-        var eyePosition = vec3.fromValues(0.5, 0.7, 1.2);
-        mat4.lookAt(viewMatrix, eyePosition, vec3.fromValues(0, 0.1, 0), vec3.fromValues(0, 1, 0));
+        var eyePosition = vec3.fromValues(0.5, 0.8, 1.2);
+        mat4.lookAt(viewMatrix, eyePosition, vec3.fromValues(0, 0.2, 0), vec3.fromValues(0, 1, 0));
 
         var viewProjMatrix = mat4.create();
         mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
@@ -531,7 +615,7 @@
         window.onresize = function() {
             app.resize(window.innerWidth, window.innerHeight);
 
-            mat4.perspective(projMatrix, Math.PI / 2, app.width / app.height, 0.1, 3.0);
+            mat4.perspective(projMatrix, Math.PI / 2, app.width / app.height, 0.1, 10.0);
             mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
             
             sceneUniformBuffer.set(0, viewProjMatrix).update();
@@ -552,59 +636,43 @@
         // Structural constraints
         var updateHorizontal1DrawCalls = [
             app.createDrawCall(updateConstraintProgram, quadArray)
-            .uniform("uRestDistance", STRUCTURAL_REST)
-            .uniform("uModVal", 0)
-            .uniform("uDir", new Int32Array([1, 0]))
+            .uniformBlock("ConstraintUniforms", horizontalStructure1Uniforms)
         ];
 
         var updateHorizontal2DrawCalls = [
             app.createDrawCall(updateConstraintProgram, quadArray)
-            .uniform("uRestDistance", STRUCTURAL_REST)
-            .uniform("uModVal", 1)
-            .uniform("uDir", new Int32Array([1, 0]))
+            .uniformBlock("ConstraintUniforms", horizontalStructure2Uniforms)
         ];
 
         var updateVertical1DrawCalls = [
             app.createDrawCall(updateConstraintProgram, quadArray)
-            .uniform("uRestDistance", STRUCTURAL_REST)
-            .uniform("uModVal", 0)
-            .uniform("uDir", new Int32Array([0, 1]))
+            .uniformBlock("ConstraintUniforms", verticalStructure1Uniforms)
         ];
 
         var updateVertical2DrawCalls = [
             app.createDrawCall(updateConstraintProgram, quadArray)
-            .uniform("uRestDistance", STRUCTURAL_REST)
-            .uniform("uModVal", 1)
-            .uniform("uDir", new Int32Array([0, 1]))
+            .uniformBlock("ConstraintUniforms", verticalStructure2Uniforms)
         ];
         
         // Shear constraints constraints
         var updateShear1DrawCalls = [
             app.createDrawCall(updateConstraintProgram, quadArray)
-            .uniform("uRestDistance", SHEAR_REST)
-            .uniform("uModVal", 0)
-            .uniform("uDir", new Int32Array([1, 1]))
+            .uniformBlock("ConstraintUniforms", shear1Uniforms)
         ];
 
         var updateShear2DrawCalls = [
             app.createDrawCall(updateConstraintProgram, quadArray)
-            .uniform("uRestDistance", SHEAR_REST)
-            .uniform("uModVal", 1)
-            .uniform("uDir", new Int32Array([1, 1]))
+            .uniformBlock("ConstraintUniforms", shear2Uniforms)
         ];
 
         var updateShear3DrawCalls = [
             app.createDrawCall(updateConstraintProgram, quadArray)
-            .uniform("uRestDistance", SHEAR_REST)
-            .uniform("uModVal", 0)
-            .uniform("uDir", new Int32Array([1, -1]))
+            .uniformBlock("ConstraintUniforms", shear3Uniforms)
         ];
 
         var updateShear4DrawCalls = [
             app.createDrawCall(updateConstraintProgram, quadArray)
-            .uniform("uRestDistance", SHEAR_REST)
-            .uniform("uModVal", 1)
-            .uniform("uDir", new Int32Array([1, -1]))
+            .uniformBlock("ConstraintUniforms", shear4Uniforms)
         ];
 
         var updateCollisionDrawCalls = [
@@ -653,7 +721,7 @@
                 .clear()
                 .draw();
 
-                for (var i = 0; i < 60; ++i) {
+                for (var i = 0; i < 1; ++i) {
                     updateHorizontal1DrawCalls[0].texture("uPositionBuffer", positionTextureB);
                     updateFramebuffer.replaceTexture(0, positionTextureA);
 
