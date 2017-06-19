@@ -537,11 +537,6 @@
             sceneUniformBuffer.set(0, viewProjMatrix).update();
         };
 
-        var readPositionTexture = positionTextureA;
-        var readOldPositionTexture = oldPositionTextureA;
-        var writePositionTexture = positionTextureB;
-        var writeOldPositionTexture = oldPositionTextureB;
-
 
         ///////////////
         // DRAW CALLS
@@ -550,7 +545,7 @@
         // Update forces
         var updateForceDrawCalls = [
             app.createDrawCall(updateForceProgram, quadArray)
-            .texture("uPositionBuffer", readPositionTexture)
+            .texture("uPositionBuffer", positionTextureA)
             .texture("uNormalBuffer", normalTexture)
         ];
 
@@ -648,10 +643,10 @@
 
                 app.timerStart();
 
-                updateForceDrawCalls[0].texture("uPositionBuffer", readPositionTexture);
-                updateForceDrawCalls[0].texture("uOldPositionBuffer", readOldPositionTexture);
-                updateForceFramebuffer.replaceTexture(0, writePositionTexture);
-                updateForceFramebuffer.replaceTexture(1, writeOldPositionTexture);
+                updateForceDrawCalls[0].texture("uPositionBuffer", positionTextureA);
+                updateForceDrawCalls[0].texture("uOldPositionBuffer", oldPositionTextureA);
+                updateForceFramebuffer.replaceTexture(0, positionTextureB);
+                updateForceFramebuffer.replaceTexture(1, oldPositionTextureB);
 
                 app.drawFramebuffer(updateForceFramebuffer)
                 .drawCalls(updateForceDrawCalls)
@@ -659,58 +654,58 @@
                 .draw();
 
                 for (var i = 0; i < 20; ++i) {
-                    updateHorizontal1DrawCalls[0].texture("uPositionBuffer", writePositionTexture);
-                    updateFramebuffer.replaceTexture(0, readPositionTexture);
+                    updateHorizontal1DrawCalls[0].texture("uPositionBuffer", positionTextureB);
+                    updateFramebuffer.replaceTexture(0, positionTextureA);
 
                     app.drawFramebuffer(updateFramebuffer)
                     .drawCalls(updateHorizontal1DrawCalls)
                     .clear()
                     .draw();
 
-                    updateHorizontal2DrawCalls[0].texture("uPositionBuffer", readPositionTexture);
-                    updateFramebuffer.replaceTexture(0, writePositionTexture);
+                    updateHorizontal2DrawCalls[0].texture("uPositionBuffer", positionTextureA);
+                    updateFramebuffer.replaceTexture(0, positionTextureB);
 
                     app.drawCalls(updateHorizontal2DrawCalls)
                     .clear()
                     .draw();
 
-                    updateVertical1DrawCalls[0].texture("uPositionBuffer", writePositionTexture);
-                    updateFramebuffer.replaceTexture(0, readPositionTexture);
+                    updateVertical1DrawCalls[0].texture("uPositionBuffer", positionTextureB);
+                    updateFramebuffer.replaceTexture(0, positionTextureA);
 
                     app.drawCalls(updateVertical1DrawCalls)
                     .clear()
                     .draw();
 
-                    updateVertical2DrawCalls[0].texture("uPositionBuffer", readPositionTexture);
-                    updateFramebuffer.replaceTexture(0, writePositionTexture);
+                    updateVertical2DrawCalls[0].texture("uPositionBuffer", positionTextureA);
+                    updateFramebuffer.replaceTexture(0, positionTextureB);
 
                     app.drawCalls(updateVertical2DrawCalls)
                     .clear()
                     .draw();
 
-                    updateShear1DrawCalls[0].texture("uPositionBuffer", writePositionTexture);
-                    updateFramebuffer.replaceTexture(0, readPositionTexture);
+                    updateShear1DrawCalls[0].texture("uPositionBuffer", positionTextureB);
+                    updateFramebuffer.replaceTexture(0, positionTextureA);
 
                     app.drawCalls(updateShear1DrawCalls)
                     .clear()
                     .draw();
 
-                    updateShear2DrawCalls[0].texture("uPositionBuffer", readPositionTexture);
-                    updateFramebuffer.replaceTexture(0, writePositionTexture);
+                    updateShear2DrawCalls[0].texture("uPositionBuffer", positionTextureA);
+                    updateFramebuffer.replaceTexture(0, positionTextureB);
 
                     app.drawCalls(updateShear2DrawCalls)
                     .clear()
                     .draw();
 
-                    updateShear3DrawCalls[0].texture("uPositionBuffer", writePositionTexture);
-                    updateFramebuffer.replaceTexture(0, readPositionTexture);
+                    updateShear3DrawCalls[0].texture("uPositionBuffer", positionTextureB);
+                    updateFramebuffer.replaceTexture(0, positionTextureA);
 
                     app.drawCalls(updateShear3DrawCalls)
                     .clear()
                     .draw();
 
-                    updateShear4DrawCalls[0].texture("uPositionBuffer", readPositionTexture);
-                    updateFramebuffer.replaceTexture(0, writePositionTexture);
+                    updateShear4DrawCalls[0].texture("uPositionBuffer", positionTextureA);
+                    updateFramebuffer.replaceTexture(0, positionTextureB);
 
                     app.drawCalls(updateShear4DrawCalls)
                     .clear()
@@ -725,34 +720,30 @@
 
                 ballUniforms.set(0, ballPosition).update();
 
-                updateCollisionDrawCalls[0].texture("uPositionBuffer", writePositionTexture);
-                updateFramebuffer.replaceTexture(0, readPositionTexture);
+                updateCollisionDrawCalls[0].texture("uPositionBuffer", positionTextureB);
+                updateFramebuffer.replaceTexture(0, positionTextureA);
 
                 app.drawCalls(updateCollisionDrawCalls)
                 .clear()
                 .draw();
 
-                updateNormalDrawCalls[0].texture("uPositionBuffer", readPositionTexture);
+                updateNormalDrawCalls[0].texture("uPositionBuffer", positionTextureA);
                 updateFramebuffer.replaceTexture(0, normalTexture);
 
                 app.drawCalls(updateNormalDrawCalls)
                 .clear()
                 .draw();
 
-                mainDrawcalls[0].texture("uPositionBuffer", readPositionTexture);
+                mainDrawcalls[0].texture("uPositionBuffer", positionTextureA);
 
                 app.defaultDrawFramebuffer()
                 .drawCalls(mainDrawcalls)
                 .clear()
                 .draw();
 
-                if (readOldPositionTexture === oldPositionTextureA) {
-                    readOldPositionTexture = oldPositionTextureB;
-                    writeOldPositionTexture = oldPositionTextureA;
-                } else {
-                    readOldPositionTexture = oldPositionTextureA;
-                    writeOldPositionTexture = oldPositionTextureB;
-                }
+                var temp = oldPositionTextureA;
+                oldPositionTextureA = oldPositionTextureB;
+                oldPositionTextureB = temp;
 
                 app.timerEnd();
 
