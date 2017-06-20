@@ -158,8 +158,8 @@
 
             vec3 diff = position - ball.position.xyz;
             float dist = length(diff);
-            if (dist < ball.radius) {
-                position += (ball.radius - dist) * normalize(diff) + 0.0015;
+            if (dist < ball.radius + 0.01) {
+                position += (ball.radius + 0.01 - dist) * normalize(diff);
             }
 
             outPosition = position;
@@ -314,7 +314,7 @@
         .depthTest()
         .floatRenderTargets();
 
-        var DATA_TEXTURE_DIM = 100;
+        var DATA_TEXTURE_DIM = 60;
         var NUM_PARTICLES = DATA_TEXTURE_DIM * DATA_TEXTURE_DIM;
         var STRUCTURAL_REST = 1 / DATA_TEXTURE_DIM;
         var SHEAR_REST = Math.sqrt(2 * STRUCTURAL_REST * STRUCTURAL_REST);
@@ -650,65 +650,56 @@
 
                 app.drawFramebuffer(updateForceFramebuffer)
                 .drawCalls(updateForceDrawCalls)
-                .clear()
                 .draw();
 
-                for (var i = 0; i < 40; ++i) {
+                for (var i = 0; i < 20; ++i) {
                     updateHorizontal1DrawCalls[0].texture("uPositionBuffer", positionTextureB);
                     updateFramebuffer.replaceTexture(0, positionTextureA);
 
                     app.drawFramebuffer(updateFramebuffer)
                     .drawCalls(updateHorizontal1DrawCalls)
-                    .clear()
                     .draw();
 
                     updateHorizontal2DrawCalls[0].texture("uPositionBuffer", positionTextureA);
                     updateFramebuffer.replaceTexture(0, positionTextureB);
 
                     app.drawCalls(updateHorizontal2DrawCalls)
-                    .clear()
                     .draw();
 
                     updateVertical1DrawCalls[0].texture("uPositionBuffer", positionTextureB);
                     updateFramebuffer.replaceTexture(0, positionTextureA);
 
                     app.drawCalls(updateVertical1DrawCalls)
-                    .clear()
                     .draw();
 
                     updateVertical2DrawCalls[0].texture("uPositionBuffer", positionTextureA);
                     updateFramebuffer.replaceTexture(0, positionTextureB);
 
                     app.drawCalls(updateVertical2DrawCalls)
-                    .clear()
                     .draw();
 
                     updateShear1DrawCalls[0].texture("uPositionBuffer", positionTextureB);
                     updateFramebuffer.replaceTexture(0, positionTextureA);
 
                     app.drawCalls(updateShear1DrawCalls)
-                    .clear()
                     .draw();
 
                     updateShear2DrawCalls[0].texture("uPositionBuffer", positionTextureA);
                     updateFramebuffer.replaceTexture(0, positionTextureB);
 
                     app.drawCalls(updateShear2DrawCalls)
-                    .clear()
                     .draw();
 
                     updateShear3DrawCalls[0].texture("uPositionBuffer", positionTextureB);
                     updateFramebuffer.replaceTexture(0, positionTextureA);
 
                     app.drawCalls(updateShear3DrawCalls)
-                    .clear()
                     .draw();
 
                     updateShear4DrawCalls[0].texture("uPositionBuffer", positionTextureA);
                     updateFramebuffer.replaceTexture(0, positionTextureB);
 
                     app.drawCalls(updateShear4DrawCalls)
-                    .clear()
                     .draw();   
                 }
 
@@ -724,14 +715,12 @@
                 updateFramebuffer.replaceTexture(0, positionTextureA);
 
                 app.drawCalls(updateCollisionDrawCalls)
-                .clear()
                 .draw();
 
                 updateNormalDrawCalls[0].texture("uPositionBuffer", positionTextureA);
                 updateFramebuffer.replaceTexture(0, normalTexture);
 
                 app.drawCalls(updateNormalDrawCalls)
-                .clear()
                 .draw();
 
                 mainDrawcalls[0].texture("uPositionBuffer", positionTextureA);

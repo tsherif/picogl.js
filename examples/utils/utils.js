@@ -236,13 +236,13 @@
         createSphere: function createSphere(options) {
           options = options || {};
 
-          var long_bands = options.long_bands || 32;
-          var lat_bands = options.lat_bands || 32;
+          var longBands = options.longBands || 32;
+          var latBands = options.latBands || 32;
           var radius = options.radius || 1;
-          var lat_step = Math.PI / lat_bands;
-          var long_step = 2 * Math.PI / long_bands;
-          var num_positions = long_bands * lat_bands * 4;
-          var num_indices = long_bands * lat_bands * 6;
+          var lat_step = Math.PI / latBands;
+          var long_step = 2 * Math.PI / longBands;
+          var num_positions = longBands * latBands * 4;
+          var num_indices = longBands * latBands * 6;
           var lat_angle, long_angle;
           var positions = new Float32Array(num_positions * 3);
           var normals = new Float32Array(num_positions * 3);
@@ -257,11 +257,11 @@
           var k = 0, l = 0;
           var vi, ti;
 
-          for (i = 0; i < lat_bands; i++) {
+          for (i = 0; i < latBands; i++) {
             lat_angle = i * lat_step;
             y1 = Math.cos(lat_angle);
             y2 = Math.cos(lat_angle + lat_step);
-            for (j = 0; j < long_bands; j++) {
+            for (j = 0; j < longBands; j++) {
               long_angle = j * long_step;
               x1 = Math.sin(lat_angle) * Math.cos(long_angle);
               x2 = Math.sin(lat_angle) * Math.cos(long_angle + long_step);
@@ -271,10 +271,10 @@
               z2 = Math.sin(lat_angle) * Math.sin(long_angle + long_step);
               z3 = Math.sin(lat_angle + lat_step) * Math.sin(long_angle);
               z4 = Math.sin(lat_angle + lat_step) * Math.sin(long_angle + long_step);
-              u1 = 1 - j / long_bands;
-              u2 = 1 - (j + 1) / long_bands;
-              v1 = 1 - i / lat_bands;
-              v2 = 1 - (i + 1) / lat_bands;
+              u1 = 1 - j / longBands;
+              u2 = 1 - (j + 1) / longBands;
+              v1 = 1 - i / latBands;
+              v2 = 1 - (i + 1) / latBands;
               vi = k * 3;
               ti = k * 2;
 
