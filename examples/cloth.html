@@ -38,7 +38,8 @@
 </head>
 <body>
     <div id="example-title">
-        PicoGL.js Example: Cloth
+        PicoGL.js Example: Cloth<BR>
+        (Use mouse to control ball)
         <div>
             <a href="https://github.com/tsherif/picogl.js/blob/master/examples/cloth.html">Source code</a>
         </div>
@@ -60,7 +61,7 @@
 
         precision highp float;
 
-        #define GRAVITY vec3(0.0, -0.0002, 0.0)
+        #define GRAVITY vec3(0.0, -0.0003, 0.0)
         #define WIND vec3(0.0, 0.0, 0.00008)
         #define DAMPING 0.99
 
@@ -335,7 +336,7 @@
         var NUM_PARTICLES = DATA_TEXTURE_DIM * DATA_TEXTURE_DIM;
         var STRUCTURAL_REST = 1 / DATA_TEXTURE_DIM;
         var SHEAR_REST = Math.sqrt(2 * STRUCTURAL_REST * STRUCTURAL_REST);
-        var BALL_RADIUS = 0.12;
+        var BALL_RADIUS = 0.15;
         var BALL_SPEED = 0.004;    
         var BALL_RANGE = 0.9;
 
@@ -700,6 +701,13 @@
 
         var image = new Image();
 
+        var targetZ = null;
+        var targetY = null;
+        canvas.addEventListener("mousemove", function(event) {
+            targetZ = -((event.clientX / canvas.width) * 2 - 1);
+            targetY = ((canvas.height - event.clientY) / canvas.height) * 2 - 1;
+        });
+
         image.onload = function() {
             var texture = app.createTexture2D(image);
 
@@ -785,13 +793,24 @@
                     .draw();   
                 }
 
-                ballPosition[2] += BALL_SPEED;
+                if (targetZ === null) {
+                    ballPosition[2] += BALL_SPEED;
 
-                if (ballPosition[2] > BALL_RANGE || ballPosition[2] < -BALL_RANGE) {
-                    BALL_SPEED *= -1;
+                    if (ballPosition[2] > BALL_RANGE || ballPosition[2] < -BALL_RANGE) {
+                        BALL_SPEED *= -1;
+                    }
+
+                    ballUniforms.set(0, ballPosition).update();
+                } else {
+                    var zDiff = targetZ - ballPosition[2];
+                    var yDiff = targetY - ballPosition[1];
+
+                    if (Math.abs(zDiff) > 0.001 || Math.abs(yDiff) > 0.001) {
+                        ballPosition[2] += zDiff * 0.02;
+                        ballPosition[1] += yDiff * 0.02;
+                        ballUniforms.set(0, ballPosition).update();
+                    }
                 }
-
-                ballUniforms.set(0, ballPosition).update();
 
                 updateCollisionDrawCalls[0].texture("uPositionBuffer", positionTextureB);
                 updateFramebuffer.replaceTexture(0, positionTextureA);
