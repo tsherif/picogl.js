@@ -119,8 +119,14 @@
             int iDot = abs(texelCoord.x * uDir.x) + abs(texelCoord.y * uDir.y);
             int neg = iDot % 2 == uModVal ? 1 : -1;
 
+            bool otherPin = false;
+
             if (!all(equal(texelCoord, ivec2(0, 0))) && !all(equal(texelCoord, ivec2(dimensions.x - 1, 0)))) {
                 ivec2 otherCoord = texelCoord + uDir * neg;
+
+                if (all(equal(otherCoord, ivec2(0, 0))) || all(equal(otherCoord, ivec2(dimensions.x - 1, 0)))) {
+                    otherPin = true;
+                }
 
                 if (all(greaterThanEqual(otherCoord, ivec2(0, 0))) && all(lessThan(otherCoord, dimensions))) {
                     vec3 otherPosition = texelFetch(uPositionBuffer, otherCoord, 0).xyz;
@@ -128,7 +134,7 @@
                     vec3 diffVec = otherPosition - position;
                     float dist = length(diffVec);
                     if (dist > uRestDistance) {
-                        position += diffVec * (1.0 - uRestDistance / dist) * 0.5;
+                        position += diffVec * (1.0 - uRestDistance / dist) * (otherPin ? 1.0 : 0.5);
                     }
                 }
             }
