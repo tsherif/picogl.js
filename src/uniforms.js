@@ -26,6 +26,7 @@
 
     // Classes to manage uniform value updates, including
     // caching current values.
+
     PicoGL.FloatUniform = function FloatUniform(gl, handle) {
         this.gl = gl;
         this.handle = handle;
@@ -37,16 +38,6 @@
             this.gl.uniform1f(this.handle, value);
             this.cache = value;
         }
-    };
-
-    PicoGL.FloatArrayUniform = function FloatArrayUniform(gl, handle, count) {
-        this.gl = gl;
-        this.handle = handle;
-        this.count = count;
-    };
-
-    PicoGL.FloatArrayUniform.prototype.set = function(value) {
-        this.gl.uniform1fv(this.handle, value);
     };
 
     PicoGL.IntUniform = function IntUniform(gl, handle) {
@@ -62,16 +53,6 @@
         }
     };
 
-    PicoGL.IntArrayUniform = function IntArrayUniform(gl, handle, count) {
-        this.gl = gl;
-        this.handle = handle;
-        this.count = count;
-    };
-
-    PicoGL.IntArrayUniform.prototype.set = function(value) {
-        this.gl.uniform1iv(this.handle, value);
-    };
-
     PicoGL.UintUniform = function UintUniform(gl, handle) {
         this.gl = gl;
         this.handle = handle;
@@ -83,16 +64,6 @@
             this.gl.uniform1ui(this.handle, value);
             this.cache = value;
         }
-    };
-
-    PicoGL.UintArrayUniform = function UintArrayUniform(gl, handle, count) {
-        this.gl = gl;
-        this.handle = handle;
-        this.count = count;
-    };
-
-    PicoGL.UintArrayUniform.prototype.set = function(value) {
-        this.gl.uniform1uiv(this.handle, value);
     };
 
     PicoGL.Vec2Uniform = function Vec2Uniform(gl, handle) {
@@ -109,16 +80,6 @@
         }
     };
 
-    PicoGL.Vec2ArrayUniform = function Vec2ArrayUniform(gl, handle, count) {
-        this.gl = gl;
-        this.handle = handle;
-        this.count = count;
-    };
-
-    PicoGL.Vec2ArrayUniform.prototype.set = function(value) {
-        this.gl.uniform2fv(this.handle, value);
-    };
-
     PicoGL.Vec3Uniform = function Vec3Uniform(gl, handle) {
         this.gl = gl;
         this.handle = handle;
@@ -132,16 +93,6 @@
             this.gl.uniform3fv(this.handle, value);
             this.cache.set(value);
         }
-    };
-
-    PicoGL.Vec3ArrayUniform = function Vec3ArrayUniform(gl, handle, count) {
-        this.gl = gl;
-        this.handle = handle;
-        this.count = count;
-    };
-
-    PicoGL.Vec3ArrayUniform.prototype.set = function(value) {
-        this.gl.uniform3fv(this.handle, value);
     };
 
     PicoGL.Vec4Uniform = function Vec4Uniform(gl, handle) {
@@ -160,16 +111,6 @@
         }
     };
 
-    PicoGL.Vec4ArrayUniform = function Vec4ArrayUniform(gl, handle, count) {
-        this.gl = gl;
-        this.handle = handle;
-        this.count = count;
-    };
-
-    PicoGL.Vec4ArrayUniform.prototype.set = function(value) {
-        this.gl.uniform4fv(this.handle, value);
-    };
-
     PicoGL.IntVec2Uniform = function IntVec2Uniform(gl, handle) {
         this.gl = gl;
         this.handle = handle;
@@ -182,16 +123,6 @@
             this.gl.uniform2iv(this.handle, value);
             this.cache.set(value);
         }
-    };
-
-    PicoGL.IntVec2ArrayUniform = function IntVec2ArrayUniform(gl, handle, count) {
-        this.gl = gl;
-        this.handle = handle;
-        this.count = count;
-    };
-
-    PicoGL.IntVec2ArrayUniform.prototype.set = function(value) {
-        this.gl.uniform2iv(this.handle, value);
     };
 
     PicoGL.IntVec3Uniform = function IntVec3Uniform(gl, handle) {
@@ -207,16 +138,6 @@
             this.gl.uniform3iv(this.handle, value);
             this.cache.set(value);
         }
-    };
-
-    PicoGL.IntVec3ArrayUniform = function IntVec3ArrayUniform(gl, handle, count) {
-        this.gl = gl;
-        this.handle = handle;
-        this.count = count;
-    };
-
-    PicoGL.IntVec3ArrayUniform.prototype.set = function(value) {
-        this.gl.uniform3iv(this.handle, value);
     };
 
     PicoGL.IntVec4Uniform = function IntVec4Uniform(gl, handle) {
@@ -235,16 +156,6 @@
         }
     };
 
-    PicoGL.IntVec4ArrayUniform = function IntVec4ArrayUniform(gl, handle, count) {
-        this.gl = gl;
-        this.handle = handle;
-        this.count = count;
-    };
-
-    PicoGL.IntVec4ArrayUniform.prototype.set = function(value) {
-        this.gl.uniform4iv(this.handle, value);
-    };
-
     PicoGL.UintVec2Uniform = function UintVec2Uniform(gl, handle) {
         this.gl = gl;
         this.handle = handle;
@@ -257,16 +168,6 @@
             this.gl.uniform2uiv(this.handle, value);
             this.cache.set(value);
         }
-    };
-
-    PicoGL.UintVec2ArrayUniform = function UintVec2ArrayUniform(gl, handle, count) {
-        this.gl = gl;
-        this.handle = handle;
-        this.count = count;
-    };
-
-    PicoGL.UintVec2ArrayUniform.prototype.set = function(value) {
-        this.gl.uniform2uiv(this.handle, value);
     };
 
     PicoGL.UintVec3Uniform = function UintVec3Uniform(gl, handle) {
@@ -282,16 +183,6 @@
             this.gl.uniform3uiv(this.handle, value);
             this.cache.set(value);
         }
-    };
-
-    PicoGL.UintVec3ArrayUniform = function UintVec3ArrayUniform(gl, handle, count) {
-        this.gl = gl;
-        this.handle = handle;
-        this.count = count;
-    };
-
-    PicoGL.UintVec3ArrayUniform.prototype.set = function(value) {
-        this.gl.uniform3uiv(this.handle, value);
     };
 
     PicoGL.UintVec4Uniform = function UintVec4Uniform(gl, handle) {
@@ -310,16 +201,6 @@
         }
     };
 
-    PicoGL.UintVec4ArrayUniform = function UintVec4ArrayUniform(gl, handle, count) {
-        this.gl = gl;
-        this.handle = handle;
-        this.count = count;
-    };
-
-    PicoGL.UintVec4ArrayUniform.prototype.set = function(value) {
-        this.gl.uniform4uiv(this.handle, value);
-    };
-
     PicoGL.BoolVec2Uniform = function BoolVec2Uniform(gl, handle) {
         this.gl = gl;
         this.handle = handle;
@@ -333,16 +214,6 @@
             this.cache[0] = value[0];
             this.cache[1] = value[1];
         }
-    };
-
-    PicoGL.BoolVec2ArrayUniform = function BoolVec2ArrayUniform(gl, handle, count) {
-        this.gl = gl;
-        this.handle = handle;
-        this.count = count;
-    };
-
-    PicoGL.BoolVec2ArrayUniform.prototype.set = function(value) {
-        this.gl.uniform2iv(this.handle, value);
     };
 
     PicoGL.BoolVec3Uniform = function BoolVec3Uniform(gl, handle) {
@@ -360,16 +231,6 @@
             this.cache[1] = value[1];
             this.cache[2] = value[2];
         }
-    };
-
-    PicoGL.BoolVec3ArrayUniform = function BoolVec3ArrayUniform(gl, handle, count) {
-        this.gl = gl;
-        this.handle = handle;
-        this.count = count;
-    };
-
-    PicoGL.BoolVec3ArrayUniform.prototype.set = function(value) {
-        this.gl.uniform3iv(this.handle, value);
     };
 
     PicoGL.BoolVec4Uniform = function BoolVec4Uniform(gl, handle) {
@@ -391,16 +252,6 @@
         }
     };
 
-    PicoGL.BoolVec3ArrayUniform = function BoolVec3ArrayUniform(gl, handle, count) {
-        this.gl = gl;
-        this.handle = handle;
-        this.count = count;
-    };
-
-    PicoGL.BoolVec3ArrayUniform.prototype.set = function(value) {
-        this.gl.uniform3iv(this.handle, value);
-    };
-
     PicoGL.Mat2Uniform = function Mat2Uniform(gl, handle) {
         this.gl = gl;
         this.handle = handle;
@@ -415,16 +266,6 @@
             this.gl.uniformMatrix2fv(this.handle, false, value);
             this.cache.set(value);
         }
-    };
-
-    PicoGL.Mat2ArrayUniform = function Mat2ArrayUniform(gl, handle, count) {
-        this.gl = gl;
-        this.handle = handle;
-        this.count = count;
-    };
-
-    PicoGL.Mat2ArrayUniform.prototype.set = function(value) {
-        this.gl.uniformMatrix2fv(this.handle, false, value);
     };
 
     PicoGL.Mat3Uniform = function Mat3Uniform(gl, handle) {
@@ -446,16 +287,6 @@
             this.gl.uniformMatrix3fv(this.handle, false, value);
             this.cache.set(value);
         }
-    };
-
-    PicoGL.Mat3ArrayUniform = function Mat3ArrayUniform(gl, handle, count) {
-        this.gl = gl;
-        this.handle = handle;
-        this.count = count;
-    };
-
-    PicoGL.Mat3ArrayUniform.prototype.set = function(value) {
-        this.gl.uniformMatrix3fv(this.handle, false, value);
     };
 
     PicoGL.Mat4Uniform = function Mat4Uniform(gl, handle) {
@@ -486,16 +317,6 @@
         }
     };
 
-    PicoGL.Mat4ArrayUniform = function Mat4ArrayUniform(gl, handle, count) {
-        this.gl = gl;
-        this.handle = handle;
-        this.count = count;
-    };
-
-    PicoGL.Mat4ArrayUniform.prototype.set = function(value) {
-        this.gl.uniformMatrix4fv(this.handle, false, value);
-    };
-
     PicoGL.Mat2x3Uniform = function Mat2x3Uniform(gl, handle) {
         this.gl = gl;
         this.handle = handle;
@@ -512,16 +333,6 @@
             this.gl.uniformMatrix2x3fv(this.handle, false, value);
             this.cache.set(value);
         }
-    };
-
-    PicoGL.Mat2x3ArrayUniform = function Mat2x3ArrayUniform(gl, handle, count) {
-        this.gl = gl;
-        this.handle = handle;
-        this.count = count;
-    };
-
-    PicoGL.Mat2x3ArrayUniform.prototype.set = function(value) {
-        this.gl.uniformMatrix2x3fv(this.handle, false, value);
     };
 
     PicoGL.Mat2x4Uniform = function Mat2x4Uniform(gl, handle) {
@@ -544,16 +355,6 @@
         }
     };
 
-    PicoGL.Mat2x4ArrayUniform = function Mat2x4ArrayUniform(gl, handle, count) {
-        this.gl = gl;
-        this.handle = handle;
-        this.count = count;
-    };
-
-    PicoGL.Mat2x4ArrayUniform.prototype.set = function(value) {
-        this.gl.uniformMatrix2x4fv(this.handle, false, value);
-    };
-
     PicoGL.Mat3x2Uniform = function Mat3x2Uniform(gl, handle) {
         this.gl = gl;
         this.handle = handle;
@@ -570,16 +371,6 @@
             this.gl.uniformMatrix3x2fv(this.handle, false, value);
             this.cache.set(value);
         }
-    };
-
-    PicoGL.Mat3x2ArrayUniform = function Mat3x2ArrayUniform(gl, handle, count) {
-        this.gl = gl;
-        this.handle = handle;
-        this.count = count;
-    };
-
-    PicoGL.Mat3x2ArrayUniform.prototype.set = function(value) {
-        this.gl.uniformMatrix3x2fv(this.handle, false, value);
     };
 
     PicoGL.Mat3x4Uniform = function Mat3x4Uniform(gl, handle) {
@@ -606,16 +397,6 @@
         }
     };
 
-    PicoGL.Mat3x4ArrayUniform = function Mat3x4ArrayUniform(gl, handle, count) {
-        this.gl = gl;
-        this.handle = handle;
-        this.count = count;
-    };
-
-    PicoGL.Mat3x4ArrayUniform.prototype.set = function(value) {
-        this.gl.uniformMatrix3x4fv(this.handle, false, value);
-    };
-
     PicoGL.Mat4x2Uniform = function Mat4x2Uniform(gl, handle) {
         this.gl = gl;
         this.handle = handle;
@@ -634,16 +415,6 @@
             this.gl.uniformMatrix4x2fv(this.handle, false, value);
             this.cache.set(value);
         }
-    };
-
-    PicoGL.Mat4x2ArrayUniform = function Mat4x2ArrayUniform(gl, handle, count) {
-        this.gl = gl;
-        this.handle = handle;
-        this.count = count;
-    };
-
-    PicoGL.Mat4x2ArrayUniform.prototype.set = function(value) {
-        this.gl.uniformMatrix4x2fv(this.handle, false, value);
     };
 
     PicoGL.Mat4x3Uniform = function Mat4x3Uniform(gl, handle) {
@@ -668,16 +439,6 @@
             this.gl.uniformMatrix4x3fv(this.handle, false, value);
             this.cache.set(value);
         }
-    };
-
-    PicoGL.Mat4x3ArrayUniform = function Mat4x3ArrayUniform(gl, handle, count) {
-        this.gl = gl;
-        this.handle = handle;
-        this.count = count;
-    };
-
-    PicoGL.Mat4x3ArrayUniform.prototype.set = function(value) {
-        this.gl.uniformMatrix4x3fv(this.handle, false, value);
     };
 
 })();
