@@ -117,6 +117,23 @@
         }
     };
 
+    PicoGL.BoolArrayUniform = function BoolArrayUniform(gl, handle, count) {
+        this.gl = gl;
+        this.handle = handle;
+        this.count = count;
+        this.cache = new Array(count).fill(false);
+    };
+
+    PicoGL.BoolArrayUniform.prototype.set = function(value) {
+        for (var i = 0, len = value.length; i < len; i++) {
+            if (this.cache[i] !== value[i]) {
+                this.gl.uniform1iv(this.handle, value);
+                this.cache.set(value);
+                return;
+            }
+        }
+    };
+
     PicoGL.Vec2Uniform = function Vec2Uniform(gl, handle, count) {
         this.gl = gl;
         this.handle = handle;

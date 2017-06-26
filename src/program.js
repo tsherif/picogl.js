@@ -93,8 +93,10 @@
             var elementCount = uniformInfo.size;
 
             switch (uniformInfo.type) {
-                case PicoGL.INT:
                 case PicoGL.BOOL:
+                    UniformClass = elementCount > 1 ? PicoGL.BoolArrayUniform : PicoGL.IntUniform;
+                    break;
+                case PicoGL.INT:
                 case PicoGL.SAMPLER_2D:
                 case PicoGL.INT_SAMPLER_2D:
                 case PicoGL.UNSIGNED_INT_SAMPLER_2D:

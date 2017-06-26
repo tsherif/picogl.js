@@ -894,8 +894,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             var elementCount = uniformInfo.size;
 
             switch (uniformInfo.type) {
-                case PicoGL.INT:
                 case PicoGL.BOOL:
+                    UniformClass = elementCount > 1 ? PicoGL.BoolArrayUniform : PicoGL.IntUniform;
+                    break;
+                case PicoGL.INT:
                 case PicoGL.SAMPLER_2D:
                 case PicoGL.INT_SAMPLER_2D:
                 case PicoGL.UNSIGNED_INT_SAMPLER_2D:
@@ -1457,6 +1459,23 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         for (var i = 0, len = value.length; i < len; i++) {
             if (this.cache[i] !== value[i]) {
                 this.gl.uniform1uiv(this.handle, value);
+                this.cache.set(value);
+                return;
+            }
+        }
+    };
+
+    PicoGL.BoolArrayUniform = function BoolArrayUniform(gl, handle, count) {
+        this.gl = gl;
+        this.handle = handle;
+        this.count = count;
+        this.cache = new Array(count).fill(false);
+    };
+
+    PicoGL.BoolArrayUniform.prototype.set = function(value) {
+        for (var i = 0, len = value.length; i < len; i++) {
+            if (this.cache[i] !== value[i]) {
+                this.gl.uniform1iv(this.handle, value);
                 this.cache.set(value);
                 return;
             }
