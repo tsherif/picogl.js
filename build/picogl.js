@@ -1473,10 +1473,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     };
 
     PicoGL.BoolArrayUniform.prototype.set = function(value) {
-        for (var i = 0, len = value.length; i < len; i++) {
+        var len = value.length;
+        for (var i = 0; i < len; i++) {
             if (this.cache[i] !== value[i]) {
                 this.gl.uniform1iv(this.handle, value);
-                this.cache.set(value);
+                for (var j = i; j < len; j++) {
+                    this.cache[j] = value[j];
+                }
                 return;
             }
         }
@@ -1643,10 +1646,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     };
 
     PicoGL.BoolVec2Uniform.prototype.set = function(value) {
-        for (var i = 0, len = value.length; i < len; i++) {
+        var len = value.length;
+        for (var i = 0; i < len; i++) {
             if (this.cache[i] !== value[i]) {
                 this.gl.uniform2iv(this.handle, value);
-                this.cache.set(value);
+                for (var j = i; j < len; j++) {
+                    this.cache[j] = value[j];
+                }
                 return;
             }
         }
@@ -1660,10 +1666,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     };
 
     PicoGL.BoolVec3Uniform.prototype.set = function(value) {
-        for (var i = 0, len = value.length; i < len; i++) {
+        var len = value.length;
+        for (var i = 0; i < len; i++) {
             if (this.cache[i] !== value[i]) {
                 this.gl.uniform3iv(this.handle, value);
-                this.cache.set(value);
+                for (var j = i; j < len; j++) {
+                    this.cache[j] = value[j];
+                }
                 return;
             }
         }
@@ -1677,10 +1686,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     };
 
     PicoGL.BoolVec4Uniform.prototype.set = function(value) {
-        for (var i = 0, len = value.length; i < len; i++) {
+        var len = value.length;
+        for (var i = 0; i < len; i++) {
             if (this.cache[i] !== value[i]) {
                 this.gl.uniform4iv(this.handle, value);
-                this.cache.set(value);
+                for (var j = i; j < len; j++) {
+                    this.cache[j] = value[j];
+                }
                 return;
             }
         }
