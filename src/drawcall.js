@@ -72,7 +72,9 @@
     };
 
     /**
-        Set the value for a uniform.
+        Set the value for a uniform. Array uniforms are supported by
+        using appending "[0]" to the array name and passing a flat array
+        with all required values.
 
         @method
         @param {string} name Uniform name.

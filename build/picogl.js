@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.3.3 
+PicoGL.js v0.3.4 
 
 The MIT License (MIT)
 
@@ -36,7 +36,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @prop {object} WEBGL_INFO WebGL context information.
     */
     var PicoGL = window.PicoGL = {
-        version: "0.3.3"
+        version: "0.3.4"
     };
 
     (function() {
@@ -2690,7 +2690,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     };
 
     /**
-        Set the value for a uniform.
+        Set the value for a uniform. Array uniforms are supported by
+        using appending "[0]" to the array name and passing a flat array
+        with all required values.
 
         @method
         @param {string} name Uniform name.
