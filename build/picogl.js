@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.3.4 
+PicoGL.js v0.3.5 
 
 The MIT License (MIT)
 
@@ -36,7 +36,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @prop {object} WEBGL_INFO WebGL context information.
     */
     var PicoGL = window.PicoGL = {
-        version: "0.3.4"
+        version: "0.3.5"
     };
 
     (function() {
