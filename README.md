@@ -125,7 +125,7 @@ Transform Feedback
 
     // Capture transform results into positions2 buffer
     var transformFeedback = app.createTransformFeedback()
-    .captureBuffer(0, positions2);
+    .feedbackBuffer(0, positions2);
 
     var drawCall = app.createDrawCall(program, vertexArray)
     .transformFeedback(transformFeedback);

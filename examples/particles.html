@@ -160,12 +160,12 @@
 
         // TRANSFORM FEEDBACK OBJECTS
         var transformFeedback1 = app.createTransformFeedback()
-        .captureBuffer(0, positions1)
-        .captureBuffer(1, velocities1);
+        .feedbackBuffer(0, positions1)
+        .feedbackBuffer(1, velocities1);
 
         var transformFeedback2 = app.createTransformFeedback()
-        .captureBuffer(0, positions2)
-        .captureBuffer(1, velocities2);
+        .feedbackBuffer(0, positions2)
+        .feedbackBuffer(1, velocities2);
 
         // UNIFORM BUFFER FOR SIMULATION PARAMETERS
         var massUniforms = app.createUniformBuffer([

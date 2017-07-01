@@ -225,12 +225,12 @@
 
         // CREATE TRANSFORM FEEDBACK FROM INPUT AND OUTPUT VERTEX ARRAYS
         var transformFeedbackA = app.createTransformFeedback()
-        .captureBuffer(0, offsetsA)
-        .captureBuffer(1, rotationsA);
+        .feedbackBuffer(0, offsetsA)
+        .feedbackBuffer(1, rotationsA);
 
         var transformFeedbackB = app.createTransformFeedback()
-        .captureBuffer(0, offsetsB)
-        .captureBuffer(1, rotationsB);
+        .feedbackBuffer(0, offsetsB)
+        .feedbackBuffer(1, rotationsB);
 
         // VERTEX ARRAYS FOR DRAWING
         var drawArrayA = app.createVertexArray()

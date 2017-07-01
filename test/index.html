@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PicoGL Tests</title>
+</head>
+<body>
+    <script>
+        var tests = [
+            "../examples/triangle.html",
+            "uniforms.html",
+            "../examples/ubo.html",
+            "../examples/transformfeedback.html",
+            "../examples/instanced.html",
+            "rtt.html",
+        ];
+
+        for (var i = 0, len = tests.length; i < len; ++i) {
+            var src = tests[i];
+            var iframe = document.createElement("iframe");
+            iframe.src = src;
+            document.body.appendChild(iframe);
+        }
+    </script>
+</body>
+</html>

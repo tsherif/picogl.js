@@ -126,10 +126,10 @@
         // CREATE TRANSFORM FEEDBACK OBJECTS AND
         // INDICATE BUFFERS TO CAPTURE
         var transformFeedbackA = app.createTransformFeedback()
-        .captureBuffer(0, positions1);
+        .feedbackBuffer(0, positions1);
 
         var transformFeedbackB = app.createTransformFeedback()
-        .captureBuffer(0, positions2);
+        .feedbackBuffer(0, positions2);
 
         // CREATE DRAW CALLS FROM PROGRAM AND TRANSFORMFEEDBACK.
         // EACH DRAW CALL REPRESENTS ONE DIRECTION OF DRAW/CAPTURE
