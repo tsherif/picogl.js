@@ -238,13 +238,13 @@
         .vertexAttributeBuffer(0, rotationsA);
 
         var transformFeedbackA = app.createTransformFeedback()
-        .captureBuffer(0, rotationsA);
+        .feedbackBuffer(0, rotationsA);
 
         var updateVertexArrayB = app.createVertexArray()
         .vertexAttributeBuffer(0, rotationsB);
 
         var transformFeedbackB = app.createTransformFeedback()
-        .captureBuffer(0, rotationsB);
+        .feedbackBuffer(0, rotationsB);
 
         // SET UP UNIFORM BUFFER
         var projMatrix = mat4.create();

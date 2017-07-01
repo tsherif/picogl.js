@@ -1302,13 +1302,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     };
 
      /**
-        Capture transform output to given buffer.
+        Bind a feedback buffer to capture transform output.
 
         @method
         @param {number} index Index of transform feedback varying to capture.
         @param {VertexBuffer} buffer Buffer to record output into.
     */
-    PicoGL.TransformFeedback.prototype.captureBuffer = function(index, buffer) {
+    PicoGL.TransformFeedback.prototype.feedbackBuffer = function(index, buffer) {
         this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedback);
         this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, index, buffer.buffer);
         this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, null);
