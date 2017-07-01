@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<!--
+  The MIT License (MIT)
+
+  Copyright (c) 2017 Tarek Sherif
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy of
+  this software and associated documentation files (the "Software"), to deal in
+  the Software without restriction, including without limitation the rights to
+  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+  the Software, and to permit persons to whom the Software is furnished to do so,
+  subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+  FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+  COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+  IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+<html>
+<head>
+    <title>PicoGL.js: Uniform Buffers</title>
+    <script src="../build/picogl.js"></script>
+    <link rel="stylesheet" href="../site/css/picogl-example.css"> 
+</head>
+<body>
+    <canvas id="gl-canvas"></canvas>
+    <script type="shader/vs" id="vs-mats">
+        #version 300 es
+        
+        layout(location=0) in vec4 position;
+
+        uniform mat4x2 offsets;
+        uniform int index;
+        
+        void main() {
+            gl_Position = position;
+            gl_Position.xy += offsets[index];
+        }
+    </script>
+    <script type="shader/fs" id="fs-mats">
+        #version 300 es
+        precision highp float;
+        precision highp int;
+        
+        uniform mat4x3 colors;
+        uniform int index;
+
+        out vec4 fragColor;
+        void main() {
+            fragColor = vec4(colors[index], 1.0);
+        }
+    </script>
+
+    <script type="shader/vs" id="vs-arrays">
+        #version 300 es
+        
+        #define NUM_TRIS 4
+
+        layout(location=0) in vec4 position;
+
+        uniform vec2 offsets[NUM_TRIS];
+        uniform int index;
+        
+        void main() {
+            gl_Position = position;
+            gl_Position.xy += offsets[index];
+        }
+    </script>
+    <script type="shader/fs" id="fs-arrays">
+        #version 300 es
+        precision highp float;
+        precision highp int;
+
+        #define NUM_TRIS 4
+        
+        uniform vec3 colors[NUM_TRIS];
+        uniform int index;
+
+        out vec4 fragColor;
+        void main() {
+            fragColor = vec4(colors[index], 1.0);
+        }
+    </script>
+
+    <script type="shader/vs" id="vs-tex-bool">
+        #version 300 es
+        
+        #define NUM_TRIS 4
+
+        layout(location=0) in vec4 position;
+        layout(location=1) in vec2 uv;
+
+        uniform vec3 offsets[NUM_TRIS];
+        uniform int index;
+        
+        out vec2 vUV;
+        void main() {
+            vUV = uv;
+            gl_Position = position;
+            gl_Position.xyz += offsets[index];
+        }
+    </script>
+    <script type="shader/fs" id="fs-tex-bool">
+        #version 300 es
+        precision highp float;
+        precision highp int;
+
+        #define NUM_TRIS 4
+
+        in vec2 vUV;
+        
+        uniform vec4 colors[NUM_TRIS];
+        uniform bool useTexture[NUM_TRIS];
+        uniform sampler2D tex;
+        uniform int index;
+
+        out vec4 fragColor;
+        void main() {
+            if (useTexture[index]) {
+                fragColor = texture(tex, vUV);
+            } else {
+                fragColor = colors[index];
+            }
+        }
+    </script>
+    
+    <script type="text/javascript">
+        var canvas = document.getElementById("gl-canvas");
+
+        if (!canvas.getContext("webgl2")) {
+            console.error("WebGL 2 not available");
+            document.body.innerHTML = "This example requires WebGL 2 which is unavailable on this system."
+        }
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        var app = PicoGL.createApp(canvas)
+        .clearColor(0.0, 0.0, 0.0, 1.0);
+
+        window.onresize = function() {
+            app.resize(window.innerWidth, window.innerHeight);
+        }
+
+        // PROGRAM
+        var vsSource =  document.getElementById("vs-mats").text.trim();
+        var fsSource =  document.getElementById("fs-mats").text.trim();                        
+        var matProgram = app.createProgram(vsSource, fsSource);
+
+        vsSource =  document.getElementById("vs-arrays").text.trim();
+        fsSource =  document.getElementById("fs-arrays").text.trim();                        
+        var arrayProgram = app.createProgram(vsSource, fsSource);
+
+        vsSource =  document.getElementById("vs-tex-bool").text.trim();
+        fsSource =  document.getElementById("fs-tex-bool").text.trim();                        
+        var texBoolProgram = app.createProgram(vsSource, fsSource);
+
+        // GEOMETRY
+        var positions = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
+            -0.15, -0.15,
+             0.15, -0.15,
+             0.0, 0.15
+        ]));
+
+        var uv = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
+             0, 0,
+             1, 0,
+             0.5, 1
+        ]));
+
+        var triangleArray = app.createVertexArray()
+        .attributeBuffer(0, positions)
+        .attributeBuffer(1, uv);
+
+        var offsets1 = new Float32Array([
+            -0.6, 0.5,
+            -0.2, 0.5,
+            0.2, 0.5,
+            0.6, 0.5,
+        ]);
+
+        var offsets2 = new Float32Array([
+            -0.6, 0.0,
+            -0.2, 0.0,
+            0.2, 0.0,
+            0.6, 0.0,
+        ]);
+
+        var offsets3 = new Float32Array([
+            -0.6, -0.5, 0.0,
+            -0.2, -0.5, 0.0,
+            0.2, -0.5, 0.0,
+            0.6, -0.5, 0.0
+        ]);
+
+        var colors1 = new Float32Array([
+            1.0, 0.0, 0.0,
+            0.0, 1.0, 0.0,
+            0.0, 0.0, 1.0,
+            0.0, 1.0, 1.0
+        ]);
+
+        var colors2 = new Float32Array([
+            1.0, 0.0, 0.0, 1.0,
+            0.0, 1.0, 0.0, 1.0,
+            0.0, 0.0, 1.0, 1.0,
+            0.0, 1.0, 1.0, 1.0
+        ]);
+
+        var useTexture = [
+            false,
+            true,
+            false,
+            true
+        ];
+    
+
+        // DRAW CALLS WITH DIFFERENT UNIFORM BUFFERS
+        var drawCall1 = app.createDrawCall(matProgram, triangleArray)
+        .uniform("offsets", offsets1)
+        .uniform("colors", colors1)
+        .uniform("index", 0);
+
+        var drawCall2 = app.createDrawCall(matProgram, triangleArray)
+        .uniform("offsets", offsets1)
+        .uniform("colors", colors1)
+        .uniform("index", 1);
+
+        var drawCall3 = app.createDrawCall(matProgram, triangleArray)
+        .uniform("offsets", offsets1)
+        .uniform("colors", colors1)
+        .uniform("index", 2);
+
+        var drawCall4 = app.createDrawCall(matProgram, triangleArray)
+        .uniform("offsets", offsets1)
+        .uniform("colors", colors1)
+        .uniform("index", 3);
+
+        var drawCall5 = app.createDrawCall(arrayProgram, triangleArray)
+        .uniform("offsets[0]", offsets2)
+        .uniform("colors[0]", colors1)
+        .uniform("index", 0);
+
+        var drawCall6 = app.createDrawCall(arrayProgram, triangleArray)
+        .uniform("offsets[0]", offsets2)
+        .uniform("colors[0]", colors1)
+        .uniform("index", 1);
+
+        var drawCall7 = app.createDrawCall(arrayProgram, triangleArray)
+        .uniform("offsets[0]", offsets2)
+        .uniform("colors[0]", colors1)
+        .uniform("index", 2);
+
+        var drawCall8 = app.createDrawCall(arrayProgram, triangleArray)
+        .uniform("offsets[0]", offsets2)
+        .uniform("colors[0]", colors1)
+        .uniform("index", 3);
+
+        var image = new Image();
+
+        image.onload = function() {
+            var texture = app.createTexture2D(image, { flipY: true });
+
+            var drawCall9 = app.createDrawCall(texBoolProgram, triangleArray)
+            .uniform("offsets[0]", offsets3)
+            .uniform("colors[0]", colors2)
+            .uniform("useTexture[0]", useTexture)
+            .uniform("index", 0)
+            .texture("tex", texture);
+
+            var drawCall10 = app.createDrawCall(texBoolProgram, triangleArray)
+            .uniform("offsets[0]", offsets3)
+            .uniform("colors[0]", colors2)
+            .uniform("useTexture[0]", useTexture)
+            .uniform("index", 1)
+            .texture("tex", texture);
+
+            var drawCall11 = app.createDrawCall(texBoolProgram, triangleArray)
+            .uniform("offsets[0]", offsets3)
+            .uniform("colors[0]", colors2)
+            .uniform("useTexture[0]", useTexture)
+            .uniform("index", 2)
+            .texture("tex", texture);
+
+            var drawCall12 = app.createDrawCall(texBoolProgram, triangleArray)
+            .uniform("offsets[0]", offsets3)
+            .uniform("colors[0]", colors2)
+            .uniform("useTexture[0]", useTexture)
+            .uniform("index", 3)
+            .texture("tex", texture);
+
+            // DRAW
+            app.drawCalls([
+                drawCall1,
+                drawCall2,
+                drawCall3,
+                drawCall4,
+                drawCall5,
+                drawCall6,
+                drawCall7,
+                drawCall8,
+                drawCall9,
+                drawCall10,
+                drawCall11,
+                drawCall12
+            ])
+            .clear()
+            .draw();
+
+            // CLEANUP
+            matProgram.delete();
+            positions.delete();
+            triangleArray.delete();
+        };
+
+        image.src = "../examples/img/khronos_webgl.png";
+
+    </script>
+</body>
+</html>
