@@ -63,7 +63,7 @@
 
         @method
         @param {number} [index=0] Color attachment index.
-        @param {Object} options Texture options.
+        @param {Object} [options] Texture options.
         @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
         @param {GLEnum} [options.format=RGBA] Texture data format.
         @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
@@ -121,7 +121,7 @@
         Add a depth target to this framebuffer.
 
         @method
-        @param {Object} options Texture options.
+        @param {Object} [options] Texture options.
         @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
         @param {GLEnum} [options.format=RGBA] Texture data format.
         @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.

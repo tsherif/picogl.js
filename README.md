@@ -45,12 +45,11 @@ Multiple Render Targets
 
 ```JavaScript
     var app = PicoGL.createApp(canvas)
-    .clearColor(0.0, 0.0, 0.0, 1.0)
-    .floatRenderTargets();  // EXT_color_buffer_float 
+    .clearColor(0.0, 0.0, 0.0, 1.0);
 
     var framebuffer = app.createFramebuffer()
-    .colorTarget(0, { type: PicoGL.FLOAT })
-    .colorTarget(1, { type: PicoGL.FLOAT })
+    .colorTarget(0)
+    .colorTarget(1)
     .depthTarget();
     
     // ... set up programs and vertex arrays for offscreen and
