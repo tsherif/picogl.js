@@ -47,6 +47,8 @@ Multiple Render Targets
     var app = PicoGL.createApp(canvas)
     .clearColor(0.0, 0.0, 0.0, 1.0);
 
+    // Create framebuffer with color targets at attachments 
+    // 0 and 1, and a depth target.
     var framebuffer = app.createFramebuffer()
     .colorTarget(0)
     .colorTarget(1)
@@ -59,9 +61,9 @@ Multiple Render Targets
 
     // Bind main program texture samplers to framebuffer targets
     var mainDrawCall = app.createDrawCall(mainProgram, mainVAO)
-    .texture("texture1", frameBuffer.colorTexture[0])
-    .texture("texture2", frameBuffer.colorTexture[1])
-    .texture("depthTexture", frameBuffer.depthTexture);
+    .texture("texture1", framebuffer.colorTexture[0])
+    .texture("texture2", framebuffer.colorTexture[1])
+    .texture("depthTexture", framebuffer.depthTexture);
 
     // Offscreen pass
     app.drawFramebuffer(framebuffer)
