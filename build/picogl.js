@@ -286,8 +286,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @method
         @param {GLEnum} mask Bit mask of buffers to clear.
     */
-    PicoGL.App.prototype.clearMask = function(mask) {
-        this.clearBits = mask;
+    PicoGL.App.prototype.colorMask = function(r, g, b, a) {
+        this.gl.colorMask(r, g, b, a);
 
         return this;
     };
@@ -303,6 +303,19 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     */
     PicoGL.App.prototype.clearColor = function(r, g, b, a) {
         this.gl.clearColor(r, g, b, a);
+
+        return this;
+    };
+
+    /**
+        Set the clear mask bits to use when calling clear().
+        E.g. app.clearMask(PicoGL.COLOR_BUFFER_BIT).
+
+        @method
+        @param {GLEnum} mask Bit mask of buffers to clear.
+    */
+    PicoGL.App.prototype.clearMask = function(mask) {
+        this.clearBits = mask;
 
         return this;
     };
@@ -455,6 +468,18 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     };
 
     /**
+        Set the depth test function. E.g. app.depthFunc(PicoGL.LEQUAL).
+
+        @method
+        @param {GLEnum} func The depth testing function to use.
+    */
+    PicoGL.App.prototype.depthFunc = function(func) {
+        this.gl.depthFunc(func);
+
+        return this;
+    };
+
+    /**
         Enable blending.
 
         @method
@@ -472,40 +497,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     */
     PicoGL.App.prototype.noBlend = function() {
         this.gl.disable(this.gl.BLEND);
-
-        return this;
-    };
-
-    /**
-        Enable rasterization step.
-
-        @method
-    */
-    PicoGL.App.prototype.rasterize = function() {
-        this.gl.disable(this.gl.RASTERIZER_DISCARD);
-
-        return this;
-    };
-
-    /**
-        Disable rasterization step.
-
-        @method
-    */
-    PicoGL.App.prototype.noRasterize = function() {
-        this.gl.enable(this.gl.RASTERIZER_DISCARD);
-
-        return this;
-    };
-
-    /**
-        Set the depth test function. E.g. app.depthFunc(PicoGL.LEQUAL).
-
-        @method
-        @param {GLEnum} func The depth testing function to use.
-    */
-    PicoGL.App.prototype.depthFunc = function(func) {
-        this.gl.depthFunc(func);
 
         return this;
     };
@@ -535,6 +526,113 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     */
     PicoGL.App.prototype.blendFuncSeparate = function(csrc, cdest, asrc, adest) {
         this.gl.blendFuncSeparate(csrc, cdest, asrc, adest);
+
+        return this;
+    };
+
+    /**
+        Enable depth testing.
+
+        @method
+    */
+    PicoGL.App.prototype.stencilTest = function() {
+        this.gl.enable(this.gl.STENCIL_TEST);
+
+        return this;
+    };
+
+    /**
+        Disable depth testing.
+
+        @method
+    */
+    PicoGL.App.prototype.noStencilTest = function() {
+        this.gl.disable(this.gl.STENCIL_TEST);
+
+        return this;
+    };
+
+    /**
+        Enable writing to the z buffer.
+
+        @method
+    */
+    PicoGL.App.prototype.stencilMask = function(mask) {
+        this.gl.stencilMask(mask);
+
+        return this;
+    };
+
+    /**
+        Enable writing to the z buffer.
+
+        @method
+    */
+    PicoGL.App.prototype.stencilMaskSeparate = function(face, mask) {
+        this.gl.stencilMaskSeparate(face, mask);
+
+        return this;
+    };
+
+    /**
+        Set the blend function. E.g. app.blendFunc(PicoGL.ONE, PicoGL.ONE_MINUS_SRC_ALPHA).
+
+        @method
+        @param {GLEnum} src The source blending weight.
+        @param {GLEnum} dest The destination blending weight.
+    */
+    PicoGL.App.prototype.stencilFunc = function(func, ref, mask) {
+        this.gl.stencilFunc(func, ref, mask);
+
+        return this;
+    };
+
+    /**
+        Set the blend function, with separate weighting for color and alpha channels. 
+        E.g. app.stencilFuncSeparate(PicoGL.ONE, PicoGL.ONE_MINUS_SRC_ALPHA, PicoGL.ONE, PicoGL.ONE).
+
+        @method
+        @param {GLEnum} csrc The source blending weight for the RGB channels.
+        @param {GLEnum} cdest The destination blending weight for the RGB channels.
+        @param {GLEnum} asrc The source blending weight for the alpha channel.
+        @param {GLEnum} adest The destination blending weight for the alpha channel.
+    */
+    PicoGL.App.prototype.stencilFuncSeparate = function(face, func, ref, mask) {
+        this.gl.stencilFuncSeparate(face, func, ref, mask);
+
+        return this;
+    };
+
+    PicoGL.App.prototype.stencilOp = function(stencilFail, depthFail, pass) {
+        this.gl.stencilOp(stencilFail, depthFail, pass);
+
+        return this;
+    };
+
+    PicoGL.App.prototype.stencilOpSeparate = function(face, stencilFail, depthFail, pass) {
+        this.gl.stencilOpSeparate(face, stencilFail, depthFail, pass);
+
+        return this;
+    };
+
+    /**
+        Enable rasterization step.
+
+        @method
+    */
+    PicoGL.App.prototype.rasterize = function() {
+        this.gl.disable(this.gl.RASTERIZER_DISCARD);
+
+        return this;
+    };
+
+    /**
+        Disable rasterization step.
+
+        @method
+    */
+    PicoGL.App.prototype.noRasterize = function() {
+        this.gl.enable(this.gl.RASTERIZER_DISCARD);
 
         return this;
     };
@@ -2091,7 +2189,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
         @method
         @param {number} [index=0] Color attachment index.
-        @param {Object} options Texture options.
+        @param {Object} [options] Texture options.
         @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
         @param {GLEnum} [options.format=RGBA] Texture data format.
         @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
@@ -2149,7 +2247,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         Add a depth target to this framebuffer.
 
         @method
-        @param {Object} options Texture options.
+        @param {Object} [options] Texture options.
         @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
         @param {GLEnum} [options.format=RGBA] Texture data format.
         @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
