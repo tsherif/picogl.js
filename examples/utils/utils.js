@@ -22,6 +22,8 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 (function() {
+    var dummyGL = document.createElement("canvas").getContext("webgl2");
+
     var translateMat = mat4.create();
     var rotateXMat = mat4.create();
     var rotateYMat = mat4.create();
@@ -38,6 +40,12 @@
     var timeSampleCount = NUM_TIMING_SAMPLES - 1;
 
     window.utils = {
+        testWebGL2: function() {
+          return !!dummyGL;
+        },
+        testExtension: function(ext) {
+          return !!dummyGL.getExtension(ext);
+        },
         xformMatrix: function xformMatrix(xform, translate, rotate, scale) {
             translate = translate || zeros;
             rotate = rotate || zeros;

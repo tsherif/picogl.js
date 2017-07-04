@@ -152,7 +152,7 @@
         var FAR = 10.0;
 
 
-        if (!document.createElement("canvas").getContext("webgl2")) {
+        if (!utils.testWebGL2()) {
             console.error("WebGL 2 not available");
             document.body.innerHTML = "This example requires WebGL 2 which is unavailable on this system."
         }

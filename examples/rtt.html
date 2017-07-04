@@ -102,7 +102,7 @@
 
         var canvas = document.getElementById("gl-canvas");
 
-        if (!canvas.getContext("webgl2")) {
+        if (!utils.testWebGL2()) {
             console.error("WebGL 2 not available");
             document.body.innerHTML = "This example requires WebGL 2 which is unavailable on this system."
         }
