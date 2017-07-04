@@ -71,7 +71,7 @@
             readFramebuffer: null,
         };
 
-        this.clearBits = this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT;
+        this.clearBits = this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT| this.gl.STENCIL_BUFFER_BIT;
         
         this.timer = new PicoGL.Timer(this.gl);
         this.cpuTime = 0;
@@ -84,11 +84,14 @@
     };
 
     /**
-        Set the clear mask bits to use when calling clear().
-        E.g. app.clearMask(PicoGL.COLOR_BUFFER_BIT).
+        Set the color mask to selectively enable or disable particular
+        color channels while rendering.
 
         @method
-        @param {GLEnum} mask Bit mask of buffers to clear.
+        @param {boolean} r Red channel.
+        @param {boolean} g Green channel.
+        @param {boolean} b Blue channel.
+        @param {boolean} a Alpha channel.
     */
     PicoGL.App.prototype.colorMask = function(r, g, b, a) {
         this.gl.colorMask(r, g, b, a);
