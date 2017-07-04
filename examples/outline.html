@@ -174,18 +174,24 @@
             };
         }
 
+        // CREATE APP WITH STENCIL BUFFER
         var app = PicoGL.createApp(canvas, { stencil: true })
         .clearColor(0.0, 0.0, 0.0, 1.0)
         .clearMask(PicoGL.COLOR_BUFFER_BIT | PicoGL.DEPTH_BUFFER_BIT | PicoGL.STENCIL_BUFFER_BIT)
         .depthFunc(PicoGL.LEQUAL)
+        // ENABLE STENCIL TESTING
         .stencilTest()
+        // SET STENCIL TEST TO UPDATE STENCIL VALUE WHEN 
+        // DEPTH AND STENCIL TESTS PASS
         .stencilOp(PicoGL.KEEP, PicoGL.KEEP, PicoGL.REPLACE);
 
-        // SET UP COLOR/GEO PROGRAM
+        // SET UP MAIN DRAW PROGRAM
         var mainVsSource =  document.getElementById("vertex-main").text.trim();
         var mainFsSource =  document.getElementById("fragment-main").text.trim();
         var mainProgram = app.createProgram(mainVsSource, mainFsSource);
 
+        // SET UP OUTLINE PROGRAM, WHICH SCALES UP GEOMETRY AND DRAWS
+        // IN SOLID YELLOW 
         var outlineVsSource =  document.getElementById("vertex-outline").text.trim();
         var outlineFsSource =  document.getElementById("fragment-outline").text.trim();
         var outlineProgram = app.createProgram(outlineVsSource, outlineFsSource);
@@ -233,8 +239,11 @@
         .update();
 
         window.onresize = function() {
+            app.resize(window.innerWidth, window.innerHeight);
+
             mat4.perspective(projMatrix, Math.PI / 2, app.width / app.height, 0.1, 10.0);
-            sceneUniforms.set(1, projMatrix).update();
+            mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
+            sceneUniforms.set(0, viewProjMatrix).update();
         };
 
         var image = new Image();
@@ -273,17 +282,21 @@
 
                     modelMatrixData.set(spheres[i].modelMatrix, i * 16);
                 }
-                
+
                 modelMatrices.data(modelMatrixData);
 
                 app.clear()
                 .drawCalls(mainDrawcall)
                 .depthTest()
+                // SET STENCIL VALUE TO 1 FOR EVERY PIXEL
+                // THAT GETS DRAWN
                 .stencilFunc(PicoGL.ALWAYS, 1, 0xFF)
                 .stencilMask(0xFFFFFFFF)
                 .draw()
                 .drawCalls(outlineDrawcall)
                 .noDepthTest()
+                // ONLY DRAW WHERE STENCIL VALUE IS NOT 1
+                // (I.E. WHERE WE DIDN'T DRAW BEFORE)
                 .stencilFunc(PicoGL.NOTEQUAL, 1, 0xFF)
                 .stencilMask(0)
                 .draw();
