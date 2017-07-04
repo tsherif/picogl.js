@@ -25,6 +25,7 @@
 <head>
     <title>PicoGL.js: Uniform Buffers</title>
     <script src="../build/picogl.js"></script>
+    <script src="utils/utils.js"></script>
     <link rel="stylesheet" href="../site/css/picogl-example.css"> 
 </head>
 <body>
@@ -68,7 +69,7 @@
     <script type="text/javascript">
         var canvas = document.getElementById("gl-canvas");
 
-        if (!canvas.getContext("webgl2")) {
+        if (!utils.testWebGL2()) {
             console.error("WebGL 2 not available");
             document.body.innerHTML = "This example requires WebGL 2 which is unavailable on this system."
         }
