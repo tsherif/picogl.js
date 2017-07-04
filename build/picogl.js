@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.3.5 
+PicoGL.js v0.3.6 
 
 The MIT License (MIT)
 
@@ -36,7 +36,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @prop {object} WEBGL_INFO WebGL context information.
     */
     var PicoGL = window.PicoGL = {
-        version: "0.3.5"
+        version: "0.3.6"
     };
 
     (function() {
@@ -280,11 +280,14 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     };
 
     /**
-        Set the clear mask bits to use when calling clear().
-        E.g. app.clearMask(PicoGL.COLOR_BUFFER_BIT).
+        Set the color mask to selectively enable or disable particular
+        color channels while rendering.
 
         @method
-        @param {GLEnum} mask Bit mask of buffers to clear.
+        @param {boolean} r Red channel.
+        @param {boolean} g Green channel.
+        @param {boolean} b Blue channel.
+        @param {boolean} a Alpha channel.
     */
     PicoGL.App.prototype.colorMask = function(r, g, b, a) {
         this.gl.colorMask(r, g, b, a);
@@ -531,7 +534,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     };
 
     /**
-        Enable depth testing.
+        Enable stencil testing.
+        NOTE: Only works if { stencil: true } passed as a 
+        context attribute when creating the App!
 
         @method
     */
@@ -542,7 +547,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     };
 
     /**
-        Disable depth testing.
+        Disable stencil testing.
 
         @method
     */
@@ -553,9 +558,14 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     };
 
     /**
-        Enable writing to the z buffer.
-
+        Set the bitmask to use for tested stencil values.
+        E.g. app.stencilMask(0xFF).
+        NOTE: Only works if { stencil: true } passed as a 
+        context attribute when creating the App!
+        
         @method
+        @param {number} mask The mask value. 
+
     */
     PicoGL.App.prototype.stencilMask = function(mask) {
         this.gl.stencilMask(mask);
@@ -564,9 +574,15 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     };
 
     /**
-        Enable writing to the z buffer.
+        Set the bitmask to use for tested stencil values for a particular face orientation. 
+        E.g. app.stencilMaskSeparate(PicoGL.FRONT, 0xFF).
+        NOTE: Only works if { stencil: true } passed as a 
+        context attribute when creating the App!
 
         @method
+        @param {GLEnum} face The face orientation to apply the mask to.
+        @param {number} mask The mask value.
+
     */
     PicoGL.App.prototype.stencilMaskSeparate = function(face, mask) {
         this.gl.stencilMaskSeparate(face, mask);
@@ -575,11 +591,16 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     };
 
     /**
-        Set the blend function. E.g. app.blendFunc(PicoGL.ONE, PicoGL.ONE_MINUS_SRC_ALPHA).
+        Set the stencil function and reference value. 
+        E.g. app.stencilFunc(PicoGL.EQUAL, 1, 0xFF).
+        NOTE: Only works if { stencil: true } passed as a 
+        context attribute when creating the App!
 
         @method
-        @param {GLEnum} src The source blending weight.
-        @param {GLEnum} dest The destination blending weight.
+        @param {GLEnum} func The testing function.
+        @param {number} ref The reference value.
+        @param {GLEnum} mask The bitmask to use against tested values before applying
+            the stencil function.
     */
     PicoGL.App.prototype.stencilFunc = function(func, ref, mask) {
         this.gl.stencilFunc(func, ref, mask);
@@ -588,14 +609,17 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     };
 
     /**
-        Set the blend function, with separate weighting for color and alpha channels. 
-        E.g. app.stencilFuncSeparate(PicoGL.ONE, PicoGL.ONE_MINUS_SRC_ALPHA, PicoGL.ONE, PicoGL.ONE).
+        Set the stencil function and reference value for a particular face orientation. 
+        E.g. app.stencilFuncSeparate(PicoGL.FRONT, PicoGL.EQUAL, 1, 0xFF).
+        NOTE: Only works if { stencil: true } passed as a 
+        context attribute when creating the App!
 
         @method
-        @param {GLEnum} csrc The source blending weight for the RGB channels.
-        @param {GLEnum} cdest The destination blending weight for the RGB channels.
-        @param {GLEnum} asrc The source blending weight for the alpha channel.
-        @param {GLEnum} adest The destination blending weight for the alpha channel.
+        @param {GLEnum} face The face orientation to apply the function to.
+        @param {GLEnum} func The testing function.
+        @param {number} ref The reference value.
+        @param {GLEnum} mask The bitmask to use against tested values before applying
+            the stencil function.
     */
     PicoGL.App.prototype.stencilFuncSeparate = function(face, func, ref, mask) {
         this.gl.stencilFuncSeparate(face, func, ref, mask);
@@ -603,12 +627,35 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         return this;
     };
 
+    /**
+        Set the operations for updating stencil buffer values. 
+        E.g. app.stencilOp(PicoGL.KEEP, PicoGL.KEEP, PicoGL.REPLACE).
+        NOTE: Only works if { stencil: true } passed as a 
+        context attribute when creating the App!
+
+        @method
+        @param {GLEnum} stencilFail Operation to apply if the stencil test fails.
+        @param {GLEnum} depthFail Operation to apply if the depth test fails.
+        @param {GLEnum} pass Operation to apply if the both the depth and stencil tests pass.
+    */
     PicoGL.App.prototype.stencilOp = function(stencilFail, depthFail, pass) {
         this.gl.stencilOp(stencilFail, depthFail, pass);
 
         return this;
     };
 
+    /**
+        Set the operations for updating stencil buffer values for a particular face orientation. 
+        E.g. app.stencilOpSeparate(PicoGL.FRONT, PicoGL.KEEP, PicoGL.KEEP, PicoGL.REPLACE).
+        NOTE: Only works if { stencil: true } passed as a 
+        context attribute when creating the App!
+
+        @method
+        @param {GLEnum} face The face orientation to apply the operations to.
+        @param {GLEnum} stencilFail Operation to apply if the stencil test fails.
+        @param {GLEnum} depthFail Operation to apply if the depth test fails.
+        @param {GLEnum} pass Operation to apply if the both the depth and stencil tests pass.
+    */
     PicoGL.App.prototype.stencilOpSeparate = function(face, stencilFail, depthFail, pass) {
         this.gl.stencilOpSeparate(face, stencilFail, depthFail, pass);
 

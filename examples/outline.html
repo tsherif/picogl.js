@@ -177,8 +177,9 @@
         var app = PicoGL.createApp(canvas, { stencil: true })
         .clearColor(0.0, 0.0, 0.0, 1.0)
         .clearMask(PicoGL.COLOR_BUFFER_BIT | PicoGL.DEPTH_BUFFER_BIT | PicoGL.STENCIL_BUFFER_BIT)
+        .depthFunc(PicoGL.LEQUAL)
         .stencilTest()
-        .depthFunc(PicoGL.LEQUAL);
+        .stencilOp(PicoGL.KEEP, PicoGL.KEEP, PicoGL.REPLACE);
 
         // SET UP COLOR/GEO PROGRAM
         var mainVsSource =  document.getElementById("vertex-main").text.trim();
@@ -272,13 +273,13 @@
 
                     modelMatrixData.set(spheres[i].modelMatrix, i * 16);
                 }
+                
                 modelMatrices.data(modelMatrixData);
 
                 app.clear()
                 .drawCalls(mainDrawcall)
                 .depthTest()
                 .stencilFunc(PicoGL.ALWAYS, 1, 0xFF)
-                .stencilOp(PicoGL.KEEP, PicoGL.KEEP, PicoGL.REPLACE)
                 .stencilMask(0xFFFFFFFF)
                 .draw()
                 .drawCalls(outlineDrawcall)
