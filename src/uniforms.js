@@ -21,80 +21,85 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-(function() {
-    "use strict";
+"use strict";
 
-    // Classes to manage uniform value updates, including
-    // caching current values.
+var PicoGL = require('./picogl');
 
-    PicoGL.SingleComponentUniform = function SingleComponentUniform(gl, handle, type) {
-        this.gl = gl;
-        this.handle = handle;
-        this.glFuncName = PicoGL.UNIFORM_FUNC_NAME[type];
-        this.cache = type === PicoGL.BOOL ? false : 0;
-    };
 
-    PicoGL.SingleComponentUniform.prototype.set = function(value) {
-        if (this.cache !== value) {
+// Classes to manage uniform value updates, including
+// caching current values.
+
+var SingleComponentUniform = function(gl, handle, type) {
+    this.gl = gl;
+    this.handle = handle;
+    this.glFuncName = PicoGL.UNIFORM_FUNC_NAME[type];
+    this.cache = type === PicoGL.BOOL ? false : 0;
+};
+
+SingleComponentUniform.prototype.set = function(value) {
+    if (this.cache !== value) {
+        this.gl[this.glFuncName](this.handle, value);
+        this.cache = value;
+    }
+};
+
+var MultiNumericUniform = function(gl, handle, type, count) {
+    this.gl = gl;
+    this.handle = handle;
+    this.glFuncName = PicoGL.UNIFORM_FUNC_NAME[type] + "v";
+    this.count = count;
+    this.cache = new PicoGL.UNIFORM_CACHE_CLASS[type](PicoGL.UNIFORM_COMPONENT_COUNT[type] * count);
+};
+
+MultiNumericUniform.prototype.set = function(value) {
+    for (var i = 0, len = value.length; i < len; ++i) {
+        if (this.cache[i] !== value[i]) {
             this.gl[this.glFuncName](this.handle, value);
-            this.cache = value;
+            this.cache.set(value);
+            return;
         }
-    };
+    }
+};
 
-    PicoGL.MultiNumericUniform = function MultiNumericUniform(gl, handle, type, count) {
-        this.gl = gl;
-        this.handle = handle;
-        this.glFuncName = PicoGL.UNIFORM_FUNC_NAME[type] + "v";
-        this.count = count;
-        this.cache = new PicoGL.UNIFORM_CACHE_CLASS[type](PicoGL.UNIFORM_COMPONENT_COUNT[type] * count);
-    };
+var MultiBoolUniform = function(gl, handle, type, count) {
+    this.gl = gl;
+    this.handle = handle;
+    this.glFuncName = PicoGL.UNIFORM_FUNC_NAME[type] + "v";
+    this.count = count;
+    this.cache = new Array(PicoGL.UNIFORM_COMPONENT_COUNT[type] * count).fill(false);
+};
 
-    PicoGL.MultiNumericUniform.prototype.set = function(value) {
-        for (var i = 0, len = value.length; i < len; ++i) {
-            if (this.cache[i] !== value[i]) {
-                this.gl[this.glFuncName](this.handle, value);
-                this.cache.set(value);
-                return;
+MultiBoolUniform.prototype.set = function(value) {
+    for (var i = 0, len = value.length; i < len; ++i) {
+        if (this.cache[i] !== value[i]) {
+            this.gl[this.glFuncName](this.handle, value);
+            for (var j = i; j < len; j++) {
+                this.cache[j] = value[j];
             }
+            return;
         }
-    };
+    }
+};
 
-    PicoGL.MultiBoolUniform = function MultiBoolUniform(gl, handle, type, count) {
-        this.gl = gl;
-        this.handle = handle;
-        this.glFuncName = PicoGL.UNIFORM_FUNC_NAME[type] + "v";
-        this.count = count;
-        this.cache = new Array(PicoGL.UNIFORM_COMPONENT_COUNT[type] * count).fill(false);
-    };
+var MatrixUniform = function(gl, handle, type, count) {
+    this.gl = gl;
+    this.handle = handle;
+    this.glFuncName = PicoGL.UNIFORM_FUNC_NAME[type];
+    this.count = count;
+    this.cache = new Float32Array(PicoGL.UNIFORM_COMPONENT_COUNT[type] * count);
+};
 
-    PicoGL.MultiBoolUniform.prototype.set = function(value) {
-        for (var i = 0, len = value.length; i < len; ++i) {
-            if (this.cache[i] !== value[i]) {
-                this.gl[this.glFuncName](this.handle, value);
-                for (var j = i; j < len; j++) {
-                    this.cache[j] = value[j];
-                }
-                return;
-            }
+MatrixUniform.prototype.set = function(value) {
+    for (var i = 0, len = value.length; i < len; ++i) {
+        if (this.cache[i] !== value[i]) {
+            this.gl[this.glFuncName](this.handle, false, value);
+            this.cache.set(value);
+            return;
         }
-    };
+    }
+};
 
-    PicoGL.MatrixUniform = function MatrixUniform(gl, handle, type, count) {
-        this.gl = gl;
-        this.handle = handle;
-        this.glFuncName = PicoGL.UNIFORM_FUNC_NAME[type];
-        this.count = count;
-        this.cache = new Float32Array(PicoGL.UNIFORM_COMPONENT_COUNT[type] * count);
-    };
-
-    PicoGL.MatrixUniform.prototype.set = function(value) {
-        for (var i = 0, len = value.length; i < len; ++i) {
-            if (this.cache[i] !== value[i]) {
-                this.gl[this.glFuncName](this.handle, false, value);
-                this.cache.set(value);
-                return;
-            }
-        }
-    };
-
-})();
+module.exports.MatrixUniform = MatrixUniform;
+module.exports.MultiBoolUniform = MultiBoolUniform;
+module.exports.MultiNumericUniform = MultiNumericUniform;
+module.exports.SingleComponentUniform = SingleComponentUniform;

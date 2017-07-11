@@ -21,112 +21,114 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-(function() {
-    "use strict";
+"use strict";
 
-    /**
-        Storage for vertex data.
+var PicoGL = require('./picogl');
 
-        @class
-        @prop {WebGLRenderingContext} gl The WebGL context.
-        @prop {WebGLBuffer} buffer Allocated buffer storage.
-        @prop {GLEnum} type The type of data stored in the buffer.
-        @prop {number} itemSize Number of array elements per vertex.
-        @prop {number} numItems Number of vertices represented.
-        @prop {GLEnum} usage The usage pattern of the buffer.
-        @prop {boolean} indexArray Whether this is an index array.
-        @prop {GLEnum} binding GL binding point (ARRAY_BUFFER or ELEMENT_ARRAY_BUFFER).
-    */
-    PicoGL.VertexBuffer = function VertexBuffer(gl, type, itemSize, data, usage, indexArray) {
-        var numColumns;
-        switch(type) {
-            case PicoGL.FLOAT_MAT4:
-            case PicoGL.FLOAT_MAT4x2:
-            case PicoGL.FLOAT_MAT4x3:
-                numColumns = 4;
-                break;
-            case PicoGL.FLOAT_MAT3:
-            case PicoGL.FLOAT_MAT3x2:
-            case PicoGL.FLOAT_MAT3x4:
-                numColumns = 3;
-                break;
-            case PicoGL.FLOAT_MAT2:
-            case PicoGL.FLOAT_MAT2x3:
-            case PicoGL.FLOAT_MAT2x4:
-                numColumns = 2;
-                break;
-            default:
-                numColumns = 1;
-        }
 
-        switch(type) {
-            case PicoGL.FLOAT_MAT4:
-            case PicoGL.FLOAT_MAT3x4:
-            case PicoGL.FLOAT_MAT2x4:
-                itemSize = 4;
-                type = PicoGL.FLOAT;
-                break;
-            case PicoGL.FLOAT_MAT3:
-            case PicoGL.FLOAT_MAT4x3:
-            case PicoGL.FLOAT_MAT2x3:
-                itemSize = 3;
-                type = PicoGL.FLOAT;
-                break;
-            case PicoGL.FLOAT_MAT2:
-            case PicoGL.FLOAT_MAT3x2:
-            case PicoGL.FLOAT_MAT4x2:
-                itemSize = 2;
-                type = PicoGL.FLOAT;
-                break;
-        }
+/**
+    Storage for vertex data.
 
-        var dataLength;
-        if (typeof data === "number") {
-            dataLength = data;
-            data *= PicoGL.TYPE_SIZE[type];
-        } else {
-            dataLength = data.length;
-        }
+    @class
+    @prop {WebGLRenderingContext} gl The WebGL context.
+    @prop {WebGLBuffer} buffer Allocated buffer storage.
+    @prop {GLEnum} type The type of data stored in the buffer.
+    @prop {number} itemSize Number of array elements per vertex.
+    @prop {number} numItems Number of vertices represented.
+    @prop {GLEnum} usage The usage pattern of the buffer.
+    @prop {boolean} indexArray Whether this is an index array.
+    @prop {GLEnum} binding GL binding point (ARRAY_BUFFER or ELEMENT_ARRAY_BUFFER).
+*/
+var VertexBuffer = function(gl, type, itemSize, data, usage, indexArray) {
+    var numColumns;
+    switch(type) {
+        case PicoGL.FLOAT_MAT4:
+        case PicoGL.FLOAT_MAT4x2:
+        case PicoGL.FLOAT_MAT4x3:
+            numColumns = 4;
+            break;
+        case PicoGL.FLOAT_MAT3:
+        case PicoGL.FLOAT_MAT3x2:
+        case PicoGL.FLOAT_MAT3x4:
+            numColumns = 3;
+            break;
+        case PicoGL.FLOAT_MAT2:
+        case PicoGL.FLOAT_MAT2x3:
+        case PicoGL.FLOAT_MAT2x4:
+            numColumns = 2;
+            break;
+        default:
+            numColumns = 1;
+    }
 
-        this.gl = gl;
-        this.buffer = gl.createBuffer();
-        this.type = type;
-        this.itemSize = itemSize;
-        this.numItems = dataLength / (itemSize * numColumns);
-        this.numColumns = numColumns;
-        this.usage = usage || gl.STATIC_DRAW;
-        this.indexArray = !!indexArray;
-        this.binding = this.indexArray ? gl.ELEMENT_ARRAY_BUFFER : gl.ARRAY_BUFFER;
+    switch(type) {
+        case PicoGL.FLOAT_MAT4:
+        case PicoGL.FLOAT_MAT3x4:
+        case PicoGL.FLOAT_MAT2x4:
+            itemSize = 4;
+            type = PicoGL.FLOAT;
+            break;
+        case PicoGL.FLOAT_MAT3:
+        case PicoGL.FLOAT_MAT4x3:
+        case PicoGL.FLOAT_MAT2x3:
+            itemSize = 3;
+            type = PicoGL.FLOAT;
+            break;
+        case PicoGL.FLOAT_MAT2:
+        case PicoGL.FLOAT_MAT3x2:
+        case PicoGL.FLOAT_MAT4x2:
+            itemSize = 2;
+            type = PicoGL.FLOAT;
+            break;
+    }
 
-        gl.bindBuffer(this.binding, this.buffer);
-        gl.bufferData(this.binding, data, this.usage);
-        gl.bindBuffer(this.binding, null);
-    };
+    var dataLength;
+    if (typeof data === "number") {
+        dataLength = data;
+        data *= PicoGL.TYPE_SIZE[type];
+    } else {
+        dataLength = data.length;
+    }
 
-    /**
-        Update data in this buffer.
+    this.gl = gl;
+    this.buffer = gl.createBuffer();
+    this.type = type;
+    this.itemSize = itemSize;
+    this.numItems = dataLength / (itemSize * numColumns);
+    this.numColumns = numColumns;
+    this.usage = usage || gl.STATIC_DRAW;
+    this.indexArray = !!indexArray;
+    this.binding = this.indexArray ? gl.ELEMENT_ARRAY_BUFFER : gl.ARRAY_BUFFER;
 
-        @method
-        @param {VertexBufferView} data Data to store in the buffer.
-    */
-    PicoGL.VertexBuffer.prototype.data = function(data) {
-        this.gl.bindBuffer(this.binding, this.buffer);
-        this.gl.bufferSubData(this.binding, 0, data);
-        this.gl.bindBuffer(this.binding, null);
+    gl.bindBuffer(this.binding, this.buffer);
+    gl.bufferData(this.binding, data, this.usage);
+    gl.bindBuffer(this.binding, null);
+};
 
-        return this;
-    };
+/**
+    Update data in this buffer.
 
-    /**
-        Delete this array buffer.
+    @method
+    @param {VertexBufferView} data Data to store in the buffer.
+*/
+VertexBuffer.prototype.data = function(data) {
+    this.gl.bindBuffer(this.binding, this.buffer);
+    this.gl.bufferSubData(this.binding, 0, data);
+    this.gl.bindBuffer(this.binding, null);
 
-        @method
-    */
-    PicoGL.VertexBuffer.prototype.delete = function() {
-        if (this.buffer) {
-            this.gl.deleteBuffer(this.buffer);
-            this.buffer = null;    
-        }
-    };
+    return this;
+};
 
-})();
+/**
+    Delete this array buffer.
+
+    @method
+*/
+VertexBuffer.prototype.delete = function() {
+    if (this.buffer) {
+        this.gl.deleteBuffer(this.buffer);
+        this.buffer = null;
+    }
+};
+
+module.exports = VertexBuffer;

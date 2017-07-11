@@ -21,43 +21,42 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-(function() {
-    "use strict";
+"use strict";
 
-    /**
-        WebGL shader.
+/**
+    WebGL shader.
 
-        @class
-        @prop {WebGLRenderingContext} gl The WebGL context.
-        @prop {WebGLShader} shader The shader.
-    */
-    PicoGL.Shader = function(gl, type, source) {
-        this.gl = gl;
-        this.shader = gl.createShader(type);
-        gl.shaderSource(this.shader, source);
-        gl.compileShader(this.shader);
+    @class
+    @prop {WebGLRenderingContext} gl The WebGL context.
+    @prop {WebGLShader} shader The shader.
+*/
+var Shader = function(gl, type, source) {
+    this.gl = gl;
+    this.shader = gl.createShader(type);
+    gl.shaderSource(this.shader, source);
+    gl.compileShader(this.shader);
 
-        if (!gl.getShaderParameter(this.shader, gl.COMPILE_STATUS)) {
-            var i, lines;
+    if (!gl.getShaderParameter(this.shader, gl.COMPILE_STATUS)) {
+        var i, lines;
 
-            console.error(gl.getShaderInfoLog(this.shader));
-            lines = source.split("\n");
-            for (i = 0; i < lines.length; ++i) {
-                console.error((i + 1) + ":", lines[i]);
-            }
+        console.error(gl.getShaderInfoLog(this.shader));
+        lines = source.split("\n");
+        for (i = 0; i < lines.length; ++i) {
+            console.error((i + 1) + ":", lines[i]);
         }
-    };
+    }
+};
 
-    /**
-        Delete this shader.
+/**
+    Delete this shader.
 
-        @method
-    */
-    PicoGL.Shader.prototype.delete = function() {
-        if (this.shader) {
-            this.gl.deleteShader(this.shader);
-            this.shader = null;
-        }
-    };
+    @method
+*/
+Shader.prototype.delete = function() {
+    if (this.shader) {
+        this.gl.deleteShader(this.shader);
+        this.shader = null;
+    }
+};
 
-})();
+module.exports = Shader;

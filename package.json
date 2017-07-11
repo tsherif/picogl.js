@@ -12,11 +12,17 @@
     "url": "http://tareksherif.net/"
   },
   "license": "MIT",
+  "scripts": {
+    "build": "browserify --standalone PicoGL -o build/picogl.js src/index.js && npm run compress",
+    "compress": "uglifyjs build/picogl.js --compress --mangle > build/picogl.min.js"
+  },
   "devDependencies": {
+    "browserify": "^14.4.0",
     "grunt": "^1.0.1",
     "grunt-contrib-concat": "^1.0.1",
     "grunt-contrib-jshint": "^1.1.0",
     "grunt-contrib-uglify": "^2.2.0",
-    "grunt-jsdoc": "^2.1.0"
+    "grunt-jsdoc": "^2.1.0",
+    "uglify-js": "^3.0.24"
   }
 }
