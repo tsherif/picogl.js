@@ -3,22 +3,6 @@ module.exports = function(grunt) {
 
     var pkg = grunt.file.readJSON("package.json");
     var banner = "/*\nPicoGL.js v<%= pkg.version %> \n\n<%= licence %>*/\n";
-    var files = [
-        "src/picogl.js",
-        "src/app.js",
-        "src/program.js",
-        "src/shader.js",
-        "src/vertexarray.js",
-        "src/transformfeedback.js",
-        "src/vertexbuffer.js",
-        "src/uniforms.js",
-        "src/uniformbuffer.js",
-        "src/texture.js",
-        "src/cubemap.js",
-        "src/framebuffer.js",
-        "src/drawcall.js",
-        "src/timer.js"
-    ];
 
     grunt.initConfig({
         pkg: pkg,
@@ -62,7 +46,7 @@ module.exports = function(grunt) {
                         PicoGL: true
                     }
                 },
-                src: files
+                src: "src/*.js"
             }
         },
         browserify: {
@@ -84,7 +68,7 @@ module.exports = function(grunt) {
         },
         jsdoc : {
             src : {
-                src: files,
+                src: "src/*.js",
                 dest: "docs"
             }
         }
