@@ -40,7 +40,7 @@ var Texture = require('./texture');
     @prop {Array} colorAttachments Array of color attachment enums.
     @prop {Object} appState Tracked GL state.
 */
-var Framebuffer = function(gl, appState, width, height) {
+function Framebuffer(gl, appState, width, height) {
     this.gl = gl;
     this.framebuffer = gl.createFramebuffer();
     this.appState = appState;
@@ -58,7 +58,7 @@ var Framebuffer = function(gl, appState, width, height) {
     this.colorTextures = [];
     this.colorAttachments = [];
     this.depthTexture = null;
-};
+}
 
 /**
     Add a color target to this framebuffer.

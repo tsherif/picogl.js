@@ -40,7 +40,7 @@
     @prop {boolean} is3D Whether this texture contains 3D data.
     @prop {Object} appState Tracked GL state.
 */
-var Texture = function(gl, appState, binding, image, width, height, depth, is3D, options) {
+function Texture(gl, appState, binding, image, width, height, depth, is3D, options) {
     options = options || PicoGL.DUMMY_OBJECT;
 
     this.gl = gl;
@@ -105,7 +105,7 @@ var Texture = function(gl, appState, binding, image, width, height, depth, is3D,
     this.bind(true);
     gl.bindSampler(this.unit, this.sampler);
     this.image(image, width, height, depth);
-};
+}
 
 /**
     Set the image data for the texture.

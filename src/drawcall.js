@@ -45,7 +45,7 @@
     @prop {number} textureCount The number of active textures for this draw call.
     @prop {GLEnum} primitive The primitive type being drawn.
 */
-var DrawCall = function(gl, program, vertexArray, primitive) {
+function DrawCall(gl, program, vertexArray, primitive) {
     this.gl = gl;
     this.currentProgram = program;
     this.currentVertexArray = vertexArray;
@@ -63,7 +63,7 @@ var DrawCall = function(gl, program, vertexArray, primitive) {
     this.textures = new Array(PicoGL.WEBGL_INFO.MAX_TEXTURE_UNITS);
     this.textureCount = 0;
     this.primitive = primitive !== undefined ? primitive : PicoGL.TRIANGLES;
-};
+}
 
 DrawCall.prototype.transformFeedback = function(transformFeedback) {
     this.currentTransformFeedback = transformFeedback;

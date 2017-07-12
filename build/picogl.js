@@ -66,7 +66,7 @@ var VertexBuffer      = require('./vertexbuffer');
     state and manage draw calls.
 
     @class
-    @memberof! PicoGL
+    @memberof PicoGL
     @prop {DOMElement} canvas The canvas on which this app drawing.
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {number} width The width of the drawing surface.
@@ -80,7 +80,7 @@ var VertexBuffer      = require('./vertexbuffer');
     @prop {number} gpuTime Time spent on GPU during last timing. Only valid if timerReady() returns true.
             Will remain 0 if extension EXT_disjoint_timer_query_webgl2 is unavailable.
 */
-var App = function(canvas, contextAttributes) {
+function App(canvas, contextAttributes) {
     this.canvas = canvas;
     this.gl = canvas.getContext("webgl2", contextAttributes);
     this.width = this.gl.drawingBufferWidth;
@@ -119,7 +119,7 @@ var App = function(canvas, contextAttributes) {
     this.linearFloatTexturesEnabled = false;
 
     this.gl.viewport(0, 0, this.viewportWidth, this.viewportHeight);
-};
+}
 
 /**
     Set the color mask to selectively enable or disable particular
@@ -951,6 +951,7 @@ module.exports = App;
     Cubemap for environment mapping.
 
     @class
+    @memberof PicoGL
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLTexture} texture Handle to the texture.
     @prop {GLEnum} type Type of data stored in the texture.
@@ -960,7 +961,7 @@ module.exports = App;
     @prop {GLEnum} unitEnum The GLEnum of texture unit this texture is bound to.
     @prop {Object} appState Tracked GL state.
 */
-var Cubemap = function(gl, appState, options) {
+function Cubemap(gl, appState, options) {
     options = options || PicoGL.DUMMY_OBJECT;
 
     this.gl = gl;
@@ -1034,7 +1035,7 @@ var Cubemap = function(gl, appState, options) {
         gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
     }
 
-};
+}
 
 /**
     Delete this cubemap.
@@ -1099,6 +1100,7 @@ module.exports = Cubemap;
     attributes, uniforms and textures for a single draw call.
 
     @class
+    @memberof PicoGL
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {Program} currentProgram The program to use for this draw call.
     @prop {VertexArray} currentVertexArray Vertex array to use for this draw call.
@@ -1115,7 +1117,7 @@ module.exports = Cubemap;
     @prop {number} textureCount The number of active textures for this draw call.
     @prop {GLEnum} primitive The primitive type being drawn.
 */
-var DrawCall = function(gl, program, vertexArray, primitive) {
+function DrawCall(gl, program, vertexArray, primitive) {
     this.gl = gl;
     this.currentProgram = program;
     this.currentVertexArray = vertexArray;
@@ -1133,7 +1135,7 @@ var DrawCall = function(gl, program, vertexArray, primitive) {
     this.textures = new Array(PicoGL.WEBGL_INFO.MAX_TEXTURE_UNITS);
     this.textureCount = 0;
     this.primitive = primitive !== undefined ? primitive : PicoGL.TRIANGLES;
-};
+}
 
 DrawCall.prototype.transformFeedback = function(transformFeedback) {
     this.currentTransformFeedback = transformFeedback;
@@ -1298,6 +1300,7 @@ var Texture = require('./texture');
     Storage for vertex data.
 
     @class
+    @memberof PicoGL
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLFramebuffer} framebuffer Handle to the framebuffer.
     @prop {number} width The width of the framebuffer.
@@ -1308,7 +1311,7 @@ var Texture = require('./texture');
     @prop {Array} colorAttachments Array of color attachment enums.
     @prop {Object} appState Tracked GL state.
 */
-var Framebuffer = function(gl, appState, width, height) {
+function Framebuffer(gl, appState, width, height) {
     this.gl = gl;
     this.framebuffer = gl.createFramebuffer();
     this.appState = appState;
@@ -1326,7 +1329,7 @@ var Framebuffer = function(gl, appState, width, height) {
     this.colorTextures = [];
     this.colorAttachments = [];
     this.depthTexture = null;
-};
+}
 
 /**
     Add a color target to this framebuffer.
@@ -1810,13 +1813,14 @@ var Uniforms = require('./uniforms');
     shaders.
 
     @class
+    @memberof PicoGL
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLProgram} program The WebGL program.
     @prop {boolean} transformFeedback Whether this program is set up for transform feedback.
     @prop {Object} uniforms Map of uniform names to handles.
     @prop {Object} uniformBlocks Map of uniform block names to handles.
 */
-var Program = function(gl, vsSource, fsSource, xformFeebackVars) {
+function Program(gl, vsSource, fsSource, xformFeebackVars) {
     var i;
 
     var vShader, fShader;
@@ -1940,7 +1944,7 @@ var Program = function(gl, vsSource, fsSource, xformFeebackVars) {
 
         this.uniformBlocks[blockName] = blockIndex;
     }
-};
+}
 
 /**
     Delete this program.
@@ -2000,10 +2004,11 @@ module.exports = Program;
     WebGL shader.
 
     @class
+    @memberof PicoGL
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLShader} shader The shader.
 */
-var Shader = function(gl, type, source) {
+function Shader(gl, type, source) {
     this.gl = gl;
     this.shader = gl.createShader(type);
     gl.shaderSource(this.shader, source);
@@ -2018,7 +2023,7 @@ var Shader = function(gl, type, source) {
             console.error((i + 1) + ":", lines[i]);
         }
     }
-};
+}
 
 /**
     Delete this shader.
@@ -2064,6 +2069,7 @@ module.exports = Shader;
     General-purpose texture.
 
     @class
+    @memberof PicoGL
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLTexture} texture Handle to the texture.
     @prop {WebGLSamler} sampler Sampler object.
@@ -2076,7 +2082,7 @@ module.exports = Shader;
     @prop {boolean} is3D Whether this texture contains 3D data.
     @prop {Object} appState Tracked GL state.
 */
-var Texture = function(gl, appState, binding, image, width, height, depth, is3D, options) {
+function Texture(gl, appState, binding, image, width, height, depth, is3D, options) {
     options = options || PicoGL.DUMMY_OBJECT;
 
     this.gl = gl;
@@ -2141,7 +2147,7 @@ var Texture = function(gl, appState, binding, image, width, height, depth, is3D,
     this.bind(true);
     gl.bindSampler(this.unit, this.sampler);
     this.image(image, width, height, depth);
-};
+}
 
 /**
     Set the image data for the texture.
@@ -2285,6 +2291,7 @@ module.exports = Texture;
     Rendering timer.
 
     @class
+    @memberof PicoGL
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {Object} cpuTimer Timer for CPU. Will be window.performance, if available, or window.Date.
     @prop {boolean} gpuTimer Whether the gpu timing is available (EXT_disjoint_timer_query_webgl2 or
@@ -2295,7 +2302,7 @@ module.exports = Texture;
     @prop {number} cpuTime Time spent on the CPU during the last timing. Only valid if App.timerReady() returns true.
     @prop {number} gpuTime Time spent on the GPU during the last timing. Only valid if App.timerReady() returns true.
 */
-var Timer = function(gl) {
+function Timer(gl) {
     this.gl = gl;
     this.cpuTimer = window.performance || window.Date;
 
@@ -2317,7 +2324,7 @@ var Timer = function(gl) {
     this.cpuStartTime = 0;
     this.cpuTime = 0;
     this.gpuTime = 0;
-};
+}
 
 // Start the rendering timer.
 Timer.prototype.start = function() {
@@ -2404,16 +2411,17 @@ module.exports = Timer;
     Tranform feedback object.
 
     @class
+    @memberof PicoGL
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLTransformFeedback} transformFeedback Transform feedback object.
 */
-var TransformFeedback = function(gl) {
+function TransformFeedback(gl) {
     this.gl = gl;
     this.transformFeedback = gl.createTransformFeedback();
     // TODO(Tarek): Need to rebind buffers due to bug in ANGLE.
     // Remove this when that's fixed.
     this.angleBugBuffers = [];
-};
+}
 
  /**
     Bind a feedback buffer to capture transform output.
@@ -2488,6 +2496,7 @@ module.exports = TransformFeedback;
     Storage for uniform data. Data is stored in std140 layout.
 
     @class
+    @memberof PicoGL
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLBuffer} buffer Allocated buffer storage.
     @prop {Float32Array} data Buffer data.
@@ -2498,7 +2507,7 @@ module.exports = TransformFeedback;
     @prop {number} size The size of the buffer (in 4-byte items).
     @prop {GLEnum} usage Usage pattern of the buffer.
 */
-var UniformBuffer = function(gl, layout, usage) {
+function UniformBuffer(gl, layout, usage) {
     this.gl = gl;
     this.buffer = gl.createBuffer();
     this.dataViews = {};
@@ -2613,7 +2622,7 @@ var UniformBuffer = function(gl, layout, usage) {
     this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, 0, this.buffer);
     this.gl.bufferData(this.gl.UNIFORM_BUFFER, this.size * 4, this.usage);
     this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, 0, null);
-};
+}
 
 /**
     Update data for a given item in the buffer. NOTE: Data is not
@@ -2711,12 +2720,12 @@ module.exports = UniformBuffer;
 // Classes to manage uniform value updates, including
 // caching current values.
 
-var SingleComponentUniform = function(gl, handle, type) {
+function SingleComponentUniform(gl, handle, type) {
     this.gl = gl;
     this.handle = handle;
     this.glFuncName = PicoGL.UNIFORM_FUNC_NAME[type];
     this.cache = type === PicoGL.BOOL ? false : 0;
-};
+}
 
 SingleComponentUniform.prototype.set = function(value) {
     if (this.cache !== value) {
@@ -2725,13 +2734,13 @@ SingleComponentUniform.prototype.set = function(value) {
     }
 };
 
-var MultiNumericUniform = function(gl, handle, type, count) {
+function MultiNumericUniform(gl, handle, type, count) {
     this.gl = gl;
     this.handle = handle;
     this.glFuncName = PicoGL.UNIFORM_FUNC_NAME[type] + "v";
     this.count = count;
     this.cache = new PicoGL.UNIFORM_CACHE_CLASS[type](PicoGL.UNIFORM_COMPONENT_COUNT[type] * count);
-};
+}
 
 MultiNumericUniform.prototype.set = function(value) {
     for (var i = 0, len = value.length; i < len; ++i) {
@@ -2743,13 +2752,13 @@ MultiNumericUniform.prototype.set = function(value) {
     }
 };
 
-var MultiBoolUniform = function(gl, handle, type, count) {
+function MultiBoolUniform(gl, handle, type, count) {
     this.gl = gl;
     this.handle = handle;
     this.glFuncName = PicoGL.UNIFORM_FUNC_NAME[type] + "v";
     this.count = count;
     this.cache = new Array(PicoGL.UNIFORM_COMPONENT_COUNT[type] * count).fill(false);
-};
+}
 
 MultiBoolUniform.prototype.set = function(value) {
     for (var i = 0, len = value.length; i < len; ++i) {
@@ -2763,13 +2772,13 @@ MultiBoolUniform.prototype.set = function(value) {
     }
 };
 
-var MatrixUniform = function(gl, handle, type, count) {
+function MatrixUniform(gl, handle, type, count) {
     this.gl = gl;
     this.handle = handle;
     this.glFuncName = PicoGL.UNIFORM_FUNC_NAME[type];
     this.count = count;
     this.cache = new Float32Array(PicoGL.UNIFORM_COMPONENT_COUNT[type] * count);
-};
+}
 
 MatrixUniform.prototype.set = function(value) {
     for (var i = 0, len = value.length; i < len; ++i) {
@@ -2810,9 +2819,10 @@ module.exports.SingleComponentUniform = SingleComponentUniform;
 "use strict";
 
 /**
-    Storage for vertex data.
+    Organizes vertex buffer and attribute state.
 
     @class
+    @memberof PicoGL
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLVertexArrayObject} vertexArray Vertex array object.
     @prop {number} numElements Number of elements in the vertex array.
@@ -2821,7 +2831,7 @@ module.exports.SingleComponentUniform = SingleComponentUniform;
     @prop {boolean} instanced Whether this vertex array is set up for instanced drawing.
     @prop {number} numInstances Number of instances to draw with this vertex array.
 */
-var VertexArray = function(gl) {
+function VertexArray(gl) {
     this.gl = gl;
     this.vertexArray = gl.createVertexArray();
     this.numElements = 0;
@@ -2829,7 +2839,7 @@ var VertexArray = function(gl) {
     this.instancedBuffers = 0;
     this.indexed = false;
     this.numInstances = 0;
-};
+}
 
 /**
     Bind an per-vertex attribute buffer to this vertex array.
@@ -2977,6 +2987,7 @@ module.exports = VertexArray;
     Storage for vertex data.
 
     @class
+    @memberof PicoGL
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLBuffer} buffer Allocated buffer storage.
     @prop {GLEnum} type The type of data stored in the buffer.
@@ -2986,7 +2997,7 @@ module.exports = VertexArray;
     @prop {boolean} indexArray Whether this is an index array.
     @prop {GLEnum} binding GL binding point (ARRAY_BUFFER or ELEMENT_ARRAY_BUFFER).
 */
-var VertexBuffer = function(gl, type, itemSize, data, usage, indexArray) {
+function VertexBuffer(gl, type, itemSize, data, usage, indexArray) {
     var numColumns;
     switch(type) {
         case PicoGL.FLOAT_MAT4:
@@ -3050,7 +3061,7 @@ var VertexBuffer = function(gl, type, itemSize, data, usage, indexArray) {
     gl.bindBuffer(this.binding, this.buffer);
     gl.bufferData(this.binding, data, this.usage);
     gl.bindBuffer(this.binding, null);
-};
+}
 
 /**
     Update data in this buffer.

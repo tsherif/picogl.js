@@ -37,7 +37,7 @@
     @prop {boolean} indexArray Whether this is an index array.
     @prop {GLEnum} binding GL binding point (ARRAY_BUFFER or ELEMENT_ARRAY_BUFFER).
 */
-var VertexBuffer = function(gl, type, itemSize, data, usage, indexArray) {
+function VertexBuffer(gl, type, itemSize, data, usage, indexArray) {
     var numColumns;
     switch(type) {
         case PicoGL.FLOAT_MAT4:
@@ -101,7 +101,7 @@ var VertexBuffer = function(gl, type, itemSize, data, usage, indexArray) {
     gl.bindBuffer(this.binding, this.buffer);
     gl.bufferData(this.binding, data, this.usage);
     gl.bindBuffer(this.binding, null);
-};
+}
 
 /**
     Update data in this buffer.

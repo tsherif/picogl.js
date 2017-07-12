@@ -33,7 +33,7 @@
     @prop {boolean} instanced Whether this vertex array is set up for instanced drawing.
     @prop {number} numInstances Number of instances to draw with this vertex array.
 */
-var VertexArray = function(gl) {
+function VertexArray(gl) {
     this.gl = gl;
     this.vertexArray = gl.createVertexArray();
     this.numElements = 0;
@@ -41,7 +41,7 @@ var VertexArray = function(gl) {
     this.instancedBuffers = 0;
     this.indexed = false;
     this.numInstances = 0;
-};
+}
 
 /**
     Bind an per-vertex attribute buffer to this vertex array.

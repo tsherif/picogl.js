@@ -31,13 +31,13 @@
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLTransformFeedback} transformFeedback Transform feedback object.
 */
-var TransformFeedback = function(gl) {
+function TransformFeedback(gl) {
     this.gl = gl;
     this.transformFeedback = gl.createTransformFeedback();
     // TODO(Tarek): Need to rebind buffers due to bug in ANGLE.
     // Remove this when that's fixed.
     this.angleBugBuffers = [];
-};
+}
 
  /**
     Bind a feedback buffer to capture transform output.

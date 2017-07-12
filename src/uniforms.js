@@ -26,12 +26,12 @@
 // Classes to manage uniform value updates, including
 // caching current values.
 
-var SingleComponentUniform = function(gl, handle, type) {
+function SingleComponentUniform(gl, handle, type) {
     this.gl = gl;
     this.handle = handle;
     this.glFuncName = PicoGL.UNIFORM_FUNC_NAME[type];
     this.cache = type === PicoGL.BOOL ? false : 0;
-};
+}
 
 SingleComponentUniform.prototype.set = function(value) {
     if (this.cache !== value) {
@@ -40,13 +40,13 @@ SingleComponentUniform.prototype.set = function(value) {
     }
 };
 
-var MultiNumericUniform = function(gl, handle, type, count) {
+function MultiNumericUniform(gl, handle, type, count) {
     this.gl = gl;
     this.handle = handle;
     this.glFuncName = PicoGL.UNIFORM_FUNC_NAME[type] + "v";
     this.count = count;
     this.cache = new PicoGL.UNIFORM_CACHE_CLASS[type](PicoGL.UNIFORM_COMPONENT_COUNT[type] * count);
-};
+}
 
 MultiNumericUniform.prototype.set = function(value) {
     for (var i = 0, len = value.length; i < len; ++i) {
@@ -58,13 +58,13 @@ MultiNumericUniform.prototype.set = function(value) {
     }
 };
 
-var MultiBoolUniform = function(gl, handle, type, count) {
+function MultiBoolUniform(gl, handle, type, count) {
     this.gl = gl;
     this.handle = handle;
     this.glFuncName = PicoGL.UNIFORM_FUNC_NAME[type] + "v";
     this.count = count;
     this.cache = new Array(PicoGL.UNIFORM_COMPONENT_COUNT[type] * count).fill(false);
-};
+}
 
 MultiBoolUniform.prototype.set = function(value) {
     for (var i = 0, len = value.length; i < len; ++i) {
@@ -78,13 +78,13 @@ MultiBoolUniform.prototype.set = function(value) {
     }
 };
 
-var MatrixUniform = function(gl, handle, type, count) {
+function MatrixUniform(gl, handle, type, count) {
     this.gl = gl;
     this.handle = handle;
     this.glFuncName = PicoGL.UNIFORM_FUNC_NAME[type];
     this.count = count;
     this.cache = new Float32Array(PicoGL.UNIFORM_COMPONENT_COUNT[type] * count);
-};
+}
 
 MatrixUniform.prototype.set = function(value) {
     for (var i = 0, len = value.length; i < len; ++i) {

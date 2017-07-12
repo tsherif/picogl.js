@@ -38,7 +38,7 @@
     @prop {number} cpuTime Time spent on the CPU during the last timing. Only valid if App.timerReady() returns true.
     @prop {number} gpuTime Time spent on the GPU during the last timing. Only valid if App.timerReady() returns true.
 */
-var Timer = function(gl) {
+function Timer(gl) {
     this.gl = gl;
     this.cpuTimer = window.performance || window.Date;
 
@@ -60,7 +60,7 @@ var Timer = function(gl) {
     this.cpuStartTime = 0;
     this.cpuTime = 0;
     this.gpuTime = 0;
-};
+}
 
 // Start the rendering timer.
 Timer.prototype.start = function() {

@@ -54,7 +54,7 @@ var VertexBuffer      = require('./vertexbuffer');
     @prop {number} gpuTime Time spent on GPU during last timing. Only valid if timerReady() returns true.
             Will remain 0 if extension EXT_disjoint_timer_query_webgl2 is unavailable.
 */
-var App = function(canvas, contextAttributes) {
+function App(canvas, contextAttributes) {
     this.canvas = canvas;
     this.gl = canvas.getContext("webgl2", contextAttributes);
     this.width = this.gl.drawingBufferWidth;
@@ -93,7 +93,7 @@ var App = function(canvas, contextAttributes) {
     this.linearFloatTexturesEnabled = false;
 
     this.gl.viewport(0, 0, this.viewportWidth, this.viewportHeight);
-};
+}
 
 /**
     Set the color mask to selectively enable or disable particular

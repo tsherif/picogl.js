@@ -38,7 +38,7 @@
     @prop {number} size The size of the buffer (in 4-byte items).
     @prop {GLEnum} usage Usage pattern of the buffer.
 */
-var UniformBuffer = function(gl, layout, usage) {
+function UniformBuffer(gl, layout, usage) {
     this.gl = gl;
     this.buffer = gl.createBuffer();
     this.dataViews = {};
@@ -153,7 +153,7 @@ var UniformBuffer = function(gl, layout, usage) {
     this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, 0, this.buffer);
     this.gl.bufferData(this.gl.UNIFORM_BUFFER, this.size * 4, this.usage);
     this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, 0, null);
-};
+}
 
 /**
     Update data for a given item in the buffer. NOTE: Data is not

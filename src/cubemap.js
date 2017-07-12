@@ -37,7 +37,7 @@
     @prop {GLEnum} unitEnum The GLEnum of texture unit this texture is bound to.
     @prop {Object} appState Tracked GL state.
 */
-var Cubemap = function(gl, appState, options) {
+function Cubemap(gl, appState, options) {
     options = options || PicoGL.DUMMY_OBJECT;
 
     this.gl = gl;
@@ -111,7 +111,7 @@ var Cubemap = function(gl, appState, options) {
         gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
     }
 
-};
+}
 
 /**
     Delete this cubemap.

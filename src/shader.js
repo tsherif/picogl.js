@@ -31,7 +31,7 @@
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLShader} shader The shader.
 */
-var Shader = function(gl, type, source) {
+function Shader(gl, type, source) {
     this.gl = gl;
     this.shader = gl.createShader(type);
     gl.shaderSource(this.shader, source);
@@ -46,7 +46,7 @@ var Shader = function(gl, type, source) {
             console.error((i + 1) + ":", lines[i]);
         }
     }
-};
+}
 
 /**
     Delete this shader.

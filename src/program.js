@@ -38,7 +38,7 @@ var Uniforms = require('./uniforms');
     @prop {Object} uniforms Map of uniform names to handles.
     @prop {Object} uniformBlocks Map of uniform block names to handles.
 */
-var Program = function(gl, vsSource, fsSource, xformFeebackVars) {
+function Program(gl, vsSource, fsSource, xformFeebackVars) {
     var i;
 
     var vShader, fShader;
@@ -162,7 +162,7 @@ var Program = function(gl, vsSource, fsSource, xformFeebackVars) {
 
         this.uniformBlocks[blockName] = blockIndex;
     }
-};
+}
 
 /**
     Delete this program.
