@@ -27,6 +27,7 @@
     General-purpose texture.
 
     @class
+    @memberof PicoGL
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLTexture} texture Handle to the texture.
     @prop {WebGLSamler} sampler Sampler object.

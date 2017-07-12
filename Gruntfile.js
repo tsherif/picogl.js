@@ -3,6 +3,22 @@ module.exports = function(grunt) {
 
     var pkg = grunt.file.readJSON("package.json");
     var banner = "/*\nPicoGL.js v<%= pkg.version %> \n\n<%= licence %>*/\n";
+    var files = [
+        "src/picogl.js",
+        "src/app.js",
+        "src/program.js",
+        "src/shader.js",
+        "src/vertexarray.js",
+        "src/transformfeedback.js",
+        "src/vertexbuffer.js",
+        "src/uniforms.js",
+        "src/uniformbuffer.js",
+        "src/texture.js",
+        "src/cubemap.js",
+        "src/framebuffer.js",
+        "src/drawcall.js",
+        "src/timer.js"
+    ];
 
     grunt.initConfig({
         pkg: pkg,
@@ -46,16 +62,25 @@ module.exports = function(grunt) {
                         PicoGL: true
                     }
                 },
-                src: "<%= concat.src.src %>"
+                src: files
             }
         },
         browserify: {
             src: {
-                src: [
-                  "src/picogl.js",
-                ],
+                src: [ "src/picogl.js" ],
                 dest: "build/<%= packageName %>.js"
-            }
+            },
+            options: {
+                banner: banner,
+                transform: [
+                    [   "browserify-replace", {
+                            replace: [
+                                { from: "%%VERSION%%", to: "<%= VERSION %>" }
+                            ]
+                        }
+                    ]
+                ]
+            },
         },
         concat: {
             options: {
@@ -89,7 +114,7 @@ module.exports = function(grunt) {
         },
         jsdoc : {
             src : {
-                src: "<%= concat.src.src %>",
+                src: files,
                 dest: "docs"
             }
         }

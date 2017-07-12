@@ -27,6 +27,7 @@
     Cubemap for environment mapping.
 
     @class
+    @memberof PicoGL
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLTexture} texture Handle to the texture.
     @prop {GLEnum} type Type of data stored in the texture.

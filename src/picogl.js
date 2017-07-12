@@ -32,7 +32,7 @@
     @namespace PicoGL
 */
 var PicoGL = global.PicoGL = {
-    version: "<%= VERSION %>"
+    version: "%%VERSION%%"
 };
 
 var canvas = document.createElement("canvas");

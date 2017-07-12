@@ -31,6 +31,7 @@ var Uniforms = require('./uniforms');
     shaders.
 
     @class
+    @memberof PicoGL
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLProgram} program The WebGL program.
     @prop {boolean} transformFeedback Whether this program is set up for transform feedback.

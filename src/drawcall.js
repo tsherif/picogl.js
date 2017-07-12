@@ -28,6 +28,7 @@
     attributes, uniforms and textures for a single draw call.
 
     @class
+    @memberof PicoGL
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {Program} currentProgram The program to use for this draw call.
     @prop {VertexArray} currentVertexArray Vertex array to use for this draw call.

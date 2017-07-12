@@ -27,6 +27,7 @@
     Storage for vertex data.
 
     @class
+    @memberof PicoGL
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLBuffer} buffer Allocated buffer storage.
     @prop {GLEnum} type The type of data stored in the buffer.

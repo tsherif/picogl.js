@@ -27,6 +27,7 @@
     Rendering timer.
 
     @class
+    @memberof PicoGL
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {Object} cpuTimer Timer for CPU. Will be window.performance, if available, or window.Date.
     @prop {boolean} gpuTimer Whether the gpu timing is available (EXT_disjoint_timer_query_webgl2 or
