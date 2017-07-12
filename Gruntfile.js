@@ -41,46 +41,34 @@ module.exports = function(grunt) {
                 options: {
                     browser: true,
                     devel: true,
+                    browserify: true,
                     globals: {
                         PicoGL: true
                     }
                 },
-                src: "<%= concat.src.src %>"
+                src: "src/*.js"
             }
         },
-        concat: {
-            options: {
-                separator: ";",
-                banner: banner,
-                stripBanners: {
-                    line: true,
-                    block: true
-                },
-                process: true
-            },
+        browserify: {
             src: {
-                src: [
-                  "src/picogl.js",
-                  "src/app.js",
-                  "src/program.js",
-                  "src/shader.js",
-                  "src/vertexarray.js",
-                  "src/transformfeedback.js",
-                  "src/vertexbuffer.js",
-                  "src/uniforms.js",
-                  "src/uniformbuffer.js",
-                  "src/texture.js",
-                  "src/cubemap.js",
-                  "src/framebuffer.js",
-                  "src/drawcall.js",
-                  "src/timer.js"
-                ],
+                src: [ "src/picogl.js" ],
                 dest: "build/<%= packageName %>.js"
-            }
+            },
+            options: {
+                banner: banner,
+                transform: [
+                    [   "browserify-replace", {
+                            replace: [
+                                { from: "%%VERSION%%", to: "<%= VERSION %>" }
+                            ]
+                        }
+                    ]
+                ]
+            },
         },
         jsdoc : {
             src : {
-                src: "<%= concat.src.src %>",
+                src: "src/*.js",
                 dest: "docs"
             }
         }
@@ -88,10 +76,10 @@ module.exports = function(grunt) {
 
     grunt.loadNpmTasks("grunt-contrib-uglify");
     grunt.loadNpmTasks("grunt-contrib-jshint");
-    grunt.loadNpmTasks("grunt-contrib-concat");
+    grunt.loadNpmTasks("grunt-browserify");
     grunt.loadNpmTasks("grunt-jsdoc");
 
     grunt.registerTask("lint", ["jshint"]);
-    grunt.registerTask("build", ["jshint", "concat", "uglify"]);
+    grunt.registerTask("build", ["jshint", "browserify", "uglify"]);
     grunt.registerTask("default", ["build"]);
 };

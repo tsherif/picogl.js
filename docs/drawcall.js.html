@@ -49,183 +49,180 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-(function() {
-    "use strict";
+"use strict";
 
-    /**
-        A DrawCall represents the program and values of associated
-        attributes, uniforms and textures for a single draw call.
+/**
+    A DrawCall represents the program and values of associated
+    attributes, uniforms and textures for a single draw call.
 
-        @class
-        @prop {WebGLRenderingContext} gl The WebGL context.
-        @prop {Program} currentProgram The program to use for this draw call.
-        @prop {VertexArray} currentVertexArray Vertex array to use for this draw call.
-        @prop {TransformFeedback} currentTransformFeedback Transform feedback to use for this draw call.
-        @prop {Array} uniformBuffers Ordered list of active uniform buffers.
-        @prop {Array} uniformBlockNames Ordered list of uniform block names.
-        @prop {Object} uniformBlockBases Map of uniform blocks to uniform buffer bases.
-        @prop {Number} uniformBlockCount Number of active uniform blocks for this draw call.
-        @prop {Object} uniformIndices Map of uniform names to indices in the uniform arrays.
-        @prop {Array} uniformNames Ordered list of uniform names.
-        @prop {Array} uniformValue Ordered list of uniform values.
-        @prop {number} uniformCount The number of active uniforms for this draw call.
-        @prop {Array} textures Array of active textures.
-        @prop {number} textureCount The number of active textures for this draw call. 
-        @prop {GLEnum} primitive The primitive type being drawn. 
-    */
-    PicoGL.DrawCall = function DrawCall(gl, program, vertexArray, primitive) {
-        this.gl = gl;
-        this.currentProgram = program;
-        this.currentVertexArray = vertexArray;
-        this.currentTransformFeedback = null;    
-        
-        this.uniformIndices = {};
-        this.uniformNames = new Array(PicoGL.WEBGL_INFO.MAX_UNIFORMS);
-        this.uniformValues = new Array(PicoGL.WEBGL_INFO.MAX_UNIFORMS);
-        this.uniformCount = 0;
-        this.uniformBuffers = new Array(PicoGL.WEBGL_INFO.MAX_UNIFORM_BUFFERS);
-        this.uniformBlockNames = new Array(PicoGL.WEBGL_INFO.MAX_UNIFORM_BUFFERS);
-        this.uniformBlockBases = {};
-        this.uniformBlockCount = 0;
-        this.samplerIndices = {};
-        this.textures = new Array(PicoGL.WEBGL_INFO.MAX_TEXTURE_UNITS);
-        this.textureCount = 0;
-        this.primitive = primitive !== undefined ? primitive : PicoGL.TRIANGLES;
-    };
+    @class
+    @hideconstructor
+    @prop {WebGLRenderingContext} gl The WebGL context.
+    @prop {Program} currentProgram The program to use for this draw call.
+    @prop {VertexArray} currentVertexArray Vertex array to use for this draw call.
+    @prop {TransformFeedback} currentTransformFeedback Transform feedback to use for this draw call.
+    @prop {Array} uniformBuffers Ordered list of active uniform buffers.
+    @prop {Array} uniformBlockNames Ordered list of uniform block names.
+    @prop {Object} uniformBlockBases Map of uniform blocks to uniform buffer bases.
+    @prop {Number} uniformBlockCount Number of active uniform blocks for this draw call.
+    @prop {Object} uniformIndices Map of uniform names to indices in the uniform arrays.
+    @prop {Array} uniformNames Ordered list of uniform names.
+    @prop {Array} uniformValue Ordered list of uniform values.
+    @prop {number} uniformCount The number of active uniforms for this draw call.
+    @prop {Array} textures Array of active textures.
+    @prop {number} textureCount The number of active textures for this draw call.
+    @prop {GLEnum} primitive The primitive type being drawn.
+*/
+function DrawCall(gl, program, vertexArray, primitive) {
+    this.gl = gl;
+    this.currentProgram = program;
+    this.currentVertexArray = vertexArray;
+    this.currentTransformFeedback = null;
 
-    PicoGL.DrawCall.prototype.transformFeedback = function(transformFeedback) {
-        this.currentTransformFeedback = transformFeedback;    
+    this.uniformIndices = {};
+    this.uniformNames = new Array(PicoGL.WEBGL_INFO.MAX_UNIFORMS);
+    this.uniformValues = new Array(PicoGL.WEBGL_INFO.MAX_UNIFORMS);
+    this.uniformCount = 0;
+    this.uniformBuffers = new Array(PicoGL.WEBGL_INFO.MAX_UNIFORM_BUFFERS);
+    this.uniformBlockNames = new Array(PicoGL.WEBGL_INFO.MAX_UNIFORM_BUFFERS);
+    this.uniformBlockBases = {};
+    this.uniformBlockCount = 0;
+    this.samplerIndices = {};
+    this.textures = new Array(PicoGL.WEBGL_INFO.MAX_TEXTURE_UNITS);
+    this.textureCount = 0;
+    this.primitive = primitive !== undefined ? primitive : PicoGL.TRIANGLES;
+}
 
-        return this;
-    };
+DrawCall.prototype.transformFeedback = function(transformFeedback) {
+    this.currentTransformFeedback = transformFeedback;
 
-    /**
-        Set the value for a uniform. Array uniforms are supported by
-        using appending "[0]" to the array name and passing a flat array
-        with all required values.
+    return this;
+};
 
-        @method
-        @param {string} name Uniform name.
-        @param {any} value Uniform value.
-    */
-    PicoGL.DrawCall.prototype.uniform = function(name, value) {
-        var index = this.uniformIndices[name];
-        if (index === undefined) {
-            index = this.uniformCount++;
-            this.uniformIndices[name] = index;
-            this.uniformNames[index] = name;
+/**
+    Set the value for a uniform. Array uniforms are supported by
+    using appending "[0]" to the array name and passing a flat array
+    with all required values.
+
+    @method
+    @param {string} name Uniform name.
+    @param {any} value Uniform value.
+*/
+DrawCall.prototype.uniform = function(name, value) {
+    var index = this.uniformIndices[name];
+    if (index === undefined) {
+        index = this.uniformCount++;
+        this.uniformIndices[name] = index;
+        this.uniformNames[index] = name;
+    }
+    this.uniformValues[index] = value;
+
+    return this;
+};
+
+/**
+    Set texture to bind to a sampler uniform.
+
+    @method
+    @param {string} name Sampler uniform name.
+    @param {Texture} texture Texture to bind.
+*/
+DrawCall.prototype.texture = function(name, texture) {
+    var textureIndex = this.samplerIndices[name];
+    if (textureIndex === undefined) {
+        textureIndex = this.textureCount++;
+        this.samplerIndices[name] = textureIndex;
+    }
+
+    this.uniform(name, texture.unit);
+    this.textures[textureIndex] = texture;
+
+    return this;
+};
+
+/**
+    Set uniform buffer to bind to a uniform block.
+
+    @method
+    @param {string} name Uniform block name.
+    @param {UniformBuffer} buffer Uniform buffer to bind.
+*/
+DrawCall.prototype.uniformBlock = function(name, buffer) {
+    var base = this.uniformBlockBases[name];
+    if (base === undefined) {
+        base = this.uniformBlockCount++;
+        this.uniformBlockBases[name] = base;
+        this.uniformBlockNames[base] = name;
+    }
+
+    this.uniformBuffers[base] = buffer;
+
+    return this;
+};
+
+// Draw something.
+DrawCall.prototype.draw = function(state) {
+    var uniformNames = this.uniformNames;
+    var uniformValues = this.uniformValues;
+    var uniformBuffers = this.uniformBuffers;
+    var uniformBlockNames = this.uniformBlockNames;
+    var textures = this.textures;
+
+    if (state.program !== this.currentProgram) {
+        this.gl.useProgram(this.currentProgram.program);
+        state.program = this.currentProgram;
+    }
+
+    for (var uIndex = 0; uIndex &lt; this.uniformCount; ++uIndex) {
+        this.currentProgram.uniform(uniformNames[uIndex], uniformValues[uIndex]);
+    }
+
+    for (var base = 0; base &lt; this.uniformBlockCount; ++base) {
+        this.currentProgram.uniformBlock(uniformBlockNames[base], base);
+        uniformBuffers[base].bind(base);
+    }
+
+    for (var tIndex = 0; tIndex &lt; this.textureCount; ++tIndex) {
+        textures[tIndex].bind();
+    }
+
+    if (state.vertexArray !== this.currentVertexArray) {
+        this.currentVertexArray.bind();
+        state.vertexArray = this.currentVertexArray;
+    }
+
+    if (this.currentTransformFeedback) {
+        if (state.transformFeedback !== this.currentTransformFeedback) {
+            this.currentTransformFeedback.bind();
         }
-        this.uniformValues[index] = value;
+        this.gl.beginTransformFeedback(this.primitive);
+    }
 
-        return this;
-    };
-
-    /**
-        Set texture to bind to a sampler uniform.
-
-        @method
-        @param {string} name Sampler uniform name.
-        @param {Texture} texture Texture to bind.
-    */
-    PicoGL.DrawCall.prototype.texture = function(name, texture) {
-        var textureIndex = this.samplerIndices[name];
-        if (textureIndex === undefined) {
-            textureIndex = this.textureCount++;
-            this.samplerIndices[name] = textureIndex;
-        }
-        
-        this.uniform(name, texture.unit);
-        this.textures[textureIndex] = texture;
-        
-        return this;
-    };
-
-    /**
-        Set uniform buffer to bind to a uniform block.
-
-        @method
-        @param {string} name Uniform block name.
-        @param {UniformBuffer} buffer Uniform buffer to bind.
-    */
-    PicoGL.DrawCall.prototype.uniformBlock = function(name, buffer) {
-        var base = this.uniformBlockBases[name];
-        if (base === undefined) {
-            base = this.uniformBlockCount++;
-            this.uniformBlockBases[name] = base;
-            this.uniformBlockNames[base] = name;
-        }
-        
-        this.uniformBuffers[base] = buffer;
-        
-        return this;
-    };
-
-    // Draw something.
-    PicoGL.DrawCall.prototype.draw = function(state) {
-        var uniformNames = this.uniformNames;
-        var uniformValues = this.uniformValues;
-        var uniformBuffers = this.uniformBuffers;
-        var uniformBlockNames = this.uniformBlockNames;
-        var textures = this.textures;
-
-        if (state.program !== this.currentProgram) {
-            this.gl.useProgram(this.currentProgram.program);
-            state.program = this.currentProgram;
-        }
-
-        for (var uIndex = 0; uIndex &lt; this.uniformCount; ++uIndex) {
-            this.currentProgram.uniform(uniformNames[uIndex], uniformValues[uIndex]);
-        }
-
-        for (var base = 0; base &lt; this.uniformBlockCount; ++base) {
-            this.currentProgram.uniformBlock(uniformBlockNames[base], base);
-            uniformBuffers[base].bind(base);
-        }
-
-        for (var tIndex = 0; tIndex &lt; this.textureCount; ++tIndex) {
-            textures[tIndex].bind();
-        }
-
-        if (state.vertexArray !== this.currentVertexArray) {
-            this.currentVertexArray.bind();
-            state.vertexArray = this.currentVertexArray;
-        }
-
-        if (this.currentTransformFeedback) {
-            if (state.transformFeedback !== this.currentTransformFeedback) {
-                this.currentTransformFeedback.bind();
-            }
-            this.gl.beginTransformFeedback(this.primitive);
-        }
-
-        if (this.currentVertexArray.instanced) {
-            if (this.currentVertexArray.indexed) {
-                this.gl.drawElementsInstanced(this.primitive, this.currentVertexArray.numElements, this.currentVertexArray.indexType, 0, this.currentVertexArray.numInstances);
-            } else {
-                this.gl.drawArraysInstanced(this.primitive, 0, this.currentVertexArray.numElements, this.currentVertexArray.numInstances);
-            }
+    if (this.currentVertexArray.instanced) {
+        if (this.currentVertexArray.indexed) {
+            this.gl.drawElementsInstanced(this.primitive, this.currentVertexArray.numElements, this.currentVertexArray.indexType, 0, this.currentVertexArray.numInstances);
         } else {
-            if (this.currentVertexArray.indexed) {
-                this.gl.drawElements(this.primitive, this.currentVertexArray.numElements, this.currentVertexArray.indexType, 0);
-            } else {
-                this.gl.drawArrays(this.primitive, 0, this.currentVertexArray.numElements);
-            }
+            this.gl.drawArraysInstanced(this.primitive, 0, this.currentVertexArray.numElements, this.currentVertexArray.numInstances);
         }
-
-        if (this.currentTransformFeedback) {
-            this.gl.endTransformFeedback();
-            // TODO(Tarek): Need to rebind buffers due to bug in ANGLE.
-            // Remove this when that's fixed.
-            for (var i = 0, len = this.currentTransformFeedback.angleBugBuffers.length; i &lt; len; ++i) {
-                this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, i, null);
-            }
+    } else {
+        if (this.currentVertexArray.indexed) {
+            this.gl.drawElements(this.primitive, this.currentVertexArray.numElements, this.currentVertexArray.indexType, 0);
+        } else {
+            this.gl.drawArrays(this.primitive, 0, this.currentVertexArray.numElements);
         }
+    }
 
-    };
+    if (this.currentTransformFeedback) {
+        this.gl.endTransformFeedback();
+        // TODO(Tarek): Need to rebind buffers due to bug in ANGLE.
+        // Remove this when that's fixed.
+        for (var i = 0, len = this.currentTransformFeedback.angleBugBuffers.length; i &lt; len; ++i) {
+            this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, i, null);
+        }
+    }
+};
 
-})();
-
-
+module.exports = DrawCall;
 </code></pre>
         </article>
     </section>
@@ -236,13 +233,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="PicoGL.App.html">App</a></li><li><a href="PicoGL.Cubemap.html">Cubemap</a></li><li><a href="PicoGL.DrawCall.html">DrawCall</a></li><li><a href="PicoGL.Framebuffer.html">Framebuffer</a></li><li><a href="PicoGL.Program.html">Program</a></li><li><a href="PicoGL.Shader.html">Shader</a></li><li><a href="PicoGL.Texture.html">Texture</a></li><li><a href="PicoGL.Timer.html">Timer</a></li><li><a href="PicoGL.TransformFeedback.html">TransformFeedback</a></li><li><a href="PicoGL.UniformBuffer.html">UniformBuffer</a></li><li><a href="PicoGL.VertexArray.html">VertexArray</a></li><li><a href="PicoGL.VertexBuffer.html">VertexBuffer</a></li></ul><h3>Namespaces</h3><ul><li><a href="PicoGL.html">PicoGL</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="App.html">App</a></li><li><a href="Cubemap.html">Cubemap</a></li><li><a href="DrawCall.html">DrawCall</a></li><li><a href="Framebuffer.html">Framebuffer</a></li><li><a href="Program.html">Program</a></li><li><a href="Shader.html">Shader</a></li><li><a href="Texture.html">Texture</a></li><li><a href="Timer.html">Timer</a></li><li><a href="TransformFeedback.html">TransformFeedback</a></li><li><a href="UniformBuffer.html">UniformBuffer</a></li><li><a href="VertexArray.html">VertexArray</a></li><li><a href="VertexBuffer.html">VertexBuffer</a></li></ul><h3>Namespaces</h3><ul><li><a href="PicoGL.html">PicoGL</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue Jul 04 2017 17:48:16 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.1</a> on Wed Jul 12 2017 08:35:04 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

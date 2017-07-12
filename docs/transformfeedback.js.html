@@ -49,66 +49,66 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-(function() {
-    "use strict";
+"use strict";
 
-    /**
-        Tranform feedback object.
+/**
+    Tranform feedback object.
 
-        @class
-        @prop {WebGLRenderingContext} gl The WebGL context.
-        @prop {WebGLTransformFeedback} transformFeedback Transform feedback object.
-    */
-    PicoGL.TransformFeedback = function TransformFeedback(gl) {
-        this.gl = gl;
-        this.transformFeedback = gl.createTransformFeedback();
-        // TODO(Tarek): Need to rebind buffers due to bug in ANGLE.
-        // Remove this when that's fixed.
-        this.angleBugBuffers = [];
-    };
+    @class
+    @hideconstructor
+    @prop {WebGLRenderingContext} gl The WebGL context.
+    @prop {WebGLTransformFeedback} transformFeedback Transform feedback object.
+*/
+function TransformFeedback(gl) {
+    this.gl = gl;
+    this.transformFeedback = gl.createTransformFeedback();
+    // TODO(Tarek): Need to rebind buffers due to bug in ANGLE.
+    // Remove this when that's fixed.
+    this.angleBugBuffers = [];
+}
 
-     /**
-        Bind a feedback buffer to capture transform output.
+ /**
+    Bind a feedback buffer to capture transform output.
 
-        @method
-        @param {number} index Index of transform feedback varying to capture.
-        @param {VertexBuffer} buffer Buffer to record output into.
-    */
-    PicoGL.TransformFeedback.prototype.feedbackBuffer = function(index, buffer) {
-        this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedback);
-        this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, index, buffer.buffer);
-        this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, null);
-        this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, index, null);
+    @method
+    @param {number} index Index of transform feedback varying to capture.
+    @param {VertexBuffer} buffer Buffer to record output into.
+*/
+TransformFeedback.prototype.feedbackBuffer = function(index, buffer) {
+    this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedback);
+    this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, index, buffer.buffer);
+    this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, null);
+    this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, index, null);
 
-        this.angleBugBuffers[index] = buffer;
+    this.angleBugBuffers[index] = buffer;
 
-        return this;
-    };
+    return this;
+};
 
-    /**
-        Delete this transform feedback.
+/**
+    Delete this transform feedback.
 
-        @method
-    */
-    PicoGL.TransformFeedback.prototype.delete = function() {
-        if (this.transformFeedback) {
-            this.gl.deleteTransformFeedback(this.transformFeedback);
-            this.transformFeedback = null;
-        }
-    }; 
+    @method
+*/
+TransformFeedback.prototype.delete = function() {
+    if (this.transformFeedback) {
+        this.gl.deleteTransformFeedback(this.transformFeedback);
+        this.transformFeedback = null;
+    }
+};
 
-    // Bind this transform feedback.
-    PicoGL.TransformFeedback.prototype.bind = function() {
-        this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedback);
+// Bind this transform feedback.
+TransformFeedback.prototype.bind = function() {
+    this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedback);
 
-        for (var i = 0, len = this.angleBugBuffers.length; i &lt; len; ++i) {
-            this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, i, this.angleBugBuffers[i].buffer);
-        }
+    for (var i = 0, len = this.angleBugBuffers.length; i &lt; len; ++i) {
+        this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, i, this.angleBugBuffers[i].buffer);
+    }
 
-        return this;
-    };
+    return this;
+};
 
-})();
+module.exports = TransformFeedback;
 </code></pre>
         </article>
     </section>
@@ -119,13 +119,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="PicoGL.App.html">App</a></li><li><a href="PicoGL.Cubemap.html">Cubemap</a></li><li><a href="PicoGL.DrawCall.html">DrawCall</a></li><li><a href="PicoGL.Framebuffer.html">Framebuffer</a></li><li><a href="PicoGL.Program.html">Program</a></li><li><a href="PicoGL.Shader.html">Shader</a></li><li><a href="PicoGL.Texture.html">Texture</a></li><li><a href="PicoGL.Timer.html">Timer</a></li><li><a href="PicoGL.TransformFeedback.html">TransformFeedback</a></li><li><a href="PicoGL.UniformBuffer.html">UniformBuffer</a></li><li><a href="PicoGL.VertexArray.html">VertexArray</a></li><li><a href="PicoGL.VertexBuffer.html">VertexBuffer</a></li></ul><h3>Namespaces</h3><ul><li><a href="PicoGL.html">PicoGL</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="App.html">App</a></li><li><a href="Cubemap.html">Cubemap</a></li><li><a href="DrawCall.html">DrawCall</a></li><li><a href="Framebuffer.html">Framebuffer</a></li><li><a href="Program.html">Program</a></li><li><a href="Shader.html">Shader</a></li><li><a href="Texture.html">Texture</a></li><li><a href="Timer.html">Timer</a></li><li><a href="TransformFeedback.html">TransformFeedback</a></li><li><a href="UniformBuffer.html">UniformBuffer</a></li><li><a href="VertexArray.html">VertexArray</a></li><li><a href="VertexBuffer.html">VertexBuffer</a></li></ul><h3>Namespaces</h3><ul><li><a href="PicoGL.html">PicoGL</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue Jul 04 2017 17:48:16 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.1</a> on Wed Jul 12 2017 08:35:04 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

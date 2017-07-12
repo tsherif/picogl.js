@@ -49,869 +49,879 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-(function() {
-    "use strict";
+"use strict";
+var Cubemap           = require('./cubemap');
+var DrawCall          = require('./drawcall');
+var Framebuffer       = require('./framebuffer');
+var Program           = require('./program');
+var Shader            = require('./shader');
+var Texture           = require('./texture');
+var Timer             = require('./timer');
+var TransformFeedback = require('./transformfeedback');
+var UniformBuffer     = require('./uniformbuffer');
+var VertexArray       = require('./vertexarray');
+var VertexBuffer      = require('./vertexbuffer');
 
-    /**
-        Primary entry point to PicoGL. An app will store all parts of the WebGL
-        state and manage draw calls.
 
-        @class
-        @prop {DOMElement} canvas The canvas on which this app drawing.
-        @prop {WebGLRenderingContext} gl The WebGL context.
-        @prop {number} width The width of the drawing surface.
-        @prop {number} height The height of the drawing surface.
-        @prop {boolean} floatRenderTargetsEnabled Whether the EXT_color_buffer_float extension is enabled.
-        @prop {boolean} linearFloatTexturesEnabled Whether the OES_texture_float_linear extension is enabled.
-        @prop {Object} state Tracked GL state.
-        @prop {GLEnum} clearBits Current clear mask to use with clear().
-        @prop {Timer} timer Rendering timer.
-        @prop {number} cpuTime Time spent on CPU during last timing. Only valid if timerReady() returns true.
-        @prop {number} gpuTime Time spent on GPU during last timing. Only valid if timerReady() returns true.
-                Will remain 0 if extension EXT_disjoint_timer_query_webgl2 is unavailable.
-    */
-    PicoGL.App = function App(canvas, contextAttributes) {
-        this.canvas = canvas;
-        this.gl = canvas.getContext("webgl2", contextAttributes);
-        this.width = this.gl.drawingBufferWidth;
-        this.height = this.gl.drawingBufferHeight;
-        this.viewportWidth = this.width;
-        this.viewportHeight = this.height;
-        this.currentDrawCalls = null;
-        this.emptyFragmentShader = null;
+/**
+    Primary entry point to PicoGL. An app will store all parts of the WebGL
+    state and manage draw calls.
 
-        this.state = {
-            program: null,
-            vertexArray: null,
-            transformFeedback: null,
-            activeTexture: -1,
-            textures: new Array(PicoGL.WEBGL_INFO.MAX_TEXTURE_UNITS),
-            textureCount: 0,
-            freeTextureUnits: [],
-            // TODO(Tarek): UBO state currently not tracked, due bug
-            // with UBO state becoming corrupted between frames in Chrome
-            // https://bugs.chromium.org/p/chromium/issues/detail?id=722060
-            // Enable UBO state tracking when that's fixed.
-            uniformBuffers: new Array(PicoGL.WEBGL_INFO.MAX_UNIFORM_BUFFERS),
-            uniformBufferCount: 0,
-            freeUniformBufferBases: [],
-            drawFramebuffer: null,
-            readFramebuffer: null,
-        };
+    @class
+    @hideconstructor
+    @prop {DOMElement} canvas The canvas on which this app drawing.
+    @prop {WebGLRenderingContext} gl The WebGL context.
+    @prop {number} width The width of the drawing surface.
+    @prop {number} height The height of the drawing surface.
+    @prop {boolean} floatRenderTargetsEnabled Whether the EXT_color_buffer_float extension is enabled.
+    @prop {boolean} linearFloatTexturesEnabled Whether the OES_texture_float_linear extension is enabled.
+    @prop {Object} state Tracked GL state.
+    @prop {GLEnum} clearBits Current clear mask to use with clear().
+    @prop {Timer} timer Rendering timer.
+    @prop {number} cpuTime Time spent on CPU during last timing. Only valid if timerReady() returns true.
+    @prop {number} gpuTime Time spent on GPU during last timing. Only valid if timerReady() returns true.
+            Will remain 0 if extension EXT_disjoint_timer_query_webgl2 is unavailable.
+*/
+function App(canvas, contextAttributes) {
+    this.canvas = canvas;
+    this.gl = canvas.getContext("webgl2", contextAttributes);
+    this.width = this.gl.drawingBufferWidth;
+    this.height = this.gl.drawingBufferHeight;
+    this.viewportWidth = this.width;
+    this.viewportHeight = this.height;
+    this.currentDrawCalls = null;
+    this.emptyFragmentShader = null;
 
-        this.clearBits = this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT| this.gl.STENCIL_BUFFER_BIT;
-        
-        this.timer = new PicoGL.Timer(this.gl);
-        this.cpuTime = 0;
-        this.gpuTime = 0;
+    this.state = {
+        program: null,
+        vertexArray: null,
+        transformFeedback: null,
+        activeTexture: -1,
+        textures: new Array(PicoGL.WEBGL_INFO.MAX_TEXTURE_UNITS),
+        textureCount: 0,
+        freeTextureUnits: [],
+        // TODO(Tarek): UBO state currently not tracked, due bug
+        // with UBO state becoming corrupted between frames in Chrome
+        // https://bugs.chromium.org/p/chromium/issues/detail?id=722060
+        // Enable UBO state tracking when that's fixed.
+        uniformBuffers: new Array(PicoGL.WEBGL_INFO.MAX_UNIFORM_BUFFERS),
+        uniformBufferCount: 0,
+        freeUniformBufferBases: [],
+        drawFramebuffer: null,
+        readFramebuffer: null,
+    };
 
-        this.floatRenderTargetsEnabled = false;
-        this.linearFloatTexturesEnabled = false;
-        
+    this.clearBits = this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT| this.gl.STENCIL_BUFFER_BIT;
+
+    this.timer = new Timer(this.gl);
+    this.cpuTime = 0;
+    this.gpuTime = 0;
+
+    this.floatRenderTargetsEnabled = false;
+    this.linearFloatTexturesEnabled = false;
+
+    this.gl.viewport(0, 0, this.viewportWidth, this.viewportHeight);
+}
+
+/**
+    Set the color mask to selectively enable or disable particular
+    color channels while rendering.
+
+    @method
+    @param {boolean} r Red channel.
+    @param {boolean} g Green channel.
+    @param {boolean} b Blue channel.
+    @param {boolean} a Alpha channel.
+*/
+App.prototype.colorMask = function(r, g, b, a) {
+    this.gl.colorMask(r, g, b, a);
+
+    return this;
+};
+
+/**
+    Set the clear color.
+
+    @method
+    @param {number} r Red channel.
+    @param {number} g Green channel.
+    @param {number} b Blue channel.
+    @param {number} a Alpha channel.
+*/
+App.prototype.clearColor = function(r, g, b, a) {
+    this.gl.clearColor(r, g, b, a);
+
+    return this;
+};
+
+/**
+    Set the clear mask bits to use when calling clear().
+    E.g. app.clearMask(PicoGL.COLOR_BUFFER_BIT).
+
+    @method
+    @param {GLEnum} mask Bit mask of buffers to clear.
+*/
+App.prototype.clearMask = function(mask) {
+    this.clearBits = mask;
+
+    return this;
+};
+
+/**
+    Clear the canvas
+
+    @method
+*/
+App.prototype.clear = function() {
+    this.gl.clear(this.clearBits);
+
+    return this;
+};
+
+/**
+    Set the list of DrawCalls to use when calling draw().
+
+    @method
+    @param {Array} drawCallList Array of DrawCall objects.
+    @see DrawCall
+*/
+App.prototype.drawCalls = function(drawCallList) {
+    this.currentDrawCalls = drawCallList;
+
+    return this;
+};
+
+/**
+    Bind a draw framebuffer to the WebGL context.
+
+    @method
+    @param {Framebuffer} framebuffer The Framebuffer object to bind.
+    @see Framebuffer
+*/
+App.prototype.drawFramebuffer = function(framebuffer) {
+    framebuffer.bindForDraw();
+
+    if (this.viewportWidth !== framebuffer.width || this.viewportHeight !== framebuffer.height) {
+        this.viewportWidth = framebuffer.width;
+        this.viewportHeight = framebuffer.height;
         this.gl.viewport(0, 0, this.viewportWidth, this.viewportHeight);
-    };
+    }
 
-    /**
-        Set the color mask to selectively enable or disable particular
-        color channels while rendering.
+    return this;
+};
 
-        @method
-        @param {boolean} r Red channel.
-        @param {boolean} g Green channel.
-        @param {boolean} b Blue channel.
-        @param {boolean} a Alpha channel.
-    */
-    PicoGL.App.prototype.colorMask = function(r, g, b, a) {
-        this.gl.colorMask(r, g, b, a);
+/**
+    Bind a read framebuffer to the WebGL context.
 
-        return this;
-    };
+    @method
+    @param {Framebuffer} framebuffer The Framebuffer object to bind.
+    @see Framebuffer
+*/
+App.prototype.readFramebuffer = function(framebuffer) {
+    framebuffer.bindForRead();
 
-    /**
-        Set the clear color.
+    return this;
+};
 
-        @method
-        @param {number} r Red channel.
-        @param {number} g Green channel.
-        @param {number} b Blue channel.
-        @param {number} a Alpha channel.
-    */
-    PicoGL.App.prototype.clearColor = function(r, g, b, a) {
-        this.gl.clearColor(r, g, b, a);
+/**
+    Switch back to the default framebuffer for drawing (i.e. draw to the screen).
 
-        return this;
-    };
+    @method
+*/
+App.prototype.defaultDrawFramebuffer = function() {
+    if (this.state.drawFramebuffer !== null) {
+        this.gl.bindFramebuffer(this.gl.DRAW_FRAMEBUFFER, null);
+        this.state.drawFramebuffer = null;
 
-    /**
-        Set the clear mask bits to use when calling clear().
-        E.g. app.clearMask(PicoGL.COLOR_BUFFER_BIT).
-
-        @method
-        @param {GLEnum} mask Bit mask of buffers to clear.
-    */
-    PicoGL.App.prototype.clearMask = function(mask) {
-        this.clearBits = mask;
-
-        return this;
-    };
-
-    /**
-        Clear the canvas
-
-        @method
-    */
-    PicoGL.App.prototype.clear = function() {
-        this.gl.clear(this.clearBits);
-
-        return this;
-    };
-
-    /**
-        Set the list of DrawCalls to use when calling draw().
-
-        @method
-        @param {Array} drawCallList Array of DrawCall objects.
-        @see DrawCall
-    */
-    PicoGL.App.prototype.drawCalls = function(drawCallList) {
-        this.currentDrawCalls = drawCallList;
-
-        return this;
-    };
-
-    /**
-        Bind a draw framebuffer to the WebGL context.
-
-        @method
-        @param {Framebuffer} framebuffer The Framebuffer object to bind.
-        @see Framebuffer
-    */
-    PicoGL.App.prototype.drawFramebuffer = function(framebuffer) {
-        framebuffer.bindForDraw();
-
-        if (this.viewportWidth !== framebuffer.width || this.viewportHeight !== framebuffer.height) {
-            this.viewportWidth = framebuffer.width;
-            this.viewportHeight = framebuffer.height;
+        if (this.viewportWidth !== this.width || this.viewportHeight !== this.height) {
+            this.viewportWidth = this.width;
+            this.viewportHeight = this.height;
             this.gl.viewport(0, 0, this.viewportWidth, this.viewportHeight);
-        }      
-
-        return this;
-    };
-
-    /**
-        Bind a read framebuffer to the WebGL context.
-
-        @method
-        @param {Framebuffer} framebuffer The Framebuffer object to bind.
-        @see Framebuffer
-    */
-    PicoGL.App.prototype.readFramebuffer = function(framebuffer) {
-        framebuffer.bindForRead();
-
-        return this;
-    };
-
-    /**
-        Switch back to the default framebuffer for drawing (i.e. draw to the screen).
-
-        @method
-    */
-    PicoGL.App.prototype.defaultDrawFramebuffer = function() {
-        if (this.state.drawFramebuffer !== null) {
-            this.gl.bindFramebuffer(this.gl.DRAW_FRAMEBUFFER, null);
-            this.state.drawFramebuffer = null;
-            
-            if (this.viewportWidth !== this.width || this.viewportHeight !== this.height) {
-                this.viewportWidth = this.width;
-                this.viewportHeight = this.height;
-                this.gl.viewport(0, 0, this.viewportWidth, this.viewportHeight);
-            } 
         }
-    
-        return this;
-    };
+    }
 
-    /**
-        Switch back to the default framebuffer for reading (i.e. read from the screen).
+    return this;
+};
 
-        @method
-    */
-    PicoGL.App.prototype.defaultReadFramebuffer = function() {
-        if (this.state.readFramebuffer !== null) {
-            this.gl.bindFramebuffer(this.gl.READ_FRAMEBUFFER, null);
-            this.state.readFramebuffer = null;
-        }
+/**
+    Switch back to the default framebuffer for reading (i.e. read from the screen).
 
-        return this;
-    };
-
-    /**
-        Set the depth range.
+    @method
+*/
+App.prototype.defaultReadFramebuffer = function() {
+    if (this.state.readFramebuffer !== null) {
+        this.gl.bindFramebuffer(this.gl.READ_FRAMEBUFFER, null);
+        this.state.readFramebuffer = null;
+    }
 
-        @method
-        @param {number} near Minimum depth value. 
-        @param {number} far Maximum depth value.
-    */
-    PicoGL.App.prototype.depthRange = function(near, far) {
-        this.gl.depthRange(near, far);
+    return this;
+};
 
-        return this;
-    };
-
-    /**
-        Enable depth testing.
-
-        @method
-    */
-    PicoGL.App.prototype.depthTest = function() {
-        this.gl.enable(this.gl.DEPTH_TEST);
-
-        return this;
-    };
-
-    /**
-        Disable depth testing.
-
-        @method
-    */
-    PicoGL.App.prototype.noDepthTest = function() {
-        this.gl.disable(this.gl.DEPTH_TEST);
-
-        return this;
-    };
-
-    /**
-        Enable writing to the z buffer.
-
-        @method
-    */
-    PicoGL.App.prototype.depthMask = function() {
-        this.gl.depthMask(true);
-
-        return this;
-    };
-
-    /**
-        Disable writing to the z buffer.
-
-        @method
-    */
-    PicoGL.App.prototype.noDepthMask = function() {
-        this.gl.depthMask(false);
-
-        return this;
-    };
-
-    /**
-        Set the depth test function. E.g. app.depthFunc(PicoGL.LEQUAL).
-
-        @method
-        @param {GLEnum} func The depth testing function to use.
-    */
-    PicoGL.App.prototype.depthFunc = function(func) {
-        this.gl.depthFunc(func);
-
-        return this;
-    };
-
-    /**
-        Enable blending.
-
-        @method
-    */
-    PicoGL.App.prototype.blend = function() {
-        this.gl.enable(this.gl.BLEND);
-
-        return this;
-    };
-
-    /**
-        Disable blending
-
-        @method
-    */
-    PicoGL.App.prototype.noBlend = function() {
-        this.gl.disable(this.gl.BLEND);
-
-        return this;
-    };
-
-    /**
-        Set the blend function. E.g. app.blendFunc(PicoGL.ONE, PicoGL.ONE_MINUS_SRC_ALPHA).
-
-        @method
-        @param {GLEnum} src The source blending weight.
-        @param {GLEnum} dest The destination blending weight.
-    */
-    PicoGL.App.prototype.blendFunc = function(src, dest) {
-        this.gl.blendFunc(src, dest);
-
-        return this;
-    };
-
-    /**
-        Set the blend function, with separate weighting for color and alpha channels. 
-        E.g. app.blendFuncSeparate(PicoGL.ONE, PicoGL.ONE_MINUS_SRC_ALPHA, PicoGL.ONE, PicoGL.ONE).
-
-        @method
-        @param {GLEnum} csrc The source blending weight for the RGB channels.
-        @param {GLEnum} cdest The destination blending weight for the RGB channels.
-        @param {GLEnum} asrc The source blending weight for the alpha channel.
-        @param {GLEnum} adest The destination blending weight for the alpha channel.
-    */
-    PicoGL.App.prototype.blendFuncSeparate = function(csrc, cdest, asrc, adest) {
-        this.gl.blendFuncSeparate(csrc, cdest, asrc, adest);
-
-        return this;
-    };
-
-    /**
-        Enable stencil testing.
-        NOTE: Only works if { stencil: true } passed as a 
-        context attribute when creating the App!
-
-        @method
-    */
-    PicoGL.App.prototype.stencilTest = function() {
-        this.gl.enable(this.gl.STENCIL_TEST);
-
-        return this;
-    };
-
-    /**
-        Disable stencil testing.
-
-        @method
-    */
-    PicoGL.App.prototype.noStencilTest = function() {
-        this.gl.disable(this.gl.STENCIL_TEST);
-
-        return this;
-    };
-
-    /**
-        Set the bitmask to use for tested stencil values.
-        E.g. app.stencilMask(0xFF).
-        NOTE: Only works if { stencil: true } passed as a 
-        context attribute when creating the App!
-        
-        @method
-        @param {number} mask The mask value. 
-
-    */
-    PicoGL.App.prototype.stencilMask = function(mask) {
-        this.gl.stencilMask(mask);
-
-        return this;
-    };
-
-    /**
-        Set the bitmask to use for tested stencil values for a particular face orientation. 
-        E.g. app.stencilMaskSeparate(PicoGL.FRONT, 0xFF).
-        NOTE: Only works if { stencil: true } passed as a 
-        context attribute when creating the App!
-
-        @method
-        @param {GLEnum} face The face orientation to apply the mask to.
-        @param {number} mask The mask value.
-
-    */
-    PicoGL.App.prototype.stencilMaskSeparate = function(face, mask) {
-        this.gl.stencilMaskSeparate(face, mask);
-
-        return this;
-    };
-
-    /**
-        Set the stencil function and reference value. 
-        E.g. app.stencilFunc(PicoGL.EQUAL, 1, 0xFF).
-        NOTE: Only works if { stencil: true } passed as a 
-        context attribute when creating the App!
-
-        @method
-        @param {GLEnum} func The testing function.
-        @param {number} ref The reference value.
-        @param {GLEnum} mask The bitmask to use against tested values before applying
-            the stencil function.
-    */
-    PicoGL.App.prototype.stencilFunc = function(func, ref, mask) {
-        this.gl.stencilFunc(func, ref, mask);
-
-        return this;
-    };
-
-    /**
-        Set the stencil function and reference value for a particular face orientation. 
-        E.g. app.stencilFuncSeparate(PicoGL.FRONT, PicoGL.EQUAL, 1, 0xFF).
-        NOTE: Only works if { stencil: true } passed as a 
-        context attribute when creating the App!
-
-        @method
-        @param {GLEnum} face The face orientation to apply the function to.
-        @param {GLEnum} func The testing function.
-        @param {number} ref The reference value.
-        @param {GLEnum} mask The bitmask to use against tested values before applying
-            the stencil function.
-    */
-    PicoGL.App.prototype.stencilFuncSeparate = function(face, func, ref, mask) {
-        this.gl.stencilFuncSeparate(face, func, ref, mask);
-
-        return this;
-    };
-
-    /**
-        Set the operations for updating stencil buffer values. 
-        E.g. app.stencilOp(PicoGL.KEEP, PicoGL.KEEP, PicoGL.REPLACE).
-        NOTE: Only works if { stencil: true } passed as a 
-        context attribute when creating the App!
-
-        @method
-        @param {GLEnum} stencilFail Operation to apply if the stencil test fails.
-        @param {GLEnum} depthFail Operation to apply if the depth test fails.
-        @param {GLEnum} pass Operation to apply if the both the depth and stencil tests pass.
-    */
-    PicoGL.App.prototype.stencilOp = function(stencilFail, depthFail, pass) {
-        this.gl.stencilOp(stencilFail, depthFail, pass);
-
-        return this;
-    };
-
-    /**
-        Set the operations for updating stencil buffer values for a particular face orientation. 
-        E.g. app.stencilOpSeparate(PicoGL.FRONT, PicoGL.KEEP, PicoGL.KEEP, PicoGL.REPLACE).
-        NOTE: Only works if { stencil: true } passed as a 
-        context attribute when creating the App!
-
-        @method
-        @param {GLEnum} face The face orientation to apply the operations to.
-        @param {GLEnum} stencilFail Operation to apply if the stencil test fails.
-        @param {GLEnum} depthFail Operation to apply if the depth test fails.
-        @param {GLEnum} pass Operation to apply if the both the depth and stencil tests pass.
-    */
-    PicoGL.App.prototype.stencilOpSeparate = function(face, stencilFail, depthFail, pass) {
-        this.gl.stencilOpSeparate(face, stencilFail, depthFail, pass);
-
-        return this;
-    };
-
-    /**
-        Enable rasterization step.
-
-        @method
-    */
-    PicoGL.App.prototype.rasterize = function() {
-        this.gl.disable(this.gl.RASTERIZER_DISCARD);
-
-        return this;
-    };
-
-    /**
-        Disable rasterization step.
-
-        @method
-    */
-    PicoGL.App.prototype.noRasterize = function() {
-        this.gl.enable(this.gl.RASTERIZER_DISCARD);
-
-        return this;
-    };
-
-    /**
-        Enable backface culling.
-
-        @method
-    */
-    PicoGL.App.prototype.cullBackfaces = function() {
-        this.gl.enable(this.gl.CULL_FACE);
-
-        return this;
-    };
-
-    /**
-        Disable backface culling.
-
-        @method
-    */
-    PicoGL.App.prototype.drawBackfaces = function() {
-        this.gl.disable(this.gl.CULL_FACE);
-
-        return this;
-    };
-
-    /**
-        Enable the EXT_color_buffer_float extension. Allows for creating float textures as
-        render targets on FrameBuffer objects. E.g. app.createFramebuffer().colorTarget(0, PicoGL.FLOAT).
-
-        @method
-        @see Framebuffer
-    */
-    PicoGL.App.prototype.floatRenderTargets = function() {
-        this.floatRenderTargetsEnabled = !!this.gl.getExtension("EXT_color_buffer_float");
-        
-        if (!this.floatRenderTargetsEnabled) {
-            console.warn("Extension EXT_color_buffer_float unavailable. Cannot enable float textures.");
-        }
-        
-        return this;
-    };
-
-    /**
-        Enable the OES_texture_float_linear extension. Allows for linear blending on float textures.
-
-        @method
-        @see Framebuffer
-    */
-    PicoGL.App.prototype.linearFloatTextures = function() {
-        this.linearFloatTexturesEnabled = !!this.gl.getExtension("OES_texture_float_linear");
-        
-        if (!this.linearFloatTexturesEnabled) {
-            console.warn("Extension OES_texture_float_linear unavailable. Cannot enable float texture linear filtering.");
-        }
-        
-        return this;
-    };
-
-    /**
-        Read a pixel's color value from the canvas. Note that the RGBA values will be encoded 
-        as 0-255.
-
-        @method
-        @param {number} x The x coordinate of the pixel.
-        @param {number} y The y coordinate of the pixel.
-        @param {Uint8Array} outColor 4-element Uint8Array to store the pixel's color.
-    */
-    PicoGL.App.prototype.readPixel = function(x, y, outColor) {
-        this.gl.readPixels(x, y, 1, 1, this.gl.RGBA, this.gl.UNSIGNED_BYTE, outColor);
-
-        return this;
-    };
-
-    /**
-        Resize the drawing surface.
-
-        @method
-        @param {number} width The new canvas width.
-        @param {number} height The new canvas height.
-    */
-    PicoGL.App.prototype.resize = function(width, height) {
-        this.canvas.width = width;
-        this.canvas.height = height;
-
-        this.width = this.gl.drawingBufferWidth;
-        this.height = this.gl.drawingBufferHeight;
-        this.viewportWidth = this.width;
-        this.viewportHeight = this.height;
-        this.gl.viewport(0, 0, this.viewportWidth, this.viewportHeight);
-        
-        return this;
-    };
-    /**
-        Create a program.
-
-        @method
-        @param {Shader|string} vertexShader Vertex shader object or source code.
-        @param {Shader|string} fragmentShader Fragment shader object or source code.
-        @param {Array} [xformFeedbackVars] Transform feedback varyings.
-    */
-    PicoGL.App.prototype.createProgram = function(vsSource, fsSource, xformFeedbackVars) {
-        return new PicoGL.Program(this.gl, vsSource, fsSource, xformFeedbackVars);
-    };
-
-    /**
-        Create a shader. Creating a shader separately from a program allows for 
-        shader reuse.
-
-        @method
-        @param {GLEnum} type Shader type.
-        @param {string} source Shader source.
-    */
-    PicoGL.App.prototype.createShader = function(type, source) {
-        return new PicoGL.Shader(this.gl, type, source);
-    };
-
-    /**
-        Create a vertex array.
-
-        @method
-    */
-    PicoGL.App.prototype.createVertexArray = function() {
-        return new PicoGL.VertexArray(this.gl);
-    };
-
-    /**
-        Create a transform feedback object.
-
-        @method
-    */
-    PicoGL.App.prototype.createTransformFeedback = function() {
-        return new PicoGL.TransformFeedback(this.gl);
-    };
-
-    /**
-        Create a vertex buffer.
-
-        @method
-        @param {GLEnum} type The data type stored in the vertex buffer.
-        @param {number} itemSize Number of elements per vertex.
-        @param {ArrayBufferView} data Buffer data.
-        @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
-    */
-    PicoGL.App.prototype.createVertexBuffer = function(type, itemSize, data, usage) {
-        return new PicoGL.VertexBuffer(this.gl, type, itemSize, data, usage);
-    };
-
-    /**
-        Create a per-vertex matrix buffer. Matrix buffers ensure that columns
-        are correctly split across attribute locations.
-
-        @method
-        @param {GLEnum} type The data type stored in the matrix buffer. Valid types
-        are FLOAT_MAT4, FLOAT_MAT4x2, FLOAT_MAT4x3, FLOAT_MAT3, FLOAT_MAT3x2, 
-        FLOAT_MAT3x4, FLOAT_MAT2, FLOAT_MAT2x3, FLOAT_MAT2x4.
-        @param {ArrayBufferView} data Matrix buffer data.
-        @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
-    */
-    PicoGL.App.prototype.createMatrixBuffer = function(type, data, usage) {
-        return new PicoGL.VertexBuffer(this.gl, type, null, data, usage);
-    };
-
-    /**
-        Create an index buffer.
-
-        @method
-        @param {GLEnum} type The data type stored in the index buffer.
-        @param {number} itemSize Number of elements per primitive.
-        @param {ArrayBufferView} data Index buffer data.
-    */
-    PicoGL.App.prototype.createIndexBuffer = function(type, itemSize, data) {
-        return new PicoGL.VertexBuffer(this.gl, type, itemSize, data, null, true);
-    };
-
-    /**
-        Create a uniform buffer in std140 layout. NOTE: FLOAT_MAT2, FLOAT_MAT3x2, FLOAT_MAT4x2, 
-        FLOAT_MAT3, FLOAT_MAT2x3, FLOAT_MAT4x3 are supported, but must be manually padded to
-        4-float column alignment by the application!
-
-        @method
-        @param {Array} layout Array indicating the order and types of items to 
-                        be stored in the buffer.
-        @param {GLEnum} [usage=DYNAMIC_DRAW] Buffer usage.
-    */
-    PicoGL.App.prototype.createUniformBuffer = function(layout, usage) {
-        return new PicoGL.UniformBuffer(this.gl, layout, usage);
-    };
-
-    /**
-        Create a 2D texture.
-
-        @method
-        @param {DOMElement|ArrayBufferView} image Image data. Can be any format that would be accepted 
-                by texImage2D. 
-        @param {number} [width] Texture width. Required for array data.
-        @param {number} [height] Texture height. Required for array data.
-        @param {Object} [options] Texture options.
-        @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
-        @param {GLEnum} [options.format=RGBA] Texture data format.
-        @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
-        @param {boolean} [options.flipY=false] Whether the y-axis be flipped when unpacking the texture.
-        @param {GLEnum} [options.minFilter=LINEAR_MIPMAP_NEAREST] Minification filter.
-        @param {GLEnum} [options.magFilter=LINEAR] Magnification filter.
-        @param {GLEnum} [options.wrapS=REPEAT] Horizontal wrap mode.
-        @param {GLEnum} [options.wrapT=REPEAT] Vertical wrap mode.
-        @param {GLEnum} [options.compareMode=NONE] Comparison mode.
-        @param {GLEnum} [options.compareFunc=LEQUAL] Comparison function.
-        @param {GLEnum} [options.baseLevel] Base mipmap level. 
-        @param {GLEnum} [options.maxLevel] Maximum mipmap level.
-        @param {GLEnum} [options.minLOD] Mimimum level of detail.
-        @param {GLEnum} [options.maxLOD] Maximum level of detail.
-        @param {boolean} [options.generateMipmaps] Should mipmaps be generated.
-    */
-    PicoGL.App.prototype.createTexture2D = function(image, width, height, options) {
-        if (height === undefined) {
-            // Passing in a DOM element. Height/width not required.
-            options = width;
-            width = image.width;
-            height = image.height;
-        }
-
-        return new PicoGL.Texture(this.gl, this.state, this.gl.TEXTURE_2D, image, width, height, null, false, options);
-    };
-
-    /**
-        Create a 2D texture array.
-
-        @method
-        @param {ArrayBufferView} image Typed array containing pixel data.
-        @param {number} width Texture width.
-        @param {number} height Texture height.
-        @param {number} size Number of images in the array.
-        @param {Object} [options] Texture options.
-        @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
-        @param {GLEnum} [options.format=RGBA] Texture data format.
-        @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
-        @param {boolean} [options.flipY=false] Whether the y-axis be flipped when unpacking the texture.
-        @param {GLEnum} [options.minFilter=LINEAR_MIPMAP_NEAREST] Minification filter.
-        @param {GLEnum} [options.magFilter=LINEAR] Magnification filter.
-        @param {GLEnum} [options.wrapS=REPEAT] Horizontal wrap mode.
-        @param {GLEnum} [options.wrapT=REPEAT] Vertical wrap mode.
-        @param {GLEnum} [options.compareMode=NONE] Comparison mode.
-        @param {GLEnum} [options.compareFunc=LEQUAL] Comparison function.
-        @param {GLEnum} [options.baseLevel] Base mipmap level. 
-        @param {GLEnum} [options.maxLevel] Maximum mipmap level.
-        @param {GLEnum} [options.minLOD] Mimimum level of detail.
-        @param {GLEnum} [options.maxLOD] Maximum level of detail.
-        @param {boolean} [options.generateMipmaps] Should mipmaps be generated.
-    */
-    PicoGL.App.prototype.createTextureArray = function(image, width, height, depth, options) {
-        return new PicoGL.Texture(this.gl, this.state, this.gl.TEXTURE_2D_ARRAY, image, width, height, depth, true, options);
-    };
-
-    /**
-        Create a 3D texture.
-
-        @method
-        @param {ArrayBufferView} image Typed array containing pixel data.
-        @param {number} width Texture width.
-        @param {number} height Texture height.
-        @param {number} depth Texture depth.
-        @param {Object} [options] Texture options.
-        @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
-        @param {GLEnum} [options.format=RGBA] Texture data format.
-        @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
-        @param {boolean} [options.flipY=false] Whether the y-axis be flipped when unpacking the texture.
-        @param {GLEnum} [options.minFilter=LINEAR_MIPMAP_NEAREST] Minification filter.
-        @param {GLEnum} [options.magFilter=LINEAR] Magnification filter.
-        @param {GLEnum} [options.wrapS=REPEAT] Horizontal wrap mode.
-        @param {GLEnum} [options.wrapT=REPEAT] Vertical wrap mode.
-        @param {GLEnum} [options.wrapR=REPEAT] Depth wrap mode.
-        @param {GLEnum} [options.compareMode=NONE] Comparison mode.
-        @param {GLEnum} [options.compareFunc=LEQUAL] Comparison function.
-        @param {GLEnum} [options.baseLevel] Base mipmap level. 
-        @param {GLEnum} [options.maxLevel] Maximum mipmap level.
-        @param {GLEnum} [options.minLOD] Mimimum level of detail.
-        @param {GLEnum} [options.maxLOD] Maximum level of detail.
-        @param {boolean} [options.generateMipmaps] Should mipmaps be generated.
-    */
-    PicoGL.App.prototype.createTexture3D = function(image, width, height, depth, options) {
-        return new PicoGL.Texture(this.gl, this.state, this.gl.TEXTURE_3D, image, width, height, depth, true, options);
-    };
-
-    /**
-        Create a cubemap.
-
-        @method
-        @param {Object} options Texture options.
-        @param {DOMElement|ArrayBufferView} options.negX The image data for the negative X direction.
-                Can be any format that would be accepted by texImage2D.
-        @param {DOMElement|ArrayBufferView} options.posX The image data for the positive X direction.
-                Can be any format that would be accepted by texImage2D.
-        @param {DOMElement|ArrayBufferView} options.negY The image data for the negative Y direction.
-                Can be any format that would be accepted by texImage2D.
-        @param {DOMElement|ArrayBufferView} options.posY The image data for the positive Y direction.
-                Can be any format that would be accepted by texImage2D.
-        @param {DOMElement|ArrayBufferView} options.negZ The image data for the negative Z direction.
-                Can be any format that would be accepted by texImage2D.
-        @param {DOMElement|ArrayBufferView} options.posZ The image data for the positive Z direction.
-                Can be any format that would be accepted by texImage2D.
-        @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
-        @param {GLEnum} [options.format=RGBA] Texture data format.
-        @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
-        @param {number} [options.width] Texture width. Required when passing array data.
-        @param {number} [options.height] Texture height. Required when passing array data.
-        @param {boolean} [options.flipY=false] Whether the y-axis be flipped when unpacking the texture.
-        @param {GLEnum} [options.minFilter=LINEAR_MIPMAP_NEAREST] Minification filter.
-        @param {GLEnum} [options.magFilter=LINEAR] Magnification filter.
-        @param {GLEnum} [options.wrapS=REPEAT] Horizontal wrap mode.
-        @param {GLEnum} [options.wrapT=REPEAT] Vertical wrap mode.
-        @param {GLEnum} [options.compareMode=NONE] Comparison mode.
-        @param {GLEnum} [options.compareFunc=LEQUAL] Comparison function.
-        @param {boolean} [options.generateMipmaps] Should mipmaps be generated.
-    */
-    PicoGL.App.prototype.createCubemap = function(options) {
-        return new PicoGL.Cubemap(this.gl, this.state, options);
-    };
-
-    /**
-        Create a framebuffer.
-
-        @method
-        @param {number} [width=app.width] Width of the framebuffer.
-        @param {number} [height=app.height] Height of the framebuffer.
-    */
-    PicoGL.App.prototype.createFramebuffer = function(width, height) {
-        return new PicoGL.Framebuffer(this.gl, this.state, width, height);
-    };
-
-    /**
-        Create a DrawCall. A DrawCall manages the state associated with 
-        a WebGL draw call including a program and associated vertex data, textures, 
-        uniforms and uniform blocks.
-
-        @method
-        @param {Program} program The program to use for this DrawCall.
-        @param {VertexArray} vertexArray Vertex data to use for drawing.
-        @param {GLEnum} [primitive=TRIANGLES] Type of primitive to draw.
-    */
-    PicoGL.App.prototype.createDrawCall = function(program, vertexArray, primitive) {
-        return new PicoGL.DrawCall(this.gl, program, vertexArray, primitive);
-    };
-
-    /** 
-        Execute the currently attached list of DrawCalls.
-
-        @method
-    */
-    PicoGL.App.prototype.draw = function() {
-        for (var i = 0, len = this.currentDrawCalls.length; i &lt; len; i++) {
-            this.currentDrawCalls[i].draw(this.state);
-        }
-
-        return this;
-    };
-
-    /** 
-        Start the rendering timer.
-
-        @method
-    */
-    PicoGL.App.prototype.timerStart = function() {
-        this.timer.start();
-
-        return this;
-    };
-
-    /** 
-        Stop the rendering timer.
-
-        @method
-    */
-    PicoGL.App.prototype.timerEnd = function() {
-        this.timer.end();
-
-        return this;
-    };
-
-    /** 
-        Check if the rendering time is available. If
-        this method returns true, the cpuTime and
-        gpuTime properties will be set to valid 
-        values.
-
-        @method
-    */
-    PicoGL.App.prototype.timerReady = function() {
-        if (this.timer.ready()) {
-            this.cpuTime = this.timer.cpuTime;
-            this.gpuTime = this.timer.gpuTime;
-            return true;
-        } else {
-            return false;
-        }
-    };
-
-
-
-})();
+/**
+    Set the depth range.
+
+    @method
+    @param {number} near Minimum depth value.
+    @param {number} far Maximum depth value.
+*/
+App.prototype.depthRange = function(near, far) {
+    this.gl.depthRange(near, far);
+
+    return this;
+};
+
+/**
+    Enable depth testing.
+
+    @method
+*/
+App.prototype.depthTest = function() {
+    this.gl.enable(this.gl.DEPTH_TEST);
+
+    return this;
+};
+
+/**
+    Disable depth testing.
+
+    @method
+*/
+App.prototype.noDepthTest = function() {
+    this.gl.disable(this.gl.DEPTH_TEST);
+
+    return this;
+};
+
+/**
+    Enable writing to the z buffer.
+
+    @method
+*/
+App.prototype.depthMask = function() {
+    this.gl.depthMask(true);
+
+    return this;
+};
+
+/**
+    Disable writing to the z buffer.
+
+    @method
+*/
+App.prototype.noDepthMask = function() {
+    this.gl.depthMask(false);
+
+    return this;
+};
+
+/**
+    Set the depth test function. E.g. app.depthFunc(PicoGL.LEQUAL).
+
+    @method
+    @param {GLEnum} func The depth testing function to use.
+*/
+App.prototype.depthFunc = function(func) {
+    this.gl.depthFunc(func);
+
+    return this;
+};
+
+/**
+    Enable blending.
+
+    @method
+*/
+App.prototype.blend = function() {
+    this.gl.enable(this.gl.BLEND);
+
+    return this;
+};
+
+/**
+    Disable blending
+
+    @method
+*/
+App.prototype.noBlend = function() {
+    this.gl.disable(this.gl.BLEND);
+
+    return this;
+};
+
+/**
+    Set the blend function. E.g. app.blendFunc(PicoGL.ONE, PicoGL.ONE_MINUS_SRC_ALPHA).
+
+    @method
+    @param {GLEnum} src The source blending weight.
+    @param {GLEnum} dest The destination blending weight.
+*/
+App.prototype.blendFunc = function(src, dest) {
+    this.gl.blendFunc(src, dest);
+
+    return this;
+};
+
+/**
+    Set the blend function, with separate weighting for color and alpha channels.
+    E.g. app.blendFuncSeparate(PicoGL.ONE, PicoGL.ONE_MINUS_SRC_ALPHA, PicoGL.ONE, PicoGL.ONE).
+
+    @method
+    @param {GLEnum} csrc The source blending weight for the RGB channels.
+    @param {GLEnum} cdest The destination blending weight for the RGB channels.
+    @param {GLEnum} asrc The source blending weight for the alpha channel.
+    @param {GLEnum} adest The destination blending weight for the alpha channel.
+*/
+App.prototype.blendFuncSeparate = function(csrc, cdest, asrc, adest) {
+    this.gl.blendFuncSeparate(csrc, cdest, asrc, adest);
+
+    return this;
+};
+
+/**
+    Enable stencil testing.
+    NOTE: Only works if { stencil: true } passed as a
+    context attribute when creating the App!
+
+    @method
+*/
+App.prototype.stencilTest = function() {
+    this.gl.enable(this.gl.STENCIL_TEST);
+
+    return this;
+};
+
+/**
+    Disable stencil testing.
+
+    @method
+*/
+App.prototype.noStencilTest = function() {
+    this.gl.disable(this.gl.STENCIL_TEST);
+
+    return this;
+};
+
+/**
+    Set the bitmask to use for tested stencil values.
+    E.g. app.stencilMask(0xFF).
+    NOTE: Only works if { stencil: true } passed as a
+    context attribute when creating the App!
+
+    @method
+    @param {number} mask The mask value.
+
+*/
+App.prototype.stencilMask = function(mask) {
+    this.gl.stencilMask(mask);
+
+    return this;
+};
+
+/**
+    Set the bitmask to use for tested stencil values for a particular face orientation.
+    E.g. app.stencilMaskSeparate(PicoGL.FRONT, 0xFF).
+    NOTE: Only works if { stencil: true } passed as a
+    context attribute when creating the App!
+
+    @method
+    @param {GLEnum} face The face orientation to apply the mask to.
+    @param {number} mask The mask value.
+
+*/
+App.prototype.stencilMaskSeparate = function(face, mask) {
+    this.gl.stencilMaskSeparate(face, mask);
+
+    return this;
+};
+
+/**
+    Set the stencil function and reference value.
+    E.g. app.stencilFunc(PicoGL.EQUAL, 1, 0xFF).
+    NOTE: Only works if { stencil: true } passed as a
+    context attribute when creating the App!
+
+    @method
+    @param {GLEnum} func The testing function.
+    @param {number} ref The reference value.
+    @param {GLEnum} mask The bitmask to use against tested values before applying
+        the stencil function.
+*/
+App.prototype.stencilFunc = function(func, ref, mask) {
+    this.gl.stencilFunc(func, ref, mask);
+
+    return this;
+};
+
+/**
+    Set the stencil function and reference value for a particular face orientation.
+    E.g. app.stencilFuncSeparate(PicoGL.FRONT, PicoGL.EQUAL, 1, 0xFF).
+    NOTE: Only works if { stencil: true } passed as a
+    context attribute when creating the App!
+
+    @method
+    @param {GLEnum} face The face orientation to apply the function to.
+    @param {GLEnum} func The testing function.
+    @param {number} ref The reference value.
+    @param {GLEnum} mask The bitmask to use against tested values before applying
+        the stencil function.
+*/
+App.prototype.stencilFuncSeparate = function(face, func, ref, mask) {
+    this.gl.stencilFuncSeparate(face, func, ref, mask);
+
+    return this;
+};
+
+/**
+    Set the operations for updating stencil buffer values.
+    E.g. app.stencilOp(PicoGL.KEEP, PicoGL.KEEP, PicoGL.REPLACE).
+    NOTE: Only works if { stencil: true } passed as a
+    context attribute when creating the App!
+
+    @method
+    @param {GLEnum} stencilFail Operation to apply if the stencil test fails.
+    @param {GLEnum} depthFail Operation to apply if the depth test fails.
+    @param {GLEnum} pass Operation to apply if the both the depth and stencil tests pass.
+*/
+App.prototype.stencilOp = function(stencilFail, depthFail, pass) {
+    this.gl.stencilOp(stencilFail, depthFail, pass);
+
+    return this;
+};
+
+/**
+    Set the operations for updating stencil buffer values for a particular face orientation.
+    E.g. app.stencilOpSeparate(PicoGL.FRONT, PicoGL.KEEP, PicoGL.KEEP, PicoGL.REPLACE).
+    NOTE: Only works if { stencil: true } passed as a
+    context attribute when creating the App!
+
+    @method
+    @param {GLEnum} face The face orientation to apply the operations to.
+    @param {GLEnum} stencilFail Operation to apply if the stencil test fails.
+    @param {GLEnum} depthFail Operation to apply if the depth test fails.
+    @param {GLEnum} pass Operation to apply if the both the depth and stencil tests pass.
+*/
+App.prototype.stencilOpSeparate = function(face, stencilFail, depthFail, pass) {
+    this.gl.stencilOpSeparate(face, stencilFail, depthFail, pass);
+
+    return this;
+};
+
+/**
+    Enable rasterization step.
+
+    @method
+*/
+App.prototype.rasterize = function() {
+    this.gl.disable(this.gl.RASTERIZER_DISCARD);
+
+    return this;
+};
+
+/**
+    Disable rasterization step.
+
+    @method
+*/
+App.prototype.noRasterize = function() {
+    this.gl.enable(this.gl.RASTERIZER_DISCARD);
+
+    return this;
+};
+
+/**
+    Enable backface culling.
+
+    @method
+*/
+App.prototype.cullBackfaces = function() {
+    this.gl.enable(this.gl.CULL_FACE);
+
+    return this;
+};
+
+/**
+    Disable backface culling.
+
+    @method
+*/
+App.prototype.drawBackfaces = function() {
+    this.gl.disable(this.gl.CULL_FACE);
+
+    return this;
+};
+
+/**
+    Enable the EXT_color_buffer_float extension. Allows for creating float textures as
+    render targets on FrameBuffer objects. E.g. app.createFramebuffer().colorTarget(0, PicoGL.FLOAT).
+
+    @method
+    @see Framebuffer
+*/
+App.prototype.floatRenderTargets = function() {
+    this.floatRenderTargetsEnabled = !!this.gl.getExtension("EXT_color_buffer_float");
+
+    if (!this.floatRenderTargetsEnabled) {
+        console.warn("Extension EXT_color_buffer_float unavailable. Cannot enable float textures.");
+    }
+
+    return this;
+};
+
+/**
+    Enable the OES_texture_float_linear extension. Allows for linear blending on float textures.
+
+    @method
+    @see Framebuffer
+*/
+App.prototype.linearFloatTextures = function() {
+    this.linearFloatTexturesEnabled = !!this.gl.getExtension("OES_texture_float_linear");
+
+    if (!this.linearFloatTexturesEnabled) {
+        console.warn("Extension OES_texture_float_linear unavailable. Cannot enable float texture linear filtering.");
+    }
+
+    return this;
+};
+
+/**
+    Read a pixel's color value from the canvas. Note that the RGBA values will be encoded
+    as 0-255.
+
+    @method
+    @param {number} x The x coordinate of the pixel.
+    @param {number} y The y coordinate of the pixel.
+    @param {Uint8Array} outColor 4-element Uint8Array to store the pixel's color.
+*/
+App.prototype.readPixel = function(x, y, outColor) {
+    this.gl.readPixels(x, y, 1, 1, this.gl.RGBA, this.gl.UNSIGNED_BYTE, outColor);
+
+    return this;
+};
+
+/**
+    Resize the drawing surface.
+
+    @method
+    @param {number} width The new canvas width.
+    @param {number} height The new canvas height.
+*/
+App.prototype.resize = function(width, height) {
+    this.canvas.width = width;
+    this.canvas.height = height;
+
+    this.width = this.gl.drawingBufferWidth;
+    this.height = this.gl.drawingBufferHeight;
+    this.viewportWidth = this.width;
+    this.viewportHeight = this.height;
+    this.gl.viewport(0, 0, this.viewportWidth, this.viewportHeight);
+
+    return this;
+};
+/**
+    Create a program.
+
+    @method
+    @param {Shader|string} vertexShader Vertex shader object or source code.
+    @param {Shader|string} fragmentShader Fragment shader object or source code.
+    @param {Array} [xformFeedbackVars] Transform feedback varyings.
+*/
+App.prototype.createProgram = function(vsSource, fsSource, xformFeedbackVars) {
+    return new Program(this.gl, vsSource, fsSource, xformFeedbackVars);
+};
+
+/**
+    Create a shader. Creating a shader separately from a program allows for
+    shader reuse.
+
+    @method
+    @param {GLEnum} type Shader type.
+    @param {string} source Shader source.
+*/
+App.prototype.createShader = function(type, source) {
+    return new Shader(this.gl, type, source);
+};
+
+/**
+    Create a vertex array.
+
+    @method
+*/
+App.prototype.createVertexArray = function() {
+    return new VertexArray(this.gl);
+};
+
+/**
+    Create a transform feedback object.
+
+    @method
+*/
+App.prototype.createTransformFeedback = function() {
+    return new TransformFeedback(this.gl);
+};
+
+/**
+    Create a vertex buffer.
+
+    @method
+    @param {GLEnum} type The data type stored in the vertex buffer.
+    @param {number} itemSize Number of elements per vertex.
+    @param {ArrayBufferView} data Buffer data.
+    @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
+*/
+App.prototype.createVertexBuffer = function(type, itemSize, data, usage) {
+    return new VertexBuffer(this.gl, type, itemSize, data, usage);
+};
+
+/**
+    Create a per-vertex matrix buffer. Matrix buffers ensure that columns
+    are correctly split across attribute locations.
+
+    @method
+    @param {GLEnum} type The data type stored in the matrix buffer. Valid types
+    are FLOAT_MAT4, FLOAT_MAT4x2, FLOAT_MAT4x3, FLOAT_MAT3, FLOAT_MAT3x2,
+    FLOAT_MAT3x4, FLOAT_MAT2, FLOAT_MAT2x3, FLOAT_MAT2x4.
+    @param {ArrayBufferView} data Matrix buffer data.
+    @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
+*/
+App.prototype.createMatrixBuffer = function(type, data, usage) {
+    return new VertexBuffer(this.gl, type, null, data, usage);
+};
+
+/**
+    Create an index buffer.
+
+    @method
+    @param {GLEnum} type The data type stored in the index buffer.
+    @param {number} itemSize Number of elements per primitive.
+    @param {ArrayBufferView} data Index buffer data.
+*/
+App.prototype.createIndexBuffer = function(type, itemSize, data) {
+    return new VertexBuffer(this.gl, type, itemSize, data, null, true);
+};
+
+/**
+    Create a uniform buffer in std140 layout. NOTE: FLOAT_MAT2, FLOAT_MAT3x2, FLOAT_MAT4x2,
+    FLOAT_MAT3, FLOAT_MAT2x3, FLOAT_MAT4x3 are supported, but must be manually padded to
+    4-float column alignment by the application!
+
+    @method
+    @param {Array} layout Array indicating the order and types of items to
+                    be stored in the buffer.
+    @param {GLEnum} [usage=DYNAMIC_DRAW] Buffer usage.
+*/
+App.prototype.createUniformBuffer = function(layout, usage) {
+    return new UniformBuffer(this.gl, layout, usage);
+};
+
+/**
+    Create a 2D texture.
+
+    @method
+    @param {DOMElement|ArrayBufferView} image Image data. Can be any format that would be accepted
+            by texImage2D.
+    @param {number} [width] Texture width. Required for array data.
+    @param {number} [height] Texture height. Required for array data.
+    @param {Object} [options] Texture options.
+    @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
+    @param {GLEnum} [options.format=RGBA] Texture data format.
+    @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
+    @param {boolean} [options.flipY=false] Whether the y-axis be flipped when unpacking the texture.
+    @param {GLEnum} [options.minFilter=LINEAR_MIPMAP_NEAREST] Minification filter.
+    @param {GLEnum} [options.magFilter=LINEAR] Magnification filter.
+    @param {GLEnum} [options.wrapS=REPEAT] Horizontal wrap mode.
+    @param {GLEnum} [options.wrapT=REPEAT] Vertical wrap mode.
+    @param {GLEnum} [options.compareMode=NONE] Comparison mode.
+    @param {GLEnum} [options.compareFunc=LEQUAL] Comparison function.
+    @param {GLEnum} [options.baseLevel] Base mipmap level.
+    @param {GLEnum} [options.maxLevel] Maximum mipmap level.
+    @param {GLEnum} [options.minLOD] Mimimum level of detail.
+    @param {GLEnum} [options.maxLOD] Maximum level of detail.
+    @param {boolean} [options.generateMipmaps] Should mipmaps be generated.
+*/
+App.prototype.createTexture2D = function(image, width, height, options) {
+    if (height === undefined) {
+        // Passing in a DOM element. Height/width not required.
+        options = width;
+        width = image.width;
+        height = image.height;
+    }
+
+    return new Texture(this.gl, this.state, this.gl.TEXTURE_2D, image, width, height, null, false, options);
+};
+
+/**
+    Create a 2D texture array.
+
+    @method
+    @param {ArrayBufferView} image Typed array containing pixel data.
+    @param {number} width Texture width.
+    @param {number} height Texture height.
+    @param {number} size Number of images in the array.
+    @param {Object} [options] Texture options.
+    @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
+    @param {GLEnum} [options.format=RGBA] Texture data format.
+    @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
+    @param {boolean} [options.flipY=false] Whether the y-axis be flipped when unpacking the texture.
+    @param {GLEnum} [options.minFilter=LINEAR_MIPMAP_NEAREST] Minification filter.
+    @param {GLEnum} [options.magFilter=LINEAR] Magnification filter.
+    @param {GLEnum} [options.wrapS=REPEAT] Horizontal wrap mode.
+    @param {GLEnum} [options.wrapT=REPEAT] Vertical wrap mode.
+    @param {GLEnum} [options.compareMode=NONE] Comparison mode.
+    @param {GLEnum} [options.compareFunc=LEQUAL] Comparison function.
+    @param {GLEnum} [options.baseLevel] Base mipmap level.
+    @param {GLEnum} [options.maxLevel] Maximum mipmap level.
+    @param {GLEnum} [options.minLOD] Mimimum level of detail.
+    @param {GLEnum} [options.maxLOD] Maximum level of detail.
+    @param {boolean} [options.generateMipmaps] Should mipmaps be generated.
+*/
+App.prototype.createTextureArray = function(image, width, height, depth, options) {
+    return new Texture(this.gl, this.state, this.gl.TEXTURE_2D_ARRAY, image, width, height, depth, true, options);
+};
+
+/**
+    Create a 3D texture.
+
+    @method
+    @param {ArrayBufferView} image Typed array containing pixel data.
+    @param {number} width Texture width.
+    @param {number} height Texture height.
+    @param {number} depth Texture depth.
+    @param {Object} [options] Texture options.
+    @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
+    @param {GLEnum} [options.format=RGBA] Texture data format.
+    @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
+    @param {boolean} [options.flipY=false] Whether the y-axis be flipped when unpacking the texture.
+    @param {GLEnum} [options.minFilter=LINEAR_MIPMAP_NEAREST] Minification filter.
+    @param {GLEnum} [options.magFilter=LINEAR] Magnification filter.
+    @param {GLEnum} [options.wrapS=REPEAT] Horizontal wrap mode.
+    @param {GLEnum} [options.wrapT=REPEAT] Vertical wrap mode.
+    @param {GLEnum} [options.wrapR=REPEAT] Depth wrap mode.
+    @param {GLEnum} [options.compareMode=NONE] Comparison mode.
+    @param {GLEnum} [options.compareFunc=LEQUAL] Comparison function.
+    @param {GLEnum} [options.baseLevel] Base mipmap level.
+    @param {GLEnum} [options.maxLevel] Maximum mipmap level.
+    @param {GLEnum} [options.minLOD] Mimimum level of detail.
+    @param {GLEnum} [options.maxLOD] Maximum level of detail.
+    @param {boolean} [options.generateMipmaps] Should mipmaps be generated.
+*/
+App.prototype.createTexture3D = function(image, width, height, depth, options) {
+    return new Texture(this.gl, this.state, this.gl.TEXTURE_3D, image, width, height, depth, true, options);
+};
+
+/**
+    Create a cubemap.
+
+    @method
+    @param {Object} options Texture options.
+    @param {DOMElement|ArrayBufferView} options.negX The image data for the negative X direction.
+            Can be any format that would be accepted by texImage2D.
+    @param {DOMElement|ArrayBufferView} options.posX The image data for the positive X direction.
+            Can be any format that would be accepted by texImage2D.
+    @param {DOMElement|ArrayBufferView} options.negY The image data for the negative Y direction.
+            Can be any format that would be accepted by texImage2D.
+    @param {DOMElement|ArrayBufferView} options.posY The image data for the positive Y direction.
+            Can be any format that would be accepted by texImage2D.
+    @param {DOMElement|ArrayBufferView} options.negZ The image data for the negative Z direction.
+            Can be any format that would be accepted by texImage2D.
+    @param {DOMElement|ArrayBufferView} options.posZ The image data for the positive Z direction.
+            Can be any format that would be accepted by texImage2D.
+    @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
+    @param {GLEnum} [options.format=RGBA] Texture data format.
+    @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
+    @param {number} [options.width] Texture width. Required when passing array data.
+    @param {number} [options.height] Texture height. Required when passing array data.
+    @param {boolean} [options.flipY=false] Whether the y-axis be flipped when unpacking the texture.
+    @param {GLEnum} [options.minFilter=LINEAR_MIPMAP_NEAREST] Minification filter.
+    @param {GLEnum} [options.magFilter=LINEAR] Magnification filter.
+    @param {GLEnum} [options.wrapS=REPEAT] Horizontal wrap mode.
+    @param {GLEnum} [options.wrapT=REPEAT] Vertical wrap mode.
+    @param {GLEnum} [options.compareMode=NONE] Comparison mode.
+    @param {GLEnum} [options.compareFunc=LEQUAL] Comparison function.
+    @param {boolean} [options.generateMipmaps] Should mipmaps be generated.
+*/
+App.prototype.createCubemap = function(options) {
+    return new Cubemap(this.gl, this.state, options);
+};
+
+/**
+    Create a framebuffer.
+
+    @method
+    @param {number} [width=app.width] Width of the framebuffer.
+    @param {number} [height=app.height] Height of the framebuffer.
+*/
+App.prototype.createFramebuffer = function(width, height) {
+    return new Framebuffer(this.gl, this.state, width, height);
+};
+
+/**
+    Create a DrawCall. A DrawCall manages the state associated with
+    a WebGL draw call including a program and associated vertex data, textures,
+    uniforms and uniform blocks.
+
+    @method
+    @param {Program} program The program to use for this DrawCall.
+    @param {VertexArray} vertexArray Vertex data to use for drawing.
+    @param {GLEnum} [primitive=TRIANGLES] Type of primitive to draw.
+*/
+App.prototype.createDrawCall = function(program, vertexArray, primitive) {
+    return new DrawCall(this.gl, program, vertexArray, primitive);
+};
+
+/**
+    Execute the currently attached list of DrawCalls.
+
+    @method
+*/
+App.prototype.draw = function() {
+    for (var i = 0, len = this.currentDrawCalls.length; i &lt; len; i++) {
+        this.currentDrawCalls[i].draw(this.state);
+    }
+
+    return this;
+};
+
+/**
+    Start the rendering timer.
+
+    @method
+*/
+App.prototype.timerStart = function() {
+    this.timer.start();
+
+    return this;
+};
+
+/**
+    Stop the rendering timer.
+
+    @method
+*/
+App.prototype.timerEnd = function() {
+    this.timer.end();
+
+    return this;
+};
+
+/**
+    Check if the rendering time is available. If
+    this method returns true, the cpuTime and
+    gpuTime properties will be set to valid
+    values.
+
+    @method
+*/
+App.prototype.timerReady = function() {
+    if (this.timer.ready()) {
+        this.cpuTime = this.timer.cpuTime;
+        this.gpuTime = this.timer.gpuTime;
+        return true;
+    } else {
+        return false;
+    }
+};
+
+module.exports = App;
 </code></pre>
         </article>
     </section>
@@ -922,13 +932,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="PicoGL.App.html">App</a></li><li><a href="PicoGL.Cubemap.html">Cubemap</a></li><li><a href="PicoGL.DrawCall.html">DrawCall</a></li><li><a href="PicoGL.Framebuffer.html">Framebuffer</a></li><li><a href="PicoGL.Program.html">Program</a></li><li><a href="PicoGL.Shader.html">Shader</a></li><li><a href="PicoGL.Texture.html">Texture</a></li><li><a href="PicoGL.Timer.html">Timer</a></li><li><a href="PicoGL.TransformFeedback.html">TransformFeedback</a></li><li><a href="PicoGL.UniformBuffer.html">UniformBuffer</a></li><li><a href="PicoGL.VertexArray.html">VertexArray</a></li><li><a href="PicoGL.VertexBuffer.html">VertexBuffer</a></li></ul><h3>Namespaces</h3><ul><li><a href="PicoGL.html">PicoGL</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="App.html">App</a></li><li><a href="Cubemap.html">Cubemap</a></li><li><a href="DrawCall.html">DrawCall</a></li><li><a href="Framebuffer.html">Framebuffer</a></li><li><a href="Program.html">Program</a></li><li><a href="Shader.html">Shader</a></li><li><a href="Texture.html">Texture</a></li><li><a href="Timer.html">Timer</a></li><li><a href="TransformFeedback.html">TransformFeedback</a></li><li><a href="UniformBuffer.html">UniformBuffer</a></li><li><a href="VertexArray.html">VertexArray</a></li><li><a href="VertexBuffer.html">VertexBuffer</a></li></ul><h3>Namespaces</h3><ul><li><a href="PicoGL.html">PicoGL</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue Jul 04 2017 17:48:16 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.1</a> on Wed Jul 12 2017 08:35:04 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

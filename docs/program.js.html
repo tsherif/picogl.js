@@ -49,174 +49,176 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-(function() {
-    "use strict";
+"use strict";
 
+var Shader   = require('./shader');
+var Uniforms = require('./uniforms');
 
-    /**
-        WebGL program consisting of compiled and linked vertex and fragment
-        shaders.
+/**
+    WebGL program consisting of compiled and linked vertex and fragment
+    shaders.
 
-        @class
-        @prop {WebGLRenderingContext} gl The WebGL context.
-        @prop {WebGLProgram} program The WebGL program.
-        @prop {boolean} transformFeedback Whether this program is set up for transform feedback.
-        @prop {Object} uniforms Map of uniform names to handles.
-        @prop {Object} uniformBlocks Map of uniform block names to handles.
-    */
-    PicoGL.Program = function Program(gl, vsSource, fsSource, xformFeebackVars) {
-        var i;
+    @class
+    @hideconstructor
+    @prop {WebGLRenderingContext} gl The WebGL context.
+    @prop {WebGLProgram} program The WebGL program.
+    @prop {boolean} transformFeedback Whether this program is set up for transform feedback.
+    @prop {Object} uniforms Map of uniform names to handles.
+    @prop {Object} uniformBlocks Map of uniform block names to handles.
+*/
+function Program(gl, vsSource, fsSource, xformFeebackVars) {
+    var i;
 
-        var vShader, fShader;
+    var vShader, fShader;
 
-        var ownVertexShader = false;
-        var ownFragmentShader = false;
-        if (typeof vsSource === "string") {
-            vShader = new PicoGL.Shader(gl, gl.VERTEX_SHADER, vsSource);
-            ownVertexShader = true;
-        } else {
-            vShader = vsSource;
+    var ownVertexShader = false;
+    var ownFragmentShader = false;
+    if (typeof vsSource === "string") {
+        vShader = new Shader(gl, gl.VERTEX_SHADER, vsSource);
+        ownVertexShader = true;
+    } else {
+        vShader = vsSource;
+    }
+
+    if (typeof fsSource === "string") {
+        fShader = new Shader(gl, gl.FRAGMENT_SHADER, fsSource);
+        ownFragmentShader = true;
+    } else {
+        fShader = fsSource;
+    }
+
+    var program = gl.createProgram();
+    gl.attachShader(program, vShader.shader);
+    gl.attachShader(program, fShader.shader);
+    if (xformFeebackVars) {
+        gl.transformFeedbackVaryings(program, xformFeebackVars, gl.SEPARATE_ATTRIBS);
+    }
+    gl.linkProgram(program);
+
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+      console.error(gl.getProgramInfoLog(program));
+    }
+
+    if (ownVertexShader) {
+        vShader.delete();
+    }
+
+    if (ownFragmentShader) {
+       fShader.delete();
+    }
+
+    this.gl = gl;
+    this.program = program;
+    this.transformFeedback = !!xformFeebackVars;
+    this.uniforms = {};
+    this.uniformBlocks = {};
+    this.uniformBlockBindings = {};
+
+    var numUniforms = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
+
+    for (i = 0; i &lt; numUniforms; ++i) {
+        var uniformInfo = gl.getActiveUniform(program, i);
+        var uniformHandle = gl.getUniformLocation(this.program, uniformInfo.name);
+        var UniformClass = null;
+        var type = uniformInfo.type;
+        var numElements = uniformInfo.size;
+
+        switch (type) {
+            case PicoGL.INT:
+            case PicoGL.SAMPLER_2D:
+            case PicoGL.INT_SAMPLER_2D:
+            case PicoGL.UNSIGNED_INT_SAMPLER_2D:
+            case PicoGL.SAMPLER_2D_SHADOW:
+            case PicoGL.SAMPLER_2D_ARRAY:
+            case PicoGL.INT_SAMPLER_2D_ARRAY:
+            case PicoGL.UNSIGNED_INT_SAMPLER_2D_ARRAY:
+            case PicoGL.SAMPLER_2D_ARRAY_SHADOW:
+            case PicoGL.SAMPLER_CUBE:
+            case PicoGL.INT_SAMPLER_CUBE:
+            case PicoGL.UNSIGNED_INT_SAMPLER_CUBE:
+            case PicoGL.SAMPLER_CUBE_SHADOW:
+            case PicoGL.SAMPLER_3D:
+            case PicoGL.INT_SAMPLER_3D:
+            case PicoGL.UNSIGNED_INT_SAMPLER_3D:
+            case PicoGL.UNSIGNED_INT:
+            case PicoGL.FLOAT:
+                UniformClass = numElements > 1 ? Uniforms.MultiNumericUniform : Uniforms.SingleComponentUniform;
+                break;
+            case PicoGL.BOOL:
+                UniformClass = numElements > 1 ? Uniforms.MultiBoolUniform : Uniforms.SingleComponentUniform;
+                break;
+            case PicoGL.FLOAT_VEC2:
+            case PicoGL.INT_VEC2:
+            case PicoGL.UNSIGNED_INT_VEC2:
+            case PicoGL.FLOAT_VEC3:
+            case PicoGL.INT_VEC3:
+            case PicoGL.UNSIGNED_INT_VEC3:
+            case PicoGL.FLOAT_VEC4:
+            case PicoGL.INT_VEC4:
+            case PicoGL.UNSIGNED_INT_VEC4:
+                UniformClass = Uniforms.MultiNumericUniform;
+                break;
+            case PicoGL.BOOL_VEC2:
+            case PicoGL.BOOL_VEC3:
+            case PicoGL.BOOL_VEC4:
+                UniformClass = Uniforms.MultiBoolUniform;
+                break;
+            case PicoGL.FLOAT_MAT2:
+            case PicoGL.FLOAT_MAT3:
+            case PicoGL.FLOAT_MAT4:
+            case PicoGL.FLOAT_MAT2x3:
+            case PicoGL.FLOAT_MAT2x4:
+            case PicoGL.FLOAT_MAT3x2:
+            case PicoGL.FLOAT_MAT3x4:
+            case PicoGL.FLOAT_MAT4x2:
+            case PicoGL.FLOAT_MAT4x3:
+                UniformClass = Uniforms.MatrixUniform;
+                break;
+            default:
+                console.error("Unrecognized type for uniform ", uniformInfo.name);
+                break;
         }
 
-        if (typeof fsSource === "string") {
-            fShader = new PicoGL.Shader(gl, gl.FRAGMENT_SHADER, fsSource);
-            ownFragmentShader = true;
-        } else {
-            fShader = fsSource;
-        }
+        this.uniforms[uniformInfo.name] = new UniformClass(gl, uniformHandle, type, numElements);
+    }
 
-        var program = gl.createProgram();
-        gl.attachShader(program, vShader.shader);
-        gl.attachShader(program, fShader.shader);
-        if (xformFeebackVars) {
-            gl.transformFeedbackVaryings(program, xformFeebackVars, gl.SEPARATE_ATTRIBS);
-        }
-        gl.linkProgram(program);
+    var numUniformBlocks = gl.getProgramParameter(program, gl.ACTIVE_UNIFORM_BLOCKS);
 
-        if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-          console.error(gl.getProgramInfoLog(program));
-        }
+    for (i = 0; i &lt; numUniformBlocks; ++i) {
+        var blockName = gl.getActiveUniformBlockName(this.program, i);
+        var blockIndex = gl.getUniformBlockIndex(this.program, blockName);
 
-        if (ownVertexShader) {
-            vShader.delete();
-        }
+        this.uniformBlocks[blockName] = blockIndex;
+    }
+}
 
-        if (ownFragmentShader) {
-           fShader.delete();
-        }
+/**
+    Delete this program.
 
-        this.gl = gl;
-        this.program = program;
-        this.transformFeedback = !!xformFeebackVars;
-        this.uniforms = {};
-        this.uniformBlocks = {};
-        this.uniformBlockBindings = {};
+    @method
+*/
+Program.prototype.delete = function() {
+    if (this.program) {
+        this.gl.deleteProgram(this.program);
+        this.program = null;
+    }
+};
 
-        var numUniforms = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
+// Set the value of a uniform.
+Program.prototype.uniform = function(name, value) {
+    this.uniforms[name].set(value);
+};
 
-        for (i = 0; i &lt; numUniforms; ++i) {
-            var uniformInfo = gl.getActiveUniform(program, i);
-            var uniformHandle = gl.getUniformLocation(this.program, uniformInfo.name);
-            var UniformClass = null;
-            var type = uniformInfo.type;
-            var numElements = uniformInfo.size;
+// Bind a uniform block to a uniform buffer base.
+Program.prototype.uniformBlock = function(name, base) {
+    if (this.uniformBlockBindings[name] !== base) {
+        this.gl.uniformBlockBinding(this.program, this.uniformBlocks[name], base);
+        this.uniformBlockBindings[name] = base;
+    }
 
-            switch (type) {
-                case PicoGL.INT:
-                case PicoGL.SAMPLER_2D:
-                case PicoGL.INT_SAMPLER_2D:
-                case PicoGL.UNSIGNED_INT_SAMPLER_2D:
-                case PicoGL.SAMPLER_2D_SHADOW:
-                case PicoGL.SAMPLER_2D_ARRAY:
-                case PicoGL.INT_SAMPLER_2D_ARRAY:
-                case PicoGL.UNSIGNED_INT_SAMPLER_2D_ARRAY:
-                case PicoGL.SAMPLER_2D_ARRAY_SHADOW:
-                case PicoGL.SAMPLER_CUBE:
-                case PicoGL.INT_SAMPLER_CUBE:
-                case PicoGL.UNSIGNED_INT_SAMPLER_CUBE:
-                case PicoGL.SAMPLER_CUBE_SHADOW:
-                case PicoGL.SAMPLER_3D:
-                case PicoGL.INT_SAMPLER_3D:
-                case PicoGL.UNSIGNED_INT_SAMPLER_3D:
-                case PicoGL.UNSIGNED_INT:
-                case PicoGL.FLOAT:
-                    UniformClass = numElements > 1 ? PicoGL.MultiNumericUniform : PicoGL.SingleComponentUniform;
-                    break;
-                case PicoGL.BOOL:
-                    UniformClass = numElements > 1 ? PicoGL.MultiBoolUniform : PicoGL.SingleComponentUniform;
-                    break;
-                case PicoGL.FLOAT_VEC2:
-                case PicoGL.INT_VEC2:
-                case PicoGL.UNSIGNED_INT_VEC2:
-                case PicoGL.FLOAT_VEC3:
-                case PicoGL.INT_VEC3:
-                case PicoGL.UNSIGNED_INT_VEC3:
-                case PicoGL.FLOAT_VEC4:
-                case PicoGL.INT_VEC4:
-                case PicoGL.UNSIGNED_INT_VEC4:
-                    UniformClass = PicoGL.MultiNumericUniform;
-                    break;
-                case PicoGL.BOOL_VEC2:
-                case PicoGL.BOOL_VEC3:
-                case PicoGL.BOOL_VEC4:
-                    UniformClass = PicoGL.MultiBoolUniform;
-                    break;
-                case PicoGL.FLOAT_MAT2:
-                case PicoGL.FLOAT_MAT3:
-                case PicoGL.FLOAT_MAT4:
-                case PicoGL.FLOAT_MAT2x3:
-                case PicoGL.FLOAT_MAT2x4:
-                case PicoGL.FLOAT_MAT3x2:
-                case PicoGL.FLOAT_MAT3x4:
-                case PicoGL.FLOAT_MAT4x2:
-                case PicoGL.FLOAT_MAT4x3:
-                    UniformClass = PicoGL.MatrixUniform;
-                    break;
-                default:
-                    console.error("Unrecognized type for uniform ", uniformInfo.name);
-                    break;
-            }
+};
 
-            this.uniforms[uniformInfo.name] = new UniformClass(gl, uniformHandle, type, numElements);
-        }
-
-        var numUniformBlocks = gl.getProgramParameter(program, gl.ACTIVE_UNIFORM_BLOCKS);
-
-        for (i = 0; i &lt; numUniformBlocks; ++i) {
-            var blockName = gl.getActiveUniformBlockName(this.program, i);
-            var blockIndex = gl.getUniformBlockIndex(this.program, blockName);
-
-            this.uniformBlocks[blockName] = blockIndex;
-        }
-    };
-
-    /**
-        Delete this program.
-
-        @method
-    */
-    PicoGL.Program.prototype.delete = function() {
-        if (this.program) {
-            this.gl.deleteProgram(this.program);
-            this.program = null;
-        }
-    };
-
-    // Set the value of a uniform.
-    PicoGL.Program.prototype.uniform = function(name, value) {
-        this.uniforms[name].set(value);
-    };
-
-    // Bind a uniform block to a uniform buffer base.
-    PicoGL.Program.prototype.uniformBlock = function(name, base) {
-        if (this.uniformBlockBindings[name] !== base) {
-            this.gl.uniformBlockBinding(this.program, this.uniformBlocks[name], base);
-            this.uniformBlockBindings[name] = base;
-        }
-
-    };
-
-})();
+module.exports = Program;
 </code></pre>
         </article>
     </section>
@@ -227,13 +229,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="PicoGL.App.html">App</a></li><li><a href="PicoGL.Cubemap.html">Cubemap</a></li><li><a href="PicoGL.DrawCall.html">DrawCall</a></li><li><a href="PicoGL.Framebuffer.html">Framebuffer</a></li><li><a href="PicoGL.Program.html">Program</a></li><li><a href="PicoGL.Shader.html">Shader</a></li><li><a href="PicoGL.Texture.html">Texture</a></li><li><a href="PicoGL.Timer.html">Timer</a></li><li><a href="PicoGL.TransformFeedback.html">TransformFeedback</a></li><li><a href="PicoGL.UniformBuffer.html">UniformBuffer</a></li><li><a href="PicoGL.VertexArray.html">VertexArray</a></li><li><a href="PicoGL.VertexBuffer.html">VertexBuffer</a></li></ul><h3>Namespaces</h3><ul><li><a href="PicoGL.html">PicoGL</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="App.html">App</a></li><li><a href="Cubemap.html">Cubemap</a></li><li><a href="DrawCall.html">DrawCall</a></li><li><a href="Framebuffer.html">Framebuffer</a></li><li><a href="Program.html">Program</a></li><li><a href="Shader.html">Shader</a></li><li><a href="Texture.html">Texture</a></li><li><a href="Timer.html">Timer</a></li><li><a href="TransformFeedback.html">TransformFeedback</a></li><li><a href="UniformBuffer.html">UniformBuffer</a></li><li><a href="VertexArray.html">VertexArray</a></li><li><a href="VertexBuffer.html">VertexBuffer</a></li></ul><h3>Namespaces</h3><ul><li><a href="PicoGL.html">PicoGL</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue Jul 04 2017 17:48:16 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.1</a> on Wed Jul 12 2017 08:35:04 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>
