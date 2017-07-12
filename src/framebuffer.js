@@ -29,7 +29,7 @@ var Texture = require('./texture');
     Storage for vertex data.
 
     @class
-    @memberof PicoGL
+    @hideconstructor
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLFramebuffer} framebuffer Handle to the framebuffer.
     @prop {number} width The width of the framebuffer.

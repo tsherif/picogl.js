@@ -27,7 +27,7 @@
     Tranform feedback object.
 
     @class
-    @memberof PicoGL
+    @hideconstructor
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLTransformFeedback} transformFeedback Transform feedback object.
 */

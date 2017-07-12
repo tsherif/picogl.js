@@ -27,7 +27,7 @@
     WebGL shader.
 
     @class
-    @memberof PicoGL
+    @hideconstructor
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLShader} shader The shader.
 */

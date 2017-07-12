@@ -24,7 +24,7 @@
     Organizes vertex buffer and attribute state.
 
     @class
-    @memberof PicoGL
+    @hideconstructor
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLVertexArrayObject} vertexArray Vertex array object.
     @prop {number} numElements Number of elements in the vertex array.

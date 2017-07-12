@@ -40,7 +40,7 @@ var VertexBuffer      = require('./vertexbuffer');
     state and manage draw calls.
 
     @class
-    @memberof PicoGL
+    @hideconstructor
     @prop {DOMElement} canvas The canvas on which this app drawing.
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {number} width The width of the drawing surface.

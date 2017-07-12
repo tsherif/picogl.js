@@ -66,7 +66,7 @@ var VertexBuffer      = require('./vertexbuffer');
     state and manage draw calls.
 
     @class
-    @memberof PicoGL
+    @hideconstructor
     @prop {DOMElement} canvas The canvas on which this app drawing.
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {number} width The width of the drawing surface.
@@ -951,7 +951,6 @@ module.exports = App;
     Cubemap for environment mapping.
 
     @class
-    @memberof PicoGL
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLTexture} texture Handle to the texture.
     @prop {GLEnum} type Type of data stored in the texture.
@@ -1100,7 +1099,6 @@ module.exports = Cubemap;
     attributes, uniforms and textures for a single draw call.
 
     @class
-    @memberof PicoGL
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {Program} currentProgram The program to use for this draw call.
     @prop {VertexArray} currentVertexArray Vertex array to use for this draw call.
@@ -1300,7 +1298,6 @@ var Texture = require('./texture');
     Storage for vertex data.
 
     @class
-    @memberof PicoGL
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLFramebuffer} framebuffer Handle to the framebuffer.
     @prop {number} width The width of the framebuffer.
@@ -1580,6 +1577,8 @@ module.exports = Framebuffer;
 
 "use strict";
 
+var App = require('./app');
+
 /**
     Global PicoGL module. For convenience, all WebGL enums are stored
     as properties of PicoGL (e.g. PicoGL.FLOAT, PicoGL.ONE_MINUS_SRC_ALPHA).
@@ -1749,19 +1748,6 @@ PicoGL.WEBGL_INFO.MAX_UNIFORM_BUFFERS = gl.getParameter(gl.MAX_UNIFORM_BUFFER_BI
 
 PicoGL.DUMMY_OBJECT = {};
 
-PicoGL.App = require('./app');
-PicoGL.Program = require('./program');
-PicoGL.Texture = require('./texture');
-PicoGL.Cubemap = require('./cubemap');
-PicoGL.DrawCall = require('./drawcall');
-PicoGL.Framebuffer = require('./framebuffer');
-PicoGL.Shader = require('./shader');
-PicoGL.Timer = require('./timer');
-PicoGL.TransformFeedback = require('./transformfeedback');
-PicoGL.UniformBuffer = require('./uniformbuffer');
-PicoGL.VertexArray = require('./vertexarray');
-PicoGL.VertexBuffer = require('./vertexbuffer');
-
 /**
     Create a PicoGL app. The app is the primary entry point to PicoGL. It stores
     the canvas, the WebGL context and all WebGL state.
@@ -1771,13 +1757,13 @@ PicoGL.VertexBuffer = require('./vertexbuffer');
     @param {Object} [contextAttributes] Context attributes to pass when calling getContext().
 */
 PicoGL.createApp = function(canvas, contextAttributes) {
-    return new PicoGL.App(canvas, contextAttributes);
+    return new App(canvas, contextAttributes);
 };
 
 module.exports = PicoGL;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./app":1,"./cubemap":2,"./drawcall":3,"./framebuffer":4,"./program":6,"./shader":7,"./texture":8,"./timer":9,"./transformfeedback":10,"./uniformbuffer":11,"./vertexarray":13,"./vertexbuffer":14}],6:[function(require,module,exports){
+},{"./app":1}],6:[function(require,module,exports){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -1811,7 +1797,6 @@ var Uniforms = require('./uniforms');
     shaders.
 
     @class
-    @memberof PicoGL
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLProgram} program The WebGL program.
     @prop {boolean} transformFeedback Whether this program is set up for transform feedback.
@@ -2002,7 +1987,6 @@ module.exports = Program;
     WebGL shader.
 
     @class
-    @memberof PicoGL
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLShader} shader The shader.
 */
@@ -2067,7 +2051,6 @@ module.exports = Shader;
     General-purpose texture.
 
     @class
-    @memberof PicoGL
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLTexture} texture Handle to the texture.
     @prop {WebGLSamler} sampler Sampler object.
@@ -2289,7 +2272,6 @@ module.exports = Texture;
     Rendering timer.
 
     @class
-    @memberof PicoGL
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {Object} cpuTimer Timer for CPU. Will be window.performance, if available, or window.Date.
     @prop {boolean} gpuTimer Whether the gpu timing is available (EXT_disjoint_timer_query_webgl2 or
@@ -2409,7 +2391,6 @@ module.exports = Timer;
     Tranform feedback object.
 
     @class
-    @memberof PicoGL
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLTransformFeedback} transformFeedback Transform feedback object.
 */
@@ -2494,7 +2475,6 @@ module.exports = TransformFeedback;
     Storage for uniform data. Data is stored in std140 layout.
 
     @class
-    @memberof PicoGL
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLBuffer} buffer Allocated buffer storage.
     @prop {Float32Array} data Buffer data.
@@ -2820,7 +2800,6 @@ module.exports.SingleComponentUniform = SingleComponentUniform;
     Organizes vertex buffer and attribute state.
 
     @class
-    @memberof PicoGL
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLVertexArrayObject} vertexArray Vertex array object.
     @prop {number} numElements Number of elements in the vertex array.
@@ -2985,7 +2964,6 @@ module.exports = VertexArray;
     Storage for vertex data.
 
     @class
-    @memberof PicoGL
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLBuffer} buffer Allocated buffer storage.
     @prop {GLEnum} type The type of data stored in the buffer.
