@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.3.6 
+PicoGL.js v0.4.0 
 
 The MIT License (MIT)
 
@@ -1580,8 +1580,6 @@ module.exports = Framebuffer;
 
 "use strict";
 
-
-
 /**
     Global PicoGL module. For convenience, all WebGL enums are stored
     as properties of PicoGL (e.g. PicoGL.FLOAT, PicoGL.ONE_MINUS_SRC_ALPHA).
@@ -1589,7 +1587,7 @@ module.exports = Framebuffer;
     @namespace PicoGL
 */
 var PicoGL = global.PicoGL = {
-    version: "0.3.6"
+    version: "0.4.0"
 };
 
 var canvas = document.createElement("canvas");

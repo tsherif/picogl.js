@@ -82,36 +82,6 @@ module.exports = function(grunt) {
                 ]
             },
         },
-        concat: {
-            options: {
-                separator: ";",
-                banner: banner,
-                stripBanners: {
-                    line: true,
-                    block: true
-                },
-                process: true
-            },
-            src: {
-                src: [
-                  "src/picogl.js",
-                  "src/app.js",
-                  "src/program.js",
-                  "src/shader.js",
-                  "src/vertexarray.js",
-                  "src/transformfeedback.js",
-                  "src/vertexbuffer.js",
-                  "src/uniforms.js",
-                  "src/uniformbuffer.js",
-                  "src/texture.js",
-                  "src/cubemap.js",
-                  "src/framebuffer.js",
-                  "src/drawcall.js",
-                  "src/timer.js"
-                ],
-                dest: "build/<%= packageName %>.js"
-            }
-        },
         jsdoc : {
             src : {
                 src: files,
@@ -122,7 +92,6 @@ module.exports = function(grunt) {
 
     grunt.loadNpmTasks("grunt-contrib-uglify");
     grunt.loadNpmTasks("grunt-contrib-jshint");
-    grunt.loadNpmTasks("grunt-contrib-concat");
     grunt.loadNpmTasks("grunt-browserify");
     grunt.loadNpmTasks("grunt-jsdoc");
 

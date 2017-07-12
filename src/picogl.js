@@ -23,8 +23,6 @@
 
 "use strict";
 
-
-
 /**
     Global PicoGL module. For convenience, all WebGL enums are stored
     as properties of PicoGL (e.g. PicoGL.FLOAT, PicoGL.ONE_MINUS_SRC_ALPHA).
