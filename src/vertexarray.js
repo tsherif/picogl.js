@@ -1,6 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////////
-// The MIT License (MIT)
-//
 // Copyright (c) 2017 Tarek Sherif
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -22,9 +19,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 "use strict";
-
-var PicoGL = require('./picogl');
-
 
 /**
     Storage for vertex data.

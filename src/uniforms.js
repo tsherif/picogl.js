@@ -23,9 +23,6 @@
 
 "use strict";
 
-var PicoGL = require('./picogl');
-
-
 // Classes to manage uniform value updates, including
 // caching current values.
 

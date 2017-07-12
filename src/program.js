@@ -23,10 +23,8 @@
 
 "use strict";
 
-var PicoGL   = require('./picogl');
 var Shader   = require('./shader');
 var Uniforms = require('./uniforms');
-
 
 /**
     WebGL program consisting of compiled and linked vertex and fragment

@@ -23,9 +23,6 @@
 
 "use strict";
 
-var PicoGL = require('./picogl');
-
-
 /**
     A DrawCall represents the program and values of associated
     attributes, uniforms and textures for a single draw call.

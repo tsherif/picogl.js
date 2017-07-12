@@ -23,9 +23,7 @@
 
 "use strict";
 
-var PicoGL  = require('./picogl');
 var Texture = require('./texture');
-
 
 /**
     Storage for vertex data.

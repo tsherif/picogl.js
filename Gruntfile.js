@@ -41,11 +41,20 @@ module.exports = function(grunt) {
                 options: {
                     browser: true,
                     devel: true,
+                    browserify: true,
                     globals: {
                         PicoGL: true
                     }
                 },
                 src: "<%= concat.src.src %>"
+            }
+        },
+        browserify: {
+            src: {
+                src: [
+                  "src/picogl.js",
+                ],
+                dest: "build/<%= packageName %>.js"
             }
         },
         concat: {
@@ -89,9 +98,10 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks("grunt-contrib-uglify");
     grunt.loadNpmTasks("grunt-contrib-jshint");
     grunt.loadNpmTasks("grunt-contrib-concat");
+    grunt.loadNpmTasks("grunt-browserify");
     grunt.loadNpmTasks("grunt-jsdoc");
 
     grunt.registerTask("lint", ["jshint"]);
-    grunt.registerTask("build", ["jshint", "concat", "uglify"]);
+    grunt.registerTask("build", ["jshint", "browserify", "uglify"]);
     grunt.registerTask("default", ["build"]);
 };

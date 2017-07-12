@@ -25,7 +25,6 @@
 var Cubemap           = require('./cubemap');
 var DrawCall          = require('./drawcall');
 var Framebuffer       = require('./framebuffer');
-var PicoGL            = require('./picogl');
 var Program           = require('./program');
 var Shader            = require('./shader');
 var Texture           = require('./texture');
@@ -893,4 +892,4 @@ App.prototype.timerReady = function() {
     }
 };
 
-module.exports = App
+module.exports = App;

@@ -23,9 +23,6 @@
 
 "use strict";
 
-var PicoGL = require('./picogl');
-
-
 /**
     Cubemap for environment mapping.
 

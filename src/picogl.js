@@ -23,13 +23,17 @@
 
 "use strict";
 
+
+
 /**
     Global PicoGL module. For convenience, all WebGL enums are stored
     as properties of PicoGL (e.g. PicoGL.FLOAT, PicoGL.ONE_MINUS_SRC_ALPHA).
 
     @namespace PicoGL
 */
-var PicoGL = { };
+var PicoGL = global.PicoGL = {
+    version: "<%= VERSION %>"
+};
 
 var canvas = document.createElement("canvas");
 var gl = canvas.getContext("webgl2");
@@ -189,5 +193,30 @@ PicoGL.WEBGL_INFO.MAX_UNIFORM_BUFFERS = gl.getParameter(gl.MAX_UNIFORM_BUFFER_BI
 
 
 PicoGL.DUMMY_OBJECT = {};
+
+PicoGL.App = require('./app');
+PicoGL.Program = require('./program');
+PicoGL.Texture = require('./texture');
+PicoGL.Cubemap = require('./cubemap');
+PicoGL.DrawCall = require('./drawcall');
+PicoGL.Framebuffer = require('./framebuffer');
+PicoGL.Shader = require('./shader');
+PicoGL.Timer = require('./timer');
+PicoGL.TransformFeedback = require('./transformfeedback');
+PicoGL.UniformBuffer = require('./uniformbuffer');
+PicoGL.VertexArray = require('./vertexarray');
+PicoGL.VertexBuffer = require('./vertexbuffer');
+
+/**
+    Create a PicoGL app. The app is the primary entry point to PicoGL. It stores
+    the canvas, the WebGL context and all WebGL state.
+
+    @function PicoGL.createApp
+    @param {DOMElement} canvas The canvas on which to create the WebGL context.
+    @param {Object} [contextAttributes] Context attributes to pass when calling getContext().
+*/
+PicoGL.createApp = function(canvas, contextAttributes) {
+    return new PicoGL.App(canvas, contextAttributes);
+};
 
 module.exports = PicoGL;

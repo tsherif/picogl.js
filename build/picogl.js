@@ -1,4 +1,4 @@
-(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.PicoGL = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -26,7 +26,6 @@
 var Cubemap           = require('./cubemap');
 var DrawCall          = require('./drawcall');
 var Framebuffer       = require('./framebuffer');
-var PicoGL            = require('./picogl');
 var Program           = require('./program');
 var Shader            = require('./shader');
 var Texture           = require('./texture');
@@ -894,9 +893,9 @@ App.prototype.timerReady = function() {
     }
 };
 
-module.exports = App
+module.exports = App;
 
-},{"./cubemap":2,"./drawcall":3,"./framebuffer":4,"./picogl":6,"./program":7,"./shader":8,"./texture":9,"./timer":10,"./transformfeedback":11,"./uniformbuffer":12,"./vertexarray":14,"./vertexbuffer":15}],2:[function(require,module,exports){
+},{"./cubemap":2,"./drawcall":3,"./framebuffer":4,"./program":6,"./shader":7,"./texture":8,"./timer":9,"./transformfeedback":10,"./uniformbuffer":11,"./vertexarray":13,"./vertexbuffer":14}],2:[function(require,module,exports){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -921,9 +920,6 @@ module.exports = App
 ///////////////////////////////////////////////////////////////////////////////////
 
 "use strict";
-
-var PicoGL = require('./picogl');
-
 
 /**
     Cubemap for environment mapping.
@@ -1046,7 +1042,7 @@ Cubemap.prototype.bind = function() {
 
 module.exports = Cubemap;
 
-},{"./picogl":6}],3:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -1071,9 +1067,6 @@ module.exports = Cubemap;
 ///////////////////////////////////////////////////////////////////////////////////
 
 "use strict";
-
-var PicoGL = require('./picogl');
-
 
 /**
     A DrawCall represents the program and values of associated
@@ -1247,7 +1240,7 @@ DrawCall.prototype.draw = function(state) {
 
 module.exports = DrawCall;
 
-},{"./picogl":6}],4:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -1273,9 +1266,7 @@ module.exports = DrawCall;
 
 "use strict";
 
-var PicoGL  = require('./picogl');
 var Texture = require('./texture');
-
 
 /**
     Storage for vertex data.
@@ -1533,7 +1524,7 @@ Framebuffer.prototype.restoreState = function(framebuffer) {
 
 module.exports = Framebuffer;
 
-},{"./picogl":6,"./texture":9}],5:[function(require,module,exports){
+},{"./texture":8}],5:[function(require,module,exports){
 (function (global){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
@@ -1560,8 +1551,6 @@ module.exports = Framebuffer;
 
 "use strict";
 
-var App    = require('./app');
-var PicoGL = require('./picogl');
 
 
 /**
@@ -1569,72 +1558,11 @@ var PicoGL = require('./picogl');
     as properties of PicoGL (e.g. PicoGL.FLOAT, PicoGL.ONE_MINUS_SRC_ALPHA).
 
     @namespace PicoGL
-    @prop {string} version Current PicoGL version.
-    @prop {object} TEXTURE_INTERNAL_FORMAT Map of framebuffer texture formats to internal formats.
-    @prop {object} TYPE_SIZE Map of data types to sizes in bytes.
-    @prop {object} WEBGL_INFO WebGL context information.
 */
-global.PicoGL = PicoGL;
-
-PicoGL.version = "<%= VERSION %>";
-PicoGL.App = App;
-PicoGL.Program = require('./program');
-PicoGL.Texture = require('./texture');
-PicoGL.Cubemap = require('./cubemap');
-PicoGL.DrawCall          = require('./drawcall');
-PicoGL.Framebuffer       = require('./framebuffer');
-PicoGL.Shader            = require('./shader');
-PicoGL.Timer             = require('./timer');
-PicoGL.TransformFeedback = require('./transformfeedback');
-PicoGL.UniformBuffer     = require('./uniformbuffer');
-PicoGL.VertexArray       = require('./vertexarray');
-PicoGL.VertexBuffer      = require('./vertexbuffer');
-
-
-/**
-    Create a PicoGL app. The app is the primary entry point to PicoGL. It stores
-    the canvas, the WebGL context and all WebGL state.
-
-    @function PicoGL.createApp
-    @param {DOMElement} canvas The canvas on which to create the WebGL context.
-    @param {Object} [contextAttributes] Context attributes to pass when calling getContext().
-*/
-PicoGL.createApp = function(canvas, contextAttributes) {
-    return new App(canvas, contextAttributes);
+var PicoGL = global.PicoGL = {
+    version: "<%= VERSION %>"
 };
 
-module.exports = PicoGL;
-
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./app":1,"./cubemap":2,"./drawcall":3,"./framebuffer":4,"./picogl":6,"./program":7,"./shader":8,"./texture":9,"./timer":10,"./transformfeedback":11,"./uniformbuffer":12,"./vertexarray":14,"./vertexbuffer":15}],6:[function(require,module,exports){
-///////////////////////////////////////////////////////////////////////////////////
-// The MIT License (MIT)
-//
-// Copyright (c) 2017 Tarek Sherif
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy of
-// this software and associated documentation files (the "Software"), to deal in
-// the Software without restriction, including without limitation the rights to
-// use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
-// the Software, and to permit persons to whom the Software is furnished to do so,
-// subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-// FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-// COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-// IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-// CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-///////////////////////////////////////////////////////////////////////////////////
-
-"use strict";
-
-var PicoGL = { };
-
-// Absorb all GL enums for convenience
 var canvas = document.createElement("canvas");
 var gl = canvas.getContext("webgl2");
 
@@ -1794,9 +1722,35 @@ PicoGL.WEBGL_INFO.MAX_UNIFORM_BUFFERS = gl.getParameter(gl.MAX_UNIFORM_BUFFER_BI
 
 PicoGL.DUMMY_OBJECT = {};
 
+PicoGL.App = require('./app');
+PicoGL.Program = require('./program');
+PicoGL.Texture = require('./texture');
+PicoGL.Cubemap = require('./cubemap');
+PicoGL.DrawCall = require('./drawcall');
+PicoGL.Framebuffer = require('./framebuffer');
+PicoGL.Shader = require('./shader');
+PicoGL.Timer = require('./timer');
+PicoGL.TransformFeedback = require('./transformfeedback');
+PicoGL.UniformBuffer = require('./uniformbuffer');
+PicoGL.VertexArray = require('./vertexarray');
+PicoGL.VertexBuffer = require('./vertexbuffer');
+
+/**
+    Create a PicoGL app. The app is the primary entry point to PicoGL. It stores
+    the canvas, the WebGL context and all WebGL state.
+
+    @function PicoGL.createApp
+    @param {DOMElement} canvas The canvas on which to create the WebGL context.
+    @param {Object} [contextAttributes] Context attributes to pass when calling getContext().
+*/
+PicoGL.createApp = function(canvas, contextAttributes) {
+    return new PicoGL.App(canvas, contextAttributes);
+};
+
 module.exports = PicoGL;
 
-},{}],7:[function(require,module,exports){
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./app":1,"./cubemap":2,"./drawcall":3,"./framebuffer":4,"./program":6,"./shader":7,"./texture":8,"./timer":9,"./transformfeedback":10,"./uniformbuffer":11,"./vertexarray":13,"./vertexbuffer":14}],6:[function(require,module,exports){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -1822,10 +1776,8 @@ module.exports = PicoGL;
 
 "use strict";
 
-var PicoGL   = require('./picogl');
 var Shader   = require('./shader');
 var Uniforms = require('./uniforms');
-
 
 /**
     WebGL program consisting of compiled and linked vertex and fragment
@@ -1992,7 +1944,7 @@ Program.prototype.uniformBlock = function(name, base) {
 
 module.exports = Program;
 
-},{"./picogl":6,"./shader":8,"./uniforms":13}],8:[function(require,module,exports){
+},{"./shader":7,"./uniforms":12}],7:[function(require,module,exports){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -2056,7 +2008,7 @@ Shader.prototype.delete = function() {
 
 module.exports = Shader;
 
-},{}],9:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -2081,9 +2033,6 @@ module.exports = Shader;
 ///////////////////////////////////////////////////////////////////////////////////
 
 "use strict";
-
-var PicoGL = require('./picogl');
-
 
 /**
     General-purpose texture.
@@ -2280,7 +2229,7 @@ Texture.prototype.bind = function(force) {
 
 module.exports = Texture;
 
-},{"./picogl":6}],10:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -2399,7 +2348,7 @@ Timer.prototype.ready = function() {
 
 module.exports = Timer;
 
-},{}],11:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -2483,7 +2432,7 @@ TransformFeedback.prototype.bind = function() {
 
 module.exports = TransformFeedback;
 
-},{}],12:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -2508,9 +2457,6 @@ module.exports = TransformFeedback;
 ///////////////////////////////////////////////////////////////////////////////////
 
 "use strict";
-
-var PicoGL = require('./picogl');
-
 
 /**
     Storage for uniform data. Data is stored in std140 layout.
@@ -2710,7 +2656,7 @@ UniformBuffer.prototype.bind = function(base) {
 
 module.exports = UniformBuffer;
 
-},{"./picogl":6}],13:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -2735,9 +2681,6 @@ module.exports = UniformBuffer;
 ///////////////////////////////////////////////////////////////////////////////////
 
 "use strict";
-
-var PicoGL = require('./picogl');
-
 
 // Classes to manage uniform value updates, including
 // caching current values.
@@ -2817,10 +2760,7 @@ module.exports.MultiBoolUniform = MultiBoolUniform;
 module.exports.MultiNumericUniform = MultiNumericUniform;
 module.exports.SingleComponentUniform = SingleComponentUniform;
 
-},{"./picogl":6}],14:[function(require,module,exports){
-///////////////////////////////////////////////////////////////////////////////////
-// The MIT License (MIT)
-//
+},{}],13:[function(require,module,exports){
 // Copyright (c) 2017 Tarek Sherif
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -2842,9 +2782,6 @@ module.exports.SingleComponentUniform = SingleComponentUniform;
 ///////////////////////////////////////////////////////////////////////////////////
 
 "use strict";
-
-var PicoGL = require('./picogl');
-
 
 /**
     Storage for vertex data.
@@ -2984,7 +2921,7 @@ VertexArray.prototype.attributeBuffer = function(attributeIndex, vertexBuffer, i
 
 module.exports = VertexArray;
 
-},{"./picogl":6}],15:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -3009,9 +2946,6 @@ module.exports = VertexArray;
 ///////////////////////////////////////////////////////////////////////////////////
 
 "use strict";
-
-var PicoGL = require('./picogl');
-
 
 /**
     Storage for vertex data.
@@ -3120,5 +3054,4 @@ VertexBuffer.prototype.delete = function() {
 
 module.exports = VertexBuffer;
 
-},{"./picogl":6}]},{},[5])(5)
-});
+},{}]},{},[5]);

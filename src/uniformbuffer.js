@@ -23,9 +23,6 @@
 
 "use strict";
 
-var PicoGL = require('./picogl');
-
-
 /**
     Storage for uniform data. Data is stored in std140 layout.
 
