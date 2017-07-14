@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.4.0 
+PicoGL.js v0.4.1 
 
 The MIT License (MIT)
 
@@ -48,17 +48,18 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
 "use strict";
-var Cubemap           = require('./cubemap');
-var DrawCall          = require('./drawcall');
-var Framebuffer       = require('./framebuffer');
-var Program           = require('./program');
-var Shader            = require('./shader');
-var Texture           = require('./texture');
-var Timer             = require('./timer');
-var TransformFeedback = require('./transformfeedback');
-var UniformBuffer     = require('./uniformbuffer');
-var VertexArray       = require('./vertexarray');
-var VertexBuffer      = require('./vertexbuffer');
+var CONSTANTS         = require("./constants");
+var Cubemap           = require("./cubemap");
+var DrawCall          = require("./drawcall");
+var Framebuffer       = require("./framebuffer");
+var Program           = require("./program");
+var Shader            = require("./shader");
+var Texture           = require("./texture");
+var Timer             = require("./timer");
+var TransformFeedback = require("./transformfeedback");
+var UniformBuffer     = require("./uniformbuffer");
+var VertexArray       = require("./vertexarray");
+var VertexBuffer      = require("./vertexbuffer");
 
 
 /**
@@ -95,14 +96,14 @@ function App(canvas, contextAttributes) {
         vertexArray: null,
         transformFeedback: null,
         activeTexture: -1,
-        textures: new Array(PicoGL.WEBGL_INFO.MAX_TEXTURE_UNITS),
+        textures: new Array(CONSTANTS.WEBGL_INFO.MAX_TEXTURE_UNITS),
         textureCount: 0,
         freeTextureUnits: [],
         // TODO(Tarek): UBO state currently not tracked, due bug
         // with UBO state becoming corrupted between frames in Chrome
         // https://bugs.chromium.org/p/chromium/issues/detail?id=722060
         // Enable UBO state tracking when that's fixed.
-        uniformBuffers: new Array(PicoGL.WEBGL_INFO.MAX_UNIFORM_BUFFERS),
+        uniformBuffers: new Array(CONSTANTS.WEBGL_INFO.MAX_UNIFORM_BUFFERS),
         uniformBufferCount: 0,
         freeUniformBufferBases: [],
         drawFramebuffer: null,
@@ -921,7 +922,7 @@ App.prototype.timerReady = function() {
 
 module.exports = App;
 
-},{"./cubemap":3,"./drawcall":4,"./framebuffer":5,"./program":7,"./shader":8,"./texture":9,"./timer":10,"./transformfeedback":11,"./uniformbuffer":12,"./vertexarray":14,"./vertexbuffer":15}],2:[function(require,module,exports){
+},{"./constants":2,"./cubemap":3,"./drawcall":4,"./framebuffer":5,"./program":7,"./shader":8,"./texture":9,"./timer":10,"./transformfeedback":11,"./uniformbuffer":12,"./vertexarray":14,"./vertexbuffer":15}],2:[function(require,module,exports){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -1020,6 +1021,8 @@ module.exports = CONSTANTS;
 
 "use strict";
 
+var CONSTANTS = require("./constants");
+
 /**
     Cubemap for environment mapping.
 
@@ -1035,13 +1038,13 @@ module.exports = CONSTANTS;
     @prop {Object} appState Tracked GL state.
 */
 function Cubemap(gl, appState, options) {
-    options = options || PicoGL.DUMMY_OBJECT;
+    options = options || CONSTANTS.DUMMY_OBJECT;
 
     this.gl = gl;
     this.texture = gl.createTexture();
     this.format = options.format !== undefined ? options.format : gl.RGBA;
     this.type = options.type !== undefined ? options.type : gl.UNSIGNED_BYTE;
-    this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : PicoGL.TEXTURE_INTERNAL_FORMAT[this.type][this.format];
+    this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : CONSTANTS.TEXTURE_INTERNAL_FORMAT[this.type][this.format];
     this.appState = appState;
     if (appState.freeTextureUnits.length > 0) {
         this.unit = appState.freeTextureUnits.pop();
@@ -1142,7 +1145,7 @@ Cubemap.prototype.bind = function() {
 
 module.exports = Cubemap;
 
-},{}],4:[function(require,module,exports){
+},{"./constants":2}],4:[function(require,module,exports){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -1167,6 +1170,8 @@ module.exports = Cubemap;
 ///////////////////////////////////////////////////////////////////////////////////
 
 "use strict";
+
+var CONSTANTS = require("./constants");
 
 /**
     A DrawCall represents the program and values of associated
@@ -1197,17 +1202,17 @@ function DrawCall(gl, program, vertexArray, primitive) {
     this.currentTransformFeedback = null;
 
     this.uniformIndices = {};
-    this.uniformNames = new Array(PicoGL.WEBGL_INFO.MAX_UNIFORMS);
-    this.uniformValues = new Array(PicoGL.WEBGL_INFO.MAX_UNIFORMS);
+    this.uniformNames = new Array(CONSTANTS.WEBGL_INFO.MAX_UNIFORMS);
+    this.uniformValues = new Array(CONSTANTS.WEBGL_INFO.MAX_UNIFORMS);
     this.uniformCount = 0;
-    this.uniformBuffers = new Array(PicoGL.WEBGL_INFO.MAX_UNIFORM_BUFFERS);
-    this.uniformBlockNames = new Array(PicoGL.WEBGL_INFO.MAX_UNIFORM_BUFFERS);
+    this.uniformBuffers = new Array(CONSTANTS.WEBGL_INFO.MAX_UNIFORM_BUFFERS);
+    this.uniformBlockNames = new Array(CONSTANTS.WEBGL_INFO.MAX_UNIFORM_BUFFERS);
     this.uniformBlockBases = {};
     this.uniformBlockCount = 0;
     this.samplerIndices = {};
-    this.textures = new Array(PicoGL.WEBGL_INFO.MAX_TEXTURE_UNITS);
+    this.textures = new Array(CONSTANTS.WEBGL_INFO.MAX_TEXTURE_UNITS);
     this.textureCount = 0;
-    this.primitive = primitive !== undefined ? primitive : PicoGL.TRIANGLES;
+    this.primitive = primitive !== undefined ? primitive : CONSTANTS.TRIANGLES;
 }
 
 DrawCall.prototype.transformFeedback = function(transformFeedback) {
@@ -1341,7 +1346,7 @@ DrawCall.prototype.draw = function(state) {
 
 module.exports = DrawCall;
 
-},{}],5:[function(require,module,exports){
+},{"./constants":2}],5:[function(require,module,exports){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -1367,7 +1372,8 @@ module.exports = DrawCall;
 
 "use strict";
 
-var Texture = require('./texture');
+var CONSTANTS = require("./constants");
+var Texture = require("./texture");
 
 /**
     Storage for vertex data.
@@ -1431,7 +1437,7 @@ Framebuffer.prototype.colorTarget = function(index, options) {
     options = options || {};
     options.type = options.type || this.gl.UNSIGNED_BYTE;
     options.format = options.format || this.gl.RGBA;
-    options.internalFormat = options.internalFormat || PicoGL.TEXTURE_INTERNAL_FORMAT[options.type][options.format];
+    options.internalFormat = options.internalFormat || CONSTANTS.TEXTURE_INTERNAL_FORMAT[options.type][options.format];
     options.minFilter = options.minFilter || this.gl.NEAREST;
     options.magFilter = options.magFilter || this.gl.NEAREST;
     options.wrapS = options.wrapS || this.gl.CLAMP_TO_EDGE;
@@ -1488,7 +1494,7 @@ Framebuffer.prototype.depthTarget = function(options) {
     options = options || {};
     options.format = this.gl.DEPTH_COMPONENT;
     options.type = options.type || this.gl.UNSIGNED_SHORT;
-    options.internalFormat = options.internalFormat || PicoGL.TEXTURE_INTERNAL_FORMAT[options.type][options.format];
+    options.internalFormat = options.internalFormat || CONSTANTS.TEXTURE_INTERNAL_FORMAT[options.type][options.format];
     options.minFilter = options.minFilter || this.gl.NEAREST;
     options.magFilter = options.magFilter || this.gl.NEAREST;
     options.wrapS = options.wrapS || this.gl.CLAMP_TO_EDGE;
@@ -1626,7 +1632,7 @@ Framebuffer.prototype.restoreState = function(framebuffer) {
 
 module.exports = Framebuffer;
 
-},{"./texture":9}],6:[function(require,module,exports){
+},{"./constants":2,"./texture":9}],6:[function(require,module,exports){
 (function (global){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
@@ -1653,7 +1659,7 @@ module.exports = Framebuffer;
 
 "use strict";
 
-var App = require('./app');
+var App = require("./app");
 
 /**
     Global PicoGL module. For convenience, all WebGL enums are stored
@@ -1662,7 +1668,7 @@ var App = require('./app');
     @namespace PicoGL
 */
 var PicoGL = global.PicoGL = require("./constants");    
-PicoGL.version = "0.4.0";
+PicoGL.version = "0.4.1";
 
 /**
     Create a PicoGL app. The app is the primary entry point to PicoGL. It stores
@@ -1705,8 +1711,9 @@ module.exports = PicoGL;
 
 "use strict";
 
-var Shader   = require('./shader');
-var Uniforms = require('./uniforms');
+var CONSTANTS = require("./constants");
+var Shader   = require("./shader");
+var Uniforms = require("./uniforms");
 
 /**
     WebGL program consisting of compiled and linked vertex and fragment
@@ -1778,54 +1785,54 @@ function Program(gl, vsSource, fsSource, xformFeebackVars) {
         var numElements = uniformInfo.size;
 
         switch (type) {
-            case PicoGL.INT:
-            case PicoGL.SAMPLER_2D:
-            case PicoGL.INT_SAMPLER_2D:
-            case PicoGL.UNSIGNED_INT_SAMPLER_2D:
-            case PicoGL.SAMPLER_2D_SHADOW:
-            case PicoGL.SAMPLER_2D_ARRAY:
-            case PicoGL.INT_SAMPLER_2D_ARRAY:
-            case PicoGL.UNSIGNED_INT_SAMPLER_2D_ARRAY:
-            case PicoGL.SAMPLER_2D_ARRAY_SHADOW:
-            case PicoGL.SAMPLER_CUBE:
-            case PicoGL.INT_SAMPLER_CUBE:
-            case PicoGL.UNSIGNED_INT_SAMPLER_CUBE:
-            case PicoGL.SAMPLER_CUBE_SHADOW:
-            case PicoGL.SAMPLER_3D:
-            case PicoGL.INT_SAMPLER_3D:
-            case PicoGL.UNSIGNED_INT_SAMPLER_3D:
-            case PicoGL.UNSIGNED_INT:
-            case PicoGL.FLOAT:
+            case CONSTANTS.INT:
+            case CONSTANTS.SAMPLER_2D:
+            case CONSTANTS.INT_SAMPLER_2D:
+            case CONSTANTS.UNSIGNED_INT_SAMPLER_2D:
+            case CONSTANTS.SAMPLER_2D_SHADOW:
+            case CONSTANTS.SAMPLER_2D_ARRAY:
+            case CONSTANTS.INT_SAMPLER_2D_ARRAY:
+            case CONSTANTS.UNSIGNED_INT_SAMPLER_2D_ARRAY:
+            case CONSTANTS.SAMPLER_2D_ARRAY_SHADOW:
+            case CONSTANTS.SAMPLER_CUBE:
+            case CONSTANTS.INT_SAMPLER_CUBE:
+            case CONSTANTS.UNSIGNED_INT_SAMPLER_CUBE:
+            case CONSTANTS.SAMPLER_CUBE_SHADOW:
+            case CONSTANTS.SAMPLER_3D:
+            case CONSTANTS.INT_SAMPLER_3D:
+            case CONSTANTS.UNSIGNED_INT_SAMPLER_3D:
+            case CONSTANTS.UNSIGNED_INT:
+            case CONSTANTS.FLOAT:
                 UniformClass = numElements > 1 ? Uniforms.MultiNumericUniform : Uniforms.SingleComponentUniform;
                 break;
-            case PicoGL.BOOL:
+            case CONSTANTS.BOOL:
                 UniformClass = numElements > 1 ? Uniforms.MultiBoolUniform : Uniforms.SingleComponentUniform;
                 break;
-            case PicoGL.FLOAT_VEC2:
-            case PicoGL.INT_VEC2:
-            case PicoGL.UNSIGNED_INT_VEC2:
-            case PicoGL.FLOAT_VEC3:
-            case PicoGL.INT_VEC3:
-            case PicoGL.UNSIGNED_INT_VEC3:
-            case PicoGL.FLOAT_VEC4:
-            case PicoGL.INT_VEC4:
-            case PicoGL.UNSIGNED_INT_VEC4:
+            case CONSTANTS.FLOAT_VEC2:
+            case CONSTANTS.INT_VEC2:
+            case CONSTANTS.UNSIGNED_INT_VEC2:
+            case CONSTANTS.FLOAT_VEC3:
+            case CONSTANTS.INT_VEC3:
+            case CONSTANTS.UNSIGNED_INT_VEC3:
+            case CONSTANTS.FLOAT_VEC4:
+            case CONSTANTS.INT_VEC4:
+            case CONSTANTS.UNSIGNED_INT_VEC4:
                 UniformClass = Uniforms.MultiNumericUniform;
                 break;
-            case PicoGL.BOOL_VEC2:
-            case PicoGL.BOOL_VEC3:
-            case PicoGL.BOOL_VEC4:
+            case CONSTANTS.BOOL_VEC2:
+            case CONSTANTS.BOOL_VEC3:
+            case CONSTANTS.BOOL_VEC4:
                 UniformClass = Uniforms.MultiBoolUniform;
                 break;
-            case PicoGL.FLOAT_MAT2:
-            case PicoGL.FLOAT_MAT3:
-            case PicoGL.FLOAT_MAT4:
-            case PicoGL.FLOAT_MAT2x3:
-            case PicoGL.FLOAT_MAT2x4:
-            case PicoGL.FLOAT_MAT3x2:
-            case PicoGL.FLOAT_MAT3x4:
-            case PicoGL.FLOAT_MAT4x2:
-            case PicoGL.FLOAT_MAT4x3:
+            case CONSTANTS.FLOAT_MAT2:
+            case CONSTANTS.FLOAT_MAT3:
+            case CONSTANTS.FLOAT_MAT4:
+            case CONSTANTS.FLOAT_MAT2x3:
+            case CONSTANTS.FLOAT_MAT2x4:
+            case CONSTANTS.FLOAT_MAT3x2:
+            case CONSTANTS.FLOAT_MAT3x4:
+            case CONSTANTS.FLOAT_MAT4x2:
+            case CONSTANTS.FLOAT_MAT4x3:
                 UniformClass = Uniforms.MatrixUniform;
                 break;
             default:
@@ -1874,7 +1881,7 @@ Program.prototype.uniformBlock = function(name, base) {
 
 module.exports = Program;
 
-},{"./shader":8,"./uniforms":13}],8:[function(require,module,exports){
+},{"./constants":2,"./shader":8,"./uniforms":13}],8:[function(require,module,exports){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -1965,6 +1972,8 @@ module.exports = Shader;
 
 "use strict";
 
+var CONSTANTS = require("./constants");
+
 /**
     General-purpose texture.
 
@@ -1983,7 +1992,7 @@ module.exports = Shader;
     @prop {Object} appState Tracked GL state.
 */
 function Texture(gl, appState, binding, image, width, height, depth, is3D, options) {
-    options = options || PicoGL.DUMMY_OBJECT;
+    options = options || CONSTANTS.DUMMY_OBJECT;
 
     this.gl = gl;
     this.binding = binding;
@@ -1993,7 +2002,7 @@ function Texture(gl, appState, binding, image, width, height, depth, is3D, optio
     this.depth = -1;
     this.format = options.format !== undefined ? options.format : gl.RGBA;
     this.type = options.type !== undefined ? options.type : gl.UNSIGNED_BYTE;
-    this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : PicoGL.TEXTURE_INTERNAL_FORMAT[this.type][this.format];
+    this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : CONSTANTS.TEXTURE_INTERNAL_FORMAT[this.type][this.format];
     this.is3D = is3D;
     this.appState = appState;
     if (appState.freeTextureUnits.length > 0) {
@@ -2161,7 +2170,7 @@ Texture.prototype.bind = function(force) {
 
 module.exports = Texture;
 
-},{}],10:[function(require,module,exports){
+},{"./constants":2}],10:[function(require,module,exports){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -2392,6 +2401,8 @@ module.exports = TransformFeedback;
 
 "use strict";
 
+var CONSTANTS = require("./constants");
+
 /**
     Storage for uniform data. Data is stored in std140 layout.
 
@@ -2420,90 +2431,90 @@ function UniformBuffer(gl, layout, usage) {
     for (var i = 0, len = layout.length; i < len; ++i) {
         var type = layout[i];
         switch(type) {
-            case PicoGL.FLOAT:
-            case PicoGL.INT:
-            case PicoGL.UNSIGNED_INT:
-            case PicoGL.BOOL:
+            case CONSTANTS.FLOAT:
+            case CONSTANTS.INT:
+            case CONSTANTS.UNSIGNED_INT:
+            case CONSTANTS.BOOL:
                 this.offsets[i] = this.size;
                 this.sizes[i] = 1;
 
-                if (type === PicoGL.INT) {
-                    this.types[i] = PicoGL.INT;
-                } else if (this.type === PicoGL.UNSIGNED_INT) {
-                    this.types[i] = PicoGL.UNSIGNED_INT;
+                if (type === CONSTANTS.INT) {
+                    this.types[i] = CONSTANTS.INT;
+                } else if (this.type === CONSTANTS.UNSIGNED_INT) {
+                    this.types[i] = CONSTANTS.UNSIGNED_INT;
                 } else {
-                    this.types[i] = PicoGL.FLOAT;
+                    this.types[i] = CONSTANTS.FLOAT;
                 }
 
                 this.size++;
                 break;
-            case PicoGL.FLOAT_VEC2:
-            case PicoGL.INT_VEC2:
-            case PicoGL.UNSIGNED_INT_VEC2:
-            case PicoGL.BOOL_VEC2:
+            case CONSTANTS.FLOAT_VEC2:
+            case CONSTANTS.INT_VEC2:
+            case CONSTANTS.UNSIGNED_INT_VEC2:
+            case CONSTANTS.BOOL_VEC2:
                 this.size += this.size % 2;
                 this.offsets[i] = this.size;
                 this.sizes[i] = 2;
 
-                if (type === PicoGL.INT_VEC2) {
-                    this.types[i] = PicoGL.INT;
-                } else if (this.type === PicoGL.UNSIGNED_INT_VEC2) {
-                    this.types[i] = PicoGL.UNSIGNED_INT;
+                if (type === CONSTANTS.INT_VEC2) {
+                    this.types[i] = CONSTANTS.INT;
+                } else if (this.type === CONSTANTS.UNSIGNED_INT_VEC2) {
+                    this.types[i] = CONSTANTS.UNSIGNED_INT;
                 } else {
-                    this.types[i] = PicoGL.FLOAT;
+                    this.types[i] = CONSTANTS.FLOAT;
                 }
 
                 this.size += 2;
                 break;
-            case PicoGL.FLOAT_VEC3:
-            case PicoGL.INT_VEC3:
-            case PicoGL.UNSIGNED_INT_VEC3:
-            case PicoGL.BOOL_VEC3:
-            case PicoGL.FLOAT_VEC4:
-            case PicoGL.INT_VEC4:
-            case PicoGL.UNSIGNED_INT_VEC4:
-            case PicoGL.BOOL_VEC4:
+            case CONSTANTS.FLOAT_VEC3:
+            case CONSTANTS.INT_VEC3:
+            case CONSTANTS.UNSIGNED_INT_VEC3:
+            case CONSTANTS.BOOL_VEC3:
+            case CONSTANTS.FLOAT_VEC4:
+            case CONSTANTS.INT_VEC4:
+            case CONSTANTS.UNSIGNED_INT_VEC4:
+            case CONSTANTS.BOOL_VEC4:
                 this.size += (4 - this.size % 4) % 4;
                 this.offsets[i] = this.size;
                 this.sizes[i] = 4;
 
-                if (type === PicoGL.INT_VEC4 || type === PicoGL.INT_VEC3) {
-                    this.types[i] = PicoGL.INT;
-                } else if (this.type === PicoGL.UNSIGNED_INT_VEC4 || this.type === PicoGL.UNSIGNED_INT_VEC3) {
-                    this.types[i] = PicoGL.UNSIGNED_INT;
+                if (type === CONSTANTS.INT_VEC4 || type === CONSTANTS.INT_VEC3) {
+                    this.types[i] = CONSTANTS.INT;
+                } else if (this.type === CONSTANTS.UNSIGNED_INT_VEC4 || this.type === CONSTANTS.UNSIGNED_INT_VEC3) {
+                    this.types[i] = CONSTANTS.UNSIGNED_INT;
                 } else {
-                    this.types[i] = PicoGL.FLOAT;
+                    this.types[i] = CONSTANTS.FLOAT;
                 }
 
                 this.size += 4;
                 break;
-            case PicoGL.FLOAT_MAT2:
-            case PicoGL.FLOAT_MAT2x3:
-            case PicoGL.FLOAT_MAT2x4:
+            case CONSTANTS.FLOAT_MAT2:
+            case CONSTANTS.FLOAT_MAT2x3:
+            case CONSTANTS.FLOAT_MAT2x4:
                 this.size += (4 - this.size % 4) % 4;
                 this.offsets[i] = this.size;
                 this.sizes[i] = 8;
-                this.types[i] = PicoGL.FLOAT;
+                this.types[i] = CONSTANTS.FLOAT;
 
                 this.size += 8;
                 break;
-            case PicoGL.FLOAT_MAT3:
-            case PicoGL.FLOAT_MAT3x2:
-            case PicoGL.FLOAT_MAT3x4:
+            case CONSTANTS.FLOAT_MAT3:
+            case CONSTANTS.FLOAT_MAT3x2:
+            case CONSTANTS.FLOAT_MAT3x4:
                 this.size += (4 - this.size % 4) % 4;
                 this.offsets[i] = this.size;
                 this.sizes[i] = 12;
-                this.types[i] = PicoGL.FLOAT;
+                this.types[i] = CONSTANTS.FLOAT;
 
                 this.size += 12;
                 break;
-            case PicoGL.FLOAT_MAT4:
-            case PicoGL.FLOAT_MAT4x2:
-            case PicoGL.FLOAT_MAT4x3:
+            case CONSTANTS.FLOAT_MAT4:
+            case CONSTANTS.FLOAT_MAT4x2:
+            case CONSTANTS.FLOAT_MAT4x3:
                 this.size += (4 - this.size % 4) % 4;
                 this.offsets[i] = this.size;
                 this.sizes[i] = 16;
-                this.types[i] = PicoGL.FLOAT;
+                this.types[i] = CONSTANTS.FLOAT;
 
                 this.size += 16;
                 break;
@@ -2515,9 +2526,9 @@ function UniformBuffer(gl, layout, usage) {
     this.size += (4 - this.size % 4) % 4;
 
     this.data = new Float32Array(this.size);
-    this.dataViews[PicoGL.FLOAT] = this.data;
-    this.dataViews[PicoGL.INT] = new Int32Array(this.data.buffer);
-    this.dataViews[PicoGL.UNSIGNED_INT] = new Uint32Array(this.data.buffer);
+    this.dataViews[CONSTANTS.FLOAT] = this.data;
+    this.dataViews[CONSTANTS.INT] = new Int32Array(this.data.buffer);
+    this.dataViews[CONSTANTS.UNSIGNED_INT] = new Uint32Array(this.data.buffer);
 
     this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, 0, this.buffer);
     this.gl.bufferData(this.gl.UNIFORM_BUFFER, this.size * 4, this.usage);
@@ -2591,7 +2602,7 @@ UniformBuffer.prototype.bind = function(base) {
 
 module.exports = UniformBuffer;
 
-},{}],13:[function(require,module,exports){
+},{"./constants":2}],13:[function(require,module,exports){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -2833,6 +2844,8 @@ module.exports.SingleComponentUniform = SingleComponentUniform;
 
 "use strict";
 
+var CONSTANTS = require("./constants");
+
 /**
     Organizes vertex buffer and attribute state.
 
@@ -2938,15 +2951,15 @@ VertexArray.prototype.attributeBuffer = function(attributeIndex, vertexBuffer, i
                 vertexBuffer.itemSize,
                 vertexBuffer.type,
                 false,
-                numColumns * vertexBuffer.itemSize * PicoGL.TYPE_SIZE[vertexBuffer.type],
-                i * vertexBuffer.itemSize * PicoGL.TYPE_SIZE[vertexBuffer.type]);
+                numColumns * vertexBuffer.itemSize * CONSTANTS.TYPE_SIZE[vertexBuffer.type],
+                i * vertexBuffer.itemSize * CONSTANTS.TYPE_SIZE[vertexBuffer.type]);
         } else {
             this.gl.vertexAttribIPointer(
                 attributeIndex + i,
                 vertexBuffer.itemSize,
                 vertexBuffer.type,
-                numColumns * vertexBuffer.itemSize * PicoGL.TYPE_SIZE[vertexBuffer.type],
-                i * vertexBuffer.itemSize * PicoGL.TYPE_SIZE[vertexBuffer.type]);
+                numColumns * vertexBuffer.itemSize * CONSTANTS.TYPE_SIZE[vertexBuffer.type],
+                i * vertexBuffer.itemSize * CONSTANTS.TYPE_SIZE[vertexBuffer.type]);
         }
 
         if (instanced) {
@@ -2972,7 +2985,7 @@ VertexArray.prototype.attributeBuffer = function(attributeIndex, vertexBuffer, i
 
 module.exports = VertexArray;
 
-},{}],15:[function(require,module,exports){
+},{"./constants":2}],15:[function(require,module,exports){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -2998,6 +3011,8 @@ module.exports = VertexArray;
 
 "use strict";
 
+var CONSTANTS = require("./constants");
+
 /**
     Storage for vertex data.
 
@@ -3015,19 +3030,19 @@ module.exports = VertexArray;
 function VertexBuffer(gl, type, itemSize, data, usage, indexArray) {
     var numColumns;
     switch(type) {
-        case PicoGL.FLOAT_MAT4:
-        case PicoGL.FLOAT_MAT4x2:
-        case PicoGL.FLOAT_MAT4x3:
+        case CONSTANTS.FLOAT_MAT4:
+        case CONSTANTS.FLOAT_MAT4x2:
+        case CONSTANTS.FLOAT_MAT4x3:
             numColumns = 4;
             break;
-        case PicoGL.FLOAT_MAT3:
-        case PicoGL.FLOAT_MAT3x2:
-        case PicoGL.FLOAT_MAT3x4:
+        case CONSTANTS.FLOAT_MAT3:
+        case CONSTANTS.FLOAT_MAT3x2:
+        case CONSTANTS.FLOAT_MAT3x4:
             numColumns = 3;
             break;
-        case PicoGL.FLOAT_MAT2:
-        case PicoGL.FLOAT_MAT2x3:
-        case PicoGL.FLOAT_MAT2x4:
+        case CONSTANTS.FLOAT_MAT2:
+        case CONSTANTS.FLOAT_MAT2x3:
+        case CONSTANTS.FLOAT_MAT2x4:
             numColumns = 2;
             break;
         default:
@@ -3035,30 +3050,30 @@ function VertexBuffer(gl, type, itemSize, data, usage, indexArray) {
     }
 
     switch(type) {
-        case PicoGL.FLOAT_MAT4:
-        case PicoGL.FLOAT_MAT3x4:
-        case PicoGL.FLOAT_MAT2x4:
+        case CONSTANTS.FLOAT_MAT4:
+        case CONSTANTS.FLOAT_MAT3x4:
+        case CONSTANTS.FLOAT_MAT2x4:
             itemSize = 4;
-            type = PicoGL.FLOAT;
+            type = CONSTANTS.FLOAT;
             break;
-        case PicoGL.FLOAT_MAT3:
-        case PicoGL.FLOAT_MAT4x3:
-        case PicoGL.FLOAT_MAT2x3:
+        case CONSTANTS.FLOAT_MAT3:
+        case CONSTANTS.FLOAT_MAT4x3:
+        case CONSTANTS.FLOAT_MAT2x3:
             itemSize = 3;
-            type = PicoGL.FLOAT;
+            type = CONSTANTS.FLOAT;
             break;
-        case PicoGL.FLOAT_MAT2:
-        case PicoGL.FLOAT_MAT3x2:
-        case PicoGL.FLOAT_MAT4x2:
+        case CONSTANTS.FLOAT_MAT2:
+        case CONSTANTS.FLOAT_MAT3x2:
+        case CONSTANTS.FLOAT_MAT4x2:
             itemSize = 2;
-            type = PicoGL.FLOAT;
+            type = CONSTANTS.FLOAT;
             break;
     }
 
     var dataLength;
     if (typeof data === "number") {
         dataLength = data;
-        data *= PicoGL.TYPE_SIZE[type];
+        data *= CONSTANTS.TYPE_SIZE[type];
     } else {
         dataLength = data.length;
     }
@@ -3106,4 +3121,4 @@ VertexBuffer.prototype.delete = function() {
 
 module.exports = VertexBuffer;
 
-},{}]},{},[6]);
+},{"./constants":2}]},{},[6]);

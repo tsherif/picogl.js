@@ -23,6 +23,8 @@
 
 "use strict";
 
+var CONSTANTS = require("./constants");
+
 /**
     Storage for uniform data. Data is stored in std140 layout.
 
@@ -51,90 +53,90 @@ function UniformBuffer(gl, layout, usage) {
     for (var i = 0, len = layout.length; i < len; ++i) {
         var type = layout[i];
         switch(type) {
-            case PicoGL.FLOAT:
-            case PicoGL.INT:
-            case PicoGL.UNSIGNED_INT:
-            case PicoGL.BOOL:
+            case CONSTANTS.FLOAT:
+            case CONSTANTS.INT:
+            case CONSTANTS.UNSIGNED_INT:
+            case CONSTANTS.BOOL:
                 this.offsets[i] = this.size;
                 this.sizes[i] = 1;
 
-                if (type === PicoGL.INT) {
-                    this.types[i] = PicoGL.INT;
-                } else if (this.type === PicoGL.UNSIGNED_INT) {
-                    this.types[i] = PicoGL.UNSIGNED_INT;
+                if (type === CONSTANTS.INT) {
+                    this.types[i] = CONSTANTS.INT;
+                } else if (this.type === CONSTANTS.UNSIGNED_INT) {
+                    this.types[i] = CONSTANTS.UNSIGNED_INT;
                 } else {
-                    this.types[i] = PicoGL.FLOAT;
+                    this.types[i] = CONSTANTS.FLOAT;
                 }
 
                 this.size++;
                 break;
-            case PicoGL.FLOAT_VEC2:
-            case PicoGL.INT_VEC2:
-            case PicoGL.UNSIGNED_INT_VEC2:
-            case PicoGL.BOOL_VEC2:
+            case CONSTANTS.FLOAT_VEC2:
+            case CONSTANTS.INT_VEC2:
+            case CONSTANTS.UNSIGNED_INT_VEC2:
+            case CONSTANTS.BOOL_VEC2:
                 this.size += this.size % 2;
                 this.offsets[i] = this.size;
                 this.sizes[i] = 2;
 
-                if (type === PicoGL.INT_VEC2) {
-                    this.types[i] = PicoGL.INT;
-                } else if (this.type === PicoGL.UNSIGNED_INT_VEC2) {
-                    this.types[i] = PicoGL.UNSIGNED_INT;
+                if (type === CONSTANTS.INT_VEC2) {
+                    this.types[i] = CONSTANTS.INT;
+                } else if (this.type === CONSTANTS.UNSIGNED_INT_VEC2) {
+                    this.types[i] = CONSTANTS.UNSIGNED_INT;
                 } else {
-                    this.types[i] = PicoGL.FLOAT;
+                    this.types[i] = CONSTANTS.FLOAT;
                 }
 
                 this.size += 2;
                 break;
-            case PicoGL.FLOAT_VEC3:
-            case PicoGL.INT_VEC3:
-            case PicoGL.UNSIGNED_INT_VEC3:
-            case PicoGL.BOOL_VEC3:
-            case PicoGL.FLOAT_VEC4:
-            case PicoGL.INT_VEC4:
-            case PicoGL.UNSIGNED_INT_VEC4:
-            case PicoGL.BOOL_VEC4:
+            case CONSTANTS.FLOAT_VEC3:
+            case CONSTANTS.INT_VEC3:
+            case CONSTANTS.UNSIGNED_INT_VEC3:
+            case CONSTANTS.BOOL_VEC3:
+            case CONSTANTS.FLOAT_VEC4:
+            case CONSTANTS.INT_VEC4:
+            case CONSTANTS.UNSIGNED_INT_VEC4:
+            case CONSTANTS.BOOL_VEC4:
                 this.size += (4 - this.size % 4) % 4;
                 this.offsets[i] = this.size;
                 this.sizes[i] = 4;
 
-                if (type === PicoGL.INT_VEC4 || type === PicoGL.INT_VEC3) {
-                    this.types[i] = PicoGL.INT;
-                } else if (this.type === PicoGL.UNSIGNED_INT_VEC4 || this.type === PicoGL.UNSIGNED_INT_VEC3) {
-                    this.types[i] = PicoGL.UNSIGNED_INT;
+                if (type === CONSTANTS.INT_VEC4 || type === CONSTANTS.INT_VEC3) {
+                    this.types[i] = CONSTANTS.INT;
+                } else if (this.type === CONSTANTS.UNSIGNED_INT_VEC4 || this.type === CONSTANTS.UNSIGNED_INT_VEC3) {
+                    this.types[i] = CONSTANTS.UNSIGNED_INT;
                 } else {
-                    this.types[i] = PicoGL.FLOAT;
+                    this.types[i] = CONSTANTS.FLOAT;
                 }
 
                 this.size += 4;
                 break;
-            case PicoGL.FLOAT_MAT2:
-            case PicoGL.FLOAT_MAT2x3:
-            case PicoGL.FLOAT_MAT2x4:
+            case CONSTANTS.FLOAT_MAT2:
+            case CONSTANTS.FLOAT_MAT2x3:
+            case CONSTANTS.FLOAT_MAT2x4:
                 this.size += (4 - this.size % 4) % 4;
                 this.offsets[i] = this.size;
                 this.sizes[i] = 8;
-                this.types[i] = PicoGL.FLOAT;
+                this.types[i] = CONSTANTS.FLOAT;
 
                 this.size += 8;
                 break;
-            case PicoGL.FLOAT_MAT3:
-            case PicoGL.FLOAT_MAT3x2:
-            case PicoGL.FLOAT_MAT3x4:
+            case CONSTANTS.FLOAT_MAT3:
+            case CONSTANTS.FLOAT_MAT3x2:
+            case CONSTANTS.FLOAT_MAT3x4:
                 this.size += (4 - this.size % 4) % 4;
                 this.offsets[i] = this.size;
                 this.sizes[i] = 12;
-                this.types[i] = PicoGL.FLOAT;
+                this.types[i] = CONSTANTS.FLOAT;
 
                 this.size += 12;
                 break;
-            case PicoGL.FLOAT_MAT4:
-            case PicoGL.FLOAT_MAT4x2:
-            case PicoGL.FLOAT_MAT4x3:
+            case CONSTANTS.FLOAT_MAT4:
+            case CONSTANTS.FLOAT_MAT4x2:
+            case CONSTANTS.FLOAT_MAT4x3:
                 this.size += (4 - this.size % 4) % 4;
                 this.offsets[i] = this.size;
                 this.sizes[i] = 16;
-                this.types[i] = PicoGL.FLOAT;
+                this.types[i] = CONSTANTS.FLOAT;
 
                 this.size += 16;
                 break;
@@ -146,9 +148,9 @@ function UniformBuffer(gl, layout, usage) {
     this.size += (4 - this.size % 4) % 4;
 
     this.data = new Float32Array(this.size);
-    this.dataViews[PicoGL.FLOAT] = this.data;
-    this.dataViews[PicoGL.INT] = new Int32Array(this.data.buffer);
-    this.dataViews[PicoGL.UNSIGNED_INT] = new Uint32Array(this.data.buffer);
+    this.dataViews[CONSTANTS.FLOAT] = this.data;
+    this.dataViews[CONSTANTS.INT] = new Int32Array(this.data.buffer);
+    this.dataViews[CONSTANTS.UNSIGNED_INT] = new Uint32Array(this.data.buffer);
 
     this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, 0, this.buffer);
     this.gl.bufferData(this.gl.UNIFORM_BUFFER, this.size * 4, this.usage);

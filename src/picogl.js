@@ -23,7 +23,7 @@
 
 "use strict";
 
-var App = require('./app');
+var App = require("./app");
 
 /**
     Global PicoGL module. For convenience, all WebGL enums are stored

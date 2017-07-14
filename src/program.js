@@ -23,8 +23,9 @@
 
 "use strict";
 
-var Shader   = require('./shader');
-var Uniforms = require('./uniforms');
+var CONSTANTS = require("./constants");
+var Shader   = require("./shader");
+var Uniforms = require("./uniforms");
 
 /**
     WebGL program consisting of compiled and linked vertex and fragment
@@ -96,54 +97,54 @@ function Program(gl, vsSource, fsSource, xformFeebackVars) {
         var numElements = uniformInfo.size;
 
         switch (type) {
-            case PicoGL.INT:
-            case PicoGL.SAMPLER_2D:
-            case PicoGL.INT_SAMPLER_2D:
-            case PicoGL.UNSIGNED_INT_SAMPLER_2D:
-            case PicoGL.SAMPLER_2D_SHADOW:
-            case PicoGL.SAMPLER_2D_ARRAY:
-            case PicoGL.INT_SAMPLER_2D_ARRAY:
-            case PicoGL.UNSIGNED_INT_SAMPLER_2D_ARRAY:
-            case PicoGL.SAMPLER_2D_ARRAY_SHADOW:
-            case PicoGL.SAMPLER_CUBE:
-            case PicoGL.INT_SAMPLER_CUBE:
-            case PicoGL.UNSIGNED_INT_SAMPLER_CUBE:
-            case PicoGL.SAMPLER_CUBE_SHADOW:
-            case PicoGL.SAMPLER_3D:
-            case PicoGL.INT_SAMPLER_3D:
-            case PicoGL.UNSIGNED_INT_SAMPLER_3D:
-            case PicoGL.UNSIGNED_INT:
-            case PicoGL.FLOAT:
+            case CONSTANTS.INT:
+            case CONSTANTS.SAMPLER_2D:
+            case CONSTANTS.INT_SAMPLER_2D:
+            case CONSTANTS.UNSIGNED_INT_SAMPLER_2D:
+            case CONSTANTS.SAMPLER_2D_SHADOW:
+            case CONSTANTS.SAMPLER_2D_ARRAY:
+            case CONSTANTS.INT_SAMPLER_2D_ARRAY:
+            case CONSTANTS.UNSIGNED_INT_SAMPLER_2D_ARRAY:
+            case CONSTANTS.SAMPLER_2D_ARRAY_SHADOW:
+            case CONSTANTS.SAMPLER_CUBE:
+            case CONSTANTS.INT_SAMPLER_CUBE:
+            case CONSTANTS.UNSIGNED_INT_SAMPLER_CUBE:
+            case CONSTANTS.SAMPLER_CUBE_SHADOW:
+            case CONSTANTS.SAMPLER_3D:
+            case CONSTANTS.INT_SAMPLER_3D:
+            case CONSTANTS.UNSIGNED_INT_SAMPLER_3D:
+            case CONSTANTS.UNSIGNED_INT:
+            case CONSTANTS.FLOAT:
                 UniformClass = numElements > 1 ? Uniforms.MultiNumericUniform : Uniforms.SingleComponentUniform;
                 break;
-            case PicoGL.BOOL:
+            case CONSTANTS.BOOL:
                 UniformClass = numElements > 1 ? Uniforms.MultiBoolUniform : Uniforms.SingleComponentUniform;
                 break;
-            case PicoGL.FLOAT_VEC2:
-            case PicoGL.INT_VEC2:
-            case PicoGL.UNSIGNED_INT_VEC2:
-            case PicoGL.FLOAT_VEC3:
-            case PicoGL.INT_VEC3:
-            case PicoGL.UNSIGNED_INT_VEC3:
-            case PicoGL.FLOAT_VEC4:
-            case PicoGL.INT_VEC4:
-            case PicoGL.UNSIGNED_INT_VEC4:
+            case CONSTANTS.FLOAT_VEC2:
+            case CONSTANTS.INT_VEC2:
+            case CONSTANTS.UNSIGNED_INT_VEC2:
+            case CONSTANTS.FLOAT_VEC3:
+            case CONSTANTS.INT_VEC3:
+            case CONSTANTS.UNSIGNED_INT_VEC3:
+            case CONSTANTS.FLOAT_VEC4:
+            case CONSTANTS.INT_VEC4:
+            case CONSTANTS.UNSIGNED_INT_VEC4:
                 UniformClass = Uniforms.MultiNumericUniform;
                 break;
-            case PicoGL.BOOL_VEC2:
-            case PicoGL.BOOL_VEC3:
-            case PicoGL.BOOL_VEC4:
+            case CONSTANTS.BOOL_VEC2:
+            case CONSTANTS.BOOL_VEC3:
+            case CONSTANTS.BOOL_VEC4:
                 UniformClass = Uniforms.MultiBoolUniform;
                 break;
-            case PicoGL.FLOAT_MAT2:
-            case PicoGL.FLOAT_MAT3:
-            case PicoGL.FLOAT_MAT4:
-            case PicoGL.FLOAT_MAT2x3:
-            case PicoGL.FLOAT_MAT2x4:
-            case PicoGL.FLOAT_MAT3x2:
-            case PicoGL.FLOAT_MAT3x4:
-            case PicoGL.FLOAT_MAT4x2:
-            case PicoGL.FLOAT_MAT4x3:
+            case CONSTANTS.FLOAT_MAT2:
+            case CONSTANTS.FLOAT_MAT3:
+            case CONSTANTS.FLOAT_MAT4:
+            case CONSTANTS.FLOAT_MAT2x3:
+            case CONSTANTS.FLOAT_MAT2x4:
+            case CONSTANTS.FLOAT_MAT3x2:
+            case CONSTANTS.FLOAT_MAT3x4:
+            case CONSTANTS.FLOAT_MAT4x2:
+            case CONSTANTS.FLOAT_MAT4x3:
                 UniformClass = Uniforms.MatrixUniform;
                 break;
             default:

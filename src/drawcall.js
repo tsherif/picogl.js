@@ -23,6 +23,8 @@
 
 "use strict";
 
+var CONSTANTS = require("./constants");
+
 /**
     A DrawCall represents the program and values of associated
     attributes, uniforms and textures for a single draw call.
@@ -52,17 +54,17 @@ function DrawCall(gl, program, vertexArray, primitive) {
     this.currentTransformFeedback = null;
 
     this.uniformIndices = {};
-    this.uniformNames = new Array(PicoGL.WEBGL_INFO.MAX_UNIFORMS);
-    this.uniformValues = new Array(PicoGL.WEBGL_INFO.MAX_UNIFORMS);
+    this.uniformNames = new Array(CONSTANTS.WEBGL_INFO.MAX_UNIFORMS);
+    this.uniformValues = new Array(CONSTANTS.WEBGL_INFO.MAX_UNIFORMS);
     this.uniformCount = 0;
-    this.uniformBuffers = new Array(PicoGL.WEBGL_INFO.MAX_UNIFORM_BUFFERS);
-    this.uniformBlockNames = new Array(PicoGL.WEBGL_INFO.MAX_UNIFORM_BUFFERS);
+    this.uniformBuffers = new Array(CONSTANTS.WEBGL_INFO.MAX_UNIFORM_BUFFERS);
+    this.uniformBlockNames = new Array(CONSTANTS.WEBGL_INFO.MAX_UNIFORM_BUFFERS);
     this.uniformBlockBases = {};
     this.uniformBlockCount = 0;
     this.samplerIndices = {};
-    this.textures = new Array(PicoGL.WEBGL_INFO.MAX_TEXTURE_UNITS);
+    this.textures = new Array(CONSTANTS.WEBGL_INFO.MAX_TEXTURE_UNITS);
     this.textureCount = 0;
-    this.primitive = primitive !== undefined ? primitive : PicoGL.TRIANGLES;
+    this.primitive = primitive !== undefined ? primitive : CONSTANTS.TRIANGLES;
 }
 
 DrawCall.prototype.transformFeedback = function(transformFeedback) {

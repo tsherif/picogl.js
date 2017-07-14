@@ -23,6 +23,8 @@
 
 "use strict";
 
+var CONSTANTS = require("./constants");
+
 /**
     Cubemap for environment mapping.
 
@@ -38,13 +40,13 @@
     @prop {Object} appState Tracked GL state.
 */
 function Cubemap(gl, appState, options) {
-    options = options || PicoGL.DUMMY_OBJECT;
+    options = options || CONSTANTS.DUMMY_OBJECT;
 
     this.gl = gl;
     this.texture = gl.createTexture();
     this.format = options.format !== undefined ? options.format : gl.RGBA;
     this.type = options.type !== undefined ? options.type : gl.UNSIGNED_BYTE;
-    this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : PicoGL.TEXTURE_INTERNAL_FORMAT[this.type][this.format];
+    this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : CONSTANTS.TEXTURE_INTERNAL_FORMAT[this.type][this.format];
     this.appState = appState;
     if (appState.freeTextureUnits.length > 0) {
         this.unit = appState.freeTextureUnits.pop();

@@ -23,6 +23,8 @@
 
 "use strict";
 
+var CONSTANTS = require("./constants");
+
 /**
     General-purpose texture.
 
@@ -41,7 +43,7 @@
     @prop {Object} appState Tracked GL state.
 */
 function Texture(gl, appState, binding, image, width, height, depth, is3D, options) {
-    options = options || PicoGL.DUMMY_OBJECT;
+    options = options || CONSTANTS.DUMMY_OBJECT;
 
     this.gl = gl;
     this.binding = binding;
@@ -51,7 +53,7 @@ function Texture(gl, appState, binding, image, width, height, depth, is3D, optio
     this.depth = -1;
     this.format = options.format !== undefined ? options.format : gl.RGBA;
     this.type = options.type !== undefined ? options.type : gl.UNSIGNED_BYTE;
-    this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : PicoGL.TEXTURE_INTERNAL_FORMAT[this.type][this.format];
+    this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : CONSTANTS.TEXTURE_INTERNAL_FORMAT[this.type][this.format];
     this.is3D = is3D;
     this.appState = appState;
     if (appState.freeTextureUnits.length > 0) {
