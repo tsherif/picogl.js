@@ -23,6 +23,8 @@
 
 "use strict";
 
+var CONSTANTS = require("./constants");
+
 /**
     Storage for vertex data.
 
@@ -40,19 +42,19 @@
 function VertexBuffer(gl, type, itemSize, data, usage, indexArray) {
     var numColumns;
     switch(type) {
-        case PicoGL.FLOAT_MAT4:
-        case PicoGL.FLOAT_MAT4x2:
-        case PicoGL.FLOAT_MAT4x3:
+        case CONSTANTS.FLOAT_MAT4:
+        case CONSTANTS.FLOAT_MAT4x2:
+        case CONSTANTS.FLOAT_MAT4x3:
             numColumns = 4;
             break;
-        case PicoGL.FLOAT_MAT3:
-        case PicoGL.FLOAT_MAT3x2:
-        case PicoGL.FLOAT_MAT3x4:
+        case CONSTANTS.FLOAT_MAT3:
+        case CONSTANTS.FLOAT_MAT3x2:
+        case CONSTANTS.FLOAT_MAT3x4:
             numColumns = 3;
             break;
-        case PicoGL.FLOAT_MAT2:
-        case PicoGL.FLOAT_MAT2x3:
-        case PicoGL.FLOAT_MAT2x4:
+        case CONSTANTS.FLOAT_MAT2:
+        case CONSTANTS.FLOAT_MAT2x3:
+        case CONSTANTS.FLOAT_MAT2x4:
             numColumns = 2;
             break;
         default:
@@ -60,30 +62,30 @@ function VertexBuffer(gl, type, itemSize, data, usage, indexArray) {
     }
 
     switch(type) {
-        case PicoGL.FLOAT_MAT4:
-        case PicoGL.FLOAT_MAT3x4:
-        case PicoGL.FLOAT_MAT2x4:
+        case CONSTANTS.FLOAT_MAT4:
+        case CONSTANTS.FLOAT_MAT3x4:
+        case CONSTANTS.FLOAT_MAT2x4:
             itemSize = 4;
-            type = PicoGL.FLOAT;
+            type = CONSTANTS.FLOAT;
             break;
-        case PicoGL.FLOAT_MAT3:
-        case PicoGL.FLOAT_MAT4x3:
-        case PicoGL.FLOAT_MAT2x3:
+        case CONSTANTS.FLOAT_MAT3:
+        case CONSTANTS.FLOAT_MAT4x3:
+        case CONSTANTS.FLOAT_MAT2x3:
             itemSize = 3;
-            type = PicoGL.FLOAT;
+            type = CONSTANTS.FLOAT;
             break;
-        case PicoGL.FLOAT_MAT2:
-        case PicoGL.FLOAT_MAT3x2:
-        case PicoGL.FLOAT_MAT4x2:
+        case CONSTANTS.FLOAT_MAT2:
+        case CONSTANTS.FLOAT_MAT3x2:
+        case CONSTANTS.FLOAT_MAT4x2:
             itemSize = 2;
-            type = PicoGL.FLOAT;
+            type = CONSTANTS.FLOAT;
             break;
     }
 
     var dataLength;
     if (typeof data === "number") {
         dataLength = data;
-        data *= PicoGL.TYPE_SIZE[type];
+        data *= CONSTANTS.TYPE_SIZE[type];
     } else {
         dataLength = data.length;
     }

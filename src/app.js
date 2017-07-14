@@ -22,17 +22,18 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 "use strict";
-var Cubemap           = require('./cubemap');
-var DrawCall          = require('./drawcall');
-var Framebuffer       = require('./framebuffer');
-var Program           = require('./program');
-var Shader            = require('./shader');
-var Texture           = require('./texture');
-var Timer             = require('./timer');
-var TransformFeedback = require('./transformfeedback');
-var UniformBuffer     = require('./uniformbuffer');
-var VertexArray       = require('./vertexarray');
-var VertexBuffer      = require('./vertexbuffer');
+var CONSTANTS         = require("./constants");
+var Cubemap           = require("./cubemap");
+var DrawCall          = require("./drawcall");
+var Framebuffer       = require("./framebuffer");
+var Program           = require("./program");
+var Shader            = require("./shader");
+var Texture           = require("./texture");
+var Timer             = require("./timer");
+var TransformFeedback = require("./transformfeedback");
+var UniformBuffer     = require("./uniformbuffer");
+var VertexArray       = require("./vertexarray");
+var VertexBuffer      = require("./vertexbuffer");
 
 
 /**
@@ -69,14 +70,14 @@ function App(canvas, contextAttributes) {
         vertexArray: null,
         transformFeedback: null,
         activeTexture: -1,
-        textures: new Array(PicoGL.WEBGL_INFO.MAX_TEXTURE_UNITS),
+        textures: new Array(CONSTANTS.WEBGL_INFO.MAX_TEXTURE_UNITS),
         textureCount: 0,
         freeTextureUnits: [],
         // TODO(Tarek): UBO state currently not tracked, due bug
         // with UBO state becoming corrupted between frames in Chrome
         // https://bugs.chromium.org/p/chromium/issues/detail?id=722060
         // Enable UBO state tracking when that's fixed.
-        uniformBuffers: new Array(PicoGL.WEBGL_INFO.MAX_UNIFORM_BUFFERS),
+        uniformBuffers: new Array(CONSTANTS.WEBGL_INFO.MAX_UNIFORM_BUFFERS),
         uniformBufferCount: 0,
         freeUniformBufferBases: [],
         drawFramebuffer: null,

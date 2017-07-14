@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.4.0 
+PicoGL.js v0.4.1 
 
 The MIT License (MIT)
 
@@ -48,17 +48,18 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
 "use strict";
-var Cubemap           = require('./cubemap');
-var DrawCall          = require('./drawcall');
-var Framebuffer       = require('./framebuffer');
-var Program           = require('./program');
-var Shader            = require('./shader');
-var Texture           = require('./texture');
-var Timer             = require('./timer');
-var TransformFeedback = require('./transformfeedback');
-var UniformBuffer     = require('./uniformbuffer');
-var VertexArray       = require('./vertexarray');
-var VertexBuffer      = require('./vertexbuffer');
+var CONSTANTS         = require("./constants");
+var Cubemap           = require("./cubemap");
+var DrawCall          = require("./drawcall");
+var Framebuffer       = require("./framebuffer");
+var Program           = require("./program");
+var Shader            = require("./shader");
+var Texture           = require("./texture");
+var Timer             = require("./timer");
+var TransformFeedback = require("./transformfeedback");
+var UniformBuffer     = require("./uniformbuffer");
+var VertexArray       = require("./vertexarray");
+var VertexBuffer      = require("./vertexbuffer");
 
 
 /**
@@ -95,14 +96,14 @@ function App(canvas, contextAttributes) {
         vertexArray: null,
         transformFeedback: null,
         activeTexture: -1,
-        textures: new Array(PicoGL.WEBGL_INFO.MAX_TEXTURE_UNITS),
+        textures: new Array(CONSTANTS.WEBGL_INFO.MAX_TEXTURE_UNITS),
         textureCount: 0,
         freeTextureUnits: [],
         // TODO(Tarek): UBO state currently not tracked, due bug
         // with UBO state becoming corrupted between frames in Chrome
         // https://bugs.chromium.org/p/chromium/issues/detail?id=722060
         // Enable UBO state tracking when that's fixed.
-        uniformBuffers: new Array(PicoGL.WEBGL_INFO.MAX_UNIFORM_BUFFERS),
+        uniformBuffers: new Array(CONSTANTS.WEBGL_INFO.MAX_UNIFORM_BUFFERS),
         uniformBufferCount: 0,
         freeUniformBufferBases: [],
         drawFramebuffer: null,
@@ -921,7 +922,7 @@ App.prototype.timerReady = function() {
 
 module.exports = App;
 
-},{"./cubemap":2,"./drawcall":3,"./framebuffer":4,"./program":6,"./shader":7,"./texture":8,"./timer":9,"./transformfeedback":10,"./uniformbuffer":11,"./vertexarray":13,"./vertexbuffer":14}],2:[function(require,module,exports){
+},{"./constants":2,"./cubemap":3,"./drawcall":4,"./framebuffer":5,"./program":7,"./shader":8,"./texture":9,"./timer":10,"./transformfeedback":11,"./uniformbuffer":12,"./vertexarray":14,"./vertexbuffer":15}],2:[function(require,module,exports){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -947,10 +948,86 @@ module.exports = App;
 
 "use strict";
 
+var CONSTANTS = {};
+var canvas = document.createElement("canvas");
+var gl = canvas.getContext("webgl2");
+
+if (gl) {
+    for (var enumName in gl) {
+        if (enumName.match(/^[A-Z0-9_x]+$/) && typeof(gl[enumName]) === "number") {
+            CONSTANTS[enumName] = gl[enumName];
+        }
+    }
+}
+
+
+CONSTANTS.TEXTURE_INTERNAL_FORMAT = {};
+var UNSIGNED_BYTE = CONSTANTS.TEXTURE_INTERNAL_FORMAT[gl.UNSIGNED_BYTE] = {};
+UNSIGNED_BYTE[gl.RED] = gl.R8;
+UNSIGNED_BYTE[gl.RG] = gl.RG8;
+UNSIGNED_BYTE[gl.RGB] = gl.RGB8;
+UNSIGNED_BYTE[gl.RGBA] = gl.RGBA8;
+
+var UNSIGNED_SHORT = CONSTANTS.TEXTURE_INTERNAL_FORMAT[gl.UNSIGNED_SHORT] = {};
+UNSIGNED_SHORT[gl.DEPTH_COMPONENT] = gl.DEPTH_COMPONENT16;
+
+var FLOAT = CONSTANTS.TEXTURE_INTERNAL_FORMAT[gl.FLOAT] = {};
+FLOAT[gl.RED] = gl.R16F;
+FLOAT[gl.RG] = gl.RG16F;
+FLOAT[gl.RGB] = gl.RGB16F;
+FLOAT[gl.RGBA] = gl.RGBA16F;
+FLOAT[gl.DEPTH_COMPONENT] = gl.DEPTH_COMPONENT32F;
+
+CONSTANTS.TYPE_SIZE = {};
+CONSTANTS.TYPE_SIZE[gl.BYTE]              = 1;
+CONSTANTS.TYPE_SIZE[gl.UNSIGNED_BYTE]     = 1;
+CONSTANTS.TYPE_SIZE[gl.SHORT]             = 2;
+CONSTANTS.TYPE_SIZE[gl.UNSIGNED_SHORT]    = 2;
+CONSTANTS.TYPE_SIZE[gl.INT]               = 4;
+CONSTANTS.TYPE_SIZE[gl.UNSIGNED_INT]      = 4;
+CONSTANTS.TYPE_SIZE[gl.FLOAT]             = 4;
+
+CONSTANTS.WEBGL_INFO = {};
+CONSTANTS.WEBGL_INFO.MAX_TEXTURE_UNITS = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
+CONSTANTS.WEBGL_INFO.MAX_UNIFORM_BUFFERS = gl.getParameter(gl.MAX_UNIFORM_BUFFER_BINDINGS);
+
+CONSTANTS.DUMMY_OBJECT = {};
+
+module.exports = CONSTANTS;
+
+},{}],3:[function(require,module,exports){
+///////////////////////////////////////////////////////////////////////////////////
+// The MIT License (MIT)
+//
+// Copyright (c) 2017 Tarek Sherif
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy of
+// this software and associated documentation files (the "Software"), to deal in
+// the Software without restriction, including without limitation the rights to
+// use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+// the Software, and to permit persons to whom the Software is furnished to do so,
+// subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+// FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+// COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+// IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+// CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+///////////////////////////////////////////////////////////////////////////////////
+
+"use strict";
+
+var CONSTANTS = require("./constants");
+
 /**
     Cubemap for environment mapping.
 
     @class
+    @hideconstructor
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLTexture} texture Handle to the texture.
     @prop {GLEnum} type Type of data stored in the texture.
@@ -961,13 +1038,13 @@ module.exports = App;
     @prop {Object} appState Tracked GL state.
 */
 function Cubemap(gl, appState, options) {
-    options = options || PicoGL.DUMMY_OBJECT;
+    options = options || CONSTANTS.DUMMY_OBJECT;
 
     this.gl = gl;
     this.texture = gl.createTexture();
     this.format = options.format !== undefined ? options.format : gl.RGBA;
     this.type = options.type !== undefined ? options.type : gl.UNSIGNED_BYTE;
-    this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : PicoGL.TEXTURE_INTERNAL_FORMAT[this.type][this.format];
+    this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : CONSTANTS.TEXTURE_INTERNAL_FORMAT[this.type][this.format];
     this.appState = appState;
     if (appState.freeTextureUnits.length > 0) {
         this.unit = appState.freeTextureUnits.pop();
@@ -1068,7 +1145,7 @@ Cubemap.prototype.bind = function() {
 
 module.exports = Cubemap;
 
-},{}],3:[function(require,module,exports){
+},{"./constants":2}],4:[function(require,module,exports){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -1094,11 +1171,14 @@ module.exports = Cubemap;
 
 "use strict";
 
+var CONSTANTS = require("./constants");
+
 /**
     A DrawCall represents the program and values of associated
     attributes, uniforms and textures for a single draw call.
 
     @class
+    @hideconstructor
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {Program} currentProgram The program to use for this draw call.
     @prop {VertexArray} currentVertexArray Vertex array to use for this draw call.
@@ -1122,17 +1202,17 @@ function DrawCall(gl, program, vertexArray, primitive) {
     this.currentTransformFeedback = null;
 
     this.uniformIndices = {};
-    this.uniformNames = new Array(PicoGL.WEBGL_INFO.MAX_UNIFORMS);
-    this.uniformValues = new Array(PicoGL.WEBGL_INFO.MAX_UNIFORMS);
+    this.uniformNames = new Array(CONSTANTS.WEBGL_INFO.MAX_UNIFORMS);
+    this.uniformValues = new Array(CONSTANTS.WEBGL_INFO.MAX_UNIFORMS);
     this.uniformCount = 0;
-    this.uniformBuffers = new Array(PicoGL.WEBGL_INFO.MAX_UNIFORM_BUFFERS);
-    this.uniformBlockNames = new Array(PicoGL.WEBGL_INFO.MAX_UNIFORM_BUFFERS);
+    this.uniformBuffers = new Array(CONSTANTS.WEBGL_INFO.MAX_UNIFORM_BUFFERS);
+    this.uniformBlockNames = new Array(CONSTANTS.WEBGL_INFO.MAX_UNIFORM_BUFFERS);
     this.uniformBlockBases = {};
     this.uniformBlockCount = 0;
     this.samplerIndices = {};
-    this.textures = new Array(PicoGL.WEBGL_INFO.MAX_TEXTURE_UNITS);
+    this.textures = new Array(CONSTANTS.WEBGL_INFO.MAX_TEXTURE_UNITS);
     this.textureCount = 0;
-    this.primitive = primitive !== undefined ? primitive : PicoGL.TRIANGLES;
+    this.primitive = primitive !== undefined ? primitive : CONSTANTS.TRIANGLES;
 }
 
 DrawCall.prototype.transformFeedback = function(transformFeedback) {
@@ -1266,7 +1346,7 @@ DrawCall.prototype.draw = function(state) {
 
 module.exports = DrawCall;
 
-},{}],4:[function(require,module,exports){
+},{"./constants":2}],5:[function(require,module,exports){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -1292,12 +1372,14 @@ module.exports = DrawCall;
 
 "use strict";
 
-var Texture = require('./texture');
+var CONSTANTS = require("./constants");
+var Texture = require("./texture");
 
 /**
     Storage for vertex data.
 
     @class
+    @hideconstructor
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLFramebuffer} framebuffer Handle to the framebuffer.
     @prop {number} width The width of the framebuffer.
@@ -1355,7 +1437,7 @@ Framebuffer.prototype.colorTarget = function(index, options) {
     options = options || {};
     options.type = options.type || this.gl.UNSIGNED_BYTE;
     options.format = options.format || this.gl.RGBA;
-    options.internalFormat = options.internalFormat || PicoGL.TEXTURE_INTERNAL_FORMAT[options.type][options.format];
+    options.internalFormat = options.internalFormat || CONSTANTS.TEXTURE_INTERNAL_FORMAT[options.type][options.format];
     options.minFilter = options.minFilter || this.gl.NEAREST;
     options.magFilter = options.magFilter || this.gl.NEAREST;
     options.wrapS = options.wrapS || this.gl.CLAMP_TO_EDGE;
@@ -1412,7 +1494,7 @@ Framebuffer.prototype.depthTarget = function(options) {
     options = options || {};
     options.format = this.gl.DEPTH_COMPONENT;
     options.type = options.type || this.gl.UNSIGNED_SHORT;
-    options.internalFormat = options.internalFormat || PicoGL.TEXTURE_INTERNAL_FORMAT[options.type][options.format];
+    options.internalFormat = options.internalFormat || CONSTANTS.TEXTURE_INTERNAL_FORMAT[options.type][options.format];
     options.minFilter = options.minFilter || this.gl.NEAREST;
     options.magFilter = options.magFilter || this.gl.NEAREST;
     options.wrapS = options.wrapS || this.gl.CLAMP_TO_EDGE;
@@ -1550,7 +1632,7 @@ Framebuffer.prototype.restoreState = function(framebuffer) {
 
 module.exports = Framebuffer;
 
-},{"./texture":8}],5:[function(require,module,exports){
+},{"./constants":2,"./texture":9}],6:[function(require,module,exports){
 (function (global){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
@@ -1577,7 +1659,7 @@ module.exports = Framebuffer;
 
 "use strict";
 
-var App = require('./app');
+var App = require("./app");
 
 /**
     Global PicoGL module. For convenience, all WebGL enums are stored
@@ -1585,168 +1667,8 @@ var App = require('./app');
 
     @namespace PicoGL
 */
-var PicoGL = global.PicoGL = {
-    version: "0.4.0"
-};
-
-var canvas = document.createElement("canvas");
-var gl = canvas.getContext("webgl2");
-
-if (gl) {
-    for (var enumName in gl) {
-        if (enumName.match(/^[A-Z0-9_x]+$/) && typeof(gl[enumName]) === "number") {
-            PicoGL[enumName] = gl[enumName];
-        }
-    }
-}
-
-
-PicoGL.TEXTURE_INTERNAL_FORMAT = {};
-var UNSIGNED_BYTE = PicoGL.TEXTURE_INTERNAL_FORMAT[gl.UNSIGNED_BYTE] = {};
-UNSIGNED_BYTE[gl.RED] = gl.R8;
-UNSIGNED_BYTE[gl.RG] = gl.RG8;
-UNSIGNED_BYTE[gl.RGB] = gl.RGB8;
-UNSIGNED_BYTE[gl.RGBA] = gl.RGBA8;
-
-var UNSIGNED_SHORT = PicoGL.TEXTURE_INTERNAL_FORMAT[gl.UNSIGNED_SHORT] = {};
-UNSIGNED_SHORT[gl.DEPTH_COMPONENT] = gl.DEPTH_COMPONENT16;
-
-var FLOAT = PicoGL.TEXTURE_INTERNAL_FORMAT[gl.FLOAT] = {};
-FLOAT[gl.RED] = gl.R16F;
-FLOAT[gl.RG] = gl.RG16F;
-FLOAT[gl.RGB] = gl.RGB16F;
-FLOAT[gl.RGBA] = gl.RGBA16F;
-FLOAT[gl.DEPTH_COMPONENT] = gl.DEPTH_COMPONENT32F;
-
-PicoGL.TYPE_SIZE = {};
-PicoGL.TYPE_SIZE[gl.BYTE]              = 1;
-PicoGL.TYPE_SIZE[gl.UNSIGNED_BYTE]     = 1;
-PicoGL.TYPE_SIZE[gl.SHORT]             = 2;
-PicoGL.TYPE_SIZE[gl.UNSIGNED_SHORT]    = 2;
-PicoGL.TYPE_SIZE[gl.INT]               = 4;
-PicoGL.TYPE_SIZE[gl.UNSIGNED_INT]      = 4;
-PicoGL.TYPE_SIZE[gl.FLOAT]             = 4;
-
-PicoGL.UNIFORM_FUNC_NAME = {};
-PicoGL.UNIFORM_FUNC_NAME[gl.BOOL] = "uniform1i";
-PicoGL.UNIFORM_FUNC_NAME[gl.INT] = "uniform1i";
-PicoGL.UNIFORM_FUNC_NAME[gl.SAMPLER_2D] = "uniform1i";
-PicoGL.UNIFORM_FUNC_NAME[gl.INT_SAMPLER_2D] = "uniform1i";
-PicoGL.UNIFORM_FUNC_NAME[gl.UNSIGNED_INT_SAMPLER_2D] = "uniform1i";
-PicoGL.UNIFORM_FUNC_NAME[gl.SAMPLER_2D_SHADOW] = "uniform1i";
-PicoGL.UNIFORM_FUNC_NAME[gl.SAMPLER_2D_ARRAY] = "uniform1i";
-PicoGL.UNIFORM_FUNC_NAME[gl.INT_SAMPLER_2D_ARRAY] = "uniform1i";
-PicoGL.UNIFORM_FUNC_NAME[gl.UNSIGNED_INT_SAMPLER_2D_ARRAY] = "uniform1i";
-PicoGL.UNIFORM_FUNC_NAME[gl.SAMPLER_2D_ARRAY_SHADOW] = "uniform1i";
-PicoGL.UNIFORM_FUNC_NAME[gl.SAMPLER_CUBE] = "uniform1i";
-PicoGL.UNIFORM_FUNC_NAME[gl.INT_SAMPLER_CUBE] = "uniform1i";
-PicoGL.UNIFORM_FUNC_NAME[gl.UNSIGNED_INT_SAMPLER_CUBE] = "uniform1i";
-PicoGL.UNIFORM_FUNC_NAME[gl.SAMPLER_CUBE_SHADOW] = "uniform1i";
-PicoGL.UNIFORM_FUNC_NAME[gl.SAMPLER_3D] = "uniform1i";
-PicoGL.UNIFORM_FUNC_NAME[gl.INT_SAMPLER_3D] = "uniform1i";
-PicoGL.UNIFORM_FUNC_NAME[gl.UNSIGNED_INT_SAMPLER_3D] = "uniform1i";
-PicoGL.UNIFORM_FUNC_NAME[gl.UNSIGNED_INT] = "uniform1ui";
-PicoGL.UNIFORM_FUNC_NAME[gl.FLOAT] = "uniform1f";
-PicoGL.UNIFORM_FUNC_NAME[gl.FLOAT_VEC2] = "uniform2f";
-PicoGL.UNIFORM_FUNC_NAME[gl.FLOAT_VEC3] = "uniform3f";
-PicoGL.UNIFORM_FUNC_NAME[gl.FLOAT_VEC4] = "uniform4f";
-PicoGL.UNIFORM_FUNC_NAME[gl.INT_VEC2] = "uniform2i";
-PicoGL.UNIFORM_FUNC_NAME[gl.INT_VEC3] = "uniform3i";
-PicoGL.UNIFORM_FUNC_NAME[gl.INT_VEC4] = "uniform4i";
-PicoGL.UNIFORM_FUNC_NAME[gl.UNSIGNED_INT_VEC2] = "uniform2ui";
-PicoGL.UNIFORM_FUNC_NAME[gl.UNSIGNED_INT_VEC3] = "uniform3ui";
-PicoGL.UNIFORM_FUNC_NAME[gl.UNSIGNED_INT_VEC4] = "uniform4ui";
-PicoGL.UNIFORM_FUNC_NAME[gl.BOOL_VEC2] = "uniform2i";
-PicoGL.UNIFORM_FUNC_NAME[gl.BOOL_VEC3] = "uniform3i";
-PicoGL.UNIFORM_FUNC_NAME[gl.BOOL_VEC4] = "uniform4i";
-PicoGL.UNIFORM_FUNC_NAME[gl.FLOAT_MAT2] = "uniformMatrix2fv";
-PicoGL.UNIFORM_FUNC_NAME[gl.FLOAT_MAT3] = "uniformMatrix3fv";
-PicoGL.UNIFORM_FUNC_NAME[gl.FLOAT_MAT4] = "uniformMatrix4fv";
-PicoGL.UNIFORM_FUNC_NAME[gl.FLOAT_MAT2x3] = "uniformMatrix2x3fv";
-PicoGL.UNIFORM_FUNC_NAME[gl.FLOAT_MAT2x4] = "uniformMatrix2x4fv";
-PicoGL.UNIFORM_FUNC_NAME[gl.FLOAT_MAT3x2] = "uniformMatrix3x2fv";
-PicoGL.UNIFORM_FUNC_NAME[gl.FLOAT_MAT3x4] = "uniformMatrix3x4fv";
-PicoGL.UNIFORM_FUNC_NAME[gl.FLOAT_MAT4x2] = "uniformMatrix4x2fv";
-PicoGL.UNIFORM_FUNC_NAME[gl.FLOAT_MAT4x3] = "uniformMatrix4x3fv";
-
-PicoGL.UNIFORM_COMPONENT_COUNT = {};
-PicoGL.UNIFORM_COMPONENT_COUNT[gl.BOOL] = 1;
-PicoGL.UNIFORM_COMPONENT_COUNT[gl.INT] = 1;
-PicoGL.UNIFORM_COMPONENT_COUNT[gl.SAMPLER_2D] = 1;
-PicoGL.UNIFORM_COMPONENT_COUNT[gl.INT_SAMPLER_2D] = 1;
-PicoGL.UNIFORM_COMPONENT_COUNT[gl.UNSIGNED_INT_SAMPLER_2D] = 1;
-PicoGL.UNIFORM_COMPONENT_COUNT[gl.SAMPLER_2D_SHADOW] = 1;
-PicoGL.UNIFORM_COMPONENT_COUNT[gl.SAMPLER_2D_ARRAY] = 1;
-PicoGL.UNIFORM_COMPONENT_COUNT[gl.INT_SAMPLER_2D_ARRAY] = 1;
-PicoGL.UNIFORM_COMPONENT_COUNT[gl.UNSIGNED_INT_SAMPLER_2D_ARRAY] = 1;
-PicoGL.UNIFORM_COMPONENT_COUNT[gl.SAMPLER_2D_ARRAY_SHADOW] = 1;
-PicoGL.UNIFORM_COMPONENT_COUNT[gl.SAMPLER_CUBE] = 1;
-PicoGL.UNIFORM_COMPONENT_COUNT[gl.INT_SAMPLER_CUBE] = 1;
-PicoGL.UNIFORM_COMPONENT_COUNT[gl.UNSIGNED_INT_SAMPLER_CUBE] = 1;
-PicoGL.UNIFORM_COMPONENT_COUNT[gl.SAMPLER_CUBE_SHADOW] = 1;
-PicoGL.UNIFORM_COMPONENT_COUNT[gl.SAMPLER_3D] = 1;
-PicoGL.UNIFORM_COMPONENT_COUNT[gl.INT_SAMPLER_3D] = 1;
-PicoGL.UNIFORM_COMPONENT_COUNT[gl.UNSIGNED_INT_SAMPLER_3D] = 1;
-PicoGL.UNIFORM_COMPONENT_COUNT[gl.UNSIGNED_INT] = 1;
-PicoGL.UNIFORM_COMPONENT_COUNT[gl.FLOAT] = 1;
-PicoGL.UNIFORM_COMPONENT_COUNT[gl.FLOAT_VEC2] = 2;
-PicoGL.UNIFORM_COMPONENT_COUNT[gl.FLOAT_VEC3] = 3;
-PicoGL.UNIFORM_COMPONENT_COUNT[gl.FLOAT_VEC4] = 4;
-PicoGL.UNIFORM_COMPONENT_COUNT[gl.INT_VEC2] = 2;
-PicoGL.UNIFORM_COMPONENT_COUNT[gl.INT_VEC3] = 3;
-PicoGL.UNIFORM_COMPONENT_COUNT[gl.INT_VEC4] = 4;
-PicoGL.UNIFORM_COMPONENT_COUNT[gl.UNSIGNED_INT_VEC2] = 2;
-PicoGL.UNIFORM_COMPONENT_COUNT[gl.UNSIGNED_INT_VEC3] = 3;
-PicoGL.UNIFORM_COMPONENT_COUNT[gl.UNSIGNED_INT_VEC4] = 4;
-PicoGL.UNIFORM_COMPONENT_COUNT[gl.BOOL_VEC2] = 2;
-PicoGL.UNIFORM_COMPONENT_COUNT[gl.BOOL_VEC3] = 3;
-PicoGL.UNIFORM_COMPONENT_COUNT[gl.BOOL_VEC4] = 4;
-PicoGL.UNIFORM_COMPONENT_COUNT[gl.FLOAT_MAT2] = 4;
-PicoGL.UNIFORM_COMPONENT_COUNT[gl.FLOAT_MAT3] = 9;
-PicoGL.UNIFORM_COMPONENT_COUNT[gl.FLOAT_MAT4] = 16;
-PicoGL.UNIFORM_COMPONENT_COUNT[gl.FLOAT_MAT2x3] = 6;
-PicoGL.UNIFORM_COMPONENT_COUNT[gl.FLOAT_MAT2x4] = 8;
-PicoGL.UNIFORM_COMPONENT_COUNT[gl.FLOAT_MAT3x2] = 6;
-PicoGL.UNIFORM_COMPONENT_COUNT[gl.FLOAT_MAT3x4] = 12;
-PicoGL.UNIFORM_COMPONENT_COUNT[gl.FLOAT_MAT4x2] = 8;
-PicoGL.UNIFORM_COMPONENT_COUNT[gl.FLOAT_MAT4x3] = 12;
-
-PicoGL.UNIFORM_CACHE_CLASS = {};
-PicoGL.UNIFORM_CACHE_CLASS[gl.INT] = Int32Array;
-PicoGL.UNIFORM_CACHE_CLASS[gl.SAMPLER_2D] = Int32Array;
-PicoGL.UNIFORM_CACHE_CLASS[gl.INT_SAMPLER_2D] = Int32Array;
-PicoGL.UNIFORM_CACHE_CLASS[gl.UNSIGNED_INT_SAMPLER_2D] = Int32Array;
-PicoGL.UNIFORM_CACHE_CLASS[gl.SAMPLER_2D_SHADOW] = Int32Array;
-PicoGL.UNIFORM_CACHE_CLASS[gl.SAMPLER_2D_ARRAY] = Int32Array;
-PicoGL.UNIFORM_CACHE_CLASS[gl.INT_SAMPLER_2D_ARRAY] = Int32Array;
-PicoGL.UNIFORM_CACHE_CLASS[gl.UNSIGNED_INT_SAMPLER_2D_ARRAY] = Int32Array;
-PicoGL.UNIFORM_CACHE_CLASS[gl.SAMPLER_2D_ARRAY_SHADOW] = Int32Array;
-PicoGL.UNIFORM_CACHE_CLASS[gl.SAMPLER_CUBE] = Int32Array;
-PicoGL.UNIFORM_CACHE_CLASS[gl.INT_SAMPLER_CUBE] = Int32Array;
-PicoGL.UNIFORM_CACHE_CLASS[gl.UNSIGNED_INT_SAMPLER_CUBE] = Int32Array;
-PicoGL.UNIFORM_CACHE_CLASS[gl.SAMPLER_CUBE_SHADOW] = Int32Array;
-PicoGL.UNIFORM_CACHE_CLASS[gl.SAMPLER_3D] = Int32Array;
-PicoGL.UNIFORM_CACHE_CLASS[gl.INT_SAMPLER_3D] = Int32Array;
-PicoGL.UNIFORM_CACHE_CLASS[gl.UNSIGNED_INT_SAMPLER_3D] = Int32Array;
-PicoGL.UNIFORM_CACHE_CLASS[gl.UNSIGNED_INT] = Uint32Array;
-PicoGL.UNIFORM_CACHE_CLASS[gl.FLOAT] = Float32Array;
-PicoGL.UNIFORM_CACHE_CLASS[gl.FLOAT_VEC2] = Float32Array;
-PicoGL.UNIFORM_CACHE_CLASS[gl.FLOAT_VEC3] = Float32Array;
-PicoGL.UNIFORM_CACHE_CLASS[gl.FLOAT_VEC4] = Float32Array;
-PicoGL.UNIFORM_CACHE_CLASS[gl.INT_VEC2] = Int32Array;
-PicoGL.UNIFORM_CACHE_CLASS[gl.INT_VEC3] = Int32Array;
-PicoGL.UNIFORM_CACHE_CLASS[gl.INT_VEC4] = Int32Array;
-PicoGL.UNIFORM_CACHE_CLASS[gl.UNSIGNED_INT_VEC2] = Uint32Array;
-PicoGL.UNIFORM_CACHE_CLASS[gl.UNSIGNED_INT_VEC3] = Uint32Array;
-PicoGL.UNIFORM_CACHE_CLASS[gl.UNSIGNED_INT_VEC4] = Uint32Array;
-
-
-PicoGL.WEBGL_INFO = {};
-PicoGL.WEBGL_INFO.MAX_TEXTURE_UNITS = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
-PicoGL.WEBGL_INFO.MAX_UNIFORM_BUFFERS = gl.getParameter(gl.MAX_UNIFORM_BUFFER_BINDINGS);
-
-
-PicoGL.DUMMY_OBJECT = {};
+var PicoGL = global.PicoGL = require("./constants");    
+PicoGL.version = "0.4.1";
 
 /**
     Create a PicoGL app. The app is the primary entry point to PicoGL. It stores
@@ -1763,7 +1685,7 @@ PicoGL.createApp = function(canvas, contextAttributes) {
 module.exports = PicoGL;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./app":1}],6:[function(require,module,exports){
+},{"./app":1,"./constants":2}],7:[function(require,module,exports){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -1789,14 +1711,16 @@ module.exports = PicoGL;
 
 "use strict";
 
-var Shader   = require('./shader');
-var Uniforms = require('./uniforms');
+var CONSTANTS = require("./constants");
+var Shader   = require("./shader");
+var Uniforms = require("./uniforms");
 
 /**
     WebGL program consisting of compiled and linked vertex and fragment
     shaders.
 
     @class
+    @hideconstructor
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLProgram} program The WebGL program.
     @prop {boolean} transformFeedback Whether this program is set up for transform feedback.
@@ -1861,54 +1785,54 @@ function Program(gl, vsSource, fsSource, xformFeebackVars) {
         var numElements = uniformInfo.size;
 
         switch (type) {
-            case PicoGL.INT:
-            case PicoGL.SAMPLER_2D:
-            case PicoGL.INT_SAMPLER_2D:
-            case PicoGL.UNSIGNED_INT_SAMPLER_2D:
-            case PicoGL.SAMPLER_2D_SHADOW:
-            case PicoGL.SAMPLER_2D_ARRAY:
-            case PicoGL.INT_SAMPLER_2D_ARRAY:
-            case PicoGL.UNSIGNED_INT_SAMPLER_2D_ARRAY:
-            case PicoGL.SAMPLER_2D_ARRAY_SHADOW:
-            case PicoGL.SAMPLER_CUBE:
-            case PicoGL.INT_SAMPLER_CUBE:
-            case PicoGL.UNSIGNED_INT_SAMPLER_CUBE:
-            case PicoGL.SAMPLER_CUBE_SHADOW:
-            case PicoGL.SAMPLER_3D:
-            case PicoGL.INT_SAMPLER_3D:
-            case PicoGL.UNSIGNED_INT_SAMPLER_3D:
-            case PicoGL.UNSIGNED_INT:
-            case PicoGL.FLOAT:
+            case CONSTANTS.INT:
+            case CONSTANTS.SAMPLER_2D:
+            case CONSTANTS.INT_SAMPLER_2D:
+            case CONSTANTS.UNSIGNED_INT_SAMPLER_2D:
+            case CONSTANTS.SAMPLER_2D_SHADOW:
+            case CONSTANTS.SAMPLER_2D_ARRAY:
+            case CONSTANTS.INT_SAMPLER_2D_ARRAY:
+            case CONSTANTS.UNSIGNED_INT_SAMPLER_2D_ARRAY:
+            case CONSTANTS.SAMPLER_2D_ARRAY_SHADOW:
+            case CONSTANTS.SAMPLER_CUBE:
+            case CONSTANTS.INT_SAMPLER_CUBE:
+            case CONSTANTS.UNSIGNED_INT_SAMPLER_CUBE:
+            case CONSTANTS.SAMPLER_CUBE_SHADOW:
+            case CONSTANTS.SAMPLER_3D:
+            case CONSTANTS.INT_SAMPLER_3D:
+            case CONSTANTS.UNSIGNED_INT_SAMPLER_3D:
+            case CONSTANTS.UNSIGNED_INT:
+            case CONSTANTS.FLOAT:
                 UniformClass = numElements > 1 ? Uniforms.MultiNumericUniform : Uniforms.SingleComponentUniform;
                 break;
-            case PicoGL.BOOL:
+            case CONSTANTS.BOOL:
                 UniformClass = numElements > 1 ? Uniforms.MultiBoolUniform : Uniforms.SingleComponentUniform;
                 break;
-            case PicoGL.FLOAT_VEC2:
-            case PicoGL.INT_VEC2:
-            case PicoGL.UNSIGNED_INT_VEC2:
-            case PicoGL.FLOAT_VEC3:
-            case PicoGL.INT_VEC3:
-            case PicoGL.UNSIGNED_INT_VEC3:
-            case PicoGL.FLOAT_VEC4:
-            case PicoGL.INT_VEC4:
-            case PicoGL.UNSIGNED_INT_VEC4:
+            case CONSTANTS.FLOAT_VEC2:
+            case CONSTANTS.INT_VEC2:
+            case CONSTANTS.UNSIGNED_INT_VEC2:
+            case CONSTANTS.FLOAT_VEC3:
+            case CONSTANTS.INT_VEC3:
+            case CONSTANTS.UNSIGNED_INT_VEC3:
+            case CONSTANTS.FLOAT_VEC4:
+            case CONSTANTS.INT_VEC4:
+            case CONSTANTS.UNSIGNED_INT_VEC4:
                 UniformClass = Uniforms.MultiNumericUniform;
                 break;
-            case PicoGL.BOOL_VEC2:
-            case PicoGL.BOOL_VEC3:
-            case PicoGL.BOOL_VEC4:
+            case CONSTANTS.BOOL_VEC2:
+            case CONSTANTS.BOOL_VEC3:
+            case CONSTANTS.BOOL_VEC4:
                 UniformClass = Uniforms.MultiBoolUniform;
                 break;
-            case PicoGL.FLOAT_MAT2:
-            case PicoGL.FLOAT_MAT3:
-            case PicoGL.FLOAT_MAT4:
-            case PicoGL.FLOAT_MAT2x3:
-            case PicoGL.FLOAT_MAT2x4:
-            case PicoGL.FLOAT_MAT3x2:
-            case PicoGL.FLOAT_MAT3x4:
-            case PicoGL.FLOAT_MAT4x2:
-            case PicoGL.FLOAT_MAT4x3:
+            case CONSTANTS.FLOAT_MAT2:
+            case CONSTANTS.FLOAT_MAT3:
+            case CONSTANTS.FLOAT_MAT4:
+            case CONSTANTS.FLOAT_MAT2x3:
+            case CONSTANTS.FLOAT_MAT2x4:
+            case CONSTANTS.FLOAT_MAT3x2:
+            case CONSTANTS.FLOAT_MAT3x4:
+            case CONSTANTS.FLOAT_MAT4x2:
+            case CONSTANTS.FLOAT_MAT4x3:
                 UniformClass = Uniforms.MatrixUniform;
                 break;
             default:
@@ -1957,7 +1881,7 @@ Program.prototype.uniformBlock = function(name, base) {
 
 module.exports = Program;
 
-},{"./shader":7,"./uniforms":12}],7:[function(require,module,exports){
+},{"./constants":2,"./shader":8,"./uniforms":13}],8:[function(require,module,exports){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -1987,6 +1911,7 @@ module.exports = Program;
     WebGL shader.
 
     @class
+    @hideconstructor
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLShader} shader The shader.
 */
@@ -2021,7 +1946,7 @@ Shader.prototype.delete = function() {
 
 module.exports = Shader;
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -2047,10 +1972,13 @@ module.exports = Shader;
 
 "use strict";
 
+var CONSTANTS = require("./constants");
+
 /**
     General-purpose texture.
 
     @class
+    @hideconstructor
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLTexture} texture Handle to the texture.
     @prop {WebGLSamler} sampler Sampler object.
@@ -2064,7 +1992,7 @@ module.exports = Shader;
     @prop {Object} appState Tracked GL state.
 */
 function Texture(gl, appState, binding, image, width, height, depth, is3D, options) {
-    options = options || PicoGL.DUMMY_OBJECT;
+    options = options || CONSTANTS.DUMMY_OBJECT;
 
     this.gl = gl;
     this.binding = binding;
@@ -2074,7 +2002,7 @@ function Texture(gl, appState, binding, image, width, height, depth, is3D, optio
     this.depth = -1;
     this.format = options.format !== undefined ? options.format : gl.RGBA;
     this.type = options.type !== undefined ? options.type : gl.UNSIGNED_BYTE;
-    this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : PicoGL.TEXTURE_INTERNAL_FORMAT[this.type][this.format];
+    this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : CONSTANTS.TEXTURE_INTERNAL_FORMAT[this.type][this.format];
     this.is3D = is3D;
     this.appState = appState;
     if (appState.freeTextureUnits.length > 0) {
@@ -2242,7 +2170,7 @@ Texture.prototype.bind = function(force) {
 
 module.exports = Texture;
 
-},{}],9:[function(require,module,exports){
+},{"./constants":2}],10:[function(require,module,exports){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -2272,6 +2200,7 @@ module.exports = Texture;
     Rendering timer.
 
     @class
+    @hideconstructor
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {Object} cpuTimer Timer for CPU. Will be window.performance, if available, or window.Date.
     @prop {boolean} gpuTimer Whether the gpu timing is available (EXT_disjoint_timer_query_webgl2 or
@@ -2361,7 +2290,7 @@ Timer.prototype.ready = function() {
 
 module.exports = Timer;
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -2391,6 +2320,7 @@ module.exports = Timer;
     Tranform feedback object.
 
     @class
+    @hideconstructor
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLTransformFeedback} transformFeedback Transform feedback object.
 */
@@ -2445,7 +2375,7 @@ TransformFeedback.prototype.bind = function() {
 
 module.exports = TransformFeedback;
 
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -2471,10 +2401,13 @@ module.exports = TransformFeedback;
 
 "use strict";
 
+var CONSTANTS = require("./constants");
+
 /**
     Storage for uniform data. Data is stored in std140 layout.
 
     @class
+    @hideconstructor
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLBuffer} buffer Allocated buffer storage.
     @prop {Float32Array} data Buffer data.
@@ -2498,90 +2431,90 @@ function UniformBuffer(gl, layout, usage) {
     for (var i = 0, len = layout.length; i < len; ++i) {
         var type = layout[i];
         switch(type) {
-            case PicoGL.FLOAT:
-            case PicoGL.INT:
-            case PicoGL.UNSIGNED_INT:
-            case PicoGL.BOOL:
+            case CONSTANTS.FLOAT:
+            case CONSTANTS.INT:
+            case CONSTANTS.UNSIGNED_INT:
+            case CONSTANTS.BOOL:
                 this.offsets[i] = this.size;
                 this.sizes[i] = 1;
 
-                if (type === PicoGL.INT) {
-                    this.types[i] = PicoGL.INT;
-                } else if (this.type === PicoGL.UNSIGNED_INT) {
-                    this.types[i] = PicoGL.UNSIGNED_INT;
+                if (type === CONSTANTS.INT) {
+                    this.types[i] = CONSTANTS.INT;
+                } else if (this.type === CONSTANTS.UNSIGNED_INT) {
+                    this.types[i] = CONSTANTS.UNSIGNED_INT;
                 } else {
-                    this.types[i] = PicoGL.FLOAT;
+                    this.types[i] = CONSTANTS.FLOAT;
                 }
 
                 this.size++;
                 break;
-            case PicoGL.FLOAT_VEC2:
-            case PicoGL.INT_VEC2:
-            case PicoGL.UNSIGNED_INT_VEC2:
-            case PicoGL.BOOL_VEC2:
+            case CONSTANTS.FLOAT_VEC2:
+            case CONSTANTS.INT_VEC2:
+            case CONSTANTS.UNSIGNED_INT_VEC2:
+            case CONSTANTS.BOOL_VEC2:
                 this.size += this.size % 2;
                 this.offsets[i] = this.size;
                 this.sizes[i] = 2;
 
-                if (type === PicoGL.INT_VEC2) {
-                    this.types[i] = PicoGL.INT;
-                } else if (this.type === PicoGL.UNSIGNED_INT_VEC2) {
-                    this.types[i] = PicoGL.UNSIGNED_INT;
+                if (type === CONSTANTS.INT_VEC2) {
+                    this.types[i] = CONSTANTS.INT;
+                } else if (this.type === CONSTANTS.UNSIGNED_INT_VEC2) {
+                    this.types[i] = CONSTANTS.UNSIGNED_INT;
                 } else {
-                    this.types[i] = PicoGL.FLOAT;
+                    this.types[i] = CONSTANTS.FLOAT;
                 }
 
                 this.size += 2;
                 break;
-            case PicoGL.FLOAT_VEC3:
-            case PicoGL.INT_VEC3:
-            case PicoGL.UNSIGNED_INT_VEC3:
-            case PicoGL.BOOL_VEC3:
-            case PicoGL.FLOAT_VEC4:
-            case PicoGL.INT_VEC4:
-            case PicoGL.UNSIGNED_INT_VEC4:
-            case PicoGL.BOOL_VEC4:
+            case CONSTANTS.FLOAT_VEC3:
+            case CONSTANTS.INT_VEC3:
+            case CONSTANTS.UNSIGNED_INT_VEC3:
+            case CONSTANTS.BOOL_VEC3:
+            case CONSTANTS.FLOAT_VEC4:
+            case CONSTANTS.INT_VEC4:
+            case CONSTANTS.UNSIGNED_INT_VEC4:
+            case CONSTANTS.BOOL_VEC4:
                 this.size += (4 - this.size % 4) % 4;
                 this.offsets[i] = this.size;
                 this.sizes[i] = 4;
 
-                if (type === PicoGL.INT_VEC4 || type === PicoGL.INT_VEC3) {
-                    this.types[i] = PicoGL.INT;
-                } else if (this.type === PicoGL.UNSIGNED_INT_VEC4 || this.type === PicoGL.UNSIGNED_INT_VEC3) {
-                    this.types[i] = PicoGL.UNSIGNED_INT;
+                if (type === CONSTANTS.INT_VEC4 || type === CONSTANTS.INT_VEC3) {
+                    this.types[i] = CONSTANTS.INT;
+                } else if (this.type === CONSTANTS.UNSIGNED_INT_VEC4 || this.type === CONSTANTS.UNSIGNED_INT_VEC3) {
+                    this.types[i] = CONSTANTS.UNSIGNED_INT;
                 } else {
-                    this.types[i] = PicoGL.FLOAT;
+                    this.types[i] = CONSTANTS.FLOAT;
                 }
 
                 this.size += 4;
                 break;
-            case PicoGL.FLOAT_MAT2:
-            case PicoGL.FLOAT_MAT2x3:
-            case PicoGL.FLOAT_MAT2x4:
+            case CONSTANTS.FLOAT_MAT2:
+            case CONSTANTS.FLOAT_MAT2x3:
+            case CONSTANTS.FLOAT_MAT2x4:
                 this.size += (4 - this.size % 4) % 4;
                 this.offsets[i] = this.size;
                 this.sizes[i] = 8;
-                this.types[i] = PicoGL.FLOAT;
+                this.types[i] = CONSTANTS.FLOAT;
 
                 this.size += 8;
                 break;
-            case PicoGL.FLOAT_MAT3:
-            case PicoGL.FLOAT_MAT3x2:
-            case PicoGL.FLOAT_MAT3x4:
+            case CONSTANTS.FLOAT_MAT3:
+            case CONSTANTS.FLOAT_MAT3x2:
+            case CONSTANTS.FLOAT_MAT3x4:
                 this.size += (4 - this.size % 4) % 4;
                 this.offsets[i] = this.size;
                 this.sizes[i] = 12;
-                this.types[i] = PicoGL.FLOAT;
+                this.types[i] = CONSTANTS.FLOAT;
 
                 this.size += 12;
                 break;
-            case PicoGL.FLOAT_MAT4:
-            case PicoGL.FLOAT_MAT4x2:
-            case PicoGL.FLOAT_MAT4x3:
+            case CONSTANTS.FLOAT_MAT4:
+            case CONSTANTS.FLOAT_MAT4x2:
+            case CONSTANTS.FLOAT_MAT4x3:
                 this.size += (4 - this.size % 4) % 4;
                 this.offsets[i] = this.size;
                 this.sizes[i] = 16;
-                this.types[i] = PicoGL.FLOAT;
+                this.types[i] = CONSTANTS.FLOAT;
 
                 this.size += 16;
                 break;
@@ -2593,9 +2526,9 @@ function UniformBuffer(gl, layout, usage) {
     this.size += (4 - this.size % 4) % 4;
 
     this.data = new Float32Array(this.size);
-    this.dataViews[PicoGL.FLOAT] = this.data;
-    this.dataViews[PicoGL.INT] = new Int32Array(this.data.buffer);
-    this.dataViews[PicoGL.UNSIGNED_INT] = new Uint32Array(this.data.buffer);
+    this.dataViews[CONSTANTS.FLOAT] = this.data;
+    this.dataViews[CONSTANTS.INT] = new Int32Array(this.data.buffer);
+    this.dataViews[CONSTANTS.UNSIGNED_INT] = new Uint32Array(this.data.buffer);
 
     this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, 0, this.buffer);
     this.gl.bufferData(this.gl.UNIFORM_BUFFER, this.size * 4, this.usage);
@@ -2669,7 +2602,7 @@ UniformBuffer.prototype.bind = function(base) {
 
 module.exports = UniformBuffer;
 
-},{}],12:[function(require,module,exports){
+},{"./constants":2}],13:[function(require,module,exports){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -2695,14 +2628,129 @@ module.exports = UniformBuffer;
 
 "use strict";
 
+var CONSTANTS = require("./constants");
+
 // Classes to manage uniform value updates, including
 // caching current values.
+
+var UNIFORM_FUNC_NAME = {};
+UNIFORM_FUNC_NAME[CONSTANTS.BOOL] = "uniform1i";
+UNIFORM_FUNC_NAME[CONSTANTS.INT] = "uniform1i";
+UNIFORM_FUNC_NAME[CONSTANTS.SAMPLER_2D] = "uniform1i";
+UNIFORM_FUNC_NAME[CONSTANTS.INT_SAMPLER_2D] = "uniform1i";
+UNIFORM_FUNC_NAME[CONSTANTS.UNSIGNED_INT_SAMPLER_2D] = "uniform1i";
+UNIFORM_FUNC_NAME[CONSTANTS.SAMPLER_2D_SHADOW] = "uniform1i";
+UNIFORM_FUNC_NAME[CONSTANTS.SAMPLER_2D_ARRAY] = "uniform1i";
+UNIFORM_FUNC_NAME[CONSTANTS.INT_SAMPLER_2D_ARRAY] = "uniform1i";
+UNIFORM_FUNC_NAME[CONSTANTS.UNSIGNED_INT_SAMPLER_2D_ARRAY] = "uniform1i";
+UNIFORM_FUNC_NAME[CONSTANTS.SAMPLER_2D_ARRAY_SHADOW] = "uniform1i";
+UNIFORM_FUNC_NAME[CONSTANTS.SAMPLER_CUBE] = "uniform1i";
+UNIFORM_FUNC_NAME[CONSTANTS.INT_SAMPLER_CUBE] = "uniform1i";
+UNIFORM_FUNC_NAME[CONSTANTS.UNSIGNED_INT_SAMPLER_CUBE] = "uniform1i";
+UNIFORM_FUNC_NAME[CONSTANTS.SAMPLER_CUBE_SHADOW] = "uniform1i";
+UNIFORM_FUNC_NAME[CONSTANTS.SAMPLER_3D] = "uniform1i";
+UNIFORM_FUNC_NAME[CONSTANTS.INT_SAMPLER_3D] = "uniform1i";
+UNIFORM_FUNC_NAME[CONSTANTS.UNSIGNED_INT_SAMPLER_3D] = "uniform1i";
+UNIFORM_FUNC_NAME[CONSTANTS.UNSIGNED_INT] = "uniform1ui";
+UNIFORM_FUNC_NAME[CONSTANTS.FLOAT] = "uniform1f";
+UNIFORM_FUNC_NAME[CONSTANTS.FLOAT_VEC2] = "uniform2f";
+UNIFORM_FUNC_NAME[CONSTANTS.FLOAT_VEC3] = "uniform3f";
+UNIFORM_FUNC_NAME[CONSTANTS.FLOAT_VEC4] = "uniform4f";
+UNIFORM_FUNC_NAME[CONSTANTS.INT_VEC2] = "uniform2i";
+UNIFORM_FUNC_NAME[CONSTANTS.INT_VEC3] = "uniform3i";
+UNIFORM_FUNC_NAME[CONSTANTS.INT_VEC4] = "uniform4i";
+UNIFORM_FUNC_NAME[CONSTANTS.UNSIGNED_INT_VEC2] = "uniform2ui";
+UNIFORM_FUNC_NAME[CONSTANTS.UNSIGNED_INT_VEC3] = "uniform3ui";
+UNIFORM_FUNC_NAME[CONSTANTS.UNSIGNED_INT_VEC4] = "uniform4ui";
+UNIFORM_FUNC_NAME[CONSTANTS.BOOL_VEC2] = "uniform2i";
+UNIFORM_FUNC_NAME[CONSTANTS.BOOL_VEC3] = "uniform3i";
+UNIFORM_FUNC_NAME[CONSTANTS.BOOL_VEC4] = "uniform4i";
+UNIFORM_FUNC_NAME[CONSTANTS.FLOAT_MAT2] = "uniformMatrix2fv";
+UNIFORM_FUNC_NAME[CONSTANTS.FLOAT_MAT3] = "uniformMatrix3fv";
+UNIFORM_FUNC_NAME[CONSTANTS.FLOAT_MAT4] = "uniformMatrix4fv";
+UNIFORM_FUNC_NAME[CONSTANTS.FLOAT_MAT2x3] = "uniformMatrix2x3fv";
+UNIFORM_FUNC_NAME[CONSTANTS.FLOAT_MAT2x4] = "uniformMatrix2x4fv";
+UNIFORM_FUNC_NAME[CONSTANTS.FLOAT_MAT3x2] = "uniformMatrix3x2fv";
+UNIFORM_FUNC_NAME[CONSTANTS.FLOAT_MAT3x4] = "uniformMatrix3x4fv";
+UNIFORM_FUNC_NAME[CONSTANTS.FLOAT_MAT4x2] = "uniformMatrix4x2fv";
+UNIFORM_FUNC_NAME[CONSTANTS.FLOAT_MAT4x3] = "uniformMatrix4x3fv";
+
+var UNIFORM_COMPONENT_COUNT = {};
+UNIFORM_COMPONENT_COUNT[CONSTANTS.BOOL] = 1;
+UNIFORM_COMPONENT_COUNT[CONSTANTS.INT] = 1;
+UNIFORM_COMPONENT_COUNT[CONSTANTS.SAMPLER_2D] = 1;
+UNIFORM_COMPONENT_COUNT[CONSTANTS.INT_SAMPLER_2D] = 1;
+UNIFORM_COMPONENT_COUNT[CONSTANTS.UNSIGNED_INT_SAMPLER_2D] = 1;
+UNIFORM_COMPONENT_COUNT[CONSTANTS.SAMPLER_2D_SHADOW] = 1;
+UNIFORM_COMPONENT_COUNT[CONSTANTS.SAMPLER_2D_ARRAY] = 1;
+UNIFORM_COMPONENT_COUNT[CONSTANTS.INT_SAMPLER_2D_ARRAY] = 1;
+UNIFORM_COMPONENT_COUNT[CONSTANTS.UNSIGNED_INT_SAMPLER_2D_ARRAY] = 1;
+UNIFORM_COMPONENT_COUNT[CONSTANTS.SAMPLER_2D_ARRAY_SHADOW] = 1;
+UNIFORM_COMPONENT_COUNT[CONSTANTS.SAMPLER_CUBE] = 1;
+UNIFORM_COMPONENT_COUNT[CONSTANTS.INT_SAMPLER_CUBE] = 1;
+UNIFORM_COMPONENT_COUNT[CONSTANTS.UNSIGNED_INT_SAMPLER_CUBE] = 1;
+UNIFORM_COMPONENT_COUNT[CONSTANTS.SAMPLER_CUBE_SHADOW] = 1;
+UNIFORM_COMPONENT_COUNT[CONSTANTS.SAMPLER_3D] = 1;
+UNIFORM_COMPONENT_COUNT[CONSTANTS.INT_SAMPLER_3D] = 1;
+UNIFORM_COMPONENT_COUNT[CONSTANTS.UNSIGNED_INT_SAMPLER_3D] = 1;
+UNIFORM_COMPONENT_COUNT[CONSTANTS.UNSIGNED_INT] = 1;
+UNIFORM_COMPONENT_COUNT[CONSTANTS.FLOAT] = 1;
+UNIFORM_COMPONENT_COUNT[CONSTANTS.FLOAT_VEC2] = 2;
+UNIFORM_COMPONENT_COUNT[CONSTANTS.FLOAT_VEC3] = 3;
+UNIFORM_COMPONENT_COUNT[CONSTANTS.FLOAT_VEC4] = 4;
+UNIFORM_COMPONENT_COUNT[CONSTANTS.INT_VEC2] = 2;
+UNIFORM_COMPONENT_COUNT[CONSTANTS.INT_VEC3] = 3;
+UNIFORM_COMPONENT_COUNT[CONSTANTS.INT_VEC4] = 4;
+UNIFORM_COMPONENT_COUNT[CONSTANTS.UNSIGNED_INT_VEC2] = 2;
+UNIFORM_COMPONENT_COUNT[CONSTANTS.UNSIGNED_INT_VEC3] = 3;
+UNIFORM_COMPONENT_COUNT[CONSTANTS.UNSIGNED_INT_VEC4] = 4;
+UNIFORM_COMPONENT_COUNT[CONSTANTS.BOOL_VEC2] = 2;
+UNIFORM_COMPONENT_COUNT[CONSTANTS.BOOL_VEC3] = 3;
+UNIFORM_COMPONENT_COUNT[CONSTANTS.BOOL_VEC4] = 4;
+UNIFORM_COMPONENT_COUNT[CONSTANTS.FLOAT_MAT2] = 4;
+UNIFORM_COMPONENT_COUNT[CONSTANTS.FLOAT_MAT3] = 9;
+UNIFORM_COMPONENT_COUNT[CONSTANTS.FLOAT_MAT4] = 16;
+UNIFORM_COMPONENT_COUNT[CONSTANTS.FLOAT_MAT2x3] = 6;
+UNIFORM_COMPONENT_COUNT[CONSTANTS.FLOAT_MAT2x4] = 8;
+UNIFORM_COMPONENT_COUNT[CONSTANTS.FLOAT_MAT3x2] = 6;
+UNIFORM_COMPONENT_COUNT[CONSTANTS.FLOAT_MAT3x4] = 12;
+UNIFORM_COMPONENT_COUNT[CONSTANTS.FLOAT_MAT4x2] = 8;
+UNIFORM_COMPONENT_COUNT[CONSTANTS.FLOAT_MAT4x3] = 12;
+
+var UNIFORM_CACHE_CLASS = {};
+UNIFORM_CACHE_CLASS[CONSTANTS.INT] = Int32Array;
+UNIFORM_CACHE_CLASS[CONSTANTS.SAMPLER_2D] = Int32Array;
+UNIFORM_CACHE_CLASS[CONSTANTS.INT_SAMPLER_2D] = Int32Array;
+UNIFORM_CACHE_CLASS[CONSTANTS.UNSIGNED_INT_SAMPLER_2D] = Int32Array;
+UNIFORM_CACHE_CLASS[CONSTANTS.SAMPLER_2D_SHADOW] = Int32Array;
+UNIFORM_CACHE_CLASS[CONSTANTS.SAMPLER_2D_ARRAY] = Int32Array;
+UNIFORM_CACHE_CLASS[CONSTANTS.INT_SAMPLER_2D_ARRAY] = Int32Array;
+UNIFORM_CACHE_CLASS[CONSTANTS.UNSIGNED_INT_SAMPLER_2D_ARRAY] = Int32Array;
+UNIFORM_CACHE_CLASS[CONSTANTS.SAMPLER_2D_ARRAY_SHADOW] = Int32Array;
+UNIFORM_CACHE_CLASS[CONSTANTS.SAMPLER_CUBE] = Int32Array;
+UNIFORM_CACHE_CLASS[CONSTANTS.INT_SAMPLER_CUBE] = Int32Array;
+UNIFORM_CACHE_CLASS[CONSTANTS.UNSIGNED_INT_SAMPLER_CUBE] = Int32Array;
+UNIFORM_CACHE_CLASS[CONSTANTS.SAMPLER_CUBE_SHADOW] = Int32Array;
+UNIFORM_CACHE_CLASS[CONSTANTS.SAMPLER_3D] = Int32Array;
+UNIFORM_CACHE_CLASS[CONSTANTS.INT_SAMPLER_3D] = Int32Array;
+UNIFORM_CACHE_CLASS[CONSTANTS.UNSIGNED_INT_SAMPLER_3D] = Int32Array;
+UNIFORM_CACHE_CLASS[CONSTANTS.UNSIGNED_INT] = Uint32Array;
+UNIFORM_CACHE_CLASS[CONSTANTS.FLOAT] = Float32Array;
+UNIFORM_CACHE_CLASS[CONSTANTS.FLOAT_VEC2] = Float32Array;
+UNIFORM_CACHE_CLASS[CONSTANTS.FLOAT_VEC3] = Float32Array;
+UNIFORM_CACHE_CLASS[CONSTANTS.FLOAT_VEC4] = Float32Array;
+UNIFORM_CACHE_CLASS[CONSTANTS.INT_VEC2] = Int32Array;
+UNIFORM_CACHE_CLASS[CONSTANTS.INT_VEC3] = Int32Array;
+UNIFORM_CACHE_CLASS[CONSTANTS.INT_VEC4] = Int32Array;
+UNIFORM_CACHE_CLASS[CONSTANTS.UNSIGNED_INT_VEC2] = Uint32Array;
+UNIFORM_CACHE_CLASS[CONSTANTS.UNSIGNED_INT_VEC3] = Uint32Array;
+UNIFORM_CACHE_CLASS[CONSTANTS.UNSIGNED_INT_VEC4] = Uint32Array;
 
 function SingleComponentUniform(gl, handle, type) {
     this.gl = gl;
     this.handle = handle;
-    this.glFuncName = PicoGL.UNIFORM_FUNC_NAME[type];
-    this.cache = type === PicoGL.BOOL ? false : 0;
+    this.glFuncName = UNIFORM_FUNC_NAME[type];
+    this.cache = type === CONSTANTS.BOOL ? false : 0;
 }
 
 SingleComponentUniform.prototype.set = function(value) {
@@ -2715,9 +2763,9 @@ SingleComponentUniform.prototype.set = function(value) {
 function MultiNumericUniform(gl, handle, type, count) {
     this.gl = gl;
     this.handle = handle;
-    this.glFuncName = PicoGL.UNIFORM_FUNC_NAME[type] + "v";
+    this.glFuncName = UNIFORM_FUNC_NAME[type] + "v";
     this.count = count;
-    this.cache = new PicoGL.UNIFORM_CACHE_CLASS[type](PicoGL.UNIFORM_COMPONENT_COUNT[type] * count);
+    this.cache = new UNIFORM_CACHE_CLASS[type](UNIFORM_COMPONENT_COUNT[type] * count);
 }
 
 MultiNumericUniform.prototype.set = function(value) {
@@ -2733,9 +2781,9 @@ MultiNumericUniform.prototype.set = function(value) {
 function MultiBoolUniform(gl, handle, type, count) {
     this.gl = gl;
     this.handle = handle;
-    this.glFuncName = PicoGL.UNIFORM_FUNC_NAME[type] + "v";
+    this.glFuncName = UNIFORM_FUNC_NAME[type] + "v";
     this.count = count;
-    this.cache = new Array(PicoGL.UNIFORM_COMPONENT_COUNT[type] * count).fill(false);
+    this.cache = new Array(UNIFORM_COMPONENT_COUNT[type] * count).fill(false);
 }
 
 MultiBoolUniform.prototype.set = function(value) {
@@ -2753,9 +2801,9 @@ MultiBoolUniform.prototype.set = function(value) {
 function MatrixUniform(gl, handle, type, count) {
     this.gl = gl;
     this.handle = handle;
-    this.glFuncName = PicoGL.UNIFORM_FUNC_NAME[type];
+    this.glFuncName = UNIFORM_FUNC_NAME[type];
     this.count = count;
-    this.cache = new Float32Array(PicoGL.UNIFORM_COMPONENT_COUNT[type] * count);
+    this.cache = new Float32Array(UNIFORM_COMPONENT_COUNT[type] * count);
 }
 
 MatrixUniform.prototype.set = function(value) {
@@ -2773,7 +2821,7 @@ module.exports.MultiBoolUniform = MultiBoolUniform;
 module.exports.MultiNumericUniform = MultiNumericUniform;
 module.exports.SingleComponentUniform = SingleComponentUniform;
 
-},{}],13:[function(require,module,exports){
+},{"./constants":2}],14:[function(require,module,exports){
 // Copyright (c) 2017 Tarek Sherif
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -2796,10 +2844,13 @@ module.exports.SingleComponentUniform = SingleComponentUniform;
 
 "use strict";
 
+var CONSTANTS = require("./constants");
+
 /**
     Organizes vertex buffer and attribute state.
 
     @class
+    @hideconstructor
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLVertexArrayObject} vertexArray Vertex array object.
     @prop {number} numElements Number of elements in the vertex array.
@@ -2900,15 +2951,15 @@ VertexArray.prototype.attributeBuffer = function(attributeIndex, vertexBuffer, i
                 vertexBuffer.itemSize,
                 vertexBuffer.type,
                 false,
-                numColumns * vertexBuffer.itemSize * PicoGL.TYPE_SIZE[vertexBuffer.type],
-                i * vertexBuffer.itemSize * PicoGL.TYPE_SIZE[vertexBuffer.type]);
+                numColumns * vertexBuffer.itemSize * CONSTANTS.TYPE_SIZE[vertexBuffer.type],
+                i * vertexBuffer.itemSize * CONSTANTS.TYPE_SIZE[vertexBuffer.type]);
         } else {
             this.gl.vertexAttribIPointer(
                 attributeIndex + i,
                 vertexBuffer.itemSize,
                 vertexBuffer.type,
-                numColumns * vertexBuffer.itemSize * PicoGL.TYPE_SIZE[vertexBuffer.type],
-                i * vertexBuffer.itemSize * PicoGL.TYPE_SIZE[vertexBuffer.type]);
+                numColumns * vertexBuffer.itemSize * CONSTANTS.TYPE_SIZE[vertexBuffer.type],
+                i * vertexBuffer.itemSize * CONSTANTS.TYPE_SIZE[vertexBuffer.type]);
         }
 
         if (instanced) {
@@ -2934,7 +2985,7 @@ VertexArray.prototype.attributeBuffer = function(attributeIndex, vertexBuffer, i
 
 module.exports = VertexArray;
 
-},{}],14:[function(require,module,exports){
+},{"./constants":2}],15:[function(require,module,exports){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -2960,10 +3011,13 @@ module.exports = VertexArray;
 
 "use strict";
 
+var CONSTANTS = require("./constants");
+
 /**
     Storage for vertex data.
 
     @class
+    @hideconstructor
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLBuffer} buffer Allocated buffer storage.
     @prop {GLEnum} type The type of data stored in the buffer.
@@ -2976,19 +3030,19 @@ module.exports = VertexArray;
 function VertexBuffer(gl, type, itemSize, data, usage, indexArray) {
     var numColumns;
     switch(type) {
-        case PicoGL.FLOAT_MAT4:
-        case PicoGL.FLOAT_MAT4x2:
-        case PicoGL.FLOAT_MAT4x3:
+        case CONSTANTS.FLOAT_MAT4:
+        case CONSTANTS.FLOAT_MAT4x2:
+        case CONSTANTS.FLOAT_MAT4x3:
             numColumns = 4;
             break;
-        case PicoGL.FLOAT_MAT3:
-        case PicoGL.FLOAT_MAT3x2:
-        case PicoGL.FLOAT_MAT3x4:
+        case CONSTANTS.FLOAT_MAT3:
+        case CONSTANTS.FLOAT_MAT3x2:
+        case CONSTANTS.FLOAT_MAT3x4:
             numColumns = 3;
             break;
-        case PicoGL.FLOAT_MAT2:
-        case PicoGL.FLOAT_MAT2x3:
-        case PicoGL.FLOAT_MAT2x4:
+        case CONSTANTS.FLOAT_MAT2:
+        case CONSTANTS.FLOAT_MAT2x3:
+        case CONSTANTS.FLOAT_MAT2x4:
             numColumns = 2;
             break;
         default:
@@ -2996,30 +3050,30 @@ function VertexBuffer(gl, type, itemSize, data, usage, indexArray) {
     }
 
     switch(type) {
-        case PicoGL.FLOAT_MAT4:
-        case PicoGL.FLOAT_MAT3x4:
-        case PicoGL.FLOAT_MAT2x4:
+        case CONSTANTS.FLOAT_MAT4:
+        case CONSTANTS.FLOAT_MAT3x4:
+        case CONSTANTS.FLOAT_MAT2x4:
             itemSize = 4;
-            type = PicoGL.FLOAT;
+            type = CONSTANTS.FLOAT;
             break;
-        case PicoGL.FLOAT_MAT3:
-        case PicoGL.FLOAT_MAT4x3:
-        case PicoGL.FLOAT_MAT2x3:
+        case CONSTANTS.FLOAT_MAT3:
+        case CONSTANTS.FLOAT_MAT4x3:
+        case CONSTANTS.FLOAT_MAT2x3:
             itemSize = 3;
-            type = PicoGL.FLOAT;
+            type = CONSTANTS.FLOAT;
             break;
-        case PicoGL.FLOAT_MAT2:
-        case PicoGL.FLOAT_MAT3x2:
-        case PicoGL.FLOAT_MAT4x2:
+        case CONSTANTS.FLOAT_MAT2:
+        case CONSTANTS.FLOAT_MAT3x2:
+        case CONSTANTS.FLOAT_MAT4x2:
             itemSize = 2;
-            type = PicoGL.FLOAT;
+            type = CONSTANTS.FLOAT;
             break;
     }
 
     var dataLength;
     if (typeof data === "number") {
         dataLength = data;
-        data *= PicoGL.TYPE_SIZE[type];
+        data *= CONSTANTS.TYPE_SIZE[type];
     } else {
         dataLength = data.length;
     }
@@ -3067,4 +3121,4 @@ VertexBuffer.prototype.delete = function() {
 
 module.exports = VertexBuffer;
 
-},{}]},{},[5]);
+},{"./constants":2}]},{},[6]);

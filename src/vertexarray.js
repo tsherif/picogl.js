@@ -20,6 +20,8 @@
 
 "use strict";
 
+var CONSTANTS = require("./constants");
+
 /**
     Organizes vertex buffer and attribute state.
 
@@ -125,15 +127,15 @@ VertexArray.prototype.attributeBuffer = function(attributeIndex, vertexBuffer, i
                 vertexBuffer.itemSize,
                 vertexBuffer.type,
                 false,
-                numColumns * vertexBuffer.itemSize * PicoGL.TYPE_SIZE[vertexBuffer.type],
-                i * vertexBuffer.itemSize * PicoGL.TYPE_SIZE[vertexBuffer.type]);
+                numColumns * vertexBuffer.itemSize * CONSTANTS.TYPE_SIZE[vertexBuffer.type],
+                i * vertexBuffer.itemSize * CONSTANTS.TYPE_SIZE[vertexBuffer.type]);
         } else {
             this.gl.vertexAttribIPointer(
                 attributeIndex + i,
                 vertexBuffer.itemSize,
                 vertexBuffer.type,
-                numColumns * vertexBuffer.itemSize * PicoGL.TYPE_SIZE[vertexBuffer.type],
-                i * vertexBuffer.itemSize * PicoGL.TYPE_SIZE[vertexBuffer.type]);
+                numColumns * vertexBuffer.itemSize * CONSTANTS.TYPE_SIZE[vertexBuffer.type],
+                i * vertexBuffer.itemSize * CONSTANTS.TYPE_SIZE[vertexBuffer.type]);
         }
 
         if (instanced) {
