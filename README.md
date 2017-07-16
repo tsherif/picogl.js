@@ -4,20 +4,29 @@ PicoGL.js
 PicoGL.js is minimal WebGL 2 rendering library. It's meant for developers who understand the WebGL 2 rendering pipeline and want to use it, but with a more convenient API. Typical usage of PicoGL.js will involve creating programs, vertex buffers, vertex arrays, uniform buffers, framebuffers, textures, transform feedbacks, and combining them into draw calls.
 
 ```JavaScript
+
+    // Create App which manages all GL state
     var app = PicoGL.createApp(canvas)
     .clearColor(0.0, 0.0, 0.0, 1.0);
-
+    
+    // Create Program
     var program = app.createProgram(vertexShaderSource, fragmentShaderSource);
 
+    // Create a buffer of vertex attributes
     var positions = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
         -0.5, -0.5,
          0.5, -0.5,
          0.0,  0.5
     ]));
 
+    // VertexArray manages attribute buffer state
     var vertexArray = app.createVertexArray()
     .vertexAttributeBuffer(0, positions);
 
+    // UniformBuffer allows multiple uniforms to be bound
+    // as a single block of memory.
+    // First part defines layout of the UniformBuffer.
+    // Second part updates values.
     var uniformBuffer = app.createUniformBuffer([
         PicoGL.FLOAT_VEC4,
         PicoGL.FLOAT_VEC4
@@ -26,9 +35,12 @@ PicoGL.js is minimal WebGL 2 rendering library. It's meant for developers who un
     .set(1, new Float32Array([0.0, 0.0, 1.0, 0.7]))
     .update();
 
+    // Create DrawCall from Program and VertexArray (both required),
+    // and a UniformBuffer.
     var drawCall = app.createDrawCall(program, vertexArray)
     .uniformBlock("ColorUniforms", uniformBuffer);
 
+    // Draw
     app.drawCalls([drawCall])
     .clear()
     .draw();
@@ -60,11 +72,12 @@ and loaded via CommonJS-style `require`:
     var PicoGL = require("picogl");
 ```
 
+Features
+--------
 
 PicoGL.js simplifies usage of some more complex WebGL 2 features, such as multiple render targets, uniform buffers, transform feedback and instanced drawing.
 
-Multiple Render Targets
------------------------
+**Multiple Render Targets**
 
 ```JavaScript
     var app = PicoGL.createApp(canvas)
@@ -100,8 +113,7 @@ Multiple Render Targets
     .draw();
 ```
 
-Uniform Buffers
----------------
+**Uniform Buffers**
 
 ```JavaScript
     var app = PicoGL.createApp(canvas)
@@ -126,8 +138,7 @@ Uniform Buffers
     .uniformBlock("UniformBlock", uniformBuffer);
 ```
 
-Transform Feedback
-------------------
+**Transform Feedback**
 
 ```JavaScript
     var app = PicoGL.createApp(canvas)
@@ -160,8 +171,7 @@ Transform Feedback
 
 ``` 
 
-Instanced Drawing
------------------
+**Instanced Drawing**
 
 ```JavaScript
     var app = PicoGL.createApp(canvas)
