@@ -1,5 +1,5 @@
 {
-  "name": "picogl.js",
+  "name": "picogl",
   "version": "0.4.1",
   "description": "A minimal WebGL 2 rendering library",
   "main": "src/picogl.js",
