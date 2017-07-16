@@ -24,16 +24,16 @@
 "use strict";
 var CONSTANTS         = require("./constants");
 var Cubemap           = require("./cubemap");
-var DrawCall          = require("./drawcall");
+var DrawCall          = require("./draw-call");
 var Framebuffer       = require("./framebuffer");
 var Program           = require("./program");
 var Shader            = require("./shader");
 var Texture           = require("./texture");
 var Timer             = require("./timer");
-var TransformFeedback = require("./transformfeedback");
-var UniformBuffer     = require("./uniformbuffer");
-var VertexArray       = require("./vertexarray");
-var VertexBuffer      = require("./vertexbuffer");
+var TransformFeedback = require("./transform-feedback");
+var UniformBuffer     = require("./uniform-buffer");
+var VertexArray       = require("./vertex-array");
+var VertexBuffer      = require("./vertex-buffer");
 
 
 /**

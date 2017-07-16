@@ -1,6 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////////
-// The MIT License (MIT)
-//
 // Copyright (c) 2017 Tarek Sherif
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -23,31 +20,23 @@
 
 "use strict";
 
-var CONSTANTS = {};
-var canvas = document.createElement("canvas");
-var gl = canvas.getContext("webgl2");
+var CONSTANTS = require("./constants");
 
-if (gl) {
-    for (var enumName in gl) {
-        if (enumName.match(/^[A-Z0-9_x]+$/) && typeof(gl[enumName]) === "number") {
-            CONSTANTS[enumName] = gl[enumName];
-        }
-    }
-}
+var TEXTURE_FORMAT_DEFAULTS = {};
+var UNSIGNED_BYTE = TEXTURE_FORMAT_DEFAULTS[CONSTANTS.UNSIGNED_BYTE] = {};
+UNSIGNED_BYTE[CONSTANTS.RED] = CONSTANTS.R8;
+UNSIGNED_BYTE[CONSTANTS.RG] = CONSTANTS.RG8;
+UNSIGNED_BYTE[CONSTANTS.RGB] = CONSTANTS.RGB8;
+UNSIGNED_BYTE[CONSTANTS.RGBA] = CONSTANTS.RGBA8;
 
-CONSTANTS.TYPE_SIZE = {};
-CONSTANTS.TYPE_SIZE[gl.BYTE]              = 1;
-CONSTANTS.TYPE_SIZE[gl.UNSIGNED_BYTE]     = 1;
-CONSTANTS.TYPE_SIZE[gl.SHORT]             = 2;
-CONSTANTS.TYPE_SIZE[gl.UNSIGNED_SHORT]    = 2;
-CONSTANTS.TYPE_SIZE[gl.INT]               = 4;
-CONSTANTS.TYPE_SIZE[gl.UNSIGNED_INT]      = 4;
-CONSTANTS.TYPE_SIZE[gl.FLOAT]             = 4;
+var UNSIGNED_SHORT = TEXTURE_FORMAT_DEFAULTS[CONSTANTS.UNSIGNED_SHORT] = {};
+UNSIGNED_SHORT[CONSTANTS.DEPTH_COMPONENT] = CONSTANTS.DEPTH_COMPONENT16;
 
-CONSTANTS.WEBGL_INFO = {};
-CONSTANTS.WEBGL_INFO.MAX_TEXTURE_UNITS = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
-CONSTANTS.WEBGL_INFO.MAX_UNIFORM_BUFFERS = gl.getParameter(gl.MAX_UNIFORM_BUFFER_BINDINGS);
+var FLOAT = TEXTURE_FORMAT_DEFAULTS[CONSTANTS.FLOAT] = {};
+FLOAT[CONSTANTS.RED] = CONSTANTS.R16F;
+FLOAT[CONSTANTS.RG] = CONSTANTS.RG16F;
+FLOAT[CONSTANTS.RGB] = CONSTANTS.RGB16F;
+FLOAT[CONSTANTS.RGBA] = CONSTANTS.RGBA16F;
+FLOAT[CONSTANTS.DEPTH_COMPONENT] = CONSTANTS.DEPTH_COMPONENT32F;
 
-CONSTANTS.DUMMY_OBJECT = {};
-
-module.exports = CONSTANTS;
+module.exports = TEXTURE_FORMAT_DEFAULTS;

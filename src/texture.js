@@ -24,6 +24,7 @@
 "use strict";
 
 var CONSTANTS = require("./constants");
+var TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
 
 /**
     General-purpose texture.
@@ -53,7 +54,7 @@ function Texture(gl, appState, binding, image, width, height, depth, is3D, optio
     this.depth = -1;
     this.format = options.format !== undefined ? options.format : gl.RGBA;
     this.type = options.type !== undefined ? options.type : gl.UNSIGNED_BYTE;
-    this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : CONSTANTS.TEXTURE_INTERNAL_FORMAT[this.type][this.format];
+    this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : TEXTURE_FORMAT_DEFAULTS[this.type][this.format];
     this.is3D = is3D;
     this.appState = appState;
     if (appState.freeTextureUnits.length > 0) {

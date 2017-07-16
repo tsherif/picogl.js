@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.4.1 
+PicoGL.js v0.4.2 
 
 The MIT License (MIT)
 
@@ -50,16 +50,16 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 "use strict";
 var CONSTANTS         = require("./constants");
 var Cubemap           = require("./cubemap");
-var DrawCall          = require("./drawcall");
+var DrawCall          = require("./draw-call");
 var Framebuffer       = require("./framebuffer");
 var Program           = require("./program");
 var Shader            = require("./shader");
 var Texture           = require("./texture");
 var Timer             = require("./timer");
-var TransformFeedback = require("./transformfeedback");
-var UniformBuffer     = require("./uniformbuffer");
-var VertexArray       = require("./vertexarray");
-var VertexBuffer      = require("./vertexbuffer");
+var TransformFeedback = require("./transform-feedback");
+var UniformBuffer     = require("./uniform-buffer");
+var VertexArray       = require("./vertex-array");
+var VertexBuffer      = require("./vertex-buffer");
 
 
 /**
@@ -922,7 +922,7 @@ App.prototype.timerReady = function() {
 
 module.exports = App;
 
-},{"./constants":2,"./cubemap":3,"./drawcall":4,"./framebuffer":5,"./program":7,"./shader":8,"./texture":9,"./timer":10,"./transformfeedback":11,"./uniformbuffer":12,"./vertexarray":14,"./vertexbuffer":15}],2:[function(require,module,exports){
+},{"./constants":2,"./cubemap":3,"./draw-call":4,"./framebuffer":5,"./program":7,"./shader":8,"./texture":10,"./timer":11,"./transform-feedback":12,"./uniform-buffer":13,"./vertex-array":15,"./vertex-buffer":16}],2:[function(require,module,exports){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -959,24 +959,6 @@ if (gl) {
         }
     }
 }
-
-
-CONSTANTS.TEXTURE_INTERNAL_FORMAT = {};
-var UNSIGNED_BYTE = CONSTANTS.TEXTURE_INTERNAL_FORMAT[gl.UNSIGNED_BYTE] = {};
-UNSIGNED_BYTE[gl.RED] = gl.R8;
-UNSIGNED_BYTE[gl.RG] = gl.RG8;
-UNSIGNED_BYTE[gl.RGB] = gl.RGB8;
-UNSIGNED_BYTE[gl.RGBA] = gl.RGBA8;
-
-var UNSIGNED_SHORT = CONSTANTS.TEXTURE_INTERNAL_FORMAT[gl.UNSIGNED_SHORT] = {};
-UNSIGNED_SHORT[gl.DEPTH_COMPONENT] = gl.DEPTH_COMPONENT16;
-
-var FLOAT = CONSTANTS.TEXTURE_INTERNAL_FORMAT[gl.FLOAT] = {};
-FLOAT[gl.RED] = gl.R16F;
-FLOAT[gl.RG] = gl.RG16F;
-FLOAT[gl.RGB] = gl.RGB16F;
-FLOAT[gl.RGBA] = gl.RGBA16F;
-FLOAT[gl.DEPTH_COMPONENT] = gl.DEPTH_COMPONENT32F;
 
 CONSTANTS.TYPE_SIZE = {};
 CONSTANTS.TYPE_SIZE[gl.BYTE]              = 1;
@@ -1022,6 +1004,7 @@ module.exports = CONSTANTS;
 "use strict";
 
 var CONSTANTS = require("./constants");
+var TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
 
 /**
     Cubemap for environment mapping.
@@ -1044,7 +1027,7 @@ function Cubemap(gl, appState, options) {
     this.texture = gl.createTexture();
     this.format = options.format !== undefined ? options.format : gl.RGBA;
     this.type = options.type !== undefined ? options.type : gl.UNSIGNED_BYTE;
-    this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : CONSTANTS.TEXTURE_INTERNAL_FORMAT[this.type][this.format];
+    this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : TEXTURE_FORMAT_DEFAULTS[this.type][this.format];
     this.appState = appState;
     if (appState.freeTextureUnits.length > 0) {
         this.unit = appState.freeTextureUnits.pop();
@@ -1145,7 +1128,7 @@ Cubemap.prototype.bind = function() {
 
 module.exports = Cubemap;
 
-},{"./constants":2}],4:[function(require,module,exports){
+},{"./constants":2,"./texture-format-defaults":9}],4:[function(require,module,exports){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -1372,7 +1355,7 @@ module.exports = DrawCall;
 
 "use strict";
 
-var CONSTANTS = require("./constants");
+var TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
 var Texture = require("./texture");
 
 /**
@@ -1437,7 +1420,7 @@ Framebuffer.prototype.colorTarget = function(index, options) {
     options = options || {};
     options.type = options.type || this.gl.UNSIGNED_BYTE;
     options.format = options.format || this.gl.RGBA;
-    options.internalFormat = options.internalFormat || CONSTANTS.TEXTURE_INTERNAL_FORMAT[options.type][options.format];
+    options.internalFormat = options.internalFormat || TEXTURE_FORMAT_DEFAULTS[options.type][options.format];
     options.minFilter = options.minFilter || this.gl.NEAREST;
     options.magFilter = options.magFilter || this.gl.NEAREST;
     options.wrapS = options.wrapS || this.gl.CLAMP_TO_EDGE;
@@ -1494,7 +1477,7 @@ Framebuffer.prototype.depthTarget = function(options) {
     options = options || {};
     options.format = this.gl.DEPTH_COMPONENT;
     options.type = options.type || this.gl.UNSIGNED_SHORT;
-    options.internalFormat = options.internalFormat || CONSTANTS.TEXTURE_INTERNAL_FORMAT[options.type][options.format];
+    options.internalFormat = options.internalFormat || TEXTURE_FORMAT_DEFAULTS[options.type][options.format];
     options.minFilter = options.minFilter || this.gl.NEAREST;
     options.magFilter = options.magFilter || this.gl.NEAREST;
     options.wrapS = options.wrapS || this.gl.CLAMP_TO_EDGE;
@@ -1632,7 +1615,7 @@ Framebuffer.prototype.restoreState = function(framebuffer) {
 
 module.exports = Framebuffer;
 
-},{"./constants":2,"./texture":9}],6:[function(require,module,exports){
+},{"./texture":10,"./texture-format-defaults":9}],6:[function(require,module,exports){
 (function (global){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
@@ -1668,7 +1651,7 @@ var App = require("./app");
     @namespace PicoGL
 */
 var PicoGL = global.PicoGL = require("./constants");    
-PicoGL.version = "0.4.1";
+PicoGL.version = "0.4.2";
 
 /**
     Create a PicoGL app. The app is the primary entry point to PicoGL. It stores
@@ -1881,7 +1864,7 @@ Program.prototype.uniformBlock = function(name, base) {
 
 module.exports = Program;
 
-},{"./constants":2,"./shader":8,"./uniforms":13}],8:[function(require,module,exports){
+},{"./constants":2,"./shader":8,"./uniforms":14}],8:[function(require,module,exports){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -1947,6 +1930,50 @@ Shader.prototype.delete = function() {
 module.exports = Shader;
 
 },{}],9:[function(require,module,exports){
+// Copyright (c) 2017 Tarek Sherif
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy of
+// this software and associated documentation files (the "Software"), to deal in
+// the Software without restriction, including without limitation the rights to
+// use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+// the Software, and to permit persons to whom the Software is furnished to do so,
+// subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+// FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+// COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+// IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+// CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+///////////////////////////////////////////////////////////////////////////////////
+
+"use strict";
+
+var CONSTANTS = require("./constants");
+
+var TEXTURE_FORMAT_DEFAULTS = {};
+var UNSIGNED_BYTE = TEXTURE_FORMAT_DEFAULTS[CONSTANTS.UNSIGNED_BYTE] = {};
+UNSIGNED_BYTE[CONSTANTS.RED] = CONSTANTS.R8;
+UNSIGNED_BYTE[CONSTANTS.RG] = CONSTANTS.RG8;
+UNSIGNED_BYTE[CONSTANTS.RGB] = CONSTANTS.RGB8;
+UNSIGNED_BYTE[CONSTANTS.RGBA] = CONSTANTS.RGBA8;
+
+var UNSIGNED_SHORT = TEXTURE_FORMAT_DEFAULTS[CONSTANTS.UNSIGNED_SHORT] = {};
+UNSIGNED_SHORT[CONSTANTS.DEPTH_COMPONENT] = CONSTANTS.DEPTH_COMPONENT16;
+
+var FLOAT = TEXTURE_FORMAT_DEFAULTS[CONSTANTS.FLOAT] = {};
+FLOAT[CONSTANTS.RED] = CONSTANTS.R16F;
+FLOAT[CONSTANTS.RG] = CONSTANTS.RG16F;
+FLOAT[CONSTANTS.RGB] = CONSTANTS.RGB16F;
+FLOAT[CONSTANTS.RGBA] = CONSTANTS.RGBA16F;
+FLOAT[CONSTANTS.DEPTH_COMPONENT] = CONSTANTS.DEPTH_COMPONENT32F;
+
+module.exports = TEXTURE_FORMAT_DEFAULTS;
+
+},{"./constants":2}],10:[function(require,module,exports){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -1973,6 +2000,7 @@ module.exports = Shader;
 "use strict";
 
 var CONSTANTS = require("./constants");
+var TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
 
 /**
     General-purpose texture.
@@ -2002,7 +2030,7 @@ function Texture(gl, appState, binding, image, width, height, depth, is3D, optio
     this.depth = -1;
     this.format = options.format !== undefined ? options.format : gl.RGBA;
     this.type = options.type !== undefined ? options.type : gl.UNSIGNED_BYTE;
-    this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : CONSTANTS.TEXTURE_INTERNAL_FORMAT[this.type][this.format];
+    this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : TEXTURE_FORMAT_DEFAULTS[this.type][this.format];
     this.is3D = is3D;
     this.appState = appState;
     if (appState.freeTextureUnits.length > 0) {
@@ -2170,7 +2198,7 @@ Texture.prototype.bind = function(force) {
 
 module.exports = Texture;
 
-},{"./constants":2}],10:[function(require,module,exports){
+},{"./constants":2,"./texture-format-defaults":9}],11:[function(require,module,exports){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -2290,7 +2318,7 @@ Timer.prototype.ready = function() {
 
 module.exports = Timer;
 
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -2375,7 +2403,7 @@ TransformFeedback.prototype.bind = function() {
 
 module.exports = TransformFeedback;
 
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -2602,7 +2630,7 @@ UniformBuffer.prototype.bind = function(base) {
 
 module.exports = UniformBuffer;
 
-},{"./constants":2}],13:[function(require,module,exports){
+},{"./constants":2}],14:[function(require,module,exports){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -2821,7 +2849,7 @@ module.exports.MultiBoolUniform = MultiBoolUniform;
 module.exports.MultiNumericUniform = MultiNumericUniform;
 module.exports.SingleComponentUniform = SingleComponentUniform;
 
-},{"./constants":2}],14:[function(require,module,exports){
+},{"./constants":2}],15:[function(require,module,exports){
 // Copyright (c) 2017 Tarek Sherif
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -2985,7 +3013,7 @@ VertexArray.prototype.attributeBuffer = function(attributeIndex, vertexBuffer, i
 
 module.exports = VertexArray;
 
-},{"./constants":2}],15:[function(require,module,exports){
+},{"./constants":2}],16:[function(require,module,exports){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //

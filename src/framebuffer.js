@@ -23,7 +23,7 @@
 
 "use strict";
 
-var CONSTANTS = require("./constants");
+var TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
 var Texture = require("./texture");
 
 /**
@@ -88,7 +88,7 @@ Framebuffer.prototype.colorTarget = function(index, options) {
     options = options || {};
     options.type = options.type || this.gl.UNSIGNED_BYTE;
     options.format = options.format || this.gl.RGBA;
-    options.internalFormat = options.internalFormat || CONSTANTS.TEXTURE_INTERNAL_FORMAT[options.type][options.format];
+    options.internalFormat = options.internalFormat || TEXTURE_FORMAT_DEFAULTS[options.type][options.format];
     options.minFilter = options.minFilter || this.gl.NEAREST;
     options.magFilter = options.magFilter || this.gl.NEAREST;
     options.wrapS = options.wrapS || this.gl.CLAMP_TO_EDGE;
@@ -145,7 +145,7 @@ Framebuffer.prototype.depthTarget = function(options) {
     options = options || {};
     options.format = this.gl.DEPTH_COMPONENT;
     options.type = options.type || this.gl.UNSIGNED_SHORT;
-    options.internalFormat = options.internalFormat || CONSTANTS.TEXTURE_INTERNAL_FORMAT[options.type][options.format];
+    options.internalFormat = options.internalFormat || TEXTURE_FORMAT_DEFAULTS[options.type][options.format];
     options.minFilter = options.minFilter || this.gl.NEAREST;
     options.magFilter = options.magFilter || this.gl.NEAREST;
     options.wrapS = options.wrapS || this.gl.CLAMP_TO_EDGE;
