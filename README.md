@@ -36,7 +36,30 @@ PicoGL.js is minimal WebGL 2 rendering library. It's meant for developers who un
 ``` 
 Visit the [API docs](https://tsherif.github.io/picogl.js/docs/) for more details or the [website](https://tsherif.github.io/picogl.js/) for live examples of usage. 
 
-Note that PicoGL.js is **not** a scene graph library. There are no objects, hierarchies, transforms, materials, etc. It has been designed only to make management of GPU state more convenient. Its conceptual model maps fairly directly to the constructs one deals with when writing directly with the WebGL 2 API. The only higher-level construct is the **draw call**, which manages sets of related lower-level constructs. 
+Note that PicoGL.js is **not** a scene graph library. There are no objects, hierarchies, transforms, materials, etc. It has been designed only to make management of GPU state more convenient. Its conceptual model maps fairly directly to the constructs one deals with when writing directly with the WebGL 2 API. The only higher-level construct is the **draw call**, which manages sets of related lower-level constructs.
+
+
+
+Usage
+-----
+PicoGL.js can be used directly by downloading the [built source](https://tsherif.github.io/picogl.js/build/picogl.min.js) and loading it via a script tag:
+
+```HTML
+    <script src="js/picogl.js"></script>
+```
+
+or it can be installed via NPM:
+
+```bash
+    npm install picogl
+```
+
+and loaded via CommonJS-style `require`:
+
+```JavaScript
+    var PicoGL = require("picogl");
+```
+
 
 PicoGL.js simplifies usage of some more complex WebGL 2 features, such as multiple render targets, uniform buffers, transform feedback and instanced drawing.
 
