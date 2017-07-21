@@ -37,8 +37,9 @@ var Query = require("./query");
     @prop {WebGLQuery} gpuTimerQuery Timer query object for GPU (if gpu timing is supported).
     @prop {boolean} gpuTimerQueryInProgress Whether a gpu timer query is currently in progress.
     @prop {number} cpuStartTime When the last CPU timing started.
-    @prop {number} cpuTime Time spent on the CPU during the last timing. Only valid if App.timerReady() returns true.
-    @prop {number} gpuTime Time spent on the GPU during the last timing. Only valid if App.timerReady() returns true.
+    @prop {number} cpuTime Time spent on CPU during last timing. Only valid if ready() returns true.
+    @prop {number} gpuTime Time spent on GPU during last timing. Only valid if ready() returns true.
+            Will remain 0 if extension EXT_disjoint_timer_query_webgl2 is unavailable.
 */
 function Timer(gl) {
     this.gl = gl;

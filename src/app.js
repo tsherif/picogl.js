@@ -50,11 +50,7 @@ var Query             = require("./query");
     @prop {boolean} floatRenderTargetsEnabled Whether the EXT_color_buffer_float extension is enabled.
     @prop {boolean} linearFloatTexturesEnabled Whether the OES_texture_float_linear extension is enabled.
     @prop {Object} state Tracked GL state.
-    @prop {GLEnum} clearBits Current clear mask to use with clear().
-    @prop {Timer} timer Rendering timer.
-    @prop {number} cpuTime Time spent on CPU during last timing. Only valid if timerReady() returns true.
-    @prop {number} gpuTime Time spent on GPU during last timing. Only valid if timerReady() returns true.
-            Will remain 0 if extension EXT_disjoint_timer_query_webgl2 is unavailable.
+    @prop {GLEnum} clearBits Current clear mask to use with clear().    
 */
 function App(canvas, contextAttributes) {
     this.canvas = canvas;

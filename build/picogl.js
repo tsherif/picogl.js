@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.4.2 
+PicoGL.js v0.5.0 
 
 The MIT License (MIT)
 
@@ -76,11 +76,7 @@ var Query             = require("./query");
     @prop {boolean} floatRenderTargetsEnabled Whether the EXT_color_buffer_float extension is enabled.
     @prop {boolean} linearFloatTexturesEnabled Whether the OES_texture_float_linear extension is enabled.
     @prop {Object} state Tracked GL state.
-    @prop {GLEnum} clearBits Current clear mask to use with clear().
-    @prop {Timer} timer Rendering timer.
-    @prop {number} cpuTime Time spent on CPU during last timing. Only valid if timerReady() returns true.
-    @prop {number} gpuTime Time spent on GPU during last timing. Only valid if timerReady() returns true.
-            Will remain 0 if extension EXT_disjoint_timer_query_webgl2 is unavailable.
+    @prop {GLEnum} clearBits Current clear mask to use with clear().    
 */
 function App(canvas, contextAttributes) {
     this.canvas = canvas;
@@ -1676,7 +1672,7 @@ var App = require("./app");
     @namespace PicoGL
 */
 var PicoGL = global.PicoGL = require("./constants");    
-PicoGL.version = "0.4.2";
+PicoGL.version = "0.5.0";
 
 /**
     Create a PicoGL app. The app is the primary entry point to PicoGL. It stores
@@ -2349,8 +2345,9 @@ var Query = require("./query");
     @prop {WebGLQuery} gpuTimerQuery Timer query object for GPU (if gpu timing is supported).
     @prop {boolean} gpuTimerQueryInProgress Whether a gpu timer query is currently in progress.
     @prop {number} cpuStartTime When the last CPU timing started.
-    @prop {number} cpuTime Time spent on the CPU during the last timing. Only valid if App.timerReady() returns true.
-    @prop {number} gpuTime Time spent on the GPU during the last timing. Only valid if App.timerReady() returns true.
+    @prop {number} cpuTime Time spent on CPU during last timing. Only valid if ready() returns true.
+    @prop {number} gpuTime Time spent on GPU during last timing. Only valid if ready() returns true.
+            Will remain 0 if extension EXT_disjoint_timer_query_webgl2 is unavailable.
 */
 function Timer(gl) {
     this.gl = gl;
