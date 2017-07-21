@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: shader.js</title>
+    <title>JSDoc: Source: query.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: shader.js</h1>
+    <h1 class="page-title">Source: query.js</h1>
 
     
 
@@ -52,43 +52,64 @@
 "use strict";
 
 /**
-    WebGL shader.
+    Generic query object.
 
     @class
     @hideconstructor
     @prop {WebGLRenderingContext} gl The WebGL context.
-    @prop {WebGLShader} shader The shader.
+    @prop {WebGLQuery} query Query object.
+    @prop {GLEnum} target The type of information being queried.
+    @prop {boolean} active Whether or not a query is currently in progress.
+    @prop {Any} result The result of the query (only available after a call to ready() returns true). 
 */
-function Shader(gl, type, source) {
+function Query(gl, target) {
     this.gl = gl;
-    this.shader = gl.createShader(type);
-    gl.shaderSource(this.shader, source);
-    gl.compileShader(this.shader);
-
-    if (!gl.getShaderParameter(this.shader, gl.COMPILE_STATUS)) {
-        var i, lines;
-
-        console.error(gl.getShaderInfoLog(this.shader));
-        lines = source.split("\n");
-        for (i = 0; i &lt; lines.length; ++i) {
-            console.error((i + 1) + ":", lines[i]);
-        }
-    }
+    this.query = gl.createQuery();
+    this.target = target;
+    this.active = false;
+    this.result = null;
 }
 
 /**
-    Delete this shader.
+    Begin a query.
 
     @method
 */
-Shader.prototype.delete = function() {
-    if (this.shader) {
-        this.gl.deleteShader(this.shader);
-        this.shader = null;
+Query.prototype.begin = function() {
+    if (!this.active) {
+        this.gl.beginQuery(this.target, this.query);
+        this.result = null;
+    }    
+};
+
+/**
+    End a query.
+
+    @method
+*/
+Query.prototype.end = function() {
+    if (!this.active) {
+        this.gl.endQuery(this.target);
+        this.active = true;
     }
 };
 
-module.exports = Shader;
+/**
+    Check if query result is available.
+
+    @method
+*/
+Query.prototype.ready = function() {
+    if (this.active &amp;&amp; this.gl.getQueryParameter(this.query, this.gl.QUERY_RESULT_AVAILABLE)) {
+        this.active = false;
+        this.result = this.gl.getQueryParameter(this.query, this.gl.QUERY_RESULT);
+        return true;
+    }
+
+    return false;
+};
+
+module.exports = Query;
 </code></pre>
         </article>
     </section>

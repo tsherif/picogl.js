@@ -113,6 +113,8 @@
         var app = PicoGL.createApp(canvas)
         .depthTest();
 
+        var timer = app.createTimer();
+
         // PROGRAM
         var vsSource =  document.getElementById("vertex-draw").text.trim();
         var fsSource =  document.getElementById("fragment-draw").text.trim();
@@ -184,11 +186,11 @@
             var angleY = 0;
 
             function draw() {
-                if (app.timerReady()) {
-                    utils.updateTimerElement(app.cpuTime, app.gpuTime);
+                if (timer.ready()) {
+                    utils.updateTimerElement(timer.cpuTime, timer.gpuTime);
                 }
 
-                app.timerStart();
+                timer.start();
 
                 angleX += 0.01;
                 angleY += 0.02;
@@ -207,7 +209,7 @@
                 drawCall.texture("tex", rttBuffer.colorTextures[0]);
                 app.defaultDrawFramebuffer().clearColor(0.0, 0.0, 0.0, 1.0).clear().draw();
 
-                app.timerEnd(); 
+                timer.end(); 
 
                 requestAnimationFrame(draw);
             }

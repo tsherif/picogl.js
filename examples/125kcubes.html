@@ -166,6 +166,8 @@
         .depthFunc(PicoGL.LEQUAL)
         .cullBackfaces();
 
+        var timer = app.createTimer();
+
         // SET UP UPDATE PROGRAM
         var updateVsSource =  document.getElementById("vertex-update").text.trim();
         var updateFsSource =  document.getElementById("fragment-update").text.trim();
@@ -303,11 +305,11 @@
             var eyeRadius = 40;
             var eyeRotation = 0;
             function draw() {
-                if (app.timerReady()) {
-                    utils.updateTimerElement(app.cpuTime, app.gpuTime);
+                if (timer.ready()) {
+                    utils.updateTimerElement(timer.cpuTime, timer.gpuTime);
                 }
 
-                app.timerStart();
+                timer.start();
 
                 eyeRotation += 0.002;
 
@@ -336,7 +338,7 @@
                 
                 updateA = !updateA;
 
-                app.timerEnd();
+                timer.end();
 
                 requestAnimationFrame(draw);
             }

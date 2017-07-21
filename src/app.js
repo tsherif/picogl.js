@@ -34,6 +34,7 @@ var TransformFeedback = require("./transform-feedback");
 var UniformBuffer     = require("./uniform-buffer");
 var VertexArray       = require("./vertex-array");
 var VertexBuffer      = require("./vertex-buffer");
+var Query             = require("./query");
 
 
 /**
@@ -49,19 +50,17 @@ var VertexBuffer      = require("./vertex-buffer");
     @prop {boolean} floatRenderTargetsEnabled Whether the EXT_color_buffer_float extension is enabled.
     @prop {boolean} linearFloatTexturesEnabled Whether the OES_texture_float_linear extension is enabled.
     @prop {Object} state Tracked GL state.
-    @prop {GLEnum} clearBits Current clear mask to use with clear().
-    @prop {Timer} timer Rendering timer.
-    @prop {number} cpuTime Time spent on CPU during last timing. Only valid if timerReady() returns true.
-    @prop {number} gpuTime Time spent on GPU during last timing. Only valid if timerReady() returns true.
-            Will remain 0 if extension EXT_disjoint_timer_query_webgl2 is unavailable.
+    @prop {GLEnum} clearBits Current clear mask to use with clear().    
 */
 function App(canvas, contextAttributes) {
     this.canvas = canvas;
     this.gl = canvas.getContext("webgl2", contextAttributes);
     this.width = this.gl.drawingBufferWidth;
     this.height = this.gl.drawingBufferHeight;
-    this.viewportWidth = this.width;
-    this.viewportHeight = this.height;
+    this.viewportX = 0;
+    this.viewportY = 0;
+    this.viewportWidth = 0;
+    this.viewportHeight = 0;
     this.currentDrawCalls = null;
     this.emptyFragmentShader = null;
 
@@ -86,14 +85,13 @@ function App(canvas, contextAttributes) {
 
     this.clearBits = this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT| this.gl.STENCIL_BUFFER_BIT;
 
-    this.timer = new Timer(this.gl);
     this.cpuTime = 0;
     this.gpuTime = 0;
 
     this.floatRenderTargetsEnabled = false;
     this.linearFloatTexturesEnabled = false;
 
-    this.gl.viewport(0, 0, this.viewportWidth, this.viewportHeight);
+    this.viewport(0, 0, this.width, this.height);
 }
 
 /**
@@ -165,7 +163,8 @@ App.prototype.drawCalls = function(drawCallList) {
 };
 
 /**
-    Bind a draw framebuffer to the WebGL context.
+    Bind a draw framebuffer to the WebGL context. Note that 
+    this method resets the viewport to match the given framebuffer.
 
     @method
     @param {Framebuffer} framebuffer The Framebuffer object to bind.
@@ -174,11 +173,7 @@ App.prototype.drawCalls = function(drawCallList) {
 App.prototype.drawFramebuffer = function(framebuffer) {
     framebuffer.bindForDraw();
 
-    if (this.viewportWidth !== framebuffer.width || this.viewportHeight !== framebuffer.height) {
-        this.viewportWidth = framebuffer.width;
-        this.viewportHeight = framebuffer.height;
-        this.gl.viewport(0, 0, this.viewportWidth, this.viewportHeight);
-    }
+    this.viewport(0, 0, framebuffer.width, framebuffer.height);
 
     return this;
 };
@@ -198,6 +193,7 @@ App.prototype.readFramebuffer = function(framebuffer) {
 
 /**
     Switch back to the default framebuffer for drawing (i.e. draw to the screen).
+    Note that this method resets the viewport to match the default framebuffer.
 
     @method
 */
@@ -205,12 +201,7 @@ App.prototype.defaultDrawFramebuffer = function() {
     if (this.state.drawFramebuffer !== null) {
         this.gl.bindFramebuffer(this.gl.DRAW_FRAMEBUFFER, null);
         this.state.drawFramebuffer = null;
-
-        if (this.viewportWidth !== this.width || this.viewportHeight !== this.height) {
-            this.viewportWidth = this.width;
-            this.viewportHeight = this.height;
-            this.gl.viewport(0, 0, this.viewportWidth, this.viewportHeight);
-        }
+        this.viewport(0, 0, this.width, this.height);
     }
 
     return this;
@@ -266,23 +257,13 @@ App.prototype.noDepthTest = function() {
 };
 
 /**
-    Enable writing to the z buffer.
+    Enable or disable writing to the depth buffer.
 
     @method
+    @param {Boolean} mask The depth mask.
 */
-App.prototype.depthMask = function() {
-    this.gl.depthMask(true);
-
-    return this;
-};
-
-/**
-    Disable writing to the z buffer.
-
-    @method
-*/
-App.prototype.noDepthMask = function() {
-    this.gl.depthMask(false);
+App.prototype.depthMask = function(mask) {
+    this.gl.depthMask(mask);
 
     return this;
 };
@@ -370,6 +351,40 @@ App.prototype.stencilTest = function() {
 */
 App.prototype.noStencilTest = function() {
     this.gl.disable(this.gl.STENCIL_TEST);
+
+    return this;
+};
+
+
+/**
+    Enable scissor testing.
+
+    @method
+*/
+App.prototype.scissorTest = function() {
+    this.gl.enable(this.gl.SCISSOR_TEST);
+
+    return this;
+};
+
+/**
+    Disable scissor testing.
+
+    @method
+*/
+App.prototype.noScissorTest = function() {
+    this.gl.disable(this.gl.SCISSOR_TEST);
+
+    return this;
+};
+
+/**
+    Define the scissor box.
+
+    @method
+*/
+App.prototype.scissor = function(x, y, width, height) {
+    this.gl.scissor(x, y, width, height);
 
     return this;
 };
@@ -572,6 +587,29 @@ App.prototype.readPixel = function(x, y, outColor) {
 };
 
 /**
+    Set the viewport.
+
+    @method
+    @param {number} x Left bound of the viewport rectangle.
+    @param {number} y Lower bound of the viewport rectangle.
+    @param {number} width Width of the viewport rectangle.
+    @param {number} height Height of the viewport rectangle.
+*/
+App.prototype.viewport = function(x, y, width, height) {
+
+    if (this.viewportWidth !== width || this.viewportHeight !== height ||
+            this.viewportX !== x || this.viewportY !== y) {
+        this.viewportX = x;
+        this.viewportY = y;
+        this.viewportWidth = width;
+        this.viewportHeight = height;
+        this.gl.viewport(x, y, this.viewportWidth, this.viewportHeight);
+    }
+
+    return this;
+};
+
+/**
     Resize the drawing surface.
 
     @method
@@ -584,9 +622,7 @@ App.prototype.resize = function(width, height) {
 
     this.width = this.gl.drawingBufferWidth;
     this.height = this.gl.drawingBufferHeight;
-    this.viewportWidth = this.width;
-    this.viewportHeight = this.height;
-    this.gl.viewport(0, 0, this.viewportWidth, this.viewportHeight);
+    this.viewport(0, 0, this.width, this.height);
 
     return this;
 };
@@ -828,6 +864,25 @@ App.prototype.createFramebuffer = function(width, height) {
 };
 
 /**
+    Create a query.
+
+    @method
+    @param {GLEnum} target Information to query.
+*/
+App.prototype.createQuery = function(target) {
+    return new Query(this.gl, target);
+};
+
+/**
+    Create a timer.
+
+    @method
+*/
+App.prototype.createTimer = function() {
+    return new Timer(this.gl);
+};
+
+/**
     Create a DrawCall. A DrawCall manages the state associated with
     a WebGL draw call including a program and associated vertex data, textures,
     uniforms and uniform blocks.
@@ -838,7 +893,7 @@ App.prototype.createFramebuffer = function(width, height) {
     @param {GLEnum} [primitive=TRIANGLES] Type of primitive to draw.
 */
 App.prototype.createDrawCall = function(program, vertexArray, primitive) {
-    return new DrawCall(this.gl, program, vertexArray, primitive);
+    return new DrawCall(this.gl, this.state, program, vertexArray, primitive);
 };
 
 /**
@@ -848,50 +903,10 @@ App.prototype.createDrawCall = function(program, vertexArray, primitive) {
 */
 App.prototype.draw = function() {
     for (var i = 0, len = this.currentDrawCalls.length; i < len; i++) {
-        this.currentDrawCalls[i].draw(this.state);
+        this.currentDrawCalls[i].draw();
     }
 
     return this;
-};
-
-/**
-    Start the rendering timer.
-
-    @method
-*/
-App.prototype.timerStart = function() {
-    this.timer.start();
-
-    return this;
-};
-
-/**
-    Stop the rendering timer.
-
-    @method
-*/
-App.prototype.timerEnd = function() {
-    this.timer.end();
-
-    return this;
-};
-
-/**
-    Check if the rendering time is available. If
-    this method returns true, the cpuTime and
-    gpuTime properties will be set to valid
-    values.
-
-    @method
-*/
-App.prototype.timerReady = function() {
-    if (this.timer.ready()) {
-        this.cpuTime = this.timer.cpuTime;
-        this.gpuTime = this.timer.gpuTime;
-        return true;
-    } else {
-        return false;
-    }
 };
 
 module.exports = App;

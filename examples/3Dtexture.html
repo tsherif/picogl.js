@@ -69,14 +69,13 @@
     </script>
     <script type="text/javascript">
         utils.addTimerElement();
-        
-        var canvas = document.getElementById("gl-canvas");
 
         if (!utils.testWebGL2()) {
             console.error("WebGL 2 not available");
             document.body.innerHTML = "This example requires WebGL 2 which is unavailable on this system."
         }
 
+        var canvas = document.getElementById("gl-canvas");
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         
@@ -84,6 +83,8 @@
         .clearColor(0.0, 0.0, 0.0, 1.0)
         .blend()
         .blendFunc(PicoGL.ONE, PicoGL.ONE_MINUS_SRC_ALPHA);
+
+        var timer = app.createTimer();
 
         // SET UP PROGRAM
         var vsSource =  document.getElementById("vertex-draw").text.trim();
@@ -170,11 +171,11 @@
         app.drawCalls([drawCall]);
 
         function draw() {
-            if (app.timerReady()) {
-                utils.updateTimerElement(app.cpuTime, app.gpuTime);
+            if (timer.ready()) {
+                utils.updateTimerElement(timer.cpuTime, timer.gpuTime);
             }
 
-            app.timerStart();
+            timer.start();
 
             angleX += 0.01;
             angleY += 0.02;
@@ -188,7 +189,7 @@
 
             app.clear().draw();
             
-            app.timerEnd();
+            timer.end();
 
             requestAnimationFrame(draw);
         }

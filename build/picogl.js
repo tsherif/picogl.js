@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.4.2 
+PicoGL.js v0.5.0 
 
 The MIT License (MIT)
 
@@ -60,6 +60,7 @@ var TransformFeedback = require("./transform-feedback");
 var UniformBuffer     = require("./uniform-buffer");
 var VertexArray       = require("./vertex-array");
 var VertexBuffer      = require("./vertex-buffer");
+var Query             = require("./query");
 
 
 /**
@@ -75,19 +76,17 @@ var VertexBuffer      = require("./vertex-buffer");
     @prop {boolean} floatRenderTargetsEnabled Whether the EXT_color_buffer_float extension is enabled.
     @prop {boolean} linearFloatTexturesEnabled Whether the OES_texture_float_linear extension is enabled.
     @prop {Object} state Tracked GL state.
-    @prop {GLEnum} clearBits Current clear mask to use with clear().
-    @prop {Timer} timer Rendering timer.
-    @prop {number} cpuTime Time spent on CPU during last timing. Only valid if timerReady() returns true.
-    @prop {number} gpuTime Time spent on GPU during last timing. Only valid if timerReady() returns true.
-            Will remain 0 if extension EXT_disjoint_timer_query_webgl2 is unavailable.
+    @prop {GLEnum} clearBits Current clear mask to use with clear().    
 */
 function App(canvas, contextAttributes) {
     this.canvas = canvas;
     this.gl = canvas.getContext("webgl2", contextAttributes);
     this.width = this.gl.drawingBufferWidth;
     this.height = this.gl.drawingBufferHeight;
-    this.viewportWidth = this.width;
-    this.viewportHeight = this.height;
+    this.viewportX = 0;
+    this.viewportY = 0;
+    this.viewportWidth = 0;
+    this.viewportHeight = 0;
     this.currentDrawCalls = null;
     this.emptyFragmentShader = null;
 
@@ -112,14 +111,13 @@ function App(canvas, contextAttributes) {
 
     this.clearBits = this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT| this.gl.STENCIL_BUFFER_BIT;
 
-    this.timer = new Timer(this.gl);
     this.cpuTime = 0;
     this.gpuTime = 0;
 
     this.floatRenderTargetsEnabled = false;
     this.linearFloatTexturesEnabled = false;
 
-    this.gl.viewport(0, 0, this.viewportWidth, this.viewportHeight);
+    this.viewport(0, 0, this.width, this.height);
 }
 
 /**
@@ -191,7 +189,8 @@ App.prototype.drawCalls = function(drawCallList) {
 };
 
 /**
-    Bind a draw framebuffer to the WebGL context.
+    Bind a draw framebuffer to the WebGL context. Note that 
+    this method resets the viewport to match the given framebuffer.
 
     @method
     @param {Framebuffer} framebuffer The Framebuffer object to bind.
@@ -200,11 +199,7 @@ App.prototype.drawCalls = function(drawCallList) {
 App.prototype.drawFramebuffer = function(framebuffer) {
     framebuffer.bindForDraw();
 
-    if (this.viewportWidth !== framebuffer.width || this.viewportHeight !== framebuffer.height) {
-        this.viewportWidth = framebuffer.width;
-        this.viewportHeight = framebuffer.height;
-        this.gl.viewport(0, 0, this.viewportWidth, this.viewportHeight);
-    }
+    this.viewport(0, 0, framebuffer.width, framebuffer.height);
 
     return this;
 };
@@ -224,6 +219,7 @@ App.prototype.readFramebuffer = function(framebuffer) {
 
 /**
     Switch back to the default framebuffer for drawing (i.e. draw to the screen).
+    Note that this method resets the viewport to match the default framebuffer.
 
     @method
 */
@@ -231,12 +227,7 @@ App.prototype.defaultDrawFramebuffer = function() {
     if (this.state.drawFramebuffer !== null) {
         this.gl.bindFramebuffer(this.gl.DRAW_FRAMEBUFFER, null);
         this.state.drawFramebuffer = null;
-
-        if (this.viewportWidth !== this.width || this.viewportHeight !== this.height) {
-            this.viewportWidth = this.width;
-            this.viewportHeight = this.height;
-            this.gl.viewport(0, 0, this.viewportWidth, this.viewportHeight);
-        }
+        this.viewport(0, 0, this.width, this.height);
     }
 
     return this;
@@ -292,23 +283,13 @@ App.prototype.noDepthTest = function() {
 };
 
 /**
-    Enable writing to the z buffer.
+    Enable or disable writing to the depth buffer.
 
     @method
+    @param {Boolean} mask The depth mask.
 */
-App.prototype.depthMask = function() {
-    this.gl.depthMask(true);
-
-    return this;
-};
-
-/**
-    Disable writing to the z buffer.
-
-    @method
-*/
-App.prototype.noDepthMask = function() {
-    this.gl.depthMask(false);
+App.prototype.depthMask = function(mask) {
+    this.gl.depthMask(mask);
 
     return this;
 };
@@ -396,6 +377,40 @@ App.prototype.stencilTest = function() {
 */
 App.prototype.noStencilTest = function() {
     this.gl.disable(this.gl.STENCIL_TEST);
+
+    return this;
+};
+
+
+/**
+    Enable scissor testing.
+
+    @method
+*/
+App.prototype.scissorTest = function() {
+    this.gl.enable(this.gl.SCISSOR_TEST);
+
+    return this;
+};
+
+/**
+    Disable scissor testing.
+
+    @method
+*/
+App.prototype.noScissorTest = function() {
+    this.gl.disable(this.gl.SCISSOR_TEST);
+
+    return this;
+};
+
+/**
+    Define the scissor box.
+
+    @method
+*/
+App.prototype.scissor = function(x, y, width, height) {
+    this.gl.scissor(x, y, width, height);
 
     return this;
 };
@@ -598,6 +613,29 @@ App.prototype.readPixel = function(x, y, outColor) {
 };
 
 /**
+    Set the viewport.
+
+    @method
+    @param {number} x Left bound of the viewport rectangle.
+    @param {number} y Lower bound of the viewport rectangle.
+    @param {number} width Width of the viewport rectangle.
+    @param {number} height Height of the viewport rectangle.
+*/
+App.prototype.viewport = function(x, y, width, height) {
+
+    if (this.viewportWidth !== width || this.viewportHeight !== height ||
+            this.viewportX !== x || this.viewportY !== y) {
+        this.viewportX = x;
+        this.viewportY = y;
+        this.viewportWidth = width;
+        this.viewportHeight = height;
+        this.gl.viewport(x, y, this.viewportWidth, this.viewportHeight);
+    }
+
+    return this;
+};
+
+/**
     Resize the drawing surface.
 
     @method
@@ -610,9 +648,7 @@ App.prototype.resize = function(width, height) {
 
     this.width = this.gl.drawingBufferWidth;
     this.height = this.gl.drawingBufferHeight;
-    this.viewportWidth = this.width;
-    this.viewportHeight = this.height;
-    this.gl.viewport(0, 0, this.viewportWidth, this.viewportHeight);
+    this.viewport(0, 0, this.width, this.height);
 
     return this;
 };
@@ -854,6 +890,25 @@ App.prototype.createFramebuffer = function(width, height) {
 };
 
 /**
+    Create a query.
+
+    @method
+    @param {GLEnum} target Information to query.
+*/
+App.prototype.createQuery = function(target) {
+    return new Query(this.gl, target);
+};
+
+/**
+    Create a timer.
+
+    @method
+*/
+App.prototype.createTimer = function() {
+    return new Timer(this.gl);
+};
+
+/**
     Create a DrawCall. A DrawCall manages the state associated with
     a WebGL draw call including a program and associated vertex data, textures,
     uniforms and uniform blocks.
@@ -864,7 +919,7 @@ App.prototype.createFramebuffer = function(width, height) {
     @param {GLEnum} [primitive=TRIANGLES] Type of primitive to draw.
 */
 App.prototype.createDrawCall = function(program, vertexArray, primitive) {
-    return new DrawCall(this.gl, program, vertexArray, primitive);
+    return new DrawCall(this.gl, this.state, program, vertexArray, primitive);
 };
 
 /**
@@ -874,55 +929,15 @@ App.prototype.createDrawCall = function(program, vertexArray, primitive) {
 */
 App.prototype.draw = function() {
     for (var i = 0, len = this.currentDrawCalls.length; i < len; i++) {
-        this.currentDrawCalls[i].draw(this.state);
+        this.currentDrawCalls[i].draw();
     }
 
     return this;
-};
-
-/**
-    Start the rendering timer.
-
-    @method
-*/
-App.prototype.timerStart = function() {
-    this.timer.start();
-
-    return this;
-};
-
-/**
-    Stop the rendering timer.
-
-    @method
-*/
-App.prototype.timerEnd = function() {
-    this.timer.end();
-
-    return this;
-};
-
-/**
-    Check if the rendering time is available. If
-    this method returns true, the cpuTime and
-    gpuTime properties will be set to valid
-    values.
-
-    @method
-*/
-App.prototype.timerReady = function() {
-    if (this.timer.ready()) {
-        this.cpuTime = this.timer.cpuTime;
-        this.gpuTime = this.timer.gpuTime;
-        return true;
-    } else {
-        return false;
-    }
 };
 
 module.exports = App;
 
-},{"./constants":2,"./cubemap":3,"./draw-call":4,"./framebuffer":5,"./program":7,"./shader":8,"./texture":10,"./timer":11,"./transform-feedback":12,"./uniform-buffer":13,"./vertex-array":15,"./vertex-buffer":16}],2:[function(require,module,exports){
+},{"./constants":2,"./cubemap":3,"./draw-call":4,"./framebuffer":5,"./program":7,"./query":8,"./shader":9,"./texture":11,"./timer":12,"./transform-feedback":13,"./uniform-buffer":14,"./vertex-array":16,"./vertex-buffer":17}],2:[function(require,module,exports){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -1128,7 +1143,7 @@ Cubemap.prototype.bind = function() {
 
 module.exports = Cubemap;
 
-},{"./constants":2,"./texture-format-defaults":9}],4:[function(require,module,exports){
+},{"./constants":2,"./texture-format-defaults":10}],4:[function(require,module,exports){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -1178,11 +1193,12 @@ var CONSTANTS = require("./constants");
     @prop {number} textureCount The number of active textures for this draw call.
     @prop {GLEnum} primitive The primitive type being drawn.
 */
-function DrawCall(gl, program, vertexArray, primitive) {
+function DrawCall(gl, appState, program, vertexArray, primitive) {
     this.gl = gl;
     this.currentProgram = program;
     this.currentVertexArray = vertexArray;
     this.currentTransformFeedback = null;
+    this.appState = appState;
 
     this.uniformIndices = {};
     this.uniformNames = new Array(CONSTANTS.WEBGL_INFO.MAX_UNIFORMS);
@@ -1265,8 +1281,13 @@ DrawCall.prototype.uniformBlock = function(name, buffer) {
     return this;
 };
 
-// Draw something.
-DrawCall.prototype.draw = function(state) {
+/**
+    Draw based on current state.
+
+    @method
+*/
+DrawCall.prototype.draw = function() {
+    var state = this.appState;
     var uniformNames = this.uniformNames;
     var uniformValues = this.uniformValues;
     var uniformBuffers = this.uniformBuffers;
@@ -1615,7 +1636,7 @@ Framebuffer.prototype.restoreState = function(framebuffer) {
 
 module.exports = Framebuffer;
 
-},{"./texture":10,"./texture-format-defaults":9}],6:[function(require,module,exports){
+},{"./texture":11,"./texture-format-defaults":10}],6:[function(require,module,exports){
 (function (global){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
@@ -1651,7 +1672,7 @@ var App = require("./app");
     @namespace PicoGL
 */
 var PicoGL = global.PicoGL = require("./constants");    
-PicoGL.version = "0.4.2";
+PicoGL.version = "0.5.0";
 
 /**
     Create a PicoGL app. The app is the primary entry point to PicoGL. It stores
@@ -1864,7 +1885,93 @@ Program.prototype.uniformBlock = function(name, base) {
 
 module.exports = Program;
 
-},{"./constants":2,"./shader":8,"./uniforms":14}],8:[function(require,module,exports){
+},{"./constants":2,"./shader":9,"./uniforms":15}],8:[function(require,module,exports){
+///////////////////////////////////////////////////////////////////////////////////
+// The MIT License (MIT)
+//
+// Copyright (c) 2017 Tarek Sherif
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy of
+// this software and associated documentation files (the "Software"), to deal in
+// the Software without restriction, including without limitation the rights to
+// use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+// the Software, and to permit persons to whom the Software is furnished to do so,
+// subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+// FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+// COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+// IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+// CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+///////////////////////////////////////////////////////////////////////////////////
+
+"use strict";
+
+/**
+    Generic query object.
+
+    @class
+    @hideconstructor
+    @prop {WebGLRenderingContext} gl The WebGL context.
+    @prop {WebGLQuery} query Query object.
+    @prop {GLEnum} target The type of information being queried.
+    @prop {boolean} active Whether or not a query is currently in progress.
+    @prop {Any} result The result of the query (only available after a call to ready() returns true). 
+*/
+function Query(gl, target) {
+    this.gl = gl;
+    this.query = gl.createQuery();
+    this.target = target;
+    this.active = false;
+    this.result = null;
+}
+
+/**
+    Begin a query.
+
+    @method
+*/
+Query.prototype.begin = function() {
+    if (!this.active) {
+        this.gl.beginQuery(this.target, this.query);
+        this.result = null;
+    }    
+};
+
+/**
+    End a query.
+
+    @method
+*/
+Query.prototype.end = function() {
+    if (!this.active) {
+        this.gl.endQuery(this.target);
+        this.active = true;
+    }
+};
+
+/**
+    Check if query result is available.
+
+    @method
+*/
+Query.prototype.ready = function() {
+    if (this.active && this.gl.getQueryParameter(this.query, this.gl.QUERY_RESULT_AVAILABLE)) {
+        this.active = false;
+        this.result = this.gl.getQueryParameter(this.query, this.gl.QUERY_RESULT);
+        return true;
+    }
+
+    return false;
+};
+
+module.exports = Query;
+
+},{}],9:[function(require,module,exports){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -1929,7 +2036,7 @@ Shader.prototype.delete = function() {
 
 module.exports = Shader;
 
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 // Copyright (c) 2017 Tarek Sherif
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -1973,7 +2080,7 @@ FLOAT[CONSTANTS.DEPTH_COMPONENT] = CONSTANTS.DEPTH_COMPONENT32F;
 
 module.exports = TEXTURE_FORMAT_DEFAULTS;
 
-},{"./constants":2}],10:[function(require,module,exports){
+},{"./constants":2}],11:[function(require,module,exports){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -2198,7 +2305,7 @@ Texture.prototype.bind = function(force) {
 
 module.exports = Texture;
 
-},{"./constants":2,"./texture-format-defaults":9}],11:[function(require,module,exports){
+},{"./constants":2,"./texture-format-defaults":10}],12:[function(require,module,exports){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -2224,6 +2331,8 @@ module.exports = Texture;
 
 "use strict";
 
+var Query = require("./query");
+
 /**
     Rendering timer.
 
@@ -2236,8 +2345,9 @@ module.exports = Texture;
     @prop {WebGLQuery} gpuTimerQuery Timer query object for GPU (if gpu timing is supported).
     @prop {boolean} gpuTimerQueryInProgress Whether a gpu timer query is currently in progress.
     @prop {number} cpuStartTime When the last CPU timing started.
-    @prop {number} cpuTime Time spent on the CPU during the last timing. Only valid if App.timerReady() returns true.
-    @prop {number} gpuTime Time spent on the GPU during the last timing. Only valid if App.timerReady() returns true.
+    @prop {number} cpuTime Time spent on CPU during last timing. Only valid if ready() returns true.
+    @prop {number} gpuTime Time spent on GPU during last timing. Only valid if ready() returns true.
+            Will remain 0 if extension EXT_disjoint_timer_query_webgl2 is unavailable.
 */
 function Timer(gl) {
     this.gl = gl;
@@ -2247,27 +2357,29 @@ function Timer(gl) {
     var gpuTimerExtension = this.gl.getExtension("EXT_disjoint_timer_query_webgl2") || this.gl.getExtension("EXT_disjoint_timer_query");
     if (gpuTimerExtension) {
         this.gpuTimer = true;
-        this.gpuTimerQuery = this.gl.createQuery();
-        this.TIME_ELAPSED_EXT = gpuTimerExtension.TIME_ELAPSED_EXT;
+        this.gpuTimerQuery = new Query(this.gl, gpuTimerExtension.TIME_ELAPSED_EXT);
         this.GPU_DISJOINT_EXT = gpuTimerExtension.GPU_DISJOINT_EXT;
     } else {
         this.gpuTimer = false;
         this.gpuTimerQuery = null;
-        this.TIME_ELAPSED_EXT = null;
         this.GPU_DISJOINT_EXT = null;
     }
 
-    this.gpuTimerQueryInProgress = false;
     this.cpuStartTime = 0;
     this.cpuTime = 0;
     this.gpuTime = 0;
 }
 
-// Start the rendering timer.
+
+/**
+    Start timing.
+
+    @method
+*/
 Timer.prototype.start = function() {
     if (this.gpuTimer) {
-        if (!this.gpuTimerQueryInProgress) {
-            this.gl.beginQuery(this.TIME_ELAPSED_EXT, this.gpuTimerQuery);
+        if (!this.gpuTimerQuery.active) {
+            this.gpuTimerQuery.begin();
             this.cpuStartTime = this.cpuTimer.now();
         }
     } else {
@@ -2275,38 +2387,42 @@ Timer.prototype.start = function() {
     }
 };
 
-// Stop the rendering timer.
+
+/**
+    Stop timing.
+
+    @method
+*/
 Timer.prototype.end = function() {
     if (this.gpuTimer) {
-        if (!this.gpuTimerQueryInProgress) {
-            this.gl.endQuery(this.TIME_ELAPSED_EXT);
+        if (!this.gpuTimerQuery.active) {
+            this.gpuTimerQuery.end();
             this.cpuTime = this.cpuTimer.now() - this.cpuStartTime;
-            this.gpuTimerQueryInProgress = true;
         }
     } else {
         this.cpuTime = this.cpuTimer.now() - this.cpuStartTime;
     }
 };
 
-// Check if the rendering time is available. If
-// this method returns true, the cpuTime and
-// gpuTime properties will be set to valid
-// values.
+/**
+    Check if timing results are available. If
+    this method returns true, the cpuTime and
+    gpuTime properties will be set to valid
+    values.
+
+    @method
+*/
 Timer.prototype.ready = function() {
     if (this.gpuTimer) {
-        if (!this.gpuTimerQueryInProgress) {
+        if (!this.gpuTimerQuery.active) {
             return false;
         }
 
-        var gpuTimerAvailable = this.gl.getQueryParameter(this.gpuTimerQuery, this.gl.QUERY_RESULT_AVAILABLE);
+        var gpuTimerAvailable = this.gpuTimerQuery.ready();
         var gpuTimerDisjoint = this.gl.getParameter(this.GPU_DISJOINT_EXT);
 
-        if (gpuTimerAvailable) {
-            this.gpuTimerQueryInProgress = false;
-        }
-
         if (gpuTimerAvailable && !gpuTimerDisjoint) {
-            this.gpuTime = this.gl.getQueryParameter(this.gpuTimerQuery, this.gl.QUERY_RESULT)  / 1000000;
+            this.gpuTime = this.gpuTimerQuery.result  / 1000000;
             return true;
         } else {
             return false;
@@ -2318,7 +2434,7 @@ Timer.prototype.ready = function() {
 
 module.exports = Timer;
 
-},{}],12:[function(require,module,exports){
+},{"./query":8}],13:[function(require,module,exports){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -2403,7 +2519,7 @@ TransformFeedback.prototype.bind = function() {
 
 module.exports = TransformFeedback;
 
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -2630,7 +2746,7 @@ UniformBuffer.prototype.bind = function(base) {
 
 module.exports = UniformBuffer;
 
-},{"./constants":2}],14:[function(require,module,exports){
+},{"./constants":2}],15:[function(require,module,exports){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -2849,7 +2965,7 @@ module.exports.MultiBoolUniform = MultiBoolUniform;
 module.exports.MultiNumericUniform = MultiNumericUniform;
 module.exports.SingleComponentUniform = SingleComponentUniform;
 
-},{"./constants":2}],15:[function(require,module,exports){
+},{"./constants":2}],16:[function(require,module,exports){
 // Copyright (c) 2017 Tarek Sherif
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -3013,7 +3129,7 @@ VertexArray.prototype.attributeBuffer = function(attributeIndex, vertexBuffer, i
 
 module.exports = VertexArray;
 
-},{"./constants":2}],16:[function(require,module,exports){
+},{"./constants":2}],17:[function(require,module,exports){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //

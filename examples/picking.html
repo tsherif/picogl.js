@@ -142,6 +142,8 @@
         .depthTest()
         .cullBackfaces();
 
+        var timer = app.createTimer();
+
         // SET UP PICKING PROGRAM
         var pickingVsSource = document.getElementById("picking-vs").text.trim();
         var pickingFsSource = document.getElementById("picking-fs").text.trim();
@@ -265,8 +267,8 @@
             });
 
             function draw() {
-                if (app.timerReady()) {
-                    utils.updateTimerElement(app.cpuTime, app.gpuTime);
+                if (timer.ready()) {
+                    utils.updateTimerElement(timer.cpuTime, timer.gpuTime);
                 }
 
                 for (var i = 0, len = boxes.length; i < len; ++i) {
@@ -282,7 +284,7 @@
                     .set(1, boxes[i].modelMatrix);
                 }
 
-                app.timerStart();
+                timer.start();
 
                 if (picked) {
                     // DRAW TO PICKING BUFFER
@@ -317,7 +319,7 @@
                 .clear()
                 .draw();
 
-                app.timerEnd();
+                timer.end();
 
                 requestAnimationFrame(draw);
             }

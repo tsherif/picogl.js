@@ -116,6 +116,8 @@
         .blend()
         .blendFunc(PicoGL.ONE, PicoGL.ONE_MINUS_SRC_ALPHA);
 
+        var timer = app.createTimer();
+
         // PROGRAM
         var vsSource = document.getElementById("main-vs").text.trim();
         var fsSource = document.getElementById("main-fs").text.trim();
@@ -215,11 +217,11 @@
 
         var draw1 = true;
         function draw() {      
-            if (app.timerReady()) {
-                utils.updateTimerElement(app.cpuTime, app.gpuTime);
+            if (timer.ready()) {
+                utils.updateTimerElement(timer.cpuTime, timer.gpuTime);
             }
 
-            app.timerStart();
+            timer.start();
 
             // DRAW
             app.drawCalls(draw1 ? drawCalls1 : drawCalls2)
@@ -228,7 +230,7 @@
 
             draw1 = !draw1;
 
-            app.timerEnd();
+            timer.end();
 
             requestAnimationFrame(draw);
         }

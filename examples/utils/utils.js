@@ -353,6 +353,37 @@
             };
         },
 
+        computeBoundingBox: function (position, options) {
+            options = options || {};
+            var buildGeometry = options.buildGeometry || false;
+
+            var boundary = {
+                min: vec3.create(),
+                max: vec3.create()
+            };
+            vec3.set(boundary.min, Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY);
+            vec3.set(boundary.max, Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY);
+            for (var i = 0, len = position.length; i < len; i += 3) {
+                boundary.min[0] = Math.min(position[i], boundary.min[0]);
+                boundary.max[0] = Math.max(position[i], boundary.max[0]);
+                boundary.min[1] = Math.min(position[i + 1], boundary.min[1]);
+                boundary.max[1] = Math.max(position[i + 1], boundary.max[1]);
+                boundary.min[2] = Math.min(position[i + 2], boundary.min[2]);
+                boundary.max[2] = Math.max(position[i + 2], boundary.max[2]);
+            }
+
+            if (buildGeometry) {
+                var size = vec3.create();
+                vec3.subtract(size, boundary.max, boundary.min);
+                boundary.geometry = utils.createBox({
+                    position: boundary.min,
+                    dimensions: size
+                });
+            }
+
+            return boundary;
+        },
+
         addTimerElement: function() {
             this.timerDiv = document.createElement("div")
             this.timerDiv.id = "timer";
