@@ -135,6 +135,8 @@
         .depthTest()
         .cullBackfaces();
 
+        var timer = app.createTimer();
+
         // SET UP SHADOW PROGRAM
         var shadowVsSource =  document.getElementById("shadow-vs").text.trim();
         var shadowFsSource =  document.getElementById("shadow-fs").text.trim();
@@ -230,11 +232,11 @@
 
 
             function draw() {
-                if (app.timerReady()) {
-                    utils.updateTimerElement(app.cpuTime, app.gpuTime);
+                if (timer.ready()) {
+                    utils.updateTimerElement(timer.cpuTime, timer.gpuTime);
                 }
 
-                app.timerStart();
+                timer.start();
 
                 // UPDATE TRANSFORMS
                 for (var i = 0, len = boxes.length; i < len; ++i) {
@@ -262,7 +264,7 @@
                 .clear()
                 .draw();
 
-                app.timerEnd();
+                timer.end();
 
                 requestAnimationFrame(draw);
             }

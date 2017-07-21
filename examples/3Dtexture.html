@@ -84,6 +84,8 @@
         .blend()
         .blendFunc(PicoGL.ONE, PicoGL.ONE_MINUS_SRC_ALPHA);
 
+        var timer = app.createTimer();
+
         // SET UP PROGRAM
         var vsSource =  document.getElementById("vertex-draw").text.trim();
         var fsSource =  document.getElementById("fragment-draw").text.trim();
@@ -169,11 +171,11 @@
         app.drawCalls([drawCall]);
 
         function draw() {
-            if (app.timerReady()) {
-                utils.updateTimerElement(app.cpuTime, app.gpuTime);
+            if (timer.ready()) {
+                utils.updateTimerElement(timer.cpuTime, timer.gpuTime);
             }
 
-            app.timerStart();
+            timer.start();
 
             angleX += 0.01;
             angleY += 0.02;
@@ -187,7 +189,7 @@
 
             app.clear().draw();
             
-            app.timerEnd();
+            timer.end();
 
             requestAnimationFrame(draw);
         }

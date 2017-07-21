@@ -344,6 +344,7 @@
         .depthTest()
         .floatRenderTargets();
 
+        var timer = app.createTimer();
 
         var CONSTRAINT_ITERATIONS = 20;
         var DATA_TEXTURE_DIM = 60;
@@ -784,11 +785,11 @@
                     return;
                 }
 
-                if (app.timerReady()) {
-                    utils.updateTimerElement(app.cpuTime, app.gpuTime);
+                if (timer.ready()) {
+                    utils.updateTimerElement(timer.cpuTime, timer.gpuTime);
                 }
 
-                app.timerStart();
+                timer.start();
 
                 updateForceDrawCalls[0].texture("uPositionBuffer", positionTextureA);
                 updateForceDrawCalls[0].texture("uOldPositionBuffer", oldPositionTextureA);
@@ -878,7 +879,7 @@
                 oldPositionTextureA = oldPositionTextureB;
                 oldPositionTextureB = temp;
 
-                app.timerEnd();
+                timer.end();
 
                 requestAnimationFrame(draw);
             }

@@ -175,6 +175,7 @@
         .depthMask(false)
         .floatRenderTargets();
 
+        var timer = app.createTimer();
 
         var spheres = new Array(NUM_SPHERES);
         var sphereColorData = new Float32Array(NUM_SPHERES * 4);
@@ -300,11 +301,11 @@
             var rotationMatrix = mat4.create();
 
             function draw() {
-                if (app.timerReady()) {
-                    utils.updateTimerElement(app.cpuTime, app.gpuTime);
+                if (timer.ready()) {
+                    utils.updateTimerElement(timer.cpuTime, timer.gpuTime);
                 }
 
-                app.timerStart();
+                timer.start();
 
                 for (var i = 0, len = spheres.length; i < len; ++i) {
                     spheres[i].rotate[1] += 0.002;
@@ -330,7 +331,7 @@
                 .clear()
                 .draw();
                 
-                app.timerEnd(); 
+                timer.end(); 
                                 
                 requestAnimationFrame(draw);
             }

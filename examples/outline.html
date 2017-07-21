@@ -185,6 +185,8 @@
         // DEPTH AND STENCIL TESTS PASS
         .stencilOp(PicoGL.KEEP, PicoGL.KEEP, PicoGL.REPLACE);
 
+        var timer = app.createTimer();
+
         // SET UP MAIN DRAW PROGRAM
         var mainVsSource =  document.getElementById("vertex-main").text.trim();
         var mainFsSource =  document.getElementById("fragment-main").text.trim();
@@ -266,11 +268,11 @@
             var rotationMatrix = mat4.create();
 
             function draw() {
-                if (app.timerReady()) {
-                    utils.updateTimerElement(app.cpuTime, app.gpuTime);
+                if (timer.ready()) {
+                    utils.updateTimerElement(timer.cpuTime, timer.gpuTime);
                 }
 
-                app.timerStart();
+                timer.start();
 
                 // UPDATE TRANSFORMS
                 for (var i = 0, len = spheres.length; i < len; ++i) {
@@ -301,7 +303,7 @@
                 .stencilMask(0)
                 .draw();
                 
-                app.timerEnd();
+                timer.end();
 
                 requestAnimationFrame(draw);
             }

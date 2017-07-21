@@ -61,7 +61,12 @@ function Timer(gl) {
     this.gpuTime = 0;
 }
 
-// Start the rendering timer.
+
+/**
+    Start timing.
+
+    @method
+*/
 Timer.prototype.start = function() {
     if (this.gpuTimer) {
         if (!this.gpuTimerQuery.active) {
@@ -73,7 +78,12 @@ Timer.prototype.start = function() {
     }
 };
 
-// Stop the rendering timer.
+
+/**
+    Stop timing.
+
+    @method
+*/
 Timer.prototype.end = function() {
     if (this.gpuTimer) {
         if (!this.gpuTimerQuery.active) {
@@ -85,10 +95,14 @@ Timer.prototype.end = function() {
     }
 };
 
-// Check if the rendering time is available. If
-// this method returns true, the cpuTime and
-// gpuTime properties will be set to valid
-// values.
+/**
+    Check if timing results are available. If
+    this method returns true, the cpuTime and
+    gpuTime properties will be set to valid
+    values.
+
+    @method
+*/
 Timer.prototype.ready = function() {
     if (this.gpuTimer) {
         if (!this.gpuTimerQuery.active) {

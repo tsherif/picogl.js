@@ -87,6 +87,8 @@
         var app = PicoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0);
 
+        var timer = app.createTimer();
+
         window.onresize = function() {
             app.resize(window.innerWidth, window.innerHeight);
         }
@@ -144,11 +146,11 @@
 
         var currentDrawCall = drawCallA;
         function draw() {
-            if (app.timerReady()) {
-                utils.updateTimerElement(app.cpuTime, app.gpuTime);
+            if (timer.ready()) {
+                utils.updateTimerElement(timer.cpuTime, timer.gpuTime);
             }
 
-            app.timerStart();
+            timer.start();
 
             // DRAW
             app.drawCalls(currentDrawCall)
@@ -158,7 +160,7 @@
             // SWAP INPUT AND OUTPUT
             currentDrawCall = currentDrawCall === drawCallA ? drawCallB : drawCallA;
 
-            app.timerEnd();
+            timer.end();
 
 
             requestAnimationFrame(draw);

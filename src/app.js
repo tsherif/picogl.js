@@ -89,7 +89,6 @@ function App(canvas, contextAttributes) {
 
     this.clearBits = this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT| this.gl.STENCIL_BUFFER_BIT;
 
-    this.timer = new Timer(this.gl);
     this.cpuTime = 0;
     this.gpuTime = 0;
 
@@ -871,10 +870,20 @@ App.prototype.createFramebuffer = function(width, height) {
 /**
     Create a query.
 
+    @method
     @param {GLEnum} target Information to query.
 */
 App.prototype.createQuery = function(target) {
     return new Query(this.gl, target);
+};
+
+/**
+    Create a timer.
+
+    @method
+*/
+App.prototype.createTimer = function() {
+    return new Timer(this.gl);
 };
 
 /**
@@ -902,46 +911,6 @@ App.prototype.draw = function() {
     }
 
     return this;
-};
-
-/**
-    Start the rendering timer.
-
-    @method
-*/
-App.prototype.timerStart = function() {
-    this.timer.start();
-
-    return this;
-};
-
-/**
-    Stop the rendering timer.
-
-    @method
-*/
-App.prototype.timerEnd = function() {
-    this.timer.end();
-
-    return this;
-};
-
-/**
-    Check if the rendering time is available. If
-    this method returns true, the cpuTime and
-    gpuTime properties will be set to valid
-    values.
-
-    @method
-*/
-App.prototype.timerReady = function() {
-    if (this.timer.ready()) {
-        this.cpuTime = this.timer.cpuTime;
-        this.gpuTime = this.timer.gpuTime;
-        return true;
-    } else {
-        return false;
-    }
 };
 
 module.exports = App;

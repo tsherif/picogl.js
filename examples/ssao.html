@@ -282,6 +282,8 @@
         .depthFunc(PicoGL.LEQUAL)
         .floatRenderTargets();
 
+        var timer = app.createTimer();
+
         // SET UP COLOR/GEO PROGRAM
         var colorGeoVsSource =  document.getElementById("vertex-colorgeo").text.trim();
         var colorGeoFsSource =  document.getElementById("fragment-colorgeo").text.trim();
@@ -456,11 +458,11 @@
             var rotationMatrix = mat4.create();
 
             function draw() {
-                if (app.timerReady()) {
-                    utils.updateTimerElement(app.cpuTime, app.gpuTime);
+                if (timer.ready()) {
+                    utils.updateTimerElement(timer.cpuTime, timer.gpuTime);
                 }
 
-                app.timerStart();
+                timer.start();
 
                 // UPDATE TRANSFORMS
                 for (var i = 0, len = spheres.length; i < len; ++i) {
@@ -499,7 +501,7 @@
                     .draw();
                 }
                 
-                app.timerEnd();
+                timer.end();
 
                 requestAnimationFrame(draw);
             }

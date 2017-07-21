@@ -241,6 +241,8 @@
             document.body.innerHTML = "This example requires extension EXT_color_buffer_float which is not supported on this system."
         }
 
+        var timer = app.createTimer();
+
         var resolution = new Int32Array([app.width, app.height]);
 
         // SET UP PROGRAMS
@@ -442,11 +444,11 @@
             }
 
             function draw() {
-                if (app.timerReady()) {
-                    utils.updateTimerElement(app.cpuTime, app.gpuTime);
+                if (timer.ready()) {
+                    utils.updateTimerElement(timer.cpuTime, timer.gpuTime);
                 }
 
-                app.timerStart();
+                timer.start();
 
                 cube.rotation[0] += 0.01;
                 cube.rotation[1] += 0.02;
@@ -496,7 +498,7 @@
                 .clear()
                 .draw();
                 
-                app.timerEnd();
+                timer.end();
 
                 requestAnimationFrame(draw);
             }

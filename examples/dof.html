@@ -202,6 +202,8 @@
         .depthTest()
         .clearColor(0.0, 0.0, 0.0, 1.0);
 
+        var timer = app.createTimer();
+
         var depthRange = vec2.fromValues(NEAR, FAR);
 
         // SET UP PROGRAMS
@@ -347,11 +349,11 @@
                     resized = false;
                 }
 
-                if (app.timerReady()) {
-                    utils.updateTimerElement(app.cpuTime, app.gpuTime);
+                if (timer.ready()) {
+                    utils.updateTimerElement(timer.cpuTime, timer.gpuTime);
                 }
 
-                app.timerStart();
+                timer.start();
 
                 for (var i = 0, len = boxes.length; i < len; ++i) {
                     boxes[i].rotate[0] += 0.01;
@@ -379,7 +381,7 @@
                 .clear()
                 .draw();
 
-                app.timerEnd();
+                timer.end();
 
                 requestAnimationFrame(draw);
             }

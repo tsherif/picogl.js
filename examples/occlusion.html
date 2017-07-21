@@ -212,6 +212,8 @@
         .blendFunc(PicoGL.SRC_ALPHA, PicoGL.ONE_MINUS_SRC_ALPHA)
         .scissor(hudViewport[0], hudViewport[1], hudViewport[2], hudViewport[3]);
 
+        var timer = app.createTimer();
+
         /////////////////////
         // SET UP PROGRAM
         /////////////////////

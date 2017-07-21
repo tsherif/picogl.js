@@ -155,6 +155,7 @@
         .blendFunc(PicoGL.ONE, PicoGL.ONE)
         .floatRenderTargets();
 
+        var timer = app.createTimer();
 
         // SET UP GBUFFER PROGRAM
         var geoVsSource =  document.getElementById("geo-vs").text.trim();
@@ -311,11 +312,11 @@
             }
 
             function draw() {
-                if (app.timerReady()) {
-                    utils.updateTimerElement(app.cpuTime, app.gpuTime);
+                if (timer.ready()) {
+                    utils.updateTimerElement(timer.cpuTime, timer.gpuTime);
                 }
 
-                app.timerStart();
+                timer.start();
 
                 for (var i = 0, len = boxes.length; i < len; ++i) {
                     boxes[i].rotate[0] += 0.01;
@@ -345,7 +346,7 @@
                 .clear()
                 .draw();
                 
-                app.timerEnd();                
+                timer.end();                
                 
                 requestAnimationFrame(draw);
             }
