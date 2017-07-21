@@ -23,6 +23,17 @@
 
 "use strict";
 
+/**
+    Generic query object.
+
+    @class
+    @hideconstructor
+    @prop {WebGLRenderingContext} gl The WebGL context.
+    @prop {WebGLQuery} query Query object.
+    @prop {GLEnum} target The type of information being queried.
+    @prop {boolean} active Whether or not a query is currently in progress.
+    @prop {Any} result The result of the query (only available after a call to ready() returns true). 
+*/
 function Query(gl, target) {
     this.gl = gl;
     this.query = gl.createQuery();
@@ -31,16 +42,31 @@ function Query(gl, target) {
     this.result = null;
 }
 
+/**
+    Begin a query.
+
+    @method
+*/
 Query.prototype.begin = function() {
     this.gl.beginQuery(this.target, this.query);
     this.active = true;
     this.result = null;
 };
 
+/**
+    End a query.
+
+    @method
+*/
 Query.prototype.end = function() {
     this.gl.endQuery(this.target);
 };
 
+/**
+    Check if query result is available.
+
+    @method
+*/
 Query.prototype.ready = function() {
     if (this.active && this.gl.getQueryParameter(this.query, this.gl.QUERY_RESULT_AVAILABLE)) {
         this.active = false;
@@ -51,6 +77,12 @@ Query.prototype.ready = function() {
     return false;
 };
 
+/**
+    Get an arbitrary query parameter.
+
+    @method
+    @param {GLEnum} parameter The parameter to get.
+*/
 Query.prototype.getParameter = function(parameter) {
     return this.gl.getQueryParameter(this.query, parameter);
 };

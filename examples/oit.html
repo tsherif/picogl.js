@@ -172,7 +172,7 @@
         var app = PicoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0)
         .blend()
-        .noDepthMask()
+        .depthMask(false)
         .floatRenderTargets();
 
 

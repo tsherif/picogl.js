@@ -168,7 +168,8 @@ App.prototype.drawCalls = function(drawCallList) {
 };
 
 /**
-    Bind a draw framebuffer to the WebGL context.
+    Bind a draw framebuffer to the WebGL context. Note that 
+    this method resets the viewport to match the given framebuffer.
 
     @method
     @param {Framebuffer} framebuffer The Framebuffer object to bind.
@@ -197,6 +198,7 @@ App.prototype.readFramebuffer = function(framebuffer) {
 
 /**
     Switch back to the default framebuffer for drawing (i.e. draw to the screen).
+    Note that this method resets the viewport to match the default framebuffer.
 
     @method
 */
@@ -260,9 +262,10 @@ App.prototype.noDepthTest = function() {
 };
 
 /**
-    Set the depth mask.
+    Enable or disable writing to the depth buffer.
 
     @method
+    @param {Boolean} mask The depth mask.
 */
 App.prototype.depthMask = function(mask) {
     this.gl.depthMask(mask);
@@ -588,6 +591,15 @@ App.prototype.readPixel = function(x, y, outColor) {
     return this;
 };
 
+/**
+    Set the viewport.
+
+    @method
+    @param {number} x Left bound of the viewport rectangle.
+    @param {number} y Lower bound of the viewport rectangle.
+    @param {number} width Width of the viewport rectangle.
+    @param {number} height Height of the viewport rectangle.
+*/
 App.prototype.viewport = function(x, y, width, height) {
 
     if (this.viewportWidth !== width || this.viewportHeight !== height ||

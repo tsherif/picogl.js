@@ -135,7 +135,11 @@ DrawCall.prototype.uniformBlock = function(name, buffer) {
     return this;
 };
 
-// Draw something.
+/**
+    Draw based on current state.
+
+    @method
+*/
 DrawCall.prototype.draw = function() {
     var state = this.appState;
     var uniformNames = this.uniformNames;

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: picogl.js</title>
+    <title>JSDoc: Source: query.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: picogl.js</h1>
+    <h1 class="page-title">Source: query.js</h1>
 
     
 
@@ -51,30 +51,71 @@
 
 "use strict";
 
-var App = require("./app");
+/**
+    Generic query object.
+
+    @class
+    @hideconstructor
+    @prop {WebGLRenderingContext} gl The WebGL context.
+    @prop {WebGLQuery} query Query object.
+    @prop {GLEnum} target The type of information being queried.
+    @prop {boolean} active Whether or not a query is currently in progress.
+    @prop {Any} result The result of the query (only available after a call to ready() returns true). 
+*/
+function Query(gl, target) {
+    this.gl = gl;
+    this.query = gl.createQuery();
+    this.target = target;
+    this.active = false;
+    this.result = null;
+}
 
 /**
-    Global PicoGL module. For convenience, all WebGL enums are stored
-    as properties of PicoGL (e.g. PicoGL.FLOAT, PicoGL.ONE_MINUS_SRC_ALPHA).
+    Begin a query.
 
-    @namespace PicoGL
+    @method
 */
-var PicoGL = global.PicoGL = require("./constants");    
-PicoGL.version = "%%VERSION%%";
-
-/**
-    Create a PicoGL app. The app is the primary entry point to PicoGL. It stores
-    the canvas, the WebGL context and all WebGL state.
-
-    @function PicoGL.createApp
-    @param {DOMElement} canvas The canvas on which to create the WebGL context.
-    @param {Object} [contextAttributes] Context attributes to pass when calling getContext().
-*/
-PicoGL.createApp = function(canvas, contextAttributes) {
-    return new App(canvas, contextAttributes);
+Query.prototype.begin = function() {
+    this.gl.beginQuery(this.target, this.query);
+    this.active = true;
+    this.result = null;
 };
 
-module.exports = PicoGL;
+/**
+    End a query.
+
+    @method
+*/
+Query.prototype.end = function() {
+    this.gl.endQuery(this.target);
+};
+
+/**
+    Check if query result is available.
+
+    @method
+*/
+Query.prototype.ready = function() {
+    if (this.active &amp;&amp; this.gl.getQueryParameter(this.query, this.gl.QUERY_RESULT_AVAILABLE)) {
+        this.active = false;
+        this.result = this.gl.getQueryParameter(this.query, this.gl.QUERY_RESULT);
+        return true;
+    }
+
+    return false;
+};
+
+/**
+    Get an arbitrary query parameter.
+
+    @method
+    @param {GLEnum} parameter The parameter to get.
+*/
+Query.prototype.getParameter = function(parameter) {
+    return this.gl.getQueryParameter(this.query, parameter);
+};
+
+module.exports = Query;
 </code></pre>
         </article>
     </section>
