@@ -48,9 +48,10 @@ function Query(gl, target) {
     @method
 */
 Query.prototype.begin = function() {
-    this.gl.beginQuery(this.target, this.query);
-    this.active = true;
-    this.result = null;
+    if (!this.active) {
+        this.gl.beginQuery(this.target, this.query);
+        this.result = null;
+    }    
 };
 
 /**
@@ -59,7 +60,10 @@ Query.prototype.begin = function() {
     @method
 */
 Query.prototype.end = function() {
-    this.gl.endQuery(this.target);
+    if (!this.active) {
+        this.gl.endQuery(this.target);
+        this.active = true;
+    }
 };
 
 /**
@@ -75,16 +79,6 @@ Query.prototype.ready = function() {
     }
 
     return false;
-};
-
-/**
-    Get an arbitrary query parameter.
-
-    @method
-    @param {GLEnum} parameter The parameter to get.
-*/
-Query.prototype.getParameter = function(parameter) {
-    return this.gl.getQueryParameter(this.query, parameter);
 };
 
 module.exports = Query;

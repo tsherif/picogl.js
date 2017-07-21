@@ -194,7 +194,8 @@ App.prototype.drawCalls = function(drawCallList) {
 };
 
 /**
-    Bind a draw framebuffer to the WebGL context.
+    Bind a draw framebuffer to the WebGL context. Note that 
+    this method resets the viewport to match the given framebuffer.
 
     @method
     @param {Framebuffer} framebuffer The Framebuffer object to bind.
@@ -223,6 +224,7 @@ App.prototype.readFramebuffer = function(framebuffer) {
 
 /**
     Switch back to the default framebuffer for drawing (i.e. draw to the screen).
+    Note that this method resets the viewport to match the default framebuffer.
 
     @method
 */
@@ -286,9 +288,10 @@ App.prototype.noDepthTest = function() {
 };
 
 /**
-    Set the depth mask.
+    Enable or disable writing to the depth buffer.
 
     @method
+    @param {Boolean} mask The depth mask.
 */
 App.prototype.depthMask = function(mask) {
     this.gl.depthMask(mask);
@@ -614,6 +617,15 @@ App.prototype.readPixel = function(x, y, outColor) {
     return this;
 };
 
+/**
+    Set the viewport.
+
+    @method
+    @param {number} x Left bound of the viewport rectangle.
+    @param {number} y Lower bound of the viewport rectangle.
+    @param {number} width Width of the viewport rectangle.
+    @param {number} height Height of the viewport rectangle.
+*/
 App.prototype.viewport = function(x, y, width, height) {
 
     if (this.viewportWidth !== width || this.viewportHeight !== height ||
@@ -1304,7 +1316,11 @@ DrawCall.prototype.uniformBlock = function(name, buffer) {
     return this;
 };
 
-// Draw something.
+/**
+    Draw based on current state.
+
+    @method
+*/
 DrawCall.prototype.draw = function() {
     var state = this.appState;
     var uniformNames = this.uniformNames;
@@ -1930,6 +1946,17 @@ module.exports = Program;
 
 "use strict";
 
+/**
+    Generic query object.
+
+    @class
+    @hideconstructor
+    @prop {WebGLRenderingContext} gl The WebGL context.
+    @prop {WebGLQuery} query Query object.
+    @prop {GLEnum} target The type of information being queried.
+    @prop {boolean} active Whether or not a query is currently in progress.
+    @prop {Any} result The result of the query (only available after a call to ready() returns true). 
+*/
 function Query(gl, target) {
     this.gl = gl;
     this.query = gl.createQuery();
@@ -1938,16 +1965,35 @@ function Query(gl, target) {
     this.result = null;
 }
 
+/**
+    Begin a query.
+
+    @method
+*/
 Query.prototype.begin = function() {
-    this.gl.beginQuery(this.target, this.query);
-    this.active = true;
-    this.result = null;
+    if (!this.active) {
+        this.gl.beginQuery(this.target, this.query);
+        this.result = null;
+    }    
 };
 
+/**
+    End a query.
+
+    @method
+*/
 Query.prototype.end = function() {
-    this.gl.endQuery(this.target);
+    if (!this.active) {
+        this.gl.endQuery(this.target);
+        this.active = true;
+    }
 };
 
+/**
+    Check if query result is available.
+
+    @method
+*/
 Query.prototype.ready = function() {
     if (this.active && this.gl.getQueryParameter(this.query, this.gl.QUERY_RESULT_AVAILABLE)) {
         this.active = false;
@@ -1956,10 +2002,6 @@ Query.prototype.ready = function() {
     }
 
     return false;
-};
-
-Query.prototype.getParameter = function(parameter) {
-    return this.gl.getQueryParameter(this.query, parameter);
 };
 
 module.exports = Query;
@@ -2324,6 +2366,8 @@ module.exports = Texture;
 
 "use strict";
 
+var Query = require("./query");
+
 /**
     Rendering timer.
 
@@ -2347,17 +2391,14 @@ function Timer(gl) {
     var gpuTimerExtension = this.gl.getExtension("EXT_disjoint_timer_query_webgl2") || this.gl.getExtension("EXT_disjoint_timer_query");
     if (gpuTimerExtension) {
         this.gpuTimer = true;
-        this.gpuTimerQuery = this.gl.createQuery();
-        this.TIME_ELAPSED_EXT = gpuTimerExtension.TIME_ELAPSED_EXT;
+        this.gpuTimerQuery = new Query(this.gl, gpuTimerExtension.TIME_ELAPSED_EXT);
         this.GPU_DISJOINT_EXT = gpuTimerExtension.GPU_DISJOINT_EXT;
     } else {
         this.gpuTimer = false;
         this.gpuTimerQuery = null;
-        this.TIME_ELAPSED_EXT = null;
         this.GPU_DISJOINT_EXT = null;
     }
 
-    this.gpuTimerQueryInProgress = false;
     this.cpuStartTime = 0;
     this.cpuTime = 0;
     this.gpuTime = 0;
@@ -2366,8 +2407,8 @@ function Timer(gl) {
 // Start the rendering timer.
 Timer.prototype.start = function() {
     if (this.gpuTimer) {
-        if (!this.gpuTimerQueryInProgress) {
-            this.gl.beginQuery(this.TIME_ELAPSED_EXT, this.gpuTimerQuery);
+        if (!this.gpuTimerQuery.active) {
+            this.gpuTimerQuery.begin();
             this.cpuStartTime = this.cpuTimer.now();
         }
     } else {
@@ -2378,10 +2419,9 @@ Timer.prototype.start = function() {
 // Stop the rendering timer.
 Timer.prototype.end = function() {
     if (this.gpuTimer) {
-        if (!this.gpuTimerQueryInProgress) {
-            this.gl.endQuery(this.TIME_ELAPSED_EXT);
+        if (!this.gpuTimerQuery.active) {
+            this.gpuTimerQuery.end();
             this.cpuTime = this.cpuTimer.now() - this.cpuStartTime;
-            this.gpuTimerQueryInProgress = true;
         }
     } else {
         this.cpuTime = this.cpuTimer.now() - this.cpuStartTime;
@@ -2394,19 +2434,15 @@ Timer.prototype.end = function() {
 // values.
 Timer.prototype.ready = function() {
     if (this.gpuTimer) {
-        if (!this.gpuTimerQueryInProgress) {
+        if (!this.gpuTimerQuery.active) {
             return false;
         }
 
-        var gpuTimerAvailable = this.gl.getQueryParameter(this.gpuTimerQuery, this.gl.QUERY_RESULT_AVAILABLE);
+        var gpuTimerAvailable = this.gpuTimerQuery.ready();
         var gpuTimerDisjoint = this.gl.getParameter(this.GPU_DISJOINT_EXT);
 
-        if (gpuTimerAvailable) {
-            this.gpuTimerQueryInProgress = false;
-        }
-
         if (gpuTimerAvailable && !gpuTimerDisjoint) {
-            this.gpuTime = this.gl.getQueryParameter(this.gpuTimerQuery, this.gl.QUERY_RESULT)  / 1000000;
+            this.gpuTime = this.gpuTimerQuery.result  / 1000000;
             return true;
         } else {
             return false;
@@ -2418,7 +2454,7 @@ Timer.prototype.ready = function() {
 
 module.exports = Timer;
 
-},{}],13:[function(require,module,exports){
+},{"./query":8}],13:[function(require,module,exports){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //

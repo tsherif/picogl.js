@@ -23,6 +23,8 @@
 
 "use strict";
 
+var Query = require("./query");
+
 /**
     Rendering timer.
 
@@ -46,17 +48,14 @@ function Timer(gl) {
     var gpuTimerExtension = this.gl.getExtension("EXT_disjoint_timer_query_webgl2") || this.gl.getExtension("EXT_disjoint_timer_query");
     if (gpuTimerExtension) {
         this.gpuTimer = true;
-        this.gpuTimerQuery = this.gl.createQuery();
-        this.TIME_ELAPSED_EXT = gpuTimerExtension.TIME_ELAPSED_EXT;
+        this.gpuTimerQuery = new Query(this.gl, gpuTimerExtension.TIME_ELAPSED_EXT);
         this.GPU_DISJOINT_EXT = gpuTimerExtension.GPU_DISJOINT_EXT;
     } else {
         this.gpuTimer = false;
         this.gpuTimerQuery = null;
-        this.TIME_ELAPSED_EXT = null;
         this.GPU_DISJOINT_EXT = null;
     }
 
-    this.gpuTimerQueryInProgress = false;
     this.cpuStartTime = 0;
     this.cpuTime = 0;
     this.gpuTime = 0;
@@ -65,8 +64,8 @@ function Timer(gl) {
 // Start the rendering timer.
 Timer.prototype.start = function() {
     if (this.gpuTimer) {
-        if (!this.gpuTimerQueryInProgress) {
-            this.gl.beginQuery(this.TIME_ELAPSED_EXT, this.gpuTimerQuery);
+        if (!this.gpuTimerQuery.active) {
+            this.gpuTimerQuery.begin();
             this.cpuStartTime = this.cpuTimer.now();
         }
     } else {
@@ -77,10 +76,9 @@ Timer.prototype.start = function() {
 // Stop the rendering timer.
 Timer.prototype.end = function() {
     if (this.gpuTimer) {
-        if (!this.gpuTimerQueryInProgress) {
-            this.gl.endQuery(this.TIME_ELAPSED_EXT);
+        if (!this.gpuTimerQuery.active) {
+            this.gpuTimerQuery.end();
             this.cpuTime = this.cpuTimer.now() - this.cpuStartTime;
-            this.gpuTimerQueryInProgress = true;
         }
     } else {
         this.cpuTime = this.cpuTimer.now() - this.cpuStartTime;
@@ -93,19 +91,15 @@ Timer.prototype.end = function() {
 // values.
 Timer.prototype.ready = function() {
     if (this.gpuTimer) {
-        if (!this.gpuTimerQueryInProgress) {
+        if (!this.gpuTimerQuery.active) {
             return false;
         }
 
-        var gpuTimerAvailable = this.gl.getQueryParameter(this.gpuTimerQuery, this.gl.QUERY_RESULT_AVAILABLE);
+        var gpuTimerAvailable = this.gpuTimerQuery.ready();
         var gpuTimerDisjoint = this.gl.getParameter(this.GPU_DISJOINT_EXT);
 
-        if (gpuTimerAvailable) {
-            this.gpuTimerQueryInProgress = false;
-        }
-
         if (gpuTimerAvailable && !gpuTimerDisjoint) {
-            this.gpuTime = this.gl.getQueryParameter(this.gpuTimerQuery, this.gl.QUERY_RESULT)  / 1000000;
+            this.gpuTime = this.gpuTimerQuery.result  / 1000000;
             return true;
         } else {
             return false;
