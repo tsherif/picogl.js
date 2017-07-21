@@ -34,6 +34,7 @@ var TransformFeedback = require("./transform-feedback");
 var UniformBuffer     = require("./uniform-buffer");
 var VertexArray       = require("./vertex-array");
 var VertexBuffer      = require("./vertex-buffer");
+var Query             = require("./query");
 
 
 /**
@@ -60,8 +61,10 @@ function App(canvas, contextAttributes) {
     this.gl = canvas.getContext("webgl2", contextAttributes);
     this.width = this.gl.drawingBufferWidth;
     this.height = this.gl.drawingBufferHeight;
-    this.viewportWidth = this.width;
-    this.viewportHeight = this.height;
+    this.viewportX = 0;
+    this.viewportY = 0;
+    this.viewportWidth = 0;
+    this.viewportHeight = 0;
     this.currentDrawCalls = null;
     this.emptyFragmentShader = null;
 
@@ -93,7 +96,7 @@ function App(canvas, contextAttributes) {
     this.floatRenderTargetsEnabled = false;
     this.linearFloatTexturesEnabled = false;
 
-    this.gl.viewport(0, 0, this.viewportWidth, this.viewportHeight);
+    this.viewport(0, 0, this.width, this.height);
 }
 
 /**
@@ -174,11 +177,7 @@ App.prototype.drawCalls = function(drawCallList) {
 App.prototype.drawFramebuffer = function(framebuffer) {
     framebuffer.bindForDraw();
 
-    if (this.viewportWidth !== framebuffer.width || this.viewportHeight !== framebuffer.height) {
-        this.viewportWidth = framebuffer.width;
-        this.viewportHeight = framebuffer.height;
-        this.gl.viewport(0, 0, this.viewportWidth, this.viewportHeight);
-    }
+    this.viewport(0, 0, framebuffer.width, framebuffer.height);
 
     return this;
 };
@@ -205,12 +204,7 @@ App.prototype.defaultDrawFramebuffer = function() {
     if (this.state.drawFramebuffer !== null) {
         this.gl.bindFramebuffer(this.gl.DRAW_FRAMEBUFFER, null);
         this.state.drawFramebuffer = null;
-
-        if (this.viewportWidth !== this.width || this.viewportHeight !== this.height) {
-            this.viewportWidth = this.width;
-            this.viewportHeight = this.height;
-            this.gl.viewport(0, 0, this.viewportWidth, this.viewportHeight);
-        }
+        this.viewport(0, 0, this.width, this.height);
     }
 
     return this;
@@ -266,23 +260,12 @@ App.prototype.noDepthTest = function() {
 };
 
 /**
-    Enable writing to the z buffer.
+    Set the depth mask.
 
     @method
 */
-App.prototype.depthMask = function() {
-    this.gl.depthMask(true);
-
-    return this;
-};
-
-/**
-    Disable writing to the z buffer.
-
-    @method
-*/
-App.prototype.noDepthMask = function() {
-    this.gl.depthMask(false);
+App.prototype.depthMask = function(mask) {
+    this.gl.depthMask(mask);
 
     return this;
 };
@@ -370,6 +353,40 @@ App.prototype.stencilTest = function() {
 */
 App.prototype.noStencilTest = function() {
     this.gl.disable(this.gl.STENCIL_TEST);
+
+    return this;
+};
+
+
+/**
+    Enable scissor testing.
+
+    @method
+*/
+App.prototype.scissorTest = function() {
+    this.gl.enable(this.gl.SCISSOR_TEST);
+
+    return this;
+};
+
+/**
+    Disable scissor testing.
+
+    @method
+*/
+App.prototype.noScissorTest = function() {
+    this.gl.disable(this.gl.SCISSOR_TEST);
+
+    return this;
+};
+
+/**
+    Define the scissor box.
+
+    @method
+*/
+App.prototype.scissor = function(x, y, width, height) {
+    this.gl.scissor(x, y, width, height);
 
     return this;
 };
@@ -571,6 +588,20 @@ App.prototype.readPixel = function(x, y, outColor) {
     return this;
 };
 
+App.prototype.viewport = function(x, y, width, height) {
+
+    if (this.viewportWidth !== width || this.viewportHeight !== height ||
+            this.viewportX !== x || this.viewportY !== y) {
+        this.viewportX = x;
+        this.viewportY = y;
+        this.viewportWidth = width;
+        this.viewportHeight = height;
+        this.gl.viewport(x, y, this.viewportWidth, this.viewportHeight);
+    }
+
+    return this;
+};
+
 /**
     Resize the drawing surface.
 
@@ -584,9 +615,7 @@ App.prototype.resize = function(width, height) {
 
     this.width = this.gl.drawingBufferWidth;
     this.height = this.gl.drawingBufferHeight;
-    this.viewportWidth = this.width;
-    this.viewportHeight = this.height;
-    this.gl.viewport(0, 0, this.viewportWidth, this.viewportHeight);
+    this.viewport(0, 0, this.width, this.height);
 
     return this;
 };
@@ -828,6 +857,15 @@ App.prototype.createFramebuffer = function(width, height) {
 };
 
 /**
+    Create a query.
+
+    @param {GLEnum} target Information to query.
+*/
+App.prototype.createQuery = function(target) {
+    return new Query(this.gl, target);
+};
+
+/**
     Create a DrawCall. A DrawCall manages the state associated with
     a WebGL draw call including a program and associated vertex data, textures,
     uniforms and uniform blocks.
@@ -838,7 +876,7 @@ App.prototype.createFramebuffer = function(width, height) {
     @param {GLEnum} [primitive=TRIANGLES] Type of primitive to draw.
 */
 App.prototype.createDrawCall = function(program, vertexArray, primitive) {
-    return new DrawCall(this.gl, program, vertexArray, primitive);
+    return new DrawCall(this.gl, this.state, program, vertexArray, primitive);
 };
 
 /**
@@ -848,7 +886,7 @@ App.prototype.createDrawCall = function(program, vertexArray, primitive) {
 */
 App.prototype.draw = function() {
     for (var i = 0, len = this.currentDrawCalls.length; i < len; i++) {
-        this.currentDrawCalls[i].draw(this.state);
+        this.currentDrawCalls[i].draw();
     }
 
     return this;

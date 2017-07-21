@@ -47,11 +47,12 @@ var CONSTANTS = require("./constants");
     @prop {number} textureCount The number of active textures for this draw call.
     @prop {GLEnum} primitive The primitive type being drawn.
 */
-function DrawCall(gl, program, vertexArray, primitive) {
+function DrawCall(gl, appState, program, vertexArray, primitive) {
     this.gl = gl;
     this.currentProgram = program;
     this.currentVertexArray = vertexArray;
     this.currentTransformFeedback = null;
+    this.appState = appState;
 
     this.uniformIndices = {};
     this.uniformNames = new Array(CONSTANTS.WEBGL_INFO.MAX_UNIFORMS);
@@ -135,7 +136,8 @@ DrawCall.prototype.uniformBlock = function(name, buffer) {
 };
 
 // Draw something.
-DrawCall.prototype.draw = function(state) {
+DrawCall.prototype.draw = function() {
+    var state = this.appState;
     var uniformNames = this.uniformNames;
     var uniformValues = this.uniformValues;
     var uniformBuffers = this.uniformBuffers;
