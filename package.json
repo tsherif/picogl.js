@@ -1,24 +1,35 @@
 {
-  "name": "picogl",
-  "version": "0.5.0",
-  "description": "A minimal WebGL 2 rendering library",
-  "main": "src/picogl.js",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/tsherif/picogl.js"
-  },
-  "author": {
-    "name": "Tarek Sherif",
-    "email": "tsherif@gmail.com",
-    "url": "http://tareksherif.net/"
-  },
-  "license": "MIT",
-  "devDependencies": {
-    "browserify-replace": "^0.9.0",
-    "grunt": "^1.0.1",
-    "grunt-browserify": "^5.0.0",
-    "grunt-contrib-jshint": "^1.1.0",
-    "grunt-contrib-uglify": "^2.2.0",
-    "grunt-jsdoc": "^2.1.0"
-  }
+    "name": "picogl",
+    "version": "0.5.1",
+    "description": "A minimal WebGL 2 rendering library",
+    "main": "src/picogl.js",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/tsherif/picogl.js"
+    },
+    "author": {
+        "name": "Tarek Sherif",
+        "email": "tsherif@gmail.com",
+        "url": "http://tareksherif.net/"
+    },
+    "keywords": [
+        "webgl",
+        "webgl 2",
+        "3d",
+        "picogl",
+        "picogl.js"
+    ],
+    "homepage": "https://tsherif.github.io/picogl.js/",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/tsherif/picogl.js/issues"
+    },
+    "devDependencies": {
+        "browserify-replace": "^0.9.0",
+        "grunt": "^1.0.1",
+        "grunt-browserify": "^5.0.0",
+        "grunt-contrib-jshint": "^1.1.0",
+        "grunt-contrib-uglify": "^2.2.0",
+        "grunt-jsdoc": "^2.1.0"
+    }
 }
