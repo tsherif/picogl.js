@@ -1,6 +1,6 @@
 {
     "name": "picogl",
-    "version": "0.5.1",
+    "version": "0.5.2",
     "description": "A minimal WebGL 2 rendering library",
     "main": "src/picogl.js",
     "repository": {
@@ -14,7 +14,7 @@
     },
     "keywords": [
         "webgl",
-        "webgl 2",
+        "webgl2",
         "3d",
         "picogl",
         "picogl.js"
