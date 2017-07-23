@@ -22,7 +22,7 @@ Contributing
 3. Maintain a similar style to the rest of the code base. 
 4. Make your updates.
 5. Run `npm run build` and ensure that all examples in `/examples/` and all tests on `/test/index.html` function properly.
-6. Run `git checkout build` to remove build files.
+6. Run `git checkout build` to revert build files.
 7. Commit your changes and push them to GitHub.
 8. Make a pull request against master. 
  
