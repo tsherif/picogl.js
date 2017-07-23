@@ -69,7 +69,7 @@ function Program(gl, vsSource, fsSource, xformFeebackVars) {
     gl.linkProgram(program);
 
     if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-      console.error(gl.getProgramInfoLog(program));
+        console.error(gl.getProgramInfoLog(program));
     }
 
     if (ownVertexShader) {
@@ -77,7 +77,7 @@ function Program(gl, vsSource, fsSource, xformFeebackVars) {
     }
 
     if (ownFragmentShader) {
-       fShader.delete();
+        fShader.delete();
     }
 
     this.gl = gl;

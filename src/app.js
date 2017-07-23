@@ -80,7 +80,7 @@ function App(canvas, contextAttributes) {
         uniformBufferCount: 0,
         freeUniformBufferBases: [],
         drawFramebuffer: null,
-        readFramebuffer: null,
+        readFramebuffer: null
     };
 
     this.clearBits = this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT| this.gl.STENCIL_BUFFER_BIT;

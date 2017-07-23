@@ -184,12 +184,10 @@ DrawCall.prototype.draw = function() {
         } else {
             this.gl.drawArraysInstanced(this.primitive, 0, this.currentVertexArray.numElements, this.currentVertexArray.numInstances);
         }
+    } else if (this.currentVertexArray.indexed) {
+        this.gl.drawElements(this.primitive, this.currentVertexArray.numElements, this.currentVertexArray.indexType, 0);
     } else {
-        if (this.currentVertexArray.indexed) {
-            this.gl.drawElements(this.primitive, this.currentVertexArray.numElements, this.currentVertexArray.indexType, 0);
-        } else {
-            this.gl.drawArrays(this.primitive, 0, this.currentVertexArray.numElements);
-        }
+        this.gl.drawArrays(this.primitive, 0, this.currentVertexArray.numElements);
     }
 
     if (this.currentTransformFeedback) {

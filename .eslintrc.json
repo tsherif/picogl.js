@@ -1,0 +1,45 @@
+{
+    "extends": "eslint:recommended",
+    "rules": {
+        "semi": ["error", "always"],
+        "quotes": ["error", "double"],
+        "block-scoped-var": "error",
+        "consistent-return": "error",
+        "curly": "error",
+        "eqeqeq": "error",
+        "no-alert": "error",
+        "no-caller": "error",
+        "no-eval": "error",
+        "no-console": "off",
+        "no-invalid-this": "error",
+        "no-unused-expressions": "error",
+        "strict": ["error", "safe"],
+        "global-require": "error",
+        "array-bracket-newline": "error",
+        "array-bracket-spacing": ["error", "always"],
+        "brace-style": "error",
+        "comma-dangle": "error",
+        "comma-spacing": "error",
+        "comma-style": "error",
+        "func-call-spacing": "error",
+        "indent": ["error", 4, {
+            "SwitchCase": 1
+        }],
+        "key-spacing": "error",
+        "new-cap": "error",
+        "new-parens": "error",
+        "no-lonely-if": "error",
+        "no-new-object": "error",
+        "no-nested-ternary": "error",
+        "no-whitespace-before-property": "error",
+        "object-curly-newline": "error",
+        "semi-spacing": "error",
+        "semi-style": "error",
+        "space-before-blocks": "error",
+        "space-before-function-paren": ["error", "never"],
+        "spaced-comment": ["error", "always", {
+            "exceptions": ["/"]
+        }],
+        "switch-colon-spacing": "error"
+    }
+}
