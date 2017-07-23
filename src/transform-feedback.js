@@ -39,7 +39,7 @@ function TransformFeedback(gl) {
     this.angleBugBuffers = [];
 }
 
- /**
+/**
     Bind a feedback buffer to capture transform output.
 
     @method
