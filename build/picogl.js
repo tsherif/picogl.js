@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.5.4 
+PicoGL.js v0.5.5 
 
 The MIT License (MIT)
 
@@ -1564,12 +1564,12 @@ Framebuffer.prototype.resize = function(width, height) {
     var currentFramebuffer = this.bindAndCaptureState();
 
     for (var i = 0; i < this.numColorTargets; ++i) {
-        this.colorTextures[i].image(null, this.width, this.height);
+        this.colorTextures[i].data(null, this.width, this.height);
         this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, this.colorAttachments[i], this.gl.TEXTURE_2D, this.colorTextures[i].texture, 0);
     }
 
     if (this.depthTexture) {
-        this.depthTexture.image(null, this.width, this.height);
+        this.depthTexture.data(null, this.width, this.height);
         this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, this.gl.DEPTH_ATTACHMENT, this.gl.TEXTURE_2D, this.depthTexture.texture, 0);
     }
 
@@ -1672,7 +1672,7 @@ var App = require("./app");
     @namespace PicoGL
 */
 var PicoGL = global.PicoGL = require("./constants");    
-PicoGL.version = "0.5.4";
+PicoGL.version = "0.5.5";
 
 /**
     Create a PicoGL app. The app is the primary entry point to PicoGL. It stores
@@ -2190,7 +2190,7 @@ function Texture(gl, appState, binding, image, width, height, depth, is3D, optio
 
     this.bind(true);
     gl.bindSampler(this.unit, this.sampler);
-    this.image(image, width, height, depth);
+    this.data(image, width, height, depth);
 }
 
 /**

@@ -107,7 +107,7 @@ function Texture(gl, appState, binding, image, width, height, depth, is3D, optio
 
     this.bind(true);
     gl.bindSampler(this.unit, this.sampler);
-    this.image(image, width, height, depth);
+    this.data(image, width, height, depth);
 }
 
 /**

@@ -211,12 +211,12 @@ Framebuffer.prototype.resize = function(width, height) {
     var currentFramebuffer = this.bindAndCaptureState();
 
     for (var i = 0; i < this.numColorTargets; ++i) {
-        this.colorTextures[i].image(null, this.width, this.height);
+        this.colorTextures[i].data(null, this.width, this.height);
         this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, this.colorAttachments[i], this.gl.TEXTURE_2D, this.colorTextures[i].texture, 0);
     }
 
     if (this.depthTexture) {
-        this.depthTexture.image(null, this.width, this.height);
+        this.depthTexture.data(null, this.width, this.height);
         this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, this.gl.DEPTH_ATTACHMENT, this.gl.TEXTURE_2D, this.depthTexture.texture, 0);
     }
 
