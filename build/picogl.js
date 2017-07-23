@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.5.5
+PicoGL.js v0.5.6
 
 The MIT License (MIT)
 
@@ -106,7 +106,7 @@ function App(canvas, contextAttributes) {
         uniformBufferCount: 0,
         freeUniformBufferBases: [],
         drawFramebuffer: null,
-        readFramebuffer: null,
+        readFramebuffer: null
     };
 
     this.clearBits = this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT| this.gl.STENCIL_BUFFER_BIT;
@@ -1330,12 +1330,10 @@ DrawCall.prototype.draw = function() {
         } else {
             this.gl.drawArraysInstanced(this.primitive, 0, this.currentVertexArray.numElements, this.currentVertexArray.numInstances);
         }
+    } else if (this.currentVertexArray.indexed) {
+        this.gl.drawElements(this.primitive, this.currentVertexArray.numElements, this.currentVertexArray.indexType, 0);
     } else {
-        if (this.currentVertexArray.indexed) {
-            this.gl.drawElements(this.primitive, this.currentVertexArray.numElements, this.currentVertexArray.indexType, 0);
-        } else {
-            this.gl.drawArrays(this.primitive, 0, this.currentVertexArray.numElements);
-        }
+        this.gl.drawArrays(this.primitive, 0, this.currentVertexArray.numElements);
     }
 
     if (this.currentTransformFeedback) {
@@ -1672,7 +1670,7 @@ var App = require("./app");
     @namespace PicoGL
 */
 var PicoGL = global.PicoGL = require("./constants");    
-PicoGL.version = "0.5.5";
+PicoGL.version = "0.5.6";
 
 /**
     Create a PicoGL app. The app is the primary entry point to PicoGL. It stores
@@ -1761,7 +1759,7 @@ function Program(gl, vsSource, fsSource, xformFeebackVars) {
     gl.linkProgram(program);
 
     if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-      console.error(gl.getProgramInfoLog(program));
+        console.error(gl.getProgramInfoLog(program));
     }
 
     if (ownVertexShader) {
@@ -1769,7 +1767,7 @@ function Program(gl, vsSource, fsSource, xformFeebackVars) {
     }
 
     if (ownFragmentShader) {
-       fShader.delete();
+        fShader.delete();
     }
 
     this.gl = gl;
@@ -2476,7 +2474,7 @@ function TransformFeedback(gl) {
     this.angleBugBuffers = [];
 }
 
- /**
+/**
     Bind a feedback buffer to capture transform output.
 
     @method
