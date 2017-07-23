@@ -35,3 +35,7 @@ h1 {
     text-decoration: none;
     padding: 0.4em;
 }
+
+.badge-link {
+    text-decoration: none;
+}
