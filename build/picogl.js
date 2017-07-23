@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.5.3 
+PicoGL.js v0.5.4 
 
 The MIT License (MIT)
 
@@ -1672,7 +1672,7 @@ var App = require("./app");
     @namespace PicoGL
 */
 var PicoGL = global.PicoGL = require("./constants");    
-PicoGL.version = "0.5.3";
+PicoGL.version = "0.5.4";
 
 /**
     Create a PicoGL app. The app is the primary entry point to PicoGL. It stores
@@ -2202,7 +2202,7 @@ function Texture(gl, appState, binding, image, width, height, depth, is3D, optio
     @param {number} [height] Image height. Required when passing ArrayBufferView data.
     @param {number} [depth] Image depth or number of images. Required when passing 3D or texture array data.
 */
-Texture.prototype.image = function(image, width, height, depth) {
+Texture.prototype.data = function(image, width, height, depth) {
     width = width || image.width;
     height = height || image.height;
     depth = depth || 0;

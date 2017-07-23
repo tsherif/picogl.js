@@ -119,7 +119,7 @@ function Texture(gl, appState, binding, image, width, height, depth, is3D, optio
     @param {number} [height] Image height. Required when passing ArrayBufferView data.
     @param {number} [depth] Image depth or number of images. Required when passing 3D or texture array data.
 */
-Texture.prototype.image = function(image, width, height, depth) {
+Texture.prototype.data = function(image, width, height, depth) {
     width = width || image.width;
     height = height || image.height;
     depth = depth || 0;

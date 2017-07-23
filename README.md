@@ -57,10 +57,10 @@ Usage
 PicoGL.js can be used directly by downloading the [built source](https://tsherif.github.io/picogl.js/build/picogl.min.js) and loading it via a script tag:
 
 ```HTML
-    <script src="js/picogl.js"></script>
+    <script src="js/picogl.min.js"></script>
 ```
 
-or it can be installed via NPM:
+or it can be installed via [NPM](https://www.npmjs.com/package/picogl):
 
 ```bash
     npm install picogl
