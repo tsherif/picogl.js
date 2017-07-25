@@ -1,6 +1,8 @@
 Thanks for getting involved!
 
-Please note that the scope of PicoGL.js is limited specifically to managing GL state, so requests for features outside of that scope (math utilities, physics, scene data structures) will not be accepted. Also note that requests for cosmetic changes (style, frameworks) will not be accepted. New features should have a meaningful impact on functionality or performance.
+Please note that the GitHub issue tracker is not meant for general Q & A or usage questions. Please post those types of questions to the [PicoGL.js Gitter chat room](https://gitter.im/picogl-js/general).
+
+Also note that the scope of PicoGL.js is limited specifically to managing GL state, so requests for features outside of that scope (math utilities, physics, scene data structures) will not be accepted. Also note that requests for cosmetic changes (style, frameworks) will not be accepted. New features should have a meaningful impact on functionality or performance.
 
 Reporting a Bug
 ===============
