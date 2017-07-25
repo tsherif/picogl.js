@@ -183,8 +183,6 @@
             .uniformBlock("SceneUniforms", sceneUniformBuffer)
             .texture("tex", texture);
 
-            app.drawCalls([drawCall]);
-
             function draw() {
                 if (timer.ready()) {
                     utils.updateTimerElement(timer.cpuTime, timer.gpuTime);
@@ -201,7 +199,8 @@
 
                 drawCall.uniform("uModel", modelMatrix);
 
-                app.clear().draw()
+                app.clear();
+                drawCall.draw()
                 
                 timer.end();
 

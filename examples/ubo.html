@@ -124,9 +124,9 @@
         .uniformBlock("TriangleUniforms", uniformBuffer2);
 
         // DRAW
-        app.drawCalls([drawCall1, drawCall2])
-        .clear()
-        .draw();
+        app.clear()
+        drawCall1.draw();
+        drawCall2.draw();
 
         // CLEANUP
         program.delete();

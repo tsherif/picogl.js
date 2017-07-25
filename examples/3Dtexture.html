@@ -168,8 +168,6 @@
         var drawCall = app.createDrawCall(program, pointArray, PicoGL.POINTS)
         .texture("tex", texture);
 
-        app.drawCalls([drawCall]);
-
         function draw() {
             if (timer.ready()) {
                 utils.updateTimerElement(timer.cpuTime, timer.gpuTime);
@@ -187,7 +185,8 @@
 
             drawCall.uniform("uMVP", mvpMatrix);
 
-            app.clear().draw();
+            app.clear();
+            drawCall.draw();
             
             timer.end();
 

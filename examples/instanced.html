@@ -115,9 +115,8 @@
 
         var drawCall = app.createDrawCall(program, triangleArray);
 
-        app.drawCalls([drawCall])
-        .clear()
-        .draw();
+        app.clear();
+        drawCall.draw();
 
         // CLEANUP
         program.delete();

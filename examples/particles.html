@@ -202,20 +202,16 @@
             mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
         };
 
-        var drawCalls1 = [
-            app.createDrawCall(program, vertexArray1, PicoGL.POINTS)
-            .transformFeedback(transformFeedback2)
-            .uniformBlock("Mass", massUniforms)
-        ];
+        var drawCall1 = app.createDrawCall(program, vertexArray1, PicoGL.POINTS)
+        .transformFeedback(transformFeedback2)
+        .uniformBlock("Mass", massUniforms);
 
-        var drawCalls2 = [
-            app.createDrawCall(program, vertexArray2, PicoGL.POINTS)
-            .transformFeedback(transformFeedback1)
-            .uniformBlock("Mass", massUniforms)
-        ];
+        var drawCall2 = app.createDrawCall(program, vertexArray2, PicoGL.POINTS)
+        .transformFeedback(transformFeedback1)
+        .uniformBlock("Mass", massUniforms);
 
 
-        var draw1 = true;
+        var currentDrawCall = drawCall1;
         function draw() {      
             if (timer.ready()) {
                 utils.updateTimerElement(timer.cpuTime, timer.gpuTime);
@@ -224,11 +220,10 @@
             timer.start();
 
             // DRAW
-            app.drawCalls(draw1 ? drawCalls1 : drawCalls2)
-            .clear()
-            .draw();
+            app.clear();
+            currentDrawCall.draw();
 
-            draw1 = !draw1;
+            currentDrawCall = currentDrawCall === drawCall1 ? drawCall2 : drawCall1;
 
             timer.end();
 

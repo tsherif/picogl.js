@@ -295,22 +295,20 @@
             .texture("tex", texture);
 
             // DRAW
-            app.drawCalls([
-                drawCall1,
-                drawCall2,
-                drawCall3,
-                drawCall4,
-                drawCall5,
-                drawCall6,
-                drawCall7,
-                drawCall8,
-                drawCall9,
-                drawCall10,
-                drawCall11,
-                drawCall12
-            ])
-            .clear()
-            .draw();
+            app.clear();
+
+            drawCall1.draw();
+            drawCall2.draw();
+            drawCall3.draw();
+            drawCall4.draw();
+            drawCall5.draw();
+            drawCall6.draw();
+            drawCall7.draw();
+            drawCall8.draw();
+            drawCall9.draw();
+            drawCall10.draw();
+            drawCall11.draw();
+            drawCall12.draw();
 
             // CLEANUP
             matProgram.delete();
