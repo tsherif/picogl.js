@@ -24,20 +24,26 @@
         PicoGL.js is minimal WebGL 2 rendering library. It's meant for developers who understand the WebGL 2 rendering pipeline and want to use it, but with a more convenient API. Typical usage of PicoGL.js will involve creating programs, vertex buffers, vertex arrays, uniform buffers, framebuffers, textures, transform feedbacks, and combining them into draw calls.
     </div>
     <pre><code class="javascript">
+    // Create a PicoGL.js app to manage GL state.
     var app = PicoGL.createApp(canvas)
     .clearColor(0.0, 0.0, 0.0, 1.0);
 
+    // Create program from shader source.
     var program = app.createProgram(vertexShaderSource, fragmentShaderSource);
 
+    // Scene geometry stored vertex buffer object.
     var positions = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
         -0.5, -0.5,
          0.5, -0.5,
          0.0,  0.5
     ]));
 
+    // Vertex buffer and attribute pointer state stored
+    // in vertex array object.
     var vertexArray = app.createVertexArray()
     .vertexAttributeBuffer(0, positions);
 
+    // Scene data stored in uniform buffer object. 
     var uniformBuffer = app.createUniformBuffer([
         PicoGL.FLOAT_VEC4,
         PicoGL.FLOAT_VEC4
@@ -46,12 +52,13 @@
     .set(1, new Float32Array([0.0, 0.0, 1.0, 0.7]))
     .update();
 
+    // Create a draw call from program, vertex array, uniform buffer.
     var drawCall = app.createDrawCall(program, vertexArray)
     .uniformBlock("ColorUniforms", uniformBuffer);
 
-    app.drawCalls([drawCall])
-    .clear()
-    .draw();
+    // Draw!
+    app.clear()
+    drawCall.draw();
     </code></pre>
     
     <div class="description">

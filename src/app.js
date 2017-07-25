@@ -150,19 +150,6 @@ App.prototype.clear = function() {
 };
 
 /**
-    Set the list of DrawCalls to use when calling draw().
-
-    @method
-    @param {Array} drawCallList Array of DrawCall objects.
-    @see DrawCall
-*/
-App.prototype.drawCalls = function(drawCallList) {
-    this.currentDrawCalls = drawCallList;
-
-    return this;
-};
-
-/**
     Bind a draw framebuffer to the WebGL context. Note that 
     this method resets the viewport to match the given framebuffer.
 
@@ -894,19 +881,6 @@ App.prototype.createTimer = function() {
 */
 App.prototype.createDrawCall = function(program, vertexArray, primitive) {
     return new DrawCall(this.gl, this.state, program, vertexArray, primitive);
-};
-
-/**
-    Execute the currently attached list of DrawCalls.
-
-    @method
-*/
-App.prototype.draw = function() {
-    for (var i = 0, len = this.currentDrawCalls.length; i < len; i++) {
-        this.currentDrawCalls[i].draw();
-    }
-
-    return this;
 };
 
 module.exports = App;

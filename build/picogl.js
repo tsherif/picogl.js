@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.5.7
+PicoGL.js v0.6.0
 
 The MIT License (MIT)
 
@@ -171,19 +171,6 @@ App.prototype.clearMask = function(mask) {
 */
 App.prototype.clear = function() {
     this.gl.clear(this.clearBits);
-
-    return this;
-};
-
-/**
-    Set the list of DrawCalls to use when calling draw().
-
-    @method
-    @param {Array} drawCallList Array of DrawCall objects.
-    @see DrawCall
-*/
-App.prototype.drawCalls = function(drawCallList) {
-    this.currentDrawCalls = drawCallList;
 
     return this;
 };
@@ -922,19 +909,6 @@ App.prototype.createDrawCall = function(program, vertexArray, primitive) {
     return new DrawCall(this.gl, this.state, program, vertexArray, primitive);
 };
 
-/**
-    Execute the currently attached list of DrawCalls.
-
-    @method
-*/
-App.prototype.draw = function() {
-    for (var i = 0, len = this.currentDrawCalls.length; i < len; i++) {
-        this.currentDrawCalls[i].draw();
-    }
-
-    return this;
-};
-
 module.exports = App;
 
 },{"./constants":2,"./cubemap":3,"./draw-call":4,"./framebuffer":5,"./program":7,"./query":8,"./shader":9,"./texture":11,"./timer":12,"./transform-feedback":13,"./uniform-buffer":14,"./vertex-array":16,"./vertex-buffer":17}],2:[function(require,module,exports){
@@ -1670,7 +1644,7 @@ var App = require("./app");
     @namespace PicoGL
 */
 var PicoGL = global.PicoGL = require("./constants");    
-PicoGL.version = "0.5.7";
+PicoGL.version = "0.6.0";
 
 /**
     Create a PicoGL app. The app is the primary entry point to PicoGL. It stores

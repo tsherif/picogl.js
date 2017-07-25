@@ -644,62 +644,40 @@
         ///////////////
 
         // Update forces
-        var updateForceDrawCalls = [
-            app.createDrawCall(updateForceProgram, quadArray)
-            .texture("uPositionBuffer", positionTextureA)
-            .texture("uNormalBuffer", normalTexture)
-        ];
+        var updateForceDrawCall = app.createDrawCall(updateForceProgram, quadArray)
+        .texture("uPositionBuffer", positionTextureA)
+        .texture("uNormalBuffer", normalTexture);
 
         // Structural constraints
-        var updateHorizontal1DrawCalls = [
-            app.createDrawCall(updateConstraintProgram, quadArray)
-            .uniformBlock("ConstraintUniforms", updateHorizontal1Uniforms)
-        ];
+        var updateHorizontal1DrawCall = app.createDrawCall(updateConstraintProgram, quadArray)
+        .uniformBlock("ConstraintUniforms", updateHorizontal1Uniforms);
 
-        var updateHorizontal2DrawCalls = [
-            app.createDrawCall(updateConstraintProgram, quadArray)
-            .uniformBlock("ConstraintUniforms", updateHorizontal2Uniforms)
-        ];
+        var updateHorizontal2DrawCall  = app.createDrawCall(updateConstraintProgram, quadArray)
+        .uniformBlock("ConstraintUniforms", updateHorizontal2Uniforms);
 
-        var updateVertical1DrawCalls = [
-            app.createDrawCall(updateConstraintProgram, quadArray)
-            .uniformBlock("ConstraintUniforms", updateVertical1Uniforms)
-        ];
+        var updateVertical1DrawCall = app.createDrawCall(updateConstraintProgram, quadArray)
+        .uniformBlock("ConstraintUniforms", updateVertical1Uniforms);
 
-        var updateVertical2DrawCalls = [
-            app.createDrawCall(updateConstraintProgram, quadArray)
-            .uniformBlock("ConstraintUniforms", updateVertical2Uniforms)
-        ];
+        var updateVertical2DrawCall = app.createDrawCall(updateConstraintProgram, quadArray)
+        .uniformBlock("ConstraintUniforms", updateVertical2Uniforms);
 
         // Shear constraints
-        var updateShear1DrawCalls = [
-            app.createDrawCall(updateConstraintProgram, quadArray)
-            .uniformBlock("ConstraintUniforms", updateShear1Uniforms)
-        ];
+        var updateShear1DrawCall = app.createDrawCall(updateConstraintProgram, quadArray)
+        .uniformBlock("ConstraintUniforms", updateShear1Uniforms);
 
-        var updateShear2DrawCalls = [
-            app.createDrawCall(updateConstraintProgram, quadArray)
-            .uniformBlock("ConstraintUniforms", updateShear2Uniforms)
-        ];
+        var updateShear2DrawCall = app.createDrawCall(updateConstraintProgram, quadArray)
+        .uniformBlock("ConstraintUniforms", updateShear2Uniforms);
 
-        var updateShear3DrawCalls = [
-            app.createDrawCall(updateConstraintProgram, quadArray)
-            .uniformBlock("ConstraintUniforms", updateShear3Uniforms)
-        ];
+        var updateShear3DrawCall = app.createDrawCall(updateConstraintProgram, quadArray)
+        .uniformBlock("ConstraintUniforms", updateShear3Uniforms);
 
-        var updateShear4DrawCalls = [
-            app.createDrawCall(updateConstraintProgram, quadArray)
-            .uniformBlock("ConstraintUniforms", updateShear4Uniforms)
-        ];
+        var updateShear4DrawCall = app.createDrawCall(updateConstraintProgram, quadArray)
+        .uniformBlock("ConstraintUniforms", updateShear4Uniforms);
 
-        var updateCollisionDrawCalls = [
-            app.createDrawCall(updateCollisionProgram, quadArray)
-            .uniformBlock("BallUniforms", ballUniforms)
-        ];
+        var updateCollisionDrawCall = app.createDrawCall(updateCollisionProgram, quadArray)
+        .uniformBlock("BallUniforms", ballUniforms);
 
-        var updateNormalDrawCalls = [
-            app.createDrawCall(updateNormalProgram, quadArray)
-        ];
+        var updateNormalDrawCall = app.createDrawCall(updateNormalProgram, quadArray);
 
         var image = new Image();
 
@@ -713,16 +691,15 @@
         image.onload = function() {
             var texture = app.createTexture2D(image);
 
-            var mainDrawcalls = [
-                app.createDrawCall(clothProgram, clothArray)
-                    .uniformBlock("SceneUniforms", sceneUniformBuffer)
-                    .texture("uDiffuse", texture)
-                    .texture("uNormalBuffer", normalTexture),
-                app.createDrawCall(ballProgram, ballArray)
-                    .uniformBlock("SceneUniforms", sceneUniformBuffer)
-                    .uniformBlock("BallUniforms", ballUniforms)
-                    .texture("uDiffuse", ballTexture)
-            ];
+            var clothDrawCall = app.createDrawCall(clothProgram, clothArray)
+            .uniformBlock("SceneUniforms", sceneUniformBuffer)
+            .texture("uDiffuse", texture)
+            .texture("uNormalBuffer", normalTexture);
+            
+            var ballDrawCall = app.createDrawCall(ballProgram, ballArray)
+            .uniformBlock("SceneUniforms", sceneUniformBuffer)
+            .uniformBlock("BallUniforms", ballUniforms)
+            .texture("uDiffuse", ballTexture);
 
             /////////
             // DRAW
@@ -735,64 +712,40 @@
 
                 timer.start();
 
-                updateForceDrawCalls[0].texture("uPositionBuffer", positionTextureA);
-                updateForceDrawCalls[0].texture("uOldPositionBuffer", oldPositionTextureA);
+                updateForceDrawCall.texture("uPositionBuffer", positionTextureA);
+                updateForceDrawCall.texture("uOldPositionBuffer", oldPositionTextureA);
                 updateForceFramebuffer.replaceTexture(0, positionTextureB);
                 updateForceFramebuffer.replaceTexture(1, oldPositionTextureB);
 
-                app.drawFramebuffer(updateForceFramebuffer)
-                .drawCalls(updateForceDrawCalls)
-                .draw();
+                app.drawFramebuffer(updateForceFramebuffer);
+                updateForceDrawCall.draw();
 
                 for (var i = 0; i < CONSTRAINT_ITERATIONS; ++i) {
-                    updateHorizontal1DrawCalls[0].texture("uPositionBuffer", positionTextureB);
+                    app.drawFramebuffer(updateFramebuffer);
+
                     updateFramebuffer.replaceTexture(0, positionTextureA);
+                    updateHorizontal1DrawCall.texture("uPositionBuffer", positionTextureB).draw();
 
-                    app.drawFramebuffer(updateFramebuffer)
-                    .drawCalls(updateHorizontal1DrawCalls)
-                    .draw();
-
-                    updateHorizontal2DrawCalls[0].texture("uPositionBuffer", positionTextureA);
                     updateFramebuffer.replaceTexture(0, positionTextureB);
+                    updateHorizontal2DrawCall.texture("uPositionBuffer", positionTextureA).draw();
 
-                    app.drawCalls(updateHorizontal2DrawCalls)
-                    .draw();
-
-                    updateVertical1DrawCalls[0].texture("uPositionBuffer", positionTextureB);
                     updateFramebuffer.replaceTexture(0, positionTextureA);
+                    updateVertical1DrawCall.texture("uPositionBuffer", positionTextureB).draw();
 
-                    app.drawCalls(updateVertical1DrawCalls)
-                    .draw();
-
-                    updateVertical2DrawCalls[0].texture("uPositionBuffer", positionTextureA);
                     updateFramebuffer.replaceTexture(0, positionTextureB);
+                    updateVertical2DrawCall.texture("uPositionBuffer", positionTextureA).draw();
 
-                    app.drawCalls(updateVertical2DrawCalls)
-                    .draw();
-
-                    updateShear1DrawCalls[0].texture("uPositionBuffer", positionTextureB);
                     updateFramebuffer.replaceTexture(0, positionTextureA);
+                    updateShear1DrawCall.texture("uPositionBuffer", positionTextureB).draw();
 
-                    app.drawCalls(updateShear1DrawCalls)
-                    .draw();
-
-                    updateShear2DrawCalls[0].texture("uPositionBuffer", positionTextureA);
                     updateFramebuffer.replaceTexture(0, positionTextureB);
+                    updateShear2DrawCall.texture("uPositionBuffer", positionTextureA).draw();
 
-                    app.drawCalls(updateShear2DrawCalls)
-                    .draw();
-
-                    updateShear3DrawCalls[0].texture("uPositionBuffer", positionTextureB);
                     updateFramebuffer.replaceTexture(0, positionTextureA);
+                    updateShear3DrawCall.texture("uPositionBuffer", positionTextureB).draw();
 
-                    app.drawCalls(updateShear3DrawCalls)
-                    .draw();
-
-                    updateShear4DrawCalls[0].texture("uPositionBuffer", positionTextureA);
                     updateFramebuffer.replaceTexture(0, positionTextureB);
-
-                    app.drawCalls(updateShear4DrawCalls)
-                    .draw();   
+                    updateShear4DrawCall.texture("uPositionBuffer", positionTextureA).draw();   
                 }
 
                 if (targetZ === null) {
@@ -814,24 +767,17 @@
                     }
                 }
 
-                updateCollisionDrawCalls[0].texture("uPositionBuffer", positionTextureB);
                 updateFramebuffer.replaceTexture(0, positionTextureA);
+                updateCollisionDrawCall.texture("uPositionBuffer", positionTextureB).draw();
 
-                app.drawCalls(updateCollisionDrawCalls)
-                .draw();
-
-                updateNormalDrawCalls[0].texture("uPositionBuffer", positionTextureA);
                 updateFramebuffer.replaceTexture(0, normalTexture);
+                updateNormalDrawCall.texture("uPositionBuffer", positionTextureA).draw();
 
-                app.drawCalls(updateNormalDrawCalls)
-                .draw();
+                clothDrawCall.texture("uPositionBuffer", positionTextureA);
 
-                mainDrawcalls[0].texture("uPositionBuffer", positionTextureA);
-
-                app.defaultDrawFramebuffer()
-                .drawCalls(mainDrawcalls)
-                .clear()
-                .draw();
+                app.defaultDrawFramebuffer().clear();
+                clothDrawCall.draw();
+                ballDrawCall.draw();
 
                 var temp = oldPositionTextureA;
                 oldPositionTextureA = oldPositionTextureB;

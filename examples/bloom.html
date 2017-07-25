@@ -411,11 +411,6 @@
             .texture("uColor", colorBuffer.colorTextures[0])
             .texture("uBloom", bloomBuffer.colorTextures[0]);
 
-            var colorDrawCalls = [drawCall, sunDrawCall, sun2DrawCall];
-            var hBlurDrawCalls = [hBlurDrawCall];
-            var vBlurDrawCalls = [vBlurDrawCall];
-            var blendDrawCalls = [blendDrawCall];
-
             // TEXTURES FOR PING PONGING THE BLUR
             var blurTextureA = colorBuffer.colorTextures[1];
             var blurTextureB = bloomBuffer.colorTextures[0];
@@ -458,24 +453,21 @@
 
                 colorBuffer.replaceTexture(1, blurReadTexture);
 
-                app.drawFramebuffer(colorBuffer)
-                .drawCalls(colorDrawCalls)
-                .clear()
-                .draw();
+                app.drawFramebuffer(colorBuffer).clear();
+                drawCall.draw();
+                sunDrawCall.draw();
+                sun2DrawCall.draw();
 
                 if (bloomEnabled) {
                     for (var i = 0; i < 4; ++i) {
                         hBlurDrawCall.texture("uTexture", blurReadTexture);
                         bloomBuffer.replaceTexture(0, blurWriteTexture);
 
-                        app.drawFramebuffer(blurBuffer)
-                        .drawCalls(hBlurDrawCalls)
-                        .clear()
-                        .draw()
-                        .drawFramebuffer(bloomBuffer)
-                        .drawCalls(vBlurDrawCalls)
-                        .clear()
-                        .draw();
+                        app.drawFramebuffer(blurBuffer).clear();
+                        hBlurDrawCall.draw()
+
+                        app.drawFramebuffer(bloomBuffer).clear();
+                        vBlurDrawCall.draw();
 
                         if (blurReadTexture === blurTextureA) {
                             blurReadTexture = blurTextureB;
@@ -493,10 +485,8 @@
 
                 
 
-                app.defaultDrawFramebuffer()
-                .drawCalls(blendDrawCalls)
-                .clear()
-                .draw();
+                app.defaultDrawFramebuffer().clear();
+                blendDrawCall.draw();
                 
                 timer.end();
 

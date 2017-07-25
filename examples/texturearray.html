@@ -204,8 +204,6 @@
             .uniformBlock("SceneUniforms", sceneUniformBuffer)
             .texture("tex", texture);
 
-            app.drawCalls([drawCall]);
-
             var frameCount = 0;
             var arrayIndex = 0;
             function draw() {
@@ -227,7 +225,8 @@
                 .uniform("arrayIndex", arrayIndex);
 
                 // DRAW
-                app.clear().draw();
+                app.clear();
+                drawCall.draw();
 
                 // UPDATE ARRAY INDEX
                 frameCount++;

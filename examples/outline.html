@@ -254,16 +254,12 @@
             var texture = app.createTexture2D(image, { flipY: true });
 
             // DRAW CALLS
-            var mainDrawcall = [
-                app.createDrawCall(mainProgram, sphereArray)
-                .uniformBlock("SceneUniforms", sceneUniforms)
-                .texture("uTexture", texture)
-            ];
+            var mainDrawcall = app.createDrawCall(mainProgram, sphereArray)
+            .uniformBlock("SceneUniforms", sceneUniforms)
+            .texture("uTexture", texture);
 
-            var outlineDrawcall = [
-                app.createDrawCall(outlineProgram, sphereArray)
-                .uniformBlock("SceneUniforms", sceneUniforms)
-            ];
+            var outlineDrawcall = app.createDrawCall(outlineProgram, sphereArray)
+            .uniformBlock("SceneUniforms", sceneUniforms);
 
             var rotationMatrix = mat4.create();
 
@@ -288,20 +284,19 @@
                 modelMatrices.data(modelMatrixData);
 
                 app.clear()
-                .drawCalls(mainDrawcall)
                 .depthTest()
                 // SET STENCIL VALUE TO 1 FOR EVERY PIXEL
                 // THAT GETS DRAWN
                 .stencilFunc(PicoGL.ALWAYS, 1, 0xFF)
-                .stencilMask(0xFFFFFFFF)
-                .draw()
-                .drawCalls(outlineDrawcall)
-                .noDepthTest()
+                .stencilMask(0xFFFFFFFF);
+                mainDrawcall.draw();
+                
+                app.noDepthTest()
                 // ONLY DRAW WHERE STENCIL VALUE IS NOT 1
                 // (I.E. WHERE WE DIDN'T DRAW BEFORE)
                 .stencilFunc(PicoGL.NOTEQUAL, 1, 0xFF)
-                .stencilMask(0)
-                .draw();
+                .stencilMask(0);
+                outlineDrawcall.draw();
                 
                 timer.end();
 

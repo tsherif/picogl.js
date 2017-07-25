@@ -214,20 +214,15 @@
             var texture = app.createTexture2D(image, { flipY: true });
 
             // DRAW CALLS
-            var shadowDrawCalls = new Array(boxes.length);
-            var mainDrawCalls = new Array(boxes.length);
 
             for (var i = 0, len = boxes.length; i < len; ++i) {
-                shadowDrawCalls[i] = app.createDrawCall(shadowProgram, boxArray)
+                boxes[i].shadowDrawCall = app.createDrawCall(shadowProgram, boxArray)
 
-                mainDrawCalls[i] = app.createDrawCall(mainProgram, boxArray)
+                boxes[i].mainDrawCall = app.createDrawCall(mainProgram, boxArray)
                 .uniform("uLightPosition", lightPosition)
                 .uniform("uEyePosition", eyePosition)
                 .texture("uTextureMap", texture)
                 .texture("uShadowMap", shadowBuffer.depthTexture);
-
-                boxes[i].mainDrawCall = mainDrawCalls[i];
-                boxes[i].shadowDrawCall = shadowDrawCalls[i];
             }
 
 
@@ -254,15 +249,16 @@
                 }
 
                 // DRAW TO SHADOW BUFFER
-                app.drawFramebuffer(shadowBuffer) 
-                .drawCalls(shadowDrawCalls)        
-                .clear()
-                .draw()
+                app.drawFramebuffer(shadowBuffer).clear();
+                for (var i = 0, len = boxes.length; i < len; ++i) {
+                    boxes[i].shadowDrawCall.draw();
+                }
+
                 // DRAW TO SCREEN     
-                .defaultDrawFramebuffer()   
-                .drawCalls(mainDrawCalls)
-                .clear()
-                .draw();
+                app.defaultDrawFramebuffer().clear()
+                for (var i = 0, len = boxes.length; i < len; ++i) {
+                    boxes[i].mainDrawCall.draw();
+                }
 
                 timer.end();
 

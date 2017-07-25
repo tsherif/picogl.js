@@ -141,9 +141,6 @@
         var drawCallB = app.createDrawCall(program, triangleArrayB)
         .transformFeedback(transformFeedbackA);
 
-        drawCallA = [drawCallA];
-        drawCallB = [drawCallB];
-
         var currentDrawCall = drawCallA;
         function draw() {
             if (timer.ready()) {
@@ -153,9 +150,8 @@
             timer.start();
 
             // DRAW
-            app.drawCalls(currentDrawCall)
-            .clear()
-            .draw();
+            app.clear();
+            currentDrawCall.draw();
             
             // SWAP INPUT AND OUTPUT
             currentDrawCall = currentDrawCall === drawCallA ? drawCallB : drawCallA;

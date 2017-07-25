@@ -111,15 +111,13 @@
 
             var drawCall = app.createDrawCall(program, quadArray);
 
-            app.drawCalls([drawCall]);
-
             // RENDER TO OFFSCREEN TEXTURE
-            drawCall.texture("tex", texture);
-            app.drawFramebuffer(rttBuffer).clearColor(0.4, 0.4, 0.4, 1.0).clear().draw();
+            app.drawFramebuffer(rttBuffer).clearColor(0.4, 0.4, 0.4, 1.0).clear();
+            drawCall.texture("tex", texture).draw();
             
             // RENDER TO SCREEN
-            drawCall.texture("tex", rttBuffer.colorTextures[0]);
-            app.defaultDrawFramebuffer().clearColor(0.0, 0.0, 0.0, 1.0).clear().draw();
+            app.defaultDrawFramebuffer().clearColor(0.0, 0.0, 0.0, 1.0).clear();
+            drawCall.texture("tex", rttBuffer.colorTextures[0]).draw();
             
         }
 

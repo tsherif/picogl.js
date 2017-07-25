@@ -238,20 +238,14 @@
 
             var texture = app.createTexture2D(image, { flipY: true });
 
-            var pickingDrawCalls = new Array(boxes.length);
-            var mainDrawCalls = new Array(boxes.length);
-
             for (var i = 0, len = boxes.length; i < len; ++i) {
-                pickingDrawCalls[i] = app.createDrawCall(pickingProgram, boxArray)
+                boxes[i].pickingDrawCall = app.createDrawCall(pickingProgram, boxArray)
                 .uniform("uPickColor", boxes[i].pickColor);
 
-                mainDrawCalls[i] = app.createDrawCall(mainProgram, boxArray)
+                boxes[i].mainDrawCall = app.createDrawCall(mainProgram, boxArray)
                 .uniformBlock("SceneUniforms", sceneUniforms)
                 .uniformBlock("FrameUniforms", boxes[i].frameUniforms)
                 .texture("uTextureMap", texture);
-
-                boxes[i].mainDrawCall = mainDrawCalls[i];
-                boxes[i].pickingDrawCall = pickingDrawCalls[i];
             }
 
             // MOUSE HANDLER FOR PICKING
@@ -271,6 +265,9 @@
                     utils.updateTimerElement(timer.cpuTime, timer.gpuTime);
                 }
 
+
+                timer.start();
+
                 for (var i = 0, len = boxes.length; i < len; ++i) {
                     boxes[i].rotate[0] += 0.01;
                     boxes[i].rotate[1] += 0.02;
@@ -284,15 +281,15 @@
                     .set(1, boxes[i].modelMatrix);
                 }
 
-                timer.start();
-
                 if (picked) {
                     // DRAW TO PICKING BUFFER
-                    app.drawFramebuffer(pickingBuffer)
-                    .drawCalls(pickingDrawCalls)        
-                    .clear()
-                    .draw()
-                    .defaultDrawFramebuffer()
+                    app.drawFramebuffer(pickingBuffer).clear();
+
+                    for (var i = 0, len = boxes.length; i < len; ++i) {
+                        boxes[i].pickingDrawCall.draw();
+                    }
+
+                    app.defaultDrawFramebuffer()
                     .readFramebuffer(pickingBuffer)
                     .readPixel(mouseX, canvas.height - mouseY, pickedColor);
                     
@@ -315,9 +312,11 @@
                 boxes[1].frameUniforms.update();
 
                 // MAIN DRAW
-                app.drawCalls(mainDrawCalls)
-                .clear()
-                .draw();
+                app.clear();
+                
+                for (var i = 0, len = boxes.length; i < len; ++i) {
+                    boxes[i].mainDrawCall.draw();
+                }
 
                 timer.end();
 

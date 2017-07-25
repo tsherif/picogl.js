@@ -434,26 +434,18 @@
             .uniformBlock("SceneUniforms", sceneUniforms)
             .texture("uTexture", texture);
 
-            var colorGeoDrawcalls = [colorGeoDrawcall];
-
             var ssaoDrawCall = app.createDrawCall(ssaoProgram, quadArray)
             .uniformBlock("SSAOUniforms", ssaoUniforms)
             .texture("uPositionBuffer", colorGeoBuffer.colorTextures[1])
             .texture("uNormalBuffer", colorGeoBuffer.colorTextures[2])
             .texture("uNoiseBuffer", noiseTexture);
 
-            var ssaoDrawCalls = [ssaoDrawCall];
-
             var aoBlendDrawCall = app.createDrawCall(aoBlendProgram, quadArray)
             .texture("uColorBuffer", colorGeoBuffer.colorTextures[0])
             .texture("uOcclusionBuffer", ssaoBuffer.colorTextures[0]);
 
-            var aoBlendDrawCalls = [aoBlendDrawCall];
-
             var noSSAODrawCall = app.createDrawCall(noSSAOProgram, quadArray)
             .texture("uColorBuffer", colorGeoBuffer.colorTextures[0]);
-
-            var noSSAODrawCalls = [noSSAODrawCall];
 
             var rotationMatrix = mat4.create();
 
@@ -477,28 +469,21 @@
                 modelMatrices.data(modelMatrixData);
 
                 // DRAW TO COLORGEOBUFFER
-                app.drawFramebuffer(colorGeoBuffer)
-                .drawCalls(colorGeoDrawcalls)
-                .clear()
-                .draw();
+                app.drawFramebuffer(colorGeoBuffer).clear();
+                colorGeoDrawcall.draw();
 
                 if (ssaoEnabled) {
                     // OCCLUSION PASS
-                    app.drawFramebuffer(ssaoBuffer)
-                    .drawCalls(ssaoDrawCalls)
-                    .clear()
-                    .draw()
+                    app.drawFramebuffer(ssaoBuffer).clear()
+                    ssaoDrawCall.draw();
+                    
                     // OCCLUSION BLEND PASS
-                    .defaultDrawFramebuffer()
-                    .drawCalls(aoBlendDrawCalls)
-                    .clear()
-                    .draw();
+                    app.defaultDrawFramebuffer().clear()
+                    aoBlendDrawCall.draw();
                 } else {
                     // DRAW WITHOUT SSAO
-                    app.defaultDrawFramebuffer()
-                    .drawCalls(noSSAODrawCalls)
-                    .clear()
-                    .draw();
+                    app.defaultDrawFramebuffer().clear();
+                    noSSAODrawCall.draw();
                 }
                 
                 timer.end();
