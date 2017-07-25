@@ -203,8 +203,6 @@
                 }
             }
 
-            app.drawCalls([boxesDrawCall]);
-
             var eyeRadius = 30;
             var eyeRotation = 0;
             function draw() {
@@ -238,7 +236,8 @@
                 }
                 modelMatrices.data(modelMatrixData);
 
-                app.clear().draw();
+                app.clear();
+                boxesDrawCall.draw();
                 
                 timer.end();
 

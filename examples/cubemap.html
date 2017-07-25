@@ -260,8 +260,6 @@
                 .texture("tex", texture)
                 .texture("cubemap", cubemap);
 
-                app.drawCalls([skyboxDrawcall, drawCall]);
-
                 function draw() {
                     if (timer.ready()) {
                         utils.updateTimerElement(timer.cpuTime, timer.gpuTime);
@@ -278,7 +276,9 @@
 
                     drawCall.uniform("uModel", modelMatrix);
 
-                    app.clear().draw()
+                    app.clear();
+                    skyboxDrawcall.draw();
+                    drawCall.draw();
                     
                     timer.end();
 

@@ -325,15 +325,11 @@
             .texture("uColor", boxBuffer.colorTextures[0])
             .texture("uDepth", boxBuffer.depthTexture);
 
-            var hBlurDrawCalls = [hBlurDrawCall];
-
             var finalDrawCall = app.createDrawCall(blurProgram, quadArray)
             .uniformBlock("DOFUniforms", dofUniforms)
             .uniform("uTexelOffset", hTexelOffset)
             .texture("uColor", hblurBuffer.colorTextures[0])
             .texture("uDepth", boxBuffer.depthTexture);
-
-            var finalDrawCalls = [finalDrawCall];
 
             function draw() {
                 if (resized) {
@@ -366,20 +362,16 @@
                 modelMatrices.data(modelMatrixData);
 
                 // COLOR AND DEPTH
-                app.drawFramebuffer(boxBuffer)
-                .drawCalls([boxesDrawCall])
-                .clear()
-                .draw()
+                app.drawFramebuffer(boxBuffer).clear();
+                boxesDrawCall.draw();
+
                 // HORIZONTAL BLUR
-                .drawFramebuffer(hblurBuffer)
-                .drawCalls(hBlurDrawCalls)
-                .clear()
-                .draw()
+                app.drawFramebuffer(hblurBuffer).clear()
+                hBlurDrawCall.draw()
+
                 // VERTICAL BLUR
-                .defaultDrawFramebuffer()
-                .drawCalls(finalDrawCalls)
-                .clear()
-                .draw();
+                app.defaultDrawFramebuffer().clear()
+                finalDrawCall.draw();
 
                 timer.end();
 

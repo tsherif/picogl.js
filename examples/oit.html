@@ -290,13 +290,9 @@
             .uniformBlock("SceneUniforms", sceneUniforms)
             .texture("uTexture", texture);
 
-            var accumDrawCalls = [accumDrawCall];
-
             var blendDrawCall = app.createDrawCall(blendProgram, quadArray)
             .texture("uAccumulate", accumBuffer.colorTextures[0])
             .texture("uAccumulateAlpha", accumBuffer.colorTextures[1]);
-
-            var blendDrawCalls = [blendDrawCall];
 
             var rotationMatrix = mat4.create();
 
@@ -320,16 +316,15 @@
 
                 // ACCUMULATION
                 app.drawFramebuffer(accumBuffer)
-                .drawCalls(accumDrawCalls)
                 .blendFuncSeparate(PicoGL.ONE, PicoGL.ONE, PicoGL.ZERO, PicoGL.ONE_MINUS_SRC_ALPHA)
-                .clear()
-                .draw()
+                .clear();
+                accumDrawCall.draw()
+                
                 // BLEND
-                .defaultDrawFramebuffer()
-                .drawCalls(blendDrawCalls)
+                app.defaultDrawFramebuffer()
                 .blendFunc(PicoGL.ONE, PicoGL.ONE_MINUS_SRC_ALPHA)
-                .clear()
-                .draw();
+                .clear();
+                blendDrawCall.draw();
                 
                 timer.end(); 
                                 

@@ -180,8 +180,6 @@
             var drawCall = app.createDrawCall(program, boxArray)
             .uniformBlock("SceneUniforms", sceneUniformBuffer);
 
-            app.drawCalls([drawCall]);
-
             var angleX = 0;
             var angleY = 0;
 
@@ -202,12 +200,12 @@
                 drawCall.uniform("uModel", modelMatrix);
 
                 // RENDER TO OFFSCREEN TEXTURE
-                drawCall.texture("tex", texture);
-                app.drawFramebuffer(rttBuffer).clearColor(0.4, 0.4, 0.4, 1.0).clear().draw();
+                app.drawFramebuffer(rttBuffer).clearColor(0.4, 0.4, 0.4, 1.0).clear();
+                drawCall.texture("tex", texture).draw();
                 
                 // RENDER TO SCREEN
-                drawCall.texture("tex", rttBuffer.colorTextures[0]);
-                app.defaultDrawFramebuffer().clearColor(0.0, 0.0, 0.0, 1.0).clear().draw();
+                app.defaultDrawFramebuffer().clearColor(0.0, 0.0, 0.0, 1.0).clear()
+                drawCall.texture("tex", rttBuffer.colorTextures[0]).draw();
 
                 timer.end(); 
 

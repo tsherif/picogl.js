@@ -249,27 +249,24 @@
 
         // CREATE DRAW CALLS FOR SIMULATION
         // A BUFFERS AS INPUT, UPDATE B BUFFERS
-        var updateDrawcallA = [
-            app.createDrawCall(updateProgram, updateArrayA, PicoGL.POINTS)
-            .transformFeedback(transformFeedbackB)
-        ];
+        var updateDrawCallA = app.createDrawCall(updateProgram, updateArrayA, PicoGL.POINTS)
+        .transformFeedback(transformFeedbackB);
 
         // B BUFFERS AS INPUT, UPDATE A BUFFERS
-        var updateDrawcallB = [
-            app.createDrawCall(updateProgram, updateArrayB, PicoGL.POINTS)
-            .transformFeedback(transformFeedbackA)
-        ];
+        var updateDrawCallB = app.createDrawCall(updateProgram, updateArrayB, PicoGL.POINTS)
+        .transformFeedback(transformFeedbackA);
 
         // DRAW USING CONTENTS OF A BUFFERS
-        var drawCallA = [app.createDrawCall(drawProgram, drawArrayA)];
+        var drawCallA = app.createDrawCall(drawProgram, drawArrayA);
 
         // DRAW USING CONTENTS OF B BUFFERS
-        var drawCallB = [app.createDrawCall(drawProgram, drawArrayB)];
+        var drawCallB = app.createDrawCall(drawProgram, drawArrayB);
 
         // START BY DRAWING B BUFFERS THAT ARE
         // WRITTEN TO ON FIRST TRANSFORM FEEDBACK
         // PASS 
-        var drawA = false;
+        var updateDrawCall = updateDrawCallA;
+        var mainDrawCall = drawCallB;
         function draw() {
             if (timer.ready()) {
                 utils.updateTimerElement(timer.cpuTime, timer.gpuTime);
@@ -278,17 +275,16 @@
             timer.start();
 
             // TRANSFORM FEEDBACK
-            app.drawCalls(drawA ? updateDrawcallB : updateDrawcallA)
-            .noRasterize()
-            .draw()
+            app.noRasterize()
+            updateDrawCall.draw()
+
             // DRAW
-            .drawCalls(drawA ? drawCallA : drawCallB)
-            .rasterize()
-            .clear()
-            .draw();
+            app.rasterize().clear()
+            mainDrawCall.draw();
 
             // SWAP INPUT AND OUTPUT BUFFERS
-            drawA = !drawA;
+            updateDrawCall = updateDrawCall === updateDrawCallA ? updateDrawCallB : updateDrawCallA;
+            mainDrawCall = mainDrawCall === drawCallA ? drawCallB : drawCallA;
 
             timer.end();
 

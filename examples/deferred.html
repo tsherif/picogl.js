@@ -230,10 +230,8 @@
             }
         ];
 
-        var geoDrawCalls = new Array(boxes.length);
-
         for (var i = 0, len = boxes.length; i < len; ++i) {
-            geoDrawCalls[i] = boxes[i].drawCall = app.createDrawCall(geoProgram, boxArray)
+            boxes[i].drawCall = app.createDrawCall(geoProgram, boxArray)
             .uniformBlock("BoxUniforms", boxes[i].matrixUniforms);
         }
 
@@ -242,22 +240,26 @@
             {
                 position: vec3.fromValues(0, 1, 0.5),
                 color:    vec3.fromValues(0.8, 0.0, 0.0),
-                uniforms: null
+                uniforms: null,
+                drawCall: null
             },
             {
                 position: vec3.fromValues(1, 1, 0.5),
                 color:    vec3.fromValues(0.0, 0.0, 0.8),
-                uniforms: null
+                uniforms: null,
+                drawCall: null
             },
             {
                 position: vec3.fromValues(1, 0, 0.5),
                 color:    vec3.fromValues(0.0, 0.8, 0.0),
-                uniforms: null
+                uniforms: null,
+                drawCall: null
             },
             {
                 position: vec3.fromValues(0.5, 0, 1),
                 color:    vec3.fromValues(0.0, 0.8, 0.8),
-                uniforms: null
+                uniforms: null,
+                drawCall: null
             }
         ];
 
@@ -285,7 +287,6 @@
             
             // LIGHT UNIFORMS AND DRAW CALLS    
             var lightMatrix;
-            var lightDrawCalls = new Array(lights.length);
 
             for (var i = 0, len = lights.length; i < len; ++i) {
                 lightMatrix = mat4.create();
@@ -302,7 +303,7 @@
                 .set(2, lights[i].color)
                 .update();
 
-                lightDrawCalls[i] = app.createDrawCall(mainProgram, sphereArray)
+                lights[i].drawCall = app.createDrawCall(mainProgram, sphereArray)
                 .uniformBlock("LightUniforms", lights[i].uniforms)
                 .uniform("uEyePosition", eyePosition)
                 .texture("uTextureMap", texture)
@@ -332,19 +333,23 @@
 
                 // DRAW TO GBUFFER
                 app.drawFramebuffer(gBuffer)
-                .drawCalls(geoDrawCalls)
                 .depthMask(true)
                 .noBlend()
-                .clear()
-                .draw()
+                .clear();
+
+                for (var i = 0, len = boxes.length; i < len; ++i) {
+                    boxes[i].drawCall.draw();
+                }
 
                 // DRAW LIGHTS
-                .defaultDrawFramebuffer()
-                .drawCalls(lightDrawCalls)
+                app.defaultDrawFramebuffer()
                 .blend()
                 .depthMask(false)
-                .clear()
-                .draw();
+                .clear();
+
+                for (var i = 0, len = lights.length; i < len; ++i) {
+                    lights[i].drawCall.draw();
+                }
                 
                 timer.end();                
                 

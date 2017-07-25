@@ -43,9 +43,8 @@ PicoGL.js is minimal WebGL 2 rendering library. It's meant for developers who un
     .uniformBlock("ColorUniforms", uniformBuffer);
 
     // Draw
-    app.drawCalls([drawCall])
-    .clear()
-    .draw();
+    app.clear();
+    drawCall.draw();
 
 ``` 
 Visit the [API docs](https://tsherif.github.io/picogl.js/docs/) for more details or the [website](https://tsherif.github.io/picogl.js/) for live examples of usage. 
@@ -94,7 +93,7 @@ PicoGL.js simplifies usage of some more complex WebGL 2 features, such as multip
     
     // ... set up programs and vertex arrays for offscreen and
     // main draw passes...
-
+    
     var offscreenDrawCall = app.createDrawCall(offscreenProgram, offscreenVAO);
 
     // Bind main program texture samplers to framebuffer targets
@@ -104,15 +103,12 @@ PicoGL.js simplifies usage of some more complex WebGL 2 features, such as multip
     .texture("depthTexture", framebuffer.depthTexture);
 
     // Offscreen pass
-    app.drawFramebuffer(framebuffer)
-    .drawCalls([offscreenDrawCall])
-    .clear()
-    .draw()
+    app.drawFramebuffer(framebuffer).clear();
+    offscreenDrawCall.draw();
+    
     // Main draw pass
-    .defaultDrawFramebuffer()
-    .drawCalls([mainDrawCall])
-    .clear()
-    .draw();
+    app.defaultDrawFramebuffer().clear()
+    mainDrawCall.draw();
 ```
 
 **Uniform Buffers**
@@ -167,9 +163,8 @@ PicoGL.js simplifies usage of some more complex WebGL 2 features, such as multip
     var drawCall = app.createDrawCall(program, vertexArray)
     .transformFeedback(transformFeedback);
 
-    app.drawCalls([drawCall])
-    .clear()
-    .draw();
+    app.clear();
+    drawCall.draw();
 
 ``` 
 
