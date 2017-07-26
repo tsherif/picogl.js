@@ -45,6 +45,7 @@ var CONSTANTS = require("./constants");
     @prop {Array} textures Array of active textures.
     @prop {number} textureCount The number of active textures for this draw call.
     @prop {GLEnum} primitive The primitive type being drawn.
+    @prop {Object} appState Tracked GL state.
 */
 function DrawCall(gl, appState, program, vertexArray, primitive) {
     this.gl = gl;
