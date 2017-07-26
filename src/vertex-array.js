@@ -26,7 +26,6 @@ var CONSTANTS = require("./constants");
     Organizes vertex buffer and attribute state.
 
     @class
-    @hideconstructor
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLVertexArrayObject} vertexArray Vertex array object.
     @prop {number} numElements Number of elements in the vertex array.
@@ -34,10 +33,12 @@ var CONSTANTS = require("./constants");
     @prop {GLenum} indexType Data type of the indices.
     @prop {boolean} instanced Whether this vertex array is set up for instanced drawing.
     @prop {number} numInstances Number of instances to draw with this vertex array.
+    @prop {Object} appState Tracked GL state.
 */
-function VertexArray(gl) {
+function VertexArray(gl, appState) {
     this.gl = gl;
     this.vertexArray = gl.createVertexArray();
+    this.appState = appState;
     this.numElements = 0;
     this.indexType = null;
     this.instancedBuffers = 0;
@@ -108,7 +109,10 @@ VertexArray.prototype.delete = function() {
 
 // Bind this vertex array.
 VertexArray.prototype.bind = function() {
-    this.gl.bindVertexArray(this.vertexArray);
+    if (this.appState.vertexArray !== this) {
+        this.gl.bindVertexArray(this.vertexArray);
+        this.appState.vertexArray = this;
+    }
 
     return this;
 };

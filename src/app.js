@@ -42,7 +42,6 @@ var Query             = require("./query");
     state and manage draw calls.
 
     @class
-    @hideconstructor
     @prop {DOMElement} canvas The canvas on which this app drawing.
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {number} width The width of the drawing surface.
@@ -622,7 +621,7 @@ App.prototype.resize = function(width, height) {
     @param {Array} [xformFeedbackVars] Transform feedback varyings.
 */
 App.prototype.createProgram = function(vsSource, fsSource, xformFeedbackVars) {
-    return new Program(this.gl, vsSource, fsSource, xformFeedbackVars);
+    return new Program(this.gl, this.state, vsSource, fsSource, xformFeedbackVars);
 };
 
 /**
@@ -643,7 +642,7 @@ App.prototype.createShader = function(type, source) {
     @method
 */
 App.prototype.createVertexArray = function() {
-    return new VertexArray(this.gl);
+    return new VertexArray(this.gl, this.state);
 };
 
 /**
@@ -652,7 +651,7 @@ App.prototype.createVertexArray = function() {
     @method
 */
 App.prototype.createTransformFeedback = function() {
-    return new TransformFeedback(this.gl);
+    return new TransformFeedback(this.gl, this.state);
 };
 
 /**
@@ -665,7 +664,7 @@ App.prototype.createTransformFeedback = function() {
     @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
 */
 App.prototype.createVertexBuffer = function(type, itemSize, data, usage) {
-    return new VertexBuffer(this.gl, type, itemSize, data, usage);
+    return new VertexBuffer(this.gl, this.state, type, itemSize, data, usage);
 };
 
 /**
@@ -680,7 +679,7 @@ App.prototype.createVertexBuffer = function(type, itemSize, data, usage) {
     @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
 */
 App.prototype.createMatrixBuffer = function(type, data, usage) {
-    return new VertexBuffer(this.gl, type, null, data, usage);
+    return new VertexBuffer(this.gl, this.state, type, null, data, usage);
 };
 
 /**
@@ -692,7 +691,7 @@ App.prototype.createMatrixBuffer = function(type, data, usage) {
     @param {ArrayBufferView} data Index buffer data.
 */
 App.prototype.createIndexBuffer = function(type, itemSize, data) {
-    return new VertexBuffer(this.gl, type, itemSize, data, null, true);
+    return new VertexBuffer(this.gl, this.state, type, itemSize, data, null, true);
 };
 
 /**

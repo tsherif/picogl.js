@@ -29,7 +29,6 @@ var CONSTANTS = require("./constants");
     Storage for uniform data. Data is stored in std140 layout.
 
     @class
-    @hideconstructor
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLBuffer} buffer Allocated buffer storage.
     @prop {Float32Array} data Buffer data.

@@ -30,7 +30,6 @@ var TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
     General-purpose texture.
 
     @class
-    @hideconstructor
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLTexture} texture Handle to the texture.
     @prop {WebGLSamler} sampler Sampler object.

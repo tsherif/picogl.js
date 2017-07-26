@@ -27,7 +27,6 @@
     Generic query object.
 
     @class
-    @hideconstructor
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLQuery} query Query object.
     @prop {GLEnum} target The type of information being queried.

@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.6.0
+PicoGL.js v0.6.1
 
 The MIT License (MIT)
 
@@ -68,7 +68,6 @@ var Query             = require("./query");
     state and manage draw calls.
 
     @class
-    @hideconstructor
     @prop {DOMElement} canvas The canvas on which this app drawing.
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {number} width The width of the drawing surface.
@@ -648,7 +647,7 @@ App.prototype.resize = function(width, height) {
     @param {Array} [xformFeedbackVars] Transform feedback varyings.
 */
 App.prototype.createProgram = function(vsSource, fsSource, xformFeedbackVars) {
-    return new Program(this.gl, vsSource, fsSource, xformFeedbackVars);
+    return new Program(this.gl, this.state, vsSource, fsSource, xformFeedbackVars);
 };
 
 /**
@@ -669,7 +668,7 @@ App.prototype.createShader = function(type, source) {
     @method
 */
 App.prototype.createVertexArray = function() {
-    return new VertexArray(this.gl);
+    return new VertexArray(this.gl, this.state);
 };
 
 /**
@@ -678,7 +677,7 @@ App.prototype.createVertexArray = function() {
     @method
 */
 App.prototype.createTransformFeedback = function() {
-    return new TransformFeedback(this.gl);
+    return new TransformFeedback(this.gl, this.state);
 };
 
 /**
@@ -691,7 +690,7 @@ App.prototype.createTransformFeedback = function() {
     @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
 */
 App.prototype.createVertexBuffer = function(type, itemSize, data, usage) {
-    return new VertexBuffer(this.gl, type, itemSize, data, usage);
+    return new VertexBuffer(this.gl, this.state, type, itemSize, data, usage);
 };
 
 /**
@@ -706,7 +705,7 @@ App.prototype.createVertexBuffer = function(type, itemSize, data, usage) {
     @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
 */
 App.prototype.createMatrixBuffer = function(type, data, usage) {
-    return new VertexBuffer(this.gl, type, null, data, usage);
+    return new VertexBuffer(this.gl, this.state, type, null, data, usage);
 };
 
 /**
@@ -718,7 +717,7 @@ App.prototype.createMatrixBuffer = function(type, data, usage) {
     @param {ArrayBufferView} data Index buffer data.
 */
 App.prototype.createIndexBuffer = function(type, itemSize, data) {
-    return new VertexBuffer(this.gl, type, itemSize, data, null, true);
+    return new VertexBuffer(this.gl, this.state, type, itemSize, data, null, true);
 };
 
 /**
@@ -999,7 +998,6 @@ var TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
     Cubemap for environment mapping.
 
     @class
-    @hideconstructor
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLTexture} texture Handle to the texture.
     @prop {GLEnum} type Type of data stored in the texture.
@@ -1150,7 +1148,6 @@ var CONSTANTS = require("./constants");
     attributes, uniforms and textures for a single draw call.
 
     @class
-    @hideconstructor
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {Program} currentProgram The program to use for this draw call.
     @prop {VertexArray} currentVertexArray Vertex array to use for this draw call.
@@ -1166,6 +1163,7 @@ var CONSTANTS = require("./constants");
     @prop {Array} textures Array of active textures.
     @prop {number} textureCount The number of active textures for this draw call.
     @prop {GLEnum} primitive The primitive type being drawn.
+    @prop {Object} appState Tracked GL state.
 */
 function DrawCall(gl, appState, program, vertexArray, primitive) {
     this.gl = gl;
@@ -1261,17 +1259,14 @@ DrawCall.prototype.uniformBlock = function(name, buffer) {
     @method
 */
 DrawCall.prototype.draw = function() {
-    var state = this.appState;
     var uniformNames = this.uniformNames;
     var uniformValues = this.uniformValues;
     var uniformBuffers = this.uniformBuffers;
     var uniformBlockNames = this.uniformBlockNames;
     var textures = this.textures;
 
-    if (state.program !== this.currentProgram) {
-        this.gl.useProgram(this.currentProgram.program);
-        state.program = this.currentProgram;
-    }
+    this.currentProgram.bind();
+    this.currentVertexArray.bind();
 
     for (var uIndex = 0; uIndex < this.uniformCount; ++uIndex) {
         this.currentProgram.uniform(uniformNames[uIndex], uniformValues[uIndex]);
@@ -1286,15 +1281,8 @@ DrawCall.prototype.draw = function() {
         textures[tIndex].bind();
     }
 
-    if (state.vertexArray !== this.currentVertexArray) {
-        this.currentVertexArray.bind();
-        state.vertexArray = this.currentVertexArray;
-    }
-
     if (this.currentTransformFeedback) {
-        if (state.transformFeedback !== this.currentTransformFeedback) {
-            this.currentTransformFeedback.bind();
-        }
+        this.currentTransformFeedback.bind();
         this.gl.beginTransformFeedback(this.primitive);
     }
 
@@ -1355,7 +1343,6 @@ var Texture = require("./texture");
     Storage for vertex data.
 
     @class
-    @hideconstructor
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLFramebuffer} framebuffer Handle to the framebuffer.
     @prop {number} width The width of the framebuffer.
@@ -1644,7 +1631,7 @@ var App = require("./app");
     @namespace PicoGL
 */
 var PicoGL = global.PicoGL = require("./constants");    
-PicoGL.version = "0.6.0";
+PicoGL.version = "0.6.1";
 
 /**
     Create a PicoGL app. The app is the primary entry point to PicoGL. It stores
@@ -1696,14 +1683,14 @@ var Uniforms = require("./uniforms");
     shaders.
 
     @class
-    @hideconstructor
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLProgram} program The WebGL program.
     @prop {boolean} transformFeedback Whether this program is set up for transform feedback.
     @prop {Object} uniforms Map of uniform names to handles.
     @prop {Object} uniformBlocks Map of uniform block names to handles.
+    @prop {Object} appState Tracked GL state.
 */
-function Program(gl, vsSource, fsSource, xformFeebackVars) {
+function Program(gl, appState, vsSource, fsSource, xformFeebackVars) {
     var i;
 
     var vShader, fShader;
@@ -1746,6 +1733,7 @@ function Program(gl, vsSource, fsSource, xformFeebackVars) {
 
     this.gl = gl;
     this.program = program;
+    this.appState = appState;
     this.transformFeedback = !!xformFeebackVars;
     this.uniforms = {};
     this.uniformBlocks = {};
@@ -1852,7 +1840,14 @@ Program.prototype.uniformBlock = function(name, base) {
         this.gl.uniformBlockBinding(this.program, this.uniformBlocks[name], base);
         this.uniformBlockBindings[name] = base;
     }
+};
 
+// Use this program.
+Program.prototype.bind = function() {
+    if (this.appState.program !== this) {
+        this.gl.useProgram(this.program);
+        this.appState.program = this;
+    }
 };
 
 module.exports = Program;
@@ -1887,7 +1882,6 @@ module.exports = Program;
     Generic query object.
 
     @class
-    @hideconstructor
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLQuery} query Query object.
     @prop {GLEnum} target The type of information being queried.
@@ -1973,7 +1967,6 @@ module.exports = Query;
     WebGL shader.
 
     @class
-    @hideconstructor
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLShader} shader The shader.
 */
@@ -2085,7 +2078,6 @@ var TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
     General-purpose texture.
 
     @class
-    @hideconstructor
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLTexture} texture Handle to the texture.
     @prop {WebGLSamler} sampler Sampler object.
@@ -2309,7 +2301,6 @@ var Query = require("./query");
     Rendering timer.
 
     @class
-    @hideconstructor
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {Object} cpuTimer Timer for CPU. Will be window.performance, if available, or window.Date.
     @prop {boolean} gpuTimer Whether the gpu timing is available (EXT_disjoint_timer_query_webgl2 or
@@ -2436,13 +2427,14 @@ module.exports = Timer;
     Tranform feedback object.
 
     @class
-    @hideconstructor
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLTransformFeedback} transformFeedback Transform feedback object.
+    @prop {Object} appState Tracked GL state.
 */
-function TransformFeedback(gl) {
+function TransformFeedback(gl, appState) {
     this.gl = gl;
     this.transformFeedback = gl.createTransformFeedback();
+    this.appState = appState;
     // TODO(Tarek): Need to rebind buffers due to bug in ANGLE.
     // Remove this when that's fixed.
     this.angleBugBuffers = [];
@@ -2480,10 +2472,14 @@ TransformFeedback.prototype.delete = function() {
 
 // Bind this transform feedback.
 TransformFeedback.prototype.bind = function() {
-    this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedback);
+    if (this.appState.transformFeedback !== this) {
+        this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedback);
 
-    for (var i = 0, len = this.angleBugBuffers.length; i < len; ++i) {
-        this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, i, this.angleBugBuffers[i].buffer);
+        for (var i = 0, len = this.angleBugBuffers.length; i < len; ++i) {
+            this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, i, this.angleBugBuffers[i].buffer);
+        }
+
+        this.appState.transformFeedback = this;
     }
 
     return this;
@@ -2523,7 +2519,6 @@ var CONSTANTS = require("./constants");
     Storage for uniform data. Data is stored in std140 layout.
 
     @class
-    @hideconstructor
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLBuffer} buffer Allocated buffer storage.
     @prop {Float32Array} data Buffer data.
@@ -2966,7 +2961,6 @@ var CONSTANTS = require("./constants");
     Organizes vertex buffer and attribute state.
 
     @class
-    @hideconstructor
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLVertexArrayObject} vertexArray Vertex array object.
     @prop {number} numElements Number of elements in the vertex array.
@@ -2974,10 +2968,12 @@ var CONSTANTS = require("./constants");
     @prop {GLenum} indexType Data type of the indices.
     @prop {boolean} instanced Whether this vertex array is set up for instanced drawing.
     @prop {number} numInstances Number of instances to draw with this vertex array.
+    @prop {Object} appState Tracked GL state.
 */
-function VertexArray(gl) {
+function VertexArray(gl, appState) {
     this.gl = gl;
     this.vertexArray = gl.createVertexArray();
+    this.appState = appState;
     this.numElements = 0;
     this.indexType = null;
     this.instancedBuffers = 0;
@@ -3048,7 +3044,10 @@ VertexArray.prototype.delete = function() {
 
 // Bind this vertex array.
 VertexArray.prototype.bind = function() {
-    this.gl.bindVertexArray(this.vertexArray);
+    if (this.appState.vertexArray !== this) {
+        this.gl.bindVertexArray(this.vertexArray);
+        this.appState.vertexArray = this;
+    }
 
     return this;
 };
@@ -3133,7 +3132,6 @@ var CONSTANTS = require("./constants");
     Storage for vertex data.
 
     @class
-    @hideconstructor
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLBuffer} buffer Allocated buffer storage.
     @prop {GLEnum} type The type of data stored in the buffer.
@@ -3142,8 +3140,9 @@ var CONSTANTS = require("./constants");
     @prop {GLEnum} usage The usage pattern of the buffer.
     @prop {boolean} indexArray Whether this is an index array.
     @prop {GLEnum} binding GL binding point (ARRAY_BUFFER or ELEMENT_ARRAY_BUFFER).
+    @prop {Object} appState Tracked GL state.
 */
-function VertexBuffer(gl, type, itemSize, data, usage, indexArray) {
+function VertexBuffer(gl, appState, type, itemSize, data, usage, indexArray) {
     var numColumns;
     switch(type) {
         case CONSTANTS.FLOAT_MAT4:
@@ -3196,6 +3195,7 @@ function VertexBuffer(gl, type, itemSize, data, usage, indexArray) {
 
     this.gl = gl;
     this.buffer = gl.createBuffer();
+    this.appState = appState;
     this.type = type;
     this.itemSize = itemSize;
     this.numItems = dataLength / (itemSize * numColumns);
@@ -3216,9 +3216,19 @@ function VertexBuffer(gl, type, itemSize, data, usage, indexArray) {
     @param {VertexBufferView} data Data to store in the buffer.
 */
 VertexBuffer.prototype.data = function(data) {
+    // Don't want to update vertex array bindings
+    var currentVertexArray = this.appState.vertexArray;
+    if (currentVertexArray) {
+        this.gl.bindVertexArray(null);
+    }
+
     this.gl.bindBuffer(this.binding, this.buffer);
     this.gl.bufferSubData(this.binding, 0, data);
     this.gl.bindBuffer(this.binding, null);
+
+    if (currentVertexArray) {
+        this.gl.bindVertexArray(currentVertexArray.vertexArray);
+    }
 
     return this;
 };

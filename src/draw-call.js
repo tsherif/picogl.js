@@ -30,7 +30,6 @@ var CONSTANTS = require("./constants");
     attributes, uniforms and textures for a single draw call.
 
     @class
-    @hideconstructor
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {Program} currentProgram The program to use for this draw call.
     @prop {VertexArray} currentVertexArray Vertex array to use for this draw call.
@@ -46,6 +45,7 @@ var CONSTANTS = require("./constants");
     @prop {Array} textures Array of active textures.
     @prop {number} textureCount The number of active textures for this draw call.
     @prop {GLEnum} primitive The primitive type being drawn.
+    @prop {Object} appState Tracked GL state.
 */
 function DrawCall(gl, appState, program, vertexArray, primitive) {
     this.gl = gl;
@@ -141,17 +141,14 @@ DrawCall.prototype.uniformBlock = function(name, buffer) {
     @method
 */
 DrawCall.prototype.draw = function() {
-    var state = this.appState;
     var uniformNames = this.uniformNames;
     var uniformValues = this.uniformValues;
     var uniformBuffers = this.uniformBuffers;
     var uniformBlockNames = this.uniformBlockNames;
     var textures = this.textures;
 
-    if (state.program !== this.currentProgram) {
-        this.gl.useProgram(this.currentProgram.program);
-        state.program = this.currentProgram;
-    }
+    this.currentProgram.bind();
+    this.currentVertexArray.bind();
 
     for (var uIndex = 0; uIndex < this.uniformCount; ++uIndex) {
         this.currentProgram.uniform(uniformNames[uIndex], uniformValues[uIndex]);
@@ -166,15 +163,8 @@ DrawCall.prototype.draw = function() {
         textures[tIndex].bind();
     }
 
-    if (state.vertexArray !== this.currentVertexArray) {
-        this.currentVertexArray.bind();
-        state.vertexArray = this.currentVertexArray;
-    }
-
     if (this.currentTransformFeedback) {
-        if (state.transformFeedback !== this.currentTransformFeedback) {
-            this.currentTransformFeedback.bind();
-        }
+        this.currentTransformFeedback.bind();
         this.gl.beginTransformFeedback(this.primitive);
     }
 

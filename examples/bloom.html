@@ -424,8 +424,8 @@
                 bloomBuffer.resize();
 
                 // Make sure both targets are correct size.
-                blurTextureA.image(null, app.width, app.height);
-                blurTextureB.image(null, app.width, app.height);
+                blurTextureA.data(null, app.width, app.height);
+                blurTextureB.data(null, app.width, app.height);
 
                 mat4.perspective(projMatrix, Math.PI / 2, app.width / app.height, 0.1, 10.0);
                 mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
@@ -452,6 +452,7 @@
                 drawCall.uniform("uModel", cube.modelMatrix);
 
                 colorBuffer.replaceTexture(1, blurReadTexture);
+
 
                 app.drawFramebuffer(colorBuffer).clear();
                 drawCall.draw();

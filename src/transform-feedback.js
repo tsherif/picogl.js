@@ -27,13 +27,14 @@
     Tranform feedback object.
 
     @class
-    @hideconstructor
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLTransformFeedback} transformFeedback Transform feedback object.
+    @prop {Object} appState Tracked GL state.
 */
-function TransformFeedback(gl) {
+function TransformFeedback(gl, appState) {
     this.gl = gl;
     this.transformFeedback = gl.createTransformFeedback();
+    this.appState = appState;
     // TODO(Tarek): Need to rebind buffers due to bug in ANGLE.
     // Remove this when that's fixed.
     this.angleBugBuffers = [];
@@ -71,10 +72,14 @@ TransformFeedback.prototype.delete = function() {
 
 // Bind this transform feedback.
 TransformFeedback.prototype.bind = function() {
-    this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedback);
+    if (this.appState.transformFeedback !== this) {
+        this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedback);
 
-    for (var i = 0, len = this.angleBugBuffers.length; i < len; ++i) {
-        this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, i, this.angleBugBuffers[i].buffer);
+        for (var i = 0, len = this.angleBugBuffers.length; i < len; ++i) {
+            this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, i, this.angleBugBuffers[i].buffer);
+        }
+
+        this.appState.transformFeedback = this;
     }
 
     return this;

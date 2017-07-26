@@ -30,7 +30,6 @@ var TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
     Cubemap for environment mapping.
 
     @class
-    @hideconstructor
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLTexture} texture Handle to the texture.
     @prop {GLEnum} type Type of data stored in the texture.

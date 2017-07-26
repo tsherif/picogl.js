@@ -38,6 +38,20 @@
     
         
 
+    
+
+    
+    <h4 class="name" id="DrawCall"><span class="type-signature"></span>new DrawCall<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    A DrawCall represents the program and values of associated
+    attributes, uniforms and textures for a single draw call.
+</div>
 
 
 
@@ -48,6 +62,402 @@
 
 
 
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>gl</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">WebGLRenderingContext</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The WebGL context.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>currentProgram</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Program.html">Program</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The program to use for this draw call.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>currentVertexArray</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="VertexArray.html">VertexArray</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Vertex array to use for this draw call.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>currentTransformFeedback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="TransformFeedback.html">TransformFeedback</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Transform feedback to use for this draw call.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>uniformBuffers</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Ordered list of active uniform buffers.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>uniformBlockNames</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Ordered list of uniform block names.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>uniformBlockBases</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Map of uniform blocks to uniform buffer bases.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>uniformBlockCount</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Number of active uniform blocks for this draw call.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>uniformIndices</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Map of uniform names to indices in the uniform arrays.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>uniformNames</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Ordered list of uniform names.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>uniformValue</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Ordered list of uniform values.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>uniformCount</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The number of active uniforms for this draw call.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>textures</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Array of active textures.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>textureCount</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The number of active textures for this draw call.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>primitive</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">GLEnum</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The primitive type being drawn.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>appState</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Tracked GL state.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
 
 
 
@@ -713,7 +1123,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.3</a> on Tue Jul 25 2017 06:02:41 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.3</a> on Wed Jul 26 2017 02:45:58 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

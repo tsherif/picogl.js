@@ -27,7 +27,6 @@
     WebGL shader.
 
     @class
-    @hideconstructor
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLShader} shader The shader.
 */
