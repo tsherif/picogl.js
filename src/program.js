@@ -39,7 +39,7 @@ var Uniforms = require("./uniforms");
     @prop {Object} uniforms Map of uniform names to handles.
     @prop {Object} uniformBlocks Map of uniform block names to handles.
 */
-function Program(gl, vsSource, fsSource, xformFeebackVars) {
+function Program(gl, appState, vsSource, fsSource, xformFeebackVars) {
     var i;
 
     var vShader, fShader;
@@ -82,6 +82,7 @@ function Program(gl, vsSource, fsSource, xformFeebackVars) {
 
     this.gl = gl;
     this.program = program;
+    this.appState = appState;
     this.transformFeedback = !!xformFeebackVars;
     this.uniforms = {};
     this.uniformBlocks = {};
@@ -188,7 +189,14 @@ Program.prototype.uniformBlock = function(name, base) {
         this.gl.uniformBlockBinding(this.program, this.uniformBlocks[name], base);
         this.uniformBlockBindings[name] = base;
     }
+};
 
+// Use this program.
+Program.prototype.bind = function() {
+    if (this.appState.program !== this) {
+        this.gl.useProgram(this.program);
+        this.appState.program = this;
+    }
 };
 
 module.exports = Program;

@@ -39,7 +39,7 @@ var CONSTANTS = require("./constants");
     @prop {boolean} indexArray Whether this is an index array.
     @prop {GLEnum} binding GL binding point (ARRAY_BUFFER or ELEMENT_ARRAY_BUFFER).
 */
-function VertexBuffer(gl, type, itemSize, data, usage, indexArray) {
+function VertexBuffer(gl, appState, type, itemSize, data, usage, indexArray) {
     var numColumns;
     switch(type) {
         case CONSTANTS.FLOAT_MAT4:
@@ -92,6 +92,7 @@ function VertexBuffer(gl, type, itemSize, data, usage, indexArray) {
 
     this.gl = gl;
     this.buffer = gl.createBuffer();
+    this.appState = appState;
     this.type = type;
     this.itemSize = itemSize;
     this.numItems = dataLength / (itemSize * numColumns);
@@ -112,9 +113,19 @@ function VertexBuffer(gl, type, itemSize, data, usage, indexArray) {
     @param {VertexBufferView} data Data to store in the buffer.
 */
 VertexBuffer.prototype.data = function(data) {
+    // Don't want to update vertex array bindings
+    var currentVertexArray = this.appState.vertexArray;
+    if (currentVertexArray) {
+        this.gl.bindVertexArray(null);
+    }
+
     this.gl.bindBuffer(this.binding, this.buffer);
     this.gl.bufferSubData(this.binding, 0, data);
     this.gl.bindBuffer(this.binding, null);
+
+    if (currentVertexArray) {
+        this.gl.bindVertexArray(currentVertexArray.vertexArray);
+    }
 
     return this;
 };

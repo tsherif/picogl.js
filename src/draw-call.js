@@ -141,17 +141,14 @@ DrawCall.prototype.uniformBlock = function(name, buffer) {
     @method
 */
 DrawCall.prototype.draw = function() {
-    var state = this.appState;
     var uniformNames = this.uniformNames;
     var uniformValues = this.uniformValues;
     var uniformBuffers = this.uniformBuffers;
     var uniformBlockNames = this.uniformBlockNames;
     var textures = this.textures;
 
-    if (state.program !== this.currentProgram) {
-        this.gl.useProgram(this.currentProgram.program);
-        state.program = this.currentProgram;
-    }
+    this.currentProgram.bind();
+    this.currentVertexArray.bind();
 
     for (var uIndex = 0; uIndex < this.uniformCount; ++uIndex) {
         this.currentProgram.uniform(uniformNames[uIndex], uniformValues[uIndex]);
@@ -166,15 +163,8 @@ DrawCall.prototype.draw = function() {
         textures[tIndex].bind();
     }
 
-    if (state.vertexArray !== this.currentVertexArray) {
-        this.currentVertexArray.bind();
-        state.vertexArray = this.currentVertexArray;
-    }
-
     if (this.currentTransformFeedback) {
-        if (state.transformFeedback !== this.currentTransformFeedback) {
-            this.currentTransformFeedback.bind();
-        }
+        this.currentTransformFeedback.bind();
         this.gl.beginTransformFeedback(this.primitive);
     }
 

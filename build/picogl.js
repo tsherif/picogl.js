@@ -648,7 +648,7 @@ App.prototype.resize = function(width, height) {
     @param {Array} [xformFeedbackVars] Transform feedback varyings.
 */
 App.prototype.createProgram = function(vsSource, fsSource, xformFeedbackVars) {
-    return new Program(this.gl, vsSource, fsSource, xformFeedbackVars);
+    return new Program(this.gl, this.state, vsSource, fsSource, xformFeedbackVars);
 };
 
 /**
@@ -669,7 +669,7 @@ App.prototype.createShader = function(type, source) {
     @method
 */
 App.prototype.createVertexArray = function() {
-    return new VertexArray(this.gl);
+    return new VertexArray(this.gl, this.state);
 };
 
 /**
@@ -678,7 +678,7 @@ App.prototype.createVertexArray = function() {
     @method
 */
 App.prototype.createTransformFeedback = function() {
-    return new TransformFeedback(this.gl);
+    return new TransformFeedback(this.gl, this.state);
 };
 
 /**
@@ -691,7 +691,7 @@ App.prototype.createTransformFeedback = function() {
     @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
 */
 App.prototype.createVertexBuffer = function(type, itemSize, data, usage) {
-    return new VertexBuffer(this.gl, type, itemSize, data, usage);
+    return new VertexBuffer(this.gl, this.state, type, itemSize, data, usage);
 };
 
 /**
@@ -706,7 +706,7 @@ App.prototype.createVertexBuffer = function(type, itemSize, data, usage) {
     @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
 */
 App.prototype.createMatrixBuffer = function(type, data, usage) {
-    return new VertexBuffer(this.gl, type, null, data, usage);
+    return new VertexBuffer(this.gl, this.state, type, null, data, usage);
 };
 
 /**
@@ -718,7 +718,7 @@ App.prototype.createMatrixBuffer = function(type, data, usage) {
     @param {ArrayBufferView} data Index buffer data.
 */
 App.prototype.createIndexBuffer = function(type, itemSize, data) {
-    return new VertexBuffer(this.gl, type, itemSize, data, null, true);
+    return new VertexBuffer(this.gl, this.state, type, itemSize, data, null, true);
 };
 
 /**
@@ -1261,17 +1261,14 @@ DrawCall.prototype.uniformBlock = function(name, buffer) {
     @method
 */
 DrawCall.prototype.draw = function() {
-    var state = this.appState;
     var uniformNames = this.uniformNames;
     var uniformValues = this.uniformValues;
     var uniformBuffers = this.uniformBuffers;
     var uniformBlockNames = this.uniformBlockNames;
     var textures = this.textures;
 
-    if (state.program !== this.currentProgram) {
-        this.gl.useProgram(this.currentProgram.program);
-        state.program = this.currentProgram;
-    }
+    this.currentProgram.bind();
+    this.currentVertexArray.bind();
 
     for (var uIndex = 0; uIndex < this.uniformCount; ++uIndex) {
         this.currentProgram.uniform(uniformNames[uIndex], uniformValues[uIndex]);
@@ -1286,15 +1283,8 @@ DrawCall.prototype.draw = function() {
         textures[tIndex].bind();
     }
 
-    if (state.vertexArray !== this.currentVertexArray) {
-        this.currentVertexArray.bind();
-        state.vertexArray = this.currentVertexArray;
-    }
-
     if (this.currentTransformFeedback) {
-        if (state.transformFeedback !== this.currentTransformFeedback) {
-            this.currentTransformFeedback.bind();
-        }
+        this.currentTransformFeedback.bind();
         this.gl.beginTransformFeedback(this.primitive);
     }
 
@@ -1703,7 +1693,7 @@ var Uniforms = require("./uniforms");
     @prop {Object} uniforms Map of uniform names to handles.
     @prop {Object} uniformBlocks Map of uniform block names to handles.
 */
-function Program(gl, vsSource, fsSource, xformFeebackVars) {
+function Program(gl, appState, vsSource, fsSource, xformFeebackVars) {
     var i;
 
     var vShader, fShader;
@@ -1746,6 +1736,7 @@ function Program(gl, vsSource, fsSource, xformFeebackVars) {
 
     this.gl = gl;
     this.program = program;
+    this.appState = appState;
     this.transformFeedback = !!xformFeebackVars;
     this.uniforms = {};
     this.uniformBlocks = {};
@@ -1852,7 +1843,14 @@ Program.prototype.uniformBlock = function(name, base) {
         this.gl.uniformBlockBinding(this.program, this.uniformBlocks[name], base);
         this.uniformBlockBindings[name] = base;
     }
+};
 
+// Use this program.
+Program.prototype.bind = function() {
+    if (this.appState.program !== this) {
+        this.gl.useProgram(this.program);
+        this.appState.program = this;
+    }
 };
 
 module.exports = Program;
@@ -2440,9 +2438,10 @@ module.exports = Timer;
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLTransformFeedback} transformFeedback Transform feedback object.
 */
-function TransformFeedback(gl) {
+function TransformFeedback(gl, appState) {
     this.gl = gl;
     this.transformFeedback = gl.createTransformFeedback();
+    this.appState = appState;
     // TODO(Tarek): Need to rebind buffers due to bug in ANGLE.
     // Remove this when that's fixed.
     this.angleBugBuffers = [];
@@ -2480,10 +2479,14 @@ TransformFeedback.prototype.delete = function() {
 
 // Bind this transform feedback.
 TransformFeedback.prototype.bind = function() {
-    this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedback);
+    if (this.appState.transformFeedback !== this) {
+        this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedback);
 
-    for (var i = 0, len = this.angleBugBuffers.length; i < len; ++i) {
-        this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, i, this.angleBugBuffers[i].buffer);
+        for (var i = 0, len = this.angleBugBuffers.length; i < len; ++i) {
+            this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, i, this.angleBugBuffers[i].buffer);
+        }
+
+        this.appState.transformFeedback = this;
     }
 
     return this;
@@ -2975,9 +2978,10 @@ var CONSTANTS = require("./constants");
     @prop {boolean} instanced Whether this vertex array is set up for instanced drawing.
     @prop {number} numInstances Number of instances to draw with this vertex array.
 */
-function VertexArray(gl) {
+function VertexArray(gl, appState) {
     this.gl = gl;
     this.vertexArray = gl.createVertexArray();
+    this.appState = appState;
     this.numElements = 0;
     this.indexType = null;
     this.instancedBuffers = 0;
@@ -3048,7 +3052,10 @@ VertexArray.prototype.delete = function() {
 
 // Bind this vertex array.
 VertexArray.prototype.bind = function() {
-    this.gl.bindVertexArray(this.vertexArray);
+    if (this.appState.vertexArray !== this) {
+        this.gl.bindVertexArray(this.vertexArray);
+        this.appState.vertexArray = this;
+    }
 
     return this;
 };
@@ -3143,7 +3150,7 @@ var CONSTANTS = require("./constants");
     @prop {boolean} indexArray Whether this is an index array.
     @prop {GLEnum} binding GL binding point (ARRAY_BUFFER or ELEMENT_ARRAY_BUFFER).
 */
-function VertexBuffer(gl, type, itemSize, data, usage, indexArray) {
+function VertexBuffer(gl, appState, type, itemSize, data, usage, indexArray) {
     var numColumns;
     switch(type) {
         case CONSTANTS.FLOAT_MAT4:
@@ -3196,6 +3203,7 @@ function VertexBuffer(gl, type, itemSize, data, usage, indexArray) {
 
     this.gl = gl;
     this.buffer = gl.createBuffer();
+    this.appState = appState;
     this.type = type;
     this.itemSize = itemSize;
     this.numItems = dataLength / (itemSize * numColumns);
@@ -3216,9 +3224,19 @@ function VertexBuffer(gl, type, itemSize, data, usage, indexArray) {
     @param {VertexBufferView} data Data to store in the buffer.
 */
 VertexBuffer.prototype.data = function(data) {
+    // Don't want to update vertex array bindings
+    var currentVertexArray = this.appState.vertexArray;
+    if (currentVertexArray) {
+        this.gl.bindVertexArray(null);
+    }
+
     this.gl.bindBuffer(this.binding, this.buffer);
     this.gl.bufferSubData(this.binding, 0, data);
     this.gl.bindBuffer(this.binding, null);
+
+    if (currentVertexArray) {
+        this.gl.bindVertexArray(currentVertexArray.vertexArray);
+    }
 
     return this;
 };
