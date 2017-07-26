@@ -27,9 +27,9 @@
     Tranform feedback object.
 
     @class
-    @hideconstructor
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLTransformFeedback} transformFeedback Transform feedback object.
+    @prop {Object} appState Tracked GL state.
 */
 function TransformFeedback(gl, appState) {
     this.gl = gl;

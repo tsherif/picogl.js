@@ -29,7 +29,6 @@ var CONSTANTS = require("./constants");
     Storage for vertex data.
 
     @class
-    @hideconstructor
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLBuffer} buffer Allocated buffer storage.
     @prop {GLEnum} type The type of data stored in the buffer.
@@ -38,6 +37,7 @@ var CONSTANTS = require("./constants");
     @prop {GLEnum} usage The usage pattern of the buffer.
     @prop {boolean} indexArray Whether this is an index array.
     @prop {GLEnum} binding GL binding point (ARRAY_BUFFER or ELEMENT_ARRAY_BUFFER).
+    @prop {Object} appState Tracked GL state.
 */
 function VertexBuffer(gl, appState, type, itemSize, data, usage, indexArray) {
     var numColumns;

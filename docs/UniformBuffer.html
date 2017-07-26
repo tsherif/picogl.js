@@ -38,6 +38,19 @@
     
         
 
+    
+
+    
+    <h4 class="name" id="UniformBuffer"><span class="type-signature"></span>new UniformBuffer<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Storage for uniform data. Data is stored in std140 layout.
+</div>
 
 
 
@@ -48,6 +61,241 @@
 
 
 
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>gl</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">WebGLRenderingContext</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The WebGL context.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>buffer</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">WebGLBuffer</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Allocated buffer storage.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Float32Array</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Buffer data.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>dataViews</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Map of base data types to matching ArrayBufferViews of the buffer data.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>offsets</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Offsets into the array for each item in the buffer.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>sizes</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Size of the item at the given offset.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>types</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The base type of the item at the given offset (FLOAT, INT or UNSIGNED_INT).</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>size</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The size of the buffer (in 4-byte items).</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>usage</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">GLEnum</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Usage pattern of the buffer.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
 
 
 
@@ -81,7 +329,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="uniform-buffer.js.html">uniform-buffer.js</a>, <a href="uniform-buffer.js.html#line43">line 43</a>
+        <a href="uniform-buffer.js.html">uniform-buffer.js</a>, <a href="uniform-buffer.js.html#line42">line 42</a>
     </li></ul></dd>
     
 
@@ -187,7 +435,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="uniform-buffer.js.html">uniform-buffer.js</a>, <a href="uniform-buffer.js.html#line211">line 211</a>
+        <a href="uniform-buffer.js.html">uniform-buffer.js</a>, <a href="uniform-buffer.js.html#line210">line 210</a>
     </li></ul></dd>
     
 
@@ -346,7 +594,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="uniform-buffer.js.html">uniform-buffer.js</a>, <a href="uniform-buffer.js.html#line168">line 168</a>
+        <a href="uniform-buffer.js.html">uniform-buffer.js</a>, <a href="uniform-buffer.js.html#line167">line 167</a>
     </li></ul></dd>
     
 
@@ -493,7 +741,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="uniform-buffer.js.html">uniform-buffer.js</a>, <a href="uniform-buffer.js.html#line186">line 186</a>
+        <a href="uniform-buffer.js.html">uniform-buffer.js</a>, <a href="uniform-buffer.js.html#line185">line 185</a>
     </li></ul></dd>
     
 
@@ -543,7 +791,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.3</a> on Tue Jul 25 2017 06:02:41 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.3</a> on Wed Jul 26 2017 02:44:54 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

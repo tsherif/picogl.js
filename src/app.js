@@ -42,7 +42,6 @@ var Query             = require("./query");
     state and manage draw calls.
 
     @class
-    @hideconstructor
     @prop {DOMElement} canvas The canvas on which this app drawing.
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {number} width The width of the drawing surface.

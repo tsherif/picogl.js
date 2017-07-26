@@ -32,12 +32,12 @@ var Uniforms = require("./uniforms");
     shaders.
 
     @class
-    @hideconstructor
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLProgram} program The WebGL program.
     @prop {boolean} transformFeedback Whether this program is set up for transform feedback.
     @prop {Object} uniforms Map of uniform names to handles.
     @prop {Object} uniformBlocks Map of uniform block names to handles.
+    @prop {Object} appState Tracked GL state.
 */
 function Program(gl, appState, vsSource, fsSource, xformFeebackVars) {
     var i;
