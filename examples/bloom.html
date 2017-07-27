@@ -424,8 +424,8 @@
                 bloomBuffer.resize();
 
                 // Make sure both targets are correct size.
-                blurTextureA.data(null, app.width, app.height);
-                blurTextureB.data(null, app.width, app.height);
+                blurTextureA.resize(app.width, app.height);
+                blurTextureB.resize(app.width, app.height);
 
                 mat4.perspective(projMatrix, Math.PI / 2, app.width / app.height, 0.1, 10.0);
                 mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
