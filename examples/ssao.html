@@ -418,7 +418,8 @@
                 noiseTextureData[index + 1] = Math.random() * 2.0 - 1.0;
             }
 
-            noiseTexture.data(noiseTextureData, app.gl.drawingBufferWidth, app.gl.drawingBufferHeight);
+            noiseTexture.resize(app.gl.drawingBufferWidth, app.gl.drawingBufferHeight)
+            .data(noiseTextureData);
 
             mat4.perspective(projMatrix, Math.PI / 2, app.width / app.height, 0.1, 10.0);
             sceneUniforms.set(1, projMatrix).update();

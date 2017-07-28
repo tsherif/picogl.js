@@ -107,7 +107,8 @@ function VertexBuffer(gl, appState, type, itemSize, data, usage, indexArray) {
 }
 
 /**
-    Update data in this buffer.
+    Update data in this buffer. NOTE: the data must fit
+    the originally-allocated buffer!
 
     @method
     @param {VertexBufferView} data Data to store in the buffer.

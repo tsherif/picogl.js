@@ -43,11 +43,13 @@ var TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
     @prop {Object} appState Tracked GL state.
 */
 function Texture(gl, appState, binding, image, width, height, depth, is3D, options) {
+    width = width || image.width;
+    height = height || image.height;
     options = options || CONSTANTS.DUMMY_OBJECT;
 
     this.gl = gl;
     this.binding = binding;
-    this.texture = gl.createTexture();
+    this.texture = null;
     this.width = -1;
     this.height = -1;
     this.depth = -1;
@@ -104,43 +106,77 @@ function Texture(gl, appState, binding, image, width, height, depth, is3D, optio
     this.generateMipmaps = options.generateMipmaps !== false &&
                         (minFilter === gl.LINEAR_MIPMAP_NEAREST || minFilter === gl.LINEAR_MIPMAP_LINEAR);
 
+    this.resize(width, height, depth);
+    this.data(image);
     this.bind(true);
     gl.bindSampler(this.unit, this.sampler);
-    this.data(image, width, height, depth);
 }
 
 /**
-    Set the image data for the texture.
+    Re-allocate texture storage.
 
     @method
-    @param {ImageElement|ArrayBufferView} image Image data.
-    @param {number} [width] Image width. Required when passing ArrayBufferView data.
-    @param {number} [height] Image height. Required when passing ArrayBufferView data.
+    @param {number} width Image width.
+    @param {number} height Image height.
     @param {number} [depth] Image depth or number of images. Required when passing 3D or texture array data.
 */
-Texture.prototype.data = function(image, width, height, depth) {
-    width = width || image.width;
-    height = height || image.height;
+Texture.prototype.resize = function(width, height, depth) {
     depth = depth || 0;
 
-    if (width !== this.width || height !== this.height || depth !== this.depth) {
-        this.gl.deleteTexture(this.texture);
-        this.texture = this.gl.createTexture();
-
-        this.bind(true);
-
-        this.width = width || image.width;
-        this.height = height || image.height;
-        this.depth = depth || 0;
-
-        this.allocateStorage();
+    if (width === this.width && height === this.height && depth === this.depth) {
+        return; 
     }
 
-    if (image) {
-        if (this.is3D) {
-            this.gl.texSubImage3D(this.binding, 0, 0, 0, 0, this.width, this.height, this.depth, this.format, this.type, image);
+    this.gl.deleteTexture(this.texture);
+    this.texture = this.gl.createTexture();
+
+    this.bind(true);
+
+    this.width = width;
+    this.height = height;
+    this.depth = depth;
+
+    this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, this.flipY);
+
+    if (this.baseLevel !== null) {
+        this.gl.texParameteri(this.binding, this.gl.TEXTURE_BASE_LEVEL, this.baseLevel);
+    }
+
+    if (this.maxLevel !== null) {
+        this.gl.texParameteri(this.binding, this.gl.TEXTURE_MAX_LEVEL, this.maxLevel);
+    }
+
+    var levels;
+    if (this.is3D) {
+        if (this.generateMipmaps) {
+            levels = Math.floor(Math.log2(Math.max(Math.max(this.width, this.height), this.depth))) + 1;
         } else {
-            this.gl.texSubImage2D(this.binding, 0, 0, 0, this.width, this.height, this.format, this.type, image);
+            levels = 1;
+        }
+        this.gl.texStorage3D(this.binding, levels, this.internalFormat, this.width, this.height, this.depth);
+    } else {
+        if (this.generateMipmaps) {
+            levels = Math.floor(Math.log2(Math.max(this.width, this.height))) + 1;
+        } else {
+            levels = 1;
+        }
+        this.gl.texStorage2D(this.binding, levels, this.internalFormat, this.width, this.height);
+    }
+};
+
+/**
+    Set the image data for the texture. NOTE: the data must fit
+    the currently-allocated storage!
+
+    @method
+    @param {ImageElement|ArrayBufferView} data Image data.
+*/
+Texture.prototype.data = function(data) {
+    if (data) {
+        if (this.is3D) {
+            this.gl.texSubImage3D(this.binding, 0, 0, 0, 0, this.width, this.height, this.depth, this.format, this.type, data);
+        } else {
+            this.gl.texSubImage2D(this.binding, 0, 0, 0, this.width, this.height, this.format, this.type, data);
         }
 
         if (this.generateMipmaps) {
@@ -166,35 +202,6 @@ Texture.prototype.delete = function() {
         this.appState.textures[this.unit] = null;
         this.unit = -1;
         this.unitEnum = -1;
-    }
-};
-
-// Initialize storage
-Texture.prototype.allocateStorage = function() {
-    this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, this.flipY);
-
-    if (this.baseLevel !== null) {
-        this.gl.texParameteri(this.binding, this.gl.TEXTURE_BASE_LEVEL, this.baseLevel);
-    }
-    if (this.maxLevel !== null) {
-        this.gl.texParameteri(this.binding, this.gl.TEXTURE_MAX_LEVEL, this.maxLevel);
-    }
-
-    var levels;
-    if (this.is3D) {
-        if (this.generateMipmaps) {
-            levels = Math.floor(Math.log2(Math.max(Math.max(this.width, this.height), this.depth))) + 1;
-        } else {
-            levels = 1;
-        }
-        this.gl.texStorage3D(this.binding, levels, this.internalFormat, this.width, this.height, this.depth);
-    } else {
-        if (this.generateMipmaps) {
-            levels = Math.floor(Math.log2(Math.max(this.width, this.height))) + 1;
-        } else {
-            levels = 1;
-        }
-        this.gl.texStorage2D(this.binding, levels, this.internalFormat, this.width, this.height);
     }
 };
 
