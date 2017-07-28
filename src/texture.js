@@ -116,8 +116,8 @@ function Texture(gl, appState, binding, image, width, height, depth, is3D, optio
     Re-allocate texture storage.
 
     @method
-    @param {number} [width] Image width.
-    @param {number} [height] Image height.
+    @param {number} width Image width.
+    @param {number} height Image height.
     @param {number} [depth] Image depth or number of images. Required when passing 3D or texture array data.
 */
 Texture.prototype.resize = function(width, height, depth) {
@@ -165,20 +165,18 @@ Texture.prototype.resize = function(width, height, depth) {
 };
 
 /**
-    Set the image data for the texture.
+    Set the image data for the texture. NOTE: the data must fit
+    the currently-allocated storage!
 
     @method
-    @param {ImageElement|ArrayBufferView} image Image data.
-    @param {number} [width] Image width. Required when passing ArrayBufferView data.
-    @param {number} [height] Image height. Required when passing ArrayBufferView data.
-    @param {number} [depth] Image depth or number of images. Required when passing 3D or texture array data.
+    @param {ImageElement|ArrayBufferView} data Image data.
 */
-Texture.prototype.data = function(image) {
-    if (image) {
+Texture.prototype.data = function(data) {
+    if (data) {
         if (this.is3D) {
-            this.gl.texSubImage3D(this.binding, 0, 0, 0, 0, this.width, this.height, this.depth, this.format, this.type, image);
+            this.gl.texSubImage3D(this.binding, 0, 0, 0, 0, this.width, this.height, this.depth, this.format, this.type, data);
         } else {
-            this.gl.texSubImage2D(this.binding, 0, 0, 0, this.width, this.height, this.format, this.type, image);
+            this.gl.texSubImage2D(this.binding, 0, 0, 0, this.width, this.height, this.format, this.type, data);
         }
 
         if (this.generateMipmaps) {
