@@ -39,3 +39,9 @@ h1 {
 .badge-link {
     text-decoration: none;
 }
+
+.resources-link {
+    font-weight: bold;
+    text-decoration: none;
+    font-size: 1.2em;
+}
