@@ -35,8 +35,7 @@ var TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
     @prop {GLEnum} type Type of data stored in the texture.
     @prop {GLEnum} format Layout of texture data.
     @prop {GLEnum} internalFormat Internal arrangement of the texture data.
-    @prop {Number} unit The texture unit this texture is bound to.
-    @prop {GLEnum} unitEnum The GLEnum of texture unit this texture is bound to.
+    @prop {Number} currentUnit The current texture unit this cubemap is bound to.
     @prop {Object} appState Tracked GL state.
 */
 function Cubemap(gl, appState, options) {
@@ -48,20 +47,9 @@ function Cubemap(gl, appState, options) {
     this.type = options.type !== undefined ? options.type : gl.UNSIGNED_BYTE;
     this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : TEXTURE_FORMAT_DEFAULTS[this.type][this.format];
     this.appState = appState;
-    if (appState.freeTextureUnits.length > 0) {
-        this.unit = appState.freeTextureUnits.pop();
-    } else {
-        /////////////////////////////////////////////////////////////////////////////////
-        // TODO(Tarek):
-        // Workaround for https://bugs.chromium.org/p/chromium/issues/detail?id=722288
-        // Use full array when that's fixed
-        /////////////////////////////////////////////////////////////////////////////////
-        this.unit = appState.textureCount % (appState.textures.length - 1);
-        this.unit += 1;
-
-        ++appState.textureCount;
-    }
-    this.unitEnum = gl.TEXTURE0 + this.unit;
+    
+    // -1 indicates unbound
+    this.currentUnit = -1;
 
     var negX = options.negX;
     var posX = options.posX;
@@ -80,7 +68,7 @@ function Cubemap(gl, appState, options) {
     var generateMipmaps = options.generateMipmaps !== false &&
                         (minFilter === gl.LINEAR_MIPMAP_NEAREST || minFilter === gl.LINEAR_MIPMAP_LINEAR);
 
-    this.bind();
+    this.bind(1);
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY);
     gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, magFilter);
     gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, minFilter);
@@ -124,22 +112,29 @@ Cubemap.prototype.delete = function() {
     if (this.texture) {
         this.gl.deleteTexture(this.texture);
         this.texture = null;
-        this.appState.freeTextureUnits.push(this.unit);
-        this.appState.textures[this.unit] = null;
-        this.unit = -1;
-        this.unitEnum = -1;
+        this.appState.textures[this.currentUnit] = null;
+        this.currentUnit = -1;
     }
 };
 
 // Bind this cubemap to a texture unit.
-Cubemap.prototype.bind = function() {
-    if (this.appState.activeTexture !== this.unit) {
-        this.gl.activeTexture(this.unitEnum);
-        this.appState.activeTexture = this.unit;
-    }
-    if (this.appState.textures[this.unit] !== this) {
+Cubemap.prototype.bind = function(unit) {
+    var currentTexture = this.appState.textures[unit];
+    
+    if (currentTexture !== this) {
+        if (currentTexture) {
+            currentTexture.currentUnit = -1;
+        }
+
+        if (this.currentUnit !== -1) {
+            this.appState.textures[this.currentUnit] = null;
+        }
+
+        this.gl.activeTexture(this.gl.TEXTURE0 + unit);
         this.gl.bindTexture(this.gl.TEXTURE_CUBE_MAP, this.texture);
-        this.appState.textures[this.unit] = this;
+
+        this.appState.textures[unit] = this;
+        this.currentUnit = unit;
     }
 
     return this;

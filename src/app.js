@@ -39,7 +39,7 @@ var Query             = require("./query");
 
 /**
     Primary entry point to PicoGL. An app will store all parts of the WebGL
-    state and manage draw calls.
+    state.
 
     @class
     @prop {DOMElement} canvas The canvas on which this app drawing.
@@ -69,8 +69,6 @@ function App(canvas, contextAttributes) {
         transformFeedback: null,
         activeTexture: -1,
         textures: new Array(CONSTANTS.WEBGL_INFO.MAX_TEXTURE_UNITS),
-        textureCount: 0,
-        freeTextureUnits: [],
         // TODO(Tarek): UBO state currently not tracked, due bug
         // with UBO state becoming corrupted between frames in Chrome
         // https://bugs.chromium.org/p/chromium/issues/detail?id=722060

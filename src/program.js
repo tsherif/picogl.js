@@ -87,6 +87,15 @@ function Program(gl, appState, vsSource, fsSource, xformFeebackVars) {
     this.uniforms = {};
     this.uniformBlocks = {};
     this.uniformBlockBindings = {};
+    this.samplers = {};
+    /////////////////////////////////////////////////////////////////////////////////
+    // TODO(Tarek):
+    // Workaround for https://bugs.chromium.org/p/chromium/issues/detail?id=722288
+    // Start at unit 0 when that's fixed
+    /////////////////////////////////////////////////////////////////////////////////
+    this.samplerCount = 1;
+
+    gl.useProgram(program);
 
     var numUniforms = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
 
@@ -98,7 +107,6 @@ function Program(gl, appState, vsSource, fsSource, xformFeebackVars) {
         var numElements = uniformInfo.size;
 
         switch (type) {
-            case CONSTANTS.INT:
             case CONSTANTS.SAMPLER_2D:
             case CONSTANTS.INT_SAMPLER_2D:
             case CONSTANTS.UNSIGNED_INT_SAMPLER_2D:
@@ -114,6 +122,11 @@ function Program(gl, appState, vsSource, fsSource, xformFeebackVars) {
             case CONSTANTS.SAMPLER_3D:
             case CONSTANTS.INT_SAMPLER_3D:
             case CONSTANTS.UNSIGNED_INT_SAMPLER_3D:
+                var textureUnit = this.samplerCount++;
+                this.samplers[uniformInfo.name] = textureUnit;
+                this.gl.uniform1i(uniformHandle, textureUnit);
+                break;
+            case CONSTANTS.INT:
             case CONSTANTS.UNSIGNED_INT:
             case CONSTANTS.FLOAT:
                 UniformClass = numElements > 1 ? Uniforms.MultiNumericUniform : Uniforms.SingleComponentUniform;
@@ -153,7 +166,9 @@ function Program(gl, appState, vsSource, fsSource, xformFeebackVars) {
                 break;
         }
 
-        this.uniforms[uniformInfo.name] = new UniformClass(gl, uniformHandle, type, numElements);
+        if (UniformClass) {
+            this.uniforms[uniformInfo.name] = new UniformClass(gl, uniformHandle, type, numElements);
+        }
     }
 
     var numUniformBlocks = gl.getProgramParameter(program, gl.ACTIVE_UNIFORM_BLOCKS);
@@ -164,6 +179,8 @@ function Program(gl, appState, vsSource, fsSource, xformFeebackVars) {
 
         this.uniformBlocks[blockName] = blockIndex;
     }
+
+    gl.useProgram(null);
 }
 
 /**

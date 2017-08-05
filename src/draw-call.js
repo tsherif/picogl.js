@@ -103,14 +103,8 @@ DrawCall.prototype.uniform = function(name, value) {
     @param {Texture} texture Texture to bind.
 */
 DrawCall.prototype.texture = function(name, texture) {
-    var textureIndex = this.samplerIndices[name];
-    if (textureIndex === undefined) {
-        textureIndex = this.textureCount++;
-        this.samplerIndices[name] = textureIndex;
-    }
-
-    this.uniform(name, texture.unit);
-    this.textures[textureIndex] = texture;
+    var unit = this.currentProgram.samplers[name];
+    this.textures[unit] = texture;
 
     return this;
 };
@@ -146,6 +140,7 @@ DrawCall.prototype.draw = function() {
     var uniformBuffers = this.uniformBuffers;
     var uniformBlockNames = this.uniformBlockNames;
     var textures = this.textures;
+    var textureCount = this.currentProgram.samplerCount;
 
     this.currentProgram.bind();
     this.currentVertexArray.bind();
@@ -159,8 +154,13 @@ DrawCall.prototype.draw = function() {
         uniformBuffers[base].bind(base);
     }
 
-    for (var tIndex = 0; tIndex < this.textureCount; ++tIndex) {
-        textures[tIndex].bind();
+    /////////////////////////////////////////////////////////////////////////////////
+    // TODO(Tarek):
+    // Workaround for https://bugs.chromium.org/p/chromium/issues/detail?id=722288
+    // Start at 0 when that's fixed
+    /////////////////////////////////////////////////////////////////////////////////
+    for (var tIndex = 1; tIndex < textureCount; ++tIndex) {
+        textures[tIndex].bind(tIndex);
     }
 
     if (this.currentTransformFeedback) {

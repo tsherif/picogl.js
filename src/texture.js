@@ -37,8 +37,7 @@ var TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
     @prop {GLEnum} type Type of data stored in the texture.
     @prop {GLEnum} format Layout of texture data.
     @prop {GLEnum} internalFormat Internal arrangement of the texture data.
-    @prop {Number} unit The texture unit this texture is bound to.
-    @prop {GLEnum} unitEnum The GLEnum of texture unit this texture is bound to.
+    @prop {Number} currentUnit The current texture unit this texture is bound to.
     @prop {boolean} is3D Whether this texture contains 3D data.
     @prop {Object} appState Tracked GL state.
 */
@@ -58,20 +57,9 @@ function Texture(gl, appState, binding, image, width, height, depth, is3D, optio
     this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : TEXTURE_FORMAT_DEFAULTS[this.type][this.format];
     this.is3D = is3D;
     this.appState = appState;
-    if (appState.freeTextureUnits.length > 0) {
-        this.unit = appState.freeTextureUnits.pop();
-    } else {
-        /////////////////////////////////////////////////////////////////////////////////
-        // TODO(Tarek):
-        // Workaround for https://bugs.chromium.org/p/chromium/issues/detail?id=722288
-        // Use full array when that's fixed
-        /////////////////////////////////////////////////////////////////////////////////
-        this.unit = appState.textureCount % (appState.textures.length - 1);
-        this.unit += 1;
 
-        ++appState.textureCount;
-    }
-    this.unitEnum = gl.TEXTURE0 + this.unit;
+    // -1 indicates unbound
+    this.currentUnit = -1;
 
     // Sampler parameters
     var minFilter = options.minFilter !== undefined ? options.minFilter : gl.LINEAR_MIPMAP_NEAREST;
@@ -107,9 +95,10 @@ function Texture(gl, appState, binding, image, width, height, depth, is3D, optio
                         (minFilter === gl.LINEAR_MIPMAP_NEAREST || minFilter === gl.LINEAR_MIPMAP_LINEAR);
 
     this.resize(width, height, depth);
-    this.data(image);
-    this.bind(true);
-    gl.bindSampler(this.unit, this.sampler);
+
+    if (image) {
+        this.data(image);
+    }
 }
 
 /**
@@ -128,9 +117,12 @@ Texture.prototype.resize = function(width, height, depth) {
     }
 
     this.gl.deleteTexture(this.texture);
-    this.texture = this.gl.createTexture();
+    if (this.currentUnit !== -1) {
+        this.appState.textures[this.currentUnit] = null;
+    }
 
-    this.bind(true);
+    this.texture = this.gl.createTexture();
+    this.bind(Math.max(this.currentUnit, 1));
 
     this.width = width;
     this.height = height;
@@ -172,16 +164,16 @@ Texture.prototype.resize = function(width, height, depth) {
     @param {ImageElement|ArrayBufferView} data Image data.
 */
 Texture.prototype.data = function(data) {
-    if (data) {
-        if (this.is3D) {
-            this.gl.texSubImage3D(this.binding, 0, 0, 0, 0, this.width, this.height, this.depth, this.format, this.type, data);
-        } else {
-            this.gl.texSubImage2D(this.binding, 0, 0, 0, this.width, this.height, this.format, this.type, data);
-        }
+    this.bind(Math.max(this.currentUnit, 0));
 
-        if (this.generateMipmaps) {
-            this.gl.generateMipmap(this.binding);
-        }
+    if (this.is3D) {
+        this.gl.texSubImage3D(this.binding, 0, 0, 0, 0, this.width, this.height, this.depth, this.format, this.type, data);
+    } else {
+        this.gl.texSubImage2D(this.binding, 0, 0, 0, this.width, this.height, this.format, this.type, data);
+    }
+
+    if (this.generateMipmaps) {
+        this.gl.generateMipmap(this.binding);
     }
 
     return this;
@@ -198,29 +190,30 @@ Texture.prototype.delete = function() {
         this.gl.deleteSampler(this.sampler);
         this.texture = null;
         this.sampler = null;
-        this.appState.freeTextureUnits.push(this.unit);
-        this.appState.textures[this.unit] = null;
-        this.unit = -1;
-        this.unitEnum = -1;
+        this.appState.textures[this.currentUnit] = null;
+        this.currentUnit = -1;
     }
-};
-
-// Activate this texture's texture unit.
-Texture.prototype.activateUnit = function() {
-    if (this.appState.activeTexture !== this.unit) {
-        this.gl.activeTexture(this.unitEnum);
-        this.appState.activeTexture = this.unit;
-    }
-
-    return this;
 };
 
 // Bind this texture to a texture unit.
-Texture.prototype.bind = function(force) {
-    if (force || this.appState.textures[this.unit] !== this) {
-        this.activateUnit();
+Texture.prototype.bind = function(unit) {
+    var currentTexture = this.appState.textures[unit];
+    
+    if (currentTexture !== this) {
+        if (currentTexture) {
+            currentTexture.currentUnit = -1;
+        }
+
+        if (this.currentUnit !== -1) {
+            this.appState.textures[this.currentUnit] = null;
+        }
+
+        this.gl.activeTexture(this.gl.TEXTURE0 + unit);
         this.gl.bindTexture(this.binding, this.texture);
-        this.appState.textures[this.unit] = this;
+        this.gl.bindSampler(unit, this.sampler);
+
+        this.appState.textures[unit] = this;
+        this.currentUnit = unit;
     }
 
     return this;
