@@ -95,8 +95,6 @@ function App(canvas, contextAttributes) {
         transformFeedback: null,
         activeTexture: -1,
         textures: new Array(CONSTANTS.WEBGL_INFO.MAX_TEXTURE_UNITS),
-        textureCount: 0,
-        freeTextureUnits: [],
         // TODO(Tarek): UBO state currently not tracked, due bug
         // with UBO state becoming corrupted between frames in Chrome
         // https://bugs.chromium.org/p/chromium/issues/detail?id=722060
@@ -1016,20 +1014,9 @@ function Cubemap(gl, appState, options) {
     this.type = options.type !== undefined ? options.type : gl.UNSIGNED_BYTE;
     this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : TEXTURE_FORMAT_DEFAULTS[this.type][this.format];
     this.appState = appState;
-    if (appState.freeTextureUnits.length > 0) {
-        this.unit = appState.freeTextureUnits.pop();
-    } else {
-        /////////////////////////////////////////////////////////////////////////////////
-        // TODO(Tarek):
-        // Workaround for https://bugs.chromium.org/p/chromium/issues/detail?id=722288
-        // Use full array when that's fixed
-        /////////////////////////////////////////////////////////////////////////////////
-        this.unit = appState.textureCount % (appState.textures.length - 1);
-        this.unit += 1;
-
-        ++appState.textureCount;
-    }
-    this.unitEnum = gl.TEXTURE0 + this.unit;
+    
+    // -1 indicates unbound
+    this.currentUnit = -1;
 
     var negX = options.negX;
     var posX = options.posX;
@@ -1048,7 +1035,7 @@ function Cubemap(gl, appState, options) {
     var generateMipmaps = options.generateMipmaps !== false &&
                         (minFilter === gl.LINEAR_MIPMAP_NEAREST || minFilter === gl.LINEAR_MIPMAP_LINEAR);
 
-    this.bind();
+    this.bind(1);
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY);
     gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, magFilter);
     gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, minFilter);
@@ -1092,22 +1079,29 @@ Cubemap.prototype.delete = function() {
     if (this.texture) {
         this.gl.deleteTexture(this.texture);
         this.texture = null;
-        this.appState.freeTextureUnits.push(this.unit);
-        this.appState.textures[this.unit] = null;
-        this.unit = -1;
-        this.unitEnum = -1;
+        this.appState.textures[this.currentUnit] = null;
+        this.currentUnit = -1;
     }
 };
 
 // Bind this cubemap to a texture unit.
-Cubemap.prototype.bind = function() {
-    if (this.appState.activeTexture !== this.unit) {
-        this.gl.activeTexture(this.unitEnum);
-        this.appState.activeTexture = this.unit;
-    }
-    if (this.appState.textures[this.unit] !== this) {
+Cubemap.prototype.bind = function(unit) {
+    var currentTexture = this.appState.textures[unit];
+    
+    if (currentTexture !== this) {
+        if (currentTexture) {
+            currentTexture.currentUnit = -1;
+        }
+
+        if (this.currentUnit !== -1) {
+            this.appState.textures[this.currentUnit] = null;
+        }
+
+        this.gl.activeTexture(this.gl.TEXTURE0 + unit);
         this.gl.bindTexture(this.gl.TEXTURE_CUBE_MAP, this.texture);
-        this.appState.textures[this.unit] = this;
+
+        this.appState.textures[unit] = this;
+        this.currentUnit = unit;
     }
 
     return this;
@@ -1272,7 +1266,12 @@ DrawCall.prototype.draw = function() {
         uniformBuffers[base].bind(base);
     }
 
-    for (var tIndex = 0; tIndex < textureCount; ++tIndex) {
+    /////////////////////////////////////////////////////////////////////////////////
+    // TODO(Tarek):
+    // Workaround for https://bugs.chromium.org/p/chromium/issues/detail?id=722288
+    // Start at 0 when that's fixed
+    /////////////////////////////////////////////////////////////////////////////////
+    for (var tIndex = 1; tIndex < textureCount; ++tIndex) {
         textures[tIndex].bind(tIndex);
     }
 
@@ -1734,7 +1733,12 @@ function Program(gl, appState, vsSource, fsSource, xformFeebackVars) {
     this.uniformBlocks = {};
     this.uniformBlockBindings = {};
     this.samplers = {};
-    this.samplerCount = 0;
+    /////////////////////////////////////////////////////////////////////////////////
+    // TODO(Tarek):
+    // Workaround for https://bugs.chromium.org/p/chromium/issues/detail?id=722288
+    // Start at unit 0 when that's fixed
+    /////////////////////////////////////////////////////////////////////////////////
+    this.samplerCount = 1;
 
     gl.useProgram(program);
 
@@ -2114,6 +2118,9 @@ function Texture(gl, appState, binding, image, width, height, depth, is3D, optio
     this.is3D = is3D;
     this.appState = appState;
 
+    // -1 indicates unbound
+    this.currentUnit = -1;
+
     // Sampler parameters
     var minFilter = options.minFilter !== undefined ? options.minFilter : gl.LINEAR_MIPMAP_NEAREST;
     var magFilter = options.magFilter !== undefined ? options.magFilter : gl.LINEAR;
@@ -2148,8 +2155,10 @@ function Texture(gl, appState, binding, image, width, height, depth, is3D, optio
                         (minFilter === gl.LINEAR_MIPMAP_NEAREST || minFilter === gl.LINEAR_MIPMAP_LINEAR);
 
     this.resize(width, height, depth);
-    this.data(image);
-    this.bind(0);
+
+    if (image) {
+        this.data(image);
+    }
 }
 
 /**
@@ -2168,9 +2177,12 @@ Texture.prototype.resize = function(width, height, depth) {
     }
 
     this.gl.deleteTexture(this.texture);
-    this.texture = this.gl.createTexture();
+    if (this.currentUnit !== -1) {
+        this.appState.textures[this.currentUnit] = null;
+    }
 
-    this.bind(0);
+    this.texture = this.gl.createTexture();
+    this.bind(Math.max(this.currentUnit, 1));
 
     this.width = width;
     this.height = height;
@@ -2212,16 +2224,16 @@ Texture.prototype.resize = function(width, height, depth) {
     @param {ImageElement|ArrayBufferView} data Image data.
 */
 Texture.prototype.data = function(data) {
-    if (data) {
-        if (this.is3D) {
-            this.gl.texSubImage3D(this.binding, 0, 0, 0, 0, this.width, this.height, this.depth, this.format, this.type, data);
-        } else {
-            this.gl.texSubImage2D(this.binding, 0, 0, 0, this.width, this.height, this.format, this.type, data);
-        }
+    this.bind(Math.max(this.currentUnit, 0));
 
-        if (this.generateMipmaps) {
-            this.gl.generateMipmap(this.binding);
-        }
+    if (this.is3D) {
+        this.gl.texSubImage3D(this.binding, 0, 0, 0, 0, this.width, this.height, this.depth, this.format, this.type, data);
+    } else {
+        this.gl.texSubImage2D(this.binding, 0, 0, 0, this.width, this.height, this.format, this.type, data);
+    }
+
+    if (this.generateMipmaps) {
+        this.gl.generateMipmap(this.binding);
     }
 
     return this;
@@ -2238,14 +2250,31 @@ Texture.prototype.delete = function() {
         this.gl.deleteSampler(this.sampler);
         this.texture = null;
         this.sampler = null;
+        this.appState.textures[this.currentUnit] = null;
+        this.currentUnit = -1;
     }
 };
 
 // Bind this texture to a texture unit.
 Texture.prototype.bind = function(unit) {
-    this.gl.activeTexture(this.gl.TEXTURE0 + unit);
-    this.gl.bindTexture(this.binding, this.texture);
-    this.gl.bindSampler(unit, this.sampler);
+    var currentTexture = this.appState.textures[unit];
+    
+    if (currentTexture !== this) {
+        if (currentTexture) {
+            currentTexture.currentUnit = -1;
+        }
+
+        if (this.currentUnit !== -1) {
+            this.appState.textures[this.currentUnit] = null;
+        }
+
+        this.gl.activeTexture(this.gl.TEXTURE0 + unit);
+        this.gl.bindTexture(this.binding, this.texture);
+        this.gl.bindSampler(unit, this.sampler);
+
+        this.appState.textures[unit] = this;
+        this.currentUnit = unit;
+    }
 
     return this;
 };
@@ -2852,17 +2881,6 @@ SingleComponentUniform.prototype.set = function(value) {
         this.gl[this.glFuncName](this.handle, value);
         this.cache = value;
     }
-};
-
-function SamplerUniform(gl, handle, type, count, unit) {
-    this.gl = gl;
-    this.handle = handle;
-    this.unit = unit;
-    this.gl.uniform1i(handle, unit);
-}
-
-SamplerUniform.prototype.set = function(texture) {
-    texture.bind(this.unit);
 };
 
 function MultiNumericUniform(gl, handle, type, count) {

@@ -59,6 +59,9 @@ function Texture(gl, appState, binding, image, width, height, depth, is3D, optio
     this.is3D = is3D;
     this.appState = appState;
 
+    // -1 indicates unbound
+    this.currentUnit = -1;
+
     // Sampler parameters
     var minFilter = options.minFilter !== undefined ? options.minFilter : gl.LINEAR_MIPMAP_NEAREST;
     var magFilter = options.magFilter !== undefined ? options.magFilter : gl.LINEAR;
@@ -93,8 +96,10 @@ function Texture(gl, appState, binding, image, width, height, depth, is3D, optio
                         (minFilter === gl.LINEAR_MIPMAP_NEAREST || minFilter === gl.LINEAR_MIPMAP_LINEAR);
 
     this.resize(width, height, depth);
-    this.data(image);
-    this.bind(0);
+
+    if (image) {
+        this.data(image);
+    }
 }
 
 /**
@@ -113,9 +118,12 @@ Texture.prototype.resize = function(width, height, depth) {
     }
 
     this.gl.deleteTexture(this.texture);
-    this.texture = this.gl.createTexture();
+    if (this.currentUnit !== -1) {
+        this.appState.textures[this.currentUnit] = null;
+    }
 
-    this.bind(0);
+    this.texture = this.gl.createTexture();
+    this.bind(Math.max(this.currentUnit, 1));
 
     this.width = width;
     this.height = height;
@@ -157,16 +165,16 @@ Texture.prototype.resize = function(width, height, depth) {
     @param {ImageElement|ArrayBufferView} data Image data.
 */
 Texture.prototype.data = function(data) {
-    if (data) {
-        if (this.is3D) {
-            this.gl.texSubImage3D(this.binding, 0, 0, 0, 0, this.width, this.height, this.depth, this.format, this.type, data);
-        } else {
-            this.gl.texSubImage2D(this.binding, 0, 0, 0, this.width, this.height, this.format, this.type, data);
-        }
+    this.bind(Math.max(this.currentUnit, 0));
 
-        if (this.generateMipmaps) {
-            this.gl.generateMipmap(this.binding);
-        }
+    if (this.is3D) {
+        this.gl.texSubImage3D(this.binding, 0, 0, 0, 0, this.width, this.height, this.depth, this.format, this.type, data);
+    } else {
+        this.gl.texSubImage2D(this.binding, 0, 0, 0, this.width, this.height, this.format, this.type, data);
+    }
+
+    if (this.generateMipmaps) {
+        this.gl.generateMipmap(this.binding);
     }
 
     return this;
@@ -183,14 +191,31 @@ Texture.prototype.delete = function() {
         this.gl.deleteSampler(this.sampler);
         this.texture = null;
         this.sampler = null;
+        this.appState.textures[this.currentUnit] = null;
+        this.currentUnit = -1;
     }
 };
 
 // Bind this texture to a texture unit.
 Texture.prototype.bind = function(unit) {
-    this.gl.activeTexture(this.gl.TEXTURE0 + unit);
-    this.gl.bindTexture(this.binding, this.texture);
-    this.gl.bindSampler(unit, this.sampler);
+    var currentTexture = this.appState.textures[unit];
+    
+    if (currentTexture !== this) {
+        if (currentTexture) {
+            currentTexture.currentUnit = -1;
+        }
+
+        if (this.currentUnit !== -1) {
+            this.appState.textures[this.currentUnit] = null;
+        }
+
+        this.gl.activeTexture(this.gl.TEXTURE0 + unit);
+        this.gl.bindTexture(this.binding, this.texture);
+        this.gl.bindSampler(unit, this.sampler);
+
+        this.appState.textures[unit] = this;
+        this.currentUnit = unit;
+    }
 
     return this;
 };

@@ -88,7 +88,12 @@ function Program(gl, appState, vsSource, fsSource, xformFeebackVars) {
     this.uniformBlocks = {};
     this.uniformBlockBindings = {};
     this.samplers = {};
-    this.samplerCount = 0;
+    /////////////////////////////////////////////////////////////////////////////////
+    // TODO(Tarek):
+    // Workaround for https://bugs.chromium.org/p/chromium/issues/detail?id=722288
+    // Start at unit 0 when that's fixed
+    /////////////////////////////////////////////////////////////////////////////////
+    this.samplerCount = 1;
 
     gl.useProgram(program);
 

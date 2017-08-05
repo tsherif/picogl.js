@@ -154,7 +154,12 @@ DrawCall.prototype.draw = function() {
         uniformBuffers[base].bind(base);
     }
 
-    for (var tIndex = 0; tIndex < textureCount; ++tIndex) {
+    /////////////////////////////////////////////////////////////////////////////////
+    // TODO(Tarek):
+    // Workaround for https://bugs.chromium.org/p/chromium/issues/detail?id=722288
+    // Start at 0 when that's fixed
+    /////////////////////////////////////////////////////////////////////////////////
+    for (var tIndex = 1; tIndex < textureCount; ++tIndex) {
         textures[tIndex].bind(tIndex);
     }
 
