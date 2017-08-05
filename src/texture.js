@@ -58,20 +58,6 @@ function Texture(gl, appState, binding, image, width, height, depth, is3D, optio
     this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : TEXTURE_FORMAT_DEFAULTS[this.type][this.format];
     this.is3D = is3D;
     this.appState = appState;
-    if (appState.freeTextureUnits.length > 0) {
-        this.unit = appState.freeTextureUnits.pop();
-    } else {
-        /////////////////////////////////////////////////////////////////////////////////
-        // TODO(Tarek):
-        // Workaround for https://bugs.chromium.org/p/chromium/issues/detail?id=722288
-        // Use full array when that's fixed
-        /////////////////////////////////////////////////////////////////////////////////
-        this.unit = appState.textureCount % (appState.textures.length - 1);
-        this.unit += 1;
-
-        ++appState.textureCount;
-    }
-    this.unitEnum = gl.TEXTURE0 + this.unit;
 
     // Sampler parameters
     var minFilter = options.minFilter !== undefined ? options.minFilter : gl.LINEAR_MIPMAP_NEAREST;
@@ -108,8 +94,7 @@ function Texture(gl, appState, binding, image, width, height, depth, is3D, optio
 
     this.resize(width, height, depth);
     this.data(image);
-    this.bind(true);
-    gl.bindSampler(this.unit, this.sampler);
+    this.bind(0);
 }
 
 /**
@@ -130,7 +115,7 @@ Texture.prototype.resize = function(width, height, depth) {
     this.gl.deleteTexture(this.texture);
     this.texture = this.gl.createTexture();
 
-    this.bind(true);
+    this.bind(0);
 
     this.width = width;
     this.height = height;
@@ -198,30 +183,14 @@ Texture.prototype.delete = function() {
         this.gl.deleteSampler(this.sampler);
         this.texture = null;
         this.sampler = null;
-        this.appState.freeTextureUnits.push(this.unit);
-        this.appState.textures[this.unit] = null;
-        this.unit = -1;
-        this.unitEnum = -1;
     }
-};
-
-// Activate this texture's texture unit.
-Texture.prototype.activateUnit = function() {
-    if (this.appState.activeTexture !== this.unit) {
-        this.gl.activeTexture(this.unitEnum);
-        this.appState.activeTexture = this.unit;
-    }
-
-    return this;
 };
 
 // Bind this texture to a texture unit.
-Texture.prototype.bind = function(force) {
-    if (force || this.appState.textures[this.unit] !== this) {
-        this.activateUnit();
-        this.gl.bindTexture(this.binding, this.texture);
-        this.appState.textures[this.unit] = this;
-    }
+Texture.prototype.bind = function(unit) {
+    this.gl.activeTexture(this.gl.TEXTURE0 + unit);
+    this.gl.bindTexture(this.binding, this.texture);
+    this.gl.bindSampler(unit, this.sampler);
 
     return this;
 };

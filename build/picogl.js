@@ -1221,14 +1221,8 @@ DrawCall.prototype.uniform = function(name, value) {
     @param {Texture} texture Texture to bind.
 */
 DrawCall.prototype.texture = function(name, texture) {
-    var textureIndex = this.samplerIndices[name];
-    if (textureIndex === undefined) {
-        textureIndex = this.textureCount++;
-        this.samplerIndices[name] = textureIndex;
-    }
-
-    this.uniform(name, texture.unit);
-    this.textures[textureIndex] = texture;
+    var unit = this.currentProgram.samplers[name];
+    this.textures[unit] = texture;
 
     return this;
 };
@@ -1264,6 +1258,7 @@ DrawCall.prototype.draw = function() {
     var uniformBuffers = this.uniformBuffers;
     var uniformBlockNames = this.uniformBlockNames;
     var textures = this.textures;
+    var textureCount = this.currentProgram.samplerCount;
 
     this.currentProgram.bind();
     this.currentVertexArray.bind();
@@ -1277,8 +1272,8 @@ DrawCall.prototype.draw = function() {
         uniformBuffers[base].bind(base);
     }
 
-    for (var tIndex = 0; tIndex < this.textureCount; ++tIndex) {
-        textures[tIndex].bind();
+    for (var tIndex = 0; tIndex < textureCount; ++tIndex) {
+        textures[tIndex].bind(tIndex);
     }
 
     if (this.currentTransformFeedback) {
@@ -1738,6 +1733,10 @@ function Program(gl, appState, vsSource, fsSource, xformFeebackVars) {
     this.uniforms = {};
     this.uniformBlocks = {};
     this.uniformBlockBindings = {};
+    this.samplers = {};
+    this.samplerCount = 0;
+
+    gl.useProgram(program);
 
     var numUniforms = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
 
@@ -1749,7 +1748,6 @@ function Program(gl, appState, vsSource, fsSource, xformFeebackVars) {
         var numElements = uniformInfo.size;
 
         switch (type) {
-            case CONSTANTS.INT:
             case CONSTANTS.SAMPLER_2D:
             case CONSTANTS.INT_SAMPLER_2D:
             case CONSTANTS.UNSIGNED_INT_SAMPLER_2D:
@@ -1765,6 +1763,11 @@ function Program(gl, appState, vsSource, fsSource, xformFeebackVars) {
             case CONSTANTS.SAMPLER_3D:
             case CONSTANTS.INT_SAMPLER_3D:
             case CONSTANTS.UNSIGNED_INT_SAMPLER_3D:
+                var textureUnit = this.samplerCount++;
+                this.samplers[uniformInfo.name] = textureUnit;
+                this.gl.uniform1i(uniformHandle, textureUnit);
+                break;
+            case CONSTANTS.INT:
             case CONSTANTS.UNSIGNED_INT:
             case CONSTANTS.FLOAT:
                 UniformClass = numElements > 1 ? Uniforms.MultiNumericUniform : Uniforms.SingleComponentUniform;
@@ -1804,7 +1807,9 @@ function Program(gl, appState, vsSource, fsSource, xformFeebackVars) {
                 break;
         }
 
-        this.uniforms[uniformInfo.name] = new UniformClass(gl, uniformHandle, type, numElements);
+        if (UniformClass) {
+            this.uniforms[uniformInfo.name] = new UniformClass(gl, uniformHandle, type, numElements);
+        }
     }
 
     var numUniformBlocks = gl.getProgramParameter(program, gl.ACTIVE_UNIFORM_BLOCKS);
@@ -1815,6 +1820,8 @@ function Program(gl, appState, vsSource, fsSource, xformFeebackVars) {
 
         this.uniformBlocks[blockName] = blockIndex;
     }
+
+    gl.useProgram(null);
 }
 
 /**
@@ -2106,20 +2113,6 @@ function Texture(gl, appState, binding, image, width, height, depth, is3D, optio
     this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : TEXTURE_FORMAT_DEFAULTS[this.type][this.format];
     this.is3D = is3D;
     this.appState = appState;
-    if (appState.freeTextureUnits.length > 0) {
-        this.unit = appState.freeTextureUnits.pop();
-    } else {
-        /////////////////////////////////////////////////////////////////////////////////
-        // TODO(Tarek):
-        // Workaround for https://bugs.chromium.org/p/chromium/issues/detail?id=722288
-        // Use full array when that's fixed
-        /////////////////////////////////////////////////////////////////////////////////
-        this.unit = appState.textureCount % (appState.textures.length - 1);
-        this.unit += 1;
-
-        ++appState.textureCount;
-    }
-    this.unitEnum = gl.TEXTURE0 + this.unit;
 
     // Sampler parameters
     var minFilter = options.minFilter !== undefined ? options.minFilter : gl.LINEAR_MIPMAP_NEAREST;
@@ -2156,8 +2149,7 @@ function Texture(gl, appState, binding, image, width, height, depth, is3D, optio
 
     this.resize(width, height, depth);
     this.data(image);
-    this.bind(true);
-    gl.bindSampler(this.unit, this.sampler);
+    this.bind(0);
 }
 
 /**
@@ -2178,7 +2170,7 @@ Texture.prototype.resize = function(width, height, depth) {
     this.gl.deleteTexture(this.texture);
     this.texture = this.gl.createTexture();
 
-    this.bind(true);
+    this.bind(0);
 
     this.width = width;
     this.height = height;
@@ -2246,30 +2238,14 @@ Texture.prototype.delete = function() {
         this.gl.deleteSampler(this.sampler);
         this.texture = null;
         this.sampler = null;
-        this.appState.freeTextureUnits.push(this.unit);
-        this.appState.textures[this.unit] = null;
-        this.unit = -1;
-        this.unitEnum = -1;
     }
-};
-
-// Activate this texture's texture unit.
-Texture.prototype.activateUnit = function() {
-    if (this.appState.activeTexture !== this.unit) {
-        this.gl.activeTexture(this.unitEnum);
-        this.appState.activeTexture = this.unit;
-    }
-
-    return this;
 };
 
 // Bind this texture to a texture unit.
-Texture.prototype.bind = function(force) {
-    if (force || this.appState.textures[this.unit] !== this) {
-        this.activateUnit();
-        this.gl.bindTexture(this.binding, this.texture);
-        this.appState.textures[this.unit] = this;
-    }
+Texture.prototype.bind = function(unit) {
+    this.gl.activeTexture(this.gl.TEXTURE0 + unit);
+    this.gl.bindTexture(this.binding, this.texture);
+    this.gl.bindSampler(unit, this.sampler);
 
     return this;
 };
@@ -2876,6 +2852,17 @@ SingleComponentUniform.prototype.set = function(value) {
         this.gl[this.glFuncName](this.handle, value);
         this.cache = value;
     }
+};
+
+function SamplerUniform(gl, handle, type, count, unit) {
+    this.gl = gl;
+    this.handle = handle;
+    this.unit = unit;
+    this.gl.uniform1i(handle, unit);
+}
+
+SamplerUniform.prototype.set = function(texture) {
+    texture.bind(this.unit);
 };
 
 function MultiNumericUniform(gl, handle, type, count) {

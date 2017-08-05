@@ -103,14 +103,8 @@ DrawCall.prototype.uniform = function(name, value) {
     @param {Texture} texture Texture to bind.
 */
 DrawCall.prototype.texture = function(name, texture) {
-    var textureIndex = this.samplerIndices[name];
-    if (textureIndex === undefined) {
-        textureIndex = this.textureCount++;
-        this.samplerIndices[name] = textureIndex;
-    }
-
-    this.uniform(name, texture.unit);
-    this.textures[textureIndex] = texture;
+    var unit = this.currentProgram.samplers[name];
+    this.textures[unit] = texture;
 
     return this;
 };
@@ -146,6 +140,7 @@ DrawCall.prototype.draw = function() {
     var uniformBuffers = this.uniformBuffers;
     var uniformBlockNames = this.uniformBlockNames;
     var textures = this.textures;
+    var textureCount = this.currentProgram.samplerCount;
 
     this.currentProgram.bind();
     this.currentVertexArray.bind();
@@ -159,8 +154,8 @@ DrawCall.prototype.draw = function() {
         uniformBuffers[base].bind(base);
     }
 
-    for (var tIndex = 0; tIndex < this.textureCount; ++tIndex) {
-        textures[tIndex].bind();
+    for (var tIndex = 0; tIndex < textureCount; ++tIndex) {
+        textures[tIndex].bind(tIndex);
     }
 
     if (this.currentTransformFeedback) {
