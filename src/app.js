@@ -39,7 +39,7 @@ var Query             = require("./query");
 
 /**
     Primary entry point to PicoGL. An app will store all parts of the WebGL
-    state and manage draw calls.
+    state.
 
     @class
     @prop {DOMElement} canvas The canvas on which this app drawing.

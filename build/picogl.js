@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.6.4
+PicoGL.js v0.6.5
 
 The MIT License (MIT)
 
@@ -65,7 +65,7 @@ var Query             = require("./query");
 
 /**
     Primary entry point to PicoGL. An app will store all parts of the WebGL
-    state and manage draw calls.
+    state.
 
     @class
     @prop {DOMElement} canvas The canvas on which this app drawing.
@@ -1001,8 +1001,7 @@ var TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
     @prop {GLEnum} type Type of data stored in the texture.
     @prop {GLEnum} format Layout of texture data.
     @prop {GLEnum} internalFormat Internal arrangement of the texture data.
-    @prop {Number} unit The texture unit this texture is bound to.
-    @prop {GLEnum} unitEnum The GLEnum of texture unit this texture is bound to.
+    @prop {Number} currentUnit The current texture unit this cubemap is bound to.
     @prop {Object} appState Tracked GL state.
 */
 function Cubemap(gl, appState, options) {
@@ -1625,7 +1624,7 @@ var App = require("./app");
     @namespace PicoGL
 */
 var PicoGL = global.PicoGL = require("./constants");    
-PicoGL.version = "0.6.4";
+PicoGL.version = "0.6.5";
 
 /**
     Create a PicoGL app. The app is the primary entry point to PicoGL. It stores
@@ -2096,8 +2095,7 @@ var TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
     @prop {GLEnum} type Type of data stored in the texture.
     @prop {GLEnum} format Layout of texture data.
     @prop {GLEnum} internalFormat Internal arrangement of the texture data.
-    @prop {Number} unit The texture unit this texture is bound to.
-    @prop {GLEnum} unitEnum The GLEnum of texture unit this texture is bound to.
+    @prop {Number} currentUnit The current texture unit this texture is bound to.
     @prop {boolean} is3D Whether this texture contains 3D data.
     @prop {Object} appState Tracked GL state.
 */

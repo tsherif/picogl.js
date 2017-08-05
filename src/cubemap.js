@@ -35,8 +35,7 @@ var TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
     @prop {GLEnum} type Type of data stored in the texture.
     @prop {GLEnum} format Layout of texture data.
     @prop {GLEnum} internalFormat Internal arrangement of the texture data.
-    @prop {Number} unit The texture unit this texture is bound to.
-    @prop {GLEnum} unitEnum The GLEnum of texture unit this texture is bound to.
+    @prop {Number} currentUnit The current texture unit this cubemap is bound to.
     @prop {Object} appState Tracked GL state.
 */
 function Cubemap(gl, appState, options) {
