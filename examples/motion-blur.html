@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<!--
+  The MIT License (MIT)
+
+  Copyright (c) 2017 Tarek Sherif
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy of
+  this software and associated documentation files (the "Software"), to deal in
+  the Software without restriction, including without limitation the rights to
+  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+  the Software, and to permit persons to whom the Software is furnished to do so,
+  subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+  FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+  COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+  IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+<html>
+<head>
+    <title>PicoGL.js: Phong Cube</title>
+    <script src="utils/gl-matrix.js"></script>
+    <script src="../build/picogl.js"></script>
+    <script src="utils/utils.js"></script>
+    <link rel="stylesheet" href="../site/css/picogl-example.css"> 
+</head>
+<body>
+    <div id="example-title">
+        PicoGL.js Example: Phong-shaded Cube
+        <div>
+            <a href="https://github.com/tsherif/picogl.js/blob/master/examples/cube.html">Source code</a>
+        </div>
+    </div>
+    <canvas id="gl-canvas"></canvas>
+    <script type="x-shader/vs" id="vertex-draw">
+        #version 300 es
+
+        layout(std140, column_major) uniform;
+
+        layout(location=0) in vec4 position;
+        layout(location=1) in vec2 uv;
+        layout(location=2) in vec4 normal;
+        
+        uniform SceneUniforms {
+            mat4 viewProj;
+            vec4 eyePosition;
+            vec4 lightPosition;
+        };
+
+        uniform mat4 uModelPrevious;
+        uniform mat4 uModel;
+        
+        out vec3 vPosition;
+        out vec2 vUV;
+        out vec3 vNormal;
+        out vec3 vVelocity;
+        out vec2 vScreenVelocity;
+
+        void main() {
+            vec4 worldPosition = uModel * position;
+            vec4 previousPosition = uModelPrevious * position;
+            
+            vPosition = worldPosition.xyz;
+            vUV = uv;
+            vNormal = (uModel * vec4(normal.xyz, 0.0)).xyz;
+            
+            vec3 velocity = worldPosition.xyz - previousPosition.xyz;
+            if (dot(vNormal, velocity) >= 0.0) {
+                gl_Position = viewProj * worldPosition;
+            } else {
+                gl_Position = viewProj * previousPosition;
+            }
+            
+            vec2 screenPosition = (gl_Position.xy / gl_Position.w) * 0.5 + 0.5;
+            vec4 previousClipPosition = viewProj * previousPosition;
+            vec2 previousScreenPosition = (previousClipPosition.xy / previousClipPosition.w) * 0.5 + 0.5;
+            vScreenVelocity = screenPosition - previousScreenPosition;
+        }
+    </script>
+    <script type="x-shader/vf" id="fragment-draw">
+        #version 300 es
+        precision highp float;
+
+        layout(std140, column_major) uniform;
+
+        uniform SceneUniforms {
+            mat4 viewProj;
+            vec4 eyePosition;
+            vec4 lightPosition;
+        };
+
+        uniform sampler2D tex;
+        
+        in vec3 vPosition;
+        in vec2 vUV;
+        in vec3 vNormal;
+        in vec3 vVelocity;
+        in vec2 vScreenVelocity;
+
+        layout(location=0) out vec4 fragColor;
+        layout(location=1) out vec2 screenVelocity;
+        void main() {
+            screenVelocity = vScreenVelocity;
+
+            vec3 color = texture(tex, vUV).rgb;
+
+            vec3 normal = normalize(vNormal);
+            vec3 eyeVec = normalize(eyePosition.xyz - vPosition);
+            vec3 incidentVec = normalize(vPosition - lightPosition.xyz);
+            vec3 lightVec = -incidentVec;
+            float diffuse = max(dot(lightVec, normal), 0.0);
+            float highlight = pow(max(dot(eyeVec, reflect(incidentVec, normal)), 0.0), 100.0);
+            float ambient = 0.1;
+            fragColor = vec4(color * (diffuse + highlight + ambient), 1.0);
+        }
+    </script>
+    <script type="x-shader/vs" id="vertex-quad">
+        #version 300 es
+
+        layout(location=0) in vec4 position;
+
+        out vec2 vUV;
+        void main() {
+            vUV = position.xy * 0.5 + 0.5;
+            gl_Position = position;
+        }
+    </script>
+    <script type="x-shader/fs" id="fragment-texture">
+        #version 300 es
+        precision highp float;
+
+        #define NUM_STEPS 8.0
+
+        uniform sampler2D color;
+        uniform sampler2D velocity;
+
+        in vec2 vUV;
+
+        out vec4 fragColor;
+        void main() {
+            vec2 step = -texture(velocity, vUV).xy / NUM_STEPS;
+            fragColor = vec4(0.0, 0.0, 0.0, 1.0);
+
+            for (float i = 0.0; i < NUM_STEPS; ++i) {
+                fragColor.rgb += texture(color, vUV + (i * step)).rgb;
+            }
+
+            // fragColor.rg = texture(velocity, vUV).xy * 100.0;
+            fragColor.rgb /= NUM_STEPS;
+        }
+    </script>
+    <script type="text/javascript">
+        utils.addTimerElement();
+        
+        var canvas = document.getElementById("gl-canvas");
+
+        if (!utils.testWebGL2()) {
+            console.error("WebGL 2 not available");
+            document.body.innerHTML = "This example requires WebGL 2 which is unavailable on this system."
+        }
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        var app = PicoGL.createApp(canvas)
+        .clearColor(0.0, 0.0, 0.0, 1.0)
+        .depthTest()
+        .floatRenderTargets();
+
+        var timer = app.createTimer();
+
+        // SET UP PROGRAM
+        var vsSource =  document.getElementById("vertex-draw").text.trim();
+        var fsSource =  document.getElementById("fragment-draw").text.trim();
+        var program = app.createProgram(vsSource, fsSource);
+
+        var quadVSSource =  document.getElementById("vertex-quad").text.trim();
+        var textureFSSource =  document.getElementById("fragment-texture").text.trim();
+        var textureProgram = app.createProgram(quadVSSource, textureFSSource);
+
+        var framebuffer = app.createFramebuffer()
+        .colorTarget(0)
+        .colorTarget(1, { type: PicoGL.FLOAT })
+        .depthTarget();
+
+        // SET UP GEOMETRY
+        var sphere = utils.createSphere({radius: 0.5})
+        var positions = app.createVertexBuffer(PicoGL.FLOAT, 3, sphere.positions);
+        var uv = app.createVertexBuffer(PicoGL.FLOAT, 2, sphere.uvs);
+        var normals = app.createVertexBuffer(PicoGL.FLOAT, 3, sphere.normals);
+        var indices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, sphere.indices);
+
+        var sphereArray = app.createVertexArray()
+        .attributeBuffer(0, positions)
+        .attributeBuffer(1, uv)
+        .attributeBuffer(2, normals)
+        .indexBuffer(indices);
+
+        var quadPositions = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
+            -1, 1,
+            -1, -1,
+            1, -1,
+            -1, 1,
+            1, -1,
+            1, 1,
+        ]));
+
+        var quadArray = app.createVertexArray().attributeBuffer(0, quadPositions);
+
+        // SET UP UNIFORM BUFFER
+        var projMatrix = mat4.create();
+        mat4.perspective(projMatrix, Math.PI / 2, canvas.width / canvas.height, 0.1, 10.0);
+
+        var viewMatrix = mat4.create();
+        var eyePosition = vec3.fromValues(0, 0, 2);
+        mat4.lookAt(viewMatrix, eyePosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
+
+        var viewProjMatrix = mat4.create();
+        mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
+
+        var lightPosition = vec3.fromValues(0, 0, 20);
+
+        var sceneUniformBuffer = app.createUniformBuffer([
+            PicoGL.FLOAT_MAT4,
+            PicoGL.FLOAT_VEC4,
+            PicoGL.FLOAT_VEC4
+        ])
+        .set(0, viewProjMatrix)
+        .set(1, eyePosition)
+        .set(2, lightPosition)
+        .update();
+
+        var modelMatrix = mat4.create();
+        var previousModelMatrix = mat4.create();
+        var rotateXMatrix = mat4.create();
+        var rotateYMatrix = mat4.create();
+
+        var position = vec3.create();
+        var previewModelMatrix = mat4.create();
+        var velocityX = 0.4;
+
+        window.onresize = function() {
+            app.resize(window.innerWidth, window.innerHeight);
+
+            mat4.perspective(projMatrix, Math.PI / 2, app.width / app.height, 0.1, 10.0);
+            mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
+            
+            sceneUniformBuffer.set(0, viewProjMatrix).update();
+        }
+
+        var image = new Image();
+
+        image.onload = function() {
+            // CREATE TEXTURE
+            var texture = app.createTexture2D(image, { flipY: true });
+
+            // SET UP DRAW CALL
+            var drawCall = app.createDrawCall(program, sphereArray)
+            .uniformBlock("SceneUniforms", sceneUniformBuffer)
+            .texture("tex", texture);
+
+            var quadDrawCall = app.createDrawCall(textureProgram, quadArray)
+            .texture("color", framebuffer.colorTextures[0])
+            .texture("velocity", framebuffer.colorTextures[1]);
+
+
+            function draw() {
+                if (timer.ready()) {
+                    utils.updateTimerElement(timer.cpuTime, timer.gpuTime);
+                }
+
+                timer.start()
+
+                position[0] += velocityX;
+
+                if (position[0] > 2 || position[0] < -2) {
+                    velocityX *= -1;
+                }
+
+                previousModelMatrix.set(modelMatrix);
+                mat4.fromTranslation(modelMatrix, position);
+                drawCall.uniform("uModelPrevious", previousModelMatrix);
+                drawCall.uniform("uModel", modelMatrix);
+            
+                app.drawFramebuffer(framebuffer)
+                .clear();
+                drawCall.draw()
+                
+                app.defaultDrawFramebuffer()
+                quadDrawCall.draw();
+                
+                timer.end();
+
+                requestAnimationFrame(draw);
+            }
+
+            requestAnimationFrame(draw);
+            
+        }
+
+        image.src = "img/khronos_webgl.png";
+
+    </script>
+    <a href="https://github.com/tsherif/picogl.js" id="github-ribbon"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"></a>
+    <script src="../site/js/iframe.js"></script>
+</body>
+</html>
