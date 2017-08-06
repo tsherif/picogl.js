@@ -239,6 +239,7 @@
         }
 
         var EASING = 0.8;
+        var STOP_THRESHOLD = 0.0001;
 
         var canvas = document.getElementById("gl-canvas");
         canvas.width = window.innerWidth;
@@ -262,11 +263,13 @@
         var noVelocityProgram = app.createProgram(noVelocityVsSource, drawFShader);
 
         var quadVSSource =  document.getElementById("vertex-quad").text.trim();
-        var textureFSSource =  document.getElementById("fragment-blur").text.trim();
-        var textureProgram = app.createProgram(quadVSSource, textureFSSource);
+        var blurFSSource =  document.getElementById("fragment-blur").text.trim();
+        var blurProgram = app.createProgram(quadVSSource, blurFSSource);
 
         var framebuffer = app.createFramebuffer()
+        // COLOR BUFFER
         .colorTarget(0)
+        // VELOCITY BUFFER  
         .colorTarget(1, { type: PicoGL.FLOAT, format: PicoGL.RG })
         .depthTarget();
 
@@ -336,6 +339,7 @@
             var NUM_SPHERES = 10;
             var spheres = new Array(NUM_SPHERES);
 
+            // OBJECT DESCRIPTIONS
             for (var i = 0, len = spheres.length; i < len; ++i) {
                 spheres[i] = {
                     rotation: 1.8,
@@ -352,7 +356,7 @@
                 }
             }
 
-            var quadDrawCall = app.createDrawCall(textureProgram, quadArray)
+            var blurDrawCall = app.createDrawCall(blurProgram, quadArray)
             .texture("color", framebuffer.colorTextures[0])
             .texture("velocity", framebuffer.colorTextures[1]);
 
@@ -385,11 +389,12 @@
                     var sphere = spheres[i];
                     sphere.previousModelMatrix.set(sphere.modelMatrix);
 
+                    // EASE OUT TO TARGET POSITION
                     var diff = vec3.create();
                     vec3.subtract(diff, sphere.translation, sphere.translationTarget);
                     var distance = vec3.length(diff);
 
-                    if (distance < 0.0001) {
+                    if (distance < STOP_THRESHOLD) {
                         sphere.translationTarget[0] = Math.random() * 2 - 1;
                         sphere.translationTarget[1] = Math.random() * 2 - 1;
                         sphere.translationTarget[2] = Math.random() * 2 - 1;
@@ -415,7 +420,7 @@
                 
                 if (blurEnabled) {
                     app.defaultDrawFramebuffer()
-                    quadDrawCall.draw();
+                    blurDrawCall.draw();
                     
                 }
                 
