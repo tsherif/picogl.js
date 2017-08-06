@@ -83,7 +83,7 @@
             vec3 oldPosition = texelFetch(uOldPositionBuffer, texelCoord, 0).xyz;
             vec3 temp = position;
 
-            if (!all(equal(texelCoord, ivec2(0, 0))) && !all(equal(texelCoord, ivec2(maxTexelCoord.x, 0)))) {
+            if (texelCoord != ivec2(0, 0) && texelCoord != ivec2(maxTexelCoord.x, 0)) {
                 position += (position - oldPosition) * DAMPING + GRAVITY;
                 float wDotN = dot(WIND, normal);
                 position += abs(wDotN) * sign(wDotN) * normal;
@@ -122,10 +122,10 @@
 
             bool otherPin = false;
 
-            if (!all(equal(texelCoord, ivec2(0, 0))) && !all(equal(texelCoord, ivec2(dimensions.x - 1, 0)))) {
+            if (texelCoord != ivec2(0, 0) && texelCoord != ivec2(dimensions.x - 1, 0)) {
                 ivec2 otherCoord = texelCoord + uDir * neg;
 
-                if (all(equal(otherCoord, ivec2(0, 0))) || all(equal(otherCoord, ivec2(dimensions.x - 1, 0)))) {
+                if (otherCoord == ivec2(0, 0) || otherCoord == ivec2(dimensions.x - 1, 0)) {
                     otherPin = true;
                 }
 
