@@ -23,13 +23,20 @@
 -->
 <html>
 <head>
-    <title>PicoGL.js: Phong Cube</title>
+    <title>PicoGL.js: Motion Blur</title>
     <script src="utils/gl-matrix.js"></script>
     <script src="../build/picogl.js"></script>
     <script src="utils/utils.js"></script>
     <link rel="stylesheet" href="../site/css/picogl-example.css"> 
     <style>
         #blur-controls {
+            position: absolute;
+            bottom: 40px;
+            right: 20px;
+            color: white;
+        }
+
+        #slowmo-controls {
             position: absolute;
             bottom: 20px;
             right: 20px;
@@ -39,13 +46,16 @@
 </head>
 <body>
     <div id="example-title">
-        PicoGL.js Example: Phong-shaded Cube
+        PicoGL.js Example: Motion Blur
         <div>
-            <a href="https://github.com/tsherif/picogl.js/blob/master/examples/cube.html">Source code</a>
+            <a href="https://github.com/tsherif/picogl.js/blob/master/examples/motion-blur.html">Source code</a>
         </div>
     </div>
     <div id="blur-controls">
         Enable Motion Blur: <input id="blur-toggle" type="checkbox" checked>
+    </div>
+    <div id="slowmo-controls">
+        Slow Motion: <input id="slowmo-toggle" type="checkbox">
     </div>
     <canvas id="gl-canvas"></canvas>
     <script type="x-shader/vs" id="vertex-velocity">
@@ -79,15 +89,17 @@
             vUV = uv;
             vNormal = (uModel * vec4(normal.xyz, 0.0)).xyz;
             
+            vec4 clipPosition = viewProj * worldPosition;
+            vec4 previousClipPosition = viewProj * previousPosition;
             vec3 velocity = worldPosition.xyz - previousPosition.xyz;
+            
             if (dot(vNormal, velocity) >= 0.0) {
-                gl_Position = viewProj * worldPosition;
+                gl_Position = clipPosition;
             } else {
-                gl_Position = viewProj * previousPosition;
+                gl_Position = previousClipPosition;
             }
             
-            vec2 screenPosition = (gl_Position.xy / gl_Position.w) * 0.5 + 0.5;
-            vec4 previousClipPosition = viewProj * previousPosition;
+            vec2 screenPosition = (clipPosition.xy / clipPosition.w) * 0.5 + 0.5;
             vec2 previousScreenPosition = (previousClipPosition.xy / previousClipPosition.w) * 0.5 + 0.5;
             vScreenVelocity = screenPosition - previousScreenPosition;
         }
@@ -179,6 +191,7 @@
         precision highp float;
 
         #define NUM_STEPS 8.0
+        #define BLUR_RADIUS 2.0
 
         uniform sampler2D color;
         uniform sampler2D velocity;
@@ -187,21 +200,27 @@
 
         out vec4 fragColor;
         void main() {
-            vec2 step = -texture(velocity, vUV).xy / NUM_STEPS;
+            vec2 step = texture(velocity, vUV).xy * BLUR_RADIUS / (NUM_STEPS - 1.0);
             fragColor = vec4(0.0, 0.0, 0.0, 1.0);
 
-            for (float i = 0.0; i < NUM_STEPS; ++i) {
+            for (float i = -NUM_STEPS + 1.0; i < NUM_STEPS; ++i) {
                 fragColor.rgb += texture(color, vUV + (i * step)).rgb;
             }
 
-            fragColor.rgb /= NUM_STEPS;
+            fragColor.rgb /= (NUM_STEPS * 2.0 - 1.0);
         }
     </script>
     <script type="text/javascript">
+        var EASING = 0.8;
         var blurEnabled = true;
+        var slowmoReset = 1;
 
         document.getElementById("blur-toggle").addEventListener("change", function() {
             blurEnabled = this.checked;
+        });
+
+        document.getElementById("slowmo-toggle").addEventListener("change", function() {
+            slowmoReset = this.checked ? 6 : 1;
         });
 
         utils.addTimerElement();
@@ -310,7 +329,7 @@
                 app.createTexture2D(new Uint8Array([255, 255, 0, 255]), 1, 1)
             ];
 
-            var NUM_SPHERES = 3;
+            var NUM_SPHERES = 10;
             var spheres = new Array(NUM_SPHERES);
 
             for (var i = 0, len = spheres.length; i < len; ++i) {
@@ -338,12 +357,20 @@
             var modelMatrix = mat4.create();
             var translationMatrix = mat4.create();
             var rotationMatrix = mat4.create();
-            var EASING = 0.7;
+
+            var slowMoCounter = 0;
 
             window.draw = function draw() {
                 if (timer.ready()) {
                     utils.updateTimerElement(timer.cpuTime, timer.gpuTime);
                 }
+
+                if (--slowMoCounter > 0) {
+                    requestAnimationFrame(draw);
+                    return;
+                }
+
+                slowMoCounter = slowmoReset;
 
                 timer.start()
 
@@ -360,7 +387,7 @@
                     vec3.subtract(diff, sphere.translation, sphere.translationTarget);
                     var distance = vec3.length(diff);
 
-                    if (distance < 0.00001) {
+                    if (distance < 0.0001) {
                         sphere.translationTarget[0] = Math.random() * 2 - 1;
                         sphere.translationTarget[1] = Math.random() * 2 - 1;
                         sphere.translationTarget[2] = Math.random() * 2 - 1;
