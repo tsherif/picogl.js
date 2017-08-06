@@ -215,27 +215,32 @@
         }
     </script>
     <script type="text/javascript">
-        var EASING = 0.8;
         var blurEnabled = true;
-        var slowmoReset = 1;
+        var slowMoReset = 1;
 
         document.getElementById("blur-toggle").addEventListener("change", function() {
             blurEnabled = this.checked;
         });
 
         document.getElementById("slowmo-toggle").addEventListener("change", function() {
-            slowmoReset = this.checked ? 6 : 1;
+            slowMoReset = this.checked ? 6 : 1;
         });
 
         utils.addTimerElement();
         
-        var canvas = document.getElementById("gl-canvas");
 
         if (!utils.testWebGL2()) {
             console.error("WebGL 2 not available");
             document.body.innerHTML = "This example requires WebGL 2 which is unavailable on this system."
         }
 
+        if (!utils.testExtension("EXT_color_buffer_float")) {
+            document.body.innerHTML = "This example requires extension EXT_color_buffer_float which is not supported on this system."
+        }
+
+        var EASING = 0.8;
+
+        var canvas = document.getElementById("gl-canvas");
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         
@@ -247,13 +252,14 @@
         var timer = app.createTimer();
 
         // SET UP PROGRAM
-        var vsSource =  document.getElementById("vertex-velocity").text.trim();
-        var fsSource =  document.getElementById("fragment-draw").text.trim();
-        var program = app.createProgram(vsSource, fsSource);
+        var drawFsSource =  document.getElementById("fragment-draw").text.trim();
+        var drawFShader = app.createShader(PicoGL.FRAGMENT_SHADER, drawFsSource)
 
-        var vsSource =  document.getElementById("vertex-no-velocity").text.trim();
-        var fsSource =  document.getElementById("fragment-draw").text.trim();
-        var noVelocityProgram = app.createProgram(vsSource, fsSource);
+        var velocityVsSource =  document.getElementById("vertex-velocity").text.trim();
+        var program = app.createProgram(velocityVsSource, drawFShader);
+
+        var noVelocityVsSource =  document.getElementById("vertex-no-velocity").text.trim();
+        var noVelocityProgram = app.createProgram(noVelocityVsSource, drawFShader);
 
         var quadVSSource =  document.getElementById("vertex-quad").text.trim();
         var textureFSSource =  document.getElementById("fragment-blur").text.trim();
@@ -261,7 +267,7 @@
 
         var framebuffer = app.createFramebuffer()
         .colorTarget(0)
-        .colorTarget(1, { type: PicoGL.FLOAT })
+        .colorTarget(1, { type: PicoGL.FLOAT, format: PicoGL.RG })
         .depthTarget();
 
         // SET UP GEOMETRY
@@ -325,22 +331,14 @@
 
         image.onload = function() {
             // CREATE TEXTURE
-            var textures = [
-                app.createTexture2D(image, { flipY: true }),
-                app.createTexture2D(new Uint8Array([255, 0, 0, 255]), 1, 1),
-                app.createTexture2D(new Uint8Array([0, 255, 0, 255]), 1, 1),
-                app.createTexture2D(new Uint8Array([0, 0, 255, 255]), 1, 1),
-                app.createTexture2D(new Uint8Array([255, 255, 0, 255]), 1, 1)
-            ];
+            var texture = app.createTexture2D(image, { flipY: true });
 
             var NUM_SPHERES = 10;
             var spheres = new Array(NUM_SPHERES);
 
             for (var i = 0, len = spheres.length; i < len; ++i) {
-                var texture = textures[0];
-
                 spheres[i] = {
-                    rotation: 1,
+                    rotation: 1.8,
                     translation: [Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1],
                     translationTarget: [Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1],
                     modelMatrix: mat4.create(),
@@ -374,7 +372,7 @@
                     return;
                 }
 
-                slowMoCounter = slowmoReset;
+                slowMoCounter = slowMoReset;
 
                 timer.start()
 
@@ -401,8 +399,8 @@
                         vec3.add(sphere.translation, sphere.translationTarget, diff);
                     }
 
-                    mat4.fromTranslation(translationMatrix, sphere.translation);
                     mat4.fromYRotation(rotationMatrix, sphere.rotation);
+                    mat4.fromTranslation(translationMatrix, sphere.translation);
                     mat4.multiply(sphere.modelMatrix, translationMatrix, rotationMatrix);
 
                     if (blurEnabled) {
