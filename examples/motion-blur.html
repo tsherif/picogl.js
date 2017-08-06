@@ -270,7 +270,7 @@
         mat4.perspective(projMatrix, Math.PI / 2, canvas.width / canvas.height, 0.1, 10.0);
 
         var viewMatrix = mat4.create();
-        var eyePosition = vec3.fromValues(0, 0, 1.3);
+        var eyePosition = vec3.fromValues(0, 0, 1.5);
         mat4.lookAt(viewMatrix, eyePosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
 
         var viewProjMatrix = mat4.create();
@@ -318,9 +318,8 @@
 
                 spheres[i] = {
                     rotation: 1,
-                    rotationSpeed: 0,
-                    translation: [1.2 * Math.pow(-1, i), 0.6 - (i / (NUM_SPHERES - 1)), 0],
-                    xVelocity: 0.04 * (i + 1),
+                    translation: [Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1],
+                    translationTarget: [Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1],
                     modelMatrix: mat4.create(),
                     previousModelMatrix: mat4.create(),
                     drawCall: app.createDrawCall(program, sphereArray)
@@ -339,6 +338,7 @@
             var modelMatrix = mat4.create();
             var translationMatrix = mat4.create();
             var rotationMatrix = mat4.create();
+            var EASING = 0.7;
 
             window.draw = function draw() {
                 if (timer.ready()) {
@@ -356,17 +356,22 @@
                     var sphere = spheres[i];
                     sphere.previousModelMatrix.set(sphere.modelMatrix);
 
-                    sphere.translation[0] += sphere.xVelocity;
+                    var diff = vec3.create();
+                    vec3.subtract(diff, sphere.translation, sphere.translationTarget);
+                    var distance = vec3.length(diff);
 
-                    if (sphere.translation[0] > 1.2 || sphere.translation[0] < -1.2) {
-                        sphere.xVelocity *= -1;
+                    if (distance < 0.00001) {
+                        sphere.translationTarget[0] = Math.random() * 2 - 1;
+                        sphere.translationTarget[1] = Math.random() * 2 - 1;
+                        sphere.translationTarget[2] = Math.random() * 2 - 1;
+                    } else {
+                        vec3.normalize(diff, diff);
+                        vec3.scale(diff, diff, distance * EASING);
+                        vec3.add(sphere.translation, sphere.translationTarget, diff);
                     }
 
-                    sphere.rotation += sphere.rotationSpeed;
                     mat4.fromTranslation(translationMatrix, sphere.translation);
                     mat4.fromYRotation(rotationMatrix, sphere.rotation);
-
-                    // mat4.multiply(sphere.modelMatrix, rotationMatrix, translationMatrix);
                     mat4.multiply(sphere.modelMatrix, translationMatrix, rotationMatrix);
 
                     if (blurEnabled) {
