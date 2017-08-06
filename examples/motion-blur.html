@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<!--
+  The MIT License (MIT)
+
+  Copyright (c) 2017 Tarek Sherif
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy of
+  this software and associated documentation files (the "Software"), to deal in
+  the Software without restriction, including without limitation the rights to
+  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+  the Software, and to permit persons to whom the Software is furnished to do so,
+  subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+  FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+  COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+  IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+<!-- 
+    Motion blur algorithm based on Stupid OpenGL Shader Tricks by Simon Green
+    http://plaza.ufl.edu/sakib/docs/GDC2003_OpenGLShaderTricks.pdf
+ -->
+<html>
+<head>
+    <title>PicoGL.js: Motion Blur</title>
+    <script src="utils/gl-matrix.js"></script>
+    <script src="../build/picogl.js"></script>
+    <script src="utils/utils.js"></script>
+    <link rel="stylesheet" href="../site/css/picogl-example.css"> 
+    <style>
+        #blur-controls {
+            position: absolute;
+            bottom: 40px;
+            right: 20px;
+            color: white;
+        }
+
+        #slowmo-controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div id="example-title">
+        PicoGL.js Example: Motion Blur
+        <div>
+            <a href="https://github.com/tsherif/picogl.js/blob/master/examples/motion-blur.html">Source code</a>
+        </div>
+    </div>
+    <div id="blur-controls">
+        Enable Motion Blur: <input id="blur-toggle" type="checkbox" checked>
+    </div>
+    <div id="slowmo-controls">
+        Slow Motion: <input id="slowmo-toggle" type="checkbox">
+    </div>
+    <canvas id="gl-canvas"></canvas>
+    <script type="x-shader/vs" id="vertex-velocity">
+        #version 300 es
+
+        layout(std140, column_major) uniform;
+
+        layout(location=0) in vec4 position;
+        layout(location=1) in vec2 uv;
+        layout(location=2) in vec4 normal;
+        
+        uniform SceneUniforms {
+            mat4 viewProj;
+            vec4 eyePosition;
+            vec4 lightPosition;
+        };
+
+        uniform mat4 uModelPrevious;
+        uniform mat4 uModel;
+        
+        out vec3 vPosition;
+        out vec2 vUV;
+        out vec3 vNormal;
+        out vec2 vScreenVelocity;
+
+        void main() {
+            vec4 worldPosition = uModel * position;
+            vec4 previousPosition = uModelPrevious * position;
+            
+            vPosition = worldPosition.xyz;
+            vUV = uv;
+            vNormal = (uModel * vec4(normal.xyz, 0.0)).xyz;
+            
+            vec4 clipPosition = viewProj * worldPosition;
+            vec4 previousClipPosition = viewProj * previousPosition;
+            vec3 velocity = worldPosition.xyz - previousPosition.xyz;
+            
+            if (dot(vNormal, velocity) >= 0.0) {
+                gl_Position = clipPosition;
+            } else {
+                gl_Position = previousClipPosition;
+            }
+            
+            vec2 screenPosition = (clipPosition.xy / clipPosition.w) * 0.5 + 0.5;
+            vec2 previousScreenPosition = (previousClipPosition.xy / previousClipPosition.w) * 0.5 + 0.5;
+            vScreenVelocity = screenPosition - previousScreenPosition;
+        }
+    </script>
+    <script type="x-shader/vs" id="vertex-no-velocity">
+        #version 300 es
+
+        layout(std140, column_major) uniform;
+
+        layout(location=0) in vec4 position;
+        layout(location=1) in vec2 uv;
+        layout(location=2) in vec4 normal;
+        
+        uniform SceneUniforms {
+            mat4 viewProj;
+            vec4 eyePosition;
+            vec4 lightPosition;
+        };
+
+        uniform mat4 uModel;
+        
+        out vec3 vPosition;
+        out vec2 vUV;
+        out vec3 vNormal;
+        out vec2 vScreenVelocity;
+
+        void main() {
+            vec4 worldPosition = uModel * position;
+            
+            vPosition = worldPosition.xyz;
+            vUV = uv;
+            vNormal = (uModel * vec4(normal.xyz, 0.0)).xyz;
+            vScreenVelocity = vec2(0.0);
+            
+            gl_Position = viewProj * worldPosition;
+        
+        }
+    </script>
+    <script type="x-shader/vf" id="fragment-draw">
+        #version 300 es
+        precision highp float;
+
+        layout(std140, column_major) uniform;
+
+        uniform SceneUniforms {
+            mat4 viewProj;
+            vec4 eyePosition;
+            vec4 lightPosition;
+        };
+
+        uniform sampler2D tex;
+        
+        in vec3 vPosition;
+        in vec2 vUV;
+        in vec3 vNormal;
+        in vec3 vVelocity;
+        in vec2 vScreenVelocity;
+
+        layout(location=0) out vec4 fragColor;
+        layout(location=1) out vec2 screenVelocity;
+        void main() {
+            screenVelocity = vScreenVelocity;
+
+            vec3 color = texture(tex, vUV).rgb;
+
+            vec3 normal = normalize(vNormal);
+            vec3 eyeVec = normalize(eyePosition.xyz - vPosition);
+            vec3 incidentVec = normalize(vPosition - lightPosition.xyz);
+            vec3 lightVec = -incidentVec;
+            float diffuse = max(dot(lightVec, normal), 0.0);
+            float highlight = pow(max(dot(eyeVec, reflect(incidentVec, normal)), 0.0), 100.0);
+            float ambient = 0.1;
+            fragColor = vec4(color * (diffuse + highlight + ambient), 1.0);
+        }
+    </script>
+    <script type="x-shader/vs" id="vertex-quad">
+        #version 300 es
+
+        layout(location=0) in vec4 position;
+
+        out vec2 vUV;
+        void main() {
+            vUV = position.xy * 0.5 + 0.5;
+            gl_Position = position;
+        }
+    </script>
+    <script type="x-shader/fs" id="fragment-blur">
+        #version 300 es
+        precision highp float;
+
+        #define NUM_STEPS 8.0
+        #define BLUR_RADIUS 2.0
+
+        uniform sampler2D color;
+        uniform sampler2D velocity;
+
+        in vec2 vUV;
+
+        out vec4 fragColor;
+        void main() {
+            vec2 step = texture(velocity, vUV).xy * BLUR_RADIUS / (NUM_STEPS - 1.0);
+            fragColor = vec4(0.0, 0.0, 0.0, 1.0);
+
+            for (float i = -NUM_STEPS + 1.0; i < NUM_STEPS; ++i) {
+                fragColor.rgb += texture(color, vUV + (i * step)).rgb;
+            }
+
+            fragColor.rgb /= (NUM_STEPS * 2.0 - 1.0);
+        }
+    </script>
+    <script type="text/javascript">
+        var blurEnabled = true;
+        var slowMoReset = 1;
+
+        document.getElementById("blur-toggle").addEventListener("change", function() {
+            blurEnabled = this.checked;
+        });
+
+        document.getElementById("slowmo-toggle").addEventListener("change", function() {
+            slowMoReset = this.checked ? 6 : 1;
+        });
+
+        utils.addTimerElement();
+        
+
+        if (!utils.testWebGL2()) {
+            console.error("WebGL 2 not available");
+            document.body.innerHTML = "This example requires WebGL 2 which is unavailable on this system."
+        }
+
+        if (!utils.testExtension("EXT_color_buffer_float")) {
+            document.body.innerHTML = "This example requires extension EXT_color_buffer_float which is not supported on this system."
+        }
+
+        var EASING = 0.8;
+        var STOP_THRESHOLD = 0.0001;
+
+        var canvas = document.getElementById("gl-canvas");
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        var app = PicoGL.createApp(canvas)
+        .clearColor(0.0, 0.0, 0.0, 1.0)
+        .depthTest()
+        .floatRenderTargets();
+
+        var timer = app.createTimer();
+
+        // SET UP PROGRAM
+        var drawFsSource =  document.getElementById("fragment-draw").text.trim();
+        var drawFShader = app.createShader(PicoGL.FRAGMENT_SHADER, drawFsSource)
+
+        var velocityVsSource =  document.getElementById("vertex-velocity").text.trim();
+        var program = app.createProgram(velocityVsSource, drawFShader);
+
+        var noVelocityVsSource =  document.getElementById("vertex-no-velocity").text.trim();
+        var noVelocityProgram = app.createProgram(noVelocityVsSource, drawFShader);
+
+        var quadVSSource =  document.getElementById("vertex-quad").text.trim();
+        var blurFSSource =  document.getElementById("fragment-blur").text.trim();
+        var blurProgram = app.createProgram(quadVSSource, blurFSSource);
+
+        var framebuffer = app.createFramebuffer()
+        // COLOR BUFFER
+        .colorTarget(0)
+        // VELOCITY BUFFER  
+        .colorTarget(1, { type: PicoGL.FLOAT, format: PicoGL.RG })
+        .depthTarget();
+
+        // SET UP GEOMETRY
+        var sphere = utils.createSphere({radius: 0.2})
+        var positions = app.createVertexBuffer(PicoGL.FLOAT, 3, sphere.positions);
+        var uv = app.createVertexBuffer(PicoGL.FLOAT, 2, sphere.uvs);
+        var normals = app.createVertexBuffer(PicoGL.FLOAT, 3, sphere.normals);
+        var indices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, sphere.indices);
+
+        var sphereArray = app.createVertexArray()
+        .attributeBuffer(0, positions)
+        .attributeBuffer(1, uv)
+        .attributeBuffer(2, normals)
+        .indexBuffer(indices);
+
+        var quadPositions = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
+            -1, 1,
+            -1, -1,
+            1, -1,
+            -1, 1,
+            1, -1,
+            1, 1,
+        ]));
+
+        var quadArray = app.createVertexArray().attributeBuffer(0, quadPositions);
+
+        // SET UP UNIFORM BUFFER
+        var projMatrix = mat4.create();
+        mat4.perspective(projMatrix, Math.PI / 2, canvas.width / canvas.height, 0.1, 10.0);
+
+        var viewMatrix = mat4.create();
+        var eyePosition = vec3.fromValues(0, 0, 1.5);
+        mat4.lookAt(viewMatrix, eyePosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
+
+        var viewProjMatrix = mat4.create();
+        mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
+
+        var lightPosition = vec3.fromValues(0.5, 0, 2);
+
+        var sceneUniformBuffer = app.createUniformBuffer([
+            PicoGL.FLOAT_MAT4,
+            PicoGL.FLOAT_VEC4,
+            PicoGL.FLOAT_VEC4
+        ])
+        .set(0, viewProjMatrix)
+        .set(1, eyePosition)
+        .set(2, lightPosition)
+        .update();
+
+        window.onresize = function() {
+            app.resize(window.innerWidth, window.innerHeight);
+            framebuffer.resize();
+
+            mat4.perspective(projMatrix, Math.PI / 2, app.width / app.height, 0.1, 10.0);
+            mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
+            
+            sceneUniformBuffer.set(0, viewProjMatrix).update();
+        }
+
+        var image = new Image();
+
+        image.onload = function() {
+            // CREATE TEXTURE
+            var texture = app.createTexture2D(image, { flipY: true });
+
+            var NUM_SPHERES = 10;
+            var spheres = new Array(NUM_SPHERES);
+
+            // OBJECT DESCRIPTIONS
+            for (var i = 0, len = spheres.length; i < len; ++i) {
+                spheres[i] = {
+                    rotation: 1.8,
+                    translation: [Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1],
+                    translationTarget: [Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1],
+                    modelMatrix: mat4.create(),
+                    previousModelMatrix: mat4.create(),
+                    drawCall: app.createDrawCall(program, sphereArray)
+                    .uniformBlock("SceneUniforms", sceneUniformBuffer)
+                    .texture("tex", texture),
+                    noBlurDrawCall: app.createDrawCall(noVelocityProgram, sphereArray)
+                    .uniformBlock("SceneUniforms", sceneUniformBuffer)
+                    .texture("tex", texture),
+                }
+            }
+
+            var blurDrawCall = app.createDrawCall(blurProgram, quadArray)
+            .texture("color", framebuffer.colorTextures[0])
+            .texture("velocity", framebuffer.colorTextures[1]);
+
+            var modelMatrix = mat4.create();
+            var translationMatrix = mat4.create();
+            var rotationMatrix = mat4.create();
+
+            var slowMoCounter = 0;
+
+            window.draw = function draw() {
+                if (timer.ready()) {
+                    utils.updateTimerElement(timer.cpuTime, timer.gpuTime);
+                }
+
+                if (--slowMoCounter > 0) {
+                    requestAnimationFrame(draw);
+                    return;
+                }
+
+                slowMoCounter = slowMoReset;
+
+                timer.start()
+
+                if (blurEnabled) {
+                    app.drawFramebuffer(framebuffer)
+                }
+                app.clear();
+
+                for (var i = 0, len = spheres.length; i < len; ++i) {
+                    var sphere = spheres[i];
+                    sphere.previousModelMatrix.set(sphere.modelMatrix);
+
+                    // EASE OUT TO TARGET POSITION
+                    var diff = vec3.create();
+                    vec3.subtract(diff, sphere.translation, sphere.translationTarget);
+                    var distance = vec3.length(diff);
+
+                    if (distance < STOP_THRESHOLD) {
+                        sphere.translationTarget[0] = Math.random() * 2 - 1;
+                        sphere.translationTarget[1] = Math.random() * 2 - 1;
+                        sphere.translationTarget[2] = Math.random() * 2 - 1;
+                    } else {
+                        vec3.normalize(diff, diff);
+                        vec3.scale(diff, diff, distance * EASING);
+                        vec3.add(sphere.translation, sphere.translationTarget, diff);
+                    }
+
+                    mat4.fromYRotation(rotationMatrix, sphere.rotation);
+                    mat4.fromTranslation(translationMatrix, sphere.translation);
+                    mat4.multiply(sphere.modelMatrix, translationMatrix, rotationMatrix);
+
+                    if (blurEnabled) {
+                        sphere.drawCall.uniform("uModelPrevious", sphere.previousModelMatrix)
+                        .uniform("uModel", sphere.modelMatrix)
+                        .draw();
+                    } else {
+                        sphere.noBlurDrawCall.uniform("uModel", sphere.modelMatrix)
+                        .draw();
+                    }
+                }
+                
+                if (blurEnabled) {
+                    app.defaultDrawFramebuffer()
+                    blurDrawCall.draw();
+                    
+                }
+                
+                timer.end();
+
+                requestAnimationFrame(draw);
+            }
+
+            requestAnimationFrame(draw);
+            
+        }
+
+        image.src = "img/khronos_webgl.png";
+
+    </script>
+    <a href="https://github.com/tsherif/picogl.js" id="github-ribbon"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"></a>
+    <script src="../site/js/iframe.js"></script>
+</body>
+</html>
