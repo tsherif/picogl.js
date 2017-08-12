@@ -217,23 +217,55 @@
                 1, 1
             ]);
 
-            var normals = new Float32Array(positions.length);
-            var i, count;
-            var ni;
+            var normals = new Float32Array([
+                // front
+                0, 0, 1, 
+                0, 0, 1, 
+                0, 0, 1, 
+                0, 0, 1, 
+                0, 0, 1, 
+                0, 0, 1,
 
-            for (i = 0, count = positions.length / 3; i < count; i++) {
-                ni = i * 3;        
+                // right
+                1, 0, 0, 
+                1, 0, 0, 
+                1, 0, 0, 
+                1, 0, 0, 
+                1, 0, 0, 
+                1, 0, 0,
 
-                normals[ni] = parseInt(i / 6, 10) === 1 ? 1 : 
-                             parseInt(i / 6, 10) === 3 ? -1 : 0; 
+                // back 
+                0, 0, -1, 
+                0, 0, -1, 
+                0, 0, -1, 
+                0, 0, -1, 
+                0, 0, -1, 
+                0, 0, -1, 
 
-                normals[ni+1] = parseInt(i / 6, 10) === 4 ? 1 : 
-                               parseInt(i / 6, 10) === 5 ? -1 : 0; 
+                // left
+                -1, 0, 0, 
+                -1, 0, 0, 
+                -1, 0, 0, 
+                -1, 0, 0, 
+                -1, 0, 0, 
+                -1, 0, 0,
 
-                normals[ni+2] = parseInt(i / 6, 10) === 0 ? 1 : 
-                               parseInt(i / 6, 10) === 2 ? -1 : 0; 
+                // top 
+                0, 1, 0, 
+                0, 1, 0, 
+                0, 1, 0, 
+                0, 1, 0, 
+                0, 1, 0, 
+                0, 1, 0,
 
-            }
+                // bottom
+                0, -1, 0, 
+                0, -1, 0, 
+                0, -1, 0, 
+                0, -1, 0, 
+                0, -1, 0, 
+                0, -1, 0
+            ]);
 
             return {
                 positions: positions,
