@@ -60,11 +60,12 @@
         in vec3 vUV;
 
         uniform sampler3D tex;
+        uniform float uTime;
 
         out vec4 fragColor;
         void main() {
-            float alpha = texture(tex, vUV).r * 0.03;
-            fragColor = vec4(vUV * alpha, alpha);
+            float alpha = texture(tex, vUV + vec3(0.0, 0.0, uTime)).r * 0.03;
+            fragColor = vec4(fract(vUV) * alpha, alpha);
         }
     </script>
     <script type="text/javascript">
@@ -132,9 +133,7 @@
             }
         }
 
-        var texture = app.createTexture3D(textureData, TEXTURE_DIMENSIONS, TEXTURE_DIMENSIONS, TEXTURE_DIMENSIONS, {
-            format: PicoGL.RED
-        });
+        var texture = app.createTexture3D(textureData, TEXTURE_DIMENSIONS, TEXTURE_DIMENSIONS, TEXTURE_DIMENSIONS, { format: PicoGL.RED });
 
         // UNIFORM DATA
         var projMatrix = mat4.create();
@@ -144,30 +143,23 @@
         var eyePosition = vec3.fromValues(1, 1, 1);
         mat4.lookAt(viewMatrix, eyePosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
 
-        var viewProjMatrix = mat4.create();
-        mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
-
-        var lightPosition = vec3.fromValues(1, 1, 0.5);
-
         var mvpMatrix = mat4.create();
-        var modelMatrix = mat4.create();
-        var rotateXMatrix = mat4.create();
-        var rotateYMatrix = mat4.create();
-
-        var angleX = 0;
-        var angleY = 0;
+        mat4.multiply(mvpMatrix, projMatrix, viewMatrix);
+        
 
         window.onresize = function() {
             app.resize(window.innerWidth, window.innerHeight);
 
             mat4.perspective(projMatrix, Math.PI / 2, app.width / app.height, 0.1, 10.0);
-            mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);            
+            mat4.multiply(mvpMatrix, projMatrix, viewMatrix);            
         }
 
         // SET UP DRAW CALL
         var drawCall = app.createDrawCall(program, pointArray, PicoGL.POINTS)
-        .texture("tex", texture);
+        .texture("tex", texture)
+        .uniform("uMVP", mvpMatrix);
 
+        var startTime = performance.now();
         function draw() {
             if (timer.ready()) {
                 utils.updateTimerElement(timer.cpuTime, timer.gpuTime);
@@ -175,15 +167,7 @@
 
             timer.start();
 
-            angleX += 0.01;
-            angleY += 0.02;
-
-            mat4.fromXRotation(rotateXMatrix, angleX);
-            mat4.fromYRotation(rotateYMatrix, angleY);
-            mat4.multiply(modelMatrix, rotateXMatrix, rotateYMatrix);
-            mat4.multiply(mvpMatrix, viewProjMatrix, modelMatrix);
-
-            drawCall.uniform("uMVP", mvpMatrix);
+            drawCall.uniform("uTime", (performance.now() - startTime) / 1000);
 
             app.clear();
             drawCall.draw();
