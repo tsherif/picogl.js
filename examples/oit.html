@@ -178,7 +178,7 @@
         var timer = app.createTimer();
 
         var spheres = new Array(NUM_SPHERES);
-        var sphereColorData = new Float32Array(NUM_SPHERES * 4);
+        var sphereColorData = new Uint8Array(NUM_SPHERES * 4);
         var modelMatrixData = new Float32Array(NUM_SPHERES * 16);
 
         for (var i = 0; i < NUM_SPHERES; ++i) {
@@ -194,10 +194,10 @@
             };
 
             sphereColorData.set(vec4.fromValues(
-                Math.sqrt(Math.random()),
-                Math.sqrt(Math.random()),
-                Math.sqrt(Math.random()),
-                0.5
+                Math.floor(Math.sqrt(Math.random()) * 256),
+                Math.floor(Math.sqrt(Math.random()) * 256),
+                Math.floor(Math.sqrt(Math.random()) * 256),
+                128
             ), i * 4);
         }
 
@@ -222,14 +222,14 @@
         var indices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, sphere.indices);
 
         // PER-INSTANCE COLORS AND MODEL MATRICES
-        var colors = app.createVertexBuffer(PicoGL.FLOAT, 4, sphereColorData);
+        var colors = app.createVertexBuffer(PicoGL.UNSIGNED_BYTE, 4, sphereColorData);
         var modelMatrices = app.createMatrixBuffer(PicoGL.FLOAT_MAT4, modelMatrixData);
 
         var sphereArray = app.createVertexArray()
         .vertexAttributeBuffer(0, positions)
         .vertexAttributeBuffer(1, uv)
         .vertexAttributeBuffer(2, normals)
-        .instanceAttributeBuffer(3, colors)
+        .instanceNormalizedAttributeBuffer(3, colors)
         .instanceAttributeBuffer(4, modelMatrices)
         .indexBuffer(indices);
 

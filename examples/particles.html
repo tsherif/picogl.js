@@ -126,7 +126,7 @@
         // GEOMETRY DATA
         var NUM_PARTICLES = 200000;
         var positionData = new Float32Array(NUM_PARTICLES * 3);
-        var colorData = new Float32Array(NUM_PARTICLES * 3);
+        var colorData = new Uint8Array(NUM_PARTICLES * 3);
 
         for (var i = 0; i < NUM_PARTICLES; ++i) {
             var vec3i = i * 3;
@@ -135,9 +135,9 @@
             positionData[vec3i + 1] = Math.random() * 2 - 1;
             positionData[vec3i + 2] = Math.random() * 2 - 1;
 
-            colorData[vec3i] = Math.random();
-            colorData[vec3i + 1] = Math.random();
-            colorData[vec3i + 2] = Math.random();
+            colorData[vec3i] =     Math.floor(Math.random() * 256);
+            colorData[vec3i + 1] = Math.floor(Math.random() * 256);
+            colorData[vec3i + 2] = Math.floor(Math.random() * 256);
         }
 
         // INPUT AND OUTPUT POSITION AND VELOCITY BUFFERS
@@ -147,18 +147,18 @@
         var velocities2 = app.createVertexBuffer(PicoGL.FLOAT, 3, positionData.length);
         
         // COLOR BUFFER NOT INVOLVED IN TRANSFORM FEEDBACK
-        var colors = app.createVertexBuffer(PicoGL.FLOAT, 3, colorData);
+        var colors = app.createVertexBuffer(PicoGL.UNSIGNED_BYTE, 3, colorData);
 
         // INPUT AND OUTPUT VERTEX ARRAYS
         var vertexArray1 = app.createVertexArray()
         .vertexAttributeBuffer(0, positions1)
         .vertexAttributeBuffer(1, velocities1)
-        .vertexAttributeBuffer(2, colors);
+        .vertexNormalizedAttributeBuffer(2, colors);
 
         var vertexArray2 = app.createVertexArray()
         .vertexAttributeBuffer(0, positions2)
         .vertexAttributeBuffer(1, velocities2)
-        .vertexAttributeBuffer(2, colors);
+        .vertexNormalizedAttributeBuffer(2, colors);
 
         // TRANSFORM FEEDBACK OBJECTS
         var transformFeedback1 = app.createTransformFeedback()

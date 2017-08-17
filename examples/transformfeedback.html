@@ -110,20 +110,20 @@
         var positions2 = app.createVertexBuffer(PicoGL.FLOAT, 2, 6);
 
         // COLOR BUFFER BECAUSE IT WON'T BE PART OF TRANSFORM FEEDBACK
-        var colors = app.createVertexBuffer(PicoGL.FLOAT, 3, new Float32Array([
-            1.0, 0.0, 0.0,
-            0.0, 1.0, 0.0,
-            0.0, 0.0, 1.0
+        var colors = app.createVertexBuffer(PicoGL.UNSIGNED_BYTE, 3, new Uint8Array([
+            255, 0, 0,
+            0, 255, 0,
+            0, 0, 255
         ]));
 
         // COMBINE VERTEX BUFFERS INTO INPUT AND OUTPUT VERTEX ARRAYS
         var triangleArrayA = app.createVertexArray()
         .vertexAttributeBuffer(0, positions1)
-        .vertexAttributeBuffer(1, colors);
+        .vertexNormalizedAttributeBuffer(1, colors);
 
         var triangleArrayB = app.createVertexArray()
         .vertexAttributeBuffer(0, positions2)
-        .vertexAttributeBuffer(1, colors);
+        .vertexNormalizedAttributeBuffer(1, colors);
 
         // CREATE TRANSFORM FEEDBACK OBJECTS AND
         // INDICATE BUFFERS TO CAPTURE

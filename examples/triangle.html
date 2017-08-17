@@ -90,16 +90,16 @@
              0.0, 0.5, 
         ]));
 
-        var colors = app.createVertexBuffer(PicoGL.FLOAT, 3, new Float32Array([
-            1.0, 0.0, 0.0,
-            0.0, 1.0, 0.0,
-            0.0, 0.0, 1.0
+        var colors = app.createVertexBuffer(PicoGL.UNSIGNED_BYTE, 3, new Uint8Array([
+            255, 0, 0,
+            0, 255, 0,
+            0, 0, 255
         ]));
 
         // COMBINE VERTEX BUFFERS INTO VERTEX ARRAY
         var triangleArray = app.createVertexArray()
         .vertexAttributeBuffer(0, positions)
-        .vertexAttributeBuffer(1, colors);
+        .vertexNormalizedAttributeBuffer(1, colors);
 
         // CREATE DRAW CALL FROM PROGRAM AND VERTEX ARRAY
         var drawCall = app.createDrawCall(program, triangleArray);
