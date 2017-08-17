@@ -281,9 +281,9 @@
         var indices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, sphere.indices);
 
         var sphereArray = app.createVertexArray()
-        .attributeBuffer(0, positions)
-        .attributeBuffer(1, uv)
-        .attributeBuffer(2, normals)
+        .vertexAttributeBuffer(0, positions)
+        .vertexAttributeBuffer(1, uv)
+        .vertexAttributeBuffer(2, normals)
         .indexBuffer(indices);
 
         var quadPositions = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
@@ -295,7 +295,7 @@
             1, 1,
         ]));
 
-        var quadArray = app.createVertexArray().attributeBuffer(0, quadPositions);
+        var quadArray = app.createVertexArray().vertexAttributeBuffer(0, quadPositions);
 
         // SET UP UNIFORM BUFFER
         var projMatrix = mat4.create();

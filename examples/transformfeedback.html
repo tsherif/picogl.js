@@ -118,12 +118,12 @@
 
         // COMBINE VERTEX BUFFERS INTO INPUT AND OUTPUT VERTEX ARRAYS
         var triangleArrayA = app.createVertexArray()
-        .attributeBuffer(0, positions1)
-        .attributeBuffer(1, colors);
+        .vertexAttributeBuffer(0, positions1)
+        .vertexAttributeBuffer(1, colors);
 
         var triangleArrayB = app.createVertexArray()
-        .attributeBuffer(0, positions2)
-        .attributeBuffer(1, colors);
+        .vertexAttributeBuffer(0, positions2)
+        .vertexAttributeBuffer(1, colors);
 
         // CREATE TRANSFORM FEEDBACK OBJECTS AND
         // INDICATE BUFFERS TO CAPTURE

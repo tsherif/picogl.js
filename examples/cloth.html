@@ -487,7 +487,7 @@
         ]));
 
         var quadArray = app.createVertexArray()
-        .attributeBuffer(0, quadPositions);
+        .vertexAttributeBuffer(0, quadPositions);
 
         // Cloth geometry for drawing
         var dataIndex = app.createVertexBuffer(PicoGL.SHORT, 2, dataTextureIndex);
@@ -495,8 +495,8 @@
         var indices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, indexData);
 
         var clothArray = app.createVertexArray()
-        .attributeBuffer(0, dataIndex)
-        .attributeBuffer(1, uv)
+        .vertexIntegerAttributeBuffer(0, dataIndex)
+        .vertexAttributeBuffer(1, uv)
         .indexBuffer(indices);
 
         // Ball geometry
@@ -506,8 +506,8 @@
         var ballIndices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, ballGeo.indices);
 
         var ballArray = app.createVertexArray()
-        .attributeBuffer(0, ballPositions)
-        .attributeBuffer(1, ballNormals)
+        .vertexAttributeBuffer(0, ballPositions)
+        .vertexAttributeBuffer(1, ballNormals)
         .indexBuffer(ballIndices);
 
 

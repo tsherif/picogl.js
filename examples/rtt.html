@@ -130,9 +130,9 @@
         var normals = app.createVertexBuffer(PicoGL.FLOAT, 3, box.normals);
 
         var boxArray = app.createVertexArray()
-        .attributeBuffer(0, positions)
-        .attributeBuffer(1, uv)
-        .attributeBuffer(2, normals);
+        .vertexAttributeBuffer(0, positions)
+        .vertexAttributeBuffer(1, uv)
+        .vertexAttributeBuffer(2, normals);
 
         // UNIFORMS
         var projMatrix = mat4.create();

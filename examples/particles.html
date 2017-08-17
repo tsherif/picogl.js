@@ -151,14 +151,14 @@
 
         // INPUT AND OUTPUT VERTEX ARRAYS
         var vertexArray1 = app.createVertexArray()
-        .attributeBuffer(0, positions1)
-        .attributeBuffer(1, velocities1)
-        .attributeBuffer(2, colors);
+        .vertexAttributeBuffer(0, positions1)
+        .vertexAttributeBuffer(1, velocities1)
+        .vertexAttributeBuffer(2, colors);
 
         var vertexArray2 = app.createVertexArray()
-        .attributeBuffer(0, positions2)
-        .attributeBuffer(1, velocities2)
-        .attributeBuffer(2, colors);
+        .vertexAttributeBuffer(0, positions2)
+        .vertexAttributeBuffer(1, velocities2)
+        .vertexAttributeBuffer(2, colors);
 
         // TRANSFORM FEEDBACK OBJECTS
         var transformFeedback1 = app.createTransformFeedback()

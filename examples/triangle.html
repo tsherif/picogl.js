@@ -98,8 +98,8 @@
 
         // COMBINE VERTEX BUFFERS INTO VERTEX ARRAY
         var triangleArray = app.createVertexArray()
-        .attributeBuffer(0, positions)
-        .attributeBuffer(1, colors);
+        .vertexAttributeBuffer(0, positions)
+        .vertexAttributeBuffer(1, colors);
 
         // CREATE DRAW CALL FROM PROGRAM AND VERTEX ARRAY
         var drawCall = app.createDrawCall(program, triangleArray);
