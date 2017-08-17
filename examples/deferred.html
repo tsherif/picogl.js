@@ -179,16 +179,16 @@
         var uv = app.createVertexBuffer(PicoGL.FLOAT, 2, box.uvs);
 
         var boxArray = app.createVertexArray()
-        .attributeBuffer(0, positions)
-        .attributeBuffer(1, normals)
-        .attributeBuffer(2, uv);
+        .vertexAttributeBuffer(0, positions)
+        .vertexAttributeBuffer(1, normals)
+        .vertexAttributeBuffer(2, uv);
 
         var sphere = utils.createSphere();
         var lightPositions = app.createVertexBuffer(PicoGL.FLOAT, 3, sphere.positions);
         var lightIndices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, sphere.indices);
 
         var sphereArray = app.createVertexArray()
-        .attributeBuffer(0, lightPositions)
+        .vertexAttributeBuffer(0, lightPositions)
         .indexBuffer(lightIndices);
 
         // CAMERA STUFF

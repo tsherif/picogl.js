@@ -289,16 +289,16 @@
         var cubeNormals = app.createVertexBuffer(PicoGL.FLOAT, 3, cube.normals);
 
         var cubeArray = app.createVertexArray()
-        .attributeBuffer(0, cubePositions)
-        .attributeBuffer(1, cubeUVs)
-        .attributeBuffer(2, cubeNormals);
+        .vertexAttributeBuffer(0, cubePositions)
+        .vertexAttributeBuffer(1, cubeUVs)
+        .vertexAttributeBuffer(2, cubeNormals);
 
         var sun = utils.createSphere({radius: 0.1});
         var sunPositions = app.createVertexBuffer(PicoGL.FLOAT, 3, sun.positions);
         var sunIndices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, sun.indices);
 
         var sunArray = app.createVertexArray()
-        .attributeBuffer(0, sunPositions)
+        .vertexAttributeBuffer(0, sunPositions)
         .indexBuffer(sunIndices);
 
         var quadPositions = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
@@ -310,7 +310,7 @@
             1, 1,
         ]));
 
-        var quadArray = app.createVertexArray().attributeBuffer(0, quadPositions);
+        var quadArray = app.createVertexArray().vertexAttributeBuffer(0, quadPositions);
 
 
         // SET UP OTHER DATA

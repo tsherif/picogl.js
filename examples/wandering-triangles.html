@@ -181,7 +181,7 @@
 
         var offsetData = new Float32Array(NUM_INSTANCES * 2);
         var rotationData = new Float32Array(NUM_INSTANCES);
-        var colorData = new Float32Array(NUM_INSTANCES * 3);
+        var colorData = new Uint8Array(NUM_INSTANCES * 3);
         var positionData = new Float32Array([
             0.012, 0.0, 
             -0.008, 0.008, 
@@ -198,9 +198,9 @@
 
             rotationData[i] = Math.random() * 2 * Math.PI;
 
-            colorData[ci] = Math.random();
-            colorData[ci + 1] = Math.random();
-            colorData[ci + 2] = Math.random();
+            colorData[ci]     = Math.floor(Math.random() * 256);
+            colorData[ci + 1] = Math.floor(Math.random() * 256);
+            colorData[ci + 2] = Math.floor(Math.random() * 256);
         }
 
         // INPUT AND OUTPUT VERTEX BUFFERS
@@ -213,7 +213,7 @@
 
         // ATTRIBUTES FOR DRAWING
         var positions = app.createVertexBuffer(PicoGL.FLOAT, 2, positionData);
-        var colors = app.createVertexBuffer(PicoGL.FLOAT, 3, colorData);
+        var colors = app.createVertexBuffer(PicoGL.UNSIGNED_BYTE, 3, colorData);
 
         
         // COMBINE VERTEX BUFFERS INTO INPUT AND OUTPUT VERTEX ARRAYS
@@ -237,13 +237,13 @@
         // VERTEX ARRAYS FOR DRAWING
         var drawArrayA = app.createVertexArray()
         .vertexAttributeBuffer(0, positions)
-        .instanceAttributeBuffer(1, colors)
+        .instanceNormalizedAttributeBuffer(1, colors)
         .instanceAttributeBuffer(2, offsetsA)
         .instanceAttributeBuffer(3, rotationsA);
 
         var drawArrayB = app.createVertexArray()
         .vertexAttributeBuffer(0, positions)
-        .instanceAttributeBuffer(1, colors)
+        .instanceNormalizedAttributeBuffer(1, colors)
         .instanceAttributeBuffer(2, offsetsB)
         .instanceAttributeBuffer(3, rotationsB);
 

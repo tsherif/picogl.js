@@ -118,7 +118,7 @@
         var positions = app.createVertexBuffer(PicoGL.FLOAT, 3, positionData)
 
         var pointArray = app.createVertexArray()
-        .attributeBuffer(0, positions);
+        .vertexAttributeBuffer(0, positions);
 
         // CREATE 3D TEXTURE
         var TEXTURE_DIMENSIONS = 16;

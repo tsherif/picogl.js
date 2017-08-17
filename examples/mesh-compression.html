@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<!--
+  The MIT License (MIT)
+
+  Copyright (c) 2017 Tarek Sherif
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy of
+  this software and associated documentation files (the "Software"), to deal in
+  the Software without restriction, including without limitation the rights to
+  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+  the Software, and to permit persons to whom the Software is furnished to do so,
+  subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+  FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+  COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+  IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+<html>
+<!-- 
+    Quantization technique from: 
+        Mesh Geometry Compression for Mobile Graphics by Lee, Choe and Lee
+        http://dl.acm.org/citation.cfm?id=1834281
+    Oct-encoding algorithm from: 
+        A Survey of Efficient Representations for Independent Unit Vectors by Cigolle et al.
+        http://jcgt.org/published/0003/02/01/
+ -->
+<head>
+    <title>PicoGL.js: Mesh Compression</title>
+    <script src="utils/gl-matrix.js"></script>
+    <script src="../build/picogl.js"></script>
+    <script src="utils/utils.js"></script>
+    <link rel="stylesheet" href="../site/css/picogl-example.css"> 
+</head>
+<body>
+    <div id="example-title">
+        PicoGL.js Example: Mesh Compression<BR>
+        Sphere on the left is uncompressed, sphere on the right is quantized <BR>
+        and oct-encoded achieving <span id="compression"></span>% compression.
+        <div>
+            <a href="https://github.com/tsherif/picogl.js/blob/master/examples/mesh-compression.html">Source code</a>
+        </div>
+    </div>
+    <canvas id="gl-canvas"></canvas>
+    <script type="shader/vs" id="vs-uncompressed">
+        #version 300 es
+
+        layout(location=0) in vec4 position;
+        layout(location=1) in vec3 normal;
+        
+        uniform mat4 model;
+
+        out vec3 vNormal;
+
+        void main() {
+            vNormal = normal;
+            gl_Position = model * position;
+        }
+    </script>
+    <script type="shader/vs" id="vs-compressed">
+        #version 300 es
+
+        layout(location=0) in vec4 position;
+        layout(location=1) in vec2 normal;
+        
+        uniform mat4 decode;
+        uniform mat4 model;
+
+        out vec3 vNormal;
+
+
+        vec3 octDecode(vec2 oct) {
+            vec3 v = vec3(oct.xy, 1.0 - abs(oct.x) - abs(oct.y));
+            if (v.z < 0.0) {
+                v.xy = (1.0 - abs(v.yx)) * vec2(v.x >= 0.0 ? 1.0 : -1.0, v.y >= 0.0 ? 1.0 : -1.0);
+            }
+            return normalize(v);
+        }
+
+        void main() {
+            vNormal = octDecode(normal);
+            gl_Position = model * decode * position;
+        }
+    </script>
+    <script type="shader/fs" id="fs">
+        #version 300 es
+        precision highp float;
+
+        in vec3 vNormal;
+
+        out vec4 fragColor;
+        void main() {
+            fragColor = vec4(normalize(vNormal) * vec3(1.0, 1.0, -1.0), 1.0);
+        }
+    </script>
+
+    <script>
+        var canvas = document.getElementById("gl-canvas");
+
+        if (!utils.testWebGL2()) {
+            console.error("WebGL 2 not available");
+            document.body.innerHTML = "This example requires WebGL 2 which is unavailable on this system."
+        }
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        var app = PicoGL.createApp(canvas)
+        .clearColor(0.0, 0.0, 0.0, 1.0)
+        .clear();
+
+        window.onresize = function() {
+            app.resize(window.innerWidth, window.innerHeight);
+        }
+
+        // SHARED FRAGMENT SHADER 
+        var fsSource =  document.getElementById("fs").text.trim();
+        var fShader = app.createShader(PicoGL.FRAGMENT_SHADER, fsSource);
+
+        // PROGRAM PASSES UNCOMPRESSED GEOMETRY
+        var uncompressedVsSource =  document.getElementById("vs-uncompressed").text.trim();
+        var uncompressedProgram = app.createProgram(uncompressedVsSource, fShader);
+
+        // PROGRAM DECODES COMPRESSED GEOMETRY
+        var compressedVsSource =  document.getElementById("vs-compressed").text.trim();
+        var compressedProgram = app.createProgram(compressedVsSource, fShader);
+
+        // GEOMETRY DATA
+        var sphere = utils.createSphere({ radius: 0.48 });
+
+        // UNCOMPRESSED GEOMETRY
+        var uncompressedPositions = app.createVertexBuffer(PicoGL.FLOAT, 3, sphere.positions);
+        var uncompressedNormals = app.createVertexBuffer(PicoGL.FLOAT, 3, sphere.normals);
+        var indices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, sphere.indices);
+
+        var uncompressedVertexArray = app.createVertexArray()
+        .vertexAttributeBuffer(0, uncompressedPositions)
+        .vertexAttributeBuffer(1, uncompressedNormals)
+        .indexBuffer(indices);
+
+        // QUANTIZE POSITIONS AND OCT-ENCODE NORMALS FOR COMPRESSED GEOMETRY
+        var b = bounds(sphere.positions);
+        var q = quantize(sphere.positions, b.min, b.max);
+        var encodedNormals = octEncode(sphere.normals);
+
+        var compressedPositions = app.createVertexBuffer(PicoGL.UNSIGNED_SHORT, 3, q.quantized);
+        var compressedNormals = app.createVertexBuffer(PicoGL.BYTE, 2, encodedNormals);
+
+        var compressedVertexArray = app.createVertexArray()
+        .vertexAttributeBuffer(0, compressedPositions)
+        .vertexNormalizedAttributeBuffer(1, compressedNormals)
+        .indexBuffer(indices);
+
+        // UNIFORMS
+        var uncompressedTransform = mat4.create();
+        mat4.fromTranslation(uncompressedTransform, vec3.fromValues(-0.5, 0.0, 0.0));
+        
+        var compressedTransform = mat4.create();
+        mat4.fromTranslation(compressedTransform, vec3.fromValues(0.5, 0.0, 0.0))
+
+        // DRAW CALLS
+        var uncompressedDrawCall = app.createDrawCall(uncompressedProgram, uncompressedVertexArray)
+        .uniform("model", uncompressedTransform);
+
+        var compressedDrawCall = app.createDrawCall(compressedProgram, compressedVertexArray)
+        .uniform("decode", q.decode)
+        .uniform("model", compressedTransform);
+
+        // DRAW
+        uncompressedDrawCall.draw();
+        compressedDrawCall.draw();
+
+        // CLEANUP
+        fShader.delete();
+        uncompressedProgram.delete();
+        compressedProgram.delete();
+        uncompressedPositions.delete();
+        uncompressedNormals.delete();
+        uncompressedVertexArray.delete();
+        compressedPositions.delete();
+        compressedNormals.delete();
+        compressedVertexArray.delete();
+
+        document.getElementById("compression").innerText = ((1 - (q.quantized.byteLength + encodedNormals.byteLength) / (sphere.positions.byteLength + sphere.normals.byteLength)) * 100).toFixed(1);
+
+        ///////////////////////////////////
+        // COMPRESSION FUNCTIONS
+        ///////////////////////////////////
+
+        // CALCULATE THE BOUNDING BOX OF THE MESH
+        function bounds(array) {
+            var min = new Float32Array(3);
+            var max = new Float32Array(3);
+            var i;
+
+            min[0] = min[1] = min[2] = Number.MAX_VALUE;
+            max[0] = max[1] = max[2] = -Number.MAX_VALUE;
+
+            for (i = 0; i < array.length; i += 3) {
+                min[0] = Math.min(min[0], array[i + 0]);
+                min[1] = Math.min(min[1], array[i + 1]);
+                min[2] = Math.min(min[2], array[i + 2]);
+                max[0] = Math.max(max[0], array[i + 0]);
+                max[1] = Math.max(max[1], array[i + 1]);
+                max[2] = Math.max(max[2], array[i + 2]);
+            }
+
+            return {
+                min: min,
+                max: max
+            };
+        }
+
+        // MAP VALUES ALONG EACH AXIS OF THE BOUNDING BOX TO
+        // UNSIGNED 16-BIT INTS
+        // http://cg.postech.ac.kr/research/mesh_comp_mobile/mesh_comp_mobile_conference.pdf
+        
+        function quantize(array, min, max) {
+
+            var quantized = new Uint16Array(array.length);
+            var multiplier = new Float32Array([
+                max[0] !== min[0] ? 65535 / (max[0] - min[0]) : 0,
+                max[1] !== min[1] ? 65535 / (max[1] - min[1]) : 0,
+                max[2] !== min[2] ? 65535 / (max[2] - min[2]) : 0
+            ]);
+            var i;
+
+            for (i = 0; i < array.length; i += 3) {
+                quantized[i    ] = Math.floor((array[i    ] - min[0]) * multiplier[0]);
+                quantized[i + 1] = Math.floor((array[i + 1] - min[1]) * multiplier[1]);
+                quantized[i + 2] = Math.floor((array[i + 2] - min[2]) * multiplier[2]);
+            }
+
+            var decodeMat = new Float32Array(16);
+
+            var translate = mat4.create();
+            var scale = mat4.create();
+
+            mat4.identity(translate);
+            mat4.identity(scale);
+            mat4.translate(translate, translate, min);
+            mat4.scale(scale, scale, [
+                (max[0] - min[0]) / 65535,
+                (max[1] - min[1]) / 65535,
+                (max[2] - min[2]) / 65535
+            ]);
+
+            mat4.multiply(decodeMat, translate, scale);
+
+            return {
+                quantized: quantized,
+                decode: decodeMat
+            };
+        }
+
+        // OCT-ENCODE ARRAY OF NORMALS
+        // http://jcgt.org/published/0003/02/01/
+        function octEncode(array) {
+            var encoded = new Int8Array(array.length * 2 / 3);
+
+            var oct, dec, best, currentCos, bestCos;
+
+            var i, ei;
+
+            for (i = 0, ei = 0; i < array.length; i += 3, ei += 2) {
+
+                // Test various combinations of ceil and floor
+                // to minimize rounding errors
+                best = oct = octEncodeVec3(array, i, "floor", "floor");
+                dec = octDecodeVec2(oct);
+                currentCos = bestCos = dot(array, i, dec);
+
+                oct = octEncodeVec3(array, i, "ceil", "floor");
+                dec = octDecodeVec2(oct);
+                currentCos = dot(array, i, dec);
+
+                if (currentCos > bestCos) {
+                    best = oct;
+                    bestCos = currentCos;
+                }
+
+                oct = octEncodeVec3(array, i, "floor", "ceil");
+                dec = octDecodeVec2(oct);
+                currentCos = dot(array, i, dec);
+
+                if (currentCos > bestCos) {
+                    best = oct;
+                    bestCos = currentCos;
+                }
+
+                oct = octEncodeVec3(array, i, "ceil", "ceil");
+                dec = octDecodeVec2(oct);
+                currentCos = dot(array, i, dec);
+
+                if (currentCos > bestCos) {
+                    best = oct;
+                    bestCos = currentCos;
+                }
+
+                encoded[ei    ] = best[0];
+                encoded[ei + 1] = best[1];
+            }
+
+            return encoded;
+        }
+
+        // OCT-ENCODE SINGLE NORMAL VECTOR IN 2 BYTES
+        function octEncodeVec3(array, i, xfunc, yfunc) {
+            var x = array[i    ] / (Math.abs(array[i]) + Math.abs(array[i + 1]) + Math.abs(array[i + 2]));
+            var y = array[i + 1] / (Math.abs(array[i]) + Math.abs(array[i + 1]) + Math.abs(array[i + 2]));
+
+            if (array[i + 2] < 0) {
+                var tempx = x;
+                var tempy = y;
+                tempx = (1 - Math.abs(y)) * (x >= 0 ? 1 : -1);
+                tempy = (1 - Math.abs(x)) * (y >= 0 ? 1 : -1);
+                x = tempx;
+                y = tempy;
+            }
+
+            return new Int8Array([
+                Math[xfunc](x * 127),
+                Math[yfunc](y * 127)
+            ]);
+
+        }
+
+        // DECODE AN OCT-ENCODED NORMAL
+        function octDecodeVec2(oct) {
+            var x = oct[0];
+            var y = oct[1];
+            x /= 127;
+            y /= 127;
+
+            var z = 1 - Math.abs(x) - Math.abs(y);
+
+            if (z < 0) {
+                x = (1 - Math.abs(y)) * (x >= 0 ? 1 : -1);
+                y = (1 - Math.abs(x)) * (y >= 0 ? 1 : -1);
+            }
+
+            var length = Math.sqrt(x * x + y * y + z * z);
+
+            return [
+                x / length,
+                y / length,
+                z / length
+            ];
+        }
+
+        // DOT PRODUCT OF A NORMAL IN AN ARRAY AGAINST A CANDIDATE DECODING
+        function dot(array, i, vec3) {
+            return array[i] * vec3[0] + array[i + 1] * vec3[1] + array[i + 2] * vec3[2];
+        }
+
+    </script>
+    <a href="https://github.com/tsherif/picogl.js" id="github-ribbon"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"></a>
+    <script src="../site/js/iframe.js"></script>
+</body>
+</html>

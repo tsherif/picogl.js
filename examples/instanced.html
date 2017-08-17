@@ -101,17 +101,17 @@
              0.4, 0.4
         ]));
 
-        var colors = app.createVertexBuffer(PicoGL.FLOAT, 3, new Float32Array([
-            1.0, 0.0, 0.0,
-            0.0, 1.0, 0.0,
-            0.0, 0.0, 1.0,
-            0.0, 1.0, 1.0
+        var colors = app.createVertexBuffer(PicoGL.UNSIGNED_BYTE, 3, new Uint8Array([
+            255, 0, 0,
+            0, 255, 0,
+            0, 0, 255,
+            0, 255, 255
         ]));
 
         var triangleArray = app.createVertexArray()
         .vertexAttributeBuffer(0, positions)
         .instanceAttributeBuffer(1, offsets)
-        .instanceAttributeBuffer(2, colors);
+        .instanceNormalizedAttributeBuffer(2, colors);
 
         var drawCall = app.createDrawCall(program, triangleArray);
 
