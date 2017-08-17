@@ -22,6 +22,14 @@
   CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -->
 <html>
+<!-- 
+    Quantization technique from: 
+        Mesh Geometry Compression for Mobile Graphics by Lee, Choe and Lee
+        http://dl.acm.org/citation.cfm?id=1834281
+    Oct-encoding algorithm from: 
+        A Survey of Efficient Representations for Independent Unit Vectors by Cigolle et al.
+        http://jcgt.org/published/0003/02/01/
+ -->
 <head>
     <title>PicoGL.js: Mesh Compression</title>
     <script src="utils/gl-matrix.js"></script>
@@ -31,7 +39,9 @@
 </head>
 <body>
     <div id="example-title">
-        PicoGL.js Example: Mesh Compression
+        PicoGL.js Example: Mesh Compression<BR>
+        Sphere on the left is uncompressed, sphere on the right is quantized <BR>
+        and oct-encoded achieving <span id="compression"></span>% compression.
         <div>
             <a href="https://github.com/tsherif/picogl.js/blob/master/examples/mesh-compression.html">Source code</a>
         </div>
@@ -108,22 +118,22 @@
             app.resize(window.innerWidth, window.innerHeight);
         }
 
-        // PROGRAM 
+        // SHARED FRAGMENT SHADER 
         var fsSource =  document.getElementById("fs").text.trim();
         var fShader = app.createShader(PicoGL.FRAGMENT_SHADER, fsSource);
 
+        // PROGRAM PASSES UNCOMPRESSED GEOMETRY
         var uncompressedVsSource =  document.getElementById("vs-uncompressed").text.trim();
         var uncompressedProgram = app.createProgram(uncompressedVsSource, fShader);
 
+        // PROGRAM DECODES COMPRESSED GEOMETRY
         var compressedVsSource =  document.getElementById("vs-compressed").text.trim();
         var compressedProgram = app.createProgram(compressedVsSource, fShader);
 
-
-        var translate = mat4.create();
-        var scale = mat4.create();
-
+        // GEOMETRY DATA
         var sphere = utils.createSphere({ radius: 0.48 });
 
+        // UNCOMPRESSED GEOMETRY
         var uncompressedPositions = app.createVertexBuffer(PicoGL.FLOAT, 3, sphere.positions);
         var uncompressedNormals = app.createVertexBuffer(PicoGL.FLOAT, 3, sphere.normals);
         var indices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, sphere.indices);
@@ -133,9 +143,9 @@
         .vertexAttributeBuffer(1, uncompressedNormals)
         .indexBuffer(indices);
 
+        // QUANTIZE POSITIONS AND OCT-ENCODE NORMALS FOR COMPRESSED GEOMETRY
         var b = bounds(sphere.positions);
         var q = quantize(sphere.positions, b.min, b.max);
-
         var encodedNormals = octEncode(sphere.normals);
 
         var compressedPositions = app.createVertexBuffer(PicoGL.UNSIGNED_SHORT, 3, q.quantized);
@@ -146,18 +156,14 @@
         .vertexNormalizedAttributeBuffer(1, compressedNormals)
         .indexBuffer(indices);
 
-
-        /////////////////////////////////////////////////////
-        // Draw left sphere uncompressed
-        /////////////////////////////////////////////////////
-
+        // UNIFORMS
         var uncompressedTransform = mat4.create();
         mat4.fromTranslation(uncompressedTransform, vec3.fromValues(-0.5, 0.0, 0.0));
         
         var compressedTransform = mat4.create();
         mat4.fromTranslation(compressedTransform, vec3.fromValues(0.5, 0.0, 0.0))
 
-
+        // DRAW CALLS
         var uncompressedDrawCall = app.createDrawCall(uncompressedProgram, uncompressedVertexArray)
         .uniform("model", uncompressedTransform);
 
@@ -165,14 +171,28 @@
         .uniform("decode", q.decode)
         .uniform("model", compressedTransform);
 
+        // DRAW
         uncompressedDrawCall.draw();
         compressedDrawCall.draw();
 
+        // CLEANUP
+        fShader.delete();
+        uncompressedProgram.delete();
+        compressedProgram.delete();
+        uncompressedPositions.delete();
+        uncompressedNormals.delete();
+        uncompressedVertexArray.delete();
+        compressedPositions.delete();
+        compressedNormals.delete();
+        compressedVertexArray.delete();
+
+        document.getElementById("compression").innerText = ((1 - (q.quantized.byteLength + encodedNormals.byteLength) / (sphere.positions.byteLength + sphere.normals.byteLength)) * 100).toFixed(1);
+
         ///////////////////////////////////
-        // Encoding Functions
+        // COMPRESSION FUNCTIONS
         ///////////////////////////////////
 
-        // Calculate the bounding box of the mesh
+        // CALCULATE THE BOUNDING BOX OF THE MESH
         function bounds(array) {
             var min = new Float32Array(3);
             var max = new Float32Array(3);
@@ -196,10 +216,12 @@
             };
         }
 
-        // Map values along each axis of the bounding box to
-        // unsigned 16-bit ints
+        // MAP VALUES ALONG EACH AXIS OF THE BOUNDING BOX TO
+        // UNSIGNED 16-BIT INTS
         // http://cg.postech.ac.kr/research/mesh_comp_mobile/mesh_comp_mobile_conference.pdf
+        
         function quantize(array, min, max) {
+
             var quantized = new Uint16Array(array.length);
             var multiplier = new Float32Array([
                 max[0] !== min[0] ? 65535 / (max[0] - min[0]) : 0,
@@ -215,6 +237,9 @@
             }
 
             var decodeMat = new Float32Array(16);
+
+            var translate = mat4.create();
+            var scale = mat4.create();
 
             mat4.identity(translate);
             mat4.identity(scale);
@@ -233,7 +258,7 @@
             };
         }
 
-        // Oct-encode array of normals
+        // OCT-ENCODE ARRAY OF NORMALS
         // http://jcgt.org/published/0003/02/01/
         function octEncode(array) {
             var encoded = new Int8Array(array.length * 2 / 3);
@@ -284,7 +309,7 @@
             return encoded;
         }
 
-        // Oct-encode single normal vector in 2 bytes
+        // OCT-ENCODE SINGLE NORMAL VECTOR IN 2 BYTES
         function octEncodeVec3(array, i, xfunc, yfunc) {
             var x = array[i    ] / (Math.abs(array[i]) + Math.abs(array[i + 1]) + Math.abs(array[i + 2]));
             var y = array[i + 1] / (Math.abs(array[i]) + Math.abs(array[i + 1]) + Math.abs(array[i + 2]));
@@ -305,7 +330,7 @@
 
         }
 
-        // Decode an oct-encoded normal
+        // DECODE AN OCT-ENCODED NORMAL
         function octDecodeVec2(oct) {
             var x = oct[0];
             var y = oct[1];
@@ -328,7 +353,7 @@
             ];
         }
 
-        // Dot product of a normal in an array against a candidate decoding
+        // DOT PRODUCT OF A NORMAL IN AN ARRAY AGAINST A CANDIDATE DECODING
         function dot(array, i, vec3) {
             return array[i] * vec3[0] + array[i + 1] * vec3[1] + array[i + 2] * vec3[2];
         }
