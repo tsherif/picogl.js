@@ -412,7 +412,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="vertex-array.js.html">vertex-array.js</a>, <a href="vertex-array.js.html#line100">line 100</a>
+        <a href="vertex-array.js.html">vertex-array.js</a>, <a href="vertex-array.js.html#line160">line 160</a>
     </li></ul></dd>
     
 
@@ -547,7 +547,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="vertex-array.js.html">vertex-array.js</a>, <a href="vertex-array.js.html#line81">line 81</a>
+        <a href="vertex-array.js.html">vertex-array.js</a>, <a href="vertex-array.js.html#line141">line 141</a>
     </li></ul></dd>
     
 
@@ -739,6 +739,326 @@
     
 
     
+    <h4 class="name" id="instanceIntegerAttributeBuffer"><span class="type-signature"></span>instanceIntegerAttributeBuffer<span class="signature">(attributeIndex, vertexBuffer)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Bind an per-instance integer attribute buffer to this vertex array.
+    Note that this refers to the attribute in the shader being an integer,
+    not the data stored in the vertex buffer.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>attributeIndex</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The attribute location to bind to.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>vertexBuffer</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="VertexBuffer.html">VertexBuffer</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The VertexBuffer to bind.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="vertex-array.js.html">vertex-array.js</a>, <a href="vertex-array.js.html#line99">line 99</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="instanceNormalizedAttributeBuffer"><span class="type-signature"></span>instanceNormalizedAttributeBuffer<span class="signature">(attributeIndex, vertexBuffer)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Bind an per-instance normalized attribute buffer to this vertex array.
+    Integer data in the vertex buffer will be normalized to [-1.0, 1.0] if
+    signed, [0.0, 1.0] if unsigned.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>attributeIndex</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The attribute location to bind to.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>vertexBuffer</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="VertexBuffer.html">VertexBuffer</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The VertexBuffer to bind.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="vertex-array.js.html">vertex-array.js</a>, <a href="vertex-array.js.html#line129">line 129</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
     <h4 class="name" id="vertexAttributeBuffer"><span class="type-signature"></span>vertexAttributeBuffer<span class="signature">(attributeIndex, vertexBuffer)</span><span class="type-signature"></span></h4>
     
 
@@ -892,6 +1212,326 @@
 
 
         
+            
+
+    
+
+    
+    <h4 class="name" id="vertexIntegerAttributeBuffer"><span class="type-signature"></span>vertexIntegerAttributeBuffer<span class="signature">(attributeIndex, vertexBuffer)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Bind an per-vertex integer attribute buffer to this vertex array.
+    Note that this refers to the attribute in the shader being an integer,
+    not the data stored in the vertex buffer.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>attributeIndex</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The attribute location to bind to.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>vertexBuffer</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="VertexBuffer.html">VertexBuffer</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The VertexBuffer to bind.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="vertex-array.js.html">vertex-array.js</a>, <a href="vertex-array.js.html#line84">line 84</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="vertexNormalizedAttributeBuffer"><span class="type-signature"></span>vertexNormalizedAttributeBuffer<span class="signature">(attributeIndex, vertexBuffer)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Bind an per-vertex normalized attribute buffer to this vertex array.
+    Integer data in the vertex buffer will be normalized to [-1.0, 1.0] if
+    signed, [0.0, 1.0] if unsigned.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>attributeIndex</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The attribute location to bind to.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>vertexBuffer</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="VertexBuffer.html">VertexBuffer</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The VertexBuffer to bind.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="vertex-array.js.html">vertex-array.js</a>, <a href="vertex-array.js.html#line114">line 114</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
     
 
     
@@ -913,7 +1553,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.3</a> on Sat Aug 05 2017 13:50:30 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.3</a> on Thu Aug 17 2017 09:48:23 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

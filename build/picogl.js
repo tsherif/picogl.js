@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.6.5
+PicoGL.js v0.6.6
 
 The MIT License (MIT)
 
@@ -1624,7 +1624,7 @@ var App = require("./app");
     @namespace PicoGL
 */
 var PicoGL = global.PicoGL = require("./constants");    
-PicoGL.version = "0.6.5";
+PicoGL.version = "0.6.6";
 
 /**
     Create a PicoGL app. The app is the primary entry point to PicoGL. It stores

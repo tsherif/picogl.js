@@ -105,10 +105,6 @@
     <div class="description">
         Note that PicoGL.js is <strong>not</strong> a scene graph library. There are no objects, hierarchies, transforms, materials, etc. It has been designed only to make management of GPU state more convenient. Its conceptual model maps fairly directly to the constructs one deals with when writing directly with the WebGL 2 API. The only higher-level construct is the draw call, which manages sets of related lower-level constructs.    
     </div>
-    
-    <div>
-        Visit the <a href="docs/">API docs</a> and <a href="https://github.com/tsherif/picogl.js/tree/master/examples">examples</a> for more details.
-    </div>
 
     <h2>Basic Examples</h2>
     <a href="#" class="example-menu-button" id="triangle">Triangle</a>
@@ -135,6 +131,7 @@
     <a href="#" class="example-menu-button" id="outline">Outline</a>
     <a href="#" class="example-menu-button" id="occlusion">Occlusion Culling</a>
     <a href="#" class="example-menu-button" id="motion-blur">Motion Blur</a>
+    <a href="#" class="example-menu-button" id="mesh-compression">Mesh Compression</a>
 
     <h2>Benchmarks</h2>
     <a href="#" class="example-menu-button" id="64kcubes">64,000 Cubes</a>
@@ -161,6 +158,9 @@
             }
             if (title === "Cloth") {
                 title += "<BR>(Use mouse to control ball)";
+            }
+            if (title === "Mesh Compression") {
+                title += "<BR>Sphere on the left is uncompressed, sphere on the right is quantized <BR>and oct-encoded.";
             }
             var src = "examples/" + event.target.id + ".html";
             var sourceCodeURL = "https://github.com/tsherif/picogl.js/blob/master/" + src;
