@@ -36,7 +36,6 @@ var VertexArray       = require("./vertex-array");
 var VertexBuffer      = require("./vertex-buffer");
 var Query             = require("./query");
 
-
 /**
     Primary entry point to PicoGL. An app will store all parts of the WebGL
     state.
@@ -551,6 +550,28 @@ App.prototype.linearFloatTextures = function() {
     if (!this.linearFloatTexturesEnabled) {
         console.warn("Extension OES_texture_float_linear unavailable. Cannot enable float texture linear filtering.");
     }
+
+    return this;
+};
+
+/**
+    Enable the OES_texture_float_linear extension. Allows for linear blending on float textures.
+
+    @method
+    @see Framebuffer
+*/
+App.prototype.dxtTextures = function() {
+    var ext = this.gl.getExtension("WEBGL_compressed_texture_s3tc");
+    this.dxtTexturesEnabled = !!ext;
+
+    if (!this.dxtTexturesEnabled) {
+        console.warn("Extension WEBGL_compressed_texture_s3tc unavailable. Cannot enable dxt compressed textures.");
+    }
+
+    CONSTANTS.COMPRESSED_RGB_S3TC_DXT1_EXT  = ext.COMPRESSED_RGB_S3TC_DXT1_EXT;
+    CONSTANTS.COMPRESSED_RGBA_S3TC_DXT1_EXT = ext.COMPRESSED_RGBA_S3TC_DXT1_EXT;
+    CONSTANTS.COMPRESSED_RGBA_S3TC_DXT3_EXT = ext.COMPRESSED_RGBA_S3TC_DXT3_EXT;
+    CONSTANTS.COMPRESSED_RGBA_S3TC_DXT5_EXT = ext.COMPRESSED_RGBA_S3TC_DXT5_EXT;
 
     return this;
 };
