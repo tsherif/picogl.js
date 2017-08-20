@@ -562,7 +562,9 @@ App.prototype.linearFloatTextures = function() {
     @param {number} x The x coordinate of the pixel.
     @param {number} y The y coordinate of the pixel.
     @param {ArrayBufferView} outColor Typed array to store the pixel's color.
-    @param {object} options Options.
+    @param {object} [options] Options.
+    @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the read framebuffer.
+    @param {GLEnum} [options.format=RGBA] Read framebuffer data format.
 */
 App.prototype.readPixel = function(x, y, outColor, options) {
     options = options || CONSTANTS.DUMMY_OBJECT;
