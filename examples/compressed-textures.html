@@ -23,7 +23,7 @@
 -->
 <html>
 <head>
-    <title>PicoGL.js: Phong Cube</title>
+    <title>PicoGL.js: Compressed Textures</title>
     <script src="utils/gl-matrix.js"></script>
     <script src="../build/picogl.js"></script>
     <script src="utils/utils.js"></script>
@@ -31,9 +31,9 @@
 </head>
 <body>
     <div id="example-title">
-        PicoGL.js Example: Phong-shaded Cube
+        PicoGL.js Example: Compressed Textures
         <div>
-            <a href="https://github.com/tsherif/picogl.js/blob/master/examples/cube.html">Source code</a>
+            <a href="https://github.com/tsherif/picogl.js/blob/master/examples/compressed-textures.html">Source code</a>
         </div>
     </div>
     <canvas id="gl-canvas"></canvas>
@@ -44,7 +44,7 @@
 
         layout(location=0) in vec4 position;
         layout(location=1) in vec2 uv;
-        layout(location=2) in vec4 normal;
+        layout(location=2) in vec3 normal;
         
         uniform SceneUniforms {
             mat4 viewProj;
@@ -62,7 +62,7 @@
             vec4 worldPosition = uModel * position;
             vPosition = worldPosition.xyz;
             vUV = vec2(uv.x, 1.0 - uv.y);
-            vNormal = (uModel * normal).xyz;
+            vNormal = (uModel * vec4(normal, 0.0)).xyz;
             gl_Position = viewProj * worldPosition;
         }
     </script>
@@ -114,7 +114,10 @@
         var app = PicoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0)
         .depthTest()
-        .s3tcTextures();
+        .s3tcTextures()
+        .etcTextures()
+        .astcTextures()
+        .pvrtcTextures();
 
         var timer = app.createTimer();
 
@@ -139,13 +142,13 @@
         mat4.perspective(projMatrix, Math.PI / 2, canvas.width / canvas.height, 0.1, 10.0);
 
         var viewMatrix = mat4.create();
-        var eyePosition = vec3.fromValues(1, 1, 1);
+        var eyePosition = vec3.fromValues(0, 0, 3);
         mat4.lookAt(viewMatrix, eyePosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
 
         var viewProjMatrix = mat4.create();
         mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
 
-        var lightPosition = vec3.fromValues(1, 1, 0.5);
+        var lightPosition = vec3.fromValues(0, 0, 2);
 
         var sceneUniformBuffer = app.createUniformBuffer([
             PicoGL.FLOAT_MAT4,
@@ -157,12 +160,32 @@
         .set(2, lightPosition)
         .update();
 
-        var modelMatrix = mat4.create();
-        var rotateXMatrix = mat4.create();
-        var rotateYMatrix = mat4.create();
-
-        var angleX = 0;
-        var angleY = 0;
+        var boxes = [
+            {
+                rotation: vec3.fromValues(0, Math.random(), 0),
+                translation: vec3.fromValues(-1, 1, 0),
+                modelMatrix: mat4.create(),
+                drawCall: null
+            },
+            {
+                rotation: vec3.fromValues(0, Math.random(), 0),
+                translation: vec3.fromValues(1, 1, 0),
+                modelMatrix: mat4.create(),
+                drawCall: null
+            },
+            {
+                rotation: vec3.fromValues(0, Math.random(), 0),
+                translation: vec3.fromValues(-1, -1, 0),
+                modelMatrix: mat4.create(),
+                drawCall: null
+            },
+            {
+                rotation: vec3.fromValues(0, Math.random(), 0),
+                translation: vec3.fromValues(1, -1, 0),
+                modelMatrix: mat4.create(),
+                drawCall: null
+            }
+        ]
 
         window.onresize = function() {
             app.resize(window.innerWidth, window.innerHeight);
@@ -173,19 +196,25 @@
             sceneUniformBuffer.set(0, viewProjMatrix).update();
         }
 
+        var s3tcTexture, etcTexture, astcTexture, pvrtcTexture;
 
-        utils.getBinary("img/khronos_webgl-dxt1.pvr", function(data) {
-            // CREATE TEXTURE
-            var textureData = utils.parsePVR(data);
-            var texture = app.createTexture2D(textureData.data, textureData.width, textureData.height, {
-                format: PicoGL[textureData.format],
-                minFilter: PicoGL.LINEAR
-            });
-
+        function startRender() {
             // SET UP DRAW CALL
-            var drawCall = app.createDrawCall(program, boxArray)
+            boxes[0].drawCall = app.createDrawCall(program, boxArray)
             .uniformBlock("SceneUniforms", sceneUniformBuffer)
-            .texture("tex", texture);
+            .texture("tex", s3tcTexture);
+
+            boxes[1].drawCall = app.createDrawCall(program, boxArray)
+            .uniformBlock("SceneUniforms", sceneUniformBuffer)
+            .texture("tex", etcTexture);
+
+            boxes[2].drawCall = app.createDrawCall(program, boxArray)
+            .uniformBlock("SceneUniforms", sceneUniformBuffer)
+            .texture("tex", astcTexture);
+
+            boxes[3].drawCall = app.createDrawCall(program, boxArray)
+            .uniformBlock("SceneUniforms", sceneUniformBuffer)
+            .texture("tex", pvrtcTexture);
 
             function draw() {
                 if (timer.ready()) {
@@ -194,17 +223,16 @@
 
                 timer.start()
 
-                angleX += 0.01;
-                angleY += 0.02;
-
-                mat4.fromXRotation(rotateXMatrix, angleX);
-                mat4.fromYRotation(rotateYMatrix, angleY);
-                mat4.multiply(modelMatrix, rotateXMatrix, rotateYMatrix);
-
-                drawCall.uniform("uModel", modelMatrix);
-
                 app.clear();
-                drawCall.draw()
+
+                for (var i = 0, len = boxes.length; i < len; ++i) {
+                    boxes[i].rotation[1] += 0.01;
+
+                    utils.xformMatrix(boxes[i].modelMatrix, boxes[i].translation, boxes[i].rotation, null);
+                    boxes[i].drawCall.uniform("uModel", boxes[i].modelMatrix);
+
+                    boxes[i].drawCall.draw()
+                }
                 
                 timer.end();
 
@@ -212,9 +240,97 @@
             }
 
             requestAnimationFrame(draw);
-            
-        });
+        }
 
+        var texturesRequested = 4;
+
+        function checkDone () {
+            if (--texturesRequested === 0) {
+                startRender();
+            }
+        }
+
+        if (app.s3tcTexturesEnabled) {
+            utils.getBinary("img/s3tc-supported-dxt1.pvr", function(data) {
+                var textureData = utils.parsePVR(data);
+                s3tcTexture = app.createTexture2D(textureData.data, textureData.width, textureData.height, {
+                    format: PicoGL[textureData.format]
+                });
+                
+                checkDone();
+            });
+        } else {
+            var s3tcImage = new Image();
+
+            s3tcImage.onload = function() {
+                s3tcTexture = app.createTexture2D(s3tcImage);
+                checkDone();
+            }
+
+            s3tcImage.src = "img/s3tc-unsupported.png";
+        }
+
+        if (app.etcTexturesEnabled) {
+            utils.getBinary("img/etc-supported-etc2.pvr", function(data) {
+                var textureData = utils.parsePVR(data);
+                etcTexture = app.createTexture2D(textureData.data, textureData.width, textureData.height, {
+                    format: PicoGL[textureData.format]
+                });
+                
+                checkDone();
+            });
+        } else {
+            var etcImage = new Image();
+
+            etcImage.onload = function() {
+                etcTexture = app.createTexture2D(etcImage);
+                checkDone();
+            }
+
+            etcImage.src = "img/etc-unsupported.png";
+        }
+
+        if (app.astcTexturesEnabled) {
+            utils.getBinary("img/astc-supported-astc.pvr", function(data) {
+                var textureData = utils.parsePVR(data);
+                astcTexture = app.createTexture2D(textureData.data, textureData.width, textureData.height, {
+                    format: PicoGL[textureData.format]
+                });
+                
+                checkDone();
+            });
+        } else {
+            var astcImage = new Image();
+
+            astcImage.onload = function() {
+                astcTexture = app.createTexture2D(astcImage);
+                checkDone();
+            }
+
+            astcImage.src = "img/astc-unsupported.png";
+        }
+
+        if (app.pvrtcTexturesEnabled) {
+            utils.getBinary("img/pvrtc-supported-pvrtc.pvr", function(data) {
+                var textureData = utils.parsePVR(data);
+                pvrtcTexture = app.createTexture2D(textureData.data, textureData.width, textureData.height, {
+                    format: PicoGL[textureData.format]
+                });
+                
+                checkDone();
+            });
+        } else {
+            var pvrtcImage = new Image();
+
+            pvrtcImage.onload = function() {
+                pvrtcTexture = app.createTexture2D(pvrtcImage);
+                checkDone();
+            }
+
+            pvrtcImage.src = "img/pvrtc-unsupported.png";
+        }
+
+        
     </script>
     <a href="https://github.com/tsherif/picogl.js" id="github-ribbon"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"></a>
     <script src="../site/js/iframe.js"></script>
