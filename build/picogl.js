@@ -48,19 +48,20 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
 "use strict";
-var CONSTANTS         = require("./constants");
-var Cubemap           = require("./cubemap");
-var DrawCall          = require("./draw-call");
-var Framebuffer       = require("./framebuffer");
-var Program           = require("./program");
-var Shader            = require("./shader");
-var Texture           = require("./texture");
-var Timer             = require("./timer");
-var TransformFeedback = require("./transform-feedback");
-var UniformBuffer     = require("./uniform-buffer");
-var VertexArray       = require("./vertex-array");
-var VertexBuffer      = require("./vertex-buffer");
-var Query             = require("./query");
+var CONSTANTS               = require("./constants");
+var TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
+var Cubemap                 = require("./cubemap");
+var DrawCall                = require("./draw-call");
+var Framebuffer             = require("./framebuffer");
+var Program                 = require("./program");
+var Shader                  = require("./shader");
+var Texture                 = require("./texture");
+var Timer                   = require("./timer");
+var TransformFeedback       = require("./transform-feedback");
+var UniformBuffer           = require("./uniform-buffer");
+var VertexArray             = require("./vertex-array");
+var VertexBuffer            = require("./vertex-buffer");
+var Query                   = require("./query");
 
 /**
     Primary entry point to PicoGL. An app will store all parts of the WebGL
@@ -599,6 +600,11 @@ App.prototype.dxtTextures = function() {
     CONSTANTS.COMPRESSED_RGBA_S3TC_DXT3_EXT = ext.COMPRESSED_RGBA_S3TC_DXT3_EXT;
     CONSTANTS.COMPRESSED_RGBA_S3TC_DXT5_EXT = ext.COMPRESSED_RGBA_S3TC_DXT5_EXT;
 
+    TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGB_S3TC_DXT1_EXT]  = true;
+    TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGBA_S3TC_DXT1_EXT] = true;
+    TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGBA_S3TC_DXT3_EXT] = true;
+    TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGBA_S3TC_DXT5_EXT] = true;
+
     return this;
 };
 
@@ -936,7 +942,7 @@ App.prototype.createDrawCall = function(program, vertexArray, primitive) {
 
 module.exports = App;
 
-},{"./constants":2,"./cubemap":3,"./draw-call":4,"./framebuffer":5,"./program":7,"./query":8,"./shader":9,"./texture":11,"./timer":12,"./transform-feedback":13,"./uniform-buffer":14,"./vertex-array":16,"./vertex-buffer":17}],2:[function(require,module,exports){
+},{"./constants":2,"./cubemap":3,"./draw-call":4,"./framebuffer":5,"./program":7,"./query":8,"./shader":9,"./texture":11,"./texture-format-defaults":10,"./timer":12,"./transform-feedback":13,"./uniform-buffer":14,"./vertex-array":16,"./vertex-buffer":17}],2:[function(require,module,exports){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -2081,6 +2087,8 @@ FLOAT[CONSTANTS.RGB] = CONSTANTS.RGB16F;
 FLOAT[CONSTANTS.RGBA] = CONSTANTS.RGBA16F;
 FLOAT[CONSTANTS.DEPTH_COMPONENT] = CONSTANTS.DEPTH_COMPONENT32F;
 
+TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES = {};
+
 module.exports = TEXTURE_FORMAT_DEFAULTS;
 
 },{"./constants":2}],11:[function(require,module,exports){
@@ -2139,12 +2147,23 @@ function Texture(gl, appState, binding, image, width, height, depth, is3D, optio
     this.width = -1;
     this.height = -1;
     this.depth = -1;
-    this.format = options.format !== undefined ? options.format : gl.RGBA;
     this.type = options.type !== undefined ? options.type : gl.UNSIGNED_BYTE;
-    this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : TEXTURE_FORMAT_DEFAULTS[this.type][this.format];
     this.is3D = is3D;
-    this.compressed = !!options.compressed;
     this.appState = appState;
+
+    this.format = null;
+    this.internalFormat = null;
+    this.compressed = !!(TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[options.format] || TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[options.internalFormat]);
+    
+    if (this.compressed) {
+        // For compressed textures, just need to provide one of format, internalFormat.
+        // The other will be the same.
+        this.format = options.format !== undefined ? options.format : options.internalFormat;
+        this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : options.format;
+    } else {
+        this.format = options.format !== undefined ? options.format : gl.RGBA;
+        this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : TEXTURE_FORMAT_DEFAULTS[this.type][this.format];
+    }
 
     // -1 indicates unbound
     this.currentUnit = -1;
@@ -2179,8 +2198,7 @@ function Texture(gl, appState, binding, image, width, height, depth, is3D, optio
     this.flipY = options.flipY !== undefined ? options.flipY : false;
     this.baseLevel = options.baseLevel !== undefined ? options.baseLevel : null;
     this.maxLevel = options.maxLevel !== undefined ? options.maxLevel : null;
-    this.generateMipmaps = options.generateMipmaps !== false &&
-                        (minFilter === gl.LINEAR_MIPMAP_NEAREST || minFilter === gl.LINEAR_MIPMAP_LINEAR);
+    this.mipmaps = (minFilter === gl.LINEAR_MIPMAP_NEAREST || minFilter === gl.LINEAR_MIPMAP_LINEAR);
 
     this.resize(width, height, depth);
 
@@ -2228,14 +2246,14 @@ Texture.prototype.resize = function(width, height, depth) {
 
     var levels;
     if (this.is3D) {
-        if (this.generateMipmaps) {
+        if (this.mipmaps) {
             levels = Math.floor(Math.log2(Math.max(Math.max(this.width, this.height), this.depth))) + 1;
         } else {
             levels = 1;
         }
         this.gl.texStorage3D(this.binding, levels, this.internalFormat, this.width, this.height, this.depth);
     } else {
-        if (this.generateMipmaps) {
+        if (this.mipmaps) {
             levels = Math.floor(Math.log2(Math.max(this.width, this.height))) + 1;
         } else {
             levels = 1;
@@ -2258,10 +2276,11 @@ Texture.prototype.data = function(data) {
         data = DUMMY_ARRAY;
     }
 
-    var numLevels = data.length;
+    var numLevels = this.mipmaps ? data.length : 1;
     var width = this.width;
     var height = this.height;
     var depth = this.depth;
+    var generateMipmaps = this.mipmaps && data.length === 1;
     var i;
 
     this.bind(Math.max(this.currentUnit, 0));
@@ -2296,7 +2315,7 @@ Texture.prototype.data = function(data) {
         }
     }
 
-    if (numLevels === 1 && this.generateMipmaps) {
+    if (generateMipmaps) {
         this.gl.generateMipmap(this.binding);
     }
 

@@ -179,8 +179,7 @@
             var textureData = utils.parsePVR(data);
             var texture = app.createTexture2D(textureData.data, textureData.width, textureData.height, {
                 format: PicoGL[textureData.format],
-                internalFormat: PicoGL[textureData.format],
-                compressed: true
+                minFilter: PicoGL.LINEAR
             });
 
             // SET UP DRAW CALL

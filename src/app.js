@@ -22,19 +22,20 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 "use strict";
-var CONSTANTS         = require("./constants");
-var Cubemap           = require("./cubemap");
-var DrawCall          = require("./draw-call");
-var Framebuffer       = require("./framebuffer");
-var Program           = require("./program");
-var Shader            = require("./shader");
-var Texture           = require("./texture");
-var Timer             = require("./timer");
-var TransformFeedback = require("./transform-feedback");
-var UniformBuffer     = require("./uniform-buffer");
-var VertexArray       = require("./vertex-array");
-var VertexBuffer      = require("./vertex-buffer");
-var Query             = require("./query");
+var CONSTANTS               = require("./constants");
+var TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
+var Cubemap                 = require("./cubemap");
+var DrawCall                = require("./draw-call");
+var Framebuffer             = require("./framebuffer");
+var Program                 = require("./program");
+var Shader                  = require("./shader");
+var Texture                 = require("./texture");
+var Timer                   = require("./timer");
+var TransformFeedback       = require("./transform-feedback");
+var UniformBuffer           = require("./uniform-buffer");
+var VertexArray             = require("./vertex-array");
+var VertexBuffer            = require("./vertex-buffer");
+var Query                   = require("./query");
 
 /**
     Primary entry point to PicoGL. An app will store all parts of the WebGL
@@ -572,6 +573,11 @@ App.prototype.dxtTextures = function() {
     CONSTANTS.COMPRESSED_RGBA_S3TC_DXT1_EXT = ext.COMPRESSED_RGBA_S3TC_DXT1_EXT;
     CONSTANTS.COMPRESSED_RGBA_S3TC_DXT3_EXT = ext.COMPRESSED_RGBA_S3TC_DXT3_EXT;
     CONSTANTS.COMPRESSED_RGBA_S3TC_DXT5_EXT = ext.COMPRESSED_RGBA_S3TC_DXT5_EXT;
+
+    TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGB_S3TC_DXT1_EXT]  = true;
+    TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGBA_S3TC_DXT1_EXT] = true;
+    TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGBA_S3TC_DXT3_EXT] = true;
+    TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGBA_S3TC_DXT5_EXT] = true;
 
     return this;
 };
