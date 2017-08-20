@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.6.6
+PicoGL.js v0.6.7
 
 The MIT License (MIT)
 
@@ -603,16 +603,23 @@ App.prototype.dxtTextures = function() {
 };
 
 /**
-    Read a pixel's color value from the canvas. Note that the RGBA values will be encoded
-    as 0-255.
+    Read a pixel's color value from the currently-bound framebuffer.
 
     @method
     @param {number} x The x coordinate of the pixel.
     @param {number} y The y coordinate of the pixel.
-    @param {Uint8Array} outColor 4-element Uint8Array to store the pixel's color.
+    @param {ArrayBufferView} outColor Typed array to store the pixel's color.
+    @param {object} [options] Options.
+    @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the read framebuffer.
+    @param {GLEnum} [options.format=RGBA] Read framebuffer data format.
 */
-App.prototype.readPixel = function(x, y, outColor) {
-    this.gl.readPixels(x, y, 1, 1, this.gl.RGBA, this.gl.UNSIGNED_BYTE, outColor);
+App.prototype.readPixel = function(x, y, outColor, options) {
+    options = options || CONSTANTS.DUMMY_OBJECT;
+    
+    var format = options.format || CONSTANTS.RGBA;
+    var type = options.type || CONSTANTS.UNSIGNED_BYTE;
+
+    this.gl.readPixels(x, y, 1, 1, format, type, outColor);
 
     return this;
 };
@@ -1645,7 +1652,7 @@ var App = require("./app");
     @namespace PicoGL
 */
 var PicoGL = global.PicoGL = require("./constants");    
-PicoGL.version = "0.6.6";
+PicoGL.version = "0.6.7";
 
 /**
     Create a PicoGL app. The app is the primary entry point to PicoGL. It stores
