@@ -229,6 +229,121 @@
 
         <tr>
             
+                <td class="name"><code>s3tcTexturesEnabled</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Whether the WEBGL_compressed_texture_s3tc extension is enabled.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>s3tcSRGBTexturesEnabled</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Whether the WEBGL_compressed_texture_s3tc_srgb extension is enabled.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>etcTexturesEnabled</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Whether the WEBGL_compressed_texture_etc extension is enabled.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>astcTexturesEnabled</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Whether the WEBGL_compressed_texture_astc extension is enabled.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>pvrtcTexturesEnabled</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Whether the WEBGL_compressed_texture_pvrtc extension is enabled.</td>
+        </tr>
+
+    
+
+        <tr>
+            
                 <td class="name"><code>state</code></td>
             
 
@@ -307,7 +422,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line54">line 54</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line59">line 59</a>
     </li></ul></dd>
     
 
@@ -354,6 +469,124 @@
 
     
         <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="astcTextures"><span class="type-signature"></span>astcTextures<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Enable the WEBGL_compressed_texture_astc extension and add the following enums, which can
+    be used as texture formats, to the PicoGL object:
+    
+    <ul>
+      <li>PicoGL.COMPRESSED_RGBA_ASTC_4x4_KHR
+      <li>PicoGL.COMPRESSED_RGBA_ASTC_5x4_KHR
+      <li>PicoGL.COMPRESSED_RGBA_ASTC_5x5_KHR
+      <li>PicoGL.COMPRESSED_RGBA_ASTC_6x5_KHR
+      <li>PicoGL.COMPRESSED_RGBA_ASTC_6x6_KHR
+      <li>PicoGL.COMPRESSED_RGBA_ASTC_8x5_KHR
+      <li>PicoGL.COMPRESSED_RGBA_ASTC_8x6_KHR
+      <li>PicoGL.COMPRESSED_RGBA_ASTC_8x8_KHR
+      <li>PicoGL.COMPRESSED_RGBA_ASTC_10x5_KHR
+      <li>PicoGL.COMPRESSED_RGBA_ASTC_10x6_KHR
+      <li>PicoGL.COMPRESSED_RGBA_ASTC_10x8_KHR
+      <li>PicoGL.COMPRESSED_RGBA_ASTC_10x10_KHR
+      <li>PicoGL.COMPRESSED_RGBA_ASTC_12x10_KHR
+      <li>PicoGL.COMPRESSED_RGBA_ASTC_12x12_KHR
+      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR
+      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR
+      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR
+      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR
+      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR
+      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR
+      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR
+      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR
+      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR
+      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR
+      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR
+      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR
+      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR
+      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR
+    </ul>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line703">line 703</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         
             
@@ -413,7 +646,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line272">line 272</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line283">line 283</a>
     </li></ul></dd>
     
 
@@ -571,7 +804,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line296">line 296</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line307">line 307</a>
     </li></ul></dd>
     
 
@@ -776,7 +1009,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line312">line 312</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line323">line 323</a>
     </li></ul></dd>
     
 
@@ -862,7 +1095,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line143">line 143</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line154">line 154</a>
     </li></ul></dd>
     
 
@@ -1066,7 +1299,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line119">line 119</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line130">line 130</a>
     </li></ul></dd>
     
 
@@ -1202,7 +1435,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line132">line 132</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line143">line 143</a>
     </li></ul></dd>
     
 
@@ -1407,7 +1640,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line104">line 104</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line115">line 115</a>
     </li></ul></dd>
     
 
@@ -2307,7 +2540,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line842">line 842</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1086">line 1086</a>
     </li></ul></dd>
     
 
@@ -2534,7 +2767,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line886">line 886</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1130">line 1130</a>
     </li></ul></dd>
     
 
@@ -2728,7 +2961,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line853">line 853</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1097">line 1097</a>
     </li></ul></dd>
     
 
@@ -2909,7 +3142,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line698">line 698</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line942">line 942</a>
     </li></ul></dd>
     
 
@@ -3137,7 +3370,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line686">line 686</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line930">line 930</a>
     </li></ul></dd>
     
 
@@ -3352,7 +3585,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line628">line 628</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line872">line 872</a>
     </li></ul></dd>
     
 
@@ -3487,7 +3720,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line863">line 863</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1107">line 1107</a>
     </li></ul></dd>
     
 
@@ -3646,7 +3879,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line640">line 640</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line884">line 884</a>
     </li></ul></dd>
     
 
@@ -4499,7 +4732,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line741">line 741</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line985">line 985</a>
     </li></ul></dd>
     
 
@@ -5414,7 +5647,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line807">line 807</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1051">line 1051</a>
     </li></ul></dd>
     
 
@@ -6290,7 +6523,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line777">line 777</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1021">line 1021</a>
     </li></ul></dd>
     
 
@@ -6376,7 +6609,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line872">line 872</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1116">line 1116</a>
     </li></ul></dd>
     
 
@@ -6462,7 +6695,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line658">line 658</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line902">line 902</a>
     </li></ul></dd>
     
 
@@ -6655,7 +6888,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line712">line 712</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line956">line 956</a>
     </li></ul></dd>
     
 
@@ -6741,7 +6974,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line649">line 649</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line893">line 893</a>
     </li></ul></dd>
     
 
@@ -7001,7 +7234,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line671">line 671</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line915">line 915</a>
     </li></ul></dd>
     
 
@@ -7087,7 +7320,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line508">line 508</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line519">line 519</a>
     </li></ul></dd>
     
 
@@ -7174,7 +7407,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line184">line 184</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line195">line 195</a>
     </li></ul></dd>
     
 
@@ -7260,7 +7493,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line199">line 199</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line210">line 210</a>
     </li></ul></dd>
     
 
@@ -7395,7 +7628,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line261">line 261</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line272">line 272</a>
     </li></ul></dd>
     
 
@@ -7530,7 +7763,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line249">line 249</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line260">line 260</a>
     </li></ul></dd>
     
 
@@ -7688,7 +7921,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line215">line 215</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line226">line 226</a>
     </li></ul></dd>
     
 
@@ -7774,7 +8007,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line226">line 226</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line237">line 237</a>
     </li></ul></dd>
     
 
@@ -7860,7 +8093,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line519">line 519</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line530">line 530</a>
     </li></ul></dd>
     
 
@@ -7996,7 +8229,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line157">line 157</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line168">line 168</a>
     </li></ul></dd>
     
 
@@ -8009,6 +8242,109 @@
             <li><a href="Framebuffer.html">Framebuffer</a></li>
         </ul>
     </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="etcTextures"><span class="type-signature"></span>etcTextures<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Enable the WEBGL_compressed_texture_etc extension  and add the following enums, which can
+    be used as texture formats, to the PicoGL object:
+    
+    <ul>
+      <li>PicoGL.COMPRESSED_R11_EAC
+      <li>PicoGL.COMPRESSED_SIGNED_R11_EAC
+      <li>PicoGL.COMPRESSED_RG11_EAC
+      <li>PicoGL.COMPRESSED_SIGNED_RG11_EAC
+      <li>PicoGL.COMPRESSED_RGB8_ETC2
+      <li>PicoGL.COMPRESSED_SRGB8_ETC2
+      <li>PicoGL.COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2
+      <li>PicoGL.COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2
+      <li>PicoGL.COMPRESSED_RGBA8_ETC2_EAC
+      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ETC2_EAC
+    </ul>
+
+    Note that while WEBGL_compressed_texture_etc1 is not enabled by this method,
+    ETC1 textures can be loaded using COMPRESSED_RGB8_ETC2 as the format.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line635">line 635</a>
+    </li></ul></dd>
+    
+
+    
+
     
 
     
@@ -8090,7 +8426,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line532">line 532</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line543">line 543</a>
     </li></ul></dd>
     
 
@@ -8183,7 +8519,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line548">line 548</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line555">line 555</a>
     </li></ul></dd>
     
 
@@ -8276,7 +8612,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line283">line 283</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line294">line 294</a>
     </li></ul></dd>
     
 
@@ -8362,7 +8698,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line237">line 237</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line248">line 248</a>
     </li></ul></dd>
     
 
@@ -8448,7 +8784,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line497">line 497</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line508">line 508</a>
     </li></ul></dd>
     
 
@@ -8534,7 +8870,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line359">line 359</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line370">line 370</a>
     </li></ul></dd>
     
 
@@ -8620,7 +8956,101 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line336">line 336</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line347">line 347</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="pvrtcTextures"><span class="type-signature"></span>pvrtcTextures<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Enable the WEBGL_compressed_texture_pvrtc extension and add the following enums, which can
+    be used as texture formats, to the PicoGL object:
+
+    <ul>
+      <li>PicoGL.COMPRESSED_RGB_PVRTC_4BPPV1_IMG
+      <li>PicoGL.COMPRESSED_RGB_PVRTC_2BPPV1_IMG
+      <li>PicoGL.COMPRESSED_RGBA_PVRTC_4BPPV1_IMG
+      <li>PicoGL.COMPRESSED_RGBA_PVRTC_2BPPV1_IMG
+    </ul>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line783">line 783</a>
     </li></ul></dd>
     
 
@@ -8706,7 +9136,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line486">line 486</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line497">line 497</a>
     </li></ul></dd>
     
 
@@ -8841,7 +9271,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line172">line 172</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line183">line 183</a>
     </li></ul></dd>
     
 
@@ -9196,7 +9626,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line569">line 569</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line813">line 813</a>
     </li></ul></dd>
     
 
@@ -9354,7 +9784,105 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line610">line 610</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line854">line 854</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="s3tcTextures"><span class="type-signature"></span>s3tcTextures<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Enable the WEBGL_compressed_texture_s3tc and WEBGL_compressed_texture_s3tc_srgb extensions, and 
+    add the following enums, which can be used as texture formats, to the PicoGL object:
+
+    <ul>
+      <li>PicoGL.COMPRESSED_RGB_S3TC_DXT1_EXT
+      <li>PicoGL.COMPRESSED_RGBA_S3TC_DXT1_EXT
+      <li>PicoGL.COMPRESSED_RGBA_S3TC_DXT3_EXT
+      <li>PicoGL.COMPRESSED_RGBA_S3TC_DXT5_EXT
+      <li>PicoGL.COMPRESSED_SRGB_S3TC_DXT1_EXT
+      <li>PicoGL.COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT
+      <li>PicoGL.COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT
+      <li>PicoGL.COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT
+    </ul>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line579">line 579</a>
     </li></ul></dd>
     
 
@@ -9440,7 +9968,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line370">line 370</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line381">line 381</a>
     </li></ul></dd>
     
 
@@ -9526,7 +10054,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line348">line 348</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line359">line 359</a>
     </li></ul></dd>
     
 
@@ -9711,7 +10239,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line421">line 421</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line432">line 432</a>
     </li></ul></dd>
     
 
@@ -9919,7 +10447,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line440">line 440</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line451">line 451</a>
     </li></ul></dd>
     
 
@@ -10057,7 +10585,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line386">line 386</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line397">line 397</a>
     </li></ul></dd>
     
 
@@ -10218,7 +10746,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line403">line 403</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line414">line 414</a>
     </li></ul></dd>
     
 
@@ -10402,7 +10930,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line457">line 457</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line468">line 468</a>
     </li></ul></dd>
     
 
@@ -10609,7 +11137,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line475">line 475</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line486">line 486</a>
     </li></ul></dd>
     
 
@@ -10697,7 +11225,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line325">line 325</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line336">line 336</a>
     </li></ul></dd>
     
 
@@ -10901,7 +11429,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line589">line 589</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line833">line 833</a>
     </li></ul></dd>
     
 
@@ -10951,7 +11479,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.3</a> on Sun Aug 20 2017 09:16:12 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.3</a> on Sun Aug 20 2017 12:04:12 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

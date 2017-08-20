@@ -72,6 +72,8 @@
     }
 
     // https://www.khronos.org/registry/webgl/extensions/WEBGL_compressed_texture_s3tc/
+    // https://www.khronos.org/registry/webgl/extensions/WEBGL_compressed_texture_etc/
+    // https://www.khronos.org/registry/webgl/extensions/WEBGL_compressed_texture_astc/
     // Size for: 
     // COMPRESSED_RGBA_S3TC_DXT3_EXT
     // COMPRESSED_RGBA_S3TC_DXT5_EXT
@@ -80,58 +82,71 @@
     // COMPRESSED_RGBA8_ETC2_EAC
     // COMPRESSED_SRGB8_ALPHA8_ETC2_EAC
     // COMPRESSED_RGBA_ASTC_4x4_KHR
-    function dxtEtcAtcBigSize(width, height) {
+    function dxtEtcAstcBigSize(width, height) {
         return Math.floor((width + 3) / 4) * Math.floor((height + 3) / 4) * 16;
     }
 
+    // https://www.khronos.org/registry/webgl/extensions/WEBGL_compressed_texture_astc/
     function atc5x4Size(width, height) {
         return Math.floor((width + 4) / 5) * Math.floor((height + 3) / 4) * 16;
     }
 
+    // https://www.khronos.org/registry/webgl/extensions/WEBGL_compressed_texture_astc/
     function atc5x5Size(width, height) {
         return Math.floor((width + 4) / 5) * Math.floor((height + 4) / 5) * 16;
     }
 
+    // https://www.khronos.org/registry/webgl/extensions/WEBGL_compressed_texture_astc/
     function atc6x5Size(width, height) {
         return Math.floor((width + 5) / 6) * Math.floor((height + 4) / 5) * 16;
     }
 
+    // https://www.khronos.org/registry/webgl/extensions/WEBGL_compressed_texture_astc/
     function atc6x6Size(width, height) {
         return Math.floor((width + 5) / 6) * Math.floor((height + 5) / 6) * 16;
     }
 
+    // https://www.khronos.org/registry/webgl/extensions/WEBGL_compressed_texture_astc/
     function atc8x5Size(width, height) {
         return Math.floor((width + 7) / 8) * Math.floor((height + 4) / 5) * 16;
     }
 
+    // https://www.khronos.org/registry/webgl/extensions/WEBGL_compressed_texture_astc/
     function atc8x6Size(width, height) {
         return Math.floor((width + 7) / 8) * Math.floor((height + 5) / 6) * 16;
     }
 
+    // https://www.khronos.org/registry/webgl/extensions/WEBGL_compressed_texture_astc/
     function atc8x8Size(width, height) {
         return Math.floor((width + 7) / 8) * Math.floor((height + 7) / 8) * 16;
     }
 
+    // https://www.khronos.org/registry/webgl/extensions/WEBGL_compressed_texture_astc/
     function atc10x5Size(width, height) {
         return Math.floor((width + 9) / 10) * Math.floor((height + 4) / 5) * 16;
     }
 
+    // https://www.khronos.org/registry/webgl/extensions/WEBGL_compressed_texture_astc/
     function atc10x6Size(width, height) {
         return Math.floor((width + 9) / 10) * Math.floor((height + 5) / 6) * 16;
     }
 
+    // https://www.khronos.org/registry/webgl/extensions/WEBGL_compressed_texture_astc/
     function atc10x8Size(width, height) {
         return Math.floor((width + 9) / 10) * Math.floor((height + 7) / 8) * 16;
     }
 
+    // https://www.khronos.org/registry/webgl/extensions/WEBGL_compressed_texture_astc/
     function atc10x10Size(width, height) {
         return Math.floor((width + 9) / 10) * Math.floor((height + 9) / 10) * 16;
     }
 
+    // https://www.khronos.org/registry/webgl/extensions/WEBGL_compressed_texture_astc/
     function atc12x10Size(width, height) {
         return Math.floor((width + 11) / 12) * Math.floor((height + 9) / 10) * 16;
     }
 
+    // https://www.khronos.org/registry/webgl/extensions/WEBGL_compressed_texture_astc/
     function atc12x12Size(width, height) {
         return Math.floor((width + 11) / 12) * Math.floor((height + 11) / 12) * 16;
     }
@@ -182,14 +197,14 @@
             3: pvrtc4bppSize,
             6: dxtEtcSmallSize,
             7: dxtEtcSmallSize,
-            9: dxtEtcAtcBigSize,
-            11: dxtEtcAtcBigSize,
+            9: dxtEtcAstcBigSize,
+            11: dxtEtcAstcBigSize,
             22: dxtEtcSmallSize,
-            23: dxtEtcAtcBigSize,
+            23: dxtEtcAstcBigSize,
             24: dxtEtcSmallSize,
             25: dxtEtcSmallSize,
-            26: dxtEtcAtcBigSize,
-            27: dxtEtcAtcBigSize,
+            26: dxtEtcAstcBigSize,
+            27: dxtEtcAstcBigSize,
             28: atc5x4Size,
             29: atc5x5Size,
             30: atc6x5Size,
