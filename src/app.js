@@ -556,16 +556,21 @@ App.prototype.linearFloatTextures = function() {
 };
 
 /**
-    Read a pixel's color value from the canvas. Note that the RGBA values will be encoded
-    as 0-255.
+    Read a pixel's color value from the currently-bound framebuffer.
 
     @method
     @param {number} x The x coordinate of the pixel.
     @param {number} y The y coordinate of the pixel.
-    @param {Uint8Array} outColor 4-element Uint8Array to store the pixel's color.
+    @param {ArrayBufferView} outColor Typed array to store the pixel's color.
+    @param {object} options Options.
 */
-App.prototype.readPixel = function(x, y, outColor) {
-    this.gl.readPixels(x, y, 1, 1, this.gl.RGBA, this.gl.UNSIGNED_BYTE, outColor);
+App.prototype.readPixel = function(x, y, outColor, options) {
+    options = options || CONSTANTS.DUMMY_OBJECT;
+    
+    var format = options.format || CONSTANTS.RGBA;
+    var type = options.type || CONSTANTS.UNSIGNED_BYTE;
+
+    this.gl.readPixels(x, y, 1, 1, format, type, outColor);
 
     return this;
 };
