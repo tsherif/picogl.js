@@ -639,6 +639,7 @@
             xhr.send(null);
         },
 
+        // http://cdn.imgtec.com/sdk-documentation/PVR+File+Format.Specification.pdf
         parsePVR: function(data) {
             var header = new Uint32Array(data, 0, PVR_CONSTANTS.HEADER_LENGTH);
 
