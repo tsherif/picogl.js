@@ -961,8 +961,9 @@ App.prototype.createUniformBuffer = function(layout, usage) {
     Create a 2D texture.
 
     @method
-    @param {DOMElement|ArrayBufferView} image Image data. Can be any format that would be accepted
-            by texImage2D.
+    @param {DOMElement|ArrayBufferView|Array} image Image data. An array can be passed to manually set all levels 
+        of the mipmap chain. If a single level is passed and mipmap filtering is being used,
+        generateMipmap() will be called to produce the remaining levels.
     @param {number} [width] Texture width. Required for array data.
     @param {number} [height] Texture height. Required for array data.
     @param {Object} [options] Texture options.
@@ -997,7 +998,9 @@ App.prototype.createTexture2D = function(image, width, height, options) {
     Create a 2D texture array.
 
     @method
-    @param {ArrayBufferView} image Typed array containing pixel data.
+    @param {ArrayBufferView|Array} image Pixel data. An array can be passed to manually set all levels 
+        of the mipmap chain. If a single level is passed and mipmap filtering is being used,
+        generateMipmap() will be called to produce the remaining levels.
     @param {number} width Texture width.
     @param {number} height Texture height.
     @param {number} size Number of images in the array.
@@ -1026,7 +1029,9 @@ App.prototype.createTextureArray = function(image, width, height, depth, options
     Create a 3D texture.
 
     @method
-    @param {ArrayBufferView} image Typed array containing pixel data.
+    @param {ArrayBufferView|Array} image Pixel data. An array can be passed to manually set all levels 
+        of the mipmap chain. If a single level is passed and mipmap filtering is being used,
+        generateMipmap() will be called to produce the remaining levels.
     @param {number} width Texture width.
     @param {number} height Texture height.
     @param {number} depth Texture depth.

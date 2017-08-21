@@ -38,8 +38,11 @@ var DUMMY_ARRAY = new Array(1);
     @prop {GLEnum} type Type of data stored in the texture.
     @prop {GLEnum} format Layout of texture data.
     @prop {GLEnum} internalFormat Internal arrangement of the texture data.
-    @prop {Number} currentUnit The current texture unit this texture is bound to.
+    @prop {number} currentUnit The current texture unit this texture is bound to.
     @prop {boolean} is3D Whether this texture contains 3D data.
+    @prop {boolean} flipY Whether the y-axis is being flipped for this texture.
+    @prop {boolean} mipmaps Whether this texture is using mipmap filtering 
+        (and thus should have a complete mipmap chain).
     @prop {Object} appState Tracked GL state.
 */
 function Texture(gl, appState, binding, image, width, height, depth, is3D, options) {
@@ -169,8 +172,10 @@ Texture.prototype.resize = function(width, height, depth) {
 };
 
 /**
-    Set the image data for the texture. NOTE: the data must fit
-    the currently-allocated storage!
+    Set the image data for the texture. An array can be passed to manually set all levels 
+    of the mipmap chain. If a single level is passed and mipmap filtering is being used,
+    generateMipmap() will be called to produce the remaining levels.
+    NOTE: the data must fit the currently-allocated storage!
 
     @method
     @param {ImageElement|ArrayBufferView|Array} data Image data. If an array is passed, it will be 

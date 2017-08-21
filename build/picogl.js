@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.6.7
+PicoGL.js v0.6.8
 
 The MIT License (MIT)
 
@@ -74,6 +74,11 @@ var Query                   = require("./query");
     @prop {number} height The height of the drawing surface.
     @prop {boolean} floatRenderTargetsEnabled Whether the EXT_color_buffer_float extension is enabled.
     @prop {boolean} linearFloatTexturesEnabled Whether the OES_texture_float_linear extension is enabled.
+    @prop {boolean} s3tcTexturesEnabled Whether the WEBGL_compressed_texture_s3tc extension is enabled.
+    @prop {boolean} s3tcSRGBTexturesEnabled Whether the WEBGL_compressed_texture_s3tc_srgb extension is enabled.
+    @prop {boolean} etcTexturesEnabled Whether the WEBGL_compressed_texture_etc extension is enabled.
+    @prop {boolean} astcTexturesEnabled Whether the WEBGL_compressed_texture_astc extension is enabled.
+    @prop {boolean} pvrtcTexturesEnabled Whether the WEBGL_compressed_texture_pvrtc extension is enabled.
     @prop {Object} state Tracked GL state.
     @prop {GLEnum} clearBits Current clear mask to use with clear().    
 */
@@ -584,14 +589,16 @@ App.prototype.linearFloatTextures = function() {
     Enable the WEBGL_compressed_texture_s3tc and WEBGL_compressed_texture_s3tc_srgb extensions, and 
     add the following enums, which can be used as texture formats, to the PicoGL object:
 
-    - PicoGL.COMPRESSED_RGB_S3TC_DXT1_EXT
-    - PicoGL.COMPRESSED_RGBA_S3TC_DXT1_EXT
-    - PicoGL.COMPRESSED_RGBA_S3TC_DXT3_EXT
-    - PicoGL.COMPRESSED_RGBA_S3TC_DXT5_EXT
-    - PicoGL.COMPRESSED_SRGB_S3TC_DXT1_EXT
-    - PicoGL.COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT
-    - PicoGL.COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT
-    - PicoGL.COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT
+    <ul>
+      <li>PicoGL.COMPRESSED_RGB_S3TC_DXT1_EXT
+      <li>PicoGL.COMPRESSED_RGBA_S3TC_DXT1_EXT
+      <li>PicoGL.COMPRESSED_RGBA_S3TC_DXT3_EXT
+      <li>PicoGL.COMPRESSED_RGBA_S3TC_DXT5_EXT
+      <li>PicoGL.COMPRESSED_SRGB_S3TC_DXT1_EXT
+      <li>PicoGL.COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT
+      <li>PicoGL.COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT
+      <li>PicoGL.COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT
+    </ul>
 
     @method
 */
@@ -633,20 +640,21 @@ App.prototype.s3tcTextures = function() {
     Enable the WEBGL_compressed_texture_etc extension  and add the following enums, which can
     be used as texture formats, to the PicoGL object:
     
-    - PicoGL.COMPRESSED_R11_EAC
-    - PicoGL.COMPRESSED_SIGNED_R11_EAC
-    - PicoGL.COMPRESSED_RG11_EAC
-    - PicoGL.COMPRESSED_SIGNED_RG11_EAC
-    - PicoGL.COMPRESSED_RGB8_ETC2
-    - PicoGL.COMPRESSED_SRGB8_ETC2
-    - PicoGL.COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2
-    - PicoGL.COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2
-    - PicoGL.COMPRESSED_RGBA8_ETC2_EAC
-    - PicoGL.COMPRESSED_SRGB8_ALPHA8_ETC2_EAC
+    <ul>
+      <li>PicoGL.COMPRESSED_R11_EAC
+      <li>PicoGL.COMPRESSED_SIGNED_R11_EAC
+      <li>PicoGL.COMPRESSED_RG11_EAC
+      <li>PicoGL.COMPRESSED_SIGNED_RG11_EAC
+      <li>PicoGL.COMPRESSED_RGB8_ETC2
+      <li>PicoGL.COMPRESSED_SRGB8_ETC2
+      <li>PicoGL.COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2
+      <li>PicoGL.COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2
+      <li>PicoGL.COMPRESSED_RGBA8_ETC2_EAC
+      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ETC2_EAC
+    </ul>
 
     Note that while WEBGL_compressed_texture_etc1 is not enabled by this method,
-    ETC1 textures can be loaded using COMPRESSED_RGB8_ETC2 from this
-    extension.
+    ETC1 textures can be loaded using COMPRESSED_RGB8_ETC2 as the format.
 
     @method
 */
@@ -685,34 +693,36 @@ App.prototype.etcTextures = function() {
     Enable the WEBGL_compressed_texture_astc extension and add the following enums, which can
     be used as texture formats, to the PicoGL object:
     
-    - PicoGL.COMPRESSED_RGBA_ASTC_4x4_KHR
-    - PicoGL.COMPRESSED_RGBA_ASTC_5x4_KHR
-    - PicoGL.COMPRESSED_RGBA_ASTC_5x5_KHR
-    - PicoGL.COMPRESSED_RGBA_ASTC_6x5_KHR
-    - PicoGL.COMPRESSED_RGBA_ASTC_6x6_KHR
-    - PicoGL.COMPRESSED_RGBA_ASTC_8x5_KHR
-    - PicoGL.COMPRESSED_RGBA_ASTC_8x6_KHR
-    - PicoGL.COMPRESSED_RGBA_ASTC_8x8_KHR
-    - PicoGL.COMPRESSED_RGBA_ASTC_10x5_KHR
-    - PicoGL.COMPRESSED_RGBA_ASTC_10x6_KHR
-    - PicoGL.COMPRESSED_RGBA_ASTC_10x8_KHR
-    - PicoGL.COMPRESSED_RGBA_ASTC_10x10_KHR
-    - PicoGL.COMPRESSED_RGBA_ASTC_12x10_KHR
-    - PicoGL.COMPRESSED_RGBA_ASTC_12x12_KHR
-    - PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR
-    - PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR
-    - PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR
-    - PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR
-    - PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR
-    - PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR
-    - PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR
-    - PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR
-    - PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR
-    - PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR
-    - PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR
-    - PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR
-    - PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR
-    - PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR
+    <ul>
+      <li>PicoGL.COMPRESSED_RGBA_ASTC_4x4_KHR
+      <li>PicoGL.COMPRESSED_RGBA_ASTC_5x4_KHR
+      <li>PicoGL.COMPRESSED_RGBA_ASTC_5x5_KHR
+      <li>PicoGL.COMPRESSED_RGBA_ASTC_6x5_KHR
+      <li>PicoGL.COMPRESSED_RGBA_ASTC_6x6_KHR
+      <li>PicoGL.COMPRESSED_RGBA_ASTC_8x5_KHR
+      <li>PicoGL.COMPRESSED_RGBA_ASTC_8x6_KHR
+      <li>PicoGL.COMPRESSED_RGBA_ASTC_8x8_KHR
+      <li>PicoGL.COMPRESSED_RGBA_ASTC_10x5_KHR
+      <li>PicoGL.COMPRESSED_RGBA_ASTC_10x6_KHR
+      <li>PicoGL.COMPRESSED_RGBA_ASTC_10x8_KHR
+      <li>PicoGL.COMPRESSED_RGBA_ASTC_10x10_KHR
+      <li>PicoGL.COMPRESSED_RGBA_ASTC_12x10_KHR
+      <li>PicoGL.COMPRESSED_RGBA_ASTC_12x12_KHR
+      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR
+      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR
+      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR
+      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR
+      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR
+      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR
+      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR
+      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR
+      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR
+      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR
+      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR
+      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR
+      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR
+      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR
+    </ul>
 
     @method
 */
@@ -787,10 +797,12 @@ App.prototype.astcTextures = function() {
     Enable the WEBGL_compressed_texture_pvrtc extension and add the following enums, which can
     be used as texture formats, to the PicoGL object:
 
-    - PicoGL.COMPRESSED_RGB_PVRTC_4BPPV1_IMG
-    - PicoGL.COMPRESSED_RGB_PVRTC_2BPPV1_IMG
-    - PicoGL.COMPRESSED_RGBA_PVRTC_4BPPV1_IMG
-    - PicoGL.COMPRESSED_RGBA_PVRTC_2BPPV1_IMG
+    <ul>
+      <li>PicoGL.COMPRESSED_RGB_PVRTC_4BPPV1_IMG
+      <li>PicoGL.COMPRESSED_RGB_PVRTC_2BPPV1_IMG
+      <li>PicoGL.COMPRESSED_RGBA_PVRTC_4BPPV1_IMG
+      <li>PicoGL.COMPRESSED_RGBA_PVRTC_2BPPV1_IMG
+    </ul>
 
     @method
 */
@@ -975,8 +987,9 @@ App.prototype.createUniformBuffer = function(layout, usage) {
     Create a 2D texture.
 
     @method
-    @param {DOMElement|ArrayBufferView} image Image data. Can be any format that would be accepted
-            by texImage2D.
+    @param {DOMElement|ArrayBufferView|Array} image Image data. An array can be passed to manually set all levels 
+        of the mipmap chain. If a single level is passed and mipmap filtering is being used,
+        generateMipmap() will be called to produce the remaining levels.
     @param {number} [width] Texture width. Required for array data.
     @param {number} [height] Texture height. Required for array data.
     @param {Object} [options] Texture options.
@@ -1011,7 +1024,9 @@ App.prototype.createTexture2D = function(image, width, height, options) {
     Create a 2D texture array.
 
     @method
-    @param {ArrayBufferView} image Typed array containing pixel data.
+    @param {ArrayBufferView|Array} image Pixel data. An array can be passed to manually set all levels 
+        of the mipmap chain. If a single level is passed and mipmap filtering is being used,
+        generateMipmap() will be called to produce the remaining levels.
     @param {number} width Texture width.
     @param {number} height Texture height.
     @param {number} size Number of images in the array.
@@ -1040,7 +1055,9 @@ App.prototype.createTextureArray = function(image, width, height, depth, options
     Create a 3D texture.
 
     @method
-    @param {ArrayBufferView} image Typed array containing pixel data.
+    @param {ArrayBufferView|Array} image Pixel data. An array can be passed to manually set all levels 
+        of the mipmap chain. If a single level is passed and mipmap filtering is being used,
+        generateMipmap() will be called to produce the remaining levels.
     @param {number} width Texture width.
     @param {number} height Texture height.
     @param {number} depth Texture depth.
@@ -1863,7 +1880,7 @@ var App = require("./app");
     @namespace PicoGL
 */
 var PicoGL = global.PicoGL = require("./constants");    
-PicoGL.version = "0.6.7";
+PicoGL.version = "0.6.8";
 
 /**
     Create a PicoGL app. The app is the primary entry point to PicoGL. It stores
@@ -2337,8 +2354,11 @@ var DUMMY_ARRAY = new Array(1);
     @prop {GLEnum} type Type of data stored in the texture.
     @prop {GLEnum} format Layout of texture data.
     @prop {GLEnum} internalFormat Internal arrangement of the texture data.
-    @prop {Number} currentUnit The current texture unit this texture is bound to.
+    @prop {number} currentUnit The current texture unit this texture is bound to.
     @prop {boolean} is3D Whether this texture contains 3D data.
+    @prop {boolean} flipY Whether the y-axis is being flipped for this texture.
+    @prop {boolean} mipmaps Whether this texture is using mipmap filtering 
+        (and thus should have a complete mipmap chain).
     @prop {Object} appState Tracked GL state.
 */
 function Texture(gl, appState, binding, image, width, height, depth, is3D, options) {
@@ -2468,8 +2488,10 @@ Texture.prototype.resize = function(width, height, depth) {
 };
 
 /**
-    Set the image data for the texture. NOTE: the data must fit
-    the currently-allocated storage!
+    Set the image data for the texture. An array can be passed to manually set all levels 
+    of the mipmap chain. If a single level is passed and mipmap filtering is being used,
+    generateMipmap() will be called to produce the remaining levels.
+    NOTE: the data must fit the currently-allocated storage!
 
     @method
     @param {ImageElement|ArrayBufferView|Array} data Image data. If an array is passed, it will be 
