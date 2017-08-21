@@ -253,8 +253,9 @@
         if (app.s3tcTexturesEnabled) {
             utils.getBinary("img/s3tc-supported-dxt1.pvr", function(data) {
                 var textureData = utils.parsePVR(data);
+                console.log(textureData.format)
                 s3tcTexture = app.createTexture2D(textureData.data, textureData.width, textureData.height, {
-                    format: PicoGL[textureData.format]
+                    format: PicoGL.COMPRESSED_RGB_S3TC_DXT1_EXT
                 });
                 
                 checkDone();
@@ -273,8 +274,9 @@
         if (app.etcTexturesEnabled) {
             utils.getBinary("img/etc-supported-etc2.pvr", function(data) {
                 var textureData = utils.parsePVR(data);
+                console.log(textureData.format)
                 etcTexture = app.createTexture2D(textureData.data, textureData.width, textureData.height, {
-                    format: PicoGL[textureData.format]
+                    format: PicoGL.COMPRESSED_RGB8_ETC2
                 });
                 
                 checkDone();
@@ -293,8 +295,9 @@
         if (app.astcTexturesEnabled) {
             utils.getBinary("img/astc-supported-astc.pvr", function(data) {
                 var textureData = utils.parsePVR(data);
+                console.log(textureData.format)
                 astcTexture = app.createTexture2D(textureData.data, textureData.width, textureData.height, {
-                    format: PicoGL[textureData.format]
+                    format: PicoGL.COMPRESSED_RGBA_ASTC_4x4_KHR
                 });
                 
                 checkDone();
@@ -313,8 +316,9 @@
         if (app.pvrtcTexturesEnabled) {
             utils.getBinary("img/pvrtc-supported-pvrtc.pvr", function(data) {
                 var textureData = utils.parsePVR(data);
+                console.log(textureData.format)
                 pvrtcTexture = app.createTexture2D(textureData.data, textureData.width, textureData.height, {
-                    format: PicoGL[textureData.format]
+                    format: PicoGL.COMPRESSED_RGB_PVRTC_4BPPV1_IMG
                 });
                 
                 checkDone();
