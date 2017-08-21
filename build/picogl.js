@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.6.7
+PicoGL.js v0.6.8
 
 The MIT License (MIT)
 
@@ -48,20 +48,20 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
 "use strict";
-var CONSTANTS         = require("./constants");
-var Cubemap           = require("./cubemap");
-var DrawCall          = require("./draw-call");
-var Framebuffer       = require("./framebuffer");
-var Program           = require("./program");
-var Shader            = require("./shader");
-var Texture           = require("./texture");
-var Timer             = require("./timer");
-var TransformFeedback = require("./transform-feedback");
-var UniformBuffer     = require("./uniform-buffer");
-var VertexArray       = require("./vertex-array");
-var VertexBuffer      = require("./vertex-buffer");
-var Query             = require("./query");
-
+var CONSTANTS               = require("./constants");
+var TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
+var Cubemap                 = require("./cubemap");
+var DrawCall                = require("./draw-call");
+var Framebuffer             = require("./framebuffer");
+var Program                 = require("./program");
+var Shader                  = require("./shader");
+var Texture                 = require("./texture");
+var Timer                   = require("./timer");
+var TransformFeedback       = require("./transform-feedback");
+var UniformBuffer           = require("./uniform-buffer");
+var VertexArray             = require("./vertex-array");
+var VertexBuffer            = require("./vertex-buffer");
+var Query                   = require("./query");
 
 /**
     Primary entry point to PicoGL. An app will store all parts of the WebGL
@@ -74,6 +74,11 @@ var Query             = require("./query");
     @prop {number} height The height of the drawing surface.
     @prop {boolean} floatRenderTargetsEnabled Whether the EXT_color_buffer_float extension is enabled.
     @prop {boolean} linearFloatTexturesEnabled Whether the OES_texture_float_linear extension is enabled.
+    @prop {boolean} s3tcTexturesEnabled Whether the WEBGL_compressed_texture_s3tc extension is enabled.
+    @prop {boolean} s3tcSRGBTexturesEnabled Whether the WEBGL_compressed_texture_s3tc_srgb extension is enabled.
+    @prop {boolean} etcTexturesEnabled Whether the WEBGL_compressed_texture_etc extension is enabled.
+    @prop {boolean} astcTexturesEnabled Whether the WEBGL_compressed_texture_astc extension is enabled.
+    @prop {boolean} pvrtcTexturesEnabled Whether the WEBGL_compressed_texture_pvrtc extension is enabled.
     @prop {Object} state Tracked GL state.
     @prop {GLEnum} clearBits Current clear mask to use with clear().    
 */
@@ -111,8 +116,14 @@ function App(canvas, contextAttributes) {
     this.cpuTime = 0;
     this.gpuTime = 0;
 
+    // Extensions
     this.floatRenderTargetsEnabled = false;
     this.linearFloatTexturesEnabled = false;
+    this.s3tcTexturesEnabled = false;
+    this.s3tcSRGBTexturesEnabled = false;
+    this.etcTexturesEnabled = false;
+    this.astcTexturesEnabled = false;
+    this.pvrtcTexturesEnabled = false;
 
     this.viewport(0, 0, this.width, this.height);
 }
@@ -558,10 +569,6 @@ App.prototype.drawBackfaces = function() {
 App.prototype.floatRenderTargets = function() {
     this.floatRenderTargetsEnabled = !!this.gl.getExtension("EXT_color_buffer_float");
 
-    if (!this.floatRenderTargetsEnabled) {
-        console.warn("Extension EXT_color_buffer_float unavailable. Cannot enable float textures.");
-    }
-
     return this;
 };
 
@@ -574,8 +581,245 @@ App.prototype.floatRenderTargets = function() {
 App.prototype.linearFloatTextures = function() {
     this.linearFloatTexturesEnabled = !!this.gl.getExtension("OES_texture_float_linear");
 
-    if (!this.linearFloatTexturesEnabled) {
-        console.warn("Extension OES_texture_float_linear unavailable. Cannot enable float texture linear filtering.");
+    return this;
+};
+
+
+/**
+    Enable the WEBGL_compressed_texture_s3tc and WEBGL_compressed_texture_s3tc_srgb extensions, and 
+    add the following enums, which can be used as texture formats, to the PicoGL object:
+
+    <ul>
+      <li>PicoGL.COMPRESSED_RGB_S3TC_DXT1_EXT
+      <li>PicoGL.COMPRESSED_RGBA_S3TC_DXT1_EXT
+      <li>PicoGL.COMPRESSED_RGBA_S3TC_DXT3_EXT
+      <li>PicoGL.COMPRESSED_RGBA_S3TC_DXT5_EXT
+      <li>PicoGL.COMPRESSED_SRGB_S3TC_DXT1_EXT
+      <li>PicoGL.COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT
+      <li>PicoGL.COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT
+      <li>PicoGL.COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT
+    </ul>
+
+    @method
+*/
+App.prototype.s3tcTextures = function() {
+    var ext = this.gl.getExtension("WEBGL_compressed_texture_s3tc");
+    this.s3tcTexturesEnabled = !!ext;
+    
+    if (this.s3tcTexturesEnabled) {
+        CONSTANTS.COMPRESSED_RGB_S3TC_DXT1_EXT  = ext.COMPRESSED_RGB_S3TC_DXT1_EXT;
+        CONSTANTS.COMPRESSED_RGBA_S3TC_DXT1_EXT = ext.COMPRESSED_RGBA_S3TC_DXT1_EXT;
+        CONSTANTS.COMPRESSED_RGBA_S3TC_DXT3_EXT = ext.COMPRESSED_RGBA_S3TC_DXT3_EXT;
+        CONSTANTS.COMPRESSED_RGBA_S3TC_DXT5_EXT = ext.COMPRESSED_RGBA_S3TC_DXT5_EXT;
+
+        TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGB_S3TC_DXT1_EXT]  = true;
+        TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGBA_S3TC_DXT1_EXT] = true;
+        TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGBA_S3TC_DXT3_EXT] = true;
+        TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGBA_S3TC_DXT5_EXT] = true;
+    }
+
+    ext = this.gl.getExtension("WEBGL_compressed_texture_s3tc_srgb");
+    this.s3tcSRGBTexturesEnabled = !!ext;
+    
+    if (this.s3tcSRGBTexturesEnabled) {
+        CONSTANTS.COMPRESSED_SRGB_S3TC_DXT1_EXT       = ext.COMPRESSED_SRGB_S3TC_DXT1_EXT;
+        CONSTANTS.COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT = ext.COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT;
+        CONSTANTS.COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT = ext.COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT;
+        CONSTANTS.COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT = ext.COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT;
+        
+        TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_SRGB_S3TC_DXT1_EXT]       = true;
+        TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT] = true;
+        TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT] = true;
+        TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT] = true;
+    }
+
+    return this;
+};
+
+/**
+    Enable the WEBGL_compressed_texture_etc extension  and add the following enums, which can
+    be used as texture formats, to the PicoGL object:
+    
+    <ul>
+      <li>PicoGL.COMPRESSED_R11_EAC
+      <li>PicoGL.COMPRESSED_SIGNED_R11_EAC
+      <li>PicoGL.COMPRESSED_RG11_EAC
+      <li>PicoGL.COMPRESSED_SIGNED_RG11_EAC
+      <li>PicoGL.COMPRESSED_RGB8_ETC2
+      <li>PicoGL.COMPRESSED_SRGB8_ETC2
+      <li>PicoGL.COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2
+      <li>PicoGL.COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2
+      <li>PicoGL.COMPRESSED_RGBA8_ETC2_EAC
+      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ETC2_EAC
+    </ul>
+
+    Note that while WEBGL_compressed_texture_etc1 is not enabled by this method,
+    ETC1 textures can be loaded using COMPRESSED_RGB8_ETC2 as the format.
+
+    @method
+*/
+App.prototype.etcTextures = function() {
+    var ext = this.gl.getExtension("WEBGL_compressed_texture_etc");
+    this.etcTexturesEnabled = !!ext;
+
+    if (this.etcTexturesEnabled) {
+        CONSTANTS.COMPRESSED_R11_EAC                        = ext.COMPRESSED_R11_EAC;
+        CONSTANTS.COMPRESSED_SIGNED_R11_EAC                 = ext.COMPRESSED_SIGNED_R11_EAC;
+        CONSTANTS.COMPRESSED_RG11_EAC                       = ext.COMPRESSED_RG11_EAC;
+        CONSTANTS.COMPRESSED_SIGNED_RG11_EAC                = ext.COMPRESSED_SIGNED_RG11_EAC;
+        CONSTANTS.COMPRESSED_RGB8_ETC2                      = ext.COMPRESSED_RGB8_ETC2;
+        CONSTANTS.COMPRESSED_SRGB8_ETC2                     = ext.COMPRESSED_SRGB8_ETC2;
+        CONSTANTS.COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2  = ext.COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2;
+        CONSTANTS.COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2 = ext.COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2;
+        CONSTANTS.COMPRESSED_RGBA8_ETC2_EAC                 = ext.COMPRESSED_RGBA8_ETC2_EAC;
+        CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ETC2_EAC          = ext.COMPRESSED_SRGB8_ALPHA8_ETC2_EAC;
+
+        TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_R11_EAC]                        = true;
+        TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_SIGNED_R11_EAC]                 = true;
+        TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RG11_EAC]                       = true;
+        TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_SIGNED_RG11_EAC]                = true;
+        TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGB8_ETC2]                      = true;
+        TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_ETC2]                     = true;
+        TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2]  = true;
+        TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2] = true;
+        TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGBA8_ETC2_EAC]                 = true;
+        TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_ALPHA8_ETC2_EAC]          = true;
+    }
+
+    return this;
+};
+
+/**
+    Enable the WEBGL_compressed_texture_astc extension and add the following enums, which can
+    be used as texture formats, to the PicoGL object:
+    
+    <ul>
+      <li>PicoGL.COMPRESSED_RGBA_ASTC_4x4_KHR
+      <li>PicoGL.COMPRESSED_RGBA_ASTC_5x4_KHR
+      <li>PicoGL.COMPRESSED_RGBA_ASTC_5x5_KHR
+      <li>PicoGL.COMPRESSED_RGBA_ASTC_6x5_KHR
+      <li>PicoGL.COMPRESSED_RGBA_ASTC_6x6_KHR
+      <li>PicoGL.COMPRESSED_RGBA_ASTC_8x5_KHR
+      <li>PicoGL.COMPRESSED_RGBA_ASTC_8x6_KHR
+      <li>PicoGL.COMPRESSED_RGBA_ASTC_8x8_KHR
+      <li>PicoGL.COMPRESSED_RGBA_ASTC_10x5_KHR
+      <li>PicoGL.COMPRESSED_RGBA_ASTC_10x6_KHR
+      <li>PicoGL.COMPRESSED_RGBA_ASTC_10x8_KHR
+      <li>PicoGL.COMPRESSED_RGBA_ASTC_10x10_KHR
+      <li>PicoGL.COMPRESSED_RGBA_ASTC_12x10_KHR
+      <li>PicoGL.COMPRESSED_RGBA_ASTC_12x12_KHR
+      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR
+      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR
+      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR
+      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR
+      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR
+      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR
+      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR
+      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR
+      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR
+      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR
+      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR
+      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR
+      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR
+      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR
+    </ul>
+
+    @method
+*/
+App.prototype.astcTextures = function() {
+    var ext = this.gl.getExtension("WEBGL_compressed_texture_astc");
+    this.astcTexturesEnabled = !!ext;
+
+    if (this.astcTexturesEnabled) {
+        CONSTANTS.COMPRESSED_RGBA_ASTC_4x4_KHR           = ext.COMPRESSED_RGBA_ASTC_4x4_KHR;
+        CONSTANTS.COMPRESSED_RGBA_ASTC_5x4_KHR           = ext.COMPRESSED_RGBA_ASTC_5x4_KHR;
+        CONSTANTS.COMPRESSED_RGBA_ASTC_5x5_KHR           = ext.COMPRESSED_RGBA_ASTC_5x5_KHR;
+        CONSTANTS.COMPRESSED_RGBA_ASTC_6x5_KHR           = ext.COMPRESSED_RGBA_ASTC_6x5_KHR;
+        CONSTANTS.COMPRESSED_RGBA_ASTC_6x6_KHR           = ext.COMPRESSED_RGBA_ASTC_6x6_KHR;
+        CONSTANTS.COMPRESSED_RGBA_ASTC_8x5_KHR           = ext.COMPRESSED_RGBA_ASTC_8x5_KHR;
+        CONSTANTS.COMPRESSED_RGBA_ASTC_8x6_KHR           = ext.COMPRESSED_RGBA_ASTC_8x6_KHR;
+        CONSTANTS.COMPRESSED_RGBA_ASTC_8x8_KHR           = ext.COMPRESSED_RGBA_ASTC_8x8_KHR;
+        CONSTANTS.COMPRESSED_RGBA_ASTC_10x5_KHR          = ext.COMPRESSED_RGBA_ASTC_10x5_KHR;
+        CONSTANTS.COMPRESSED_RGBA_ASTC_10x6_KHR          = ext.COMPRESSED_RGBA_ASTC_10x6_KHR;
+        CONSTANTS.COMPRESSED_RGBA_ASTC_10x8_KHR          = ext.COMPRESSED_RGBA_ASTC_10x8_KHR;
+        CONSTANTS.COMPRESSED_RGBA_ASTC_10x10_KHR         = ext.COMPRESSED_RGBA_ASTC_10x10_KHR;
+        CONSTANTS.COMPRESSED_RGBA_ASTC_12x10_KHR         = ext.COMPRESSED_RGBA_ASTC_12x10_KHR;
+        CONSTANTS.COMPRESSED_RGBA_ASTC_12x12_KHR         = ext.COMPRESSED_RGBA_ASTC_12x12_KHR;
+        CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR   = ext.COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR;
+        CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR   = ext.COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR;
+        CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR   = ext.COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR;
+        CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR   = ext.COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR;
+        CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR   = ext.COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR;
+        CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR   = ext.COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR;
+        CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR   = ext.COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR;
+        CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR   = ext.COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR;
+        CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR  = ext.COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR;
+        CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR  = ext.COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR;
+        CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR  = ext.COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR;
+        CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR = ext.COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR;
+        CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR = ext.COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR;
+        CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR = ext.COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR;
+
+        TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGBA_ASTC_4x4_KHR]           = true;
+        TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGBA_ASTC_5x4_KHR]           = true;
+        TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGBA_ASTC_5x5_KHR]           = true;
+        TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGBA_ASTC_6x5_KHR]           = true;
+        TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGBA_ASTC_6x6_KHR]           = true;
+        TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGBA_ASTC_8x5_KHR]           = true;
+        TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGBA_ASTC_8x6_KHR]           = true;
+        TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGBA_ASTC_8x8_KHR]           = true;
+        TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGBA_ASTC_10x5_KHR]          = true;
+        TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGBA_ASTC_10x6_KHR]          = true;
+        TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGBA_ASTC_10x8_KHR]          = true;
+        TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGBA_ASTC_10x10_KHR]         = true;
+        TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGBA_ASTC_12x10_KHR]         = true;
+        TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGBA_ASTC_12x12_KHR]         = true;
+        TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR]   = true;
+        TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR]   = true;
+        TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR]   = true;
+        TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR]   = true;
+        TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR]   = true;
+        TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR]   = true;
+        TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR]   = true;
+        TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR]   = true;
+        TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR]  = true;
+        TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR]  = true;
+        TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR]  = true;
+        TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR] = true;
+        TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR] = true;
+        TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR] = true;
+    }
+    
+    return this;
+};
+
+/**
+    Enable the WEBGL_compressed_texture_pvrtc extension and add the following enums, which can
+    be used as texture formats, to the PicoGL object:
+
+    <ul>
+      <li>PicoGL.COMPRESSED_RGB_PVRTC_4BPPV1_IMG
+      <li>PicoGL.COMPRESSED_RGB_PVRTC_2BPPV1_IMG
+      <li>PicoGL.COMPRESSED_RGBA_PVRTC_4BPPV1_IMG
+      <li>PicoGL.COMPRESSED_RGBA_PVRTC_2BPPV1_IMG
+    </ul>
+
+    @method
+*/
+App.prototype.pvrtcTextures = function() {
+    var ext = this.gl.getExtension("WEBGL_compressed_texture_pvrtc");
+    this.pvrtcTexturesEnabled = !!ext;
+    
+    if (this.pvrtcTexturesEnabled) {
+        CONSTANTS.COMPRESSED_RGB_PVRTC_4BPPV1_IMG = ext.COMPRESSED_RGB_PVRTC_4BPPV1_IMG;
+        CONSTANTS.COMPRESSED_RGB_PVRTC_2BPPV1_IMG = ext.COMPRESSED_RGB_PVRTC_2BPPV1_IMG;
+        CONSTANTS.COMPRESSED_RGBA_PVRTC_4BPPV1_IMG = ext.COMPRESSED_RGBA_PVRTC_4BPPV1_IMG;
+        CONSTANTS.COMPRESSED_RGBA_PVRTC_2BPPV1_IMG = ext.COMPRESSED_RGBA_PVRTC_2BPPV1_IMG;
+
+        TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGB_PVRTC_4BPPV1_IMG] = true;
+        TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGB_PVRTC_2BPPV1_IMG] = true;
+        TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGBA_PVRTC_4BPPV1_IMG] = true;
+        TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGBA_PVRTC_2BPPV1_IMG] = true;
     }
 
     return this;
@@ -588,7 +832,9 @@ App.prototype.linearFloatTextures = function() {
     @param {number} x The x coordinate of the pixel.
     @param {number} y The y coordinate of the pixel.
     @param {ArrayBufferView} outColor Typed array to store the pixel's color.
-    @param {object} options Options.
+    @param {object} [options] Options.
+    @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the read framebuffer.
+    @param {GLEnum} [options.format=RGBA] Read framebuffer data format.
 */
 App.prototype.readPixel = function(x, y, outColor, options) {
     options = options || CONSTANTS.DUMMY_OBJECT;
@@ -741,8 +987,9 @@ App.prototype.createUniformBuffer = function(layout, usage) {
     Create a 2D texture.
 
     @method
-    @param {DOMElement|ArrayBufferView} image Image data. Can be any format that would be accepted
-            by texImage2D.
+    @param {DOMElement|ArrayBufferView|Array} image Image data. An array can be passed to manually set all levels 
+        of the mipmap chain. If a single level is passed and mipmap filtering is being used,
+        generateMipmap() will be called to produce the remaining levels.
     @param {number} [width] Texture width. Required for array data.
     @param {number} [height] Texture height. Required for array data.
     @param {Object} [options] Texture options.
@@ -777,7 +1024,9 @@ App.prototype.createTexture2D = function(image, width, height, options) {
     Create a 2D texture array.
 
     @method
-    @param {ArrayBufferView} image Typed array containing pixel data.
+    @param {ArrayBufferView|Array} image Pixel data. An array can be passed to manually set all levels 
+        of the mipmap chain. If a single level is passed and mipmap filtering is being used,
+        generateMipmap() will be called to produce the remaining levels.
     @param {number} width Texture width.
     @param {number} height Texture height.
     @param {number} size Number of images in the array.
@@ -806,7 +1055,9 @@ App.prototype.createTextureArray = function(image, width, height, depth, options
     Create a 3D texture.
 
     @method
-    @param {ArrayBufferView} image Typed array containing pixel data.
+    @param {ArrayBufferView|Array} image Pixel data. An array can be passed to manually set all levels 
+        of the mipmap chain. If a single level is passed and mipmap filtering is being used,
+        generateMipmap() will be called to produce the remaining levels.
     @param {number} width Texture width.
     @param {number} height Texture height.
     @param {number} depth Texture depth.
@@ -913,7 +1164,7 @@ App.prototype.createDrawCall = function(program, vertexArray, primitive) {
 
 module.exports = App;
 
-},{"./constants":2,"./cubemap":3,"./draw-call":4,"./framebuffer":5,"./program":7,"./query":8,"./shader":9,"./texture":11,"./timer":12,"./transform-feedback":13,"./uniform-buffer":14,"./vertex-array":16,"./vertex-buffer":17}],2:[function(require,module,exports){
+},{"./constants":2,"./cubemap":3,"./draw-call":4,"./framebuffer":5,"./program":7,"./query":8,"./shader":9,"./texture":11,"./texture-format-defaults":10,"./timer":12,"./transform-feedback":13,"./uniform-buffer":14,"./vertex-array":16,"./vertex-buffer":17}],2:[function(require,module,exports){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -1629,7 +1880,7 @@ var App = require("./app");
     @namespace PicoGL
 */
 var PicoGL = global.PicoGL = require("./constants");    
-PicoGL.version = "0.6.7";
+PicoGL.version = "0.6.8";
 
 /**
     Create a PicoGL app. The app is the primary entry point to PicoGL. It stores
@@ -2058,6 +2309,8 @@ FLOAT[CONSTANTS.RGB] = CONSTANTS.RGB16F;
 FLOAT[CONSTANTS.RGBA] = CONSTANTS.RGBA16F;
 FLOAT[CONSTANTS.DEPTH_COMPONENT] = CONSTANTS.DEPTH_COMPONENT32F;
 
+TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES = {};
+
 module.exports = TEXTURE_FORMAT_DEFAULTS;
 
 },{"./constants":2}],11:[function(require,module,exports){
@@ -2088,6 +2341,7 @@ module.exports = TEXTURE_FORMAT_DEFAULTS;
 
 var CONSTANTS = require("./constants");
 var TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
+var DUMMY_ARRAY = new Array(1);
 
 /**
     General-purpose texture.
@@ -2100,8 +2354,11 @@ var TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
     @prop {GLEnum} type Type of data stored in the texture.
     @prop {GLEnum} format Layout of texture data.
     @prop {GLEnum} internalFormat Internal arrangement of the texture data.
-    @prop {Number} currentUnit The current texture unit this texture is bound to.
+    @prop {number} currentUnit The current texture unit this texture is bound to.
     @prop {boolean} is3D Whether this texture contains 3D data.
+    @prop {boolean} flipY Whether the y-axis is being flipped for this texture.
+    @prop {boolean} mipmaps Whether this texture is using mipmap filtering 
+        (and thus should have a complete mipmap chain).
     @prop {Object} appState Tracked GL state.
 */
 function Texture(gl, appState, binding, image, width, height, depth, is3D, options) {
@@ -2115,11 +2372,23 @@ function Texture(gl, appState, binding, image, width, height, depth, is3D, optio
     this.width = -1;
     this.height = -1;
     this.depth = -1;
-    this.format = options.format !== undefined ? options.format : gl.RGBA;
     this.type = options.type !== undefined ? options.type : gl.UNSIGNED_BYTE;
-    this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : TEXTURE_FORMAT_DEFAULTS[this.type][this.format];
     this.is3D = is3D;
     this.appState = appState;
+
+    this.format = null;
+    this.internalFormat = null;
+    this.compressed = !!(TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[options.format] || TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[options.internalFormat]);
+    
+    if (this.compressed) {
+        // For compressed textures, just need to provide one of format, internalFormat.
+        // The other will be the same.
+        this.format = options.format !== undefined ? options.format : options.internalFormat;
+        this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : options.format;
+    } else {
+        this.format = options.format !== undefined ? options.format : gl.RGBA;
+        this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : TEXTURE_FORMAT_DEFAULTS[this.type][this.format];
+    }
 
     // -1 indicates unbound
     this.currentUnit = -1;
@@ -2154,8 +2423,7 @@ function Texture(gl, appState, binding, image, width, height, depth, is3D, optio
     this.flipY = options.flipY !== undefined ? options.flipY : false;
     this.baseLevel = options.baseLevel !== undefined ? options.baseLevel : null;
     this.maxLevel = options.maxLevel !== undefined ? options.maxLevel : null;
-    this.generateMipmaps = options.generateMipmaps !== false &&
-                        (minFilter === gl.LINEAR_MIPMAP_NEAREST || minFilter === gl.LINEAR_MIPMAP_LINEAR);
+    this.mipmaps = (minFilter === gl.LINEAR_MIPMAP_NEAREST || minFilter === gl.LINEAR_MIPMAP_LINEAR);
 
     this.resize(width, height, depth);
 
@@ -2203,14 +2471,14 @@ Texture.prototype.resize = function(width, height, depth) {
 
     var levels;
     if (this.is3D) {
-        if (this.generateMipmaps) {
+        if (this.mipmaps) {
             levels = Math.floor(Math.log2(Math.max(Math.max(this.width, this.height), this.depth))) + 1;
         } else {
             levels = 1;
         }
         this.gl.texStorage3D(this.binding, levels, this.internalFormat, this.width, this.height, this.depth);
     } else {
-        if (this.generateMipmaps) {
+        if (this.mipmaps) {
             levels = Math.floor(Math.log2(Math.max(this.width, this.height))) + 1;
         } else {
             levels = 1;
@@ -2220,22 +2488,61 @@ Texture.prototype.resize = function(width, height, depth) {
 };
 
 /**
-    Set the image data for the texture. NOTE: the data must fit
-    the currently-allocated storage!
+    Set the image data for the texture. An array can be passed to manually set all levels 
+    of the mipmap chain. If a single level is passed and mipmap filtering is being used,
+    generateMipmap() will be called to produce the remaining levels.
+    NOTE: the data must fit the currently-allocated storage!
 
     @method
-    @param {ImageElement|ArrayBufferView} data Image data.
+    @param {ImageElement|ArrayBufferView|Array} data Image data. If an array is passed, it will be 
+        used to set mip map levels.
 */
 Texture.prototype.data = function(data) {
-    this.bind(Math.max(this.currentUnit, 0));
-
-    if (this.is3D) {
-        this.gl.texSubImage3D(this.binding, 0, 0, 0, 0, this.width, this.height, this.depth, this.format, this.type, data);
-    } else {
-        this.gl.texSubImage2D(this.binding, 0, 0, 0, this.width, this.height, this.format, this.type, data);
+    if (!Array.isArray(data)) {
+        DUMMY_ARRAY[0] = data;
+        data = DUMMY_ARRAY;
     }
 
-    if (this.generateMipmaps) {
+    var numLevels = this.mipmaps ? data.length : 1;
+    var width = this.width;
+    var height = this.height;
+    var depth = this.depth;
+    var generateMipmaps = this.mipmaps && data.length === 1;
+    var i;
+
+    this.bind(Math.max(this.currentUnit, 0));
+
+    if (this.compressed) {
+        if (this.is3D) {
+            for (i = 0; i < numLevels; ++i) {
+                this.gl.compressedTexSubImage3D(this.binding, i, 0, 0, 0, width, height, depth, this.format, data[i]);
+                width = Math.max(width >> 1, 1);
+                height = Math.max(height >> 1, 1);
+                depth = Math.max(depth >> 1, 1);
+            }
+        } else {
+            for (i = 0; i < numLevels; ++i) {
+                this.gl.compressedTexSubImage2D(this.binding, i, 0, 0, width, height, this.format, data[i]);
+                width = Math.max(width >> 1, 1);
+                height = Math.max(height >> 1, 1);
+            }
+        }
+    } else if (this.is3D) {
+        for (i = 0; i < numLevels; ++i) {
+            this.gl.texSubImage3D(this.binding, i, 0, 0, 0, width, height, depth, this.format, this.type, data[i]);
+            width = Math.max(width >> 1, 1);
+            height = Math.max(height >> 1, 1);
+            depth = Math.max(depth >> 1, 1);
+        }
+    } else {
+        for (i = 0; i < numLevels; ++i) {
+            this.gl.texSubImage2D(this.binding, i, 0, 0, width, height, this.format, this.type, data[i]);
+            width = Math.max(width >> 1, 1);
+            height = Math.max(height >> 1, 1);
+        }
+    }
+
+    if (generateMipmaps) {
         this.gl.generateMipmap(this.binding);
     }
 

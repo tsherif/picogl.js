@@ -25,6 +25,7 @@
 
 var CONSTANTS = require("./constants");
 var TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
+var DUMMY_ARRAY = new Array(1);
 
 /**
     General-purpose texture.
@@ -37,8 +38,11 @@ var TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
     @prop {GLEnum} type Type of data stored in the texture.
     @prop {GLEnum} format Layout of texture data.
     @prop {GLEnum} internalFormat Internal arrangement of the texture data.
-    @prop {Number} currentUnit The current texture unit this texture is bound to.
+    @prop {number} currentUnit The current texture unit this texture is bound to.
     @prop {boolean} is3D Whether this texture contains 3D data.
+    @prop {boolean} flipY Whether the y-axis is being flipped for this texture.
+    @prop {boolean} mipmaps Whether this texture is using mipmap filtering 
+        (and thus should have a complete mipmap chain).
     @prop {Object} appState Tracked GL state.
 */
 function Texture(gl, appState, binding, image, width, height, depth, is3D, options) {
@@ -52,11 +56,23 @@ function Texture(gl, appState, binding, image, width, height, depth, is3D, optio
     this.width = -1;
     this.height = -1;
     this.depth = -1;
-    this.format = options.format !== undefined ? options.format : gl.RGBA;
     this.type = options.type !== undefined ? options.type : gl.UNSIGNED_BYTE;
-    this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : TEXTURE_FORMAT_DEFAULTS[this.type][this.format];
     this.is3D = is3D;
     this.appState = appState;
+
+    this.format = null;
+    this.internalFormat = null;
+    this.compressed = !!(TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[options.format] || TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[options.internalFormat]);
+    
+    if (this.compressed) {
+        // For compressed textures, just need to provide one of format, internalFormat.
+        // The other will be the same.
+        this.format = options.format !== undefined ? options.format : options.internalFormat;
+        this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : options.format;
+    } else {
+        this.format = options.format !== undefined ? options.format : gl.RGBA;
+        this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : TEXTURE_FORMAT_DEFAULTS[this.type][this.format];
+    }
 
     // -1 indicates unbound
     this.currentUnit = -1;
@@ -91,8 +107,7 @@ function Texture(gl, appState, binding, image, width, height, depth, is3D, optio
     this.flipY = options.flipY !== undefined ? options.flipY : false;
     this.baseLevel = options.baseLevel !== undefined ? options.baseLevel : null;
     this.maxLevel = options.maxLevel !== undefined ? options.maxLevel : null;
-    this.generateMipmaps = options.generateMipmaps !== false &&
-                        (minFilter === gl.LINEAR_MIPMAP_NEAREST || minFilter === gl.LINEAR_MIPMAP_LINEAR);
+    this.mipmaps = (minFilter === gl.LINEAR_MIPMAP_NEAREST || minFilter === gl.LINEAR_MIPMAP_LINEAR);
 
     this.resize(width, height, depth);
 
@@ -140,14 +155,14 @@ Texture.prototype.resize = function(width, height, depth) {
 
     var levels;
     if (this.is3D) {
-        if (this.generateMipmaps) {
+        if (this.mipmaps) {
             levels = Math.floor(Math.log2(Math.max(Math.max(this.width, this.height), this.depth))) + 1;
         } else {
             levels = 1;
         }
         this.gl.texStorage3D(this.binding, levels, this.internalFormat, this.width, this.height, this.depth);
     } else {
-        if (this.generateMipmaps) {
+        if (this.mipmaps) {
             levels = Math.floor(Math.log2(Math.max(this.width, this.height))) + 1;
         } else {
             levels = 1;
@@ -157,22 +172,61 @@ Texture.prototype.resize = function(width, height, depth) {
 };
 
 /**
-    Set the image data for the texture. NOTE: the data must fit
-    the currently-allocated storage!
+    Set the image data for the texture. An array can be passed to manually set all levels 
+    of the mipmap chain. If a single level is passed and mipmap filtering is being used,
+    generateMipmap() will be called to produce the remaining levels.
+    NOTE: the data must fit the currently-allocated storage!
 
     @method
-    @param {ImageElement|ArrayBufferView} data Image data.
+    @param {ImageElement|ArrayBufferView|Array} data Image data. If an array is passed, it will be 
+        used to set mip map levels.
 */
 Texture.prototype.data = function(data) {
-    this.bind(Math.max(this.currentUnit, 0));
-
-    if (this.is3D) {
-        this.gl.texSubImage3D(this.binding, 0, 0, 0, 0, this.width, this.height, this.depth, this.format, this.type, data);
-    } else {
-        this.gl.texSubImage2D(this.binding, 0, 0, 0, this.width, this.height, this.format, this.type, data);
+    if (!Array.isArray(data)) {
+        DUMMY_ARRAY[0] = data;
+        data = DUMMY_ARRAY;
     }
 
-    if (this.generateMipmaps) {
+    var numLevels = this.mipmaps ? data.length : 1;
+    var width = this.width;
+    var height = this.height;
+    var depth = this.depth;
+    var generateMipmaps = this.mipmaps && data.length === 1;
+    var i;
+
+    this.bind(Math.max(this.currentUnit, 0));
+
+    if (this.compressed) {
+        if (this.is3D) {
+            for (i = 0; i < numLevels; ++i) {
+                this.gl.compressedTexSubImage3D(this.binding, i, 0, 0, 0, width, height, depth, this.format, data[i]);
+                width = Math.max(width >> 1, 1);
+                height = Math.max(height >> 1, 1);
+                depth = Math.max(depth >> 1, 1);
+            }
+        } else {
+            for (i = 0; i < numLevels; ++i) {
+                this.gl.compressedTexSubImage2D(this.binding, i, 0, 0, width, height, this.format, data[i]);
+                width = Math.max(width >> 1, 1);
+                height = Math.max(height >> 1, 1);
+            }
+        }
+    } else if (this.is3D) {
+        for (i = 0; i < numLevels; ++i) {
+            this.gl.texSubImage3D(this.binding, i, 0, 0, 0, width, height, depth, this.format, this.type, data[i]);
+            width = Math.max(width >> 1, 1);
+            height = Math.max(height >> 1, 1);
+            depth = Math.max(depth >> 1, 1);
+        }
+    } else {
+        for (i = 0; i < numLevels; ++i) {
+            this.gl.texSubImage2D(this.binding, i, 0, 0, width, height, this.format, this.type, data[i]);
+            width = Math.max(width >> 1, 1);
+            height = Math.max(height >> 1, 1);
+        }
+    }
+
+    if (generateMipmaps) {
         this.gl.generateMipmap(this.binding);
     }
 
