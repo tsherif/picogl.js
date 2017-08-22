@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.6.9
+PicoGL.js v0.6.10
 
 The MIT License (MIT)
 
@@ -791,6 +791,7 @@ App.prototype.astcTextures = function() {
 
         // TODO(Tarek): Test for https://bugs.chromium.org/p/chromium/issues/detail?id=757447
         // Remove this when that's fixed
+        this.gl.getError();
         this.state.textures[0] = null;
         this.gl.activeTexture(this.gl.TEXTURE0);
         var texture = this.gl.createTexture();
@@ -1921,7 +1922,7 @@ var App = require("./app");
     @namespace PicoGL
 */
 var PicoGL = global.PicoGL = require("./constants");    
-PicoGL.version = "0.6.9";
+PicoGL.version = "0.6.10";
 
 /**
     Create a PicoGL app. The app is the primary entry point to PicoGL. It stores

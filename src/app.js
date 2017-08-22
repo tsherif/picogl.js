@@ -765,6 +765,7 @@ App.prototype.astcTextures = function() {
 
         // TODO(Tarek): Test for https://bugs.chromium.org/p/chromium/issues/detail?id=757447
         // Remove this when that's fixed
+        this.gl.getError();
         this.state.textures[0] = null;
         this.gl.activeTexture(this.gl.TEXTURE0);
         var texture = this.gl.createTexture();
