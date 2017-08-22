@@ -788,6 +788,43 @@ App.prototype.astcTextures = function() {
         TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR] = true;
         TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR] = true;
         TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR] = true;
+
+        this.state.textures[0] = null;
+        this.gl.activeTexture(this.gl.TEXTURE0);
+        var texture = this.gl.createTexture();
+        this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
+        this.gl.texStorage2D(this.gl.TEXTURE_2D, 1, ext.COMPRESSED_RGBA_ASTC_4x4_KHR, 16, 16);
+
+        if (this.gl.getError() !== this.gl.NO_ERROR) {
+            TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_RGBA_ASTC_4x4_KHR]           = true;
+            TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_RGBA_ASTC_5x4_KHR]           = true;
+            TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_RGBA_ASTC_5x5_KHR]           = true;
+            TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_RGBA_ASTC_6x5_KHR]           = true;
+            TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_RGBA_ASTC_6x6_KHR]           = true;
+            TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_RGBA_ASTC_8x5_KHR]           = true;
+            TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_RGBA_ASTC_8x6_KHR]           = true;
+            TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_RGBA_ASTC_8x8_KHR]           = true;
+            TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_RGBA_ASTC_10x5_KHR]          = true;
+            TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_RGBA_ASTC_10x6_KHR]          = true;
+            TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_RGBA_ASTC_10x8_KHR]          = true;
+            TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_RGBA_ASTC_10x10_KHR]         = true;
+            TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_RGBA_ASTC_12x10_KHR]         = true;
+            TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_RGBA_ASTC_12x12_KHR]         = true;
+            TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR]   = true;
+            TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR]   = true;
+            TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR]   = true;
+            TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR]   = true;
+            TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR]   = true;
+            TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR]   = true;
+            TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR]   = true;
+            TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR]   = true;
+            TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR]  = true;
+            TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR]  = true;
+            TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR]  = true;
+            TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR] = true;
+            TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR] = true;
+            TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR] = true;
+        }
     }
     
     return this;
@@ -2310,6 +2347,7 @@ FLOAT[CONSTANTS.RGBA] = CONSTANTS.RGBA16F;
 FLOAT[CONSTANTS.DEPTH_COMPONENT] = CONSTANTS.DEPTH_COMPONENT32F;
 
 TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES = {};
+TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE = {};
 
 module.exports = TEXTURE_FORMAT_DEFAULTS;
 
@@ -2390,6 +2428,8 @@ function Texture(gl, appState, binding, image, width, height, depth, is3D, optio
         this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : TEXTURE_FORMAT_DEFAULTS[this.type][this.format];
     }
 
+    this.noTexStorage = !!TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[this.internalFormat];
+
     // -1 indicates unbound
     this.currentUnit = -1;
 
@@ -2469,6 +2509,10 @@ Texture.prototype.resize = function(width, height, depth) {
         this.gl.texParameteri(this.binding, this.gl.TEXTURE_MAX_LEVEL, this.maxLevel);
     }
 
+    if (this.noTexStorage) {
+        return;
+    }
+
     var levels;
     if (this.is3D) {
         if (this.mipmaps) {
@@ -2513,7 +2557,22 @@ Texture.prototype.data = function(data) {
     this.bind(Math.max(this.currentUnit, 0));
 
     if (this.compressed) {
-        if (this.is3D) {
+        if (this.noTexStorage) {
+            if (this.is3D) {
+                for (i = 0; i < numLevels; ++i) {
+                    this.gl.compressedTexImage3D(this.binding, i, this.internalFormat, width, height, depth, 0, data[i]);
+                    width = Math.max(width >> 1, 1);
+                    height = Math.max(height >> 1, 1);
+                    depth = Math.max(depth >> 1, 1);
+                }
+            } else {
+                for (i = 0; i < numLevels; ++i) {
+                    this.gl.compressedTexImage2D(this.binding, i, this.internalFormat, width, height, 0, data[i]);
+                    width = Math.max(width >> 1, 1);
+                    height = Math.max(height >> 1, 1);
+                }
+            }
+        } else if (this.is3D) {
             for (i = 0; i < numLevels; ++i) {
                 this.gl.compressedTexSubImage3D(this.binding, i, 0, 0, 0, width, height, depth, this.format, data[i]);
                 width = Math.max(width >> 1, 1);

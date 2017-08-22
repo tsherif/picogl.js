@@ -41,4 +41,8 @@ FLOAT[CONSTANTS.DEPTH_COMPONENT] = CONSTANTS.DEPTH_COMPONENT32F;
 
 TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES = {};
 
+// TODO(Tarek): For https://bugs.chromium.org/p/chromium/issues/detail?id=757447
+// Remove this when that's fixed
+TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE = {};
+
 module.exports = TEXTURE_FORMAT_DEFAULTS;
