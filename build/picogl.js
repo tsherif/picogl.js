@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.6.8
+PicoGL.js v0.6.9
 
 The MIT License (MIT)
 
@@ -789,11 +789,13 @@ App.prototype.astcTextures = function() {
         TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR] = true;
         TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR] = true;
 
+        // TODO(Tarek): Test for https://bugs.chromium.org/p/chromium/issues/detail?id=757447
+        // Remove this when that's fixed
         this.state.textures[0] = null;
         this.gl.activeTexture(this.gl.TEXTURE0);
         var texture = this.gl.createTexture();
         this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
-        this.gl.texStorage2D(this.gl.TEXTURE_2D, 1, ext.COMPRESSED_RGBA_ASTC_4x4_KHR, 16, 16);
+        this.gl.texStorage2D(this.gl.TEXTURE_2D, 1, ext.COMPRESSED_RGBA_ASTC_4x4_KHR, 4, 4);
 
         if (this.gl.getError() !== this.gl.NO_ERROR) {
             TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_RGBA_ASTC_4x4_KHR]           = true;
@@ -825,6 +827,8 @@ App.prototype.astcTextures = function() {
             TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR] = true;
             TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR] = true;
         }
+
+        this.gl.deleteTexture(texture);
     }
     
     return this;
@@ -1917,7 +1921,7 @@ var App = require("./app");
     @namespace PicoGL
 */
 var PicoGL = global.PicoGL = require("./constants");    
-PicoGL.version = "0.6.8";
+PicoGL.version = "0.6.9";
 
 /**
     Create a PicoGL app. The app is the primary entry point to PicoGL. It stores
@@ -2347,6 +2351,9 @@ FLOAT[CONSTANTS.RGBA] = CONSTANTS.RGBA16F;
 FLOAT[CONSTANTS.DEPTH_COMPONENT] = CONSTANTS.DEPTH_COMPONENT32F;
 
 TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES = {};
+
+// TODO(Tarek): For https://bugs.chromium.org/p/chromium/issues/detail?id=757447
+// Remove this when that's fixed
 TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE = {};
 
 module.exports = TEXTURE_FORMAT_DEFAULTS;
@@ -2509,6 +2516,8 @@ Texture.prototype.resize = function(width, height, depth) {
         this.gl.texParameteri(this.binding, this.gl.TEXTURE_MAX_LEVEL, this.maxLevel);
     }
 
+    // TODO(Tarek): For https://bugs.chromium.org/p/chromium/issues/detail?id=757447
+    // Remove this when that's fixed
     if (this.noTexStorage) {
         return;
     }
@@ -2557,6 +2566,9 @@ Texture.prototype.data = function(data) {
     this.bind(Math.max(this.currentUnit, 0));
 
     if (this.compressed) {
+
+        // TODO(Tarek): For https://bugs.chromium.org/p/chromium/issues/detail?id=757447
+        // Remove this when that's fixed
         if (this.noTexStorage) {
             if (this.is3D) {
                 for (i = 0; i < numLevels; ++i) {
