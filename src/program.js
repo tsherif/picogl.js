@@ -23,9 +23,9 @@
 
 "use strict";
 
-var CONSTANTS = require("./constants");
-var Shader   = require("./shader");
-var Uniforms = require("./uniforms");
+const CONSTANTS = require("./constants");
+const Shader   = require("./shader");
+const Uniforms = require("./uniforms");
 
 /**
     WebGL program consisting of compiled and linked vertex and fragment
@@ -40,12 +40,12 @@ var Uniforms = require("./uniforms");
     @prop {Object} appState Tracked GL state.
 */
 function Program(gl, appState, vsSource, fsSource, xformFeebackVars) {
-    var i;
+    let i;
 
-    var vShader, fShader;
+    let vShader, fShader;
 
-    var ownVertexShader = false;
-    var ownFragmentShader = false;
+    let ownVertexShader = false;
+    let ownFragmentShader = false;
     if (typeof vsSource === "string") {
         vShader = new Shader(gl, gl.VERTEX_SHADER, vsSource);
         ownVertexShader = true;
@@ -60,7 +60,7 @@ function Program(gl, appState, vsSource, fsSource, xformFeebackVars) {
         fShader = fsSource;
     }
 
-    var program = gl.createProgram();
+    let program = gl.createProgram();
     gl.attachShader(program, vShader.shader);
     gl.attachShader(program, fShader.shader);
     if (xformFeebackVars) {
@@ -97,14 +97,14 @@ function Program(gl, appState, vsSource, fsSource, xformFeebackVars) {
 
     gl.useProgram(program);
 
-    var numUniforms = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
+    let numUniforms = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
 
     for (i = 0; i < numUniforms; ++i) {
-        var uniformInfo = gl.getActiveUniform(program, i);
-        var uniformHandle = gl.getUniformLocation(this.program, uniformInfo.name);
-        var UniformClass = null;
-        var type = uniformInfo.type;
-        var numElements = uniformInfo.size;
+        let uniformInfo = gl.getActiveUniform(program, i);
+        let uniformHandle = gl.getUniformLocation(this.program, uniformInfo.name);
+        let UniformClass = null;
+        let type = uniformInfo.type;
+        let numElements = uniformInfo.size;
 
         switch (type) {
             case CONSTANTS.SAMPLER_2D:
@@ -122,7 +122,7 @@ function Program(gl, appState, vsSource, fsSource, xformFeebackVars) {
             case CONSTANTS.SAMPLER_3D:
             case CONSTANTS.INT_SAMPLER_3D:
             case CONSTANTS.UNSIGNED_INT_SAMPLER_3D:
-                var textureUnit = this.samplerCount++;
+                let textureUnit = this.samplerCount++;
                 this.samplers[uniformInfo.name] = textureUnit;
                 this.gl.uniform1i(uniformHandle, textureUnit);
                 break;
@@ -171,11 +171,11 @@ function Program(gl, appState, vsSource, fsSource, xformFeebackVars) {
         }
     }
 
-    var numUniformBlocks = gl.getProgramParameter(program, gl.ACTIVE_UNIFORM_BLOCKS);
+    let numUniformBlocks = gl.getProgramParameter(program, gl.ACTIVE_UNIFORM_BLOCKS);
 
     for (i = 0; i < numUniformBlocks; ++i) {
-        var blockName = gl.getActiveUniformBlockName(this.program, i);
-        var blockIndex = gl.getUniformBlockIndex(this.program, blockName);
+        let blockName = gl.getActiveUniformBlockName(this.program, i);
+        let blockIndex = gl.getUniformBlockIndex(this.program, blockName);
 
         this.uniformBlocks[blockName] = blockIndex;
     }

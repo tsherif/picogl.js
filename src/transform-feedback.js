@@ -75,7 +75,7 @@ TransformFeedback.prototype.bind = function() {
     if (this.appState.transformFeedback !== this) {
         this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedback);
 
-        for (var i = 0, len = this.angleBugBuffers.length; i < len; ++i) {
+        for (let i = 0, len = this.angleBugBuffers.length; i < len; ++i) {
             this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, i, this.angleBugBuffers[i].buffer);
         }
 

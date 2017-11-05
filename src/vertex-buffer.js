@@ -23,7 +23,7 @@
 
 "use strict";
 
-var CONSTANTS = require("./constants");
+const CONSTANTS = require("./constants");
 
 /**
     Storage for vertex data.
@@ -40,7 +40,7 @@ var CONSTANTS = require("./constants");
     @prop {Object} appState Tracked GL state.
 */
 function VertexBuffer(gl, appState, type, itemSize, data, usage, indexArray) {
-    var numColumns;
+    let numColumns;
     switch(type) {
         case CONSTANTS.FLOAT_MAT4:
         case CONSTANTS.FLOAT_MAT4x2:
@@ -82,7 +82,7 @@ function VertexBuffer(gl, appState, type, itemSize, data, usage, indexArray) {
             break;
     }
 
-    var dataLength;
+    let dataLength;
     if (typeof data === "number") {
         dataLength = data;
         data *= CONSTANTS.TYPE_SIZE[type];
@@ -115,7 +115,7 @@ function VertexBuffer(gl, appState, type, itemSize, data, usage, indexArray) {
 */
 VertexBuffer.prototype.data = function(data) {
     // Don't want to update vertex array bindings
-    var currentVertexArray = this.appState.vertexArray;
+    let currentVertexArray = this.appState.vertexArray;
     if (currentVertexArray) {
         this.gl.bindVertexArray(null);
     }

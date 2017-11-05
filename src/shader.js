@@ -37,7 +37,7 @@ function Shader(gl, type, source) {
     gl.compileShader(this.shader);
 
     if (!gl.getShaderParameter(this.shader, gl.COMPILE_STATUS)) {
-        var i, lines;
+        let i, lines;
 
         console.error(gl.getShaderInfoLog(this.shader));
         lines = source.split("\n");

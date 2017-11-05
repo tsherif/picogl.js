@@ -23,9 +23,9 @@
 
 "use strict";
 
-var CONSTANTS = require("./constants");
-var TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
-var DUMMY_ARRAY = new Array(1);
+const CONSTANTS = require("./constants");
+const TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
+const DUMMY_ARRAY = new Array(1);
 
 /**
     General-purpose texture.
@@ -80,15 +80,15 @@ function Texture(gl, appState, binding, image, width, height, depth, is3D, optio
     this.currentUnit = -1;
 
     // Sampler parameters
-    var minFilter = options.minFilter !== undefined ? options.minFilter : gl.LINEAR_MIPMAP_NEAREST;
-    var magFilter = options.magFilter !== undefined ? options.magFilter : gl.LINEAR;
-    var wrapS = options.wrapS !== undefined ? options.wrapS : gl.REPEAT;
-    var wrapT = options.wrapT !== undefined ? options.wrapT : gl.REPEAT;
-    var wrapR = options.wrapR !== undefined ? options.wrapR : gl.REPEAT;
-    var compareMode = options.compareMode !== undefined ? options.compareMode : gl.NONE;
-    var compareFunc = options.compareFunc !== undefined ? options.compareFunc : gl.LEQUAL;
-    var minLOD = options.minLOD !== undefined ? options.minLOD : null;
-    var maxLOD = options.maxLOD !== undefined ? options.maxLOD : null;
+    let minFilter = options.minFilter !== undefined ? options.minFilter : gl.LINEAR_MIPMAP_NEAREST;
+    let magFilter = options.magFilter !== undefined ? options.magFilter : gl.LINEAR;
+    let wrapS = options.wrapS !== undefined ? options.wrapS : gl.REPEAT;
+    let wrapT = options.wrapT !== undefined ? options.wrapT : gl.REPEAT;
+    let wrapR = options.wrapR !== undefined ? options.wrapR : gl.REPEAT;
+    let compareMode = options.compareMode !== undefined ? options.compareMode : gl.NONE;
+    let compareFunc = options.compareFunc !== undefined ? options.compareFunc : gl.LEQUAL;
+    let minLOD = options.minLOD !== undefined ? options.minLOD : null;
+    let maxLOD = options.maxLOD !== undefined ? options.maxLOD : null;
 
     this.sampler = gl.createSampler();
     gl.samplerParameteri(this.sampler, gl.TEXTURE_MIN_FILTER, minFilter);
@@ -161,7 +161,7 @@ Texture.prototype.resize = function(width, height, depth) {
         return;
     }
 
-    var levels;
+    let levels;
     if (this.is3D) {
         if (this.mipmaps) {
             levels = Math.floor(Math.log2(Math.max(Math.max(this.width, this.height), this.depth))) + 1;
@@ -195,12 +195,12 @@ Texture.prototype.data = function(data) {
         data = DUMMY_ARRAY;
     }
 
-    var numLevels = this.mipmaps ? data.length : 1;
-    var width = this.width;
-    var height = this.height;
-    var depth = this.depth;
-    var generateMipmaps = this.mipmaps && data.length === 1;
-    var i;
+    let numLevels = this.mipmaps ? data.length : 1;
+    let width = this.width;
+    let height = this.height;
+    let depth = this.depth;
+    let generateMipmaps = this.mipmaps && data.length === 1;
+    let i;
 
     this.bind(Math.max(this.currentUnit, 0));
 
@@ -277,7 +277,7 @@ Texture.prototype.delete = function() {
 
 // Bind this texture to a texture unit.
 Texture.prototype.bind = function(unit) {
-    var currentTexture = this.appState.textures[unit];
+    let currentTexture = this.appState.textures[unit];
     
     if (currentTexture !== this) {
         if (currentTexture) {

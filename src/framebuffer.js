@@ -23,8 +23,8 @@
 
 "use strict";
 
-var TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
-var Texture = require("./texture");
+const TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
+const Texture = require("./texture");
 
 /**
     Storage for vertex data.
@@ -96,7 +96,7 @@ Framebuffer.prototype.colorTarget = function(index, options) {
 
     this.colorAttachments[index] = this.gl.COLOR_ATTACHMENT0 + index;
 
-    var currentFramebuffer = this.bindAndCaptureState();
+    let currentFramebuffer = this.bindAndCaptureState();
 
     this.colorTextures[index] = new Texture(
         this.gl,
@@ -151,7 +151,7 @@ Framebuffer.prototype.depthTarget = function(options) {
     options.wrapT = options.wrapT || this.gl.CLAMP_TO_EDGE;
     options.generateMipmaps = options.generateMipmaps === undefined ? false : options.generateMipmaps;
 
-    var currentFramebuffer = this.bindAndCaptureState();
+    let currentFramebuffer = this.bindAndCaptureState();
 
     this.depthTexture = new Texture(
         this.gl,
@@ -182,7 +182,7 @@ Framebuffer.prototype.depthTarget = function(options) {
 Framebuffer.prototype.replaceTexture = function(index, texture) {
     this.colorTextures[index] = texture;
 
-    var currentFramebuffer = this.bindAndCaptureState();
+    let currentFramebuffer = this.bindAndCaptureState();
     this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, this.colorAttachments[index], this.gl.TEXTURE_2D, this.colorTextures[index].texture, 0);
     this.restoreState(currentFramebuffer);
 
@@ -207,9 +207,9 @@ Framebuffer.prototype.resize = function(width, height) {
         this.height = this.gl.drawingBufferHeight;
     }
 
-    var currentFramebuffer = this.bindAndCaptureState();
+    let currentFramebuffer = this.bindAndCaptureState();
 
-    for (var i = 0; i < this.numColorTargets; ++i) {
+    for (let i = 0; i < this.numColorTargets; ++i) {
         this.colorTextures[i].resize(this.width, this.height);
         this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, this.colorAttachments[i], this.gl.TEXTURE_2D, this.colorTextures[i].texture, 0);
     }
@@ -231,7 +231,7 @@ Framebuffer.prototype.resize = function(width, height) {
     @method
 */
 Framebuffer.prototype.delete = function() {
-    for (var i = 0; i < this.numColorTargets; ++i) {
+    for (let i = 0; i < this.numColorTargets; ++i) {
         this.colorTextures[i].delete();
     }
 
@@ -264,7 +264,7 @@ Framebuffer.prototype.bindForRead = function() {
 // Bind for a framebuffer state update.
 // Capture current binding so we can restore it later.
 Framebuffer.prototype.bindAndCaptureState = function() {
-    var currentFramebuffer = this.appState.drawFramebuffer;
+    let currentFramebuffer = this.appState.drawFramebuffer;
 
     if (currentFramebuffer !== this) {
         this.gl.bindFramebuffer(this.gl.DRAW_FRAMEBUFFER, this.framebuffer);

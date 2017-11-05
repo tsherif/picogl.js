@@ -23,8 +23,8 @@
 
 "use strict";
 
-var CONSTANTS = require("./constants");
-var TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
+const CONSTANTS = require("./constants");
+const TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
 
 /**
     Cubemap for environment mapping.
@@ -51,21 +51,21 @@ function Cubemap(gl, appState, options) {
     // -1 indicates unbound
     this.currentUnit = -1;
 
-    var negX = options.negX;
-    var posX = options.posX;
-    var negY = options.negY;
-    var posY = options.posY;
-    var negZ = options.negZ;
-    var posZ = options.posZ;
+    let negX = options.negX;
+    let posX = options.posX;
+    let negY = options.negY;
+    let posY = options.posY;
+    let negZ = options.negZ;
+    let posZ = options.posZ;
 
-    var width = options.width || negX.width;
-    var height = options.height || negX.height;
-    var flipY = options.flipY !== undefined ? options.flipY : false;
-    var minFilter = options.minFilter !== undefined ? options.minFilter : gl.LINEAR_MIPMAP_NEAREST;
-    var magFilter = options.magFilter !== undefined ? options.magFilter : gl.LINEAR;
-    var compareMode = options.compareMode !== undefined ? options.compareMode : gl.NONE;
-    var compareFunc = options.compareFunc !== undefined ? options.compareFunc : gl.LEQUAL;
-    var generateMipmaps = options.generateMipmaps !== false &&
+    let width = options.width || negX.width;
+    let height = options.height || negX.height;
+    let flipY = options.flipY !== undefined ? options.flipY : false;
+    let minFilter = options.minFilter !== undefined ? options.minFilter : gl.LINEAR_MIPMAP_NEAREST;
+    let magFilter = options.magFilter !== undefined ? options.magFilter : gl.LINEAR;
+    let compareMode = options.compareMode !== undefined ? options.compareMode : gl.NONE;
+    let compareFunc = options.compareFunc !== undefined ? options.compareFunc : gl.LEQUAL;
+    let generateMipmaps = options.generateMipmaps !== false &&
                         (minFilter === gl.LINEAR_MIPMAP_NEAREST || minFilter === gl.LINEAR_MIPMAP_LINEAR);
 
     this.bind(1);
@@ -87,7 +87,7 @@ function Cubemap(gl, appState, options) {
         gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAX_LOD, options.maxLOD);
     }
 
-    var levels = generateMipmaps ? Math.floor(Math.log2(Math.min(width, height))) + 1 : 1;
+    let levels = generateMipmaps ? Math.floor(Math.log2(Math.min(width, height))) + 1 : 1;
     gl.texStorage2D(gl.TEXTURE_CUBE_MAP, levels, this.internalFormat, width, height);
 
     gl.texSubImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_X, 0, 0, 0, width, height, this.format, this.type, negX);
@@ -119,7 +119,7 @@ Cubemap.prototype.delete = function() {
 
 // Bind this cubemap to a texture unit.
 Cubemap.prototype.bind = function(unit) {
-    var currentTexture = this.appState.textures[unit];
+    let currentTexture = this.appState.textures[unit];
     
     if (currentTexture !== this) {
         if (currentTexture) {

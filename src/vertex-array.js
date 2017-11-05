@@ -20,7 +20,7 @@
 
 "use strict";
 
-var CONSTANTS = require("./constants");
+const CONSTANTS = require("./constants");
 
 /**
     Organizes vertex buffer and attribute state.
@@ -182,9 +182,9 @@ VertexArray.prototype.attributeBuffer = function(attributeIndex, vertexBuffer, i
     this.gl.bindVertexArray(this.vertexArray);
     this.gl.bindBuffer(vertexBuffer.binding, vertexBuffer.buffer);
 
-    var numColumns = vertexBuffer.numColumns;
+    let numColumns = vertexBuffer.numColumns;
 
-    for (var i = 0; i < numColumns; ++i) {
+    for (let i = 0; i < numColumns; ++i) {
         if (integer) {
             this.gl.vertexAttribIPointer(
                 attributeIndex + i,

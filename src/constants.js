@@ -23,12 +23,12 @@
 
 "use strict";
 
-var CONSTANTS = {};
-var canvas = document.createElement("canvas");
-var gl = canvas.getContext("webgl2");
+const CONSTANTS = {};
+let canvas = document.createElement("canvas");
+let gl = canvas.getContext("webgl2");
 
 if (gl) {
-    for (var enumName in gl) {
+    for (let enumName in gl) {
         if (enumName.match(/^[A-Z0-9_x]+$/) && typeof(gl[enumName]) === "number") {
             CONSTANTS[enumName] = gl[enumName];
         }

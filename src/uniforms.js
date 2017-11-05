@@ -23,12 +23,12 @@
 
 "use strict";
 
-var CONSTANTS = require("./constants");
+const CONSTANTS = require("./constants");
 
 // Classes to manage uniform value updates, including
 // caching current values.
 
-var UNIFORM_FUNC_NAME = {};
+const UNIFORM_FUNC_NAME = {};
 UNIFORM_FUNC_NAME[CONSTANTS.BOOL] = "uniform1i";
 UNIFORM_FUNC_NAME[CONSTANTS.INT] = "uniform1i";
 UNIFORM_FUNC_NAME[CONSTANTS.SAMPLER_2D] = "uniform1i";
@@ -70,7 +70,7 @@ UNIFORM_FUNC_NAME[CONSTANTS.FLOAT_MAT3x4] = "uniformMatrix3x4fv";
 UNIFORM_FUNC_NAME[CONSTANTS.FLOAT_MAT4x2] = "uniformMatrix4x2fv";
 UNIFORM_FUNC_NAME[CONSTANTS.FLOAT_MAT4x3] = "uniformMatrix4x3fv";
 
-var UNIFORM_COMPONENT_COUNT = {};
+const UNIFORM_COMPONENT_COUNT = {};
 UNIFORM_COMPONENT_COUNT[CONSTANTS.BOOL] = 1;
 UNIFORM_COMPONENT_COUNT[CONSTANTS.INT] = 1;
 UNIFORM_COMPONENT_COUNT[CONSTANTS.SAMPLER_2D] = 1;
@@ -112,7 +112,7 @@ UNIFORM_COMPONENT_COUNT[CONSTANTS.FLOAT_MAT3x4] = 12;
 UNIFORM_COMPONENT_COUNT[CONSTANTS.FLOAT_MAT4x2] = 8;
 UNIFORM_COMPONENT_COUNT[CONSTANTS.FLOAT_MAT4x3] = 12;
 
-var UNIFORM_CACHE_CLASS = {};
+const UNIFORM_CACHE_CLASS = {};
 UNIFORM_CACHE_CLASS[CONSTANTS.INT] = Int32Array;
 UNIFORM_CACHE_CLASS[CONSTANTS.SAMPLER_2D] = Int32Array;
 UNIFORM_CACHE_CLASS[CONSTANTS.INT_SAMPLER_2D] = Int32Array;
@@ -164,7 +164,7 @@ function MultiNumericUniform(gl, handle, type, count) {
 }
 
 MultiNumericUniform.prototype.set = function(value) {
-    for (var i = 0, len = value.length; i < len; ++i) {
+    for (let i = 0, len = value.length; i < len; ++i) {
         if (this.cache[i] !== value[i]) {
             this.gl[this.glFuncName](this.handle, value);
             this.cache.set(value);
@@ -182,10 +182,10 @@ function MultiBoolUniform(gl, handle, type, count) {
 }
 
 MultiBoolUniform.prototype.set = function(value) {
-    for (var i = 0, len = value.length; i < len; ++i) {
+    for (let i = 0, len = value.length; i < len; ++i) {
         if (this.cache[i] !== value[i]) {
             this.gl[this.glFuncName](this.handle, value);
-            for (var j = i; j < len; j++) {
+            for (let j = i; j < len; j++) {
                 this.cache[j] = value[j];
             }
             return;
@@ -202,7 +202,7 @@ function MatrixUniform(gl, handle, type, count) {
 }
 
 MatrixUniform.prototype.set = function(value) {
-    for (var i = 0, len = value.length; i < len; ++i) {
+    for (let i = 0, len = value.length; i < len; ++i) {
         if (this.cache[i] !== value[i]) {
             this.gl[this.glFuncName](this.handle, false, value);
             this.cache.set(value);

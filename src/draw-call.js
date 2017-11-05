@@ -23,7 +23,7 @@
 
 "use strict";
 
-var CONSTANTS = require("./constants");
+const CONSTANTS = require("./constants");
 
 /**
     A DrawCall represents the program and values of associated
@@ -84,7 +84,7 @@ DrawCall.prototype.transformFeedback = function(transformFeedback) {
     @param {any} value Uniform value.
 */
 DrawCall.prototype.uniform = function(name, value) {
-    var index = this.uniformIndices[name];
+    let index = this.uniformIndices[name];
     if (index === undefined) {
         index = this.uniformCount++;
         this.uniformIndices[name] = index;
@@ -103,7 +103,7 @@ DrawCall.prototype.uniform = function(name, value) {
     @param {Texture} texture Texture to bind.
 */
 DrawCall.prototype.texture = function(name, texture) {
-    var unit = this.currentProgram.samplers[name];
+    let unit = this.currentProgram.samplers[name];
     this.textures[unit] = texture;
 
     return this;
@@ -117,7 +117,7 @@ DrawCall.prototype.texture = function(name, texture) {
     @param {UniformBuffer} buffer Uniform buffer to bind.
 */
 DrawCall.prototype.uniformBlock = function(name, buffer) {
-    var base = this.uniformBlockBases[name];
+    let base = this.uniformBlockBases[name];
     if (base === undefined) {
         base = this.uniformBlockCount++;
         this.uniformBlockBases[name] = base;
@@ -135,21 +135,21 @@ DrawCall.prototype.uniformBlock = function(name, buffer) {
     @method
 */
 DrawCall.prototype.draw = function() {
-    var uniformNames = this.uniformNames;
-    var uniformValues = this.uniformValues;
-    var uniformBuffers = this.uniformBuffers;
-    var uniformBlockNames = this.uniformBlockNames;
-    var textures = this.textures;
-    var textureCount = this.currentProgram.samplerCount;
+    let uniformNames = this.uniformNames;
+    let uniformValues = this.uniformValues;
+    let uniformBuffers = this.uniformBuffers;
+    let uniformBlockNames = this.uniformBlockNames;
+    let textures = this.textures;
+    let textureCount = this.currentProgram.samplerCount;
 
     this.currentProgram.bind();
     this.currentVertexArray.bind();
 
-    for (var uIndex = 0; uIndex < this.uniformCount; ++uIndex) {
+    for (let uIndex = 0; uIndex < this.uniformCount; ++uIndex) {
         this.currentProgram.uniform(uniformNames[uIndex], uniformValues[uIndex]);
     }
 
-    for (var base = 0; base < this.uniformBlockCount; ++base) {
+    for (let base = 0; base < this.uniformBlockCount; ++base) {
         this.currentProgram.uniformBlock(uniformBlockNames[base], base);
         uniformBuffers[base].bind(base);
     }
@@ -159,7 +159,7 @@ DrawCall.prototype.draw = function() {
     // Workaround for https://bugs.chromium.org/p/chromium/issues/detail?id=722288
     // Start at 0 when that's fixed
     /////////////////////////////////////////////////////////////////////////////////
-    for (var tIndex = 1; tIndex < textureCount; ++tIndex) {
+    for (let tIndex = 1; tIndex < textureCount; ++tIndex) {
         textures[tIndex].bind(tIndex);
     }
 
@@ -184,7 +184,7 @@ DrawCall.prototype.draw = function() {
         this.gl.endTransformFeedback();
         // TODO(Tarek): Need to rebind buffers due to bug in ANGLE.
         // Remove this when that's fixed.
-        for (var i = 0, len = this.currentTransformFeedback.angleBugBuffers.length; i < len; ++i) {
+        for (let i = 0, len = this.currentTransformFeedback.angleBugBuffers.length; i < len; ++i) {
             this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, i, null);
         }
     }

@@ -48,20 +48,20 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
 "use strict";
-var CONSTANTS               = require("./constants");
-var TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
-var Cubemap                 = require("./cubemap");
-var DrawCall                = require("./draw-call");
-var Framebuffer             = require("./framebuffer");
-var Program                 = require("./program");
-var Shader                  = require("./shader");
-var Texture                 = require("./texture");
-var Timer                   = require("./timer");
-var TransformFeedback       = require("./transform-feedback");
-var UniformBuffer           = require("./uniform-buffer");
-var VertexArray             = require("./vertex-array");
-var VertexBuffer            = require("./vertex-buffer");
-var Query                   = require("./query");
+const CONSTANTS               = require("./constants");
+const TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
+const Cubemap                 = require("./cubemap");
+const DrawCall                = require("./draw-call");
+const Framebuffer             = require("./framebuffer");
+const Program                 = require("./program");
+const Shader                  = require("./shader");
+const Texture                 = require("./texture");
+const Timer                   = require("./timer");
+const TransformFeedback       = require("./transform-feedback");
+const UniformBuffer           = require("./uniform-buffer");
+const VertexArray             = require("./vertex-array");
+const VertexBuffer            = require("./vertex-buffer");
+const Query                   = require("./query");
 
 /**
     Primary entry point to PicoGL. An app will store all parts of the WebGL
@@ -603,7 +603,7 @@ App.prototype.linearFloatTextures = function() {
     @method
 */
 App.prototype.s3tcTextures = function() {
-    var ext = this.gl.getExtension("WEBGL_compressed_texture_s3tc");
+    let ext = this.gl.getExtension("WEBGL_compressed_texture_s3tc");
     this.s3tcTexturesEnabled = !!ext;
     
     if (this.s3tcTexturesEnabled) {
@@ -659,7 +659,7 @@ App.prototype.s3tcTextures = function() {
     @method
 */
 App.prototype.etcTextures = function() {
-    var ext = this.gl.getExtension("WEBGL_compressed_texture_etc");
+    let ext = this.gl.getExtension("WEBGL_compressed_texture_etc");
     this.etcTexturesEnabled = !!ext;
 
     if (this.etcTexturesEnabled) {
@@ -727,7 +727,7 @@ App.prototype.etcTextures = function() {
     @method
 */
 App.prototype.astcTextures = function() {
-    var ext = this.gl.getExtension("WEBGL_compressed_texture_astc");
+    let ext = this.gl.getExtension("WEBGL_compressed_texture_astc");
     this.astcTexturesEnabled = !!ext;
 
     if (this.astcTexturesEnabled) {
@@ -794,7 +794,7 @@ App.prototype.astcTextures = function() {
         this.gl.getError();
         this.state.textures[0] = null;
         this.gl.activeTexture(this.gl.TEXTURE0);
-        var texture = this.gl.createTexture();
+        let texture = this.gl.createTexture();
         this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
         this.gl.texStorage2D(this.gl.TEXTURE_2D, 1, ext.COMPRESSED_RGBA_ASTC_4x4_KHR, 4, 4);
 
@@ -849,7 +849,7 @@ App.prototype.astcTextures = function() {
     @method
 */
 App.prototype.pvrtcTextures = function() {
-    var ext = this.gl.getExtension("WEBGL_compressed_texture_pvrtc");
+    let ext = this.gl.getExtension("WEBGL_compressed_texture_pvrtc");
     this.pvrtcTexturesEnabled = !!ext;
     
     if (this.pvrtcTexturesEnabled) {
@@ -881,8 +881,8 @@ App.prototype.pvrtcTextures = function() {
 App.prototype.readPixel = function(x, y, outColor, options) {
     options = options || CONSTANTS.DUMMY_OBJECT;
     
-    var format = options.format || CONSTANTS.RGBA;
-    var type = options.type || CONSTANTS.UNSIGNED_BYTE;
+    let format = options.format || CONSTANTS.RGBA;
+    let type = options.type || CONSTANTS.UNSIGNED_BYTE;
 
     this.gl.readPixels(x, y, 1, 1, format, type, outColor);
 
@@ -1232,12 +1232,12 @@ module.exports = App;
 
 "use strict";
 
-var CONSTANTS = {};
-var canvas = document.createElement("canvas");
-var gl = canvas.getContext("webgl2");
+const CONSTANTS = {};
+let canvas = document.createElement("canvas");
+let gl = canvas.getContext("webgl2");
 
 if (gl) {
-    for (var enumName in gl) {
+    for (let enumName in gl) {
         if (enumName.match(/^[A-Z0-9_x]+$/) && typeof(gl[enumName]) === "number") {
             CONSTANTS[enumName] = gl[enumName];
         }
@@ -1287,8 +1287,8 @@ module.exports = CONSTANTS;
 
 "use strict";
 
-var CONSTANTS = require("./constants");
-var TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
+const CONSTANTS = require("./constants");
+const TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
 
 /**
     Cubemap for environment mapping.
@@ -1315,21 +1315,21 @@ function Cubemap(gl, appState, options) {
     // -1 indicates unbound
     this.currentUnit = -1;
 
-    var negX = options.negX;
-    var posX = options.posX;
-    var negY = options.negY;
-    var posY = options.posY;
-    var negZ = options.negZ;
-    var posZ = options.posZ;
+    let negX = options.negX;
+    let posX = options.posX;
+    let negY = options.negY;
+    let posY = options.posY;
+    let negZ = options.negZ;
+    let posZ = options.posZ;
 
-    var width = options.width || negX.width;
-    var height = options.height || negX.height;
-    var flipY = options.flipY !== undefined ? options.flipY : false;
-    var minFilter = options.minFilter !== undefined ? options.minFilter : gl.LINEAR_MIPMAP_NEAREST;
-    var magFilter = options.magFilter !== undefined ? options.magFilter : gl.LINEAR;
-    var compareMode = options.compareMode !== undefined ? options.compareMode : gl.NONE;
-    var compareFunc = options.compareFunc !== undefined ? options.compareFunc : gl.LEQUAL;
-    var generateMipmaps = options.generateMipmaps !== false &&
+    let width = options.width || negX.width;
+    let height = options.height || negX.height;
+    let flipY = options.flipY !== undefined ? options.flipY : false;
+    let minFilter = options.minFilter !== undefined ? options.minFilter : gl.LINEAR_MIPMAP_NEAREST;
+    let magFilter = options.magFilter !== undefined ? options.magFilter : gl.LINEAR;
+    let compareMode = options.compareMode !== undefined ? options.compareMode : gl.NONE;
+    let compareFunc = options.compareFunc !== undefined ? options.compareFunc : gl.LEQUAL;
+    let generateMipmaps = options.generateMipmaps !== false &&
                         (minFilter === gl.LINEAR_MIPMAP_NEAREST || minFilter === gl.LINEAR_MIPMAP_LINEAR);
 
     this.bind(1);
@@ -1351,7 +1351,7 @@ function Cubemap(gl, appState, options) {
         gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAX_LOD, options.maxLOD);
     }
 
-    var levels = generateMipmaps ? Math.floor(Math.log2(Math.min(width, height))) + 1 : 1;
+    let levels = generateMipmaps ? Math.floor(Math.log2(Math.min(width, height))) + 1 : 1;
     gl.texStorage2D(gl.TEXTURE_CUBE_MAP, levels, this.internalFormat, width, height);
 
     gl.texSubImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_X, 0, 0, 0, width, height, this.format, this.type, negX);
@@ -1383,7 +1383,7 @@ Cubemap.prototype.delete = function() {
 
 // Bind this cubemap to a texture unit.
 Cubemap.prototype.bind = function(unit) {
-    var currentTexture = this.appState.textures[unit];
+    let currentTexture = this.appState.textures[unit];
     
     if (currentTexture !== this) {
         if (currentTexture) {
@@ -1432,7 +1432,7 @@ module.exports = Cubemap;
 
 "use strict";
 
-var CONSTANTS = require("./constants");
+const CONSTANTS = require("./constants");
 
 /**
     A DrawCall represents the program and values of associated
@@ -1493,7 +1493,7 @@ DrawCall.prototype.transformFeedback = function(transformFeedback) {
     @param {any} value Uniform value.
 */
 DrawCall.prototype.uniform = function(name, value) {
-    var index = this.uniformIndices[name];
+    let index = this.uniformIndices[name];
     if (index === undefined) {
         index = this.uniformCount++;
         this.uniformIndices[name] = index;
@@ -1512,7 +1512,7 @@ DrawCall.prototype.uniform = function(name, value) {
     @param {Texture} texture Texture to bind.
 */
 DrawCall.prototype.texture = function(name, texture) {
-    var unit = this.currentProgram.samplers[name];
+    let unit = this.currentProgram.samplers[name];
     this.textures[unit] = texture;
 
     return this;
@@ -1526,7 +1526,7 @@ DrawCall.prototype.texture = function(name, texture) {
     @param {UniformBuffer} buffer Uniform buffer to bind.
 */
 DrawCall.prototype.uniformBlock = function(name, buffer) {
-    var base = this.uniformBlockBases[name];
+    let base = this.uniformBlockBases[name];
     if (base === undefined) {
         base = this.uniformBlockCount++;
         this.uniformBlockBases[name] = base;
@@ -1544,21 +1544,21 @@ DrawCall.prototype.uniformBlock = function(name, buffer) {
     @method
 */
 DrawCall.prototype.draw = function() {
-    var uniformNames = this.uniformNames;
-    var uniformValues = this.uniformValues;
-    var uniformBuffers = this.uniformBuffers;
-    var uniformBlockNames = this.uniformBlockNames;
-    var textures = this.textures;
-    var textureCount = this.currentProgram.samplerCount;
+    let uniformNames = this.uniformNames;
+    let uniformValues = this.uniformValues;
+    let uniformBuffers = this.uniformBuffers;
+    let uniformBlockNames = this.uniformBlockNames;
+    let textures = this.textures;
+    let textureCount = this.currentProgram.samplerCount;
 
     this.currentProgram.bind();
     this.currentVertexArray.bind();
 
-    for (var uIndex = 0; uIndex < this.uniformCount; ++uIndex) {
+    for (let uIndex = 0; uIndex < this.uniformCount; ++uIndex) {
         this.currentProgram.uniform(uniformNames[uIndex], uniformValues[uIndex]);
     }
 
-    for (var base = 0; base < this.uniformBlockCount; ++base) {
+    for (let base = 0; base < this.uniformBlockCount; ++base) {
         this.currentProgram.uniformBlock(uniformBlockNames[base], base);
         uniformBuffers[base].bind(base);
     }
@@ -1568,7 +1568,7 @@ DrawCall.prototype.draw = function() {
     // Workaround for https://bugs.chromium.org/p/chromium/issues/detail?id=722288
     // Start at 0 when that's fixed
     /////////////////////////////////////////////////////////////////////////////////
-    for (var tIndex = 1; tIndex < textureCount; ++tIndex) {
+    for (let tIndex = 1; tIndex < textureCount; ++tIndex) {
         textures[tIndex].bind(tIndex);
     }
 
@@ -1593,7 +1593,7 @@ DrawCall.prototype.draw = function() {
         this.gl.endTransformFeedback();
         // TODO(Tarek): Need to rebind buffers due to bug in ANGLE.
         // Remove this when that's fixed.
-        for (var i = 0, len = this.currentTransformFeedback.angleBugBuffers.length; i < len; ++i) {
+        for (let i = 0, len = this.currentTransformFeedback.angleBugBuffers.length; i < len; ++i) {
             this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, i, null);
         }
     }
@@ -1627,8 +1627,8 @@ module.exports = DrawCall;
 
 "use strict";
 
-var TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
-var Texture = require("./texture");
+const TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
+const Texture = require("./texture");
 
 /**
     Storage for vertex data.
@@ -1700,7 +1700,7 @@ Framebuffer.prototype.colorTarget = function(index, options) {
 
     this.colorAttachments[index] = this.gl.COLOR_ATTACHMENT0 + index;
 
-    var currentFramebuffer = this.bindAndCaptureState();
+    let currentFramebuffer = this.bindAndCaptureState();
 
     this.colorTextures[index] = new Texture(
         this.gl,
@@ -1755,7 +1755,7 @@ Framebuffer.prototype.depthTarget = function(options) {
     options.wrapT = options.wrapT || this.gl.CLAMP_TO_EDGE;
     options.generateMipmaps = options.generateMipmaps === undefined ? false : options.generateMipmaps;
 
-    var currentFramebuffer = this.bindAndCaptureState();
+    let currentFramebuffer = this.bindAndCaptureState();
 
     this.depthTexture = new Texture(
         this.gl,
@@ -1786,7 +1786,7 @@ Framebuffer.prototype.depthTarget = function(options) {
 Framebuffer.prototype.replaceTexture = function(index, texture) {
     this.colorTextures[index] = texture;
 
-    var currentFramebuffer = this.bindAndCaptureState();
+    let currentFramebuffer = this.bindAndCaptureState();
     this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, this.colorAttachments[index], this.gl.TEXTURE_2D, this.colorTextures[index].texture, 0);
     this.restoreState(currentFramebuffer);
 
@@ -1811,9 +1811,9 @@ Framebuffer.prototype.resize = function(width, height) {
         this.height = this.gl.drawingBufferHeight;
     }
 
-    var currentFramebuffer = this.bindAndCaptureState();
+    let currentFramebuffer = this.bindAndCaptureState();
 
-    for (var i = 0; i < this.numColorTargets; ++i) {
+    for (let i = 0; i < this.numColorTargets; ++i) {
         this.colorTextures[i].resize(this.width, this.height);
         this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, this.colorAttachments[i], this.gl.TEXTURE_2D, this.colorTextures[i].texture, 0);
     }
@@ -1835,7 +1835,7 @@ Framebuffer.prototype.resize = function(width, height) {
     @method
 */
 Framebuffer.prototype.delete = function() {
-    for (var i = 0; i < this.numColorTargets; ++i) {
+    for (let i = 0; i < this.numColorTargets; ++i) {
         this.colorTextures[i].delete();
     }
 
@@ -1868,7 +1868,7 @@ Framebuffer.prototype.bindForRead = function() {
 // Bind for a framebuffer state update.
 // Capture current binding so we can restore it later.
 Framebuffer.prototype.bindAndCaptureState = function() {
-    var currentFramebuffer = this.appState.drawFramebuffer;
+    let currentFramebuffer = this.appState.drawFramebuffer;
 
     if (currentFramebuffer !== this) {
         this.gl.bindFramebuffer(this.gl.DRAW_FRAMEBUFFER, this.framebuffer);
@@ -1913,7 +1913,7 @@ module.exports = Framebuffer;
 
 "use strict";
 
-var App = require("./app");
+const App = require("./app");
 
 /**
     Global PicoGL module. For convenience, all WebGL enums are stored
@@ -1921,7 +1921,7 @@ var App = require("./app");
 
     @namespace PicoGL
 */
-var PicoGL = global.PicoGL = require("./constants");    
+const PicoGL = global.PicoGL = require("./constants");    
 PicoGL.version = "0.6.10";
 
 /**
@@ -1965,9 +1965,9 @@ module.exports = PicoGL;
 
 "use strict";
 
-var CONSTANTS = require("./constants");
-var Shader   = require("./shader");
-var Uniforms = require("./uniforms");
+const CONSTANTS = require("./constants");
+const Shader   = require("./shader");
+const Uniforms = require("./uniforms");
 
 /**
     WebGL program consisting of compiled and linked vertex and fragment
@@ -1982,12 +1982,12 @@ var Uniforms = require("./uniforms");
     @prop {Object} appState Tracked GL state.
 */
 function Program(gl, appState, vsSource, fsSource, xformFeebackVars) {
-    var i;
+    let i;
 
-    var vShader, fShader;
+    let vShader, fShader;
 
-    var ownVertexShader = false;
-    var ownFragmentShader = false;
+    let ownVertexShader = false;
+    let ownFragmentShader = false;
     if (typeof vsSource === "string") {
         vShader = new Shader(gl, gl.VERTEX_SHADER, vsSource);
         ownVertexShader = true;
@@ -2002,7 +2002,7 @@ function Program(gl, appState, vsSource, fsSource, xformFeebackVars) {
         fShader = fsSource;
     }
 
-    var program = gl.createProgram();
+    let program = gl.createProgram();
     gl.attachShader(program, vShader.shader);
     gl.attachShader(program, fShader.shader);
     if (xformFeebackVars) {
@@ -2039,14 +2039,14 @@ function Program(gl, appState, vsSource, fsSource, xformFeebackVars) {
 
     gl.useProgram(program);
 
-    var numUniforms = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
+    let numUniforms = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
 
     for (i = 0; i < numUniforms; ++i) {
-        var uniformInfo = gl.getActiveUniform(program, i);
-        var uniformHandle = gl.getUniformLocation(this.program, uniformInfo.name);
-        var UniformClass = null;
-        var type = uniformInfo.type;
-        var numElements = uniformInfo.size;
+        let uniformInfo = gl.getActiveUniform(program, i);
+        let uniformHandle = gl.getUniformLocation(this.program, uniformInfo.name);
+        let UniformClass = null;
+        let type = uniformInfo.type;
+        let numElements = uniformInfo.size;
 
         switch (type) {
             case CONSTANTS.SAMPLER_2D:
@@ -2064,7 +2064,7 @@ function Program(gl, appState, vsSource, fsSource, xformFeebackVars) {
             case CONSTANTS.SAMPLER_3D:
             case CONSTANTS.INT_SAMPLER_3D:
             case CONSTANTS.UNSIGNED_INT_SAMPLER_3D:
-                var textureUnit = this.samplerCount++;
+                let textureUnit = this.samplerCount++;
                 this.samplers[uniformInfo.name] = textureUnit;
                 this.gl.uniform1i(uniformHandle, textureUnit);
                 break;
@@ -2113,11 +2113,11 @@ function Program(gl, appState, vsSource, fsSource, xformFeebackVars) {
         }
     }
 
-    var numUniformBlocks = gl.getProgramParameter(program, gl.ACTIVE_UNIFORM_BLOCKS);
+    let numUniformBlocks = gl.getProgramParameter(program, gl.ACTIVE_UNIFORM_BLOCKS);
 
     for (i = 0; i < numUniformBlocks; ++i) {
-        var blockName = gl.getActiveUniformBlockName(this.program, i);
-        var blockIndex = gl.getUniformBlockIndex(this.program, blockName);
+        let blockName = gl.getActiveUniformBlockName(this.program, i);
+        let blockIndex = gl.getUniformBlockIndex(this.program, blockName);
 
         this.uniformBlocks[blockName] = blockIndex;
     }
@@ -2285,7 +2285,7 @@ function Shader(gl, type, source) {
     gl.compileShader(this.shader);
 
     if (!gl.getShaderParameter(this.shader, gl.COMPILE_STATUS)) {
-        var i, lines;
+        let i, lines;
 
         console.error(gl.getShaderInfoLog(this.shader));
         lines = source.split("\n");
@@ -2332,19 +2332,19 @@ module.exports = Shader;
 
 "use strict";
 
-var CONSTANTS = require("./constants");
+const CONSTANTS = require("./constants");
 
-var TEXTURE_FORMAT_DEFAULTS = {};
-var UNSIGNED_BYTE = TEXTURE_FORMAT_DEFAULTS[CONSTANTS.UNSIGNED_BYTE] = {};
+const TEXTURE_FORMAT_DEFAULTS = {};
+const UNSIGNED_BYTE = TEXTURE_FORMAT_DEFAULTS[CONSTANTS.UNSIGNED_BYTE] = {};
 UNSIGNED_BYTE[CONSTANTS.RED] = CONSTANTS.R8;
 UNSIGNED_BYTE[CONSTANTS.RG] = CONSTANTS.RG8;
 UNSIGNED_BYTE[CONSTANTS.RGB] = CONSTANTS.RGB8;
 UNSIGNED_BYTE[CONSTANTS.RGBA] = CONSTANTS.RGBA8;
 
-var UNSIGNED_SHORT = TEXTURE_FORMAT_DEFAULTS[CONSTANTS.UNSIGNED_SHORT] = {};
+const UNSIGNED_SHORT = TEXTURE_FORMAT_DEFAULTS[CONSTANTS.UNSIGNED_SHORT] = {};
 UNSIGNED_SHORT[CONSTANTS.DEPTH_COMPONENT] = CONSTANTS.DEPTH_COMPONENT16;
 
-var FLOAT = TEXTURE_FORMAT_DEFAULTS[CONSTANTS.FLOAT] = {};
+const FLOAT = TEXTURE_FORMAT_DEFAULTS[CONSTANTS.FLOAT] = {};
 FLOAT[CONSTANTS.RED] = CONSTANTS.R16F;
 FLOAT[CONSTANTS.RG] = CONSTANTS.RG16F;
 FLOAT[CONSTANTS.RGB] = CONSTANTS.RGB16F;
@@ -2385,9 +2385,9 @@ module.exports = TEXTURE_FORMAT_DEFAULTS;
 
 "use strict";
 
-var CONSTANTS = require("./constants");
-var TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
-var DUMMY_ARRAY = new Array(1);
+const CONSTANTS = require("./constants");
+const TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
+const DUMMY_ARRAY = new Array(1);
 
 /**
     General-purpose texture.
@@ -2442,15 +2442,15 @@ function Texture(gl, appState, binding, image, width, height, depth, is3D, optio
     this.currentUnit = -1;
 
     // Sampler parameters
-    var minFilter = options.minFilter !== undefined ? options.minFilter : gl.LINEAR_MIPMAP_NEAREST;
-    var magFilter = options.magFilter !== undefined ? options.magFilter : gl.LINEAR;
-    var wrapS = options.wrapS !== undefined ? options.wrapS : gl.REPEAT;
-    var wrapT = options.wrapT !== undefined ? options.wrapT : gl.REPEAT;
-    var wrapR = options.wrapR !== undefined ? options.wrapR : gl.REPEAT;
-    var compareMode = options.compareMode !== undefined ? options.compareMode : gl.NONE;
-    var compareFunc = options.compareFunc !== undefined ? options.compareFunc : gl.LEQUAL;
-    var minLOD = options.minLOD !== undefined ? options.minLOD : null;
-    var maxLOD = options.maxLOD !== undefined ? options.maxLOD : null;
+    let minFilter = options.minFilter !== undefined ? options.minFilter : gl.LINEAR_MIPMAP_NEAREST;
+    let magFilter = options.magFilter !== undefined ? options.magFilter : gl.LINEAR;
+    let wrapS = options.wrapS !== undefined ? options.wrapS : gl.REPEAT;
+    let wrapT = options.wrapT !== undefined ? options.wrapT : gl.REPEAT;
+    let wrapR = options.wrapR !== undefined ? options.wrapR : gl.REPEAT;
+    let compareMode = options.compareMode !== undefined ? options.compareMode : gl.NONE;
+    let compareFunc = options.compareFunc !== undefined ? options.compareFunc : gl.LEQUAL;
+    let minLOD = options.minLOD !== undefined ? options.minLOD : null;
+    let maxLOD = options.maxLOD !== undefined ? options.maxLOD : null;
 
     this.sampler = gl.createSampler();
     gl.samplerParameteri(this.sampler, gl.TEXTURE_MIN_FILTER, minFilter);
@@ -2523,7 +2523,7 @@ Texture.prototype.resize = function(width, height, depth) {
         return;
     }
 
-    var levels;
+    let levels;
     if (this.is3D) {
         if (this.mipmaps) {
             levels = Math.floor(Math.log2(Math.max(Math.max(this.width, this.height), this.depth))) + 1;
@@ -2557,12 +2557,12 @@ Texture.prototype.data = function(data) {
         data = DUMMY_ARRAY;
     }
 
-    var numLevels = this.mipmaps ? data.length : 1;
-    var width = this.width;
-    var height = this.height;
-    var depth = this.depth;
-    var generateMipmaps = this.mipmaps && data.length === 1;
-    var i;
+    let numLevels = this.mipmaps ? data.length : 1;
+    let width = this.width;
+    let height = this.height;
+    let depth = this.depth;
+    let generateMipmaps = this.mipmaps && data.length === 1;
+    let i;
 
     this.bind(Math.max(this.currentUnit, 0));
 
@@ -2639,7 +2639,7 @@ Texture.prototype.delete = function() {
 
 // Bind this texture to a texture unit.
 Texture.prototype.bind = function(unit) {
-    var currentTexture = this.appState.textures[unit];
+    let currentTexture = this.appState.textures[unit];
     
     if (currentTexture !== this) {
         if (currentTexture) {
@@ -2689,7 +2689,7 @@ module.exports = Texture;
 
 "use strict";
 
-var Query = require("./query");
+const Query = require("./query");
 
 /**
     Rendering timer.
@@ -2869,7 +2869,7 @@ TransformFeedback.prototype.bind = function() {
     if (this.appState.transformFeedback !== this) {
         this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedback);
 
-        for (var i = 0, len = this.angleBugBuffers.length; i < len; ++i) {
+        for (let i = 0, len = this.angleBugBuffers.length; i < len; ++i) {
             this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, i, this.angleBugBuffers[i].buffer);
         }
 
@@ -2907,7 +2907,7 @@ module.exports = TransformFeedback;
 
 "use strict";
 
-var CONSTANTS = require("./constants");
+const CONSTANTS = require("./constants");
 
 /**
     Storage for uniform data. Data is stored in std140 layout.
@@ -2933,8 +2933,8 @@ function UniformBuffer(gl, layout, usage) {
     this.size = 0;
     this.usage = usage || gl.DYNAMIC_DRAW;
 
-    for (var i = 0, len = layout.length; i < len; ++i) {
-        var type = layout[i];
+    for (let i = 0, len = layout.length; i < len; ++i) {
+        let type = layout[i];
         switch(type) {
             case CONSTANTS.FLOAT:
             case CONSTANTS.INT:
@@ -3049,7 +3049,7 @@ function UniformBuffer(gl, layout, usage) {
     @param {ArrayBufferView} value Value to store at the layout location.
 */
 UniformBuffer.prototype.set = function(index, value) {
-    var view = this.dataViews[this.types[index]];
+    let view = this.dataViews[this.types[index]];
 
     if (this.sizes[index] === 1)  {
         view[this.offsets[index]] = value;
@@ -3067,14 +3067,14 @@ UniformBuffer.prototype.set = function(index, value) {
     @method
 */
 UniformBuffer.prototype.update = function(index) {
-    var data;
-    var offset;
+    let data;
+    let offset;
     if (index === undefined) {
         data = this.data;
         offset = 0;
     } else {
-        var begin = this.offsets[index];
-        var end = begin + this.sizes[index];
+        let begin = this.offsets[index];
+        let end = begin + this.sizes[index];
         data = this.data.subarray(begin, end);
         offset = begin * 4;
     }
@@ -3133,12 +3133,12 @@ module.exports = UniformBuffer;
 
 "use strict";
 
-var CONSTANTS = require("./constants");
+const CONSTANTS = require("./constants");
 
 // Classes to manage uniform value updates, including
 // caching current values.
 
-var UNIFORM_FUNC_NAME = {};
+const UNIFORM_FUNC_NAME = {};
 UNIFORM_FUNC_NAME[CONSTANTS.BOOL] = "uniform1i";
 UNIFORM_FUNC_NAME[CONSTANTS.INT] = "uniform1i";
 UNIFORM_FUNC_NAME[CONSTANTS.SAMPLER_2D] = "uniform1i";
@@ -3180,7 +3180,7 @@ UNIFORM_FUNC_NAME[CONSTANTS.FLOAT_MAT3x4] = "uniformMatrix3x4fv";
 UNIFORM_FUNC_NAME[CONSTANTS.FLOAT_MAT4x2] = "uniformMatrix4x2fv";
 UNIFORM_FUNC_NAME[CONSTANTS.FLOAT_MAT4x3] = "uniformMatrix4x3fv";
 
-var UNIFORM_COMPONENT_COUNT = {};
+const UNIFORM_COMPONENT_COUNT = {};
 UNIFORM_COMPONENT_COUNT[CONSTANTS.BOOL] = 1;
 UNIFORM_COMPONENT_COUNT[CONSTANTS.INT] = 1;
 UNIFORM_COMPONENT_COUNT[CONSTANTS.SAMPLER_2D] = 1;
@@ -3222,7 +3222,7 @@ UNIFORM_COMPONENT_COUNT[CONSTANTS.FLOAT_MAT3x4] = 12;
 UNIFORM_COMPONENT_COUNT[CONSTANTS.FLOAT_MAT4x2] = 8;
 UNIFORM_COMPONENT_COUNT[CONSTANTS.FLOAT_MAT4x3] = 12;
 
-var UNIFORM_CACHE_CLASS = {};
+const UNIFORM_CACHE_CLASS = {};
 UNIFORM_CACHE_CLASS[CONSTANTS.INT] = Int32Array;
 UNIFORM_CACHE_CLASS[CONSTANTS.SAMPLER_2D] = Int32Array;
 UNIFORM_CACHE_CLASS[CONSTANTS.INT_SAMPLER_2D] = Int32Array;
@@ -3274,7 +3274,7 @@ function MultiNumericUniform(gl, handle, type, count) {
 }
 
 MultiNumericUniform.prototype.set = function(value) {
-    for (var i = 0, len = value.length; i < len; ++i) {
+    for (let i = 0, len = value.length; i < len; ++i) {
         if (this.cache[i] !== value[i]) {
             this.gl[this.glFuncName](this.handle, value);
             this.cache.set(value);
@@ -3292,10 +3292,10 @@ function MultiBoolUniform(gl, handle, type, count) {
 }
 
 MultiBoolUniform.prototype.set = function(value) {
-    for (var i = 0, len = value.length; i < len; ++i) {
+    for (let i = 0, len = value.length; i < len; ++i) {
         if (this.cache[i] !== value[i]) {
             this.gl[this.glFuncName](this.handle, value);
-            for (var j = i; j < len; j++) {
+            for (let j = i; j < len; j++) {
                 this.cache[j] = value[j];
             }
             return;
@@ -3312,7 +3312,7 @@ function MatrixUniform(gl, handle, type, count) {
 }
 
 MatrixUniform.prototype.set = function(value) {
-    for (var i = 0, len = value.length; i < len; ++i) {
+    for (let i = 0, len = value.length; i < len; ++i) {
         if (this.cache[i] !== value[i]) {
             this.gl[this.glFuncName](this.handle, false, value);
             this.cache.set(value);
@@ -3349,7 +3349,7 @@ module.exports.SingleComponentUniform = SingleComponentUniform;
 
 "use strict";
 
-var CONSTANTS = require("./constants");
+const CONSTANTS = require("./constants");
 
 /**
     Organizes vertex buffer and attribute state.
@@ -3511,9 +3511,9 @@ VertexArray.prototype.attributeBuffer = function(attributeIndex, vertexBuffer, i
     this.gl.bindVertexArray(this.vertexArray);
     this.gl.bindBuffer(vertexBuffer.binding, vertexBuffer.buffer);
 
-    var numColumns = vertexBuffer.numColumns;
+    let numColumns = vertexBuffer.numColumns;
 
-    for (var i = 0; i < numColumns; ++i) {
+    for (let i = 0; i < numColumns; ++i) {
         if (integer) {
             this.gl.vertexAttribIPointer(
                 attributeIndex + i,
@@ -3580,7 +3580,7 @@ module.exports = VertexArray;
 
 "use strict";
 
-var CONSTANTS = require("./constants");
+const CONSTANTS = require("./constants");
 
 /**
     Storage for vertex data.
@@ -3597,7 +3597,7 @@ var CONSTANTS = require("./constants");
     @prop {Object} appState Tracked GL state.
 */
 function VertexBuffer(gl, appState, type, itemSize, data, usage, indexArray) {
-    var numColumns;
+    let numColumns;
     switch(type) {
         case CONSTANTS.FLOAT_MAT4:
         case CONSTANTS.FLOAT_MAT4x2:
@@ -3639,7 +3639,7 @@ function VertexBuffer(gl, appState, type, itemSize, data, usage, indexArray) {
             break;
     }
 
-    var dataLength;
+    let dataLength;
     if (typeof data === "number") {
         dataLength = data;
         data *= CONSTANTS.TYPE_SIZE[type];
@@ -3672,7 +3672,7 @@ function VertexBuffer(gl, appState, type, itemSize, data, usage, indexArray) {
 */
 VertexBuffer.prototype.data = function(data) {
     // Don't want to update vertex array bindings
-    var currentVertexArray = this.appState.vertexArray;
+    let currentVertexArray = this.appState.vertexArray;
     if (currentVertexArray) {
         this.gl.bindVertexArray(null);
     }

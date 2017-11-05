@@ -22,20 +22,20 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 "use strict";
-var CONSTANTS               = require("./constants");
-var TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
-var Cubemap                 = require("./cubemap");
-var DrawCall                = require("./draw-call");
-var Framebuffer             = require("./framebuffer");
-var Program                 = require("./program");
-var Shader                  = require("./shader");
-var Texture                 = require("./texture");
-var Timer                   = require("./timer");
-var TransformFeedback       = require("./transform-feedback");
-var UniformBuffer           = require("./uniform-buffer");
-var VertexArray             = require("./vertex-array");
-var VertexBuffer            = require("./vertex-buffer");
-var Query                   = require("./query");
+const CONSTANTS               = require("./constants");
+const TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
+const Cubemap                 = require("./cubemap");
+const DrawCall                = require("./draw-call");
+const Framebuffer             = require("./framebuffer");
+const Program                 = require("./program");
+const Shader                  = require("./shader");
+const Texture                 = require("./texture");
+const Timer                   = require("./timer");
+const TransformFeedback       = require("./transform-feedback");
+const UniformBuffer           = require("./uniform-buffer");
+const VertexArray             = require("./vertex-array");
+const VertexBuffer            = require("./vertex-buffer");
+const Query                   = require("./query");
 
 /**
     Primary entry point to PicoGL. An app will store all parts of the WebGL
@@ -577,7 +577,7 @@ App.prototype.linearFloatTextures = function() {
     @method
 */
 App.prototype.s3tcTextures = function() {
-    var ext = this.gl.getExtension("WEBGL_compressed_texture_s3tc");
+    let ext = this.gl.getExtension("WEBGL_compressed_texture_s3tc");
     this.s3tcTexturesEnabled = !!ext;
     
     if (this.s3tcTexturesEnabled) {
@@ -633,7 +633,7 @@ App.prototype.s3tcTextures = function() {
     @method
 */
 App.prototype.etcTextures = function() {
-    var ext = this.gl.getExtension("WEBGL_compressed_texture_etc");
+    let ext = this.gl.getExtension("WEBGL_compressed_texture_etc");
     this.etcTexturesEnabled = !!ext;
 
     if (this.etcTexturesEnabled) {
@@ -701,7 +701,7 @@ App.prototype.etcTextures = function() {
     @method
 */
 App.prototype.astcTextures = function() {
-    var ext = this.gl.getExtension("WEBGL_compressed_texture_astc");
+    let ext = this.gl.getExtension("WEBGL_compressed_texture_astc");
     this.astcTexturesEnabled = !!ext;
 
     if (this.astcTexturesEnabled) {
@@ -768,7 +768,7 @@ App.prototype.astcTextures = function() {
         this.gl.getError();
         this.state.textures[0] = null;
         this.gl.activeTexture(this.gl.TEXTURE0);
-        var texture = this.gl.createTexture();
+        let texture = this.gl.createTexture();
         this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
         this.gl.texStorage2D(this.gl.TEXTURE_2D, 1, ext.COMPRESSED_RGBA_ASTC_4x4_KHR, 4, 4);
 
@@ -823,7 +823,7 @@ App.prototype.astcTextures = function() {
     @method
 */
 App.prototype.pvrtcTextures = function() {
-    var ext = this.gl.getExtension("WEBGL_compressed_texture_pvrtc");
+    let ext = this.gl.getExtension("WEBGL_compressed_texture_pvrtc");
     this.pvrtcTexturesEnabled = !!ext;
     
     if (this.pvrtcTexturesEnabled) {
@@ -855,8 +855,8 @@ App.prototype.pvrtcTextures = function() {
 App.prototype.readPixel = function(x, y, outColor, options) {
     options = options || CONSTANTS.DUMMY_OBJECT;
     
-    var format = options.format || CONSTANTS.RGBA;
-    var type = options.type || CONSTANTS.UNSIGNED_BYTE;
+    let format = options.format || CONSTANTS.RGBA;
+    let type = options.type || CONSTANTS.UNSIGNED_BYTE;
 
     this.gl.readPixels(x, y, 1, 1, format, type, outColor);
 

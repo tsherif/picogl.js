@@ -23,7 +23,7 @@
 
 "use strict";
 
-var CONSTANTS = require("./constants");
+const CONSTANTS = require("./constants");
 
 /**
     Storage for uniform data. Data is stored in std140 layout.
@@ -49,8 +49,8 @@ function UniformBuffer(gl, layout, usage) {
     this.size = 0;
     this.usage = usage || gl.DYNAMIC_DRAW;
 
-    for (var i = 0, len = layout.length; i < len; ++i) {
-        var type = layout[i];
+    for (let i = 0, len = layout.length; i < len; ++i) {
+        let type = layout[i];
         switch(type) {
             case CONSTANTS.FLOAT:
             case CONSTANTS.INT:
@@ -165,7 +165,7 @@ function UniformBuffer(gl, layout, usage) {
     @param {ArrayBufferView} value Value to store at the layout location.
 */
 UniformBuffer.prototype.set = function(index, value) {
-    var view = this.dataViews[this.types[index]];
+    let view = this.dataViews[this.types[index]];
 
     if (this.sizes[index] === 1)  {
         view[this.offsets[index]] = value;
@@ -183,14 +183,14 @@ UniformBuffer.prototype.set = function(index, value) {
     @method
 */
 UniformBuffer.prototype.update = function(index) {
-    var data;
-    var offset;
+    let data;
+    let offset;
     if (index === undefined) {
         data = this.data;
         offset = 0;
     } else {
-        var begin = this.offsets[index];
-        var end = begin + this.sizes[index];
+        let begin = this.offsets[index];
+        let end = begin + this.sizes[index];
         data = this.data.subarray(begin, end);
         offset = begin * 4;
     }

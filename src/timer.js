@@ -23,7 +23,7 @@
 
 "use strict";
 
-var Query = require("./query");
+const Query = require("./query");
 
 /**
     Rendering timer.
