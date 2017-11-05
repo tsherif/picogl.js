@@ -852,9 +852,7 @@ App.prototype.pvrtcTextures = function() {
     @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the read framebuffer.
     @param {GLEnum} [options.format=RGBA] Read framebuffer data format.
 */
-App.prototype.readPixel = function(x, y, outColor, options) {
-    options = options || CONSTANTS.DUMMY_OBJECT;
-    
+App.prototype.readPixel = function(x, y, outColor, options = CONSTANTS.DUMMY_OBJECT) {
     let format = options.format || CONSTANTS.RGBA;
     let type = options.type || CONSTANTS.UNSIGNED_BYTE;
 
@@ -970,7 +968,7 @@ App.prototype.createVertexBuffer = function(type, itemSize, data, usage) {
     @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
 */
 App.prototype.createMatrixBuffer = function(type, data, usage) {
-    return new VertexBuffer(this.gl, this.state, type, null, data, usage);
+    return new VertexBuffer(this.gl, this.state, type, 0, data, usage);
 };
 
 /**
@@ -980,9 +978,10 @@ App.prototype.createMatrixBuffer = function(type, data, usage) {
     @param {GLEnum} type The data type stored in the index buffer.
     @param {number} itemSize Number of elements per primitive.
     @param {ArrayBufferView} data Index buffer data.
+    @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
 */
-App.prototype.createIndexBuffer = function(type, itemSize, data) {
-    return new VertexBuffer(this.gl, this.state, type, itemSize, data, null, true);
+App.prototype.createIndexBuffer = function(type, itemSize, data, usage) {
+    return new VertexBuffer(this.gl, this.state, type, itemSize, data, usage, true);
 };
 
 /**
@@ -1033,7 +1032,7 @@ App.prototype.createTexture2D = function(image, width, height, options) {
         height = image.height;
     }
 
-    return new Texture(this.gl, this.state, this.gl.TEXTURE_2D, image, width, height, null, false, options);
+    return new Texture(this.gl, this.state, this.gl.TEXTURE_2D, image, width, height, undefined, false, options);
 };
 
 /**

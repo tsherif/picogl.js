@@ -39,7 +39,7 @@ const CONSTANTS = require("./constants");
     @prop {number} size The size of the buffer (in 4-byte items).
     @prop {GLEnum} usage Usage pattern of the buffer.
 */
-function UniformBuffer(gl, layout, usage) {
+function UniformBuffer(gl, layout, usage = gl.DYNAMIC_DRAW) {
     this.gl = gl;
     this.buffer = gl.createBuffer();
     this.dataViews = {};
@@ -47,7 +47,7 @@ function UniformBuffer(gl, layout, usage) {
     this.sizes = new Array(layout.length);
     this.types = new Array(layout.length);
     this.size = 0;
-    this.usage = usage || gl.DYNAMIC_DRAW;
+    this.usage = usage;
 
     for (let i = 0, len = layout.length; i < len; ++i) {
         let type = layout[i];

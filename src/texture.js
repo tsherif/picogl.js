@@ -45,11 +45,7 @@ const DUMMY_ARRAY = new Array(1);
         (and thus should have a complete mipmap chain).
     @prop {Object} appState Tracked GL state.
 */
-function Texture(gl, appState, binding, image, width, height, depth, is3D, options) {
-    width = width || image.width;
-    height = height || image.height;
-    options = options || CONSTANTS.DUMMY_OBJECT;
-
+function Texture(gl, appState, binding, image, width = image.width, height = image.height, depth, is3D, options = CONSTANTS.DUMMY_OBJECT) {
     this.gl = gl;
     this.binding = binding;
     this.texture = null;

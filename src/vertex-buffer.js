@@ -39,7 +39,7 @@ const CONSTANTS = require("./constants");
     @prop {GLEnum} binding GL binding point (ARRAY_BUFFER or ELEMENT_ARRAY_BUFFER).
     @prop {Object} appState Tracked GL state.
 */
-function VertexBuffer(gl, appState, type, itemSize, data, usage, indexArray) {
+function VertexBuffer(gl, appState, type, itemSize, data, usage = gl.STATIC_DRAW, indexArray) {
     let numColumns;
     switch(type) {
         case CONSTANTS.FLOAT_MAT4:
@@ -97,7 +97,7 @@ function VertexBuffer(gl, appState, type, itemSize, data, usage, indexArray) {
     this.itemSize = itemSize;
     this.numItems = dataLength / (itemSize * numColumns);
     this.numColumns = numColumns;
-    this.usage = usage || gl.STATIC_DRAW;
+    this.usage = usage;
     this.indexArray = !!indexArray;
     this.binding = this.indexArray ? gl.ELEMENT_ARRAY_BUFFER : gl.ARRAY_BUFFER;
 

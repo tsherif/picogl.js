@@ -23,7 +23,6 @@
 
 "use strict";
 
-const CONSTANTS = require("./constants");
 const TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
 
 /**
@@ -39,8 +38,7 @@ const TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
     @prop {Object} appState Tracked GL state.
 */
 function Cubemap(gl, appState, options) {
-    options = options || CONSTANTS.DUMMY_OBJECT;
-
+    
     this.gl = gl;
     this.texture = gl.createTexture();
     this.format = options.format !== undefined ? options.format : gl.RGBA;

@@ -47,7 +47,7 @@ const CONSTANTS = require("./constants");
     @prop {GLEnum} primitive The primitive type being drawn.
     @prop {Object} appState Tracked GL state.
 */
-function DrawCall(gl, appState, program, vertexArray, primitive) {
+function DrawCall(gl, appState, program, vertexArray, primitive = CONSTANTS.TRIANGLES) {
     this.gl = gl;
     this.currentProgram = program;
     this.currentVertexArray = vertexArray;
@@ -65,7 +65,7 @@ function DrawCall(gl, appState, program, vertexArray, primitive) {
     this.samplerIndices = {};
     this.textures = new Array(CONSTANTS.WEBGL_INFO.MAX_TEXTURE_UNITS);
     this.textureCount = 0;
-    this.primitive = primitive !== undefined ? primitive : CONSTANTS.TRIANGLES;
+    this.primitive = primitive;
 }
 
 DrawCall.prototype.transformFeedback = function(transformFeedback) {

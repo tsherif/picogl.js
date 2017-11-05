@@ -878,9 +878,7 @@ App.prototype.pvrtcTextures = function() {
     @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the read framebuffer.
     @param {GLEnum} [options.format=RGBA] Read framebuffer data format.
 */
-App.prototype.readPixel = function(x, y, outColor, options) {
-    options = options || CONSTANTS.DUMMY_OBJECT;
-    
+App.prototype.readPixel = function(x, y, outColor, options = CONSTANTS.DUMMY_OBJECT) {
     let format = options.format || CONSTANTS.RGBA;
     let type = options.type || CONSTANTS.UNSIGNED_BYTE;
 
@@ -996,7 +994,7 @@ App.prototype.createVertexBuffer = function(type, itemSize, data, usage) {
     @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
 */
 App.prototype.createMatrixBuffer = function(type, data, usage) {
-    return new VertexBuffer(this.gl, this.state, type, null, data, usage);
+    return new VertexBuffer(this.gl, this.state, type, 0, data, usage);
 };
 
 /**
@@ -1006,9 +1004,10 @@ App.prototype.createMatrixBuffer = function(type, data, usage) {
     @param {GLEnum} type The data type stored in the index buffer.
     @param {number} itemSize Number of elements per primitive.
     @param {ArrayBufferView} data Index buffer data.
+    @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
 */
-App.prototype.createIndexBuffer = function(type, itemSize, data) {
-    return new VertexBuffer(this.gl, this.state, type, itemSize, data, null, true);
+App.prototype.createIndexBuffer = function(type, itemSize, data, usage) {
+    return new VertexBuffer(this.gl, this.state, type, itemSize, data, usage, true);
 };
 
 /**
@@ -1059,7 +1058,7 @@ App.prototype.createTexture2D = function(image, width, height, options) {
         height = image.height;
     }
 
-    return new Texture(this.gl, this.state, this.gl.TEXTURE_2D, image, width, height, null, false, options);
+    return new Texture(this.gl, this.state, this.gl.TEXTURE_2D, image, width, height, undefined, false, options);
 };
 
 /**
@@ -1287,7 +1286,6 @@ module.exports = CONSTANTS;
 
 "use strict";
 
-const CONSTANTS = require("./constants");
 const TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
 
 /**
@@ -1303,8 +1301,7 @@ const TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
     @prop {Object} appState Tracked GL state.
 */
 function Cubemap(gl, appState, options) {
-    options = options || CONSTANTS.DUMMY_OBJECT;
-
+    
     this.gl = gl;
     this.texture = gl.createTexture();
     this.format = options.format !== undefined ? options.format : gl.RGBA;
@@ -1406,7 +1403,7 @@ Cubemap.prototype.bind = function(unit) {
 
 module.exports = Cubemap;
 
-},{"./constants":2,"./texture-format-defaults":10}],4:[function(require,module,exports){
+},{"./texture-format-defaults":10}],4:[function(require,module,exports){
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -1456,7 +1453,7 @@ const CONSTANTS = require("./constants");
     @prop {GLEnum} primitive The primitive type being drawn.
     @prop {Object} appState Tracked GL state.
 */
-function DrawCall(gl, appState, program, vertexArray, primitive) {
+function DrawCall(gl, appState, program, vertexArray, primitive = CONSTANTS.TRIANGLES) {
     this.gl = gl;
     this.currentProgram = program;
     this.currentVertexArray = vertexArray;
@@ -1474,7 +1471,7 @@ function DrawCall(gl, appState, program, vertexArray, primitive) {
     this.samplerIndices = {};
     this.textures = new Array(CONSTANTS.WEBGL_INFO.MAX_TEXTURE_UNITS);
     this.textureCount = 0;
-    this.primitive = primitive !== undefined ? primitive : CONSTANTS.TRIANGLES;
+    this.primitive = primitive;
 }
 
 DrawCall.prototype.transformFeedback = function(transformFeedback) {
@@ -1686,9 +1683,7 @@ function Framebuffer(gl, appState, width, height) {
     @param {GLEnum} [options.maxLOD] Maximum level of detail.
     @param {boolean} [options.generateMipmaps=false] Should mipmaps be generated.
 */
-Framebuffer.prototype.colorTarget = function(index, options) {
-    index = index || 0;
-    options = options || {};
+Framebuffer.prototype.colorTarget = function(index = 0, options = {}) {
     options.type = options.type || this.gl.UNSIGNED_BYTE;
     options.format = options.format || this.gl.RGBA;
     options.internalFormat = options.internalFormat || TEXTURE_FORMAT_DEFAULTS[options.type][options.format];
@@ -1744,8 +1739,7 @@ Framebuffer.prototype.colorTarget = function(index, options) {
     @param {GLEnum} [options.maxLOD] Maximum level of detail.
     @param {boolean} [options.generateMipmaps=false] Should mipmaps be generated.
 */
-Framebuffer.prototype.depthTarget = function(options) {
-    options = options || {};
+Framebuffer.prototype.depthTarget = function(options = {}) {
     options.format = this.gl.DEPTH_COMPONENT;
     options.type = options.type || this.gl.UNSIGNED_SHORT;
     options.internalFormat = options.internalFormat || TEXTURE_FORMAT_DEFAULTS[options.type][options.format];
@@ -2407,11 +2401,7 @@ const DUMMY_ARRAY = new Array(1);
         (and thus should have a complete mipmap chain).
     @prop {Object} appState Tracked GL state.
 */
-function Texture(gl, appState, binding, image, width, height, depth, is3D, options) {
-    width = width || image.width;
-    height = height || image.height;
-    options = options || CONSTANTS.DUMMY_OBJECT;
-
+function Texture(gl, appState, binding, image, width = image.width, height = image.height, depth, is3D, options = CONSTANTS.DUMMY_OBJECT) {
     this.gl = gl;
     this.binding = binding;
     this.texture = null;
@@ -2923,7 +2913,7 @@ const CONSTANTS = require("./constants");
     @prop {number} size The size of the buffer (in 4-byte items).
     @prop {GLEnum} usage Usage pattern of the buffer.
 */
-function UniformBuffer(gl, layout, usage) {
+function UniformBuffer(gl, layout, usage = gl.DYNAMIC_DRAW) {
     this.gl = gl;
     this.buffer = gl.createBuffer();
     this.dataViews = {};
@@ -2931,7 +2921,7 @@ function UniformBuffer(gl, layout, usage) {
     this.sizes = new Array(layout.length);
     this.types = new Array(layout.length);
     this.size = 0;
-    this.usage = usage || gl.DYNAMIC_DRAW;
+    this.usage = usage;
 
     for (let i = 0, len = layout.length; i < len; ++i) {
         let type = layout[i];
@@ -3596,7 +3586,7 @@ const CONSTANTS = require("./constants");
     @prop {GLEnum} binding GL binding point (ARRAY_BUFFER or ELEMENT_ARRAY_BUFFER).
     @prop {Object} appState Tracked GL state.
 */
-function VertexBuffer(gl, appState, type, itemSize, data, usage, indexArray) {
+function VertexBuffer(gl, appState, type, itemSize, data, usage = gl.STATIC_DRAW, indexArray) {
     let numColumns;
     switch(type) {
         case CONSTANTS.FLOAT_MAT4:
@@ -3654,7 +3644,7 @@ function VertexBuffer(gl, appState, type, itemSize, data, usage, indexArray) {
     this.itemSize = itemSize;
     this.numItems = dataLength / (itemSize * numColumns);
     this.numColumns = numColumns;
-    this.usage = usage || gl.STATIC_DRAW;
+    this.usage = usage;
     this.indexArray = !!indexArray;
     this.binding = this.indexArray ? gl.ELEMENT_ARRAY_BUFFER : gl.ARRAY_BUFFER;
 

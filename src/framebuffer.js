@@ -82,9 +82,7 @@ function Framebuffer(gl, appState, width, height) {
     @param {GLEnum} [options.maxLOD] Maximum level of detail.
     @param {boolean} [options.generateMipmaps=false] Should mipmaps be generated.
 */
-Framebuffer.prototype.colorTarget = function(index, options) {
-    index = index || 0;
-    options = options || {};
+Framebuffer.prototype.colorTarget = function(index = 0, options = {}) {
     options.type = options.type || this.gl.UNSIGNED_BYTE;
     options.format = options.format || this.gl.RGBA;
     options.internalFormat = options.internalFormat || TEXTURE_FORMAT_DEFAULTS[options.type][options.format];
@@ -140,8 +138,7 @@ Framebuffer.prototype.colorTarget = function(index, options) {
     @param {GLEnum} [options.maxLOD] Maximum level of detail.
     @param {boolean} [options.generateMipmaps=false] Should mipmaps be generated.
 */
-Framebuffer.prototype.depthTarget = function(options) {
-    options = options || {};
+Framebuffer.prototype.depthTarget = function(options = {}) {
     options.format = this.gl.DEPTH_COMPONENT;
     options.type = options.type || this.gl.UNSIGNED_SHORT;
     options.internalFormat = options.internalFormat || TEXTURE_FORMAT_DEFAULTS[options.type][options.format];
