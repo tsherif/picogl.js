@@ -23,7 +23,7 @@
 
 "use strict";
 
-import { CONSTANTS } from "./constants.js";
+import * as CONSTANTS from "./constants.js";
 
 /**
     A DrawCall represents the program and values of associated

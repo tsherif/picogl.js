@@ -20,7 +20,7 @@
 
 "use strict";
 
-import { CONSTANTS } from "./constants.js";
+import * as CONSTANTS from "./constants.js";
 
 export const TEXTURE_FORMAT_DEFAULTS = {};
 

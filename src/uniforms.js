@@ -23,7 +23,7 @@
 
 "use strict";
 
-import { CONSTANTS } from "./constants.js";
+import * as CONSTANTS from "./constants.js";
 
 // Classes to manage uniform value updates, including
 // caching current values.

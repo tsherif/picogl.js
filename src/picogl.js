@@ -24,7 +24,7 @@
 "use strict";
 
 import { App } from "./app.js";
-import { CONSTANTS as PicoGL } from "./constants.js";
+export * from "./constants.js";
 
 /**
     Global PicoGL module. For convenience, all WebGL enums are stored
@@ -32,9 +32,8 @@ import { CONSTANTS as PicoGL } from "./constants.js";
 
     @namespace PicoGL
 */
-export { PicoGL }; 
 
-PicoGL.version = "%%VERSION%%";
+export const version = "%%VERSION%%";
 
 /**
     Create a PicoGL app. The app is the primary entry point to PicoGL. It stores
@@ -44,6 +43,6 @@ PicoGL.version = "%%VERSION%%";
     @param {DOMElement} canvas The canvas on which to create the WebGL context.
     @param {Object} [contextAttributes] Context attributes to pass when calling getContext().
 */
-PicoGL.createApp = function(canvas, contextAttributes) {
+export function createApp(canvas, contextAttributes) {
     return new App(canvas, contextAttributes);
 };

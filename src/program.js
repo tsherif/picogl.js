@@ -23,7 +23,7 @@
 
 "use strict";
 
-import { CONSTANTS } from "./constants.js";
+import * as CONSTANTS from "./constants.js";
 import { Shader } from "./shader.js";
 import { SingleComponentUniform, MultiNumericUniform, MultiBoolUniform, MatrixUniform } from "./uniforms.js";
 

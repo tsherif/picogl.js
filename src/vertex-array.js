@@ -20,7 +20,7 @@
 
 "use strict";
 
-import { CONSTANTS } from "./constants.js";
+import * as CONSTANTS from "./constants.js";
 
 /**
     Organizes vertex buffer and attribute state.

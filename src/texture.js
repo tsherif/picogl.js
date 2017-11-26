@@ -23,7 +23,7 @@
 
 "use strict";
 
-import { CONSTANTS } from "./constants.js";
+import * as CONSTANTS from "./constants.js";
 import { TEXTURE_FORMAT_DEFAULTS } from "./texture-format-defaults.js";
 
 const DUMMY_ARRAY = new Array(1);
