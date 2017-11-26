@@ -21,9 +21,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-"use strict";
-
-var App = require("./app");
+import { App } from "./app.js";
 
 /**
     Global PicoGL module. For convenience, all WebGL enums are stored
@@ -31,8 +29,8 @@ var App = require("./app");
 
     @namespace PicoGL
 */
-var PicoGL = global.PicoGL = require("./constants");    
-PicoGL.version = "%%VERSION%%";
+export * from "./constants.js";
+export const version = "%%VERSION%%";
 
 /**
     Create a PicoGL app. The app is the primary entry point to PicoGL. It stores
@@ -42,8 +40,6 @@ PicoGL.version = "%%VERSION%%";
     @param {DOMElement} canvas The canvas on which to create the WebGL context.
     @param {Object} [contextAttributes] Context attributes to pass when calling getContext().
 */
-PicoGL.createApp = function(canvas, contextAttributes) {
+export function createApp(canvas, contextAttributes) {
     return new App(canvas, contextAttributes);
-};
-
-module.exports = PicoGL;
+}

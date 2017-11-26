@@ -21,14 +21,12 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-"use strict";
-
-var CONSTANTS = require("./constants");
+import * as CONSTANTS from "./constants.js";
 
 // Classes to manage uniform value updates, including
 // caching current values.
 
-var UNIFORM_FUNC_NAME = {};
+const UNIFORM_FUNC_NAME = {};
 UNIFORM_FUNC_NAME[CONSTANTS.BOOL] = "uniform1i";
 UNIFORM_FUNC_NAME[CONSTANTS.INT] = "uniform1i";
 UNIFORM_FUNC_NAME[CONSTANTS.SAMPLER_2D] = "uniform1i";
@@ -70,7 +68,7 @@ UNIFORM_FUNC_NAME[CONSTANTS.FLOAT_MAT3x4] = "uniformMatrix3x4fv";
 UNIFORM_FUNC_NAME[CONSTANTS.FLOAT_MAT4x2] = "uniformMatrix4x2fv";
 UNIFORM_FUNC_NAME[CONSTANTS.FLOAT_MAT4x3] = "uniformMatrix4x3fv";
 
-var UNIFORM_COMPONENT_COUNT = {};
+const UNIFORM_COMPONENT_COUNT = {};
 UNIFORM_COMPONENT_COUNT[CONSTANTS.BOOL] = 1;
 UNIFORM_COMPONENT_COUNT[CONSTANTS.INT] = 1;
 UNIFORM_COMPONENT_COUNT[CONSTANTS.SAMPLER_2D] = 1;
@@ -112,7 +110,7 @@ UNIFORM_COMPONENT_COUNT[CONSTANTS.FLOAT_MAT3x4] = 12;
 UNIFORM_COMPONENT_COUNT[CONSTANTS.FLOAT_MAT4x2] = 8;
 UNIFORM_COMPONENT_COUNT[CONSTANTS.FLOAT_MAT4x3] = 12;
 
-var UNIFORM_CACHE_CLASS = {};
+const UNIFORM_CACHE_CLASS = {};
 UNIFORM_CACHE_CLASS[CONSTANTS.INT] = Int32Array;
 UNIFORM_CACHE_CLASS[CONSTANTS.SAMPLER_2D] = Int32Array;
 UNIFORM_CACHE_CLASS[CONSTANTS.INT_SAMPLER_2D] = Int32Array;
@@ -141,77 +139,88 @@ UNIFORM_CACHE_CLASS[CONSTANTS.UNSIGNED_INT_VEC2] = Uint32Array;
 UNIFORM_CACHE_CLASS[CONSTANTS.UNSIGNED_INT_VEC3] = Uint32Array;
 UNIFORM_CACHE_CLASS[CONSTANTS.UNSIGNED_INT_VEC4] = Uint32Array;
 
-function SingleComponentUniform(gl, handle, type) {
-    this.gl = gl;
-    this.handle = handle;
-    this.glFuncName = UNIFORM_FUNC_NAME[type];
-    this.cache = type === CONSTANTS.BOOL ? false : 0;
-}
-
-SingleComponentUniform.prototype.set = function(value) {
-    if (this.cache !== value) {
-        this.gl[this.glFuncName](this.handle, value);
-        this.cache = value;
+export class SingleComponentUniform {
+    
+    constructor(gl, handle, type) {
+        this.gl = gl;
+        this.handle = handle;
+        this.glFuncName = UNIFORM_FUNC_NAME[type];
+        this.cache = type === CONSTANTS.BOOL ? false : 0;
     }
-};
 
-function MultiNumericUniform(gl, handle, type, count) {
-    this.gl = gl;
-    this.handle = handle;
-    this.glFuncName = UNIFORM_FUNC_NAME[type] + "v";
-    this.count = count;
-    this.cache = new UNIFORM_CACHE_CLASS[type](UNIFORM_COMPONENT_COUNT[type] * count);
-}
-
-MultiNumericUniform.prototype.set = function(value) {
-    for (var i = 0, len = value.length; i < len; ++i) {
-        if (this.cache[i] !== value[i]) {
+    set(value) {
+        if (this.cache !== value) {
             this.gl[this.glFuncName](this.handle, value);
-            this.cache.set(value);
-            return;
+            this.cache = value;
         }
     }
-};
 
-function MultiBoolUniform(gl, handle, type, count) {
-    this.gl = gl;
-    this.handle = handle;
-    this.glFuncName = UNIFORM_FUNC_NAME[type] + "v";
-    this.count = count;
-    this.cache = new Array(UNIFORM_COMPONENT_COUNT[type] * count).fill(false);
 }
 
-MultiBoolUniform.prototype.set = function(value) {
-    for (var i = 0, len = value.length; i < len; ++i) {
-        if (this.cache[i] !== value[i]) {
-            this.gl[this.glFuncName](this.handle, value);
-            for (var j = i; j < len; j++) {
-                this.cache[j] = value[j];
+export class MultiNumericUniform {
+
+    constructor(gl, handle, type, count) {
+        this.gl = gl;
+        this.handle = handle;
+        this.glFuncName = UNIFORM_FUNC_NAME[type] + "v";
+        this.count = count;
+        this.cache = new UNIFORM_CACHE_CLASS[type](UNIFORM_COMPONENT_COUNT[type] * count);
+    }
+
+    set(value) {
+        for (let i = 0, len = value.length; i < len; ++i) {
+            if (this.cache[i] !== value[i]) {
+                this.gl[this.glFuncName](this.handle, value);
+                this.cache.set(value);
+                return;
             }
-            return;
         }
     }
-};
 
-function MatrixUniform(gl, handle, type, count) {
-    this.gl = gl;
-    this.handle = handle;
-    this.glFuncName = UNIFORM_FUNC_NAME[type];
-    this.count = count;
-    this.cache = new Float32Array(UNIFORM_COMPONENT_COUNT[type] * count);
 }
 
-MatrixUniform.prototype.set = function(value) {
-    for (var i = 0, len = value.length; i < len; ++i) {
-        if (this.cache[i] !== value[i]) {
-            this.gl[this.glFuncName](this.handle, false, value);
-            this.cache.set(value);
-            return;
+export class MultiBoolUniform {
+
+    constructor(gl, handle, type, count) {
+        this.gl = gl;
+        this.handle = handle;
+        this.glFuncName = UNIFORM_FUNC_NAME[type] + "v";
+        this.count = count;
+        this.cache = new Array(UNIFORM_COMPONENT_COUNT[type] * count).fill(false);
+    }
+
+    set(value) {
+        for (let i = 0, len = value.length; i < len; ++i) {
+            if (this.cache[i] !== value[i]) {
+                this.gl[this.glFuncName](this.handle, value);
+                for (let j = i; j < len; j++) {
+                    this.cache[j] = value[j];
+                }
+                return;
+            }
         }
     }
-};
 
-module.exports.MatrixUniform = MatrixUniform;
-module.exports.MultiBoolUniform = MultiBoolUniform;
-module.exports.MultiNumericUniform = MultiNumericUniform;
-module.exports.SingleComponentUniform = SingleComponentUniform;
+}
+
+export class MatrixUniform {
+
+    constructor(gl, handle, type, count) {
+        this.gl = gl;
+        this.handle = handle;
+        this.glFuncName = UNIFORM_FUNC_NAME[type];
+        this.count = count;
+        this.cache = new Float32Array(UNIFORM_COMPONENT_COUNT[type] * count);
+    }
+
+    set(value) {
+        for (let i = 0, len = value.length; i < len; ++i) {
+            if (this.cache[i] !== value[i]) {
+                this.gl[this.glFuncName](this.handle, false, value);
+                this.cache.set(value);
+                return;
+            }
+        }
+    }
+
+}
