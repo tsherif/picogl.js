@@ -24,7 +24,6 @@
 "use strict";
 
 import { App } from "./app.js";
-export * from "./constants.js";
 
 /**
     Global PicoGL module. For convenience, all WebGL enums are stored
@@ -32,7 +31,7 @@ export * from "./constants.js";
 
     @namespace PicoGL
 */
-
+export * from "./constants.js";
 export const version = "%%VERSION%%";
 
 /**
