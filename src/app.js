@@ -561,8 +561,8 @@ export class App {
 
 
     /**
-        Enable the WEBGL_compressed_texture_s3tc and WEBGL_compressed_texture_s3tc_srgb extensions, and 
-        add the following enums, which can be used as texture formats, to the PicoGL object:
+        Enable the WEBGL_compressed_texture_s3tc and WEBGL_compressed_texture_s3tc_srgb extensions, which 
+        allow the following enums to be used as texture formats:
 
         <ul>
           <li>PicoGL.COMPRESSED_RGB_S3TC_DXT1_EXT
@@ -602,8 +602,8 @@ export class App {
     }
 
     /**
-        Enable the WEBGL_compressed_texture_etc extension  and add the following enums, which can
-        be used as texture formats, to the PicoGL object:
+        Enable the WEBGL_compressed_texture_etc extension, which allows the following enums to
+        be used as texture formats:
         
         <ul>
           <li>PicoGL.COMPRESSED_R11_EAC
@@ -644,8 +644,8 @@ export class App {
     }
 
     /**
-        Enable the WEBGL_compressed_texture_astc extension and add the following enums, which can
-        be used as texture formats, to the PicoGL object:
+        Enable the WEBGL_compressed_texture_astc extension, which allows the following enums to
+        be used as texture formats:
         
         <ul>
           <li>PicoGL.COMPRESSED_RGBA_ASTC_4x4_KHR
@@ -761,8 +761,8 @@ export class App {
     }
 
     /**
-        Enable the WEBGL_compressed_texture_pvrtc extension and add the following enums, which can
-        be used as texture formats, to the PicoGL object:
+        Enable the WEBGL_compressed_texture_pvrtc extension, which allows the following enums to
+        be used as texture formats:
 
         <ul>
           <li>PicoGL.COMPRESSED_RGB_PVRTC_4BPPV1_IMG
