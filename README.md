@@ -71,7 +71,7 @@ or it can be installed via [npm](https://www.npmjs.com/package/picogl):
 and loaded via CommonJS-style `require`:
 
 ```JavaScript
-    var PicoGL = require("picogl");
+    var PicoGL = require("picogl").PicoGL;
 ```
 
 Features
