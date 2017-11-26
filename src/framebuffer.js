@@ -21,10 +21,8 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-"use strict";
-
-import { TEXTURE_FORMAT_DEFAULTS }  from "./texture-format-defaults.js" ;
-import { Texture }  from "./texture.js" ;
+import { TEXTURE_FORMAT_DEFAULTS }  from "./texture-format-defaults.js";
+import { Texture }  from "./texture.js";
 
 /**
     Storage for vertex data.

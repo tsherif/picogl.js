@@ -21,8 +21,6 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-"use strict";
-
 import { App } from "./app.js";
 
 /**
@@ -44,4 +42,4 @@ export const version = "%%VERSION%%";
 */
 export function createApp(canvas, contextAttributes) {
     return new App(canvas, contextAttributes);
-};
+}

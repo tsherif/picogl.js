@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.6.10
+PicoGL.js v0.6.11
 
 The MIT License (MIT)
 
@@ -125,8 +125,6 @@ return /******/ (function(modules) { // webpackBootstrap
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
-
-
 
 const ACTIVE_ATTRIBUTES = 35721;
 /* harmony export (immutable) */ __webpack_exports__["a"] = ACTIVE_ATTRIBUTES;
@@ -2016,8 +2014,6 @@ const DUMMY_OBJECT = {};
 
 
 
-
-
 const TEXTURE_FORMAT_DEFAULTS = {};
 /* harmony export (immutable) */ __webpack_exports__["a"] = TEXTURE_FORMAT_DEFAULTS;
 
@@ -2074,8 +2070,6 @@ TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE = {};
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
-
-
 
 
 
@@ -2384,8 +2378,6 @@ class Texture {
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-
-
 /**
     WebGL shader.
 
@@ -2456,8 +2448,6 @@ class Shader {
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
-
-
 
 /**
     Generic query object.
@@ -3169,9 +3159,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 
 
-
-
-
 /**
     Global PicoGL module. For convenience, all WebGL enums are stored
     as properties of PicoGL (e.g. PicoGL.FLOAT, PicoGL.ONE_MINUS_SRC_ALPHA).
@@ -3179,7 +3166,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     @namespace PicoGL
 */
 
-const version = "0.6.10";
+const version = "0.6.11";
 /* harmony export (immutable) */ __webpack_exports__["version"] = version;
 
 
@@ -3193,7 +3180,7 @@ const version = "0.6.10";
 */
 function createApp(canvas, contextAttributes) {
     return new __WEBPACK_IMPORTED_MODULE_0__app_js__["a" /* App */](canvas, contextAttributes);
-};
+}
 
 
 /***/ }),
@@ -3237,7 +3224,6 @@ function createApp(canvas, contextAttributes) {
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
-
 
 
 
@@ -4377,8 +4363,6 @@ class App {
 
 
 
-
-
 /**
     Cubemap for environment mapping.
 
@@ -4527,8 +4511,6 @@ class Cubemap {
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
-
-
 
 
 
@@ -4733,8 +4715,6 @@ class DrawCall {
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
-
-
 
 
 
@@ -5032,8 +5012,6 @@ class Framebuffer {
 
 
 
-
-
 /**
     WebGL program consisting of compiled and linked vertex and fragment
     shaders.
@@ -5258,8 +5236,6 @@ class Program {
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
-
-
 
 
 
@@ -5505,8 +5481,6 @@ class MatrixUniform {
 
 
 
-
-
 /**
     Rendering timer.
 
@@ -5640,8 +5614,6 @@ class Timer {
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-
-
 /**
     Tranform feedback object.
 
@@ -5739,8 +5711,6 @@ class TransformFeedback {
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
-
-
 
 
 
@@ -5972,8 +5942,6 @@ class UniformBuffer {
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
-
-
 
 
 
@@ -6213,8 +6181,6 @@ class VertexArray {
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
-
-
 
 
 

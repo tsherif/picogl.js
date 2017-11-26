@@ -21,8 +21,6 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-"use strict";
-
 export const ACTIVE_ATTRIBUTES = 35721;
 export const ACTIVE_TEXTURE = 34016;
 export const ACTIVE_UNIFORMS = 35718;

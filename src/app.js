@@ -21,7 +21,6 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-"use strict";
 import * as CONSTANTS              from "./constants.js";
 import { TEXTURE_FORMAT_DEFAULTS } from "./texture-format-defaults.js";
 import { Cubemap }                 from "./cubemap.js";
