@@ -23,7 +23,8 @@
 
 "use strict";
 
-const CONSTANTS = {};
+export const CONSTANTS = {};
+
 let canvas = document.createElement("canvas");
 let gl = canvas.getContext("webgl2");
 
@@ -49,5 +50,3 @@ CONSTANTS.WEBGL_INFO.MAX_TEXTURE_UNITS = gl.getParameter(gl.MAX_COMBINED_TEXTURE
 CONSTANTS.WEBGL_INFO.MAX_UNIFORM_BUFFERS = gl.getParameter(gl.MAX_UNIFORM_BUFFER_BINDINGS);
 
 CONSTANTS.DUMMY_OBJECT = {};
-
-module.exports = CONSTANTS;

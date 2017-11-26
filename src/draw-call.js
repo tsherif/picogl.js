@@ -23,7 +23,7 @@
 
 "use strict";
 
-const CONSTANTS = require("./constants");
+import { CONSTANTS } from "./constants.js";
 
 /**
     A DrawCall represents the program and values of associated
@@ -47,7 +47,7 @@ const CONSTANTS = require("./constants");
     @prop {GLEnum} primitive The primitive type being drawn.
     @prop {Object} appState Tracked GL state.
 */
-class DrawCall {
+export class DrawCall {
 
     constructor(gl, appState, program, vertexArray, primitive = CONSTANTS.TRIANGLES) {
         this.gl = gl;
@@ -193,5 +193,3 @@ class DrawCall {
     }
 
 }
-
-module.exports = DrawCall;

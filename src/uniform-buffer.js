@@ -23,7 +23,7 @@
 
 "use strict";
 
-const CONSTANTS = require("./constants");
+import { CONSTANTS } from "./constants.js";
 
 /**
     Storage for uniform data. Data is stored in std140 layout.
@@ -39,7 +39,7 @@ const CONSTANTS = require("./constants");
     @prop {number} size The size of the buffer (in 4-byte items).
     @prop {GLEnum} usage Usage pattern of the buffer.
 */
-class UniformBuffer {
+export class UniformBuffer {
 
     constructor(gl, layout, usage = gl.DYNAMIC_DRAW) {
         this.gl = gl;
@@ -224,5 +224,3 @@ class UniformBuffer {
     }
 
 }
-
-module.exports = UniformBuffer;

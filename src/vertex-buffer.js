@@ -23,7 +23,7 @@
 
 "use strict";
 
-const CONSTANTS = require("./constants");
+import { CONSTANTS } from "./constants.js";
 
 /**
     Storage for vertex data.
@@ -39,7 +39,7 @@ const CONSTANTS = require("./constants");
     @prop {GLEnum} binding GL binding point (ARRAY_BUFFER or ELEMENT_ARRAY_BUFFER).
     @prop {Object} appState Tracked GL state.
 */
-class VertexBuffer {
+export class VertexBuffer {
 
     constructor(gl, appState, type, itemSize, data, usage = gl.STATIC_DRAW, indexArray) {
         let numColumns;
@@ -146,5 +146,3 @@ class VertexBuffer {
     }
 
 }
-
-module.exports = VertexBuffer;

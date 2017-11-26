@@ -23,8 +23,9 @@
 
 "use strict";
 
-const CONSTANTS = require("./constants");
-const TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
+import { CONSTANTS } from "./constants.js";
+import { TEXTURE_FORMAT_DEFAULTS } from "./texture-format-defaults.js";
+
 const DUMMY_ARRAY = new Array(1);
 
 /**
@@ -45,7 +46,7 @@ const DUMMY_ARRAY = new Array(1);
         (and thus should have a complete mipmap chain).
     @prop {Object} appState Tracked GL state.
 */
-class Texture {
+export class Texture {
     constructor(gl, appState, binding, image, width = image.width, height = image.height, depth, is3D, options = CONSTANTS.DUMMY_OBJECT) {
         this.gl = gl;
         this.binding = binding;
@@ -297,5 +298,3 @@ class Texture {
     }
 
 }
-
-module.exports = Texture;

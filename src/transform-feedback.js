@@ -31,7 +31,7 @@
     @prop {WebGLTransformFeedback} transformFeedback Transform feedback object.
     @prop {Object} appState Tracked GL state.
 */
-class TransformFeedback {
+export class TransformFeedback {
 
     constructor(gl, appState) {
         this.gl = gl;
@@ -88,5 +88,3 @@ class TransformFeedback {
     }
 
 }
-
-module.exports = TransformFeedback;

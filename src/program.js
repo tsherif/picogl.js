@@ -23,9 +23,9 @@
 
 "use strict";
 
-const CONSTANTS = require("./constants");
-const Shader   = require("./shader");
-const Uniforms = require("./uniforms");
+import { CONSTANTS } from "./constants.js";
+import { Shader } from "./shader.js";
+import { SingleComponentUniform, MultiNumericUniform, MultiBoolUniform, MatrixUniform } from "./uniforms.js";
 
 /**
     WebGL program consisting of compiled and linked vertex and fragment
@@ -39,7 +39,7 @@ const Uniforms = require("./uniforms");
     @prop {Object} uniformBlocks Map of uniform block names to handles.
     @prop {Object} appState Tracked GL state.
 */
-class Program {
+export class Program {
 
     constructor(gl, appState, vsSource, fsSource, xformFeebackVars) {
         let i;
@@ -131,10 +131,10 @@ class Program {
                 case CONSTANTS.INT:
                 case CONSTANTS.UNSIGNED_INT:
                 case CONSTANTS.FLOAT:
-                    UniformClass = numElements > 1 ? Uniforms.MultiNumericUniform : Uniforms.SingleComponentUniform;
+                    UniformClass = numElements > 1 ? MultiNumericUniform : SingleComponentUniform;
                     break;
                 case CONSTANTS.BOOL:
-                    UniformClass = numElements > 1 ? Uniforms.MultiBoolUniform : Uniforms.SingleComponentUniform;
+                    UniformClass = numElements > 1 ? MultiBoolUniform : SingleComponentUniform;
                     break;
                 case CONSTANTS.FLOAT_VEC2:
                 case CONSTANTS.INT_VEC2:
@@ -145,12 +145,12 @@ class Program {
                 case CONSTANTS.FLOAT_VEC4:
                 case CONSTANTS.INT_VEC4:
                 case CONSTANTS.UNSIGNED_INT_VEC4:
-                    UniformClass = Uniforms.MultiNumericUniform;
+                    UniformClass = MultiNumericUniform;
                     break;
                 case CONSTANTS.BOOL_VEC2:
                 case CONSTANTS.BOOL_VEC3:
                 case CONSTANTS.BOOL_VEC4:
-                    UniformClass = Uniforms.MultiBoolUniform;
+                    UniformClass = MultiBoolUniform;
                     break;
                 case CONSTANTS.FLOAT_MAT2:
                 case CONSTANTS.FLOAT_MAT3:
@@ -161,7 +161,7 @@ class Program {
                 case CONSTANTS.FLOAT_MAT3x4:
                 case CONSTANTS.FLOAT_MAT4x2:
                 case CONSTANTS.FLOAT_MAT4x3:
-                    UniformClass = Uniforms.MatrixUniform;
+                    UniformClass = MatrixUniform;
                     break;
                 default:
                     console.error("Unrecognized type for uniform ", uniformInfo.name);
@@ -219,5 +219,3 @@ class Program {
     }
 
 }
-
-module.exports = Program;

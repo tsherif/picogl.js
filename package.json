@@ -15,7 +15,7 @@
   "scripts": {
     "clean": "rimraf **/npm-debug.log",
     "lint": "eslint src/*.js",
-    "compile": "browserify --standalone PicoGL -o build/temp.js src/picogl.js && concat -o build/picogl.js BANNER build/temp.js && replace %%VERSION%% $npm_package_version build/picogl.js && rimraf build/temp.js",
+    "compile": "webpack && concat -o build/picogl.js BANNER build/temp.js && replace %%VERSION%% $npm_package_version build/picogl.js && rimraf build/temp.js",
     "minify": "uglifyjs build/picogl.js --compress --mangle --screw-ie8 > build/temp.js && concat -o build/picogl.min.js BANNER build/temp.js && replace %%VERSION%% $npm_package_version build/picogl.min.js && rimraf build/temp.js",
     "build": "npm run lint && npm run compile && npm run minify",
     "docs": "jsdoc -d docs src/*.js",
@@ -49,12 +49,12 @@
     }
   },
   "devDependencies": {
-    "browserify": "^14.4.0",
     "concat": "^1.0.3",
     "eslint": "^4.3.0",
     "jsdoc": "^3.5.3",
     "replace": "^0.3.0",
     "rimraf": "^2.6.1",
-    "uglify-es": "^3.1.7"
+    "uglify-es": "^3.1.7",
+    "webpack": "^3.8.1"
   }
 }

@@ -23,7 +23,7 @@
 
 "use strict";
 
-const TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
+import { TEXTURE_FORMAT_DEFAULTS } from "./texture-format-defaults.js";
 
 /**
     Cubemap for environment mapping.
@@ -37,7 +37,7 @@ const TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
     @prop {Number} currentUnit The current texture unit this cubemap is bound to.
     @prop {Object} appState Tracked GL state.
 */
-class Cubemap {
+export class Cubemap {
 
     constructor(gl, appState, options) {
     
@@ -141,5 +141,3 @@ class Cubemap {
     }
 
 }
-
-module.exports = Cubemap;

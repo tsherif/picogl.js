@@ -23,7 +23,76 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.PicoGL = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+/******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+/******/
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId]) {
+/******/ 			return installedModules[moduleId].exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			i: moduleId,
+/******/ 			l: false,
+/******/ 			exports: {}
+/******/ 		};
+/******/
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/
+/******/ 		// Flag the module as loaded
+/******/ 		module.l = true;
+/******/
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/
+/******/
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+/******/
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+/******/
+/******/ 	// define getter function for harmony exports
+/******/ 	__webpack_require__.d = function(exports, name, getter) {
+/******/ 		if(!__webpack_require__.o(exports, name)) {
+/******/ 			Object.defineProperty(exports, name, {
+/******/ 				configurable: false,
+/******/ 				enumerable: true,
+/******/ 				get: getter
+/******/ 			});
+/******/ 		}
+/******/ 	};
+/******/
+/******/ 	// getDefaultExport function for compatibility with non-harmony modules
+/******/ 	__webpack_require__.n = function(module) {
+/******/ 		var getter = module && module.__esModule ?
+/******/ 			function getDefault() { return module['default']; } :
+/******/ 			function getModuleExports() { return module; };
+/******/ 		__webpack_require__.d(getter, 'a', getter);
+/******/ 		return getter;
+/******/ 	};
+/******/
+/******/ 	// Object.prototype.hasOwnProperty.call
+/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
+/******/
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "";
+/******/
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(__webpack_require__.s = 5);
+/******/ })
+/************************************************************************/
+/******/ ([
+/* 0 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -47,21 +116,720 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
+
+
+const CONSTANTS = {};
+/* harmony export (immutable) */ __webpack_exports__["a"] = CONSTANTS;
+
+
+let canvas = document.createElement("canvas");
+let gl = canvas.getContext("webgl2");
+
+if (gl) {
+    for (let enumName in gl) {
+        if (enumName.match(/^[A-Z0-9_x]+$/) && typeof(gl[enumName]) === "number") {
+            CONSTANTS[enumName] = gl[enumName];
+        }
+    }
+}
+
+CONSTANTS.TYPE_SIZE = {};
+CONSTANTS.TYPE_SIZE[gl.BYTE]              = 1;
+CONSTANTS.TYPE_SIZE[gl.UNSIGNED_BYTE]     = 1;
+CONSTANTS.TYPE_SIZE[gl.SHORT]             = 2;
+CONSTANTS.TYPE_SIZE[gl.UNSIGNED_SHORT]    = 2;
+CONSTANTS.TYPE_SIZE[gl.INT]               = 4;
+CONSTANTS.TYPE_SIZE[gl.UNSIGNED_INT]      = 4;
+CONSTANTS.TYPE_SIZE[gl.FLOAT]             = 4;
+
+CONSTANTS.WEBGL_INFO = {};
+CONSTANTS.WEBGL_INFO.MAX_TEXTURE_UNITS = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
+CONSTANTS.WEBGL_INFO.MAX_UNIFORM_BUFFERS = gl.getParameter(gl.MAX_UNIFORM_BUFFER_BINDINGS);
+
+CONSTANTS.DUMMY_OBJECT = {};
+
+
+/***/ }),
+/* 1 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
 "use strict";
-const CONSTANTS               = require("./constants");
-const TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
-const Cubemap                 = require("./cubemap");
-const DrawCall                = require("./draw-call");
-const Framebuffer             = require("./framebuffer");
-const Program                 = require("./program");
-const Shader                  = require("./shader");
-const Texture                 = require("./texture");
-const Timer                   = require("./timer");
-const TransformFeedback       = require("./transform-feedback");
-const UniformBuffer           = require("./uniform-buffer");
-const VertexArray             = require("./vertex-array");
-const VertexBuffer            = require("./vertex-buffer");
-const Query                   = require("./query");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constants_js__ = __webpack_require__(0);
+// Copyright (c) 2017 Tarek Sherif
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy of
+// this software and associated documentation files (the "Software"), to deal in
+// the Software without restriction, including without limitation the rights to
+// use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+// the Software, and to permit persons to whom the Software is furnished to do so,
+// subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+// FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+// COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+// IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+// CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+///////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+const TEXTURE_FORMAT_DEFAULTS = {};
+/* harmony export (immutable) */ __webpack_exports__["a"] = TEXTURE_FORMAT_DEFAULTS;
+
+
+const UNSIGNED_BYTE = TEXTURE_FORMAT_DEFAULTS[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].UNSIGNED_BYTE] = {};
+UNSIGNED_BYTE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].RED] = __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].R8;
+UNSIGNED_BYTE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].RG] = __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].RG8;
+UNSIGNED_BYTE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].RGB] = __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].RGB8;
+UNSIGNED_BYTE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].RGBA] = __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].RGBA8;
+
+const UNSIGNED_SHORT = TEXTURE_FORMAT_DEFAULTS[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].UNSIGNED_SHORT] = {};
+UNSIGNED_SHORT[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].DEPTH_COMPONENT] = __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].DEPTH_COMPONENT16;
+
+const FLOAT = TEXTURE_FORMAT_DEFAULTS[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT] = {};
+FLOAT[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].RED] = __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].R16F;
+FLOAT[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].RG] = __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].RG16F;
+FLOAT[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].RGB] = __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].RGB16F;
+FLOAT[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].RGBA] = __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].RGBA16F;
+FLOAT[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].DEPTH_COMPONENT] = __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].DEPTH_COMPONENT32F;
+
+TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES = {};
+
+// TODO(Tarek): For https://bugs.chromium.org/p/chromium/issues/detail?id=757447
+// Remove this when that's fixed
+TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE = {};
+
+
+/***/ }),
+/* 2 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constants_js__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__ = __webpack_require__(1);
+///////////////////////////////////////////////////////////////////////////////////
+// The MIT License (MIT)
+//
+// Copyright (c) 2017 Tarek Sherif
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy of
+// this software and associated documentation files (the "Software"), to deal in
+// the Software without restriction, including without limitation the rights to
+// use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+// the Software, and to permit persons to whom the Software is furnished to do so,
+// subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+// FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+// COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+// IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+// CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+///////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+const DUMMY_ARRAY = new Array(1);
+
+/**
+    General-purpose texture.
+
+    @class
+    @prop {WebGLRenderingContext} gl The WebGL context.
+    @prop {WebGLTexture} texture Handle to the texture.
+    @prop {WebGLSamler} sampler Sampler object.
+    @prop {GLEnum} binding Binding point for the texture.
+    @prop {GLEnum} type Type of data stored in the texture.
+    @prop {GLEnum} format Layout of texture data.
+    @prop {GLEnum} internalFormat Internal arrangement of the texture data.
+    @prop {number} currentUnit The current texture unit this texture is bound to.
+    @prop {boolean} is3D Whether this texture contains 3D data.
+    @prop {boolean} flipY Whether the y-axis is being flipped for this texture.
+    @prop {boolean} mipmaps Whether this texture is using mipmap filtering 
+        (and thus should have a complete mipmap chain).
+    @prop {Object} appState Tracked GL state.
+*/
+class Texture {
+    constructor(gl, appState, binding, image, width = image.width, height = image.height, depth, is3D, options = __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].DUMMY_OBJECT) {
+        this.gl = gl;
+        this.binding = binding;
+        this.texture = null;
+        this.width = -1;
+        this.height = -1;
+        this.depth = -1;
+        this.type = options.type !== undefined ? options.type : gl.UNSIGNED_BYTE;
+        this.is3D = is3D;
+        this.appState = appState;
+
+        this.format = null;
+        this.internalFormat = null;
+        this.compressed = !!(__WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[options.format] || __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[options.internalFormat]);
+        
+        if (this.compressed) {
+            // For compressed textures, just need to provide one of format, internalFormat.
+            // The other will be the same.
+            this.format = options.format !== undefined ? options.format : options.internalFormat;
+            this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : options.format;
+        } else {
+            this.format = options.format !== undefined ? options.format : gl.RGBA;
+            this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */][this.type][this.format];
+        }
+
+        this.noTexStorage = !!__WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[this.internalFormat];
+
+        // -1 indicates unbound
+        this.currentUnit = -1;
+
+        // Sampler parameters
+        let minFilter = options.minFilter !== undefined ? options.minFilter : gl.LINEAR_MIPMAP_NEAREST;
+        let magFilter = options.magFilter !== undefined ? options.magFilter : gl.LINEAR;
+        let wrapS = options.wrapS !== undefined ? options.wrapS : gl.REPEAT;
+        let wrapT = options.wrapT !== undefined ? options.wrapT : gl.REPEAT;
+        let wrapR = options.wrapR !== undefined ? options.wrapR : gl.REPEAT;
+        let compareMode = options.compareMode !== undefined ? options.compareMode : gl.NONE;
+        let compareFunc = options.compareFunc !== undefined ? options.compareFunc : gl.LEQUAL;
+        let minLOD = options.minLOD !== undefined ? options.minLOD : null;
+        let maxLOD = options.maxLOD !== undefined ? options.maxLOD : null;
+
+        this.sampler = gl.createSampler();
+        gl.samplerParameteri(this.sampler, gl.TEXTURE_MIN_FILTER, minFilter);
+        gl.samplerParameteri(this.sampler, gl.TEXTURE_MAG_FILTER, magFilter);
+        gl.samplerParameteri(this.sampler, gl.TEXTURE_WRAP_S, wrapS);
+        gl.samplerParameteri(this.sampler, gl.TEXTURE_WRAP_T, wrapT);
+        gl.samplerParameteri(this.sampler, gl.TEXTURE_WRAP_R, wrapR);
+        gl.samplerParameteri(this.sampler, gl.TEXTURE_COMPARE_FUNC, compareFunc);
+        gl.samplerParameteri(this.sampler, gl.TEXTURE_COMPARE_MODE, compareMode);
+        if (minLOD !== null) {
+            gl.samplerParameterf(this.sampler, gl.TEXTURE_MIN_LOD, minLOD);
+        }
+        if (maxLOD !== null) {
+            gl.samplerParameterf(this.sampler, gl.TEXTURE_MAX_LOD, maxLOD);
+        }
+
+        // Texture parameters
+        this.flipY = options.flipY !== undefined ? options.flipY : false;
+        this.baseLevel = options.baseLevel !== undefined ? options.baseLevel : null;
+        this.maxLevel = options.maxLevel !== undefined ? options.maxLevel : null;
+        this.mipmaps = (minFilter === gl.LINEAR_MIPMAP_NEAREST || minFilter === gl.LINEAR_MIPMAP_LINEAR);
+
+        this.resize(width, height, depth);
+
+        if (image) {
+            this.data(image);
+        }
+    }
+
+    /**
+        Re-allocate texture storage.
+
+        @method
+        @param {number} width Image width.
+        @param {number} height Image height.
+        @param {number} [depth] Image depth or number of images. Required when passing 3D or texture array data.
+    */
+    resize(width, height, depth) {
+        depth = depth || 0;
+
+        if (width === this.width && height === this.height && depth === this.depth) {
+            return; 
+        }
+
+        this.gl.deleteTexture(this.texture);
+        if (this.currentUnit !== -1) {
+            this.appState.textures[this.currentUnit] = null;
+        }
+
+        this.texture = this.gl.createTexture();
+        this.bind(Math.max(this.currentUnit, 1));
+
+        this.width = width;
+        this.height = height;
+        this.depth = depth;
+
+        this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, this.flipY);
+
+        if (this.baseLevel !== null) {
+            this.gl.texParameteri(this.binding, this.gl.TEXTURE_BASE_LEVEL, this.baseLevel);
+        }
+
+        if (this.maxLevel !== null) {
+            this.gl.texParameteri(this.binding, this.gl.TEXTURE_MAX_LEVEL, this.maxLevel);
+        }
+
+        // TODO(Tarek): For https://bugs.chromium.org/p/chromium/issues/detail?id=757447
+        // Remove this when that's fixed
+        if (this.noTexStorage) {
+            return;
+        }
+
+        let levels;
+        if (this.is3D) {
+            if (this.mipmaps) {
+                levels = Math.floor(Math.log2(Math.max(Math.max(this.width, this.height), this.depth))) + 1;
+            } else {
+                levels = 1;
+            }
+            this.gl.texStorage3D(this.binding, levels, this.internalFormat, this.width, this.height, this.depth);
+        } else {
+            if (this.mipmaps) {
+                levels = Math.floor(Math.log2(Math.max(this.width, this.height))) + 1;
+            } else {
+                levels = 1;
+            }
+            this.gl.texStorage2D(this.binding, levels, this.internalFormat, this.width, this.height);
+        }
+    }
+
+    /**
+        Set the image data for the texture. An array can be passed to manually set all levels 
+        of the mipmap chain. If a single level is passed and mipmap filtering is being used,
+        generateMipmap() will be called to produce the remaining levels.
+        NOTE: the data must fit the currently-allocated storage!
+
+        @method
+        @param {ImageElement|ArrayBufferView|Array} data Image data. If an array is passed, it will be 
+            used to set mip map levels.
+    */
+    data(data) {
+        if (!Array.isArray(data)) {
+            DUMMY_ARRAY[0] = data;
+            data = DUMMY_ARRAY;
+        }
+
+        let numLevels = this.mipmaps ? data.length : 1;
+        let width = this.width;
+        let height = this.height;
+        let depth = this.depth;
+        let generateMipmaps = this.mipmaps && data.length === 1;
+        let i;
+
+        this.bind(Math.max(this.currentUnit, 0));
+
+        if (this.compressed) {
+
+            // TODO(Tarek): For https://bugs.chromium.org/p/chromium/issues/detail?id=757447
+            // Remove this when that's fixed
+            if (this.noTexStorage) {
+                if (this.is3D) {
+                    for (i = 0; i < numLevels; ++i) {
+                        this.gl.compressedTexImage3D(this.binding, i, this.internalFormat, width, height, depth, 0, data[i]);
+                        width = Math.max(width >> 1, 1);
+                        height = Math.max(height >> 1, 1);
+                        depth = Math.max(depth >> 1, 1);
+                    }
+                } else {
+                    for (i = 0; i < numLevels; ++i) {
+                        this.gl.compressedTexImage2D(this.binding, i, this.internalFormat, width, height, 0, data[i]);
+                        width = Math.max(width >> 1, 1);
+                        height = Math.max(height >> 1, 1);
+                    }
+                }
+            } else if (this.is3D) {
+                for (i = 0; i < numLevels; ++i) {
+                    this.gl.compressedTexSubImage3D(this.binding, i, 0, 0, 0, width, height, depth, this.format, data[i]);
+                    width = Math.max(width >> 1, 1);
+                    height = Math.max(height >> 1, 1);
+                    depth = Math.max(depth >> 1, 1);
+                }
+            } else {
+                for (i = 0; i < numLevels; ++i) {
+                    this.gl.compressedTexSubImage2D(this.binding, i, 0, 0, width, height, this.format, data[i]);
+                    width = Math.max(width >> 1, 1);
+                    height = Math.max(height >> 1, 1);
+                }
+            }
+        } else if (this.is3D) {
+            for (i = 0; i < numLevels; ++i) {
+                this.gl.texSubImage3D(this.binding, i, 0, 0, 0, width, height, depth, this.format, this.type, data[i]);
+                width = Math.max(width >> 1, 1);
+                height = Math.max(height >> 1, 1);
+                depth = Math.max(depth >> 1, 1);
+            }
+        } else {
+            for (i = 0; i < numLevels; ++i) {
+                this.gl.texSubImage2D(this.binding, i, 0, 0, width, height, this.format, this.type, data[i]);
+                width = Math.max(width >> 1, 1);
+                height = Math.max(height >> 1, 1);
+            }
+        }
+
+        if (generateMipmaps) {
+            this.gl.generateMipmap(this.binding);
+        }
+
+        return this;
+    }
+
+    /**
+        Delete this texture.
+
+        @method
+    */
+    delete() {
+        if (this.texture) {
+            this.gl.deleteTexture(this.texture);
+            this.gl.deleteSampler(this.sampler);
+            this.texture = null;
+            this.sampler = null;
+            this.appState.textures[this.currentUnit] = null;
+            this.currentUnit = -1;
+        }
+    }
+
+    // Bind this texture to a texture unit.
+    bind(unit) {
+        let currentTexture = this.appState.textures[unit];
+        
+        if (currentTexture !== this) {
+            if (currentTexture) {
+                currentTexture.currentUnit = -1;
+            }
+
+            if (this.currentUnit !== -1) {
+                this.appState.textures[this.currentUnit] = null;
+            }
+
+            this.gl.activeTexture(this.gl.TEXTURE0 + unit);
+            this.gl.bindTexture(this.binding, this.texture);
+            this.gl.bindSampler(unit, this.sampler);
+
+            this.appState.textures[unit] = this;
+            this.currentUnit = unit;
+        }
+
+        return this;
+    }
+
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = Texture;
+
+
+
+/***/ }),
+/* 3 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+///////////////////////////////////////////////////////////////////////////////////
+// The MIT License (MIT)
+//
+// Copyright (c) 2017 Tarek Sherif
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy of
+// this software and associated documentation files (the "Software"), to deal in
+// the Software without restriction, including without limitation the rights to
+// use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+// the Software, and to permit persons to whom the Software is furnished to do so,
+// subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+// FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+// COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+// IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+// CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+///////////////////////////////////////////////////////////////////////////////////
+
+
+
+/**
+    WebGL shader.
+
+    @class
+    @prop {WebGLRenderingContext} gl The WebGL context.
+    @prop {WebGLShader} shader The shader.
+*/
+class Shader {
+    
+    constructor(gl, type, source) {
+        this.gl = gl;
+        this.shader = gl.createShader(type);
+        gl.shaderSource(this.shader, source);
+        gl.compileShader(this.shader);
+
+        if (!gl.getShaderParameter(this.shader, gl.COMPILE_STATUS)) {
+            let i, lines;
+
+            console.error(gl.getShaderInfoLog(this.shader));
+            lines = source.split("\n");
+            for (i = 0; i < lines.length; ++i) {
+                console.error((i + 1) + ":", lines[i]);
+            }
+        }
+    }
+
+    /**
+        Delete this shader.
+
+        @method
+    */
+    delete() {
+        if (this.shader) {
+            this.gl.deleteShader(this.shader);
+            this.shader = null;
+        }
+    }
+
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = Shader;
+
+
+
+/***/ }),
+/* 4 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+///////////////////////////////////////////////////////////////////////////////////
+// The MIT License (MIT)
+//
+// Copyright (c) 2017 Tarek Sherif
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy of
+// this software and associated documentation files (the "Software"), to deal in
+// the Software without restriction, including without limitation the rights to
+// use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+// the Software, and to permit persons to whom the Software is furnished to do so,
+// subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+// FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+// COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+// IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+// CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+///////////////////////////////////////////////////////////////////////////////////
+
+
+
+/**
+    Generic query object.
+
+    @class
+    @prop {WebGLRenderingContext} gl The WebGL context.
+    @prop {WebGLQuery} query Query object.
+    @prop {GLEnum} target The type of information being queried.
+    @prop {boolean} active Whether or not a query is currently in progress.
+    @prop {Any} result The result of the query (only available after a call to ready() returns true). 
+*/
+class Query {
+
+    constructor(gl, target) {
+        this.gl = gl;
+        this.query = gl.createQuery();
+        this.target = target;
+        this.active = false;
+        this.result = null;
+    }
+
+    /**
+        Begin a query.
+
+        @method
+    */
+    begin() {
+        if (!this.active) {
+            this.gl.beginQuery(this.target, this.query);
+            this.result = null;
+        }    
+    }
+
+    /**
+        End a query.
+
+        @method
+    */
+    end() {
+        if (!this.active) {
+            this.gl.endQuery(this.target);
+            this.active = true;
+        }
+    }
+
+    /**
+        Check if query result is available.
+
+        @method
+    */
+    ready() {
+        if (this.active && this.gl.getQueryParameter(this.query, this.gl.QUERY_RESULT_AVAILABLE)) {
+            this.active = false;
+            this.result = this.gl.getQueryParameter(this.query, this.gl.QUERY_RESULT);
+            return true;
+        }
+
+        return false;
+    }
+
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = Query;
+
+
+
+/***/ }),
+/* 5 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* WEBPACK VAR INJECTION */(function(global) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__app_js__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__constants_js__ = __webpack_require__(0);
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "PicoGL", function() { return __WEBPACK_IMPORTED_MODULE_1__constants_js__["a"]; });
+///////////////////////////////////////////////////////////////////////////////////
+// The MIT License (MIT)
+//
+// Copyright (c) 2017 Tarek Sherif
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy of
+// this software and associated documentation files (the "Software"), to deal in
+// the Software without restriction, including without limitation the rights to
+// use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+// the Software, and to permit persons to whom the Software is furnished to do so,
+// subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+// FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+// COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+// IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+// CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+///////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+/**
+    Global PicoGL module. For convenience, all WebGL enums are stored
+    as properties of PicoGL (e.g. PicoGL.FLOAT, PicoGL.ONE_MINUS_SRC_ALPHA).
+
+    @namespace PicoGL
+*/
+ 
+global.PicoGL = __WEBPACK_IMPORTED_MODULE_1__constants_js__["a" /* CONSTANTS */];
+
+__WEBPACK_IMPORTED_MODULE_1__constants_js__["a" /* CONSTANTS */].version = "0.6.10";
+
+/**
+    Create a PicoGL app. The app is the primary entry point to PicoGL. It stores
+    the canvas, the WebGL context and all WebGL state.
+
+    @function PicoGL.createApp
+    @param {DOMElement} canvas The canvas on which to create the WebGL context.
+    @param {Object} [contextAttributes] Context attributes to pass when calling getContext().
+*/
+__WEBPACK_IMPORTED_MODULE_1__constants_js__["a" /* CONSTANTS */].createApp = function(canvas, contextAttributes) {
+    return new __WEBPACK_IMPORTED_MODULE_0__app_js__["a" /* App */](canvas, contextAttributes);
+};
+
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(6)))
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports) {
+
+var g;
+
+// This works in non-strict mode
+g = (function() {
+	return this;
+})();
+
+try {
+	// This works if eval is allowed (see CSP)
+	g = g || Function("return this")() || (1,eval)("this");
+} catch(e) {
+	// This works if the window reference is available
+	if(typeof window === "object")
+		g = window;
+}
+
+// g can still be undefined, but nothing to do about it...
+// We return undefined, instead of nothing here, so it's
+// easier to handle this case. if(!global) { ...}
+
+module.exports = g;
+
+
+/***/ }),
+/* 7 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constants_js__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__cubemap_js__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__draw_call_js__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__framebuffer_js__ = __webpack_require__(10);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__program_js__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__shader_js__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__texture_js__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__timer_js__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__transform_feedback_js__ = __webpack_require__(14);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__uniform_buffer_js__ = __webpack_require__(15);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__vertex_array_js__ = __webpack_require__(16);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__vertex_buffer_js__ = __webpack_require__(17);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__query_js__ = __webpack_require__(4);
+///////////////////////////////////////////////////////////////////////////////////
+// The MIT License (MIT)
+//
+// Copyright (c) 2017 Tarek Sherif
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy of
+// this software and associated documentation files (the "Software"), to deal in
+// the Software without restriction, including without limitation the rights to
+// use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+// the Software, and to permit persons to whom the Software is furnished to do so,
+// subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+// FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+// COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+// IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+// CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+///////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /**
     Primary entry point to PicoGL. An app will store all parts of the WebGL
@@ -101,12 +869,12 @@ class App {
             vertexArray: null,
             transformFeedback: null,
             activeTexture: -1,
-            textures: new Array(CONSTANTS.WEBGL_INFO.MAX_TEXTURE_UNITS),
+            textures: new Array(__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].WEBGL_INFO.MAX_TEXTURE_UNITS),
             // TODO(Tarek): UBO state currently not tracked, due bug
             // with UBO state becoming corrupted between frames in Chrome
             // https://bugs.chromium.org/p/chromium/issues/detail?id=722060
             // Enable UBO state tracking when that's fixed.
-            uniformBuffers: new Array(CONSTANTS.WEBGL_INFO.MAX_UNIFORM_BUFFERS),
+            uniformBuffers: new Array(__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].WEBGL_INFO.MAX_UNIFORM_BUFFERS),
             uniformBufferCount: 0,
             freeUniformBufferBases: [],
             drawFramebuffer: null,
@@ -609,30 +1377,30 @@ class App {
         this.s3tcTexturesEnabled = !!ext;
         
         if (this.s3tcTexturesEnabled) {
-            CONSTANTS.COMPRESSED_RGB_S3TC_DXT1_EXT  = ext.COMPRESSED_RGB_S3TC_DXT1_EXT;
-            CONSTANTS.COMPRESSED_RGBA_S3TC_DXT1_EXT = ext.COMPRESSED_RGBA_S3TC_DXT1_EXT;
-            CONSTANTS.COMPRESSED_RGBA_S3TC_DXT3_EXT = ext.COMPRESSED_RGBA_S3TC_DXT3_EXT;
-            CONSTANTS.COMPRESSED_RGBA_S3TC_DXT5_EXT = ext.COMPRESSED_RGBA_S3TC_DXT5_EXT;
+            __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].COMPRESSED_RGB_S3TC_DXT1_EXT  = ext.COMPRESSED_RGB_S3TC_DXT1_EXT;
+            __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].COMPRESSED_RGBA_S3TC_DXT1_EXT = ext.COMPRESSED_RGBA_S3TC_DXT1_EXT;
+            __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].COMPRESSED_RGBA_S3TC_DXT3_EXT = ext.COMPRESSED_RGBA_S3TC_DXT3_EXT;
+            __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].COMPRESSED_RGBA_S3TC_DXT5_EXT = ext.COMPRESSED_RGBA_S3TC_DXT5_EXT;
 
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGB_S3TC_DXT1_EXT]  = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGBA_S3TC_DXT1_EXT] = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGBA_S3TC_DXT3_EXT] = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGBA_S3TC_DXT5_EXT] = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[ext.COMPRESSED_RGB_S3TC_DXT1_EXT]  = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[ext.COMPRESSED_RGBA_S3TC_DXT1_EXT] = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[ext.COMPRESSED_RGBA_S3TC_DXT3_EXT] = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[ext.COMPRESSED_RGBA_S3TC_DXT5_EXT] = true;
         }
 
         ext = this.gl.getExtension("WEBGL_compressed_texture_s3tc_srgb");
         this.s3tcSRGBTexturesEnabled = !!ext;
         
         if (this.s3tcSRGBTexturesEnabled) {
-            CONSTANTS.COMPRESSED_SRGB_S3TC_DXT1_EXT       = ext.COMPRESSED_SRGB_S3TC_DXT1_EXT;
-            CONSTANTS.COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT = ext.COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT;
-            CONSTANTS.COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT = ext.COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT;
-            CONSTANTS.COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT = ext.COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT;
+            __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].COMPRESSED_SRGB_S3TC_DXT1_EXT       = ext.COMPRESSED_SRGB_S3TC_DXT1_EXT;
+            __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT = ext.COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT;
+            __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT = ext.COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT;
+            __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT = ext.COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT;
             
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_SRGB_S3TC_DXT1_EXT]       = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT] = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT] = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT] = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[ext.COMPRESSED_SRGB_S3TC_DXT1_EXT]       = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[ext.COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT] = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[ext.COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT] = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[ext.COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT] = true;
         }
 
         return this;
@@ -665,27 +1433,27 @@ class App {
         this.etcTexturesEnabled = !!ext;
 
         if (this.etcTexturesEnabled) {
-            CONSTANTS.COMPRESSED_R11_EAC                        = ext.COMPRESSED_R11_EAC;
-            CONSTANTS.COMPRESSED_SIGNED_R11_EAC                 = ext.COMPRESSED_SIGNED_R11_EAC;
-            CONSTANTS.COMPRESSED_RG11_EAC                       = ext.COMPRESSED_RG11_EAC;
-            CONSTANTS.COMPRESSED_SIGNED_RG11_EAC                = ext.COMPRESSED_SIGNED_RG11_EAC;
-            CONSTANTS.COMPRESSED_RGB8_ETC2                      = ext.COMPRESSED_RGB8_ETC2;
-            CONSTANTS.COMPRESSED_SRGB8_ETC2                     = ext.COMPRESSED_SRGB8_ETC2;
-            CONSTANTS.COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2  = ext.COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2;
-            CONSTANTS.COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2 = ext.COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2;
-            CONSTANTS.COMPRESSED_RGBA8_ETC2_EAC                 = ext.COMPRESSED_RGBA8_ETC2_EAC;
-            CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ETC2_EAC          = ext.COMPRESSED_SRGB8_ALPHA8_ETC2_EAC;
+            __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].COMPRESSED_R11_EAC                        = ext.COMPRESSED_R11_EAC;
+            __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].COMPRESSED_SIGNED_R11_EAC                 = ext.COMPRESSED_SIGNED_R11_EAC;
+            __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].COMPRESSED_RG11_EAC                       = ext.COMPRESSED_RG11_EAC;
+            __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].COMPRESSED_SIGNED_RG11_EAC                = ext.COMPRESSED_SIGNED_RG11_EAC;
+            __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].COMPRESSED_RGB8_ETC2                      = ext.COMPRESSED_RGB8_ETC2;
+            __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].COMPRESSED_SRGB8_ETC2                     = ext.COMPRESSED_SRGB8_ETC2;
+            __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2  = ext.COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2;
+            __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2 = ext.COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2;
+            __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].COMPRESSED_RGBA8_ETC2_EAC                 = ext.COMPRESSED_RGBA8_ETC2_EAC;
+            __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].COMPRESSED_SRGB8_ALPHA8_ETC2_EAC          = ext.COMPRESSED_SRGB8_ALPHA8_ETC2_EAC;
 
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_R11_EAC]                        = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_SIGNED_R11_EAC]                 = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RG11_EAC]                       = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_SIGNED_RG11_EAC]                = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGB8_ETC2]                      = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_ETC2]                     = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2]  = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2] = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGBA8_ETC2_EAC]                 = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_ALPHA8_ETC2_EAC]          = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[ext.COMPRESSED_R11_EAC]                        = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[ext.COMPRESSED_SIGNED_R11_EAC]                 = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[ext.COMPRESSED_RG11_EAC]                       = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[ext.COMPRESSED_SIGNED_RG11_EAC]                = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[ext.COMPRESSED_RGB8_ETC2]                      = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_ETC2]                     = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[ext.COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2]  = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2] = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[ext.COMPRESSED_RGBA8_ETC2_EAC]                 = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_ALPHA8_ETC2_EAC]          = true;
         }
 
         return this;
@@ -733,63 +1501,63 @@ class App {
         this.astcTexturesEnabled = !!ext;
 
         if (this.astcTexturesEnabled) {
-            CONSTANTS.COMPRESSED_RGBA_ASTC_4x4_KHR           = ext.COMPRESSED_RGBA_ASTC_4x4_KHR;
-            CONSTANTS.COMPRESSED_RGBA_ASTC_5x4_KHR           = ext.COMPRESSED_RGBA_ASTC_5x4_KHR;
-            CONSTANTS.COMPRESSED_RGBA_ASTC_5x5_KHR           = ext.COMPRESSED_RGBA_ASTC_5x5_KHR;
-            CONSTANTS.COMPRESSED_RGBA_ASTC_6x5_KHR           = ext.COMPRESSED_RGBA_ASTC_6x5_KHR;
-            CONSTANTS.COMPRESSED_RGBA_ASTC_6x6_KHR           = ext.COMPRESSED_RGBA_ASTC_6x6_KHR;
-            CONSTANTS.COMPRESSED_RGBA_ASTC_8x5_KHR           = ext.COMPRESSED_RGBA_ASTC_8x5_KHR;
-            CONSTANTS.COMPRESSED_RGBA_ASTC_8x6_KHR           = ext.COMPRESSED_RGBA_ASTC_8x6_KHR;
-            CONSTANTS.COMPRESSED_RGBA_ASTC_8x8_KHR           = ext.COMPRESSED_RGBA_ASTC_8x8_KHR;
-            CONSTANTS.COMPRESSED_RGBA_ASTC_10x5_KHR          = ext.COMPRESSED_RGBA_ASTC_10x5_KHR;
-            CONSTANTS.COMPRESSED_RGBA_ASTC_10x6_KHR          = ext.COMPRESSED_RGBA_ASTC_10x6_KHR;
-            CONSTANTS.COMPRESSED_RGBA_ASTC_10x8_KHR          = ext.COMPRESSED_RGBA_ASTC_10x8_KHR;
-            CONSTANTS.COMPRESSED_RGBA_ASTC_10x10_KHR         = ext.COMPRESSED_RGBA_ASTC_10x10_KHR;
-            CONSTANTS.COMPRESSED_RGBA_ASTC_12x10_KHR         = ext.COMPRESSED_RGBA_ASTC_12x10_KHR;
-            CONSTANTS.COMPRESSED_RGBA_ASTC_12x12_KHR         = ext.COMPRESSED_RGBA_ASTC_12x12_KHR;
-            CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR   = ext.COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR;
-            CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR   = ext.COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR;
-            CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR   = ext.COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR;
-            CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR   = ext.COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR;
-            CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR   = ext.COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR;
-            CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR   = ext.COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR;
-            CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR   = ext.COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR;
-            CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR   = ext.COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR;
-            CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR  = ext.COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR;
-            CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR  = ext.COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR;
-            CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR  = ext.COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR;
-            CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR = ext.COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR;
-            CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR = ext.COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR;
-            CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR = ext.COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR;
+            __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].COMPRESSED_RGBA_ASTC_4x4_KHR           = ext.COMPRESSED_RGBA_ASTC_4x4_KHR;
+            __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].COMPRESSED_RGBA_ASTC_5x4_KHR           = ext.COMPRESSED_RGBA_ASTC_5x4_KHR;
+            __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].COMPRESSED_RGBA_ASTC_5x5_KHR           = ext.COMPRESSED_RGBA_ASTC_5x5_KHR;
+            __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].COMPRESSED_RGBA_ASTC_6x5_KHR           = ext.COMPRESSED_RGBA_ASTC_6x5_KHR;
+            __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].COMPRESSED_RGBA_ASTC_6x6_KHR           = ext.COMPRESSED_RGBA_ASTC_6x6_KHR;
+            __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].COMPRESSED_RGBA_ASTC_8x5_KHR           = ext.COMPRESSED_RGBA_ASTC_8x5_KHR;
+            __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].COMPRESSED_RGBA_ASTC_8x6_KHR           = ext.COMPRESSED_RGBA_ASTC_8x6_KHR;
+            __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].COMPRESSED_RGBA_ASTC_8x8_KHR           = ext.COMPRESSED_RGBA_ASTC_8x8_KHR;
+            __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].COMPRESSED_RGBA_ASTC_10x5_KHR          = ext.COMPRESSED_RGBA_ASTC_10x5_KHR;
+            __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].COMPRESSED_RGBA_ASTC_10x6_KHR          = ext.COMPRESSED_RGBA_ASTC_10x6_KHR;
+            __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].COMPRESSED_RGBA_ASTC_10x8_KHR          = ext.COMPRESSED_RGBA_ASTC_10x8_KHR;
+            __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].COMPRESSED_RGBA_ASTC_10x10_KHR         = ext.COMPRESSED_RGBA_ASTC_10x10_KHR;
+            __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].COMPRESSED_RGBA_ASTC_12x10_KHR         = ext.COMPRESSED_RGBA_ASTC_12x10_KHR;
+            __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].COMPRESSED_RGBA_ASTC_12x12_KHR         = ext.COMPRESSED_RGBA_ASTC_12x12_KHR;
+            __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR   = ext.COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR;
+            __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR   = ext.COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR;
+            __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR   = ext.COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR;
+            __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR   = ext.COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR;
+            __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR   = ext.COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR;
+            __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR   = ext.COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR;
+            __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR   = ext.COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR;
+            __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR   = ext.COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR;
+            __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR  = ext.COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR;
+            __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR  = ext.COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR;
+            __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR  = ext.COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR;
+            __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR = ext.COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR;
+            __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR = ext.COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR;
+            __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR = ext.COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR;
 
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGBA_ASTC_4x4_KHR]           = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGBA_ASTC_5x4_KHR]           = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGBA_ASTC_5x5_KHR]           = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGBA_ASTC_6x5_KHR]           = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGBA_ASTC_6x6_KHR]           = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGBA_ASTC_8x5_KHR]           = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGBA_ASTC_8x6_KHR]           = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGBA_ASTC_8x8_KHR]           = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGBA_ASTC_10x5_KHR]          = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGBA_ASTC_10x6_KHR]          = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGBA_ASTC_10x8_KHR]          = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGBA_ASTC_10x10_KHR]         = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGBA_ASTC_12x10_KHR]         = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGBA_ASTC_12x12_KHR]         = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR]   = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR]   = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR]   = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR]   = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR]   = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR]   = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR]   = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR]   = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR]  = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR]  = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR]  = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR] = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR] = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR] = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[ext.COMPRESSED_RGBA_ASTC_4x4_KHR]           = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[ext.COMPRESSED_RGBA_ASTC_5x4_KHR]           = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[ext.COMPRESSED_RGBA_ASTC_5x5_KHR]           = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[ext.COMPRESSED_RGBA_ASTC_6x5_KHR]           = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[ext.COMPRESSED_RGBA_ASTC_6x6_KHR]           = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[ext.COMPRESSED_RGBA_ASTC_8x5_KHR]           = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[ext.COMPRESSED_RGBA_ASTC_8x6_KHR]           = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[ext.COMPRESSED_RGBA_ASTC_8x8_KHR]           = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[ext.COMPRESSED_RGBA_ASTC_10x5_KHR]          = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[ext.COMPRESSED_RGBA_ASTC_10x6_KHR]          = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[ext.COMPRESSED_RGBA_ASTC_10x8_KHR]          = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[ext.COMPRESSED_RGBA_ASTC_10x10_KHR]         = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[ext.COMPRESSED_RGBA_ASTC_12x10_KHR]         = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[ext.COMPRESSED_RGBA_ASTC_12x12_KHR]         = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR]   = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR]   = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR]   = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR]   = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR]   = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR]   = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR]   = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR]   = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR]  = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR]  = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR]  = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR] = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR] = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR] = true;
 
             // TODO(Tarek): Test for https://bugs.chromium.org/p/chromium/issues/detail?id=757447
             // Remove this when that's fixed
@@ -801,34 +1569,34 @@ class App {
             this.gl.texStorage2D(this.gl.TEXTURE_2D, 1, ext.COMPRESSED_RGBA_ASTC_4x4_KHR, 4, 4);
 
             if (this.gl.getError() !== this.gl.NO_ERROR) {
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_RGBA_ASTC_4x4_KHR]           = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_RGBA_ASTC_5x4_KHR]           = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_RGBA_ASTC_5x5_KHR]           = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_RGBA_ASTC_6x5_KHR]           = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_RGBA_ASTC_6x6_KHR]           = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_RGBA_ASTC_8x5_KHR]           = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_RGBA_ASTC_8x6_KHR]           = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_RGBA_ASTC_8x8_KHR]           = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_RGBA_ASTC_10x5_KHR]          = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_RGBA_ASTC_10x6_KHR]          = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_RGBA_ASTC_10x8_KHR]          = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_RGBA_ASTC_10x10_KHR]         = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_RGBA_ASTC_12x10_KHR]         = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_RGBA_ASTC_12x12_KHR]         = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR]   = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR]   = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR]   = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR]   = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR]   = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR]   = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR]   = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR]   = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR]  = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR]  = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR]  = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR] = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR] = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR] = true;
+                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[ext.COMPRESSED_RGBA_ASTC_4x4_KHR]           = true;
+                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[ext.COMPRESSED_RGBA_ASTC_5x4_KHR]           = true;
+                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[ext.COMPRESSED_RGBA_ASTC_5x5_KHR]           = true;
+                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[ext.COMPRESSED_RGBA_ASTC_6x5_KHR]           = true;
+                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[ext.COMPRESSED_RGBA_ASTC_6x6_KHR]           = true;
+                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[ext.COMPRESSED_RGBA_ASTC_8x5_KHR]           = true;
+                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[ext.COMPRESSED_RGBA_ASTC_8x6_KHR]           = true;
+                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[ext.COMPRESSED_RGBA_ASTC_8x8_KHR]           = true;
+                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[ext.COMPRESSED_RGBA_ASTC_10x5_KHR]          = true;
+                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[ext.COMPRESSED_RGBA_ASTC_10x6_KHR]          = true;
+                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[ext.COMPRESSED_RGBA_ASTC_10x8_KHR]          = true;
+                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[ext.COMPRESSED_RGBA_ASTC_10x10_KHR]         = true;
+                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[ext.COMPRESSED_RGBA_ASTC_12x10_KHR]         = true;
+                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[ext.COMPRESSED_RGBA_ASTC_12x12_KHR]         = true;
+                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR]   = true;
+                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR]   = true;
+                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR]   = true;
+                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR]   = true;
+                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR]   = true;
+                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR]   = true;
+                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR]   = true;
+                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR]   = true;
+                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR]  = true;
+                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR]  = true;
+                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR]  = true;
+                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR] = true;
+                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR] = true;
+                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[ext.COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR] = true;
             }
 
             this.gl.deleteTexture(texture);
@@ -855,15 +1623,15 @@ class App {
         this.pvrtcTexturesEnabled = !!ext;
         
         if (this.pvrtcTexturesEnabled) {
-            CONSTANTS.COMPRESSED_RGB_PVRTC_4BPPV1_IMG = ext.COMPRESSED_RGB_PVRTC_4BPPV1_IMG;
-            CONSTANTS.COMPRESSED_RGB_PVRTC_2BPPV1_IMG = ext.COMPRESSED_RGB_PVRTC_2BPPV1_IMG;
-            CONSTANTS.COMPRESSED_RGBA_PVRTC_4BPPV1_IMG = ext.COMPRESSED_RGBA_PVRTC_4BPPV1_IMG;
-            CONSTANTS.COMPRESSED_RGBA_PVRTC_2BPPV1_IMG = ext.COMPRESSED_RGBA_PVRTC_2BPPV1_IMG;
+            __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].COMPRESSED_RGB_PVRTC_4BPPV1_IMG = ext.COMPRESSED_RGB_PVRTC_4BPPV1_IMG;
+            __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].COMPRESSED_RGB_PVRTC_2BPPV1_IMG = ext.COMPRESSED_RGB_PVRTC_2BPPV1_IMG;
+            __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].COMPRESSED_RGBA_PVRTC_4BPPV1_IMG = ext.COMPRESSED_RGBA_PVRTC_4BPPV1_IMG;
+            __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].COMPRESSED_RGBA_PVRTC_2BPPV1_IMG = ext.COMPRESSED_RGBA_PVRTC_2BPPV1_IMG;
 
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGB_PVRTC_4BPPV1_IMG] = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGB_PVRTC_2BPPV1_IMG] = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGBA_PVRTC_4BPPV1_IMG] = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[ext.COMPRESSED_RGBA_PVRTC_2BPPV1_IMG] = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[ext.COMPRESSED_RGB_PVRTC_4BPPV1_IMG] = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[ext.COMPRESSED_RGB_PVRTC_2BPPV1_IMG] = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[ext.COMPRESSED_RGBA_PVRTC_4BPPV1_IMG] = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[ext.COMPRESSED_RGBA_PVRTC_2BPPV1_IMG] = true;
         }
 
         return this;
@@ -880,9 +1648,9 @@ class App {
         @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the read framebuffer.
         @param {GLEnum} [options.format=RGBA] Read framebuffer data format.
     */
-    readPixel(x, y, outColor, options = CONSTANTS.DUMMY_OBJECT) {
-        let format = options.format || CONSTANTS.RGBA;
-        let type = options.type || CONSTANTS.UNSIGNED_BYTE;
+    readPixel(x, y, outColor, options = __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].DUMMY_OBJECT) {
+        let format = options.format || __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].RGBA;
+        let type = options.type || __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].UNSIGNED_BYTE;
 
         this.gl.readPixels(x, y, 1, 1, format, type, outColor);
 
@@ -938,7 +1706,7 @@ class App {
         @param {Array} [xformFeedbackVars] Transform feedback varyings.
     */
     createProgram(vsSource, fsSource, xformFeedbackVars) {
-        return new Program(this.gl, this.state, vsSource, fsSource, xformFeedbackVars);
+        return new __WEBPACK_IMPORTED_MODULE_5__program_js__["a" /* Program */](this.gl, this.state, vsSource, fsSource, xformFeedbackVars);
     }
 
     /**
@@ -950,7 +1718,7 @@ class App {
         @param {string} source Shader source.
     */
     createShader(type, source) {
-        return new Shader(this.gl, type, source);
+        return new __WEBPACK_IMPORTED_MODULE_6__shader_js__["a" /* Shader */](this.gl, type, source);
     }
 
     /**
@@ -959,7 +1727,7 @@ class App {
         @method
     */
     createVertexArray() {
-        return new VertexArray(this.gl, this.state);
+        return new __WEBPACK_IMPORTED_MODULE_11__vertex_array_js__["a" /* VertexArray */](this.gl, this.state);
     }
 
     /**
@@ -968,7 +1736,7 @@ class App {
         @method
     */
     createTransformFeedback() {
-        return new TransformFeedback(this.gl, this.state);
+        return new __WEBPACK_IMPORTED_MODULE_9__transform_feedback_js__["a" /* TransformFeedback */](this.gl, this.state);
     }
 
     /**
@@ -981,7 +1749,7 @@ class App {
         @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
     */
     createVertexBuffer(type, itemSize, data, usage) {
-        return new VertexBuffer(this.gl, this.state, type, itemSize, data, usage);
+        return new __WEBPACK_IMPORTED_MODULE_12__vertex_buffer_js__["a" /* VertexBuffer */](this.gl, this.state, type, itemSize, data, usage);
     }
 
     /**
@@ -996,7 +1764,7 @@ class App {
         @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
     */
     createMatrixBuffer(type, data, usage) {
-        return new VertexBuffer(this.gl, this.state, type, 0, data, usage);
+        return new __WEBPACK_IMPORTED_MODULE_12__vertex_buffer_js__["a" /* VertexBuffer */](this.gl, this.state, type, 0, data, usage);
     }
 
     /**
@@ -1009,7 +1777,7 @@ class App {
         @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
     */
     createIndexBuffer(type, itemSize, data, usage) {
-        return new VertexBuffer(this.gl, this.state, type, itemSize, data, usage, true);
+        return new __WEBPACK_IMPORTED_MODULE_12__vertex_buffer_js__["a" /* VertexBuffer */](this.gl, this.state, type, itemSize, data, usage, true);
     }
 
     /**
@@ -1023,7 +1791,7 @@ class App {
         @param {GLEnum} [usage=DYNAMIC_DRAW] Buffer usage.
     */
     createUniformBuffer(layout, usage) {
-        return new UniformBuffer(this.gl, layout, usage);
+        return new __WEBPACK_IMPORTED_MODULE_10__uniform_buffer_js__["a" /* UniformBuffer */](this.gl, layout, usage);
     }
 
     /**
@@ -1060,7 +1828,7 @@ class App {
             height = image.height;
         }
 
-        return new Texture(this.gl, this.state, this.gl.TEXTURE_2D, image, width, height, undefined, false, options);
+        return new __WEBPACK_IMPORTED_MODULE_7__texture_js__["a" /* Texture */](this.gl, this.state, this.gl.TEXTURE_2D, image, width, height, undefined, false, options);
     }
 
     /**
@@ -1091,7 +1859,7 @@ class App {
         @param {boolean} [options.generateMipmaps] Should mipmaps be generated.
     */
     createTextureArray(image, width, height, depth, options) {
-        return new Texture(this.gl, this.state, this.gl.TEXTURE_2D_ARRAY, image, width, height, depth, true, options);
+        return new __WEBPACK_IMPORTED_MODULE_7__texture_js__["a" /* Texture */](this.gl, this.state, this.gl.TEXTURE_2D_ARRAY, image, width, height, depth, true, options);
     }
 
     /**
@@ -1123,7 +1891,7 @@ class App {
         @param {boolean} [options.generateMipmaps] Should mipmaps be generated.
     */
     createTexture3D(image, width, height, depth, options) {
-        return new Texture(this.gl, this.state, this.gl.TEXTURE_3D, image, width, height, depth, true, options);
+        return new __WEBPACK_IMPORTED_MODULE_7__texture_js__["a" /* Texture */](this.gl, this.state, this.gl.TEXTURE_3D, image, width, height, depth, true, options);
     }
 
     /**
@@ -1158,7 +1926,7 @@ class App {
         @param {boolean} [options.generateMipmaps] Should mipmaps be generated.
     */
     createCubemap(options) {
-        return new Cubemap(this.gl, this.state, options);
+        return new __WEBPACK_IMPORTED_MODULE_2__cubemap_js__["a" /* Cubemap */](this.gl, this.state, options);
     }
 
     /**
@@ -1169,7 +1937,7 @@ class App {
         @param {number} [height=app.height] Height of the framebuffer.
     */
     createFramebuffer(width, height) {
-        return new Framebuffer(this.gl, this.state, width, height);
+        return new __WEBPACK_IMPORTED_MODULE_4__framebuffer_js__["a" /* Framebuffer */](this.gl, this.state, width, height);
     }
 
     /**
@@ -1179,7 +1947,7 @@ class App {
         @param {GLEnum} target Information to query.
     */
     createQuery(target) {
-        return new Query(this.gl, target);
+        return new __WEBPACK_IMPORTED_MODULE_13__query_js__["a" /* Query */](this.gl, target);
     }
 
     /**
@@ -1188,7 +1956,7 @@ class App {
         @method
     */
     createTimer() {
-        return new Timer(this.gl);
+        return new __WEBPACK_IMPORTED_MODULE_8__timer_js__["a" /* Timer */](this.gl);
     }
 
     /**
@@ -1202,14 +1970,20 @@ class App {
         @param {GLEnum} [primitive=TRIANGLES] Type of primitive to draw.
     */
     createDrawCall(program, vertexArray, primitive) {
-        return new DrawCall(this.gl, this.state, program, vertexArray, primitive);
+        return new __WEBPACK_IMPORTED_MODULE_3__draw_call_js__["a" /* DrawCall */](this.gl, this.state, program, vertexArray, primitive);
     }
 
 }
+/* harmony export (immutable) */ __webpack_exports__["a"] = App;
 
-module.exports = App;
 
-},{"./constants":2,"./cubemap":3,"./draw-call":4,"./framebuffer":5,"./program":7,"./query":8,"./shader":9,"./texture":11,"./texture-format-defaults":10,"./timer":12,"./transform-feedback":13,"./uniform-buffer":14,"./vertex-array":16,"./vertex-buffer":17}],2:[function(require,module,exports){
+
+/***/ }),
+/* 8 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__texture_format_defaults_js__ = __webpack_require__(1);
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -1233,64 +2007,9 @@ module.exports = App;
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-"use strict";
 
-const CONSTANTS = {};
-let canvas = document.createElement("canvas");
-let gl = canvas.getContext("webgl2");
 
-if (gl) {
-    for (let enumName in gl) {
-        if (enumName.match(/^[A-Z0-9_x]+$/) && typeof(gl[enumName]) === "number") {
-            CONSTANTS[enumName] = gl[enumName];
-        }
-    }
-}
 
-CONSTANTS.TYPE_SIZE = {};
-CONSTANTS.TYPE_SIZE[gl.BYTE]              = 1;
-CONSTANTS.TYPE_SIZE[gl.UNSIGNED_BYTE]     = 1;
-CONSTANTS.TYPE_SIZE[gl.SHORT]             = 2;
-CONSTANTS.TYPE_SIZE[gl.UNSIGNED_SHORT]    = 2;
-CONSTANTS.TYPE_SIZE[gl.INT]               = 4;
-CONSTANTS.TYPE_SIZE[gl.UNSIGNED_INT]      = 4;
-CONSTANTS.TYPE_SIZE[gl.FLOAT]             = 4;
-
-CONSTANTS.WEBGL_INFO = {};
-CONSTANTS.WEBGL_INFO.MAX_TEXTURE_UNITS = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
-CONSTANTS.WEBGL_INFO.MAX_UNIFORM_BUFFERS = gl.getParameter(gl.MAX_UNIFORM_BUFFER_BINDINGS);
-
-CONSTANTS.DUMMY_OBJECT = {};
-
-module.exports = CONSTANTS;
-
-},{}],3:[function(require,module,exports){
-///////////////////////////////////////////////////////////////////////////////////
-// The MIT License (MIT)
-//
-// Copyright (c) 2017 Tarek Sherif
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy of
-// this software and associated documentation files (the "Software"), to deal in
-// the Software without restriction, including without limitation the rights to
-// use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
-// the Software, and to permit persons to whom the Software is furnished to do so,
-// subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-// FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-// COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-// IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-// CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-///////////////////////////////////////////////////////////////////////////////////
-
-"use strict";
-
-const TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
 
 /**
     Cubemap for environment mapping.
@@ -1312,7 +2031,7 @@ class Cubemap {
         this.texture = gl.createTexture();
         this.format = options.format !== undefined ? options.format : gl.RGBA;
         this.type = options.type !== undefined ? options.type : gl.UNSIGNED_BYTE;
-        this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : TEXTURE_FORMAT_DEFAULTS[this.type][this.format];
+        this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : __WEBPACK_IMPORTED_MODULE_0__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */][this.type][this.format];
         this.appState = appState;
         
         // -1 indicates unbound
@@ -1408,10 +2127,16 @@ class Cubemap {
     }
 
 }
+/* harmony export (immutable) */ __webpack_exports__["a"] = Cubemap;
 
-module.exports = Cubemap;
 
-},{"./texture-format-defaults":10}],4:[function(require,module,exports){
+
+/***/ }),
+/* 9 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constants_js__ = __webpack_require__(0);
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -1435,9 +2160,9 @@ module.exports = Cubemap;
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-"use strict";
 
-const CONSTANTS = require("./constants");
+
+
 
 /**
     A DrawCall represents the program and values of associated
@@ -1463,7 +2188,7 @@ const CONSTANTS = require("./constants");
 */
 class DrawCall {
 
-    constructor(gl, appState, program, vertexArray, primitive = CONSTANTS.TRIANGLES) {
+    constructor(gl, appState, program, vertexArray, primitive = __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].TRIANGLES) {
         this.gl = gl;
         this.currentProgram = program;
         this.currentVertexArray = vertexArray;
@@ -1471,15 +2196,15 @@ class DrawCall {
         this.appState = appState;
 
         this.uniformIndices = {};
-        this.uniformNames = new Array(CONSTANTS.WEBGL_INFO.MAX_UNIFORMS);
-        this.uniformValues = new Array(CONSTANTS.WEBGL_INFO.MAX_UNIFORMS);
+        this.uniformNames = new Array(__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].WEBGL_INFO.MAX_UNIFORMS);
+        this.uniformValues = new Array(__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].WEBGL_INFO.MAX_UNIFORMS);
         this.uniformCount = 0;
-        this.uniformBuffers = new Array(CONSTANTS.WEBGL_INFO.MAX_UNIFORM_BUFFERS);
-        this.uniformBlockNames = new Array(CONSTANTS.WEBGL_INFO.MAX_UNIFORM_BUFFERS);
+        this.uniformBuffers = new Array(__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].WEBGL_INFO.MAX_UNIFORM_BUFFERS);
+        this.uniformBlockNames = new Array(__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].WEBGL_INFO.MAX_UNIFORM_BUFFERS);
         this.uniformBlockBases = {};
         this.uniformBlockCount = 0;
         this.samplerIndices = {};
-        this.textures = new Array(CONSTANTS.WEBGL_INFO.MAX_TEXTURE_UNITS);
+        this.textures = new Array(__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].WEBGL_INFO.MAX_TEXTURE_UNITS);
         this.textureCount = 0;
         this.primitive = primitive;
     }
@@ -1607,10 +2332,17 @@ class DrawCall {
     }
 
 }
+/* harmony export (immutable) */ __webpack_exports__["a"] = DrawCall;
 
-module.exports = DrawCall;
 
-},{"./constants":2}],5:[function(require,module,exports){
+
+/***/ }),
+/* 10 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__texture_format_defaults_js__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__texture_js__ = __webpack_require__(2);
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -1634,10 +2366,10 @@ module.exports = DrawCall;
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-"use strict";
 
-const TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
-const Texture = require("./texture");
+
+
+
 
 /**
     Storage for vertex data.
@@ -1700,7 +2432,7 @@ class Framebuffer {
     colorTarget(index = 0, options = {}) {
         options.type = options.type || this.gl.UNSIGNED_BYTE;
         options.format = options.format || this.gl.RGBA;
-        options.internalFormat = options.internalFormat || TEXTURE_FORMAT_DEFAULTS[options.type][options.format];
+        options.internalFormat = options.internalFormat || __WEBPACK_IMPORTED_MODULE_0__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */][options.type][options.format];
         options.minFilter = options.minFilter || this.gl.NEAREST;
         options.magFilter = options.magFilter || this.gl.NEAREST;
         options.wrapS = options.wrapS || this.gl.CLAMP_TO_EDGE;
@@ -1711,7 +2443,7 @@ class Framebuffer {
 
         let currentFramebuffer = this.bindAndCaptureState();
 
-        this.colorTextures[index] = new Texture(
+        this.colorTextures[index] = new __WEBPACK_IMPORTED_MODULE_1__texture_js__["a" /* Texture */](
             this.gl,
             this.appState,
             this.gl.TEXTURE_2D,
@@ -1756,7 +2488,7 @@ class Framebuffer {
     depthTarget(options = {}) {
         options.format = this.gl.DEPTH_COMPONENT;
         options.type = options.type || this.gl.UNSIGNED_SHORT;
-        options.internalFormat = options.internalFormat || TEXTURE_FORMAT_DEFAULTS[options.type][options.format];
+        options.internalFormat = options.internalFormat || __WEBPACK_IMPORTED_MODULE_0__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */][options.type][options.format];
         options.minFilter = options.minFilter || this.gl.NEAREST;
         options.magFilter = options.magFilter || this.gl.NEAREST;
         options.wrapS = options.wrapS || this.gl.CLAMP_TO_EDGE;
@@ -1765,7 +2497,7 @@ class Framebuffer {
 
         let currentFramebuffer = this.bindAndCaptureState();
 
-        this.depthTexture = new Texture(
+        this.depthTexture = new __WEBPACK_IMPORTED_MODULE_1__texture_js__["a" /* Texture */](
             this.gl,
             this.appState,
             this.gl.TEXTURE_2D,
@@ -1893,11 +2625,18 @@ class Framebuffer {
     }
 
 }
+/* harmony export (immutable) */ __webpack_exports__["a"] = Framebuffer;
 
-module.exports = Framebuffer;
 
-},{"./texture":11,"./texture-format-defaults":10}],6:[function(require,module,exports){
-(function (global){
+
+/***/ }),
+/* 11 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constants_js__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__shader_js__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__uniforms_js__ = __webpack_require__(12);
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -1921,63 +2660,11 @@ module.exports = Framebuffer;
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-"use strict";
 
-const App = require("./app");
 
-/**
-    Global PicoGL module. For convenience, all WebGL enums are stored
-    as properties of PicoGL (e.g. PicoGL.FLOAT, PicoGL.ONE_MINUS_SRC_ALPHA).
 
-    @namespace PicoGL
-*/
-const PicoGL = global.PicoGL = require("./constants");    
-PicoGL.version = "0.6.10";
 
-/**
-    Create a PicoGL app. The app is the primary entry point to PicoGL. It stores
-    the canvas, the WebGL context and all WebGL state.
 
-    @function PicoGL.createApp
-    @param {DOMElement} canvas The canvas on which to create the WebGL context.
-    @param {Object} [contextAttributes] Context attributes to pass when calling getContext().
-*/
-PicoGL.createApp = function(canvas, contextAttributes) {
-    return new App(canvas, contextAttributes);
-};
-
-module.exports = PicoGL;
-
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./app":1,"./constants":2}],7:[function(require,module,exports){
-///////////////////////////////////////////////////////////////////////////////////
-// The MIT License (MIT)
-//
-// Copyright (c) 2017 Tarek Sherif
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy of
-// this software and associated documentation files (the "Software"), to deal in
-// the Software without restriction, including without limitation the rights to
-// use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
-// the Software, and to permit persons to whom the Software is furnished to do so,
-// subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-// FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-// COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-// IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-// CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-///////////////////////////////////////////////////////////////////////////////////
-
-"use strict";
-
-const CONSTANTS = require("./constants");
-const Shader   = require("./shader");
-const Uniforms = require("./uniforms");
 
 /**
     WebGL program consisting of compiled and linked vertex and fragment
@@ -2001,14 +2688,14 @@ class Program {
         let ownVertexShader = false;
         let ownFragmentShader = false;
         if (typeof vsSource === "string") {
-            vShader = new Shader(gl, gl.VERTEX_SHADER, vsSource);
+            vShader = new __WEBPACK_IMPORTED_MODULE_1__shader_js__["a" /* Shader */](gl, gl.VERTEX_SHADER, vsSource);
             ownVertexShader = true;
         } else {
             vShader = vsSource;
         }
 
         if (typeof fsSource === "string") {
-            fShader = new Shader(gl, gl.FRAGMENT_SHADER, fsSource);
+            fShader = new __WEBPACK_IMPORTED_MODULE_1__shader_js__["a" /* Shader */](gl, gl.FRAGMENT_SHADER, fsSource);
             ownFragmentShader = true;
         } else {
             fShader = fsSource;
@@ -2061,59 +2748,59 @@ class Program {
             let numElements = uniformInfo.size;
 
             switch (type) {
-                case CONSTANTS.SAMPLER_2D:
-                case CONSTANTS.INT_SAMPLER_2D:
-                case CONSTANTS.UNSIGNED_INT_SAMPLER_2D:
-                case CONSTANTS.SAMPLER_2D_SHADOW:
-                case CONSTANTS.SAMPLER_2D_ARRAY:
-                case CONSTANTS.INT_SAMPLER_2D_ARRAY:
-                case CONSTANTS.UNSIGNED_INT_SAMPLER_2D_ARRAY:
-                case CONSTANTS.SAMPLER_2D_ARRAY_SHADOW:
-                case CONSTANTS.SAMPLER_CUBE:
-                case CONSTANTS.INT_SAMPLER_CUBE:
-                case CONSTANTS.UNSIGNED_INT_SAMPLER_CUBE:
-                case CONSTANTS.SAMPLER_CUBE_SHADOW:
-                case CONSTANTS.SAMPLER_3D:
-                case CONSTANTS.INT_SAMPLER_3D:
-                case CONSTANTS.UNSIGNED_INT_SAMPLER_3D:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].SAMPLER_2D:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].INT_SAMPLER_2D:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].UNSIGNED_INT_SAMPLER_2D:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].SAMPLER_2D_SHADOW:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].SAMPLER_2D_ARRAY:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].INT_SAMPLER_2D_ARRAY:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].UNSIGNED_INT_SAMPLER_2D_ARRAY:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].SAMPLER_2D_ARRAY_SHADOW:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].SAMPLER_CUBE:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].INT_SAMPLER_CUBE:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].UNSIGNED_INT_SAMPLER_CUBE:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].SAMPLER_CUBE_SHADOW:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].SAMPLER_3D:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].INT_SAMPLER_3D:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].UNSIGNED_INT_SAMPLER_3D:
                     let textureUnit = this.samplerCount++;
                     this.samplers[uniformInfo.name] = textureUnit;
                     this.gl.uniform1i(uniformHandle, textureUnit);
                     break;
-                case CONSTANTS.INT:
-                case CONSTANTS.UNSIGNED_INT:
-                case CONSTANTS.FLOAT:
-                    UniformClass = numElements > 1 ? Uniforms.MultiNumericUniform : Uniforms.SingleComponentUniform;
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].INT:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].UNSIGNED_INT:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT:
+                    UniformClass = numElements > 1 ? __WEBPACK_IMPORTED_MODULE_2__uniforms_js__["c" /* MultiNumericUniform */] : __WEBPACK_IMPORTED_MODULE_2__uniforms_js__["d" /* SingleComponentUniform */];
                     break;
-                case CONSTANTS.BOOL:
-                    UniformClass = numElements > 1 ? Uniforms.MultiBoolUniform : Uniforms.SingleComponentUniform;
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].BOOL:
+                    UniformClass = numElements > 1 ? __WEBPACK_IMPORTED_MODULE_2__uniforms_js__["b" /* MultiBoolUniform */] : __WEBPACK_IMPORTED_MODULE_2__uniforms_js__["d" /* SingleComponentUniform */];
                     break;
-                case CONSTANTS.FLOAT_VEC2:
-                case CONSTANTS.INT_VEC2:
-                case CONSTANTS.UNSIGNED_INT_VEC2:
-                case CONSTANTS.FLOAT_VEC3:
-                case CONSTANTS.INT_VEC3:
-                case CONSTANTS.UNSIGNED_INT_VEC3:
-                case CONSTANTS.FLOAT_VEC4:
-                case CONSTANTS.INT_VEC4:
-                case CONSTANTS.UNSIGNED_INT_VEC4:
-                    UniformClass = Uniforms.MultiNumericUniform;
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_VEC2:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].INT_VEC2:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].UNSIGNED_INT_VEC2:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_VEC3:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].INT_VEC3:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].UNSIGNED_INT_VEC3:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_VEC4:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].INT_VEC4:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].UNSIGNED_INT_VEC4:
+                    UniformClass = __WEBPACK_IMPORTED_MODULE_2__uniforms_js__["c" /* MultiNumericUniform */];
                     break;
-                case CONSTANTS.BOOL_VEC2:
-                case CONSTANTS.BOOL_VEC3:
-                case CONSTANTS.BOOL_VEC4:
-                    UniformClass = Uniforms.MultiBoolUniform;
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].BOOL_VEC2:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].BOOL_VEC3:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].BOOL_VEC4:
+                    UniformClass = __WEBPACK_IMPORTED_MODULE_2__uniforms_js__["b" /* MultiBoolUniform */];
                     break;
-                case CONSTANTS.FLOAT_MAT2:
-                case CONSTANTS.FLOAT_MAT3:
-                case CONSTANTS.FLOAT_MAT4:
-                case CONSTANTS.FLOAT_MAT2x3:
-                case CONSTANTS.FLOAT_MAT2x4:
-                case CONSTANTS.FLOAT_MAT3x2:
-                case CONSTANTS.FLOAT_MAT3x4:
-                case CONSTANTS.FLOAT_MAT4x2:
-                case CONSTANTS.FLOAT_MAT4x3:
-                    UniformClass = Uniforms.MatrixUniform;
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_MAT2:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_MAT3:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_MAT4:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_MAT2x3:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_MAT2x4:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_MAT3x2:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_MAT3x4:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_MAT4x2:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_MAT4x3:
+                    UniformClass = __WEBPACK_IMPORTED_MODULE_2__uniforms_js__["a" /* MatrixUniform */];
                     break;
                 default:
                     console.error("Unrecognized type for uniform ", uniformInfo.name);
@@ -2171,10 +2858,16 @@ class Program {
     }
 
 }
+/* harmony export (immutable) */ __webpack_exports__["a"] = Program;
 
-module.exports = Program;
 
-},{"./constants":2,"./shader":9,"./uniforms":15}],8:[function(require,module,exports){
+
+/***/ }),
+/* 12 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constants_js__ = __webpack_require__(0);
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -2198,190 +2891,227 @@ module.exports = Program;
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-"use strict";
 
-/**
-    Generic query object.
 
-    @class
-    @prop {WebGLRenderingContext} gl The WebGL context.
-    @prop {WebGLQuery} query Query object.
-    @prop {GLEnum} target The type of information being queried.
-    @prop {boolean} active Whether or not a query is currently in progress.
-    @prop {Any} result The result of the query (only available after a call to ready() returns true). 
-*/
-class Query {
 
-    constructor(gl, target) {
-        this.gl = gl;
-        this.query = gl.createQuery();
-        this.target = target;
-        this.active = false;
-        this.result = null;
-    }
 
-    /**
-        Begin a query.
+// Classes to manage uniform value updates, including
+// caching current values.
 
-        @method
-    */
-    begin() {
-        if (!this.active) {
-            this.gl.beginQuery(this.target, this.query);
-            this.result = null;
-        }    
-    }
+const UNIFORM_FUNC_NAME = {};
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].BOOL] = "uniform1i";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].INT] = "uniform1i";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].SAMPLER_2D] = "uniform1i";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].INT_SAMPLER_2D] = "uniform1i";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].UNSIGNED_INT_SAMPLER_2D] = "uniform1i";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].SAMPLER_2D_SHADOW] = "uniform1i";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].SAMPLER_2D_ARRAY] = "uniform1i";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].INT_SAMPLER_2D_ARRAY] = "uniform1i";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].UNSIGNED_INT_SAMPLER_2D_ARRAY] = "uniform1i";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].SAMPLER_2D_ARRAY_SHADOW] = "uniform1i";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].SAMPLER_CUBE] = "uniform1i";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].INT_SAMPLER_CUBE] = "uniform1i";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].UNSIGNED_INT_SAMPLER_CUBE] = "uniform1i";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].SAMPLER_CUBE_SHADOW] = "uniform1i";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].SAMPLER_3D] = "uniform1i";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].INT_SAMPLER_3D] = "uniform1i";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].UNSIGNED_INT_SAMPLER_3D] = "uniform1i";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].UNSIGNED_INT] = "uniform1ui";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT] = "uniform1f";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_VEC2] = "uniform2f";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_VEC3] = "uniform3f";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_VEC4] = "uniform4f";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].INT_VEC2] = "uniform2i";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].INT_VEC3] = "uniform3i";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].INT_VEC4] = "uniform4i";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].UNSIGNED_INT_VEC2] = "uniform2ui";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].UNSIGNED_INT_VEC3] = "uniform3ui";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].UNSIGNED_INT_VEC4] = "uniform4ui";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].BOOL_VEC2] = "uniform2i";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].BOOL_VEC3] = "uniform3i";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].BOOL_VEC4] = "uniform4i";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_MAT2] = "uniformMatrix2fv";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_MAT3] = "uniformMatrix3fv";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_MAT4] = "uniformMatrix4fv";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_MAT2x3] = "uniformMatrix2x3fv";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_MAT2x4] = "uniformMatrix2x4fv";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_MAT3x2] = "uniformMatrix3x2fv";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_MAT3x4] = "uniformMatrix3x4fv";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_MAT4x2] = "uniformMatrix4x2fv";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_MAT4x3] = "uniformMatrix4x3fv";
 
-    /**
-        End a query.
+const UNIFORM_COMPONENT_COUNT = {};
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].BOOL] = 1;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].INT] = 1;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].SAMPLER_2D] = 1;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].INT_SAMPLER_2D] = 1;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].UNSIGNED_INT_SAMPLER_2D] = 1;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].SAMPLER_2D_SHADOW] = 1;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].SAMPLER_2D_ARRAY] = 1;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].INT_SAMPLER_2D_ARRAY] = 1;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].UNSIGNED_INT_SAMPLER_2D_ARRAY] = 1;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].SAMPLER_2D_ARRAY_SHADOW] = 1;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].SAMPLER_CUBE] = 1;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].INT_SAMPLER_CUBE] = 1;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].UNSIGNED_INT_SAMPLER_CUBE] = 1;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].SAMPLER_CUBE_SHADOW] = 1;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].SAMPLER_3D] = 1;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].INT_SAMPLER_3D] = 1;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].UNSIGNED_INT_SAMPLER_3D] = 1;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].UNSIGNED_INT] = 1;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT] = 1;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_VEC2] = 2;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_VEC3] = 3;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_VEC4] = 4;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].INT_VEC2] = 2;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].INT_VEC3] = 3;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].INT_VEC4] = 4;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].UNSIGNED_INT_VEC2] = 2;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].UNSIGNED_INT_VEC3] = 3;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].UNSIGNED_INT_VEC4] = 4;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].BOOL_VEC2] = 2;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].BOOL_VEC3] = 3;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].BOOL_VEC4] = 4;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_MAT2] = 4;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_MAT3] = 9;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_MAT4] = 16;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_MAT2x3] = 6;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_MAT2x4] = 8;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_MAT3x2] = 6;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_MAT3x4] = 12;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_MAT4x2] = 8;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_MAT4x3] = 12;
 
-        @method
-    */
-    end() {
-        if (!this.active) {
-            this.gl.endQuery(this.target);
-            this.active = true;
-        }
-    }
+const UNIFORM_CACHE_CLASS = {};
+UNIFORM_CACHE_CLASS[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].INT] = Int32Array;
+UNIFORM_CACHE_CLASS[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].SAMPLER_2D] = Int32Array;
+UNIFORM_CACHE_CLASS[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].INT_SAMPLER_2D] = Int32Array;
+UNIFORM_CACHE_CLASS[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].UNSIGNED_INT_SAMPLER_2D] = Int32Array;
+UNIFORM_CACHE_CLASS[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].SAMPLER_2D_SHADOW] = Int32Array;
+UNIFORM_CACHE_CLASS[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].SAMPLER_2D_ARRAY] = Int32Array;
+UNIFORM_CACHE_CLASS[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].INT_SAMPLER_2D_ARRAY] = Int32Array;
+UNIFORM_CACHE_CLASS[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].UNSIGNED_INT_SAMPLER_2D_ARRAY] = Int32Array;
+UNIFORM_CACHE_CLASS[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].SAMPLER_2D_ARRAY_SHADOW] = Int32Array;
+UNIFORM_CACHE_CLASS[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].SAMPLER_CUBE] = Int32Array;
+UNIFORM_CACHE_CLASS[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].INT_SAMPLER_CUBE] = Int32Array;
+UNIFORM_CACHE_CLASS[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].UNSIGNED_INT_SAMPLER_CUBE] = Int32Array;
+UNIFORM_CACHE_CLASS[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].SAMPLER_CUBE_SHADOW] = Int32Array;
+UNIFORM_CACHE_CLASS[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].SAMPLER_3D] = Int32Array;
+UNIFORM_CACHE_CLASS[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].INT_SAMPLER_3D] = Int32Array;
+UNIFORM_CACHE_CLASS[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].UNSIGNED_INT_SAMPLER_3D] = Int32Array;
+UNIFORM_CACHE_CLASS[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].UNSIGNED_INT] = Uint32Array;
+UNIFORM_CACHE_CLASS[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT] = Float32Array;
+UNIFORM_CACHE_CLASS[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_VEC2] = Float32Array;
+UNIFORM_CACHE_CLASS[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_VEC3] = Float32Array;
+UNIFORM_CACHE_CLASS[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_VEC4] = Float32Array;
+UNIFORM_CACHE_CLASS[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].INT_VEC2] = Int32Array;
+UNIFORM_CACHE_CLASS[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].INT_VEC3] = Int32Array;
+UNIFORM_CACHE_CLASS[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].INT_VEC4] = Int32Array;
+UNIFORM_CACHE_CLASS[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].UNSIGNED_INT_VEC2] = Uint32Array;
+UNIFORM_CACHE_CLASS[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].UNSIGNED_INT_VEC3] = Uint32Array;
+UNIFORM_CACHE_CLASS[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].UNSIGNED_INT_VEC4] = Uint32Array;
 
-    /**
-        Check if query result is available.
-
-        @method
-    */
-    ready() {
-        if (this.active && this.gl.getQueryParameter(this.query, this.gl.QUERY_RESULT_AVAILABLE)) {
-            this.active = false;
-            this.result = this.gl.getQueryParameter(this.query, this.gl.QUERY_RESULT);
-            return true;
-        }
-
-        return false;
-    }
-
-}
-
-module.exports = Query;
-
-},{}],9:[function(require,module,exports){
-///////////////////////////////////////////////////////////////////////////////////
-// The MIT License (MIT)
-//
-// Copyright (c) 2017 Tarek Sherif
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy of
-// this software and associated documentation files (the "Software"), to deal in
-// the Software without restriction, including without limitation the rights to
-// use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
-// the Software, and to permit persons to whom the Software is furnished to do so,
-// subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-// FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-// COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-// IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-// CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-///////////////////////////////////////////////////////////////////////////////////
-
-"use strict";
-
-/**
-    WebGL shader.
-
-    @class
-    @prop {WebGLRenderingContext} gl The WebGL context.
-    @prop {WebGLShader} shader The shader.
-*/
-class Shader {
+class SingleComponentUniform {
     
-    constructor(gl, type, source) {
+    constructor(gl, handle, type) {
         this.gl = gl;
-        this.shader = gl.createShader(type);
-        gl.shaderSource(this.shader, source);
-        gl.compileShader(this.shader);
-
-        if (!gl.getShaderParameter(this.shader, gl.COMPILE_STATUS)) {
-            let i, lines;
-
-            console.error(gl.getShaderInfoLog(this.shader));
-            lines = source.split("\n");
-            for (i = 0; i < lines.length; ++i) {
-                console.error((i + 1) + ":", lines[i]);
-            }
-        }
+        this.handle = handle;
+        this.glFuncName = UNIFORM_FUNC_NAME[type];
+        this.cache = type === __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].BOOL ? false : 0;
     }
 
-    /**
-        Delete this shader.
-
-        @method
-    */
-    delete() {
-        if (this.shader) {
-            this.gl.deleteShader(this.shader);
-            this.shader = null;
+    set(value) {
+        if (this.cache !== value) {
+            this.gl[this.glFuncName](this.handle, value);
+            this.cache = value;
         }
     }
 
 }
+/* harmony export (immutable) */ __webpack_exports__["d"] = SingleComponentUniform;
 
-module.exports = Shader;
 
-},{}],10:[function(require,module,exports){
-// Copyright (c) 2017 Tarek Sherif
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy of
-// this software and associated documentation files (the "Software"), to deal in
-// the Software without restriction, including without limitation the rights to
-// use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
-// the Software, and to permit persons to whom the Software is furnished to do so,
-// subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-// FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-// COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-// IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-// CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-///////////////////////////////////////////////////////////////////////////////////
+class MultiNumericUniform {
+
+    constructor(gl, handle, type, count) {
+        this.gl = gl;
+        this.handle = handle;
+        this.glFuncName = UNIFORM_FUNC_NAME[type] + "v";
+        this.count = count;
+        this.cache = new UNIFORM_CACHE_CLASS[type](UNIFORM_COMPONENT_COUNT[type] * count);
+    }
+
+    set(value) {
+        for (let i = 0, len = value.length; i < len; ++i) {
+            if (this.cache[i] !== value[i]) {
+                this.gl[this.glFuncName](this.handle, value);
+                this.cache.set(value);
+                return;
+            }
+        }
+    }
+
+}
+/* harmony export (immutable) */ __webpack_exports__["c"] = MultiNumericUniform;
+
+
+class MultiBoolUniform {
+
+    constructor(gl, handle, type, count) {
+        this.gl = gl;
+        this.handle = handle;
+        this.glFuncName = UNIFORM_FUNC_NAME[type] + "v";
+        this.count = count;
+        this.cache = new Array(UNIFORM_COMPONENT_COUNT[type] * count).fill(false);
+    }
+
+    set(value) {
+        for (let i = 0, len = value.length; i < len; ++i) {
+            if (this.cache[i] !== value[i]) {
+                this.gl[this.glFuncName](this.handle, value);
+                for (let j = i; j < len; j++) {
+                    this.cache[j] = value[j];
+                }
+                return;
+            }
+        }
+    }
+
+}
+/* harmony export (immutable) */ __webpack_exports__["b"] = MultiBoolUniform;
+
+
+class MatrixUniform {
+
+    constructor(gl, handle, type, count) {
+        this.gl = gl;
+        this.handle = handle;
+        this.glFuncName = UNIFORM_FUNC_NAME[type];
+        this.count = count;
+        this.cache = new Float32Array(UNIFORM_COMPONENT_COUNT[type] * count);
+    }
+
+    set(value) {
+        for (let i = 0, len = value.length; i < len; ++i) {
+            if (this.cache[i] !== value[i]) {
+                this.gl[this.glFuncName](this.handle, false, value);
+                this.cache.set(value);
+                return;
+            }
+        }
+    }
+
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = MatrixUniform;
+
+
+
+/***/ }),
+/* 13 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-
-const CONSTANTS = require("./constants");
-
-const TEXTURE_FORMAT_DEFAULTS = {};
-const UNSIGNED_BYTE = TEXTURE_FORMAT_DEFAULTS[CONSTANTS.UNSIGNED_BYTE] = {};
-UNSIGNED_BYTE[CONSTANTS.RED] = CONSTANTS.R8;
-UNSIGNED_BYTE[CONSTANTS.RG] = CONSTANTS.RG8;
-UNSIGNED_BYTE[CONSTANTS.RGB] = CONSTANTS.RGB8;
-UNSIGNED_BYTE[CONSTANTS.RGBA] = CONSTANTS.RGBA8;
-
-const UNSIGNED_SHORT = TEXTURE_FORMAT_DEFAULTS[CONSTANTS.UNSIGNED_SHORT] = {};
-UNSIGNED_SHORT[CONSTANTS.DEPTH_COMPONENT] = CONSTANTS.DEPTH_COMPONENT16;
-
-const FLOAT = TEXTURE_FORMAT_DEFAULTS[CONSTANTS.FLOAT] = {};
-FLOAT[CONSTANTS.RED] = CONSTANTS.R16F;
-FLOAT[CONSTANTS.RG] = CONSTANTS.RG16F;
-FLOAT[CONSTANTS.RGB] = CONSTANTS.RGB16F;
-FLOAT[CONSTANTS.RGBA] = CONSTANTS.RGBA16F;
-FLOAT[CONSTANTS.DEPTH_COMPONENT] = CONSTANTS.DEPTH_COMPONENT32F;
-
-TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES = {};
-
-// TODO(Tarek): For https://bugs.chromium.org/p/chromium/issues/detail?id=757447
-// Remove this when that's fixed
-TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE = {};
-
-module.exports = TEXTURE_FORMAT_DEFAULTS;
-
-},{"./constants":2}],11:[function(require,module,exports){
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__query_js__ = __webpack_require__(4);
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -2405,312 +3135,9 @@ module.exports = TEXTURE_FORMAT_DEFAULTS;
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-"use strict";
 
-const CONSTANTS = require("./constants");
-const TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
-const DUMMY_ARRAY = new Array(1);
 
-/**
-    General-purpose texture.
 
-    @class
-    @prop {WebGLRenderingContext} gl The WebGL context.
-    @prop {WebGLTexture} texture Handle to the texture.
-    @prop {WebGLSamler} sampler Sampler object.
-    @prop {GLEnum} binding Binding point for the texture.
-    @prop {GLEnum} type Type of data stored in the texture.
-    @prop {GLEnum} format Layout of texture data.
-    @prop {GLEnum} internalFormat Internal arrangement of the texture data.
-    @prop {number} currentUnit The current texture unit this texture is bound to.
-    @prop {boolean} is3D Whether this texture contains 3D data.
-    @prop {boolean} flipY Whether the y-axis is being flipped for this texture.
-    @prop {boolean} mipmaps Whether this texture is using mipmap filtering 
-        (and thus should have a complete mipmap chain).
-    @prop {Object} appState Tracked GL state.
-*/
-class Texture {
-    constructor(gl, appState, binding, image, width = image.width, height = image.height, depth, is3D, options = CONSTANTS.DUMMY_OBJECT) {
-        this.gl = gl;
-        this.binding = binding;
-        this.texture = null;
-        this.width = -1;
-        this.height = -1;
-        this.depth = -1;
-        this.type = options.type !== undefined ? options.type : gl.UNSIGNED_BYTE;
-        this.is3D = is3D;
-        this.appState = appState;
-
-        this.format = null;
-        this.internalFormat = null;
-        this.compressed = !!(TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[options.format] || TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[options.internalFormat]);
-        
-        if (this.compressed) {
-            // For compressed textures, just need to provide one of format, internalFormat.
-            // The other will be the same.
-            this.format = options.format !== undefined ? options.format : options.internalFormat;
-            this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : options.format;
-        } else {
-            this.format = options.format !== undefined ? options.format : gl.RGBA;
-            this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : TEXTURE_FORMAT_DEFAULTS[this.type][this.format];
-        }
-
-        this.noTexStorage = !!TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[this.internalFormat];
-
-        // -1 indicates unbound
-        this.currentUnit = -1;
-
-        // Sampler parameters
-        let minFilter = options.minFilter !== undefined ? options.minFilter : gl.LINEAR_MIPMAP_NEAREST;
-        let magFilter = options.magFilter !== undefined ? options.magFilter : gl.LINEAR;
-        let wrapS = options.wrapS !== undefined ? options.wrapS : gl.REPEAT;
-        let wrapT = options.wrapT !== undefined ? options.wrapT : gl.REPEAT;
-        let wrapR = options.wrapR !== undefined ? options.wrapR : gl.REPEAT;
-        let compareMode = options.compareMode !== undefined ? options.compareMode : gl.NONE;
-        let compareFunc = options.compareFunc !== undefined ? options.compareFunc : gl.LEQUAL;
-        let minLOD = options.minLOD !== undefined ? options.minLOD : null;
-        let maxLOD = options.maxLOD !== undefined ? options.maxLOD : null;
-
-        this.sampler = gl.createSampler();
-        gl.samplerParameteri(this.sampler, gl.TEXTURE_MIN_FILTER, minFilter);
-        gl.samplerParameteri(this.sampler, gl.TEXTURE_MAG_FILTER, magFilter);
-        gl.samplerParameteri(this.sampler, gl.TEXTURE_WRAP_S, wrapS);
-        gl.samplerParameteri(this.sampler, gl.TEXTURE_WRAP_T, wrapT);
-        gl.samplerParameteri(this.sampler, gl.TEXTURE_WRAP_R, wrapR);
-        gl.samplerParameteri(this.sampler, gl.TEXTURE_COMPARE_FUNC, compareFunc);
-        gl.samplerParameteri(this.sampler, gl.TEXTURE_COMPARE_MODE, compareMode);
-        if (minLOD !== null) {
-            gl.samplerParameterf(this.sampler, gl.TEXTURE_MIN_LOD, minLOD);
-        }
-        if (maxLOD !== null) {
-            gl.samplerParameterf(this.sampler, gl.TEXTURE_MAX_LOD, maxLOD);
-        }
-
-        // Texture parameters
-        this.flipY = options.flipY !== undefined ? options.flipY : false;
-        this.baseLevel = options.baseLevel !== undefined ? options.baseLevel : null;
-        this.maxLevel = options.maxLevel !== undefined ? options.maxLevel : null;
-        this.mipmaps = (minFilter === gl.LINEAR_MIPMAP_NEAREST || minFilter === gl.LINEAR_MIPMAP_LINEAR);
-
-        this.resize(width, height, depth);
-
-        if (image) {
-            this.data(image);
-        }
-    }
-
-    /**
-        Re-allocate texture storage.
-
-        @method
-        @param {number} width Image width.
-        @param {number} height Image height.
-        @param {number} [depth] Image depth or number of images. Required when passing 3D or texture array data.
-    */
-    resize(width, height, depth) {
-        depth = depth || 0;
-
-        if (width === this.width && height === this.height && depth === this.depth) {
-            return; 
-        }
-
-        this.gl.deleteTexture(this.texture);
-        if (this.currentUnit !== -1) {
-            this.appState.textures[this.currentUnit] = null;
-        }
-
-        this.texture = this.gl.createTexture();
-        this.bind(Math.max(this.currentUnit, 1));
-
-        this.width = width;
-        this.height = height;
-        this.depth = depth;
-
-        this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, this.flipY);
-
-        if (this.baseLevel !== null) {
-            this.gl.texParameteri(this.binding, this.gl.TEXTURE_BASE_LEVEL, this.baseLevel);
-        }
-
-        if (this.maxLevel !== null) {
-            this.gl.texParameteri(this.binding, this.gl.TEXTURE_MAX_LEVEL, this.maxLevel);
-        }
-
-        // TODO(Tarek): For https://bugs.chromium.org/p/chromium/issues/detail?id=757447
-        // Remove this when that's fixed
-        if (this.noTexStorage) {
-            return;
-        }
-
-        let levels;
-        if (this.is3D) {
-            if (this.mipmaps) {
-                levels = Math.floor(Math.log2(Math.max(Math.max(this.width, this.height), this.depth))) + 1;
-            } else {
-                levels = 1;
-            }
-            this.gl.texStorage3D(this.binding, levels, this.internalFormat, this.width, this.height, this.depth);
-        } else {
-            if (this.mipmaps) {
-                levels = Math.floor(Math.log2(Math.max(this.width, this.height))) + 1;
-            } else {
-                levels = 1;
-            }
-            this.gl.texStorage2D(this.binding, levels, this.internalFormat, this.width, this.height);
-        }
-    }
-
-    /**
-        Set the image data for the texture. An array can be passed to manually set all levels 
-        of the mipmap chain. If a single level is passed and mipmap filtering is being used,
-        generateMipmap() will be called to produce the remaining levels.
-        NOTE: the data must fit the currently-allocated storage!
-
-        @method
-        @param {ImageElement|ArrayBufferView|Array} data Image data. If an array is passed, it will be 
-            used to set mip map levels.
-    */
-    data(data) {
-        if (!Array.isArray(data)) {
-            DUMMY_ARRAY[0] = data;
-            data = DUMMY_ARRAY;
-        }
-
-        let numLevels = this.mipmaps ? data.length : 1;
-        let width = this.width;
-        let height = this.height;
-        let depth = this.depth;
-        let generateMipmaps = this.mipmaps && data.length === 1;
-        let i;
-
-        this.bind(Math.max(this.currentUnit, 0));
-
-        if (this.compressed) {
-
-            // TODO(Tarek): For https://bugs.chromium.org/p/chromium/issues/detail?id=757447
-            // Remove this when that's fixed
-            if (this.noTexStorage) {
-                if (this.is3D) {
-                    for (i = 0; i < numLevels; ++i) {
-                        this.gl.compressedTexImage3D(this.binding, i, this.internalFormat, width, height, depth, 0, data[i]);
-                        width = Math.max(width >> 1, 1);
-                        height = Math.max(height >> 1, 1);
-                        depth = Math.max(depth >> 1, 1);
-                    }
-                } else {
-                    for (i = 0; i < numLevels; ++i) {
-                        this.gl.compressedTexImage2D(this.binding, i, this.internalFormat, width, height, 0, data[i]);
-                        width = Math.max(width >> 1, 1);
-                        height = Math.max(height >> 1, 1);
-                    }
-                }
-            } else if (this.is3D) {
-                for (i = 0; i < numLevels; ++i) {
-                    this.gl.compressedTexSubImage3D(this.binding, i, 0, 0, 0, width, height, depth, this.format, data[i]);
-                    width = Math.max(width >> 1, 1);
-                    height = Math.max(height >> 1, 1);
-                    depth = Math.max(depth >> 1, 1);
-                }
-            } else {
-                for (i = 0; i < numLevels; ++i) {
-                    this.gl.compressedTexSubImage2D(this.binding, i, 0, 0, width, height, this.format, data[i]);
-                    width = Math.max(width >> 1, 1);
-                    height = Math.max(height >> 1, 1);
-                }
-            }
-        } else if (this.is3D) {
-            for (i = 0; i < numLevels; ++i) {
-                this.gl.texSubImage3D(this.binding, i, 0, 0, 0, width, height, depth, this.format, this.type, data[i]);
-                width = Math.max(width >> 1, 1);
-                height = Math.max(height >> 1, 1);
-                depth = Math.max(depth >> 1, 1);
-            }
-        } else {
-            for (i = 0; i < numLevels; ++i) {
-                this.gl.texSubImage2D(this.binding, i, 0, 0, width, height, this.format, this.type, data[i]);
-                width = Math.max(width >> 1, 1);
-                height = Math.max(height >> 1, 1);
-            }
-        }
-
-        if (generateMipmaps) {
-            this.gl.generateMipmap(this.binding);
-        }
-
-        return this;
-    }
-
-    /**
-        Delete this texture.
-
-        @method
-    */
-    delete() {
-        if (this.texture) {
-            this.gl.deleteTexture(this.texture);
-            this.gl.deleteSampler(this.sampler);
-            this.texture = null;
-            this.sampler = null;
-            this.appState.textures[this.currentUnit] = null;
-            this.currentUnit = -1;
-        }
-    }
-
-    // Bind this texture to a texture unit.
-    bind(unit) {
-        let currentTexture = this.appState.textures[unit];
-        
-        if (currentTexture !== this) {
-            if (currentTexture) {
-                currentTexture.currentUnit = -1;
-            }
-
-            if (this.currentUnit !== -1) {
-                this.appState.textures[this.currentUnit] = null;
-            }
-
-            this.gl.activeTexture(this.gl.TEXTURE0 + unit);
-            this.gl.bindTexture(this.binding, this.texture);
-            this.gl.bindSampler(unit, this.sampler);
-
-            this.appState.textures[unit] = this;
-            this.currentUnit = unit;
-        }
-
-        return this;
-    }
-
-}
-
-module.exports = Texture;
-
-},{"./constants":2,"./texture-format-defaults":10}],12:[function(require,module,exports){
-///////////////////////////////////////////////////////////////////////////////////
-// The MIT License (MIT)
-//
-// Copyright (c) 2017 Tarek Sherif
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy of
-// this software and associated documentation files (the "Software"), to deal in
-// the Software without restriction, including without limitation the rights to
-// use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
-// the Software, and to permit persons to whom the Software is furnished to do so,
-// subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-// FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-// COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-// IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-// CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-///////////////////////////////////////////////////////////////////////////////////
-
-"use strict";
-
-const Query = require("./query");
 
 /**
     Rendering timer.
@@ -2737,7 +3164,7 @@ class Timer {
         var gpuTimerExtension = this.gl.getExtension("EXT_disjoint_timer_query_webgl2") || this.gl.getExtension("EXT_disjoint_timer_query");
         if (gpuTimerExtension) {
             this.gpuTimer = true;
-            this.gpuTimerQuery = new Query(this.gl, gpuTimerExtension.TIME_ELAPSED_EXT);
+            this.gpuTimerQuery = new __WEBPACK_IMPORTED_MODULE_0__query_js__["a" /* Query */](this.gl, gpuTimerExtension.TIME_ELAPSED_EXT);
             this.GPU_DISJOINT_EXT = gpuTimerExtension.GPU_DISJOINT_EXT;
         } else {
             this.gpuTimer = false;
@@ -2813,10 +3240,15 @@ class Timer {
     }
 
 }
+/* harmony export (immutable) */ __webpack_exports__["a"] = Timer;
 
-module.exports = Timer;
 
-},{"./query":8}],13:[function(require,module,exports){
+
+/***/ }),
+/* 14 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -2840,7 +3272,7 @@ module.exports = Timer;
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-"use strict";
+
 
 /**
     Tranform feedback object.
@@ -2907,10 +3339,16 @@ class TransformFeedback {
     }
 
 }
+/* harmony export (immutable) */ __webpack_exports__["a"] = TransformFeedback;
 
-module.exports = TransformFeedback;
 
-},{}],14:[function(require,module,exports){
+
+/***/ }),
+/* 15 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constants_js__ = __webpack_require__(0);
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -2934,9 +3372,9 @@ module.exports = TransformFeedback;
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-"use strict";
 
-const CONSTANTS = require("./constants");
+
+
 
 /**
     Storage for uniform data. Data is stored in std140 layout.
@@ -2967,90 +3405,90 @@ class UniformBuffer {
         for (let i = 0, len = layout.length; i < len; ++i) {
             let type = layout[i];
             switch(type) {
-                case CONSTANTS.FLOAT:
-                case CONSTANTS.INT:
-                case CONSTANTS.UNSIGNED_INT:
-                case CONSTANTS.BOOL:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].INT:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].UNSIGNED_INT:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].BOOL:
                     this.offsets[i] = this.size;
                     this.sizes[i] = 1;
 
-                    if (type === CONSTANTS.INT) {
-                        this.types[i] = CONSTANTS.INT;
-                    } else if (this.type === CONSTANTS.UNSIGNED_INT) {
-                        this.types[i] = CONSTANTS.UNSIGNED_INT;
+                    if (type === __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].INT) {
+                        this.types[i] = __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].INT;
+                    } else if (this.type === __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].UNSIGNED_INT) {
+                        this.types[i] = __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].UNSIGNED_INT;
                     } else {
-                        this.types[i] = CONSTANTS.FLOAT;
+                        this.types[i] = __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT;
                     }
 
                     this.size++;
                     break;
-                case CONSTANTS.FLOAT_VEC2:
-                case CONSTANTS.INT_VEC2:
-                case CONSTANTS.UNSIGNED_INT_VEC2:
-                case CONSTANTS.BOOL_VEC2:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_VEC2:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].INT_VEC2:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].UNSIGNED_INT_VEC2:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].BOOL_VEC2:
                     this.size += this.size % 2;
                     this.offsets[i] = this.size;
                     this.sizes[i] = 2;
 
-                    if (type === CONSTANTS.INT_VEC2) {
-                        this.types[i] = CONSTANTS.INT;
-                    } else if (this.type === CONSTANTS.UNSIGNED_INT_VEC2) {
-                        this.types[i] = CONSTANTS.UNSIGNED_INT;
+                    if (type === __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].INT_VEC2) {
+                        this.types[i] = __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].INT;
+                    } else if (this.type === __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].UNSIGNED_INT_VEC2) {
+                        this.types[i] = __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].UNSIGNED_INT;
                     } else {
-                        this.types[i] = CONSTANTS.FLOAT;
+                        this.types[i] = __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT;
                     }
 
                     this.size += 2;
                     break;
-                case CONSTANTS.FLOAT_VEC3:
-                case CONSTANTS.INT_VEC3:
-                case CONSTANTS.UNSIGNED_INT_VEC3:
-                case CONSTANTS.BOOL_VEC3:
-                case CONSTANTS.FLOAT_VEC4:
-                case CONSTANTS.INT_VEC4:
-                case CONSTANTS.UNSIGNED_INT_VEC4:
-                case CONSTANTS.BOOL_VEC4:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_VEC3:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].INT_VEC3:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].UNSIGNED_INT_VEC3:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].BOOL_VEC3:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_VEC4:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].INT_VEC4:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].UNSIGNED_INT_VEC4:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].BOOL_VEC4:
                     this.size += (4 - this.size % 4) % 4;
                     this.offsets[i] = this.size;
                     this.sizes[i] = 4;
 
-                    if (type === CONSTANTS.INT_VEC4 || type === CONSTANTS.INT_VEC3) {
-                        this.types[i] = CONSTANTS.INT;
-                    } else if (this.type === CONSTANTS.UNSIGNED_INT_VEC4 || this.type === CONSTANTS.UNSIGNED_INT_VEC3) {
-                        this.types[i] = CONSTANTS.UNSIGNED_INT;
+                    if (type === __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].INT_VEC4 || type === __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].INT_VEC3) {
+                        this.types[i] = __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].INT;
+                    } else if (this.type === __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].UNSIGNED_INT_VEC4 || this.type === __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].UNSIGNED_INT_VEC3) {
+                        this.types[i] = __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].UNSIGNED_INT;
                     } else {
-                        this.types[i] = CONSTANTS.FLOAT;
+                        this.types[i] = __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT;
                     }
 
                     this.size += 4;
                     break;
-                case CONSTANTS.FLOAT_MAT2:
-                case CONSTANTS.FLOAT_MAT2x3:
-                case CONSTANTS.FLOAT_MAT2x4:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_MAT2:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_MAT2x3:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_MAT2x4:
                     this.size += (4 - this.size % 4) % 4;
                     this.offsets[i] = this.size;
                     this.sizes[i] = 8;
-                    this.types[i] = CONSTANTS.FLOAT;
+                    this.types[i] = __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT;
 
                     this.size += 8;
                     break;
-                case CONSTANTS.FLOAT_MAT3:
-                case CONSTANTS.FLOAT_MAT3x2:
-                case CONSTANTS.FLOAT_MAT3x4:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_MAT3:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_MAT3x2:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_MAT3x4:
                     this.size += (4 - this.size % 4) % 4;
                     this.offsets[i] = this.size;
                     this.sizes[i] = 12;
-                    this.types[i] = CONSTANTS.FLOAT;
+                    this.types[i] = __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT;
 
                     this.size += 12;
                     break;
-                case CONSTANTS.FLOAT_MAT4:
-                case CONSTANTS.FLOAT_MAT4x2:
-                case CONSTANTS.FLOAT_MAT4x3:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_MAT4:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_MAT4x2:
+                case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_MAT4x3:
                     this.size += (4 - this.size % 4) % 4;
                     this.offsets[i] = this.size;
                     this.sizes[i] = 16;
-                    this.types[i] = CONSTANTS.FLOAT;
+                    this.types[i] = __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT;
 
                     this.size += 16;
                     break;
@@ -3062,9 +3500,9 @@ class UniformBuffer {
         this.size += (4 - this.size % 4) % 4;
 
         this.data = new Float32Array(this.size);
-        this.dataViews[CONSTANTS.FLOAT] = this.data;
-        this.dataViews[CONSTANTS.INT] = new Int32Array(this.data.buffer);
-        this.dataViews[CONSTANTS.UNSIGNED_INT] = new Uint32Array(this.data.buffer);
+        this.dataViews[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT] = this.data;
+        this.dataViews[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].INT] = new Int32Array(this.data.buffer);
+        this.dataViews[__WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].UNSIGNED_INT] = new Uint32Array(this.data.buffer);
 
         this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, 0, this.buffer);
         this.gl.bufferData(this.gl.UNIFORM_BUFFER, this.size * 4, this.usage);
@@ -3137,13 +3575,16 @@ class UniformBuffer {
     }
 
 }
+/* harmony export (immutable) */ __webpack_exports__["a"] = UniformBuffer;
 
-module.exports = UniformBuffer;
 
-},{"./constants":2}],15:[function(require,module,exports){
-///////////////////////////////////////////////////////////////////////////////////
-// The MIT License (MIT)
-//
+
+/***/ }),
+/* 16 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constants_js__ = __webpack_require__(0);
 // Copyright (c) 2017 Tarek Sherif
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -3164,241 +3605,9 @@ module.exports = UniformBuffer;
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-"use strict";
 
-const CONSTANTS = require("./constants");
 
-// Classes to manage uniform value updates, including
-// caching current values.
 
-const UNIFORM_FUNC_NAME = {};
-UNIFORM_FUNC_NAME[CONSTANTS.BOOL] = "uniform1i";
-UNIFORM_FUNC_NAME[CONSTANTS.INT] = "uniform1i";
-UNIFORM_FUNC_NAME[CONSTANTS.SAMPLER_2D] = "uniform1i";
-UNIFORM_FUNC_NAME[CONSTANTS.INT_SAMPLER_2D] = "uniform1i";
-UNIFORM_FUNC_NAME[CONSTANTS.UNSIGNED_INT_SAMPLER_2D] = "uniform1i";
-UNIFORM_FUNC_NAME[CONSTANTS.SAMPLER_2D_SHADOW] = "uniform1i";
-UNIFORM_FUNC_NAME[CONSTANTS.SAMPLER_2D_ARRAY] = "uniform1i";
-UNIFORM_FUNC_NAME[CONSTANTS.INT_SAMPLER_2D_ARRAY] = "uniform1i";
-UNIFORM_FUNC_NAME[CONSTANTS.UNSIGNED_INT_SAMPLER_2D_ARRAY] = "uniform1i";
-UNIFORM_FUNC_NAME[CONSTANTS.SAMPLER_2D_ARRAY_SHADOW] = "uniform1i";
-UNIFORM_FUNC_NAME[CONSTANTS.SAMPLER_CUBE] = "uniform1i";
-UNIFORM_FUNC_NAME[CONSTANTS.INT_SAMPLER_CUBE] = "uniform1i";
-UNIFORM_FUNC_NAME[CONSTANTS.UNSIGNED_INT_SAMPLER_CUBE] = "uniform1i";
-UNIFORM_FUNC_NAME[CONSTANTS.SAMPLER_CUBE_SHADOW] = "uniform1i";
-UNIFORM_FUNC_NAME[CONSTANTS.SAMPLER_3D] = "uniform1i";
-UNIFORM_FUNC_NAME[CONSTANTS.INT_SAMPLER_3D] = "uniform1i";
-UNIFORM_FUNC_NAME[CONSTANTS.UNSIGNED_INT_SAMPLER_3D] = "uniform1i";
-UNIFORM_FUNC_NAME[CONSTANTS.UNSIGNED_INT] = "uniform1ui";
-UNIFORM_FUNC_NAME[CONSTANTS.FLOAT] = "uniform1f";
-UNIFORM_FUNC_NAME[CONSTANTS.FLOAT_VEC2] = "uniform2f";
-UNIFORM_FUNC_NAME[CONSTANTS.FLOAT_VEC3] = "uniform3f";
-UNIFORM_FUNC_NAME[CONSTANTS.FLOAT_VEC4] = "uniform4f";
-UNIFORM_FUNC_NAME[CONSTANTS.INT_VEC2] = "uniform2i";
-UNIFORM_FUNC_NAME[CONSTANTS.INT_VEC3] = "uniform3i";
-UNIFORM_FUNC_NAME[CONSTANTS.INT_VEC4] = "uniform4i";
-UNIFORM_FUNC_NAME[CONSTANTS.UNSIGNED_INT_VEC2] = "uniform2ui";
-UNIFORM_FUNC_NAME[CONSTANTS.UNSIGNED_INT_VEC3] = "uniform3ui";
-UNIFORM_FUNC_NAME[CONSTANTS.UNSIGNED_INT_VEC4] = "uniform4ui";
-UNIFORM_FUNC_NAME[CONSTANTS.BOOL_VEC2] = "uniform2i";
-UNIFORM_FUNC_NAME[CONSTANTS.BOOL_VEC3] = "uniform3i";
-UNIFORM_FUNC_NAME[CONSTANTS.BOOL_VEC4] = "uniform4i";
-UNIFORM_FUNC_NAME[CONSTANTS.FLOAT_MAT2] = "uniformMatrix2fv";
-UNIFORM_FUNC_NAME[CONSTANTS.FLOAT_MAT3] = "uniformMatrix3fv";
-UNIFORM_FUNC_NAME[CONSTANTS.FLOAT_MAT4] = "uniformMatrix4fv";
-UNIFORM_FUNC_NAME[CONSTANTS.FLOAT_MAT2x3] = "uniformMatrix2x3fv";
-UNIFORM_FUNC_NAME[CONSTANTS.FLOAT_MAT2x4] = "uniformMatrix2x4fv";
-UNIFORM_FUNC_NAME[CONSTANTS.FLOAT_MAT3x2] = "uniformMatrix3x2fv";
-UNIFORM_FUNC_NAME[CONSTANTS.FLOAT_MAT3x4] = "uniformMatrix3x4fv";
-UNIFORM_FUNC_NAME[CONSTANTS.FLOAT_MAT4x2] = "uniformMatrix4x2fv";
-UNIFORM_FUNC_NAME[CONSTANTS.FLOAT_MAT4x3] = "uniformMatrix4x3fv";
-
-const UNIFORM_COMPONENT_COUNT = {};
-UNIFORM_COMPONENT_COUNT[CONSTANTS.BOOL] = 1;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.INT] = 1;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.SAMPLER_2D] = 1;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.INT_SAMPLER_2D] = 1;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.UNSIGNED_INT_SAMPLER_2D] = 1;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.SAMPLER_2D_SHADOW] = 1;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.SAMPLER_2D_ARRAY] = 1;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.INT_SAMPLER_2D_ARRAY] = 1;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.UNSIGNED_INT_SAMPLER_2D_ARRAY] = 1;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.SAMPLER_2D_ARRAY_SHADOW] = 1;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.SAMPLER_CUBE] = 1;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.INT_SAMPLER_CUBE] = 1;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.UNSIGNED_INT_SAMPLER_CUBE] = 1;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.SAMPLER_CUBE_SHADOW] = 1;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.SAMPLER_3D] = 1;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.INT_SAMPLER_3D] = 1;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.UNSIGNED_INT_SAMPLER_3D] = 1;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.UNSIGNED_INT] = 1;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.FLOAT] = 1;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.FLOAT_VEC2] = 2;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.FLOAT_VEC3] = 3;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.FLOAT_VEC4] = 4;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.INT_VEC2] = 2;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.INT_VEC3] = 3;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.INT_VEC4] = 4;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.UNSIGNED_INT_VEC2] = 2;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.UNSIGNED_INT_VEC3] = 3;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.UNSIGNED_INT_VEC4] = 4;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.BOOL_VEC2] = 2;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.BOOL_VEC3] = 3;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.BOOL_VEC4] = 4;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.FLOAT_MAT2] = 4;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.FLOAT_MAT3] = 9;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.FLOAT_MAT4] = 16;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.FLOAT_MAT2x3] = 6;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.FLOAT_MAT2x4] = 8;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.FLOAT_MAT3x2] = 6;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.FLOAT_MAT3x4] = 12;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.FLOAT_MAT4x2] = 8;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.FLOAT_MAT4x3] = 12;
-
-const UNIFORM_CACHE_CLASS = {};
-UNIFORM_CACHE_CLASS[CONSTANTS.INT] = Int32Array;
-UNIFORM_CACHE_CLASS[CONSTANTS.SAMPLER_2D] = Int32Array;
-UNIFORM_CACHE_CLASS[CONSTANTS.INT_SAMPLER_2D] = Int32Array;
-UNIFORM_CACHE_CLASS[CONSTANTS.UNSIGNED_INT_SAMPLER_2D] = Int32Array;
-UNIFORM_CACHE_CLASS[CONSTANTS.SAMPLER_2D_SHADOW] = Int32Array;
-UNIFORM_CACHE_CLASS[CONSTANTS.SAMPLER_2D_ARRAY] = Int32Array;
-UNIFORM_CACHE_CLASS[CONSTANTS.INT_SAMPLER_2D_ARRAY] = Int32Array;
-UNIFORM_CACHE_CLASS[CONSTANTS.UNSIGNED_INT_SAMPLER_2D_ARRAY] = Int32Array;
-UNIFORM_CACHE_CLASS[CONSTANTS.SAMPLER_2D_ARRAY_SHADOW] = Int32Array;
-UNIFORM_CACHE_CLASS[CONSTANTS.SAMPLER_CUBE] = Int32Array;
-UNIFORM_CACHE_CLASS[CONSTANTS.INT_SAMPLER_CUBE] = Int32Array;
-UNIFORM_CACHE_CLASS[CONSTANTS.UNSIGNED_INT_SAMPLER_CUBE] = Int32Array;
-UNIFORM_CACHE_CLASS[CONSTANTS.SAMPLER_CUBE_SHADOW] = Int32Array;
-UNIFORM_CACHE_CLASS[CONSTANTS.SAMPLER_3D] = Int32Array;
-UNIFORM_CACHE_CLASS[CONSTANTS.INT_SAMPLER_3D] = Int32Array;
-UNIFORM_CACHE_CLASS[CONSTANTS.UNSIGNED_INT_SAMPLER_3D] = Int32Array;
-UNIFORM_CACHE_CLASS[CONSTANTS.UNSIGNED_INT] = Uint32Array;
-UNIFORM_CACHE_CLASS[CONSTANTS.FLOAT] = Float32Array;
-UNIFORM_CACHE_CLASS[CONSTANTS.FLOAT_VEC2] = Float32Array;
-UNIFORM_CACHE_CLASS[CONSTANTS.FLOAT_VEC3] = Float32Array;
-UNIFORM_CACHE_CLASS[CONSTANTS.FLOAT_VEC4] = Float32Array;
-UNIFORM_CACHE_CLASS[CONSTANTS.INT_VEC2] = Int32Array;
-UNIFORM_CACHE_CLASS[CONSTANTS.INT_VEC3] = Int32Array;
-UNIFORM_CACHE_CLASS[CONSTANTS.INT_VEC4] = Int32Array;
-UNIFORM_CACHE_CLASS[CONSTANTS.UNSIGNED_INT_VEC2] = Uint32Array;
-UNIFORM_CACHE_CLASS[CONSTANTS.UNSIGNED_INT_VEC3] = Uint32Array;
-UNIFORM_CACHE_CLASS[CONSTANTS.UNSIGNED_INT_VEC4] = Uint32Array;
-
-class SingleComponentUniform {
-    
-    constructor(gl, handle, type) {
-        this.gl = gl;
-        this.handle = handle;
-        this.glFuncName = UNIFORM_FUNC_NAME[type];
-        this.cache = type === CONSTANTS.BOOL ? false : 0;
-    }
-
-    set(value) {
-        if (this.cache !== value) {
-            this.gl[this.glFuncName](this.handle, value);
-            this.cache = value;
-        }
-    }
-
-}
-
-class MultiNumericUniform {
-
-    constructor(gl, handle, type, count) {
-        this.gl = gl;
-        this.handle = handle;
-        this.glFuncName = UNIFORM_FUNC_NAME[type] + "v";
-        this.count = count;
-        this.cache = new UNIFORM_CACHE_CLASS[type](UNIFORM_COMPONENT_COUNT[type] * count);
-    }
-
-    set(value) {
-        for (let i = 0, len = value.length; i < len; ++i) {
-            if (this.cache[i] !== value[i]) {
-                this.gl[this.glFuncName](this.handle, value);
-                this.cache.set(value);
-                return;
-            }
-        }
-    }
-
-}
-
-class MultiBoolUniform {
-
-    constructor(gl, handle, type, count) {
-        this.gl = gl;
-        this.handle = handle;
-        this.glFuncName = UNIFORM_FUNC_NAME[type] + "v";
-        this.count = count;
-        this.cache = new Array(UNIFORM_COMPONENT_COUNT[type] * count).fill(false);
-    }
-
-    set(value) {
-        for (let i = 0, len = value.length; i < len; ++i) {
-            if (this.cache[i] !== value[i]) {
-                this.gl[this.glFuncName](this.handle, value);
-                for (let j = i; j < len; j++) {
-                    this.cache[j] = value[j];
-                }
-                return;
-            }
-        }
-    }
-
-}
-
-class MatrixUniform {
-
-    constructor(gl, handle, type, count) {
-        this.gl = gl;
-        this.handle = handle;
-        this.glFuncName = UNIFORM_FUNC_NAME[type];
-        this.count = count;
-        this.cache = new Float32Array(UNIFORM_COMPONENT_COUNT[type] * count);
-    }
-
-    set(value) {
-        for (let i = 0, len = value.length; i < len; ++i) {
-            if (this.cache[i] !== value[i]) {
-                this.gl[this.glFuncName](this.handle, false, value);
-                this.cache.set(value);
-                return;
-            }
-        }
-    }
-
-}
-
-module.exports.MatrixUniform = MatrixUniform;
-module.exports.MultiBoolUniform = MultiBoolUniform;
-module.exports.MultiNumericUniform = MultiNumericUniform;
-module.exports.SingleComponentUniform = SingleComponentUniform;
-
-},{"./constants":2}],16:[function(require,module,exports){
-// Copyright (c) 2017 Tarek Sherif
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy of
-// this software and associated documentation files (the "Software"), to deal in
-// the Software without restriction, including without limitation the rights to
-// use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
-// the Software, and to permit persons to whom the Software is furnished to do so,
-// subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-// FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-// COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-// IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-// CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-///////////////////////////////////////////////////////////////////////////////////
-
-"use strict";
-
-const CONSTANTS = require("./constants");
 
 /**
     Organizes vertex buffer and attribute state.
@@ -3570,16 +3779,16 @@ class VertexArray {
                     attributeIndex + i,
                     vertexBuffer.itemSize,
                     vertexBuffer.type,
-                    numColumns * vertexBuffer.itemSize * CONSTANTS.TYPE_SIZE[vertexBuffer.type],
-                    i * vertexBuffer.itemSize * CONSTANTS.TYPE_SIZE[vertexBuffer.type]);
+                    numColumns * vertexBuffer.itemSize * __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].TYPE_SIZE[vertexBuffer.type],
+                    i * vertexBuffer.itemSize * __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].TYPE_SIZE[vertexBuffer.type]);
             } else {
                 this.gl.vertexAttribPointer(
                     attributeIndex + i,
                     vertexBuffer.itemSize,
                     vertexBuffer.type,
                     normalized,
-                    numColumns * vertexBuffer.itemSize * CONSTANTS.TYPE_SIZE[vertexBuffer.type],
-                    i * vertexBuffer.itemSize * CONSTANTS.TYPE_SIZE[vertexBuffer.type]);
+                    numColumns * vertexBuffer.itemSize * __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].TYPE_SIZE[vertexBuffer.type],
+                    i * vertexBuffer.itemSize * __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].TYPE_SIZE[vertexBuffer.type]);
             }
 
             if (instanced) {
@@ -3604,10 +3813,16 @@ class VertexArray {
     }
 
 }
+/* harmony export (immutable) */ __webpack_exports__["a"] = VertexArray;
 
-module.exports = VertexArray;
 
-},{"./constants":2}],17:[function(require,module,exports){
+
+/***/ }),
+/* 17 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constants_js__ = __webpack_require__(0);
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -3631,9 +3846,9 @@ module.exports = VertexArray;
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-"use strict";
 
-const CONSTANTS = require("./constants");
+
+
 
 /**
     Storage for vertex data.
@@ -3654,19 +3869,19 @@ class VertexBuffer {
     constructor(gl, appState, type, itemSize, data, usage = gl.STATIC_DRAW, indexArray) {
         let numColumns;
         switch(type) {
-            case CONSTANTS.FLOAT_MAT4:
-            case CONSTANTS.FLOAT_MAT4x2:
-            case CONSTANTS.FLOAT_MAT4x3:
+            case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_MAT4:
+            case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_MAT4x2:
+            case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_MAT4x3:
                 numColumns = 4;
                 break;
-            case CONSTANTS.FLOAT_MAT3:
-            case CONSTANTS.FLOAT_MAT3x2:
-            case CONSTANTS.FLOAT_MAT3x4:
+            case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_MAT3:
+            case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_MAT3x2:
+            case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_MAT3x4:
                 numColumns = 3;
                 break;
-            case CONSTANTS.FLOAT_MAT2:
-            case CONSTANTS.FLOAT_MAT2x3:
-            case CONSTANTS.FLOAT_MAT2x4:
+            case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_MAT2:
+            case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_MAT2x3:
+            case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_MAT2x4:
                 numColumns = 2;
                 break;
             default:
@@ -3674,30 +3889,30 @@ class VertexBuffer {
         }
 
         switch(type) {
-            case CONSTANTS.FLOAT_MAT4:
-            case CONSTANTS.FLOAT_MAT3x4:
-            case CONSTANTS.FLOAT_MAT2x4:
+            case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_MAT4:
+            case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_MAT3x4:
+            case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_MAT2x4:
                 itemSize = 4;
-                type = CONSTANTS.FLOAT;
+                type = __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT;
                 break;
-            case CONSTANTS.FLOAT_MAT3:
-            case CONSTANTS.FLOAT_MAT4x3:
-            case CONSTANTS.FLOAT_MAT2x3:
+            case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_MAT3:
+            case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_MAT4x3:
+            case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_MAT2x3:
                 itemSize = 3;
-                type = CONSTANTS.FLOAT;
+                type = __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT;
                 break;
-            case CONSTANTS.FLOAT_MAT2:
-            case CONSTANTS.FLOAT_MAT3x2:
-            case CONSTANTS.FLOAT_MAT4x2:
+            case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_MAT2:
+            case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_MAT3x2:
+            case __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT_MAT4x2:
                 itemSize = 2;
-                type = CONSTANTS.FLOAT;
+                type = __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].FLOAT;
                 break;
         }
 
         let dataLength;
         if (typeof data === "number") {
             dataLength = data;
-            data *= CONSTANTS.TYPE_SIZE[type];
+            data *= __WEBPACK_IMPORTED_MODULE_0__constants_js__["a" /* CONSTANTS */].TYPE_SIZE[type];
         } else {
             dataLength = data.length;
         }
@@ -3756,8 +3971,9 @@ class VertexBuffer {
     }
 
 }
+/* harmony export (immutable) */ __webpack_exports__["a"] = VertexBuffer;
 
-module.exports = VertexBuffer;
 
-},{"./constants":2}]},{},[6])(6)
-});
+
+/***/ })
+/******/ ]);

@@ -23,8 +23,8 @@
 
 "use strict";
 
-const TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
-const Texture = require("./texture");
+import { TEXTURE_FORMAT_DEFAULTS }  from "./texture-format-defaults.js" ;
+import { Texture }  from "./texture.js" ;
 
 /**
     Storage for vertex data.
@@ -40,7 +40,7 @@ const Texture = require("./texture");
     @prop {Array} colorAttachments Array of color attachment enums.
     @prop {Object} appState Tracked GL state.
 */
-class Framebuffer {
+export class Framebuffer {
 
     constructor(gl, appState, width, height) {
         this.gl = gl;
@@ -280,5 +280,3 @@ class Framebuffer {
     }
 
 }
-
-module.exports = Framebuffer;

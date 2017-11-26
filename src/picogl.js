@@ -23,7 +23,8 @@
 
 "use strict";
 
-const App = require("./app");
+import { App } from "./app.js";
+import { CONSTANTS as PicoGL } from "./constants.js";
 
 /**
     Global PicoGL module. For convenience, all WebGL enums are stored
@@ -31,7 +32,9 @@ const App = require("./app");
 
     @namespace PicoGL
 */
-const PicoGL = global.PicoGL = require("./constants");    
+export { PicoGL }; 
+global.PicoGL = PicoGL;
+
 PicoGL.version = "%%VERSION%%";
 
 /**
@@ -45,5 +48,3 @@ PicoGL.version = "%%VERSION%%";
 PicoGL.createApp = function(canvas, contextAttributes) {
     return new App(canvas, contextAttributes);
 };
-
-module.exports = PicoGL;

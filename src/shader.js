@@ -30,7 +30,7 @@
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLShader} shader The shader.
 */
-class Shader {
+export class Shader {
     
     constructor(gl, type, source) {
         this.gl = gl;
@@ -62,5 +62,3 @@ class Shader {
     }
 
 }
-
-module.exports = Shader;

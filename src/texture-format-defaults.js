@@ -20,9 +20,10 @@
 
 "use strict";
 
-const CONSTANTS = require("./constants");
+import { CONSTANTS } from "./constants.js";
 
-const TEXTURE_FORMAT_DEFAULTS = {};
+export const TEXTURE_FORMAT_DEFAULTS = {};
+
 const UNSIGNED_BYTE = TEXTURE_FORMAT_DEFAULTS[CONSTANTS.UNSIGNED_BYTE] = {};
 UNSIGNED_BYTE[CONSTANTS.RED] = CONSTANTS.R8;
 UNSIGNED_BYTE[CONSTANTS.RG] = CONSTANTS.RG8;
@@ -44,5 +45,3 @@ TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES = {};
 // TODO(Tarek): For https://bugs.chromium.org/p/chromium/issues/detail?id=757447
 // Remove this when that's fixed
 TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE = {};
-
-module.exports = TEXTURE_FORMAT_DEFAULTS;
