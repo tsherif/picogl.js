@@ -1,6 +1,8 @@
 module.exports = {
     entry: "./src/picogl.js",
     output: {
-        filename: "build/temp.js"
+        library: "PicoGL",
+        filename: "build/temp.js",
+        libraryTarget: "umd"
     }
 };

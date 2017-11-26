@@ -33,7 +33,6 @@ import { CONSTANTS as PicoGL } from "./constants.js";
     @namespace PicoGL
 */
 export { PicoGL }; 
-global.PicoGL = PicoGL;
 
 PicoGL.version = "%%VERSION%%";
 
