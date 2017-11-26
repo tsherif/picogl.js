@@ -98,6 +98,7 @@ export class Program {
         gl.useProgram(program);
 
         let numUniforms = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
+        let textureUnit;
 
         for (i = 0; i < numUniforms; ++i) {
             let uniformInfo = gl.getActiveUniform(program, i);
@@ -122,7 +123,7 @@ export class Program {
                 case CONSTANTS.SAMPLER_3D:
                 case CONSTANTS.INT_SAMPLER_3D:
                 case CONSTANTS.UNSIGNED_INT_SAMPLER_3D:
-                    let textureUnit = this.samplerCount++;
+                    textureUnit = this.samplerCount++;
                     this.samplers[uniformInfo.name] = textureUnit;
                     this.gl.uniform1i(uniformHandle, textureUnit);
                     break;

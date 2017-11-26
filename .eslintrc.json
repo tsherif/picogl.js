@@ -40,7 +40,6 @@
         "spaced-comment": ["error", "always", {
             "exceptions": ["/"]
         }],
-        "switch-colon-spacing": "error",
-        "no-case-declarations": "off"
+        "switch-colon-spacing": "error"
     }
 }
