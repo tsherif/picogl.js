@@ -30,6 +30,9 @@
     
         <h2><span class="attribs"><span class="type-signature"></span></span>App<span class="signature">()</span><span class="type-signature"></span></h2>
         
+            <div class="class-description">Primary entry point to PicoGL. An app will store all parts of the WebGL
+    state.</div>
+        
     
 </header>
 
@@ -39,6 +42,8 @@
         
 
     
+    <h2>Constructor</h2>
+    
 
     
     <h4 class="name" id="App"><span class="type-signature"></span>new App<span class="signature">()</span><span class="type-signature"></span></h4>
@@ -47,11 +52,6 @@
     
 
 
-
-<div class="description">
-    Primary entry point to PicoGL. An app will store all parts of the WebGL
-    state.
-</div>
 
 
 
@@ -485,38 +485,38 @@
 
 <div class="description">
     Enable the WEBGL_compressed_texture_astc extension and add the following enums, which can
-    be used as texture formats, to the PicoGL object:
-    
-    <ul>
-      <li>PicoGL.COMPRESSED_RGBA_ASTC_4x4_KHR
-      <li>PicoGL.COMPRESSED_RGBA_ASTC_5x4_KHR
-      <li>PicoGL.COMPRESSED_RGBA_ASTC_5x5_KHR
-      <li>PicoGL.COMPRESSED_RGBA_ASTC_6x5_KHR
-      <li>PicoGL.COMPRESSED_RGBA_ASTC_6x6_KHR
-      <li>PicoGL.COMPRESSED_RGBA_ASTC_8x5_KHR
-      <li>PicoGL.COMPRESSED_RGBA_ASTC_8x6_KHR
-      <li>PicoGL.COMPRESSED_RGBA_ASTC_8x8_KHR
-      <li>PicoGL.COMPRESSED_RGBA_ASTC_10x5_KHR
-      <li>PicoGL.COMPRESSED_RGBA_ASTC_10x6_KHR
-      <li>PicoGL.COMPRESSED_RGBA_ASTC_10x8_KHR
-      <li>PicoGL.COMPRESSED_RGBA_ASTC_10x10_KHR
-      <li>PicoGL.COMPRESSED_RGBA_ASTC_12x10_KHR
-      <li>PicoGL.COMPRESSED_RGBA_ASTC_12x12_KHR
-      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR
-      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR
-      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR
-      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR
-      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR
-      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR
-      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR
-      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR
-      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR
-      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR
-      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR
-      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR
-      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR
-      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR
-    </ul>
+        be used as texture formats, to the PicoGL object:
+        
+        <ul>
+          <li>PicoGL.COMPRESSED_RGBA_ASTC_4x4_KHR
+          <li>PicoGL.COMPRESSED_RGBA_ASTC_5x4_KHR
+          <li>PicoGL.COMPRESSED_RGBA_ASTC_5x5_KHR
+          <li>PicoGL.COMPRESSED_RGBA_ASTC_6x5_KHR
+          <li>PicoGL.COMPRESSED_RGBA_ASTC_6x6_KHR
+          <li>PicoGL.COMPRESSED_RGBA_ASTC_8x5_KHR
+          <li>PicoGL.COMPRESSED_RGBA_ASTC_8x6_KHR
+          <li>PicoGL.COMPRESSED_RGBA_ASTC_8x8_KHR
+          <li>PicoGL.COMPRESSED_RGBA_ASTC_10x5_KHR
+          <li>PicoGL.COMPRESSED_RGBA_ASTC_10x6_KHR
+          <li>PicoGL.COMPRESSED_RGBA_ASTC_10x8_KHR
+          <li>PicoGL.COMPRESSED_RGBA_ASTC_10x10_KHR
+          <li>PicoGL.COMPRESSED_RGBA_ASTC_12x10_KHR
+          <li>PicoGL.COMPRESSED_RGBA_ASTC_12x12_KHR
+          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR
+          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR
+          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR
+          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR
+          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR
+          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR
+          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR
+          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR
+          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR
+          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR
+          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR
+          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR
+          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR
+          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR
+        </ul>
 </div>
 
 
@@ -560,7 +560,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line703">line 703</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line705">line 705</a>
     </li></ul></dd>
     
 
@@ -646,7 +646,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line283">line 283</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line285">line 285</a>
     </li></ul></dd>
     
 
@@ -804,7 +804,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line307">line 307</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line309">line 309</a>
     </li></ul></dd>
     
 
@@ -847,7 +847,7 @@
 
 <div class="description">
     Set the blend function, with separate weighting for color and alpha channels.
-    E.g. app.blendFuncSeparate(PicoGL.ONE, PicoGL.ONE_MINUS_SRC_ALPHA, PicoGL.ONE, PicoGL.ONE).
+        E.g. app.blendFuncSeparate(PicoGL.ONE, PicoGL.ONE_MINUS_SRC_ALPHA, PicoGL.ONE, PicoGL.ONE).
 </div>
 
 
@@ -1009,7 +1009,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line323">line 323</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line325">line 325</a>
     </li></ul></dd>
     
 
@@ -1095,7 +1095,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line154">line 154</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line156">line 156</a>
     </li></ul></dd>
     
 
@@ -1299,7 +1299,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line130">line 130</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line132">line 132</a>
     </li></ul></dd>
     
 
@@ -1342,7 +1342,7 @@
 
 <div class="description">
     Set the clear mask bits to use when calling clear().
-    E.g. app.clearMask(PicoGL.COLOR_BUFFER_BIT).
+        E.g. app.clearMask(PicoGL.COLOR_BUFFER_BIT).
 </div>
 
 
@@ -1435,7 +1435,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line143">line 143</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line145">line 145</a>
     </li></ul></dd>
     
 
@@ -1478,7 +1478,7 @@
 
 <div class="description">
     Set the color mask to selectively enable or disable particular
-    color channels while rendering.
+        color channels while rendering.
 </div>
 
 
@@ -1640,7 +1640,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line115">line 115</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line117">line 117</a>
     </li></ul></dd>
     
 
@@ -1796,7 +1796,7 @@
             
 
             <td class="description last">The image data for the negative X direction.
-            Can be any format that would be accepted by texImage2D.</td>
+                Can be any format that would be accepted by texImage2D.</td>
         </tr>
 
     
@@ -1835,7 +1835,7 @@
             
 
             <td class="description last">The image data for the positive X direction.
-            Can be any format that would be accepted by texImage2D.</td>
+                Can be any format that would be accepted by texImage2D.</td>
         </tr>
 
     
@@ -1874,7 +1874,7 @@
             
 
             <td class="description last">The image data for the negative Y direction.
-            Can be any format that would be accepted by texImage2D.</td>
+                Can be any format that would be accepted by texImage2D.</td>
         </tr>
 
     
@@ -1913,7 +1913,7 @@
             
 
             <td class="description last">The image data for the positive Y direction.
-            Can be any format that would be accepted by texImage2D.</td>
+                Can be any format that would be accepted by texImage2D.</td>
         </tr>
 
     
@@ -1952,7 +1952,7 @@
             
 
             <td class="description last">The image data for the negative Z direction.
-            Can be any format that would be accepted by texImage2D.</td>
+                Can be any format that would be accepted by texImage2D.</td>
         </tr>
 
     
@@ -1991,7 +1991,7 @@
             
 
             <td class="description last">The image data for the positive Z direction.
-            Can be any format that would be accepted by texImage2D.</td>
+                Can be any format that would be accepted by texImage2D.</td>
         </tr>
 
     
@@ -2540,7 +2540,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1091">line 1091</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1134">line 1134</a>
     </li></ul></dd>
     
 
@@ -2583,8 +2583,8 @@
 
 <div class="description">
     Create a DrawCall. A DrawCall manages the state associated with
-    a WebGL draw call including a program and associated vertex data, textures,
-    uniforms and uniform blocks.
+        a WebGL draw call including a program and associated vertex data, textures,
+        uniforms and uniform blocks.
 </div>
 
 
@@ -2767,7 +2767,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1135">line 1135</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1178">line 1178</a>
     </li></ul></dd>
     
 
@@ -2961,7 +2961,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1102">line 1102</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1145">line 1145</a>
     </li></ul></dd>
     
 
@@ -2995,7 +2995,7 @@
     
 
     
-    <h4 class="name" id="createIndexBuffer"><span class="type-signature"></span>createIndexBuffer<span class="signature">(type, itemSize, data)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="createIndexBuffer"><span class="type-signature"></span>createIndexBuffer<span class="signature">(type, itemSize, data, usage<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
     
 
     
@@ -3027,7 +3027,11 @@
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
+        
+        <th>Default</th>
         
 
         <th class="last">Description</th>
@@ -3052,7 +3056,19 @@
             </td>
 
             
+                <td class="attributes">
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last">The data type stored in the index buffer.</td>
@@ -3075,7 +3091,19 @@
             </td>
 
             
+                <td class="attributes">
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last">Number of elements per primitive.</td>
@@ -3098,10 +3126,61 @@
             </td>
 
             
+                <td class="attributes">
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last">Index buffer data.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>usage</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">GLEnum</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    STATIC_DRAW
+                
+                </td>
+            
+
+            <td class="description last">Buffer usage.</td>
         </tr>
 
     
@@ -3142,7 +3221,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line942">line 942</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line985">line 985</a>
     </li></ul></dd>
     
 
@@ -3185,7 +3264,7 @@
 
 <div class="description">
     Create a per-vertex matrix buffer. Matrix buffers ensure that columns
-    are correctly split across attribute locations.
+        are correctly split across attribute locations.
 </div>
 
 
@@ -3254,8 +3333,8 @@
             
 
             <td class="description last">The data type stored in the matrix buffer. Valid types
-    are FLOAT_MAT4, FLOAT_MAT4x2, FLOAT_MAT4x3, FLOAT_MAT3, FLOAT_MAT3x2,
-    FLOAT_MAT3x4, FLOAT_MAT2, FLOAT_MAT2x3, FLOAT_MAT2x4.</td>
+        are FLOAT_MAT4, FLOAT_MAT4x2, FLOAT_MAT4x3, FLOAT_MAT3, FLOAT_MAT3x2,
+        FLOAT_MAT3x4, FLOAT_MAT2, FLOAT_MAT2x3, FLOAT_MAT2x4.</td>
         </tr>
 
     
@@ -3370,7 +3449,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line930">line 930</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line972">line 972</a>
     </li></ul></dd>
     
 
@@ -3585,7 +3664,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line872">line 872</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line914">line 914</a>
     </li></ul></dd>
     
 
@@ -3720,7 +3799,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1112">line 1112</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1155">line 1155</a>
     </li></ul></dd>
     
 
@@ -3763,7 +3842,7 @@
 
 <div class="description">
     Create a shader. Creating a shader separately from a program allows for
-    shader reuse.
+        shader reuse.
 </div>
 
 
@@ -3879,7 +3958,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line884">line 884</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line926">line 926</a>
     </li></ul></dd>
     
 
@@ -3990,8 +4069,8 @@
             
 
             <td class="description last">Image data. An array can be passed to manually set all levels 
-        of the mipmap chain. If a single level is passed and mipmap filtering is being used,
-        generateMipmap() will be called to produce the remaining levels.</td>
+            of the mipmap chain. If a single level is passed and mipmap filtering is being used,
+            generateMipmap() will be called to produce the remaining levels.</td>
         </tr>
 
     
@@ -4736,7 +4815,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line986">line 986</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1029">line 1029</a>
     </li></ul></dd>
     
 
@@ -4844,8 +4923,8 @@
             
 
             <td class="description last">Pixel data. An array can be passed to manually set all levels 
-        of the mipmap chain. If a single level is passed and mipmap filtering is being used,
-        generateMipmap() will be called to produce the remaining levels.</td>
+            of the mipmap chain. If a single level is passed and mipmap filtering is being used,
+            generateMipmap() will be called to produce the remaining levels.</td>
         </tr>
 
     
@@ -5656,7 +5735,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1056">line 1056</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1099">line 1099</a>
     </li></ul></dd>
     
 
@@ -5764,8 +5843,8 @@
             
 
             <td class="description last">Pixel data. An array can be passed to manually set all levels 
-        of the mipmap chain. If a single level is passed and mipmap filtering is being used,
-        generateMipmap() will be called to produce the remaining levels.</td>
+            of the mipmap chain. If a single level is passed and mipmap filtering is being used,
+            generateMipmap() will be called to produce the remaining levels.</td>
         </tr>
 
     
@@ -6537,7 +6616,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1024">line 1024</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1067">line 1067</a>
     </li></ul></dd>
     
 
@@ -6623,7 +6702,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1121">line 1121</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1164">line 1164</a>
     </li></ul></dd>
     
 
@@ -6709,7 +6788,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line902">line 902</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line944">line 944</a>
     </li></ul></dd>
     
 
@@ -6752,8 +6831,8 @@
 
 <div class="description">
     Create a uniform buffer in std140 layout. NOTE: FLOAT_MAT2, FLOAT_MAT3x2, FLOAT_MAT4x2,
-    FLOAT_MAT3, FLOAT_MAT2x3, FLOAT_MAT4x3 are supported, but must be manually padded to
-    4-float column alignment by the application!
+        FLOAT_MAT3, FLOAT_MAT2x3, FLOAT_MAT4x3 are supported, but must be manually padded to
+        4-float column alignment by the application!
 </div>
 
 
@@ -6822,7 +6901,7 @@
             
 
             <td class="description last">Array indicating the order and types of items to
-                    be stored in the buffer.</td>
+                        be stored in the buffer.</td>
         </tr>
 
     
@@ -6902,7 +6981,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line956">line 956</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line999">line 999</a>
     </li></ul></dd>
     
 
@@ -6988,7 +7067,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line893">line 893</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line935">line 935</a>
     </li></ul></dd>
     
 
@@ -7248,7 +7327,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line915">line 915</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line957">line 957</a>
     </li></ul></dd>
     
 
@@ -7334,7 +7413,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line519">line 519</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line521">line 521</a>
     </li></ul></dd>
     
 
@@ -7377,7 +7456,7 @@
 
 <div class="description">
     Switch back to the default framebuffer for drawing (i.e. draw to the screen).
-    Note that this method resets the viewport to match the default framebuffer.
+        Note that this method resets the viewport to match the default framebuffer.
 </div>
 
 
@@ -7421,7 +7500,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line195">line 195</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line197">line 197</a>
     </li></ul></dd>
     
 
@@ -7507,7 +7586,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line210">line 210</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line212">line 212</a>
     </li></ul></dd>
     
 
@@ -7642,7 +7721,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line272">line 272</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line274">line 274</a>
     </li></ul></dd>
     
 
@@ -7777,7 +7856,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line260">line 260</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line262">line 262</a>
     </li></ul></dd>
     
 
@@ -7935,7 +8014,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line226">line 226</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line228">line 228</a>
     </li></ul></dd>
     
 
@@ -8021,7 +8100,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line237">line 237</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line239">line 239</a>
     </li></ul></dd>
     
 
@@ -8107,7 +8186,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line530">line 530</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line532">line 532</a>
     </li></ul></dd>
     
 
@@ -8150,7 +8229,7 @@
 
 <div class="description">
     Bind a draw framebuffer to the WebGL context. Note that 
-    this method resets the viewport to match the given framebuffer.
+        this method resets the viewport to match the given framebuffer.
 </div>
 
 
@@ -8243,7 +8322,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line168">line 168</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line170">line 170</a>
     </li></ul></dd>
     
 
@@ -8293,23 +8372,23 @@
 
 <div class="description">
     Enable the WEBGL_compressed_texture_etc extension  and add the following enums, which can
-    be used as texture formats, to the PicoGL object:
-    
-    <ul>
-      <li>PicoGL.COMPRESSED_R11_EAC
-      <li>PicoGL.COMPRESSED_SIGNED_R11_EAC
-      <li>PicoGL.COMPRESSED_RG11_EAC
-      <li>PicoGL.COMPRESSED_SIGNED_RG11_EAC
-      <li>PicoGL.COMPRESSED_RGB8_ETC2
-      <li>PicoGL.COMPRESSED_SRGB8_ETC2
-      <li>PicoGL.COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2
-      <li>PicoGL.COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2
-      <li>PicoGL.COMPRESSED_RGBA8_ETC2_EAC
-      <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ETC2_EAC
-    </ul>
+        be used as texture formats, to the PicoGL object:
+        
+        <ul>
+          <li>PicoGL.COMPRESSED_R11_EAC
+          <li>PicoGL.COMPRESSED_SIGNED_R11_EAC
+          <li>PicoGL.COMPRESSED_RG11_EAC
+          <li>PicoGL.COMPRESSED_SIGNED_RG11_EAC
+          <li>PicoGL.COMPRESSED_RGB8_ETC2
+          <li>PicoGL.COMPRESSED_SRGB8_ETC2
+          <li>PicoGL.COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2
+          <li>PicoGL.COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2
+          <li>PicoGL.COMPRESSED_RGBA8_ETC2_EAC
+          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ETC2_EAC
+        </ul>
 
-    Note that while WEBGL_compressed_texture_etc1 is not enabled by this method,
-    ETC1 textures can be loaded using COMPRESSED_RGB8_ETC2 as the format.
+        Note that while WEBGL_compressed_texture_etc1 is not enabled by this method,
+        ETC1 textures can be loaded using COMPRESSED_RGB8_ETC2 as the format.
 </div>
 
 
@@ -8353,7 +8432,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line635">line 635</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line637">line 637</a>
     </li></ul></dd>
     
 
@@ -8396,7 +8475,7 @@
 
 <div class="description">
     Enable the EXT_color_buffer_float extension. Allows for creating float textures as
-    render targets on FrameBuffer objects. E.g. app.createFramebuffer().colorTarget(0, PicoGL.FLOAT).
+        render targets on FrameBuffer objects. E.g. app.createFramebuffer().colorTarget(0, PicoGL.FLOAT).
 </div>
 
 
@@ -8440,7 +8519,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line543">line 543</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line545">line 545</a>
     </li></ul></dd>
     
 
@@ -8533,7 +8612,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line555">line 555</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line557">line 557</a>
     </li></ul></dd>
     
 
@@ -8626,7 +8705,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line294">line 294</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line296">line 296</a>
     </li></ul></dd>
     
 
@@ -8712,7 +8791,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line248">line 248</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line250">line 250</a>
     </li></ul></dd>
     
 
@@ -8798,7 +8877,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line508">line 508</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line510">line 510</a>
     </li></ul></dd>
     
 
@@ -8884,7 +8963,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line370">line 370</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line372">line 372</a>
     </li></ul></dd>
     
 
@@ -8970,7 +9049,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line347">line 347</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line349">line 349</a>
     </li></ul></dd>
     
 
@@ -9013,14 +9092,14 @@
 
 <div class="description">
     Enable the WEBGL_compressed_texture_pvrtc extension and add the following enums, which can
-    be used as texture formats, to the PicoGL object:
+        be used as texture formats, to the PicoGL object:
 
-    <ul>
-      <li>PicoGL.COMPRESSED_RGB_PVRTC_4BPPV1_IMG
-      <li>PicoGL.COMPRESSED_RGB_PVRTC_2BPPV1_IMG
-      <li>PicoGL.COMPRESSED_RGBA_PVRTC_4BPPV1_IMG
-      <li>PicoGL.COMPRESSED_RGBA_PVRTC_2BPPV1_IMG
-    </ul>
+        <ul>
+          <li>PicoGL.COMPRESSED_RGB_PVRTC_4BPPV1_IMG
+          <li>PicoGL.COMPRESSED_RGB_PVRTC_2BPPV1_IMG
+          <li>PicoGL.COMPRESSED_RGBA_PVRTC_4BPPV1_IMG
+          <li>PicoGL.COMPRESSED_RGBA_PVRTC_2BPPV1_IMG
+        </ul>
 </div>
 
 
@@ -9064,7 +9143,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line783">line 783</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line827">line 827</a>
     </li></ul></dd>
     
 
@@ -9150,7 +9229,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line497">line 497</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line499">line 499</a>
     </li></ul></dd>
     
 
@@ -9285,7 +9364,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line183">line 183</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line185">line 185</a>
     </li></ul></dd>
     
 
@@ -9640,7 +9719,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line813">line 813</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line857">line 857</a>
     </li></ul></dd>
     
 
@@ -9798,7 +9877,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line854">line 854</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line896">line 896</a>
     </li></ul></dd>
     
 
@@ -9841,18 +9920,18 @@
 
 <div class="description">
     Enable the WEBGL_compressed_texture_s3tc and WEBGL_compressed_texture_s3tc_srgb extensions, and 
-    add the following enums, which can be used as texture formats, to the PicoGL object:
+        add the following enums, which can be used as texture formats, to the PicoGL object:
 
-    <ul>
-      <li>PicoGL.COMPRESSED_RGB_S3TC_DXT1_EXT
-      <li>PicoGL.COMPRESSED_RGBA_S3TC_DXT1_EXT
-      <li>PicoGL.COMPRESSED_RGBA_S3TC_DXT3_EXT
-      <li>PicoGL.COMPRESSED_RGBA_S3TC_DXT5_EXT
-      <li>PicoGL.COMPRESSED_SRGB_S3TC_DXT1_EXT
-      <li>PicoGL.COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT
-      <li>PicoGL.COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT
-      <li>PicoGL.COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT
-    </ul>
+        <ul>
+          <li>PicoGL.COMPRESSED_RGB_S3TC_DXT1_EXT
+          <li>PicoGL.COMPRESSED_RGBA_S3TC_DXT1_EXT
+          <li>PicoGL.COMPRESSED_RGBA_S3TC_DXT3_EXT
+          <li>PicoGL.COMPRESSED_RGBA_S3TC_DXT5_EXT
+          <li>PicoGL.COMPRESSED_SRGB_S3TC_DXT1_EXT
+          <li>PicoGL.COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT
+          <li>PicoGL.COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT
+          <li>PicoGL.COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT
+        </ul>
 </div>
 
 
@@ -9896,7 +9975,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line579">line 579</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line581">line 581</a>
     </li></ul></dd>
     
 
@@ -9982,7 +10061,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line381">line 381</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line383">line 383</a>
     </li></ul></dd>
     
 
@@ -10068,7 +10147,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line359">line 359</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line361">line 361</a>
     </li></ul></dd>
     
 
@@ -10111,9 +10190,9 @@
 
 <div class="description">
     Set the stencil function and reference value.
-    E.g. app.stencilFunc(PicoGL.EQUAL, 1, 0xFF).
-    NOTE: Only works if { stencil: true } passed as a
-    context attribute when creating the App!
+        E.g. app.stencilFunc(PicoGL.EQUAL, 1, 0xFF).
+        NOTE: Only works if { stencil: true } passed as a
+        context attribute when creating the App!
 </div>
 
 
@@ -10212,7 +10291,7 @@
             
 
             <td class="description last">The bitmask to use against tested values before applying
-        the stencil function.</td>
+            the stencil function.</td>
         </tr>
 
     
@@ -10253,7 +10332,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line432">line 432</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line434">line 434</a>
     </li></ul></dd>
     
 
@@ -10296,9 +10375,9 @@
 
 <div class="description">
     Set the stencil function and reference value for a particular face orientation.
-    E.g. app.stencilFuncSeparate(PicoGL.FRONT, PicoGL.EQUAL, 1, 0xFF).
-    NOTE: Only works if { stencil: true } passed as a
-    context attribute when creating the App!
+        E.g. app.stencilFuncSeparate(PicoGL.FRONT, PicoGL.EQUAL, 1, 0xFF).
+        NOTE: Only works if { stencil: true } passed as a
+        context attribute when creating the App!
 </div>
 
 
@@ -10420,7 +10499,7 @@
             
 
             <td class="description last">The bitmask to use against tested values before applying
-        the stencil function.</td>
+            the stencil function.</td>
         </tr>
 
     
@@ -10461,7 +10540,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line451">line 451</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line453">line 453</a>
     </li></ul></dd>
     
 
@@ -10504,9 +10583,9 @@
 
 <div class="description">
     Set the bitmask to use for tested stencil values.
-    E.g. app.stencilMask(0xFF).
-    NOTE: Only works if { stencil: true } passed as a
-    context attribute when creating the App!
+        E.g. app.stencilMask(0xFF).
+        NOTE: Only works if { stencil: true } passed as a
+        context attribute when creating the App!
 </div>
 
 
@@ -10599,7 +10678,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line397">line 397</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line399">line 399</a>
     </li></ul></dd>
     
 
@@ -10642,9 +10721,9 @@
 
 <div class="description">
     Set the bitmask to use for tested stencil values for a particular face orientation.
-    E.g. app.stencilMaskSeparate(PicoGL.FRONT, 0xFF).
-    NOTE: Only works if { stencil: true } passed as a
-    context attribute when creating the App!
+        E.g. app.stencilMaskSeparate(PicoGL.FRONT, 0xFF).
+        NOTE: Only works if { stencil: true } passed as a
+        context attribute when creating the App!
 </div>
 
 
@@ -10760,7 +10839,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line414">line 414</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line416">line 416</a>
     </li></ul></dd>
     
 
@@ -10803,9 +10882,9 @@
 
 <div class="description">
     Set the operations for updating stencil buffer values.
-    E.g. app.stencilOp(PicoGL.KEEP, PicoGL.KEEP, PicoGL.REPLACE).
-    NOTE: Only works if { stencil: true } passed as a
-    context attribute when creating the App!
+        E.g. app.stencilOp(PicoGL.KEEP, PicoGL.KEEP, PicoGL.REPLACE).
+        NOTE: Only works if { stencil: true } passed as a
+        context attribute when creating the App!
 </div>
 
 
@@ -10944,7 +11023,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line468">line 468</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line470">line 470</a>
     </li></ul></dd>
     
 
@@ -10987,9 +11066,9 @@
 
 <div class="description">
     Set the operations for updating stencil buffer values for a particular face orientation.
-    E.g. app.stencilOpSeparate(PicoGL.FRONT, PicoGL.KEEP, PicoGL.KEEP, PicoGL.REPLACE).
-    NOTE: Only works if { stencil: true } passed as a
-    context attribute when creating the App!
+        E.g. app.stencilOpSeparate(PicoGL.FRONT, PicoGL.KEEP, PicoGL.KEEP, PicoGL.REPLACE).
+        NOTE: Only works if { stencil: true } passed as a
+        context attribute when creating the App!
 </div>
 
 
@@ -11151,7 +11230,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line486">line 486</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line488">line 488</a>
     </li></ul></dd>
     
 
@@ -11194,8 +11273,8 @@
 
 <div class="description">
     Enable stencil testing.
-    NOTE: Only works if { stencil: true } passed as a
-    context attribute when creating the App!
+        NOTE: Only works if { stencil: true } passed as a
+        context attribute when creating the App!
 </div>
 
 
@@ -11239,7 +11318,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line336">line 336</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line338">line 338</a>
     </li></ul></dd>
     
 
@@ -11443,7 +11522,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line833">line 833</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line875">line 875</a>
     </li></ul></dd>
     
 
@@ -11493,7 +11572,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.3</a> on Mon Aug 21 2017 00:24:31 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sun Nov 26 2017 12:11:36 GMT-0500 (EST)
 </footer>
 
 <script> prettyPrint(); </script>

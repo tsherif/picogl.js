@@ -33,51 +33,55 @@
     @prop {boolean} active Whether or not a query is currently in progress.
     @prop {Any} result The result of the query (only available after a call to ready() returns true). 
 */
-function Query(gl, target) {
-    this.gl = gl;
-    this.query = gl.createQuery();
-    this.target = target;
-    this.active = false;
-    this.result = null;
-}
+class Query {
 
-/**
-    Begin a query.
-
-    @method
-*/
-Query.prototype.begin = function() {
-    if (!this.active) {
-        this.gl.beginQuery(this.target, this.query);
-        this.result = null;
-    }    
-};
-
-/**
-    End a query.
-
-    @method
-*/
-Query.prototype.end = function() {
-    if (!this.active) {
-        this.gl.endQuery(this.target);
-        this.active = true;
-    }
-};
-
-/**
-    Check if query result is available.
-
-    @method
-*/
-Query.prototype.ready = function() {
-    if (this.active && this.gl.getQueryParameter(this.query, this.gl.QUERY_RESULT_AVAILABLE)) {
+    constructor(gl, target) {
+        this.gl = gl;
+        this.query = gl.createQuery();
+        this.target = target;
         this.active = false;
-        this.result = this.gl.getQueryParameter(this.query, this.gl.QUERY_RESULT);
-        return true;
+        this.result = null;
     }
 
-    return false;
-};
+    /**
+        Begin a query.
+
+        @method
+    */
+    begin() {
+        if (!this.active) {
+            this.gl.beginQuery(this.target, this.query);
+            this.result = null;
+        }    
+    }
+
+    /**
+        End a query.
+
+        @method
+    */
+    end() {
+        if (!this.active) {
+            this.gl.endQuery(this.target);
+            this.active = true;
+        }
+    }
+
+    /**
+        Check if query result is available.
+
+        @method
+    */
+    ready() {
+        if (this.active && this.gl.getQueryParameter(this.query, this.gl.QUERY_RESULT_AVAILABLE)) {
+            this.active = false;
+            this.result = this.gl.getQueryParameter(this.query, this.gl.QUERY_RESULT);
+            return true;
+        }
+
+        return false;
+    }
+
+}
 
 module.exports = Query;

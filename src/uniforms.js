@@ -141,75 +141,91 @@ UNIFORM_CACHE_CLASS[CONSTANTS.UNSIGNED_INT_VEC2] = Uint32Array;
 UNIFORM_CACHE_CLASS[CONSTANTS.UNSIGNED_INT_VEC3] = Uint32Array;
 UNIFORM_CACHE_CLASS[CONSTANTS.UNSIGNED_INT_VEC4] = Uint32Array;
 
-function SingleComponentUniform(gl, handle, type) {
-    this.gl = gl;
-    this.handle = handle;
-    this.glFuncName = UNIFORM_FUNC_NAME[type];
-    this.cache = type === CONSTANTS.BOOL ? false : 0;
-}
-
-SingleComponentUniform.prototype.set = function(value) {
-    if (this.cache !== value) {
-        this.gl[this.glFuncName](this.handle, value);
-        this.cache = value;
+class SingleComponentUniform {
+    
+    constructor(gl, handle, type) {
+        this.gl = gl;
+        this.handle = handle;
+        this.glFuncName = UNIFORM_FUNC_NAME[type];
+        this.cache = type === CONSTANTS.BOOL ? false : 0;
     }
-};
 
-function MultiNumericUniform(gl, handle, type, count) {
-    this.gl = gl;
-    this.handle = handle;
-    this.glFuncName = UNIFORM_FUNC_NAME[type] + "v";
-    this.count = count;
-    this.cache = new UNIFORM_CACHE_CLASS[type](UNIFORM_COMPONENT_COUNT[type] * count);
-}
-
-MultiNumericUniform.prototype.set = function(value) {
-    for (let i = 0, len = value.length; i < len; ++i) {
-        if (this.cache[i] !== value[i]) {
+    set(value) {
+        if (this.cache !== value) {
             this.gl[this.glFuncName](this.handle, value);
-            this.cache.set(value);
-            return;
+            this.cache = value;
         }
     }
-};
 
-function MultiBoolUniform(gl, handle, type, count) {
-    this.gl = gl;
-    this.handle = handle;
-    this.glFuncName = UNIFORM_FUNC_NAME[type] + "v";
-    this.count = count;
-    this.cache = new Array(UNIFORM_COMPONENT_COUNT[type] * count).fill(false);
 }
 
-MultiBoolUniform.prototype.set = function(value) {
-    for (let i = 0, len = value.length; i < len; ++i) {
-        if (this.cache[i] !== value[i]) {
-            this.gl[this.glFuncName](this.handle, value);
-            for (let j = i; j < len; j++) {
-                this.cache[j] = value[j];
+class MultiNumericUniform {
+
+    constructor(gl, handle, type, count) {
+        this.gl = gl;
+        this.handle = handle;
+        this.glFuncName = UNIFORM_FUNC_NAME[type] + "v";
+        this.count = count;
+        this.cache = new UNIFORM_CACHE_CLASS[type](UNIFORM_COMPONENT_COUNT[type] * count);
+    }
+
+    set(value) {
+        for (let i = 0, len = value.length; i < len; ++i) {
+            if (this.cache[i] !== value[i]) {
+                this.gl[this.glFuncName](this.handle, value);
+                this.cache.set(value);
+                return;
             }
-            return;
         }
     }
-};
 
-function MatrixUniform(gl, handle, type, count) {
-    this.gl = gl;
-    this.handle = handle;
-    this.glFuncName = UNIFORM_FUNC_NAME[type];
-    this.count = count;
-    this.cache = new Float32Array(UNIFORM_COMPONENT_COUNT[type] * count);
 }
 
-MatrixUniform.prototype.set = function(value) {
-    for (let i = 0, len = value.length; i < len; ++i) {
-        if (this.cache[i] !== value[i]) {
-            this.gl[this.glFuncName](this.handle, false, value);
-            this.cache.set(value);
-            return;
+class MultiBoolUniform {
+
+    constructor(gl, handle, type, count) {
+        this.gl = gl;
+        this.handle = handle;
+        this.glFuncName = UNIFORM_FUNC_NAME[type] + "v";
+        this.count = count;
+        this.cache = new Array(UNIFORM_COMPONENT_COUNT[type] * count).fill(false);
+    }
+
+    set(value) {
+        for (let i = 0, len = value.length; i < len; ++i) {
+            if (this.cache[i] !== value[i]) {
+                this.gl[this.glFuncName](this.handle, value);
+                for (let j = i; j < len; j++) {
+                    this.cache[j] = value[j];
+                }
+                return;
+            }
         }
     }
-};
+
+}
+
+class MatrixUniform {
+
+    constructor(gl, handle, type, count) {
+        this.gl = gl;
+        this.handle = handle;
+        this.glFuncName = UNIFORM_FUNC_NAME[type];
+        this.count = count;
+        this.cache = new Float32Array(UNIFORM_COMPONENT_COUNT[type] * count);
+    }
+
+    set(value) {
+        for (let i = 0, len = value.length; i < len; ++i) {
+            if (this.cache[i] !== value[i]) {
+                this.gl[this.glFuncName](this.handle, false, value);
+                this.cache.set(value);
+                return;
+            }
+        }
+    }
+
+}
 
 module.exports.MatrixUniform = MatrixUniform;
 module.exports.MultiBoolUniform = MultiBoolUniform;

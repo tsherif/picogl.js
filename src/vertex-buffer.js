@@ -39,108 +39,112 @@ const CONSTANTS = require("./constants");
     @prop {GLEnum} binding GL binding point (ARRAY_BUFFER or ELEMENT_ARRAY_BUFFER).
     @prop {Object} appState Tracked GL state.
 */
-function VertexBuffer(gl, appState, type, itemSize, data, usage = gl.STATIC_DRAW, indexArray) {
-    let numColumns;
-    switch(type) {
-        case CONSTANTS.FLOAT_MAT4:
-        case CONSTANTS.FLOAT_MAT4x2:
-        case CONSTANTS.FLOAT_MAT4x3:
-            numColumns = 4;
-            break;
-        case CONSTANTS.FLOAT_MAT3:
-        case CONSTANTS.FLOAT_MAT3x2:
-        case CONSTANTS.FLOAT_MAT3x4:
-            numColumns = 3;
-            break;
-        case CONSTANTS.FLOAT_MAT2:
-        case CONSTANTS.FLOAT_MAT2x3:
-        case CONSTANTS.FLOAT_MAT2x4:
-            numColumns = 2;
-            break;
-        default:
-            numColumns = 1;
+class VertexBuffer {
+
+    constructor(gl, appState, type, itemSize, data, usage = gl.STATIC_DRAW, indexArray) {
+        let numColumns;
+        switch(type) {
+            case CONSTANTS.FLOAT_MAT4:
+            case CONSTANTS.FLOAT_MAT4x2:
+            case CONSTANTS.FLOAT_MAT4x3:
+                numColumns = 4;
+                break;
+            case CONSTANTS.FLOAT_MAT3:
+            case CONSTANTS.FLOAT_MAT3x2:
+            case CONSTANTS.FLOAT_MAT3x4:
+                numColumns = 3;
+                break;
+            case CONSTANTS.FLOAT_MAT2:
+            case CONSTANTS.FLOAT_MAT2x3:
+            case CONSTANTS.FLOAT_MAT2x4:
+                numColumns = 2;
+                break;
+            default:
+                numColumns = 1;
+        }
+
+        switch(type) {
+            case CONSTANTS.FLOAT_MAT4:
+            case CONSTANTS.FLOAT_MAT3x4:
+            case CONSTANTS.FLOAT_MAT2x4:
+                itemSize = 4;
+                type = CONSTANTS.FLOAT;
+                break;
+            case CONSTANTS.FLOAT_MAT3:
+            case CONSTANTS.FLOAT_MAT4x3:
+            case CONSTANTS.FLOAT_MAT2x3:
+                itemSize = 3;
+                type = CONSTANTS.FLOAT;
+                break;
+            case CONSTANTS.FLOAT_MAT2:
+            case CONSTANTS.FLOAT_MAT3x2:
+            case CONSTANTS.FLOAT_MAT4x2:
+                itemSize = 2;
+                type = CONSTANTS.FLOAT;
+                break;
+        }
+
+        let dataLength;
+        if (typeof data === "number") {
+            dataLength = data;
+            data *= CONSTANTS.TYPE_SIZE[type];
+        } else {
+            dataLength = data.length;
+        }
+
+        this.gl = gl;
+        this.buffer = gl.createBuffer();
+        this.appState = appState;
+        this.type = type;
+        this.itemSize = itemSize;
+        this.numItems = dataLength / (itemSize * numColumns);
+        this.numColumns = numColumns;
+        this.usage = usage;
+        this.indexArray = !!indexArray;
+        this.binding = this.indexArray ? gl.ELEMENT_ARRAY_BUFFER : gl.ARRAY_BUFFER;
+
+        gl.bindBuffer(this.binding, this.buffer);
+        gl.bufferData(this.binding, data, this.usage);
+        gl.bindBuffer(this.binding, null);
     }
 
-    switch(type) {
-        case CONSTANTS.FLOAT_MAT4:
-        case CONSTANTS.FLOAT_MAT3x4:
-        case CONSTANTS.FLOAT_MAT2x4:
-            itemSize = 4;
-            type = CONSTANTS.FLOAT;
-            break;
-        case CONSTANTS.FLOAT_MAT3:
-        case CONSTANTS.FLOAT_MAT4x3:
-        case CONSTANTS.FLOAT_MAT2x3:
-            itemSize = 3;
-            type = CONSTANTS.FLOAT;
-            break;
-        case CONSTANTS.FLOAT_MAT2:
-        case CONSTANTS.FLOAT_MAT3x2:
-        case CONSTANTS.FLOAT_MAT4x2:
-            itemSize = 2;
-            type = CONSTANTS.FLOAT;
-            break;
+    /**
+        Update data in this buffer. NOTE: the data must fit
+        the originally-allocated buffer!
+
+        @method
+        @param {VertexBufferView} data Data to store in the buffer.
+    */
+    data(data) {
+        // Don't want to update vertex array bindings
+        let currentVertexArray = this.appState.vertexArray;
+        if (currentVertexArray) {
+            this.gl.bindVertexArray(null);
+        }
+
+        this.gl.bindBuffer(this.binding, this.buffer);
+        this.gl.bufferSubData(this.binding, 0, data);
+        this.gl.bindBuffer(this.binding, null);
+
+        if (currentVertexArray) {
+            this.gl.bindVertexArray(currentVertexArray.vertexArray);
+        }
+
+        return this;
     }
 
-    let dataLength;
-    if (typeof data === "number") {
-        dataLength = data;
-        data *= CONSTANTS.TYPE_SIZE[type];
-    } else {
-        dataLength = data.length;
+    /**
+        Delete this array buffer.
+
+        @method
+    */
+    delete() {
+        if (this.buffer) {
+            this.gl.deleteBuffer(this.buffer);
+            this.buffer = null;
+        }
     }
 
-    this.gl = gl;
-    this.buffer = gl.createBuffer();
-    this.appState = appState;
-    this.type = type;
-    this.itemSize = itemSize;
-    this.numItems = dataLength / (itemSize * numColumns);
-    this.numColumns = numColumns;
-    this.usage = usage;
-    this.indexArray = !!indexArray;
-    this.binding = this.indexArray ? gl.ELEMENT_ARRAY_BUFFER : gl.ARRAY_BUFFER;
-
-    gl.bindBuffer(this.binding, this.buffer);
-    gl.bufferData(this.binding, data, this.usage);
-    gl.bindBuffer(this.binding, null);
 }
-
-/**
-    Update data in this buffer. NOTE: the data must fit
-    the originally-allocated buffer!
-
-    @method
-    @param {VertexBufferView} data Data to store in the buffer.
-*/
-VertexBuffer.prototype.data = function(data) {
-    // Don't want to update vertex array bindings
-    let currentVertexArray = this.appState.vertexArray;
-    if (currentVertexArray) {
-        this.gl.bindVertexArray(null);
-    }
-
-    this.gl.bindBuffer(this.binding, this.buffer);
-    this.gl.bufferSubData(this.binding, 0, data);
-    this.gl.bindBuffer(this.binding, null);
-
-    if (currentVertexArray) {
-        this.gl.bindVertexArray(currentVertexArray.vertexArray);
-    }
-
-    return this;
-};
-
-/**
-    Delete this array buffer.
-
-    @method
-*/
-VertexBuffer.prototype.delete = function() {
-    if (this.buffer) {
-        this.gl.deleteBuffer(this.buffer);
-        this.buffer = null;
-    }
-};
 
 module.exports = VertexBuffer;

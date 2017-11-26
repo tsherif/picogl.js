@@ -39,181 +39,185 @@ const Uniforms = require("./uniforms");
     @prop {Object} uniformBlocks Map of uniform block names to handles.
     @prop {Object} appState Tracked GL state.
 */
-function Program(gl, appState, vsSource, fsSource, xformFeebackVars) {
-    let i;
+class Program {
 
-    let vShader, fShader;
+    constructor(gl, appState, vsSource, fsSource, xformFeebackVars) {
+        let i;
 
-    let ownVertexShader = false;
-    let ownFragmentShader = false;
-    if (typeof vsSource === "string") {
-        vShader = new Shader(gl, gl.VERTEX_SHADER, vsSource);
-        ownVertexShader = true;
-    } else {
-        vShader = vsSource;
-    }
+        let vShader, fShader;
 
-    if (typeof fsSource === "string") {
-        fShader = new Shader(gl, gl.FRAGMENT_SHADER, fsSource);
-        ownFragmentShader = true;
-    } else {
-        fShader = fsSource;
-    }
-
-    let program = gl.createProgram();
-    gl.attachShader(program, vShader.shader);
-    gl.attachShader(program, fShader.shader);
-    if (xformFeebackVars) {
-        gl.transformFeedbackVaryings(program, xformFeebackVars, gl.SEPARATE_ATTRIBS);
-    }
-    gl.linkProgram(program);
-
-    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-        console.error(gl.getProgramInfoLog(program));
-    }
-
-    if (ownVertexShader) {
-        vShader.delete();
-    }
-
-    if (ownFragmentShader) {
-        fShader.delete();
-    }
-
-    this.gl = gl;
-    this.program = program;
-    this.appState = appState;
-    this.transformFeedback = !!xformFeebackVars;
-    this.uniforms = {};
-    this.uniformBlocks = {};
-    this.uniformBlockBindings = {};
-    this.samplers = {};
-    /////////////////////////////////////////////////////////////////////////////////
-    // TODO(Tarek):
-    // Workaround for https://bugs.chromium.org/p/chromium/issues/detail?id=722288
-    // Start at unit 0 when that's fixed
-    /////////////////////////////////////////////////////////////////////////////////
-    this.samplerCount = 1;
-
-    gl.useProgram(program);
-
-    let numUniforms = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
-
-    for (i = 0; i < numUniforms; ++i) {
-        let uniformInfo = gl.getActiveUniform(program, i);
-        let uniformHandle = gl.getUniformLocation(this.program, uniformInfo.name);
-        let UniformClass = null;
-        let type = uniformInfo.type;
-        let numElements = uniformInfo.size;
-
-        switch (type) {
-            case CONSTANTS.SAMPLER_2D:
-            case CONSTANTS.INT_SAMPLER_2D:
-            case CONSTANTS.UNSIGNED_INT_SAMPLER_2D:
-            case CONSTANTS.SAMPLER_2D_SHADOW:
-            case CONSTANTS.SAMPLER_2D_ARRAY:
-            case CONSTANTS.INT_SAMPLER_2D_ARRAY:
-            case CONSTANTS.UNSIGNED_INT_SAMPLER_2D_ARRAY:
-            case CONSTANTS.SAMPLER_2D_ARRAY_SHADOW:
-            case CONSTANTS.SAMPLER_CUBE:
-            case CONSTANTS.INT_SAMPLER_CUBE:
-            case CONSTANTS.UNSIGNED_INT_SAMPLER_CUBE:
-            case CONSTANTS.SAMPLER_CUBE_SHADOW:
-            case CONSTANTS.SAMPLER_3D:
-            case CONSTANTS.INT_SAMPLER_3D:
-            case CONSTANTS.UNSIGNED_INT_SAMPLER_3D:
-                let textureUnit = this.samplerCount++;
-                this.samplers[uniformInfo.name] = textureUnit;
-                this.gl.uniform1i(uniformHandle, textureUnit);
-                break;
-            case CONSTANTS.INT:
-            case CONSTANTS.UNSIGNED_INT:
-            case CONSTANTS.FLOAT:
-                UniformClass = numElements > 1 ? Uniforms.MultiNumericUniform : Uniforms.SingleComponentUniform;
-                break;
-            case CONSTANTS.BOOL:
-                UniformClass = numElements > 1 ? Uniforms.MultiBoolUniform : Uniforms.SingleComponentUniform;
-                break;
-            case CONSTANTS.FLOAT_VEC2:
-            case CONSTANTS.INT_VEC2:
-            case CONSTANTS.UNSIGNED_INT_VEC2:
-            case CONSTANTS.FLOAT_VEC3:
-            case CONSTANTS.INT_VEC3:
-            case CONSTANTS.UNSIGNED_INT_VEC3:
-            case CONSTANTS.FLOAT_VEC4:
-            case CONSTANTS.INT_VEC4:
-            case CONSTANTS.UNSIGNED_INT_VEC4:
-                UniformClass = Uniforms.MultiNumericUniform;
-                break;
-            case CONSTANTS.BOOL_VEC2:
-            case CONSTANTS.BOOL_VEC3:
-            case CONSTANTS.BOOL_VEC4:
-                UniformClass = Uniforms.MultiBoolUniform;
-                break;
-            case CONSTANTS.FLOAT_MAT2:
-            case CONSTANTS.FLOAT_MAT3:
-            case CONSTANTS.FLOAT_MAT4:
-            case CONSTANTS.FLOAT_MAT2x3:
-            case CONSTANTS.FLOAT_MAT2x4:
-            case CONSTANTS.FLOAT_MAT3x2:
-            case CONSTANTS.FLOAT_MAT3x4:
-            case CONSTANTS.FLOAT_MAT4x2:
-            case CONSTANTS.FLOAT_MAT4x3:
-                UniformClass = Uniforms.MatrixUniform;
-                break;
-            default:
-                console.error("Unrecognized type for uniform ", uniformInfo.name);
-                break;
+        let ownVertexShader = false;
+        let ownFragmentShader = false;
+        if (typeof vsSource === "string") {
+            vShader = new Shader(gl, gl.VERTEX_SHADER, vsSource);
+            ownVertexShader = true;
+        } else {
+            vShader = vsSource;
         }
 
-        if (UniformClass) {
-            this.uniforms[uniformInfo.name] = new UniformClass(gl, uniformHandle, type, numElements);
+        if (typeof fsSource === "string") {
+            fShader = new Shader(gl, gl.FRAGMENT_SHADER, fsSource);
+            ownFragmentShader = true;
+        } else {
+            fShader = fsSource;
+        }
+
+        let program = gl.createProgram();
+        gl.attachShader(program, vShader.shader);
+        gl.attachShader(program, fShader.shader);
+        if (xformFeebackVars) {
+            gl.transformFeedbackVaryings(program, xformFeebackVars, gl.SEPARATE_ATTRIBS);
+        }
+        gl.linkProgram(program);
+
+        if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+            console.error(gl.getProgramInfoLog(program));
+        }
+
+        if (ownVertexShader) {
+            vShader.delete();
+        }
+
+        if (ownFragmentShader) {
+            fShader.delete();
+        }
+
+        this.gl = gl;
+        this.program = program;
+        this.appState = appState;
+        this.transformFeedback = !!xformFeebackVars;
+        this.uniforms = {};
+        this.uniformBlocks = {};
+        this.uniformBlockBindings = {};
+        this.samplers = {};
+        /////////////////////////////////////////////////////////////////////////////////
+        // TODO(Tarek):
+        // Workaround for https://bugs.chromium.org/p/chromium/issues/detail?id=722288
+        // Start at unit 0 when that's fixed
+        /////////////////////////////////////////////////////////////////////////////////
+        this.samplerCount = 1;
+
+        gl.useProgram(program);
+
+        let numUniforms = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
+
+        for (i = 0; i < numUniforms; ++i) {
+            let uniformInfo = gl.getActiveUniform(program, i);
+            let uniformHandle = gl.getUniformLocation(this.program, uniformInfo.name);
+            let UniformClass = null;
+            let type = uniformInfo.type;
+            let numElements = uniformInfo.size;
+
+            switch (type) {
+                case CONSTANTS.SAMPLER_2D:
+                case CONSTANTS.INT_SAMPLER_2D:
+                case CONSTANTS.UNSIGNED_INT_SAMPLER_2D:
+                case CONSTANTS.SAMPLER_2D_SHADOW:
+                case CONSTANTS.SAMPLER_2D_ARRAY:
+                case CONSTANTS.INT_SAMPLER_2D_ARRAY:
+                case CONSTANTS.UNSIGNED_INT_SAMPLER_2D_ARRAY:
+                case CONSTANTS.SAMPLER_2D_ARRAY_SHADOW:
+                case CONSTANTS.SAMPLER_CUBE:
+                case CONSTANTS.INT_SAMPLER_CUBE:
+                case CONSTANTS.UNSIGNED_INT_SAMPLER_CUBE:
+                case CONSTANTS.SAMPLER_CUBE_SHADOW:
+                case CONSTANTS.SAMPLER_3D:
+                case CONSTANTS.INT_SAMPLER_3D:
+                case CONSTANTS.UNSIGNED_INT_SAMPLER_3D:
+                    let textureUnit = this.samplerCount++;
+                    this.samplers[uniformInfo.name] = textureUnit;
+                    this.gl.uniform1i(uniformHandle, textureUnit);
+                    break;
+                case CONSTANTS.INT:
+                case CONSTANTS.UNSIGNED_INT:
+                case CONSTANTS.FLOAT:
+                    UniformClass = numElements > 1 ? Uniforms.MultiNumericUniform : Uniforms.SingleComponentUniform;
+                    break;
+                case CONSTANTS.BOOL:
+                    UniformClass = numElements > 1 ? Uniforms.MultiBoolUniform : Uniforms.SingleComponentUniform;
+                    break;
+                case CONSTANTS.FLOAT_VEC2:
+                case CONSTANTS.INT_VEC2:
+                case CONSTANTS.UNSIGNED_INT_VEC2:
+                case CONSTANTS.FLOAT_VEC3:
+                case CONSTANTS.INT_VEC3:
+                case CONSTANTS.UNSIGNED_INT_VEC3:
+                case CONSTANTS.FLOAT_VEC4:
+                case CONSTANTS.INT_VEC4:
+                case CONSTANTS.UNSIGNED_INT_VEC4:
+                    UniformClass = Uniforms.MultiNumericUniform;
+                    break;
+                case CONSTANTS.BOOL_VEC2:
+                case CONSTANTS.BOOL_VEC3:
+                case CONSTANTS.BOOL_VEC4:
+                    UniformClass = Uniforms.MultiBoolUniform;
+                    break;
+                case CONSTANTS.FLOAT_MAT2:
+                case CONSTANTS.FLOAT_MAT3:
+                case CONSTANTS.FLOAT_MAT4:
+                case CONSTANTS.FLOAT_MAT2x3:
+                case CONSTANTS.FLOAT_MAT2x4:
+                case CONSTANTS.FLOAT_MAT3x2:
+                case CONSTANTS.FLOAT_MAT3x4:
+                case CONSTANTS.FLOAT_MAT4x2:
+                case CONSTANTS.FLOAT_MAT4x3:
+                    UniformClass = Uniforms.MatrixUniform;
+                    break;
+                default:
+                    console.error("Unrecognized type for uniform ", uniformInfo.name);
+                    break;
+            }
+
+            if (UniformClass) {
+                this.uniforms[uniformInfo.name] = new UniformClass(gl, uniformHandle, type, numElements);
+            }
+        }
+
+        let numUniformBlocks = gl.getProgramParameter(program, gl.ACTIVE_UNIFORM_BLOCKS);
+
+        for (i = 0; i < numUniformBlocks; ++i) {
+            let blockName = gl.getActiveUniformBlockName(this.program, i);
+            let blockIndex = gl.getUniformBlockIndex(this.program, blockName);
+
+            this.uniformBlocks[blockName] = blockIndex;
+        }
+
+        gl.useProgram(null);
+    }
+
+    /**
+        Delete this program.
+
+        @method
+    */
+    delete() {
+        if (this.program) {
+            this.gl.deleteProgram(this.program);
+            this.program = null;
         }
     }
 
-    let numUniformBlocks = gl.getProgramParameter(program, gl.ACTIVE_UNIFORM_BLOCKS);
-
-    for (i = 0; i < numUniformBlocks; ++i) {
-        let blockName = gl.getActiveUniformBlockName(this.program, i);
-        let blockIndex = gl.getUniformBlockIndex(this.program, blockName);
-
-        this.uniformBlocks[blockName] = blockIndex;
+    // Set the value of a uniform.
+    uniform(name, value) {
+        this.uniforms[name].set(value);
     }
 
-    gl.useProgram(null);
+    // Bind a uniform block to a uniform buffer base.
+    uniformBlock(name, base) {
+        if (this.uniformBlockBindings[name] !== base) {
+            this.gl.uniformBlockBinding(this.program, this.uniformBlocks[name], base);
+            this.uniformBlockBindings[name] = base;
+        }
+    }
+
+    // Use this program.
+    bind() {
+        if (this.appState.program !== this) {
+            this.gl.useProgram(this.program);
+            this.appState.program = this;
+        }
+    }
+
 }
-
-/**
-    Delete this program.
-
-    @method
-*/
-Program.prototype.delete = function() {
-    if (this.program) {
-        this.gl.deleteProgram(this.program);
-        this.program = null;
-    }
-};
-
-// Set the value of a uniform.
-Program.prototype.uniform = function(name, value) {
-    this.uniforms[name].set(value);
-};
-
-// Bind a uniform block to a uniform buffer base.
-Program.prototype.uniformBlock = function(name, base) {
-    if (this.uniformBlockBindings[name] !== base) {
-        this.gl.uniformBlockBinding(this.program, this.uniformBlocks[name], base);
-        this.uniformBlockBindings[name] = base;
-    }
-};
-
-// Use this program.
-Program.prototype.bind = function() {
-    if (this.appState.program !== this) {
-        this.gl.useProgram(this.program);
-        this.appState.program = this;
-    }
-};
 
 module.exports = Program;

@@ -31,58 +31,62 @@
     @prop {WebGLTransformFeedback} transformFeedback Transform feedback object.
     @prop {Object} appState Tracked GL state.
 */
-function TransformFeedback(gl, appState) {
-    this.gl = gl;
-    this.transformFeedback = gl.createTransformFeedback();
-    this.appState = appState;
-    // TODO(Tarek): Need to rebind buffers due to bug in ANGLE.
-    // Remove this when that's fixed.
-    this.angleBugBuffers = [];
-}
+class TransformFeedback {
 
-/**
-    Bind a feedback buffer to capture transform output.
-
-    @method
-    @param {number} index Index of transform feedback varying to capture.
-    @param {VertexBuffer} buffer Buffer to record output into.
-*/
-TransformFeedback.prototype.feedbackBuffer = function(index, buffer) {
-    this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedback);
-    this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, index, buffer.buffer);
-    this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, null);
-    this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, index, null);
-
-    this.angleBugBuffers[index] = buffer;
-
-    return this;
-};
-
-/**
-    Delete this transform feedback.
-
-    @method
-*/
-TransformFeedback.prototype.delete = function() {
-    if (this.transformFeedback) {
-        this.gl.deleteTransformFeedback(this.transformFeedback);
-        this.transformFeedback = null;
+    constructor(gl, appState) {
+        this.gl = gl;
+        this.transformFeedback = gl.createTransformFeedback();
+        this.appState = appState;
+        // TODO(Tarek): Need to rebind buffers due to bug in ANGLE.
+        // Remove this when that's fixed.
+        this.angleBugBuffers = [];
     }
-};
 
-// Bind this transform feedback.
-TransformFeedback.prototype.bind = function() {
-    if (this.appState.transformFeedback !== this) {
+    /**
+        Bind a feedback buffer to capture transform output.
+
+        @method
+        @param {number} index Index of transform feedback varying to capture.
+        @param {VertexBuffer} buffer Buffer to record output into.
+    */
+    feedbackBuffer(index, buffer) {
         this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedback);
+        this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, index, buffer.buffer);
+        this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, null);
+        this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, index, null);
 
-        for (let i = 0, len = this.angleBugBuffers.length; i < len; ++i) {
-            this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, i, this.angleBugBuffers[i].buffer);
+        this.angleBugBuffers[index] = buffer;
+
+        return this;
+    }
+
+    /**
+        Delete this transform feedback.
+
+        @method
+    */
+    delete() {
+        if (this.transformFeedback) {
+            this.gl.deleteTransformFeedback(this.transformFeedback);
+            this.transformFeedback = null;
+        }
+    }
+
+    // Bind this transform feedback.
+    bind() {
+        if (this.appState.transformFeedback !== this) {
+            this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedback);
+
+            for (let i = 0, len = this.angleBugBuffers.length; i < len; ++i) {
+                this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, i, this.angleBugBuffers[i].buffer);
+            }
+
+            this.appState.transformFeedback = this;
         }
 
-        this.appState.transformFeedback = this;
+        return this;
     }
 
-    return this;
-};
+}
 
 module.exports = TransformFeedback;
