@@ -384,13 +384,27 @@
         ////////////////////
 
         // Store results of force update
+        var forceTarget1 = app.createTexture2D(null, DATA_TEXTURE_DIM, DATA_TEXTURE_DIM, { 
+            type: PicoGL.FLOAT,
+            internalFormat: PicoGL.RGBA32F
+        });
+        var forceTarget2 = app.createTexture2D(null, DATA_TEXTURE_DIM, DATA_TEXTURE_DIM, { 
+            type: PicoGL.FLOAT,
+            internalFormat: PicoGL.RGBA32F
+        });
+
         var updateForceFramebuffer = app.createFramebuffer(DATA_TEXTURE_DIM, DATA_TEXTURE_DIM)
-        .colorTarget(0, { type: PicoGL.FLOAT, internalFormat: PicoGL.RGBA32F })
-        .colorTarget(1, { type: PicoGL.FLOAT, internalFormat: PicoGL.RGBA32F });
+        .colorTarget(0, forceTarget1)
+        .colorTarget(1, forceTarget2);
 
         // Results of constraint satisfaction passes
+        var updateTarget = app.createTexture2D(null, DATA_TEXTURE_DIM, DATA_TEXTURE_DIM, { 
+            type: PicoGL.FLOAT,
+            internalFormat: PicoGL.RGBA32F
+        });
+
         var updateFramebuffer = app.createFramebuffer(DATA_TEXTURE_DIM, DATA_TEXTURE_DIM)
-        .colorTarget(0, { type: PicoGL.FLOAT, internalFormat: PicoGL.RGBA32F });
+        .colorTarget(0, updateTarget);
 
         ///////////////////////////
         // CLOTH GEOMETRY DATA

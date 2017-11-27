@@ -5145,7 +5145,8 @@ const DUMMY_ARRAY = new Array(1);
 */
 class Texture {
     constructor(gl, appState, binding, image, width = image.width, height = image.height, depth, is3D, options = __WEBPACK_IMPORTED_MODULE_0__constants_js__["_113" /* DUMMY_OBJECT */]) {
-        let defaultMinFilter = image ? gl.LINEAR_MIPMAP_NEAREST : gl.LINEAR;
+        let defaultMinFilter = image ? gl.LINEAR_MIPMAP_NEAREST : gl.NEAREST;
+        let defaultMagFilter = image ? gl.LINEAR : gl.NEAREST;
         let defaultType = options.format === __WEBPACK_IMPORTED_MODULE_0__constants_js__["_81" /* DEPTH_COMPONENT */] ? __WEBPACK_IMPORTED_MODULE_0__constants_js__["_538" /* UNSIGNED_SHORT */] : __WEBPACK_IMPORTED_MODULE_0__constants_js__["_524" /* UNSIGNED_BYTE */];
 
         this.gl = gl;
@@ -5179,7 +5180,7 @@ class Texture {
 
         // Sampler parameters
         let minFilter = options.minFilter !== undefined ? options.minFilter : defaultMinFilter;
-        let magFilter = options.magFilter !== undefined ? options.magFilter : gl.LINEAR;
+        let magFilter = options.magFilter !== undefined ? options.magFilter : defaultMagFilter;
         let wrapS = options.wrapS !== undefined ? options.wrapS : gl.REPEAT;
         let wrapT = options.wrapT !== undefined ? options.wrapT : gl.REPEAT;
         let wrapR = options.wrapR !== undefined ? options.wrapR : gl.REPEAT;
