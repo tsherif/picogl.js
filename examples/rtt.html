@@ -121,7 +121,13 @@
         var program = app.createProgram(vsSource, fsSource);
 
         // FRAMEBUFFER
-        var rttBuffer = app.createFramebuffer().colorTarget().depthTarget();
+        var colorTarget = app.createTexture2D(null, app.width, app.height);
+        var depthTarget = app.createTexture2D(null, app.width, app.height, {
+            format: PicoGL.DEPTH_COMPONENT,
+            type: PicoGL.UNSIGNED_SHORT
+        });
+
+        var rttBuffer = app.createFramebuffer().colorTarget(0, colorTarget).depthTarget(depthTarget);
 
         // GEOMETRY
         var box = utils.createBox({dimensions: [1.0, 1.0, 1.0]})

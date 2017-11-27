@@ -21,8 +21,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-import { TEXTURE_FORMAT_DEFAULTS }  from "./texture-format-defaults.js";
-import { Texture }  from "./texture.js";
+import * as CONSTANTS from "./constants.js";
 
 /**
     Storage for vertex data.
@@ -64,51 +63,19 @@ export class Framebuffer {
         Add a color target to this framebuffer.
 
         @method
-        @param {number} [index=0] Color attachment index.
-        @param {Object} [options] Texture options.
-        @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
-        @param {GLEnum} [options.format=RGBA] Texture data format.
-        @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
-        @param {boolean} [options.flipY=true] Whether th y-axis be flipped when reading the texture.
-        @param {GLEnum} [options.minFilter=NEAREST] Minification filter.
-        @param {GLEnum} [options.magFilter=NEAREST] Magnification filter.
-        @param {GLEnum} [options.wrapS=CLAMP_TO_EDGE] Horizontal wrap mode.
-        @param {GLEnum} [options.wrapT=CLAMP_TO_EDGE] Vertical wrap mode.
-        @param {GLEnum} [options.compareMode=NONE] Comparison mode.
-        @param {GLEnum} [options.compareFunc=LEQUAL] Comparison function.
-        @param {GLEnum} [options.baseLevel] Base mipmap level.
-        @param {GLEnum} [options.maxLevel] Maximum mipmap level.
-        @param {GLEnum} [options.minLOD] Mimimum level of detail.
-        @param {GLEnum} [options.maxLOD] Maximum level of detail.
-        @param {boolean} [options.generateMipmaps=false] Should mipmaps be generated.
+        @param {number} index Color attachment index.
+        @param {Texture} texture The texture to attach.
+        @param {GLEnum} [target=TEXTURE_2D] The texture target to attach.
     */
-    colorTarget(index = 0, options = {}) {
-        options.type = options.type || this.gl.UNSIGNED_BYTE;
-        options.format = options.format || this.gl.RGBA;
-        options.internalFormat = options.internalFormat || TEXTURE_FORMAT_DEFAULTS[options.type][options.format];
-        options.minFilter = options.minFilter || this.gl.NEAREST;
-        options.magFilter = options.magFilter || this.gl.NEAREST;
-        options.wrapS = options.wrapS || this.gl.CLAMP_TO_EDGE;
-        options.wrapT = options.wrapT || this.gl.CLAMP_TO_EDGE;
-        options.generateMipmaps = options.generateMipmaps === undefined ? false : options.generateMipmaps;
+    colorTarget(index, texture, target = CONSTANTS.TEXTURE_2D) {
 
-        this.colorAttachments[index] = this.gl.COLOR_ATTACHMENT0 + index;
+        this.colorAttachments[index] = CONSTANTS.COLOR_ATTACHMENT0 + index;
 
         let currentFramebuffer = this.bindAndCaptureState();
 
-        this.colorTextures[index] = new Texture(
-            this.gl,
-            this.appState,
-            this.gl.TEXTURE_2D,
-            null,
-            this.width,
-            this.height,
-            null,
-            false,
-            options
-        );
+        this.colorTextures[index] = texture;
 
-        this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.colorAttachments[index], this.gl.TEXTURE_2D, this.colorTextures[index].texture, 0);
+        this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.colorAttachments[index], target, texture.texture, 0);
         this.gl.drawBuffers(this.colorAttachments);
         this.numColorTargets++;
 
@@ -138,31 +105,13 @@ export class Framebuffer {
         @param {GLEnum} [options.maxLOD] Maximum level of detail.
         @param {boolean} [options.generateMipmaps=false] Should mipmaps be generated.
     */
-    depthTarget(options = {}) {
-        options.format = this.gl.DEPTH_COMPONENT;
-        options.type = options.type || this.gl.UNSIGNED_SHORT;
-        options.internalFormat = options.internalFormat || TEXTURE_FORMAT_DEFAULTS[options.type][options.format];
-        options.minFilter = options.minFilter || this.gl.NEAREST;
-        options.magFilter = options.magFilter || this.gl.NEAREST;
-        options.wrapS = options.wrapS || this.gl.CLAMP_TO_EDGE;
-        options.wrapT = options.wrapT || this.gl.CLAMP_TO_EDGE;
-        options.generateMipmaps = options.generateMipmaps === undefined ? false : options.generateMipmaps;
+    depthTarget(texture, target = CONSTANTS.TEXTURE_2D) {
 
         let currentFramebuffer = this.bindAndCaptureState();
 
-        this.depthTexture = new Texture(
-            this.gl,
-            this.appState,
-            this.gl.TEXTURE_2D,
-            null,
-            this.width,
-            this.height,
-            null,
-            false,
-            options
-        );
+        this.depthTexture = texture;
 
-        this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, this.gl.DEPTH_ATTACHMENT, this.gl.TEXTURE_2D, this.depthTexture.texture, 0);
+        this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, this.gl.DEPTH_ATTACHMENT, target, texture.texture, 0);
 
         this.restoreState(currentFramebuffer);
 

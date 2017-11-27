@@ -76,7 +76,8 @@ export class Texture {
         this.currentUnit = -1;
 
         // Sampler parameters
-        let minFilter = options.minFilter !== undefined ? options.minFilter : gl.LINEAR_MIPMAP_NEAREST;
+        let defaultMinFilter = image ? gl.LINEAR_MIPMAP_NEAREST : gl.LINEAR;
+        let minFilter = options.minFilter !== undefined ? options.minFilter : defaultMinFilter;
         let magFilter = options.magFilter !== undefined ? options.magFilter : gl.LINEAR;
         let wrapS = options.wrapS !== undefined ? options.wrapS : gl.REPEAT;
         let wrapT = options.wrapT !== undefined ? options.wrapT : gl.REPEAT;
