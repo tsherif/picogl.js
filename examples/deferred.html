@@ -161,11 +161,25 @@
         var geoVsSource =  document.getElementById("geo-vs").text.trim();
         var geoFsSource =  document.getElementById("geo-fs").text.trim();
         var geoProgram = app.createProgram(geoVsSource, geoFsSource);
+
+        var positionTarget = app.createTexture2D(app.width, app.height, { 
+            type: PicoGL.FLOAT 
+        });
+        var normalTarget = app.createTexture2D(app.width, app.height, { 
+            type: PicoGL.FLOAT 
+        });
+        var uvTarget = app.createTexture2D(app.width, app.height, { 
+            type: PicoGL.FLOAT,
+            format: PicoGL.RG
+        });
+        var depthTarget = app.createTexture2D(app.width, app.height, {
+            format: PicoGL.DEPTH_COMPONENT
+        });
         var gBuffer = app.createFramebuffer()
-        .colorTarget(0, { type: PicoGL.FLOAT })
-        .colorTarget(1, { type: PicoGL.FLOAT })
-        .colorTarget(2, { type: PicoGL.FLOAT, format: PicoGL.RG })
-        .depthTarget();
+        .colorTarget(0, positionTarget)
+        .colorTarget(1, normalTarget)
+        .colorTarget(2, uvTarget)
+        .depthTarget(depthTarget);
 
         // SET UP MAIN PROGRAM
         var vsSource =  document.getElementById("main-vs").text.trim();

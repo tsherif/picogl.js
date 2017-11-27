@@ -288,11 +288,22 @@
         var colorGeoVsSource =  document.getElementById("vertex-colorgeo").text.trim();
         var colorGeoFsSource =  document.getElementById("fragment-colorgeo").text.trim();
         var colorGeoProgram = app.createProgram(colorGeoVsSource, colorGeoFsSource);
+        
+        var colorTarget = app.createTexture2D(app.width, app.height);
+        var positionTarget = app.createTexture2D(app.width, app.height, { 
+            type: PicoGL.FLOAT 
+        });
+        var normalTarget = app.createTexture2D(app.width, app.height, { 
+            type: PicoGL.FLOAT 
+        });
+        var depthTarget = app.createTexture2D(app.width, app.height, {
+            format: PicoGL.DEPTH_COMPONENT
+        });
         var colorGeoBuffer = app.createFramebuffer()
-        .colorTarget(0)
-        .colorTarget(1, { type: PicoGL.FLOAT })
-        .colorTarget(2, { type: PicoGL.FLOAT })
-        .depthTarget();
+        .colorTarget(0, colorTarget)
+        .colorTarget(1, positionTarget)
+        .colorTarget(2, normalTarget)
+        .depthTarget(depthTarget);
 
         // QUAD VERTEX SHADER
         var quadVsSource =  document.getElementById("vertex-quad").text.trim();
@@ -301,7 +312,10 @@
         // SET UP SSAO PROGRAM
         var ssaoFsSource =  document.getElementById("fragment-ssao").text.trim();
         var ssaoProgram = app.createProgram(quadShader, ssaoFsSource);
-        var ssaoBuffer = app.createFramebuffer().colorTarget(0, { type: PicoGL.FLOAT });
+        var ssaoTarget = app.createTexture2D(app.width, app.height, { 
+            type: PicoGL.FLOAT 
+        });
+        var ssaoBuffer = app.createFramebuffer().colorTarget(0, ssaoTarget);
 
         // SET UP AO BLEND PROGRAM
         var aoBlendFsSource =  document.getElementById("fragment-aoblend").text.trim();

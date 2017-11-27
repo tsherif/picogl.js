@@ -3054,8 +3054,7 @@ class App {
     }
 
     /**
-        Bind a draw framebuffer to the WebGL context. Note that 
-        this method resets the viewport to match the given framebuffer.
+        Bind a draw framebuffer to the WebGL context.
 
         @method
         @param {Framebuffer} framebuffer The Framebuffer object to bind.
@@ -3063,8 +3062,6 @@ class App {
     */
     drawFramebuffer(framebuffer) {
         framebuffer.bindForDraw();
-
-        this.viewport(0, 0, framebuffer.width, framebuffer.height);
 
         return this;
     }
@@ -3092,7 +3089,6 @@ class App {
         if (this.state.drawFramebuffer !== null) {
             this.gl.bindFramebuffer(this.gl.DRAW_FRAMEBUFFER, null);
             this.state.drawFramebuffer = null;
-            this.viewport(0, 0, this.width, this.height);
         }
 
         return this;
@@ -3726,6 +3722,17 @@ class App {
     }
 
     /**
+        Set the viewport to the full canvas.
+
+        @method
+    */
+    defaultViewport() {
+        this.viewport(0, 0, this.width, this.height);
+
+        return this;
+    }
+
+    /**
         Resize the drawing surface.
 
         @method
@@ -3840,14 +3847,17 @@ class App {
     }
 
     /**
-        Create a 2D texture.
+        Create a 2D texture. Can be used in several ways depending on the type of texture data:
+            - app.createTexture(ImageElement, options); // Create texture from a DOM image element.
+            - app.createTexture(TypedArray, width, height, options); // Create texture from a typed array.
+            - app.createTexture(width, height, options); // Create empty texture.
 
         @method
-        @param {DOMElement|ArrayBufferView|Array} image Image data. An array can be passed to manually set all levels 
+        @param {DOMElement|ArrayBufferView|Array} [image] Image data. An array can be passed to manually set all levels 
             of the mipmap chain. If a single level is passed and mipmap filtering is being used,
             generateMipmap() will be called to produce the remaining levels.
-        @param {number} [width] Texture width. Required for array data.
-        @param {number} [height] Texture height. Required for array data.
+        @param {number} [width] Texture width. Required for array or empty data.
+        @param {number} [height] Texture height. Required for array or empty data.
         @param {Object} [options] Texture options.
         @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
         @param {GLEnum} [options.format=RGBA] Texture data format.
@@ -3866,7 +3876,13 @@ class App {
         @param {boolean} [options.generateMipmaps] Should mipmaps be generated.
     */
     createTexture2D(image, width, height, options) {
-        if (height === undefined) {
+        if (typeof image === "number") {
+            // Create empty texture just give width/height.
+            options = height;
+            height = width;
+            width = image;
+            image = null;    
+        } else if (height === undefined) {
             // Passing in a DOM element. Height/width not required.
             options = width;
             width = image.width;
@@ -3978,11 +3994,9 @@ class App {
         Create a framebuffer.
 
         @method
-        @param {number} [width=app.width] Width of the framebuffer.
-        @param {number} [height=app.height] Height of the framebuffer.
     */
-    createFramebuffer(width, height) {
-        return new __WEBPACK_IMPORTED_MODULE_4__framebuffer_js__["a" /* Framebuffer */](this.gl, this.state, width, height);
+    createFramebuffer() {
+        return new __WEBPACK_IMPORTED_MODULE_4__framebuffer_js__["a" /* Framebuffer */](this.gl, this.state);
     }
 
     /**
@@ -4414,8 +4428,6 @@ class DrawCall {
     @class
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLFramebuffer} framebuffer Handle to the framebuffer.
-    @prop {number} width The width of the framebuffer.
-    @prop {number} height The height of the framebuffer.
     @prop {Array} colorTextures Array of color texture targets.
     @prop {number} numColorTargets Number of color texture targets.
     @prop {Texture} depthTexture Depth texture target.
@@ -4424,24 +4436,18 @@ class DrawCall {
 */
 class Framebuffer {
 
-    constructor(gl, appState, width, height) {
+    constructor(gl, appState) {
         this.gl = gl;
         this.framebuffer = gl.createFramebuffer();
         this.appState = appState;
-
-        if (width && height) {
-            this.width = width;
-            this.height = height;
-        } else {
-            this.width = gl.drawingBufferWidth;
-            this.height = gl.drawingBufferHeight;
-        }
 
         this.numColorTargets = 0;
 
         this.colorTextures = [];
         this.colorAttachments = [];
+        this.colorsTextureTargets = [];
         this.depthTexture = null;
+        this.depthTextureTarget = null;
     }
 
     /**
@@ -4459,6 +4465,7 @@ class Framebuffer {
         let currentFramebuffer = this.bindAndCaptureState();
 
         this.colorTextures[index] = texture;
+        this.colorsTextureTargets[index] = target;
 
         this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.colorAttachments[index], target, texture.texture, 0);
         this.gl.drawBuffers(this.colorAttachments);
@@ -4495,6 +4502,7 @@ class Framebuffer {
         let currentFramebuffer = this.bindAndCaptureState();
 
         this.depthTexture = texture;
+        this.depthTextureTarget = target;
 
         this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, this.gl.DEPTH_ATTACHMENT, target, texture.texture, 0);
 
@@ -4510,44 +4518,36 @@ class Framebuffer {
         @param {number} index Color attachment to bind the texture to.
         @param {Texture} texture New texture to bind.
     */
-    replaceTexture(index, texture) {
+    replaceTexture(index, texture, target = __WEBPACK_IMPORTED_MODULE_0__constants_js__["_452" /* TEXTURE_2D */]) {
         this.colorTextures[index] = texture;
+        this.colorsTextureTargets[index] = target;
 
         let currentFramebuffer = this.bindAndCaptureState();
-        this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, this.colorAttachments[index], this.gl.TEXTURE_2D, this.colorTextures[index].texture, 0);
+        this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, this.colorAttachments[index], target, this.colorTextures[index].texture, 0);
         this.restoreState(currentFramebuffer);
 
         return this;
     }
 
     /**
-        Resize framebuffer to current default drawing buffer
-        size. Should be called after calls to App.resize().
+        Resize all currently attached textures.
 
         @method
         @param {number} [width=app.width] New width of the framebuffer.
         @param {number} [height=app.height] New height of the framebuffer.
     */
-    resize(width, height) {
-
-        if (width && height) {
-            this.width = width;
-            this.height = height;
-        } else {
-            this.width = this.gl.drawingBufferWidth;
-            this.height = this.gl.drawingBufferHeight;
-        }
+    resize(width = this.gl.drawingBufferWidth, height = this.gl.drawingBufferHeight) {
 
         let currentFramebuffer = this.bindAndCaptureState();
 
         for (let i = 0; i < this.numColorTargets; ++i) {
-            this.colorTextures[i].resize(this.width, this.height);
-            this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, this.colorAttachments[i], this.gl.TEXTURE_2D, this.colorTextures[i].texture, 0);
+            this.colorTextures[i].resize(width, height);
+            this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, this.colorAttachments[i], this.colorsTextureTargets[i], this.colorTextures[i].texture, 0);
         }
 
         if (this.depthTexture) {
-            this.depthTexture.resize(this.width, this.height);
-            this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, this.gl.DEPTH_ATTACHMENT, this.gl.TEXTURE_2D, this.depthTexture.texture, 0);
+            this.depthTexture.resize(width, height);
+            this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, this.gl.DEPTH_ATTACHMENT, this.depthTextureTarget, this.depthTexture.texture, 0);
         }
 
         this.restoreState(currentFramebuffer);
@@ -4556,20 +4556,11 @@ class Framebuffer {
     }
 
     /**
-        Delete this framebuffer. NOTE: will delete any currently
-        attached textures.
+        Delete this framebuffer.
 
         @method
     */
     delete() {
-        for (let i = 0; i < this.numColorTargets; ++i) {
-            this.colorTextures[i].delete();
-        }
-
-        if (this.depthTexture) {
-            this.depthTexture.delete();
-        }
-
         if (this.framebuffer) {
             this.gl.deleteFramebuffer(this.framebuffer);
             this.framebuffer = null;

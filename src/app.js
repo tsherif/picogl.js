@@ -159,8 +159,7 @@ export class App {
     }
 
     /**
-        Bind a draw framebuffer to the WebGL context. Note that 
-        this method resets the viewport to match the given framebuffer.
+        Bind a draw framebuffer to the WebGL context.
 
         @method
         @param {Framebuffer} framebuffer The Framebuffer object to bind.
@@ -168,8 +167,6 @@ export class App {
     */
     drawFramebuffer(framebuffer) {
         framebuffer.bindForDraw();
-
-        this.viewport(0, 0, framebuffer.width, framebuffer.height);
 
         return this;
     }
@@ -197,7 +194,6 @@ export class App {
         if (this.state.drawFramebuffer !== null) {
             this.gl.bindFramebuffer(this.gl.DRAW_FRAMEBUFFER, null);
             this.state.drawFramebuffer = null;
-            this.viewport(0, 0, this.width, this.height);
         }
 
         return this;
@@ -831,6 +827,17 @@ export class App {
     }
 
     /**
+        Set the viewport to the full canvas.
+
+        @method
+    */
+    defaultViewport() {
+        this.viewport(0, 0, this.width, this.height);
+
+        return this;
+    }
+
+    /**
         Resize the drawing surface.
 
         @method
@@ -945,14 +952,17 @@ export class App {
     }
 
     /**
-        Create a 2D texture.
+        Create a 2D texture. Can be used in several ways depending on the type of texture data:
+            - app.createTexture(ImageElement, options); // Create texture from a DOM image element.
+            - app.createTexture(TypedArray, width, height, options); // Create texture from a typed array.
+            - app.createTexture(width, height, options); // Create empty texture.
 
         @method
-        @param {DOMElement|ArrayBufferView|Array} image Image data. An array can be passed to manually set all levels 
+        @param {DOMElement|ArrayBufferView|Array} [image] Image data. An array can be passed to manually set all levels 
             of the mipmap chain. If a single level is passed and mipmap filtering is being used,
             generateMipmap() will be called to produce the remaining levels.
-        @param {number} [width] Texture width. Required for array data.
-        @param {number} [height] Texture height. Required for array data.
+        @param {number} [width] Texture width. Required for array or empty data.
+        @param {number} [height] Texture height. Required for array or empty data.
         @param {Object} [options] Texture options.
         @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
         @param {GLEnum} [options.format=RGBA] Texture data format.
@@ -971,7 +981,13 @@ export class App {
         @param {boolean} [options.generateMipmaps] Should mipmaps be generated.
     */
     createTexture2D(image, width, height, options) {
-        if (height === undefined) {
+        if (typeof image === "number") {
+            // Create empty texture just give width/height.
+            options = height;
+            height = width;
+            width = image;
+            image = null;    
+        } else if (height === undefined) {
             // Passing in a DOM element. Height/width not required.
             options = width;
             width = image.width;
@@ -1083,11 +1099,9 @@ export class App {
         Create a framebuffer.
 
         @method
-        @param {number} [width=app.width] Width of the framebuffer.
-        @param {number} [height=app.height] Height of the framebuffer.
     */
-    createFramebuffer(width, height) {
-        return new Framebuffer(this.gl, this.state, width, height);
+    createFramebuffer() {
+        return new Framebuffer(this.gl, this.state);
     }
 
     /**
