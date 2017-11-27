@@ -532,7 +532,7 @@ export class App {
 
     /**
         Enable the EXT_color_buffer_float extension. Allows for creating float textures as
-        render targets on FrameBuffer objects. E.g. app.createFramebuffer().colorTarget(0, PicoGL.FLOAT).
+        render targets on FrameBuffer objects.
 
         @method
         @see Framebuffer
@@ -953,9 +953,11 @@ export class App {
 
     /**
         Create a 2D texture. Can be used in several ways depending on the type of texture data:
-            - app.createTexture(ImageElement, options); // Create texture from a DOM image element.
-            - app.createTexture(TypedArray, width, height, options); // Create texture from a typed array.
-            - app.createTexture(width, height, options); // Create empty texture.
+        <ul>
+            <li><b>app.createTexture(ImageElement, options)</b>: Create texture from a DOM image element.
+            <li><b>app.createTexture(TypedArray, width, height, options)</b>: Create texture from a typed array.
+            <li><b>app.createTexture(width, height, options)</b>: Create empty texture.
+        </ul>
 
         @method
         @param {DOMElement|ArrayBufferView|Array} [image] Image data. An array can be passed to manually set all levels 
