@@ -941,7 +941,7 @@ export class App {
         @param {GLEnum} [usage=DYNAMIC_DRAW] Buffer usage.
     */
     createUniformBuffer(layout, usage) {
-        return new UniformBuffer(this.gl, layout, usage);
+        return new UniformBuffer(this.gl, this.state, layout, usage);
     }
 
     /**

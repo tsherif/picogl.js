@@ -135,7 +135,7 @@ export class Texture {
         }
 
         this.texture = this.gl.createTexture();
-        this.bind(Math.max(this.currentUnit, 1));
+        this.bind(Math.max(this.currentUnit, 0));
 
         this.width = width;
         this.height = height;
@@ -266,8 +266,11 @@ export class Texture {
             this.gl.deleteSampler(this.sampler);
             this.texture = null;
             this.sampler = null;
-            this.appState.textures[this.currentUnit] = null;
-            this.currentUnit = -1;
+
+            if (this.currentUnit !== -1 && this.appState.textures[this.currentUnit] === this) {
+                this.appState.textures[this.currentUnit] = null;
+                this.currentUnit = -1;
+            }
         }
     }
 

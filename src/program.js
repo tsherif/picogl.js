@@ -34,7 +34,6 @@ import { SingleComponentUniform, MultiNumericUniform, MultiBoolUniform, MatrixUn
     @prop {WebGLProgram} program The WebGL program.
     @prop {boolean} transformFeedback Whether this program is set up for transform feedback.
     @prop {Object} uniforms Map of uniform names to handles.
-    @prop {Object} uniformBlocks Map of uniform block names to handles.
     @prop {Object} appState Tracked GL state.
 */
 export class Program {
@@ -86,14 +85,9 @@ export class Program {
         this.transformFeedback = !!xformFeebackVars;
         this.uniforms = {};
         this.uniformBlocks = {};
-        this.uniformBlockBindings = {};
+        this.uniformBlockCount = 0;
         this.samplers = {};
-        /////////////////////////////////////////////////////////////////////////////////
-        // TODO(Tarek):
-        // Workaround for https://bugs.chromium.org/p/chromium/issues/detail?id=722288
-        // Start at unit 0 when that's fixed
-        /////////////////////////////////////////////////////////////////////////////////
-        this.samplerCount = 1;
+        this.samplerCount = 0;
 
         gl.useProgram(program);
 
@@ -177,8 +171,10 @@ export class Program {
         for (i = 0; i < numUniformBlocks; ++i) {
             let blockName = gl.getActiveUniformBlockName(this.program, i);
             let blockIndex = gl.getUniformBlockIndex(this.program, blockName);
-
-            this.uniformBlocks[blockName] = blockIndex;
+            
+            let uniformBlockBase = this.uniformBlockCount++;
+            this.gl.uniformBlockBinding(this.program, blockIndex, uniformBlockBase);
+            this.uniformBlocks[blockName] = uniformBlockBase;
         }
 
         gl.useProgram(null);
@@ -199,14 +195,6 @@ export class Program {
     // Set the value of a uniform.
     uniform(name, value) {
         this.uniforms[name].set(value);
-    }
-
-    // Bind a uniform block to a uniform buffer base.
-    uniformBlock(name, base) {
-        if (this.uniformBlockBindings[name] !== base) {
-            this.gl.uniformBlockBinding(this.program, this.uniformBlocks[name], base);
-            this.uniformBlockBindings[name] = base;
-        }
     }
 
     // Use this program.
