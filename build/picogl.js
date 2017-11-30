@@ -3427,7 +3427,7 @@ class App {
 
     /**
         Enable the EXT_color_buffer_float extension. Allows for creating float textures as
-        render targets on FrameBuffer objects. E.g. app.createFramebuffer().colorTarget(0, PicoGL.FLOAT).
+        render targets on FrameBuffer objects.
 
         @method
         @see Framebuffer
@@ -3848,9 +3848,11 @@ class App {
 
     /**
         Create a 2D texture. Can be used in several ways depending on the type of texture data:
-            - app.createTexture(ImageElement, options); // Create texture from a DOM image element.
-            - app.createTexture(TypedArray, width, height, options); // Create texture from a typed array.
-            - app.createTexture(width, height, options); // Create empty texture.
+        <ul>
+            <li><b>app.createTexture(ImageElement, options)</b>: Create texture from a DOM image element.
+            <li><b>app.createTexture(TypedArray, width, height, options)</b>: Create texture from a typed array.
+            <li><b>app.createTexture(width, height, options)</b>: Create empty texture.
+        </ul>
 
         @method
         @param {DOMElement|ArrayBufferView|Array} [image] Image data. An array can be passed to manually set all levels 
@@ -4133,16 +4135,19 @@ class Cubemap {
         let levels = generateMipmaps ? Math.floor(Math.log2(Math.min(width, height))) + 1 : 1;
         gl.texStorage2D(gl.TEXTURE_CUBE_MAP, levels, this.internalFormat, width, height);
 
-        gl.texSubImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_X, 0, 0, 0, width, height, this.format, this.type, negX);
-        gl.texSubImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X, 0, 0, 0, width, height, this.format, this.type, posX);
-        gl.texSubImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, 0, 0, width, height, this.format, this.type, negY);
-        gl.texSubImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Y, 0, 0, 0, width, height, this.format, this.type, posY);
-        gl.texSubImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, 0, 0, width, height, this.format, this.type, negZ);
-        gl.texSubImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Z, 0, 0, 0, width, height, this.format, this.type, posZ);
+        if (negX) {
+            gl.texSubImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_X, 0, 0, 0, width, height, this.format, this.type, negX);
+            gl.texSubImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X, 0, 0, 0, width, height, this.format, this.type, posX);
+            gl.texSubImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, 0, 0, width, height, this.format, this.type, negY);
+            gl.texSubImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Y, 0, 0, 0, width, height, this.format, this.type, posY);
+            gl.texSubImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, 0, 0, width, height, this.format, this.type, negZ);
+            gl.texSubImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Z, 0, 0, 0, width, height, this.format, this.type, posZ);
 
-        if (generateMipmaps) {
-            gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
+            if (generateMipmaps) {
+                gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
+            }
         }
+
 
     }
 
@@ -4480,22 +4485,8 @@ class Framebuffer {
         Add a depth target to this framebuffer.
 
         @method
-        @param {Object} [options] Texture options.
-        @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
-        @param {GLEnum} [options.format=RGBA] Texture data format.
-        @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
-        @param {boolean} [options.flipY=true] Whether th y-axis be flipped when reading the texture.
-        @param {GLEnum} [options.minFilter=NEAREST] Minification filter.
-        @param {GLEnum} [options.magFilter=NEAREST] Magnification filter.
-        @param {GLEnum} [options.wrapS=CLAMP_TO_EDGE] Horizontal wrap mode.
-        @param {GLEnum} [options.wrapT=CLAMP_TO_EDGE] Vertical wrap mode.
-        @param {GLEnum} [options.compareMode=NONE] Comparison mode.
-        @param {GLEnum} [options.compareFunc=LEQUAL] Comparison function.
-        @param {GLEnum} [options.baseLevel] Base mipmap level.
-        @param {GLEnum} [options.maxLevel] Maximum mipmap level.
-        @param {GLEnum} [options.minLOD] Mimimum level of detail.
-        @param {GLEnum} [options.maxLOD] Maximum level of detail.
-        @param {boolean} [options.generateMipmaps=false] Should mipmaps be generated.
+        @param {Texture} texture The texture to attach.
+        @param {GLEnum} [target=TEXTURE_2D] The texture target to attach.
     */
     depthTarget(texture, target = __WEBPACK_IMPORTED_MODULE_0__constants_js__["_452" /* TEXTURE_2D */]) {
 
@@ -4517,6 +4508,7 @@ class Framebuffer {
         @method
         @param {number} index Color attachment to bind the texture to.
         @param {Texture} texture New texture to bind.
+        @param {GLEnum} [target=TEXTURE_2D] The texture target to attach.
     */
     replaceTexture(index, texture, target = __WEBPACK_IMPORTED_MODULE_0__constants_js__["_452" /* TEXTURE_2D */]) {
         this.colorTextures[index] = texture;
