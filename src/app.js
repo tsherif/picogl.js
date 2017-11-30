@@ -75,12 +75,7 @@ export class App {
             transformFeedback: null,
             activeTexture: -1,
             textures: new Array(CONSTANTS.WEBGL_INFO.MAX_TEXTURE_UNITS),
-            // TODO(Tarek): UBO state currently not tracked, due bug
-            // with UBO state becoming corrupted between frames in Chrome
-            // https://bugs.chromium.org/p/chromium/issues/detail?id=722060
-            // Enable UBO state tracking when that's fixed.
             uniformBuffers: new Array(CONSTANTS.WEBGL_INFO.MAX_UNIFORM_BUFFERS),
-            uniformBufferCount: 0,
             freeUniformBufferBases: [],
             drawFramebuffer: null,
             readFramebuffer: null
@@ -713,48 +708,6 @@ export class App {
             TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR] = true;
             TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR] = true;
             TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR] = true;
-
-            // TODO(Tarek): Test for https://bugs.chromium.org/p/chromium/issues/detail?id=757447
-            // Remove this when that's fixed
-            this.gl.getError();
-            this.state.textures[0] = null;
-            this.gl.activeTexture(this.gl.TEXTURE0);
-            let texture = this.gl.createTexture();
-            this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
-            this.gl.texStorage2D(this.gl.TEXTURE_2D, 1, CONSTANTS.COMPRESSED_RGBA_ASTC_4x4_KHR, 4, 4);
-
-            if (this.gl.getError() !== this.gl.NO_ERROR) {
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_RGBA_ASTC_4x4_KHR]           = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_RGBA_ASTC_5x4_KHR]           = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_RGBA_ASTC_5x5_KHR]           = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_RGBA_ASTC_6x5_KHR]           = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_RGBA_ASTC_6x6_KHR]           = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_RGBA_ASTC_8x5_KHR]           = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_RGBA_ASTC_8x6_KHR]           = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_RGBA_ASTC_8x8_KHR]           = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_RGBA_ASTC_10x5_KHR]          = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_RGBA_ASTC_10x6_KHR]          = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_RGBA_ASTC_10x8_KHR]          = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_RGBA_ASTC_10x10_KHR]         = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_RGBA_ASTC_12x10_KHR]         = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_RGBA_ASTC_12x12_KHR]         = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR]   = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR]   = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR]   = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR]   = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR]   = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR]   = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR]   = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR]   = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR]  = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR]  = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR]  = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR] = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR] = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR] = true;
-            }
-
-            this.gl.deleteTexture(texture);
         }
         
         return this;

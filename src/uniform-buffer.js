@@ -230,7 +230,7 @@ export class UniformBuffer {
         if (currentBuffer !== this) {
 
             if (currentBuffer) {
-                currentBuffer.currentBase = -1
+                currentBuffer.currentBase = -1;
             }
 
             if (this.currentBase !== -1) {

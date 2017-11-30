@@ -2036,10 +2036,6 @@ FLOAT[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_81" /* DEPTH_COMPONENT */]] 
 
 TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES = {};
 
-// TODO(Tarek): For https://bugs.chromium.org/p/chromium/issues/detail?id=757447
-// Remove this when that's fixed
-TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE = {};
-
 
 /***/ }),
 /* 2 */
@@ -2120,8 +2116,6 @@ class Texture {
             this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */][this.type][this.format];
         }
 
-        this.noTexStorage = !!__WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[this.internalFormat];
-
         // -1 indicates unbound
         this.currentUnit = -1;
 
@@ -2201,12 +2195,6 @@ class Texture {
             this.gl.texParameteri(this.binding, this.gl.TEXTURE_MAX_LEVEL, this.maxLevel);
         }
 
-        // TODO(Tarek): For https://bugs.chromium.org/p/chromium/issues/detail?id=757447
-        // Remove this when that's fixed
-        if (this.noTexStorage) {
-            return;
-        }
-
         let levels;
         if (this.is3D) {
             if (this.mipmaps) {
@@ -2251,25 +2239,7 @@ class Texture {
         this.bind(Math.max(this.currentUnit, 0));
 
         if (this.compressed) {
-
-            // TODO(Tarek): For https://bugs.chromium.org/p/chromium/issues/detail?id=757447
-            // Remove this when that's fixed
-            if (this.noTexStorage) {
-                if (this.is3D) {
-                    for (i = 0; i < numLevels; ++i) {
-                        this.gl.compressedTexImage3D(this.binding, i, this.internalFormat, width, height, depth, 0, data[i]);
-                        width = Math.max(width >> 1, 1);
-                        height = Math.max(height >> 1, 1);
-                        depth = Math.max(depth >> 1, 1);
-                    }
-                } else {
-                    for (i = 0; i < numLevels; ++i) {
-                        this.gl.compressedTexImage2D(this.binding, i, this.internalFormat, width, height, 0, data[i]);
-                        width = Math.max(width >> 1, 1);
-                        height = Math.max(height >> 1, 1);
-                    }
-                }
-            } else if (this.is3D) {
+            if (this.is3D) {
                 for (i = 0; i < numLevels; ++i) {
                     this.gl.compressedTexSubImage3D(this.binding, i, 0, 0, 0, width, height, depth, this.format, data[i]);
                     width = Math.max(width >> 1, 1);
@@ -3282,12 +3252,7 @@ class App {
             transformFeedback: null,
             activeTexture: -1,
             textures: new Array(__WEBPACK_IMPORTED_MODULE_0__constants_js__["_558" /* WEBGL_INFO */].MAX_TEXTURE_UNITS),
-            // TODO(Tarek): UBO state currently not tracked, due bug
-            // with UBO state becoming corrupted between frames in Chrome
-            // https://bugs.chromium.org/p/chromium/issues/detail?id=722060
-            // Enable UBO state tracking when that's fixed.
             uniformBuffers: new Array(__WEBPACK_IMPORTED_MODULE_0__constants_js__["_558" /* WEBGL_INFO */].MAX_UNIFORM_BUFFERS),
-            uniformBufferCount: 0,
             freeUniformBufferBases: [],
             drawFramebuffer: null,
             readFramebuffer: null
@@ -3920,48 +3885,6 @@ class App {
             __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_35" /* COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR */]] = true;
             __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_39" /* COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR */]] = true;
             __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_40" /* COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR */]] = true;
-
-            // TODO(Tarek): Test for https://bugs.chromium.org/p/chromium/issues/detail?id=757447
-            // Remove this when that's fixed
-            this.gl.getError();
-            this.state.textures[0] = null;
-            this.gl.activeTexture(this.gl.TEXTURE0);
-            let texture = this.gl.createTexture();
-            this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
-            this.gl.texStorage2D(this.gl.TEXTURE_2D, 1, __WEBPACK_IMPORTED_MODULE_0__constants_js__["_17" /* COMPRESSED_RGBA_ASTC_4x4_KHR */], 4, 4);
-
-            if (this.gl.getError() !== this.gl.NO_ERROR) {
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_17" /* COMPRESSED_RGBA_ASTC_4x4_KHR */]]           = true;
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_18" /* COMPRESSED_RGBA_ASTC_5x4_KHR */]]           = true;
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_19" /* COMPRESSED_RGBA_ASTC_5x5_KHR */]]           = true;
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_20" /* COMPRESSED_RGBA_ASTC_6x5_KHR */]]           = true;
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_21" /* COMPRESSED_RGBA_ASTC_6x6_KHR */]]           = true;
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_22" /* COMPRESSED_RGBA_ASTC_8x5_KHR */]]           = true;
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_23" /* COMPRESSED_RGBA_ASTC_8x6_KHR */]]           = true;
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_24" /* COMPRESSED_RGBA_ASTC_8x8_KHR */]]           = true;
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_12" /* COMPRESSED_RGBA_ASTC_10x5_KHR */]]          = true;
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_13" /* COMPRESSED_RGBA_ASTC_10x6_KHR */]]          = true;
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_14" /* COMPRESSED_RGBA_ASTC_10x8_KHR */]]          = true;
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_11" /* COMPRESSED_RGBA_ASTC_10x10_KHR */]]         = true;
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_15" /* COMPRESSED_RGBA_ASTC_12x10_KHR */]]         = true;
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_16" /* COMPRESSED_RGBA_ASTC_12x12_KHR */]]         = true;
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_41" /* COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR */]]   = true;
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_42" /* COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR */]]   = true;
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_43" /* COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR */]]   = true;
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_44" /* COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR */]]   = true;
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_45" /* COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR */]]   = true;
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_46" /* COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR */]]   = true;
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_47" /* COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR */]]   = true;
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_48" /* COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR */]]   = true;
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_36" /* COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR */]]  = true;
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_37" /* COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR */]]  = true;
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_38" /* COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR */]]  = true;
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_35" /* COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR */]] = true;
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_39" /* COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR */]] = true;
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_40" /* COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR */]] = true;
-            }
-
-            this.gl.deleteTexture(texture);
         }
         
         return this;
@@ -5901,7 +5824,7 @@ class UniformBuffer {
         if (currentBuffer !== this) {
 
             if (currentBuffer) {
-                currentBuffer.currentBase = -1
+                currentBuffer.currentBase = -1;
             }
 
             if (this.currentBase !== -1) {
