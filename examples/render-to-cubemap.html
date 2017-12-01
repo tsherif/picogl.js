@@ -23,7 +23,7 @@
 -->
 <html>
 <head>
-    <title>PicoGL.js: Render to Texture</title>
+    <title>PicoGL.js: Render to Cubemap</title>
     <script src="utils/gl-matrix.js"></script>
     <script src="../build/picogl.js"></script>
     <script src="utils/utils.js"></script>
@@ -31,9 +31,9 @@
 </head>
 <body>
     <div id="example-title">
-        PicoGL.js Example: Render to Texture
+        PicoGL.js Example: Render to Cubemap
         <div>
-            <a href="https://github.com/tsherif/picogl.js/blob/master/examples/rtt.html">Source code</a>
+            <a href="https://github.com/tsherif/picogl.js/blob/master/examples/render-to-cubemap.html">Source code</a>
         </div>
     </div>
     <canvas id="gl-canvas"></canvas>
@@ -75,7 +75,6 @@
         out vec4 fragColor;
         void main() {
             vec3 viewDir = vPosition - uEyePosition.xyz;
-            // vec3 color = texture(cubemap, normalize(viewDir)).rgb;
             vec3 color = mix(texture(cubemap, viewDir).rgb, texture(cubemap2, viewDir).rgb, 0.5);
             fragColor = vec4(color, 1.0);
         }
@@ -92,7 +91,6 @@
         uniform SceneUniforms {
             mat4 uViewProj;
             vec4 uEyePosition;
-            vec4 uLightPosition;
         };
 
         uniform mat4 uModel;
@@ -119,7 +117,6 @@
         uniform SceneUniforms {
             mat4 uViewProj;
             vec4 uEyePosition;
-            vec4 uLightPosition;
         };
 
         uniform bool reflecting;
@@ -146,22 +143,17 @@
             vec3 color1 = texture(cubemap, dir).rgb;
             vec3 color2 = texture(cubemap2, dir).rgb;
             fragColor = vec4(mix(color1, color2, 0.5), 1.0);
-            // if (normal.x > -2.0) {
-            //     vec3 color1 = texture(cubemap, vModelPosition).rgb;
-            //     vec3 color2 = texture(cubemap2, vModelPosition).rgb;
-            //     fragColor = vec4(mix(color1, color2, 0.5), 1.0);
-            // }
             fragColor1 = fragColor;
             fragColor2 = fragColor;
             fragColor3 = fragColor;
             fragColor4 = fragColor;
             fragColor5 = fragColor;
-
         }
     </script>
     <script type="text/javascript">
         utils.addTimerElement();
-
+        utils.timerDiv.style.color = "black";
+        
         var canvas = document.getElementById("gl-canvas");
 
         if (!utils.testWebGL2()) {
@@ -234,12 +226,10 @@
         // UNIFORM BUFFER
         var sceneUniformBuffer = app.createUniformBuffer([
             PicoGL.FLOAT_MAT4,
-            PicoGL.FLOAT_VEC4,
             PicoGL.FLOAT_VEC4
         ])
         .set(0, viewProjMatrix)
         .set(1, eyePosition)
-        .set(2, lightPosition)
         .update();
 
         var skyboxSceneUniforms = app.createUniformBuffer([
@@ -293,19 +283,6 @@
                     posZ: posZ,
                 });
 
-
-                var redCubemap = app.createCubemap({
-                    negX: new Uint8Array([255, 0, 0, 255]),
-                    posX: new Uint8Array([255, 0, 0, 255]),
-                    negY: new Uint8Array([255, 0, 0, 255]),
-                    posY: new Uint8Array([255, 0, 0, 255]),
-                    negZ: new Uint8Array([255, 0, 0, 255]),
-                    posZ: new Uint8Array([255, 0, 0, 255]),
-                    width: 1,
-                    height: 1
-                });
-
-
                 // PROGRAM
                 var vsSource =  document.getElementById("vertex-draw").text.trim();
                 var fsSource =  document.getElementById("fragment-draw").text.trim();
@@ -315,7 +292,7 @@
                 var skyboxFsSource =  document.getElementById("fragment-skybox").text.trim();
                 var skyboxProgram = app.createProgram(skyboxVsSource, skyboxFsSource);
 
-                var drawCall2 = app.createDrawCall(program, boxArray)
+                var drawCall = app.createDrawCall(program, boxArray)
                 .uniformBlock("SceneUniforms", sceneUniformBuffer);
 
                 var skyboxDrawcall = app.createDrawCall(skyboxProgram, boxArray)
@@ -340,26 +317,23 @@
                     mat4.fromYRotation(rotateYMatrix, angleY);
                     mat4.multiply(modelMatrix, rotateXMatrix, rotateYMatrix);
 
-                    drawCall2.uniform("uModel", modelMatrix);
+                    drawCall.uniform("uModel", modelMatrix);
 
-                    // RENDER TO OFFSCREEN TEXTURE
+                    // DRAW SAME IMAGE TO ALL SIX FACES OF CUBEMAP
                     app
                     .drawFramebuffer(rttBuffer)
                     .viewport(0, 0, 2048, 2048)
-                    .clearColor(0.1, 0.1, 0.1, 1.0)
                     .clear();
-                    drawCall2
+                    drawCall
                     .uniform("reflecting", false)
                     .texture("cubemap", baseCubemap)
                     .texture("cubemap2", baseCubemap)
                     .draw();
                     
                     // RENDER TO SCREEN
-                    app.defaultDrawFramebuffer().defaultViewport()
-                    .clearColor(0.0, 0.0, 0.0, 1.0)
-                    .clear();
+                    app.defaultDrawFramebuffer().defaultViewport();
                     skyboxDrawcall.draw();
-                    drawCall2
+                    drawCall
                     .uniform("reflecting", true)
                     .texture("cubemap", skyCubemap)
                     .texture("cubemap2", colorTarget)
