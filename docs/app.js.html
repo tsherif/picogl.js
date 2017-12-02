@@ -103,12 +103,7 @@ export class App {
             transformFeedback: null,
             activeTexture: -1,
             textures: new Array(CONSTANTS.WEBGL_INFO.MAX_TEXTURE_UNITS),
-            // TODO(Tarek): UBO state currently not tracked, due bug
-            // with UBO state becoming corrupted between frames in Chrome
-            // https://bugs.chromium.org/p/chromium/issues/detail?id=722060
-            // Enable UBO state tracking when that's fixed.
             uniformBuffers: new Array(CONSTANTS.WEBGL_INFO.MAX_UNIFORM_BUFFERS),
-            uniformBufferCount: 0,
             freeUniformBufferBases: [],
             drawFramebuffer: null,
             readFramebuffer: null
@@ -737,48 +732,6 @@ export class App {
             TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR] = true;
             TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR] = true;
             TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR] = true;
-
-            // TODO(Tarek): Test for https://bugs.chromium.org/p/chromium/issues/detail?id=757447
-            // Remove this when that's fixed
-            this.gl.getError();
-            this.state.textures[0] = null;
-            this.gl.activeTexture(this.gl.TEXTURE0);
-            let texture = this.gl.createTexture();
-            this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
-            this.gl.texStorage2D(this.gl.TEXTURE_2D, 1, CONSTANTS.COMPRESSED_RGBA_ASTC_4x4_KHR, 4, 4);
-
-            if (this.gl.getError() !== this.gl.NO_ERROR) {
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_RGBA_ASTC_4x4_KHR]           = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_RGBA_ASTC_5x4_KHR]           = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_RGBA_ASTC_5x5_KHR]           = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_RGBA_ASTC_6x5_KHR]           = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_RGBA_ASTC_6x6_KHR]           = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_RGBA_ASTC_8x5_KHR]           = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_RGBA_ASTC_8x6_KHR]           = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_RGBA_ASTC_8x8_KHR]           = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_RGBA_ASTC_10x5_KHR]          = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_RGBA_ASTC_10x6_KHR]          = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_RGBA_ASTC_10x8_KHR]          = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_RGBA_ASTC_10x10_KHR]         = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_RGBA_ASTC_12x10_KHR]         = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_RGBA_ASTC_12x12_KHR]         = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR]   = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR]   = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR]   = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR]   = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR]   = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR]   = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR]   = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR]   = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR]  = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR]  = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR]  = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR] = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR] = true;
-                TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR] = true;
-            }
-
-            this.gl.deleteTexture(texture);
         }
         
         return this;
@@ -976,15 +929,15 @@ export class App {
         @param {GLEnum} [usage=DYNAMIC_DRAW] Buffer usage.
     */
     createUniformBuffer(layout, usage) {
-        return new UniformBuffer(this.gl, layout, usage);
+        return new UniformBuffer(this.gl, this.state, layout, usage);
     }
 
     /**
         Create a 2D texture. Can be used in several ways depending on the type of texture data:
         &lt;ul>
-            &lt;li>&lt;b>app.createTexture(ImageElement, options)&lt;/b>: Create texture from a DOM image element.
-            &lt;li>&lt;b>app.createTexture(TypedArray, width, height, options)&lt;/b>: Create texture from a typed array.
-            &lt;li>&lt;b>app.createTexture(width, height, options)&lt;/b>: Create empty texture.
+            &lt;li>&lt;b>app.createTexture2D(ImageElement, options)&lt;/b>: Create texture from a DOM image element.
+            &lt;li>&lt;b>app.createTexture2D(TypedArray, width, height, options)&lt;/b>: Create texture from a typed array.
+            &lt;li>&lt;b>app.createTexture2D(width, height, options)&lt;/b>: Create empty texture.
         &lt;/ul>
 
         @method
@@ -994,12 +947,15 @@ export class App {
         @param {number} [width] Texture width. Required for array or empty data.
         @param {number} [height] Texture height. Required for array or empty data.
         @param {Object} [options] Texture options.
-        @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
+        @param {GLEnum} [options.type] Type of data stored in the texture. Defaults to UNSIGNED_SHORT 
+            if format is DEPTH_COMPONENT, UNSIGNED_BYTE otherwise.
         @param {GLEnum} [options.format=RGBA] Texture data format.
         @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
-        @param {boolean} [options.flipY=false] Whether the y-axis be flipped when unpacking the texture.
-        @param {GLEnum} [options.minFilter=LINEAR_MIPMAP_NEAREST] Minification filter.
-        @param {GLEnum} [options.magFilter=LINEAR] Magnification filter.
+        @param {boolean} [options.flipY=false] Whether the y-axis should be flipped when unpacking the texture. 
+        @param {GLEnum} [options.minFilter] Minification filter. Defaults to 
+            LINEAR_MIPMAP_NEAREST if image data is provided, NEAREST otherwise.
+        @param {GLEnum} [options.magFilter] Magnification filter. Defaults to LINEAR
+            if image data is provided, NEAREST otherwise.
         @param {GLEnum} [options.wrapS=REPEAT] Horizontal wrap mode.
         @param {GLEnum} [options.wrapT=REPEAT] Vertical wrap mode.
         @param {GLEnum} [options.compareMode=NONE] Comparison mode.
@@ -1008,7 +964,8 @@ export class App {
         @param {GLEnum} [options.maxLevel] Maximum mipmap level.
         @param {GLEnum} [options.minLOD] Mimimum level of detail.
         @param {GLEnum} [options.maxLOD] Maximum level of detail.
-        @param {boolean} [options.generateMipmaps] Should mipmaps be generated.
+        @param {boolean} [options.generateMipmaps] Should mipmaps be generated. Defaults to generating mipmaps if
+            a mipmap sampling filter is use and the mipmap levels aren't provided directly.
     */
     createTexture2D(image, width, height, options) {
         if (typeof image === "number") {
@@ -1038,21 +995,26 @@ export class App {
         @param {number} height Texture height.
         @param {number} size Number of images in the array.
         @param {Object} [options] Texture options.
-        @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
+         @param {GLEnum} [options.type] Type of data stored in the texture. Defaults to UNSIGNED_SHORT 
+            if format is DEPTH_COMPONENT, UNSIGNED_BYTE otherwise.
         @param {GLEnum} [options.format=RGBA] Texture data format.
         @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
-        @param {boolean} [options.flipY=false] Whether the y-axis be flipped when unpacking the texture.
-        @param {GLEnum} [options.minFilter=LINEAR_MIPMAP_NEAREST] Minification filter.
-        @param {GLEnum} [options.magFilter=LINEAR] Magnification filter.
+        @param {boolean} [options.flipY=false] Whether the y-axis should be flipped when unpacking the texture. 
+        @param {GLEnum} [options.minFilter] Minification filter. Defaults to 
+            LINEAR_MIPMAP_NEAREST if image data is provided, NEAREST otherwise.
+        @param {GLEnum} [options.magFilter] Magnification filter. Defaults to LINEAR
+            if image data is provided, NEAREST otherwise.
         @param {GLEnum} [options.wrapS=REPEAT] Horizontal wrap mode.
         @param {GLEnum} [options.wrapT=REPEAT] Vertical wrap mode.
+        @param {GLEnum} [options.wrapR=REPEAT] Depth wrap mode.
         @param {GLEnum} [options.compareMode=NONE] Comparison mode.
         @param {GLEnum} [options.compareFunc=LEQUAL] Comparison function.
         @param {GLEnum} [options.baseLevel] Base mipmap level.
         @param {GLEnum} [options.maxLevel] Maximum mipmap level.
         @param {GLEnum} [options.minLOD] Mimimum level of detail.
         @param {GLEnum} [options.maxLOD] Maximum level of detail.
-        @param {boolean} [options.generateMipmaps] Should mipmaps be generated.
+        @param {boolean} [options.generateMipmaps] Should mipmaps be generated. Defaults to generating mipmaps if
+            a mipmap sampling filter is use and the mipmap levels aren't provided directly.
     */
     createTextureArray(image, width, height, depth, options) {
         return new Texture(this.gl, this.state, this.gl.TEXTURE_2D_ARRAY, image, width, height, depth, true, options);
@@ -1069,12 +1031,15 @@ export class App {
         @param {number} height Texture height.
         @param {number} depth Texture depth.
         @param {Object} [options] Texture options.
-        @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
+        @param {GLEnum} [options.type] Type of data stored in the texture. Defaults to UNSIGNED_SHORT 
+            if format is DEPTH_COMPONENT, UNSIGNED_BYTE otherwise.
         @param {GLEnum} [options.format=RGBA] Texture data format.
         @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
-        @param {boolean} [options.flipY=false] Whether the y-axis be flipped when unpacking the texture.
-        @param {GLEnum} [options.minFilter=LINEAR_MIPMAP_NEAREST] Minification filter.
-        @param {GLEnum} [options.magFilter=LINEAR] Magnification filter.
+        @param {boolean} [options.flipY=false] Whether the y-axis should be flipped when unpacking the texture. 
+        @param {GLEnum} [options.minFilter] Minification filter. Defaults to 
+            LINEAR_MIPMAP_NEAREST if image data is provided, NEAREST otherwise.
+        @param {GLEnum} [options.magFilter] Magnification filter. Defaults to LINEAR
+            if image data is provided, NEAREST otherwise.
         @param {GLEnum} [options.wrapS=REPEAT] Horizontal wrap mode.
         @param {GLEnum} [options.wrapT=REPEAT] Vertical wrap mode.
         @param {GLEnum} [options.wrapR=REPEAT] Depth wrap mode.
@@ -1084,7 +1049,8 @@ export class App {
         @param {GLEnum} [options.maxLevel] Maximum mipmap level.
         @param {GLEnum} [options.minLOD] Mimimum level of detail.
         @param {GLEnum} [options.maxLOD] Maximum level of detail.
-        @param {boolean} [options.generateMipmaps] Should mipmaps be generated.
+        @param {boolean} [options.generateMipmaps] Should mipmaps be generated. Defaults to generating mipmaps if
+            a mipmap sampling filter is use and the mipmap levels aren't provided directly.
     */
     createTexture3D(image, width, height, depth, options) {
         return new Texture(this.gl, this.state, this.gl.TEXTURE_3D, image, width, height, depth, true, options);
@@ -1095,31 +1061,37 @@ export class App {
 
         @method
         @param {Object} options Texture options.
-        @param {DOMElement|ArrayBufferView} options.negX The image data for the negative X direction.
+        @param {DOMElement|ArrayBufferView} [options.negX] The image data for the negative X direction.
                 Can be any format that would be accepted by texImage2D.
-        @param {DOMElement|ArrayBufferView} options.posX The image data for the positive X direction.
+        @param {DOMElement|ArrayBufferView} [options.posX] The image data for the positive X direction.
                 Can be any format that would be accepted by texImage2D.
-        @param {DOMElement|ArrayBufferView} options.negY The image data for the negative Y direction.
+        @param {DOMElement|ArrayBufferView} [options.negY] The image data for the negative Y direction.
                 Can be any format that would be accepted by texImage2D.
-        @param {DOMElement|ArrayBufferView} options.posY The image data for the positive Y direction.
+        @param {DOMElement|ArrayBufferView} [options.posY] The image data for the positive Y direction.
                 Can be any format that would be accepted by texImage2D.
-        @param {DOMElement|ArrayBufferView} options.negZ The image data for the negative Z direction.
+        @param {DOMElement|ArrayBufferView} [options.negZ] The image data for the negative Z direction.
                 Can be any format that would be accepted by texImage2D.
-        @param {DOMElement|ArrayBufferView} options.posZ The image data for the positive Z direction.
+        @param {DOMElement|ArrayBufferView} [options.posZ] The image data for the positive Z direction.
                 Can be any format that would be accepted by texImage2D.
-        @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
+        @param {GLEnum} [options.type] Type of data stored in the texture. Defaults to UNSIGNED_SHORT 
+            if format is DEPTH_COMPONENT, UNSIGNED_BYTE otherwise.
         @param {GLEnum} [options.format=RGBA] Texture data format.
         @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
-        @param {number} [options.width] Texture width. Required when passing array data.
-        @param {number} [options.height] Texture height. Required when passing array data.
-        @param {boolean} [options.flipY=false] Whether the y-axis be flipped when unpacking the texture.
-        @param {GLEnum} [options.minFilter=LINEAR_MIPMAP_NEAREST] Minification filter.
-        @param {GLEnum} [options.magFilter=LINEAR] Magnification filter.
+        @param {boolean} [options.flipY=false] Whether the y-axis should be flipped when unpacking the texture. 
+        @param {GLEnum} [options.minFilter] Minification filter. Defaults to 
+            LINEAR_MIPMAP_NEAREST if image data is provided, NEAREST otherwise.
+        @param {GLEnum} [options.magFilter] Magnification filter. Defaults to LINEAR
+            if image data is provided, NEAREST otherwise.
         @param {GLEnum} [options.wrapS=REPEAT] Horizontal wrap mode.
         @param {GLEnum} [options.wrapT=REPEAT] Vertical wrap mode.
         @param {GLEnum} [options.compareMode=NONE] Comparison mode.
         @param {GLEnum} [options.compareFunc=LEQUAL] Comparison function.
-        @param {boolean} [options.generateMipmaps] Should mipmaps be generated.
+        @param {GLEnum} [options.baseLevel] Base mipmap level.
+        @param {GLEnum} [options.maxLevel] Maximum mipmap level.
+        @param {GLEnum} [options.minLOD] Mimimum level of detail.
+        @param {GLEnum} [options.maxLOD] Maximum level of detail.
+        @param {boolean} [options.generateMipmaps] Should mipmaps be generated. Defaults to generating mipmaps if
+            a mipmap sampling filter is use and the mipmap levels aren't provided directly.
     */
     createCubemap(options) {
         return new Cubemap(this.gl, this.state, options);
@@ -1184,7 +1156,7 @@ export class App {
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Mon Nov 27 2017 07:13:42 GMT-0500 (EST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sat Dec 02 2017 10:30:39 GMT-0500 (EST)
 </footer>
 
 <script> prettyPrint(); </script>
