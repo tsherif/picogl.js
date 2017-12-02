@@ -71,8 +71,8 @@
             vec4 uEyePosition;
         };
 
-        uniform samplerCube cubemap;
-        uniform samplerCube cubemap2;
+        uniform samplerCube renderCubemap;
+        uniform samplerCube skyCubemap;
         
         in vec3 vPosition;
         in vec2 vUV;
@@ -88,11 +88,11 @@
             } else {
                 debugColor = vPosition.z > 0.0 ? vec3(0.0, 0.2, 0.2) : vec3(0.2, 0.0, 0.2); 
             }
-            vec3 color = texture(cubemap, vPosition).rgb * texture(cubemap2, vPosition).rgb;
+            vec3 color = texture(renderCubemap, vPosition).rgb * texture(skyCubemap, vPosition).rgb;
             fragColor = vec4(color, 1.0);
         }
     </script>
-    <script type="x-shader/vs" id="vertex-draw">
+    <script type="x-shader/vs" id="vertex-cube">
         #version 300 es
         
         layout(std140, column_major) uniform;
@@ -154,7 +154,7 @@
             fragColor5 = fragColor;
         }
     </script>
-    <script type="x-shader/vf" id="fragment-draw">
+    <script type="x-shader/vf" id="fragment-cube">
         #version 300 es
         precision highp float;
 
@@ -165,8 +165,8 @@
             vec4 uEyePosition;
         };
 
-        uniform samplerCube cubemap;
-        uniform samplerCube cubemap2;
+        uniform samplerCube renderCubemap;
+        uniform samplerCube skyCubemap;
         
         in vec3 vPosition;
         in vec3 vNormal;
@@ -179,8 +179,8 @@
             vec3 normal = normalize(vNormal);
             vec3 viewVec = normalize(vPosition - uEyePosition.xyz);
             vec3 dir = reflect(viewVec, normal);
-            vec3 color1 = texture(cubemap, dir).rgb;
-            vec3 color2 = texture(cubemap2, dir).rgb;
+            vec3 color1 = texture(renderCubemap, dir).rgb;
+            vec3 color2 = texture(skyCubemap, dir).rgb;
             fragColor = vec4(color1 * color2, 1.0);
         }
     </script>
@@ -215,7 +215,7 @@
             format: PicoGL.DEPTH_COMPONENT
         });
 
-        var rttBuffer = app.createFramebuffer()
+        var cubemapBuffer = app.createFramebuffer()
         .colorTarget(0, colorTarget, PicoGL.TEXTURE_CUBE_MAP_NEGATIVE_X)
         .colorTarget(1, colorTarget, PicoGL.TEXTURE_CUBE_MAP_POSITIVE_X)
         .colorTarget(2, colorTarget, PicoGL.TEXTURE_CUBE_MAP_NEGATIVE_Y)
@@ -245,7 +245,6 @@
 
         var cubemapViewProjMatrix = mat4.create();
         mat4.multiply(cubemapViewProjMatrix, cubemapProjMatrix, cubemapViewMatrix);
-
 
         var projMatrix = mat4.create();
         mat4.perspective(projMatrix, Math.PI / 2, canvas.width / canvas.height, 0.1, 10.0);
@@ -329,13 +328,13 @@
                 });
 
                 // PROGRAM
-                var vsSource =  document.getElementById("vertex-draw").text.trim();
+                var vsSource =  document.getElementById("vertex-cube").text.trim();
                 var vShader = app.createShader(PicoGL.VERTEX_SHADER, vsSource);
 
                 var cubemapFsSource =  document.getElementById("fragment-cubemap").text.trim();
                 var cubeMapProgram = app.createProgram(vShader, cubemapFsSource);
 
-                var fsSource =  document.getElementById("fragment-draw").text.trim();
+                var fsSource =  document.getElementById("fragment-cube").text.trim();
                 var program = app.createProgram(vShader, fsSource);
 
                 vShader.delete();
@@ -348,14 +347,14 @@
                 .texture("tex", texture)
                 .uniformBlock("SceneUniforms", cubemapSceneUniformBuffer);
 
-                var drawCall = app.createDrawCall(program, boxArray)
-                .texture("cubemap2", skyCubemap)
-                .texture("cubemap", colorTarget)
+                var cubeDrawCall = app.createDrawCall(program, boxArray)
+                .texture("renderCubemap", colorTarget)
+                .texture("skyCubemap", skyCubemap)
                 .uniformBlock("SceneUniforms", sceneUniformBuffer);
 
                 var skyboxDrawcall = app.createDrawCall(skyboxProgram, boxArray)
-                .texture("cubemap", skyCubemap)
-                .texture("cubemap2", colorTarget)
+                .texture("renderCubemap", colorTarget)
+                .texture("skyCubemap", skyCubemap)
                 .uniformBlock("SceneUniforms", skyboxSceneUniforms)
 
                 var angleX = 0;
@@ -376,20 +375,19 @@
                     mat4.multiply(modelMatrix, rotateXMatrix, rotateYMatrix);
 
                     cubemapDrawCall.uniform("uModel", modelMatrix);
-                    drawCall.uniform("uModel", modelMatrix);
+                    cubeDrawCall.uniform("uModel", modelMatrix);
 
                     // DRAW SAME IMAGE TO ALL SIX FACES OF CUBEMAP
                     app
-                    .drawFramebuffer(rttBuffer)
+                    .drawFramebuffer(cubemapBuffer)
                     .viewport(0, 0, CUBEMAP_DIM, CUBEMAP_DIM)
                     .clear();
                     cubemapDrawCall.draw();
                     
                     // RENDER TO SCREEN
                     app.defaultDrawFramebuffer().defaultViewport();
-                    
                     skyboxDrawcall.draw();
-                    drawCall.draw();
+                    cubeDrawCall.draw();
 
                     timer.end(); 
 
