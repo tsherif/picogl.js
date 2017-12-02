@@ -748,9 +748,11 @@ export class App {
         @param {GLEnum} [options.format=RGBA] Read framebuffer data format.
     */
     readPixel(x, y, outColor, options = CONSTANTS.DUMMY_OBJECT) {
-        let format = options.format || CONSTANTS.RGBA;
-        let type = options.type || CONSTANTS.UNSIGNED_BYTE;
-
+        let {
+            format = CONSTANTS.RGBA,
+            type = CONSTANTS.UNSIGNED_BYTE    
+        } = options;
+        
         this.gl.readPixels(x, y, 1, 1, format, type, outColor);
 
         return this;

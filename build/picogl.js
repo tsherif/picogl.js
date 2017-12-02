@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.7.0
+PicoGL.js v0.7.1
 
 The MIT License (MIT)
 
@@ -2086,7 +2086,7 @@ class Shader {
             console.error(gl.getShaderInfoLog(this.shader));
             lines = source.split("\n");
             for (i = 0; i < lines.length; ++i) {
-                console.error((i + 1) + ":", lines[i]);
+                console.error(`${i + 1}: ${lines[i]}`);
             }
         }
     }
@@ -2853,7 +2853,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     @namespace PicoGL
 */
 
-const version = "0.7.0";
+const version = "0.7.1";
 /* harmony export (immutable) */ __webpack_exports__["version"] = version;
 
 
@@ -3639,9 +3639,11 @@ class App {
         @param {GLEnum} [options.format=RGBA] Read framebuffer data format.
     */
     readPixel(x, y, outColor, options = __WEBPACK_IMPORTED_MODULE_0__constants_js__["_113" /* DUMMY_OBJECT */]) {
-        let format = options.format || __WEBPACK_IMPORTED_MODULE_0__constants_js__["_342" /* RGBA */];
-        let type = options.type || __WEBPACK_IMPORTED_MODULE_0__constants_js__["_524" /* UNSIGNED_BYTE */];
-
+        let {
+            format = __WEBPACK_IMPORTED_MODULE_0__constants_js__["_342" /* RGBA */],
+            type = __WEBPACK_IMPORTED_MODULE_0__constants_js__["_524" /* UNSIGNED_BYTE */]    
+        } = options;
+        
         this.gl.readPixels(x, y, 1, 1, format, type, outColor);
 
         return this;
@@ -4055,15 +4057,8 @@ class App {
 class Cubemap {
 
     constructor(gl, appState, options) {
-        let negX = options.negX;
-        let posX = options.posX;
-        let negY = options.negY;
-        let posY = options.posY;
-        let negZ = options.negZ;
-        let posZ = options.posZ;
+        let { negX, posX, negY, posY, negZ, posZ } = options;
 
-        let defaultMinFilter = negX ? gl.LINEAR_MIPMAP_NEAREST : gl.NEAREST;
-        let defaultMagFilter = negX ? gl.LINEAR : gl.NEAREST;
         let defaultType = options.format === __WEBPACK_IMPORTED_MODULE_0__constants_js__["_81" /* DEPTH_COMPONENT */] ? __WEBPACK_IMPORTED_MODULE_0__constants_js__["_538" /* UNSIGNED_SHORT */] : __WEBPACK_IMPORTED_MODULE_0__constants_js__["_524" /* UNSIGNED_BYTE */];
 
         this.gl = gl;
@@ -4076,18 +4071,21 @@ class Cubemap {
         // -1 indicates unbound
         this.currentUnit = -1;
 
-        let width = options.width || negX.width;
-        let height = options.height || negX.height;
-        let flipY = options.flipY !== undefined ? options.flipY : false;
-        let minFilter = options.minFilter !== undefined ? options.minFilter : defaultMinFilter;
-        let magFilter = options.magFilter !== undefined ? options.magFilter : defaultMagFilter;
-        let wrapS = options.wrapS !== undefined ? options.wrapS : gl.REPEAT;
-        let wrapT = options.wrapT !== undefined ? options.wrapT : gl.REPEAT;
-        let compareMode = options.compareMode !== undefined ? options.compareMode : gl.NONE;
-        let compareFunc = options.compareFunc !== undefined ? options.compareFunc : gl.LEQUAL;
-        let generateMipmaps = negX && options.generateMipmaps !== false &&
-                            (minFilter === gl.LINEAR_MIPMAP_NEAREST || minFilter === gl.LINEAR_MIPMAP_LINEAR);
+        let {
+            width = negX.width,
+            height = negX.height,
+            flipY = false,
+            minFilter = negX ? gl.LINEAR_MIPMAP_NEAREST : gl.NEAREST,
+            magFilter = negX ? gl.LINEAR : gl.NEAREST,
+            wrapS = gl.REPEAT,
+            wrapT = gl.REPEAT,
+            compareMode = gl.NONE,
+            compareFunc = gl.LEQUAL
+        } = options;
 
+        let generateMipmaps = negX && options.generateMipmaps !== false &&
+                            (minFilter === gl.LINEAR_MIPMAP_NEAREST || minFilter === gl.LINEAR_MIPMAP_LINEAR); 
+        
         this.bind(0);
         gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY);
         gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, magFilter);
@@ -5076,8 +5074,6 @@ const DUMMY_ARRAY = new Array(1);
 */
 class Texture {
     constructor(gl, appState, binding, image, width = image.width, height = image.height, depth, is3D, options = __WEBPACK_IMPORTED_MODULE_0__constants_js__["_113" /* DUMMY_OBJECT */]) {
-        let defaultMinFilter = image ? gl.LINEAR_MIPMAP_NEAREST : gl.NEAREST;
-        let defaultMagFilter = image ? gl.LINEAR : gl.NEAREST;
         let defaultType = options.format === __WEBPACK_IMPORTED_MODULE_0__constants_js__["_81" /* DEPTH_COMPONENT */] ? __WEBPACK_IMPORTED_MODULE_0__constants_js__["_538" /* UNSIGNED_SHORT */] : __WEBPACK_IMPORTED_MODULE_0__constants_js__["_524" /* UNSIGNED_BYTE */];
 
         this.gl = gl;
@@ -5108,15 +5104,17 @@ class Texture {
         this.currentUnit = -1;
 
         // Sampler parameters
-        let minFilter = options.minFilter !== undefined ? options.minFilter : defaultMinFilter;
-        let magFilter = options.magFilter !== undefined ? options.magFilter : defaultMagFilter;
-        let wrapS = options.wrapS !== undefined ? options.wrapS : gl.REPEAT;
-        let wrapT = options.wrapT !== undefined ? options.wrapT : gl.REPEAT;
-        let wrapR = options.wrapR !== undefined ? options.wrapR : gl.REPEAT;
-        let compareMode = options.compareMode !== undefined ? options.compareMode : gl.NONE;
-        let compareFunc = options.compareFunc !== undefined ? options.compareFunc : gl.LEQUAL;
-        let minLOD = options.minLOD !== undefined ? options.minLOD : null;
-        let maxLOD = options.maxLOD !== undefined ? options.maxLOD : null;
+        let {
+            minFilter = image ? gl.LINEAR_MIPMAP_NEAREST : gl.NEAREST,
+            magFilter = image ? gl.LINEAR : gl.NEAREST,
+            wrapS = gl.REPEAT,
+            wrapT = gl.REPEAT,
+            wrapR = gl.REPEAT,
+            compareMode = gl.NONE,
+            compareFunc = gl.LEQUAL,
+            minLOD = null,
+            maxLOD = null
+        } = options;
 
         this.sampler = gl.createSampler();
         gl.samplerParameteri(this.sampler, gl.TEXTURE_MIN_FILTER, minFilter);

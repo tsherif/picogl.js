@@ -46,8 +46,6 @@ const DUMMY_ARRAY = new Array(1);
 */
 export class Texture {
     constructor(gl, appState, binding, image, width = image.width, height = image.height, depth, is3D, options = CONSTANTS.DUMMY_OBJECT) {
-        let defaultMinFilter = image ? gl.LINEAR_MIPMAP_NEAREST : gl.NEAREST;
-        let defaultMagFilter = image ? gl.LINEAR : gl.NEAREST;
         let defaultType = options.format === CONSTANTS.DEPTH_COMPONENT ? CONSTANTS.UNSIGNED_SHORT : CONSTANTS.UNSIGNED_BYTE;
 
         this.gl = gl;
@@ -78,15 +76,17 @@ export class Texture {
         this.currentUnit = -1;
 
         // Sampler parameters
-        let minFilter = options.minFilter !== undefined ? options.minFilter : defaultMinFilter;
-        let magFilter = options.magFilter !== undefined ? options.magFilter : defaultMagFilter;
-        let wrapS = options.wrapS !== undefined ? options.wrapS : gl.REPEAT;
-        let wrapT = options.wrapT !== undefined ? options.wrapT : gl.REPEAT;
-        let wrapR = options.wrapR !== undefined ? options.wrapR : gl.REPEAT;
-        let compareMode = options.compareMode !== undefined ? options.compareMode : gl.NONE;
-        let compareFunc = options.compareFunc !== undefined ? options.compareFunc : gl.LEQUAL;
-        let minLOD = options.minLOD !== undefined ? options.minLOD : null;
-        let maxLOD = options.maxLOD !== undefined ? options.maxLOD : null;
+        let {
+            minFilter = image ? gl.LINEAR_MIPMAP_NEAREST : gl.NEAREST,
+            magFilter = image ? gl.LINEAR : gl.NEAREST,
+            wrapS = gl.REPEAT,
+            wrapT = gl.REPEAT,
+            wrapR = gl.REPEAT,
+            compareMode = gl.NONE,
+            compareFunc = gl.LEQUAL,
+            minLOD = null,
+            maxLOD = null
+        } = options;
 
         this.sampler = gl.createSampler();
         gl.samplerParameteri(this.sampler, gl.TEXTURE_MIN_FILTER, minFilter);

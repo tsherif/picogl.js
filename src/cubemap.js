@@ -39,15 +39,8 @@ import { TEXTURE_FORMAT_DEFAULTS } from "./texture-format-defaults.js";
 export class Cubemap {
 
     constructor(gl, appState, options) {
-        let negX = options.negX;
-        let posX = options.posX;
-        let negY = options.negY;
-        let posY = options.posY;
-        let negZ = options.negZ;
-        let posZ = options.posZ;
+        let { negX, posX, negY, posY, negZ, posZ } = options;
 
-        let defaultMinFilter = negX ? gl.LINEAR_MIPMAP_NEAREST : gl.NEAREST;
-        let defaultMagFilter = negX ? gl.LINEAR : gl.NEAREST;
         let defaultType = options.format === CONSTANTS.DEPTH_COMPONENT ? CONSTANTS.UNSIGNED_SHORT : CONSTANTS.UNSIGNED_BYTE;
 
         this.gl = gl;
@@ -60,18 +53,21 @@ export class Cubemap {
         // -1 indicates unbound
         this.currentUnit = -1;
 
-        let width = options.width || negX.width;
-        let height = options.height || negX.height;
-        let flipY = options.flipY !== undefined ? options.flipY : false;
-        let minFilter = options.minFilter !== undefined ? options.minFilter : defaultMinFilter;
-        let magFilter = options.magFilter !== undefined ? options.magFilter : defaultMagFilter;
-        let wrapS = options.wrapS !== undefined ? options.wrapS : gl.REPEAT;
-        let wrapT = options.wrapT !== undefined ? options.wrapT : gl.REPEAT;
-        let compareMode = options.compareMode !== undefined ? options.compareMode : gl.NONE;
-        let compareFunc = options.compareFunc !== undefined ? options.compareFunc : gl.LEQUAL;
-        let generateMipmaps = negX && options.generateMipmaps !== false &&
-                            (minFilter === gl.LINEAR_MIPMAP_NEAREST || minFilter === gl.LINEAR_MIPMAP_LINEAR);
+        let {
+            width = negX.width,
+            height = negX.height,
+            flipY = false,
+            minFilter = negX ? gl.LINEAR_MIPMAP_NEAREST : gl.NEAREST,
+            magFilter = negX ? gl.LINEAR : gl.NEAREST,
+            wrapS = gl.REPEAT,
+            wrapT = gl.REPEAT,
+            compareMode = gl.NONE,
+            compareFunc = gl.LEQUAL
+        } = options;
 
+        let generateMipmaps = negX && options.generateMipmaps !== false &&
+                            (minFilter === gl.LINEAR_MIPMAP_NEAREST || minFilter === gl.LINEAR_MIPMAP_LINEAR); 
+        
         this.bind(0);
         gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY);
         gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, magFilter);
