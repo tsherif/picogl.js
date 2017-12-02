@@ -85,12 +85,21 @@ PicoGL.js simplifies usage of some more complex WebGL 2 features, such as multip
     var app = PicoGL.createApp(canvas)
     .clearColor(0.0, 0.0, 0.0, 1.0);
 
+
+    // Texture render targets
+    var colorTarget0 = app.createTexture2D(app.width, app.height);
+    var colorTarget1 = app.createTexture2D(app.width, app.height);
+    var depthTarget = app.createTexture2D(app.width, app.height, {
+        format: PicoGL.DEPTH_COMPONENT
+    });
+
+
     // Create framebuffer with color targets at attachments 
     // 0 and 1, and a depth target.
     var framebuffer = app.createFramebuffer()
-    .colorTarget(0)
-    .colorTarget(1)
-    .depthTarget();
+    .colorTarget(0, colorTarget0)
+    .colorTarget(1, colorTarget1)
+    .depthTarget(depthTarget);
     
     // ... set up programs and vertex arrays for offscreen and
     // main draw passes...

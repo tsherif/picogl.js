@@ -297,12 +297,13 @@
 
         window.onresize = function() {
             app.resize(window.innerWidth, window.innerHeight);
-            rttBuffer.resize();
 
             mat4.perspective(projMatrix, Math.PI / 2, app.width / app.height, 0.1, 10.0);
             mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
+            mat4.multiply(skyboxViewProjMatrix, projMatrix, skyboxViewMatrix);
 
             sceneUniformBuffer.set(0, viewProjMatrix).update();
+            skyboxSceneUniforms.set(0, skyboxViewProjMatrix).update();
         };
 
         var image = new Image();
