@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.6.11
+PicoGL.js v$npm_package_version
 
 The MIT License (MIT)
 
@@ -2036,10 +2036,6 @@ FLOAT[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_81" /* DEPTH_COMPONENT */]] 
 
 TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES = {};
 
-// TODO(Tarek): For https://bugs.chromium.org/p/chromium/issues/detail?id=757447
-// Remove this when that's fixed
-TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE = {};
-
 
 /***/ }),
 /* 2 */
@@ -2120,8 +2116,6 @@ class Texture {
             this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */][this.type][this.format];
         }
 
-        this.noTexStorage = !!__WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[this.internalFormat];
-
         // -1 indicates unbound
         this.currentUnit = -1;
 
@@ -2185,7 +2179,7 @@ class Texture {
         }
 
         this.texture = this.gl.createTexture();
-        this.bind(Math.max(this.currentUnit, 1));
+        this.bind(Math.max(this.currentUnit, 0));
 
         this.width = width;
         this.height = height;
@@ -2199,12 +2193,6 @@ class Texture {
 
         if (this.maxLevel !== null) {
             this.gl.texParameteri(this.binding, this.gl.TEXTURE_MAX_LEVEL, this.maxLevel);
-        }
-
-        // TODO(Tarek): For https://bugs.chromium.org/p/chromium/issues/detail?id=757447
-        // Remove this when that's fixed
-        if (this.noTexStorage) {
-            return;
         }
 
         let levels;
@@ -2251,25 +2239,7 @@ class Texture {
         this.bind(Math.max(this.currentUnit, 0));
 
         if (this.compressed) {
-
-            // TODO(Tarek): For https://bugs.chromium.org/p/chromium/issues/detail?id=757447
-            // Remove this when that's fixed
-            if (this.noTexStorage) {
-                if (this.is3D) {
-                    for (i = 0; i < numLevels; ++i) {
-                        this.gl.compressedTexImage3D(this.binding, i, this.internalFormat, width, height, depth, 0, data[i]);
-                        width = Math.max(width >> 1, 1);
-                        height = Math.max(height >> 1, 1);
-                        depth = Math.max(depth >> 1, 1);
-                    }
-                } else {
-                    for (i = 0; i < numLevels; ++i) {
-                        this.gl.compressedTexImage2D(this.binding, i, this.internalFormat, width, height, 0, data[i]);
-                        width = Math.max(width >> 1, 1);
-                        height = Math.max(height >> 1, 1);
-                    }
-                }
-            } else if (this.is3D) {
+            if (this.is3D) {
                 for (i = 0; i < numLevels; ++i) {
                     this.gl.compressedTexSubImage3D(this.binding, i, 0, 0, 0, width, height, depth, this.format, data[i]);
                     width = Math.max(width >> 1, 1);
@@ -2316,8 +2286,11 @@ class Texture {
             this.gl.deleteSampler(this.sampler);
             this.texture = null;
             this.sampler = null;
-            this.appState.textures[this.currentUnit] = null;
-            this.currentUnit = -1;
+
+            if (this.currentUnit !== -1 && this.appState.textures[this.currentUnit] === this) {
+                this.appState.textures[this.currentUnit] = null;
+                this.currentUnit = -1;
+            }
         }
     }
 
@@ -3166,7 +3139,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     @namespace PicoGL
 */
 
-const version = "0.6.11";
+const version = "$npm_package_version";
 /* harmony export (immutable) */ __webpack_exports__["version"] = version;
 
 
@@ -3279,12 +3252,7 @@ class App {
             transformFeedback: null,
             activeTexture: -1,
             textures: new Array(__WEBPACK_IMPORTED_MODULE_0__constants_js__["_558" /* WEBGL_INFO */].MAX_TEXTURE_UNITS),
-            // TODO(Tarek): UBO state currently not tracked, due bug
-            // with UBO state becoming corrupted between frames in Chrome
-            // https://bugs.chromium.org/p/chromium/issues/detail?id=722060
-            // Enable UBO state tracking when that's fixed.
             uniformBuffers: new Array(__WEBPACK_IMPORTED_MODULE_0__constants_js__["_558" /* WEBGL_INFO */].MAX_UNIFORM_BUFFERS),
-            uniformBufferCount: 0,
             freeUniformBufferBases: [],
             drawFramebuffer: null,
             readFramebuffer: null
@@ -3765,8 +3733,8 @@ class App {
 
 
     /**
-        Enable the WEBGL_compressed_texture_s3tc and WEBGL_compressed_texture_s3tc_srgb extensions, and 
-        add the following enums, which can be used as texture formats, to the PicoGL object:
+        Enable the WEBGL_compressed_texture_s3tc and WEBGL_compressed_texture_s3tc_srgb extensions, which 
+        allow the following enums to be used as texture formats:
 
         <ul>
           <li>PicoGL.COMPRESSED_RGB_S3TC_DXT1_EXT
@@ -3806,8 +3774,8 @@ class App {
     }
 
     /**
-        Enable the WEBGL_compressed_texture_etc extension  and add the following enums, which can
-        be used as texture formats, to the PicoGL object:
+        Enable the WEBGL_compressed_texture_etc extension, which allows the following enums to
+        be used as texture formats:
         
         <ul>
           <li>PicoGL.COMPRESSED_R11_EAC
@@ -3848,8 +3816,8 @@ class App {
     }
 
     /**
-        Enable the WEBGL_compressed_texture_astc extension and add the following enums, which can
-        be used as texture formats, to the PicoGL object:
+        Enable the WEBGL_compressed_texture_astc extension, which allows the following enums to
+        be used as texture formats:
         
         <ul>
           <li>PicoGL.COMPRESSED_RGBA_ASTC_4x4_KHR
@@ -3917,56 +3885,14 @@ class App {
             __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_35" /* COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR */]] = true;
             __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_39" /* COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR */]] = true;
             __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_40" /* COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR */]] = true;
-
-            // TODO(Tarek): Test for https://bugs.chromium.org/p/chromium/issues/detail?id=757447
-            // Remove this when that's fixed
-            this.gl.getError();
-            this.state.textures[0] = null;
-            this.gl.activeTexture(this.gl.TEXTURE0);
-            let texture = this.gl.createTexture();
-            this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
-            this.gl.texStorage2D(this.gl.TEXTURE_2D, 1, __WEBPACK_IMPORTED_MODULE_0__constants_js__["_17" /* COMPRESSED_RGBA_ASTC_4x4_KHR */], 4, 4);
-
-            if (this.gl.getError() !== this.gl.NO_ERROR) {
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_17" /* COMPRESSED_RGBA_ASTC_4x4_KHR */]]           = true;
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_18" /* COMPRESSED_RGBA_ASTC_5x4_KHR */]]           = true;
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_19" /* COMPRESSED_RGBA_ASTC_5x5_KHR */]]           = true;
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_20" /* COMPRESSED_RGBA_ASTC_6x5_KHR */]]           = true;
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_21" /* COMPRESSED_RGBA_ASTC_6x6_KHR */]]           = true;
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_22" /* COMPRESSED_RGBA_ASTC_8x5_KHR */]]           = true;
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_23" /* COMPRESSED_RGBA_ASTC_8x6_KHR */]]           = true;
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_24" /* COMPRESSED_RGBA_ASTC_8x8_KHR */]]           = true;
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_12" /* COMPRESSED_RGBA_ASTC_10x5_KHR */]]          = true;
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_13" /* COMPRESSED_RGBA_ASTC_10x6_KHR */]]          = true;
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_14" /* COMPRESSED_RGBA_ASTC_10x8_KHR */]]          = true;
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_11" /* COMPRESSED_RGBA_ASTC_10x10_KHR */]]         = true;
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_15" /* COMPRESSED_RGBA_ASTC_12x10_KHR */]]         = true;
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_16" /* COMPRESSED_RGBA_ASTC_12x12_KHR */]]         = true;
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_41" /* COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR */]]   = true;
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_42" /* COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR */]]   = true;
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_43" /* COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR */]]   = true;
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_44" /* COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR */]]   = true;
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_45" /* COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR */]]   = true;
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_46" /* COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR */]]   = true;
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_47" /* COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR */]]   = true;
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_48" /* COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR */]]   = true;
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_36" /* COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR */]]  = true;
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_37" /* COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR */]]  = true;
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_38" /* COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR */]]  = true;
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_35" /* COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR */]] = true;
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_39" /* COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR */]] = true;
-                __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */].NO_TEX_STORAGE[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_40" /* COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR */]] = true;
-            }
-
-            this.gl.deleteTexture(texture);
         }
         
         return this;
     }
 
     /**
-        Enable the WEBGL_compressed_texture_pvrtc extension and add the following enums, which can
-        be used as texture formats, to the PicoGL object:
+        Enable the WEBGL_compressed_texture_pvrtc extension, which allows the following enums to
+        be used as texture formats:
 
         <ul>
           <li>PicoGL.COMPRESSED_RGB_PVRTC_4BPPV1_IMG
@@ -4145,7 +4071,7 @@ class App {
         @param {GLEnum} [usage=DYNAMIC_DRAW] Buffer usage.
     */
     createUniformBuffer(layout, usage) {
-        return new __WEBPACK_IMPORTED_MODULE_10__uniform_buffer_js__["a" /* UniformBuffer */](this.gl, layout, usage);
+        return new __WEBPACK_IMPORTED_MODULE_10__uniform_buffer_js__["a" /* UniformBuffer */](this.gl, this.state, layout, usage);
     }
 
     /**
@@ -4608,13 +4534,7 @@ class DrawCall {
         @param {UniformBuffer} buffer Uniform buffer to bind.
     */
     uniformBlock(name, buffer) {
-        let base = this.uniformBlockBases[name];
-        if (base === undefined) {
-            base = this.uniformBlockCount++;
-            this.uniformBlockBases[name] = base;
-            this.uniformBlockNames[base] = name;
-        }
-
+        let base = this.currentProgram.uniformBlocks[name];
         this.uniformBuffers[base] = buffer;
 
         return this;
@@ -4629,7 +4549,7 @@ class DrawCall {
         let uniformNames = this.uniformNames;
         let uniformValues = this.uniformValues;
         let uniformBuffers = this.uniformBuffers;
-        let uniformBlockNames = this.uniformBlockNames;
+        let uniformBlockCount = this.currentProgram.uniformBlockCount;
         let textures = this.textures;
         let textureCount = this.currentProgram.samplerCount;
 
@@ -4640,17 +4560,11 @@ class DrawCall {
             this.currentProgram.uniform(uniformNames[uIndex], uniformValues[uIndex]);
         }
 
-        for (let base = 0; base < this.uniformBlockCount; ++base) {
-            this.currentProgram.uniformBlock(uniformBlockNames[base], base);
+        for (let base = 0; base < uniformBlockCount; ++base) {
             uniformBuffers[base].bind(base);
         }
 
-        /////////////////////////////////////////////////////////////////////////////////
-        // TODO(Tarek):
-        // Workaround for https://bugs.chromium.org/p/chromium/issues/detail?id=722288
-        // Start at 0 when that's fixed
-        /////////////////////////////////////////////////////////////////////////////////
-        for (let tIndex = 1; tIndex < textureCount; ++tIndex) {
+        for (let tIndex = 0; tIndex < textureCount; ++tIndex) {
             textures[tIndex].bind(tIndex);
         }
 
@@ -4673,11 +4587,6 @@ class DrawCall {
 
         if (this.currentTransformFeedback) {
             this.gl.endTransformFeedback();
-            // TODO(Tarek): Need to rebind buffers due to bug in ANGLE.
-            // Remove this when that's fixed.
-            for (let i = 0, len = this.currentTransformFeedback.angleBugBuffers.length; i < len; ++i) {
-                this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, i, null);
-            }
         }
     }
 
@@ -5021,7 +4930,6 @@ class Framebuffer {
     @prop {WebGLProgram} program The WebGL program.
     @prop {boolean} transformFeedback Whether this program is set up for transform feedback.
     @prop {Object} uniforms Map of uniform names to handles.
-    @prop {Object} uniformBlocks Map of uniform block names to handles.
     @prop {Object} appState Tracked GL state.
 */
 class Program {
@@ -5073,14 +4981,9 @@ class Program {
         this.transformFeedback = !!xformFeebackVars;
         this.uniforms = {};
         this.uniformBlocks = {};
-        this.uniformBlockBindings = {};
+        this.uniformBlockCount = 0;
         this.samplers = {};
-        /////////////////////////////////////////////////////////////////////////////////
-        // TODO(Tarek):
-        // Workaround for https://bugs.chromium.org/p/chromium/issues/detail?id=722288
-        // Start at unit 0 when that's fixed
-        /////////////////////////////////////////////////////////////////////////////////
-        this.samplerCount = 1;
+        this.samplerCount = 0;
 
         gl.useProgram(program);
 
@@ -5164,8 +5067,10 @@ class Program {
         for (i = 0; i < numUniformBlocks; ++i) {
             let blockName = gl.getActiveUniformBlockName(this.program, i);
             let blockIndex = gl.getUniformBlockIndex(this.program, blockName);
-
-            this.uniformBlocks[blockName] = blockIndex;
+            
+            let uniformBlockBase = this.uniformBlockCount++;
+            this.gl.uniformBlockBinding(this.program, blockIndex, uniformBlockBase);
+            this.uniformBlocks[blockName] = uniformBlockBase;
         }
 
         gl.useProgram(null);
@@ -5186,14 +5091,6 @@ class Program {
     // Set the value of a uniform.
     uniform(name, value) {
         this.uniforms[name].set(value);
-    }
-
-    // Bind a uniform block to a uniform buffer base.
-    uniformBlock(name, base) {
-        if (this.uniformBlockBindings[name] !== base) {
-            this.gl.uniformBlockBinding(this.program, this.uniformBlocks[name], base);
-            this.uniformBlockBindings[name] = base;
-        }
     }
 
     // Use this program.
@@ -5629,9 +5526,6 @@ class TransformFeedback {
         this.gl = gl;
         this.transformFeedback = gl.createTransformFeedback();
         this.appState = appState;
-        // TODO(Tarek): Need to rebind buffers due to bug in ANGLE.
-        // Remove this when that's fixed.
-        this.angleBugBuffers = [];
     }
 
     /**
@@ -5646,8 +5540,6 @@ class TransformFeedback {
         this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, index, buffer.buffer);
         this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, null);
         this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, index, null);
-
-        this.angleBugBuffers[index] = buffer;
 
         return this;
     }
@@ -5668,10 +5560,6 @@ class TransformFeedback {
     bind() {
         if (this.appState.transformFeedback !== this) {
             this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedback);
-
-            for (let i = 0, len = this.angleBugBuffers.length; i < len; ++i) {
-                this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, i, this.angleBugBuffers[i].buffer);
-            }
 
             this.appState.transformFeedback = this;
         }
@@ -5731,7 +5619,7 @@ class TransformFeedback {
 */
 class UniformBuffer {
 
-    constructor(gl, layout, usage = gl.DYNAMIC_DRAW) {
+    constructor(gl, appState, layout, usage = gl.DYNAMIC_DRAW) {
         this.gl = gl;
         this.buffer = gl.createBuffer();
         this.dataViews = {};
@@ -5740,6 +5628,10 @@ class UniformBuffer {
         this.types = new Array(layout.length);
         this.size = 0;
         this.usage = usage;
+        this.appState = appState;
+
+        // -1 indicates unbound
+        this.currentBase = -1;
 
         for (let i = 0, len = layout.length; i < len; ++i) {
             let type = layout[i];
@@ -5843,9 +5735,10 @@ class UniformBuffer {
         this.dataViews[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_176" /* INT */]] = new Int32Array(this.data.buffer);
         this.dataViews[__WEBPACK_IMPORTED_MODULE_0__constants_js__["_525" /* UNSIGNED_INT */]] = new Uint32Array(this.data.buffer);
 
-        this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, 0, this.buffer);
+        
+        this.gl.bindBuffer(this.gl.UNIFORM_BUFFER, this.buffer);
         this.gl.bufferData(this.gl.UNIFORM_BUFFER, this.size * 4, this.usage);
-        this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, 0, null);
+        this.gl.bindBuffer(this.gl.UNIFORM_BUFFER, null);
     }
 
     /**
@@ -5887,9 +5780,9 @@ class UniformBuffer {
             offset = begin * 4;
         }
 
-        this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, 0, this.buffer);
+        this.gl.bindBuffer(this.gl.UNIFORM_BUFFER, this.buffer);
         this.gl.bufferSubData(this.gl.UNIFORM_BUFFER, offset, data);
-        this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, 0, null);
+        this.gl.bindBuffer(this.gl.UNIFORM_BUFFER, null);
 
         return this;
     }
@@ -5903,12 +5796,32 @@ class UniformBuffer {
         if (this.buffer) {
             this.gl.deleteBuffer(this.buffer);
             this.buffer = null;
+
+            if (this.currentBase !== -1 && this.appState.uniformBuffers[this.currentBase] === this) {
+                this.appState.uniformBuffers[this.currentBase] = null;
+            }
         }
     }
 
     // Bind this uniform buffer to the given base.
     bind(base) {
-        this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, base, this.buffer);
+        let currentBuffer = this.appState.uniformBuffers[base];
+
+        if (currentBuffer !== this) {
+
+            if (currentBuffer) {
+                currentBuffer.currentBase = -1;
+            }
+
+            if (this.currentBase !== -1) {
+                this.appState.uniformBuffers[this.currentBase] = null;
+            }
+
+            this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, base, this.buffer);
+            
+            this.appState.uniformBuffers[base] = this;
+            this.currentBase = base;
+        }
 
         return this;
     }

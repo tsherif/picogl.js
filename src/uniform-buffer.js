@@ -39,7 +39,7 @@ import * as CONSTANTS from "./constants.js";
 */
 export class UniformBuffer {
 
-    constructor(gl, layout, usage = gl.DYNAMIC_DRAW) {
+    constructor(gl, appState, layout, usage = gl.DYNAMIC_DRAW) {
         this.gl = gl;
         this.buffer = gl.createBuffer();
         this.dataViews = {};
@@ -48,6 +48,10 @@ export class UniformBuffer {
         this.types = new Array(layout.length);
         this.size = 0;
         this.usage = usage;
+        this.appState = appState;
+
+        // -1 indicates unbound
+        this.currentBase = -1;
 
         for (let i = 0, len = layout.length; i < len; ++i) {
             let type = layout[i];
@@ -151,9 +155,10 @@ export class UniformBuffer {
         this.dataViews[CONSTANTS.INT] = new Int32Array(this.data.buffer);
         this.dataViews[CONSTANTS.UNSIGNED_INT] = new Uint32Array(this.data.buffer);
 
-        this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, 0, this.buffer);
+        
+        this.gl.bindBuffer(this.gl.UNIFORM_BUFFER, this.buffer);
         this.gl.bufferData(this.gl.UNIFORM_BUFFER, this.size * 4, this.usage);
-        this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, 0, null);
+        this.gl.bindBuffer(this.gl.UNIFORM_BUFFER, null);
     }
 
     /**
@@ -195,9 +200,9 @@ export class UniformBuffer {
             offset = begin * 4;
         }
 
-        this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, 0, this.buffer);
+        this.gl.bindBuffer(this.gl.UNIFORM_BUFFER, this.buffer);
         this.gl.bufferSubData(this.gl.UNIFORM_BUFFER, offset, data);
-        this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, 0, null);
+        this.gl.bindBuffer(this.gl.UNIFORM_BUFFER, null);
 
         return this;
     }
@@ -211,12 +216,32 @@ export class UniformBuffer {
         if (this.buffer) {
             this.gl.deleteBuffer(this.buffer);
             this.buffer = null;
+
+            if (this.currentBase !== -1 && this.appState.uniformBuffers[this.currentBase] === this) {
+                this.appState.uniformBuffers[this.currentBase] = null;
+            }
         }
     }
 
     // Bind this uniform buffer to the given base.
     bind(base) {
-        this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, base, this.buffer);
+        let currentBuffer = this.appState.uniformBuffers[base];
+
+        if (currentBuffer !== this) {
+
+            if (currentBuffer) {
+                currentBuffer.currentBase = -1;
+            }
+
+            if (this.currentBase !== -1) {
+                this.appState.uniformBuffers[this.currentBase] = null;
+            }
+
+            this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, base, this.buffer);
+            
+            this.appState.uniformBuffers[base] = this;
+            this.currentBase = base;
+        }
 
         return this;
     }
