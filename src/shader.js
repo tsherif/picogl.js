@@ -42,7 +42,7 @@ export class Shader {
             console.error(gl.getShaderInfoLog(this.shader));
             lines = source.split("\n");
             for (i = 0; i < lines.length; ++i) {
-                console.error((i + 1) + ":", lines[i]);
+                console.error(`${i + 1}: ${lines[i]}`);
             }
         }
     }
