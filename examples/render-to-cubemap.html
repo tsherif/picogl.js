@@ -43,6 +43,7 @@
         layout(std140, column_major) uniform;
 
         layout(location=0) in vec4 position;
+        layout(location=1) in vec2 uv;
         
         uniform SceneUniforms {
             mat4 uViewProj;
@@ -50,9 +51,11 @@
         };
         
         out vec3 vPosition;
+        out vec2 vUV;
         void main() {
             vec4 worldPosition = vec4(position.xyz * 5.0, 1.0);            
-            vPosition = worldPosition.xyz;
+            vPosition = position.xyz;
+            vUV  = uv;
             gl_Position = uViewProj * worldPosition;
         }
     </script>
@@ -72,10 +75,20 @@
         uniform samplerCube cubemap2;
         
         in vec3 vPosition;
+        in vec2 vUV;
+
         out vec4 fragColor;
         void main() {
-            vec3 viewDir = vPosition - uEyePosition.xyz;
-            vec3 color = mix(texture(cubemap, viewDir).rgb, texture(cubemap2, viewDir).rgb, 0.5);
+            vec3 debugColor;
+            vec3 mags = abs(vPosition);
+            if (mags.x > mags.y && mags.x > mags.z) {
+                debugColor = vPosition.x > 0.0 ? vec3(0.2, 0.0, 0.0) : vec3(0.0, 0.2, 0.0); 
+            } else if (mags.y > mags.x && mags.y > mags.z) { 
+                debugColor = vPosition.y > 0.0 ? vec3(0.0, 0.0, 0.2) : vec3(0.2, 0.2, 0.0); 
+            } else {
+                debugColor = vPosition.z > 0.0 ? vec3(0.0, 0.2, 0.2) : vec3(0.2, 0.0, 0.2); 
+            }
+            vec3 color = texture(cubemap, vPosition).rgb * texture(cubemap2, vPosition).rgb;
             fragColor = vec4(color, 1.0);
         }
     </script>
@@ -95,10 +108,12 @@
 
         uniform mat4 uModel;
         
-        out vec3 vModelPosition;
         out vec3 vPosition;
         out vec2 vUV;
         out vec3 vNormal;
+
+        out vec3 vModelPosition;
+
         void main() {
             vModelPosition = position.xyz;
             vec4 worldPosition = uModel * position;
@@ -106,6 +121,37 @@
             vUV = uv;
             vNormal = (uModel * normal).xyz;
             gl_Position = uViewProj * worldPosition;
+        }
+    </script>
+    <script type="x-shader/vf" id="fragment-cubemap">
+        #version 300 es
+        precision highp float;
+
+        layout(std140, column_major) uniform;
+        
+        uniform SceneUniforms {
+            mat4 uViewProj;
+            vec4 uEyePosition;
+        };
+
+        uniform sampler2D tex;
+        
+        in vec2 vUV;
+
+        layout(location=0) out vec4 fragColor;
+        layout(location=1) out vec4 fragColor1;
+        layout(location=2) out vec4 fragColor2;
+        layout(location=3) out vec4 fragColor3;
+        layout(location=4) out vec4 fragColor4;
+        layout(location=5) out vec4 fragColor5;
+
+        void main() {
+            fragColor = vec4(texture(tex, vUV).rgb, 1.0);
+            fragColor1 = fragColor;
+            fragColor2 = fragColor;
+            fragColor3 = fragColor;
+            fragColor4 = fragColor;
+            fragColor5 = fragColor;
         }
     </script>
     <script type="x-shader/vf" id="fragment-draw">
@@ -119,35 +165,23 @@
             vec4 uEyePosition;
         };
 
-        uniform bool reflecting;
-
         uniform samplerCube cubemap;
         uniform samplerCube cubemap2;
         
-        in vec3 vModelPosition;
         in vec3 vPosition;
-        in vec2 vUV;
         in vec3 vNormal;
 
-        layout(location=0) out vec4 fragColor;
-        layout(location=1) out vec4 fragColor1;
-        layout(location=2) out vec4 fragColor2;
-        layout(location=3) out vec4 fragColor3;
-        layout(location=4) out vec4 fragColor4;
-        layout(location=5) out vec4 fragColor5;
+        in vec3 vModelPosition;
+
+        out vec4 fragColor;
 
         void main() {
             vec3 normal = normalize(vNormal);
             vec3 viewVec = normalize(vPosition - uEyePosition.xyz);
-            vec3 dir = reflecting ? reflect(viewVec, normal) : vModelPosition;
+            vec3 dir = reflect(viewVec, normal);
             vec3 color1 = texture(cubemap, dir).rgb;
             vec3 color2 = texture(cubemap2, dir).rgb;
-            fragColor = vec4(mix(color1, color2, 0.5), 1.0);
-            fragColor1 = fragColor;
-            fragColor2 = fragColor;
-            fragColor3 = fragColor;
-            fragColor4 = fragColor;
-            fragColor5 = fragColor;
+            fragColor = vec4(color1 * color2, 1.0);
         }
     </script>
     <script type="text/javascript">
@@ -163,19 +197,21 @@
 
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
+
+        var CUBEMAP_DIM = 2048;
         
         var app = PicoGL.createApp(canvas)
-        .clearColor(0.0, 0.0, 0.0, 1.0)
+        .clearColor(1.0, 1.0, 1.0, 1.0)
         .depthTest();
 
         var timer = app.createTimer();
 
         // FRAMEBUFFER
         var colorTarget = app.createCubemap({
-            width: 2048,
-            height: 2048
+            width: CUBEMAP_DIM,
+            height: CUBEMAP_DIM
         });
-        var depthTarget = app.createTexture2D(2048, 2048, {
+        var depthTarget = app.createTexture2D(CUBEMAP_DIM, CUBEMAP_DIM, {
             format: PicoGL.DEPTH_COMPONENT
         });
 
@@ -200,17 +236,26 @@
         .vertexAttributeBuffer(2, normals);
 
         // UNIFORMS
+        var cubemapProjMatrix = mat4.create();
+        mat4.perspective(cubemapProjMatrix, Math.PI / 2, 1, 0.1, 10.0);
+
+        var cubemapViewMatrix = mat4.create();
+        var cubemapEyePosition = vec3.fromValues(1.2, 0, 1.2);
+        mat4.lookAt(cubemapViewMatrix, cubemapEyePosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
+
+        var cubemapViewProjMatrix = mat4.create();
+        mat4.multiply(cubemapViewProjMatrix, cubemapProjMatrix, cubemapViewMatrix);
+
+
         var projMatrix = mat4.create();
         mat4.perspective(projMatrix, Math.PI / 2, canvas.width / canvas.height, 0.1, 10.0);
 
         var viewMatrix = mat4.create();
-        var eyePosition = vec3.fromValues(1.2, 0, 1.2);
+        var eyePosition = vec3.fromValues(1.3, -1.3, 1.3);
         mat4.lookAt(viewMatrix, eyePosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
 
         var viewProjMatrix = mat4.create();
         mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
-
-        var lightPosition = vec3.fromValues(1, 1, 0.5);
 
         var skyboxViewMatrix = mat4.create();
         skyboxViewMatrix.set(viewMatrix);
@@ -221,9 +266,15 @@
         var skyboxViewProjMatrix = mat4.create();
         mat4.multiply(skyboxViewProjMatrix, projMatrix, skyboxViewMatrix);
 
-        var lightPosition = vec3.fromValues(1, 1, 0.5);
-
         // UNIFORM BUFFER
+        var cubemapSceneUniformBuffer = app.createUniformBuffer([
+            PicoGL.FLOAT_MAT4,
+            PicoGL.FLOAT_VEC4
+        ])
+        .set(0, cubemapViewProjMatrix)
+        .set(1, cubemapEyePosition)
+        .update();
+
         var sceneUniformBuffer = app.createUniformBuffer([
             PicoGL.FLOAT_MAT4,
             PicoGL.FLOAT_VEC4
@@ -265,14 +316,7 @@
                 negZ: "img/sky-negz.png",
                 posZ: "img/sky-posz.png"
             }, function(negX, posX, negY, posY, negZ, posZ) {
-                var baseCubemap = app.createCubemap({
-                    negX: image,
-                    posX: image,
-                    negY: image,
-                    posY: image,
-                    negZ: image,
-                    posZ: image,
-                });
+                var texture = app.createTexture2D(image, { flipY: true });
 
                 var skyCubemap = app.createCubemap({
                     negX: negX,
@@ -285,20 +329,33 @@
 
                 // PROGRAM
                 var vsSource =  document.getElementById("vertex-draw").text.trim();
+                var vShader = app.createShader(PicoGL.VERTEX_SHADER, vsSource);
+
+                var cubemapFsSource =  document.getElementById("fragment-cubemap").text.trim();
+                var cubeMapProgram = app.createProgram(vShader, cubemapFsSource);
+
                 var fsSource =  document.getElementById("fragment-draw").text.trim();
-                var program = app.createProgram(vsSource, fsSource);
+                var program = app.createProgram(vShader, fsSource);
+
+                vShader.delete();
 
                 var skyboxVsSource =  document.getElementById("vertex-skybox").text.trim();
                 var skyboxFsSource =  document.getElementById("fragment-skybox").text.trim();
                 var skyboxProgram = app.createProgram(skyboxVsSource, skyboxFsSource);
 
+                var cubemapDrawCall = app.createDrawCall(cubeMapProgram, boxArray)
+                .texture("tex", texture)
+                .uniformBlock("SceneUniforms", cubemapSceneUniformBuffer);
+
                 var drawCall = app.createDrawCall(program, boxArray)
+                .texture("cubemap2", skyCubemap)
+                .texture("cubemap", colorTarget)
                 .uniformBlock("SceneUniforms", sceneUniformBuffer);
 
                 var skyboxDrawcall = app.createDrawCall(skyboxProgram, boxArray)
-                .uniformBlock("SceneUniforms", skyboxSceneUniforms)
                 .texture("cubemap", skyCubemap)
                 .texture("cubemap2", colorTarget)
+                .uniformBlock("SceneUniforms", skyboxSceneUniforms)
 
                 var angleX = 0;
                 var angleY = 0;
@@ -317,27 +374,21 @@
                     mat4.fromYRotation(rotateYMatrix, angleY);
                     mat4.multiply(modelMatrix, rotateXMatrix, rotateYMatrix);
 
+                    cubemapDrawCall.uniform("uModel", modelMatrix);
                     drawCall.uniform("uModel", modelMatrix);
 
                     // DRAW SAME IMAGE TO ALL SIX FACES OF CUBEMAP
                     app
                     .drawFramebuffer(rttBuffer)
-                    .viewport(0, 0, 2048, 2048)
+                    .viewport(0, 0, CUBEMAP_DIM, CUBEMAP_DIM)
                     .clear();
-                    drawCall
-                    .uniform("reflecting", false)
-                    .texture("cubemap", baseCubemap)
-                    .texture("cubemap2", baseCubemap)
-                    .draw();
+                    cubemapDrawCall.draw();
                     
                     // RENDER TO SCREEN
                     app.defaultDrawFramebuffer().defaultViewport();
+                    
                     skyboxDrawcall.draw();
-                    drawCall
-                    .uniform("reflecting", true)
-                    .texture("cubemap", skyCubemap)
-                    .texture("cubemap2", colorTarget)
-                    .draw();
+                    drawCall.draw();
 
                     timer.end(); 
 

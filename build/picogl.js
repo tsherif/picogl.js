@@ -3993,7 +3993,8 @@ class App {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__texture_format_defaults_js__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constants_js__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__ = __webpack_require__(1);
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -4019,6 +4020,7 @@ class App {
 
 
 
+
 /**
     Cubemap for environment mapping.
 
@@ -4034,17 +4036,6 @@ class App {
 class Cubemap {
 
     constructor(gl, appState, options) {
-    
-        this.gl = gl;
-        this.texture = gl.createTexture();
-        this.format = options.format !== undefined ? options.format : gl.RGBA;
-        this.type = options.type !== undefined ? options.type : gl.UNSIGNED_BYTE;
-        this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : __WEBPACK_IMPORTED_MODULE_0__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */][this.type][this.format];
-        this.appState = appState;
-        
-        // -1 indicates unbound
-        this.currentUnit = -1;
-
         let negX = options.negX;
         let posX = options.posX;
         let negY = options.negY;
@@ -4052,20 +4043,38 @@ class Cubemap {
         let negZ = options.negZ;
         let posZ = options.posZ;
 
+        let defaultMinFilter = negX ? gl.LINEAR_MIPMAP_NEAREST : gl.NEAREST;
+        let defaultMagFilter = negX ? gl.LINEAR : gl.NEAREST;
+        let defaultType = options.format === __WEBPACK_IMPORTED_MODULE_0__constants_js__["_81" /* DEPTH_COMPONENT */] ? __WEBPACK_IMPORTED_MODULE_0__constants_js__["_538" /* UNSIGNED_SHORT */] : __WEBPACK_IMPORTED_MODULE_0__constants_js__["_524" /* UNSIGNED_BYTE */];
+
+        this.gl = gl;
+        this.texture = gl.createTexture();
+        this.format = options.format !== undefined ? options.format : gl.RGBA;
+        this.type = options.type !== undefined ? options.type : defaultType;
+        this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults_js__["a" /* TEXTURE_FORMAT_DEFAULTS */][this.type][this.format];
+        this.appState = appState;
+        
+        // -1 indicates unbound
+        this.currentUnit = -1;
+
         let width = options.width || negX.width;
         let height = options.height || negX.height;
         let flipY = options.flipY !== undefined ? options.flipY : false;
-        let minFilter = options.minFilter !== undefined ? options.minFilter : gl.LINEAR_MIPMAP_NEAREST;
-        let magFilter = options.magFilter !== undefined ? options.magFilter : gl.LINEAR;
+        let minFilter = options.minFilter !== undefined ? options.minFilter : defaultMinFilter;
+        let magFilter = options.magFilter !== undefined ? options.magFilter : defaultMagFilter;
+        let wrapS = options.wrapS !== undefined ? options.wrapS : gl.REPEAT;
+        let wrapT = options.wrapT !== undefined ? options.wrapT : gl.REPEAT;
         let compareMode = options.compareMode !== undefined ? options.compareMode : gl.NONE;
         let compareFunc = options.compareFunc !== undefined ? options.compareFunc : gl.LEQUAL;
-        let generateMipmaps = options.generateMipmaps !== false &&
+        let generateMipmaps = negX && options.generateMipmaps !== false &&
                             (minFilter === gl.LINEAR_MIPMAP_NEAREST || minFilter === gl.LINEAR_MIPMAP_LINEAR);
 
-        this.bind(1);
+        this.bind(0);
         gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY);
         gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, magFilter);
         gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, minFilter);
+        gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, wrapS);
+        gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, wrapT);
         gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_COMPARE_FUNC, compareFunc);
         gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_COMPARE_MODE, compareMode);
         if (options.baseLevel !== undefined) {
