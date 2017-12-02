@@ -117,13 +117,7 @@ export class DrawCall {
         @param {UniformBuffer} buffer Uniform buffer to bind.
     */
     uniformBlock(name, buffer) {
-        let base = this.uniformBlockBases[name];
-        if (base === undefined) {
-            base = this.uniformBlockCount++;
-            this.uniformBlockBases[name] = base;
-            this.uniformBlockNames[base] = name;
-        }
-
+        let base = this.currentProgram.uniformBlocks[name];
         this.uniformBuffers[base] = buffer;
 
         return this;
@@ -138,7 +132,7 @@ export class DrawCall {
         let uniformNames = this.uniformNames;
         let uniformValues = this.uniformValues;
         let uniformBuffers = this.uniformBuffers;
-        let uniformBlockNames = this.uniformBlockNames;
+        let uniformBlockCount = this.currentProgram.uniformBlockCount;
         let textures = this.textures;
         let textureCount = this.currentProgram.samplerCount;
 
@@ -149,17 +143,11 @@ export class DrawCall {
             this.currentProgram.uniform(uniformNames[uIndex], uniformValues[uIndex]);
         }
 
-        for (let base = 0; base < this.uniformBlockCount; ++base) {
-            this.currentProgram.uniformBlock(uniformBlockNames[base], base);
+        for (let base = 0; base < uniformBlockCount; ++base) {
             uniformBuffers[base].bind(base);
         }
 
-        /////////////////////////////////////////////////////////////////////////////////
-        // TODO(Tarek):
-        // Workaround for https://bugs.chromium.org/p/chromium/issues/detail?id=722288
-        // Start at 0 when that's fixed
-        /////////////////////////////////////////////////////////////////////////////////
-        for (let tIndex = 1; tIndex < textureCount; ++tIndex) {
+        for (let tIndex = 0; tIndex < textureCount; ++tIndex) {
             textures[tIndex].bind(tIndex);
         }
 
@@ -182,11 +170,6 @@ export class DrawCall {
 
         if (this.currentTransformFeedback) {
             this.gl.endTransformFeedback();
-            // TODO(Tarek): Need to rebind buffers due to bug in ANGLE.
-            // Remove this when that's fixed.
-            for (let i = 0, len = this.currentTransformFeedback.angleBugBuffers.length; i < len; ++i) {
-                this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, i, null);
-            }
         }
     }
 

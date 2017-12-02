@@ -74,8 +74,6 @@ export class Texture {
             this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : TEXTURE_FORMAT_DEFAULTS[this.type][this.format];
         }
 
-        this.noTexStorage = !!TEXTURE_FORMAT_DEFAULTS.NO_TEX_STORAGE[this.internalFormat];
-
         // -1 indicates unbound
         this.currentUnit = -1;
 
@@ -139,7 +137,7 @@ export class Texture {
         }
 
         this.texture = this.gl.createTexture();
-        this.bind(Math.max(this.currentUnit, 1));
+        this.bind(Math.max(this.currentUnit, 0));
 
         this.width = width;
         this.height = height;
@@ -153,12 +151,6 @@ export class Texture {
 
         if (this.maxLevel !== null) {
             this.gl.texParameteri(this.binding, this.gl.TEXTURE_MAX_LEVEL, this.maxLevel);
-        }
-
-        // TODO(Tarek): For https://bugs.chromium.org/p/chromium/issues/detail?id=757447
-        // Remove this when that's fixed
-        if (this.noTexStorage) {
-            return;
         }
 
         let levels;
@@ -205,25 +197,7 @@ export class Texture {
         this.bind(Math.max(this.currentUnit, 0));
 
         if (this.compressed) {
-
-            // TODO(Tarek): For https://bugs.chromium.org/p/chromium/issues/detail?id=757447
-            // Remove this when that's fixed
-            if (this.noTexStorage) {
-                if (this.is3D) {
-                    for (i = 0; i < numLevels; ++i) {
-                        this.gl.compressedTexImage3D(this.binding, i, this.internalFormat, width, height, depth, 0, data[i]);
-                        width = Math.max(width >> 1, 1);
-                        height = Math.max(height >> 1, 1);
-                        depth = Math.max(depth >> 1, 1);
-                    }
-                } else {
-                    for (i = 0; i < numLevels; ++i) {
-                        this.gl.compressedTexImage2D(this.binding, i, this.internalFormat, width, height, 0, data[i]);
-                        width = Math.max(width >> 1, 1);
-                        height = Math.max(height >> 1, 1);
-                    }
-                }
-            } else if (this.is3D) {
+            if (this.is3D) {
                 for (i = 0; i < numLevels; ++i) {
                     this.gl.compressedTexSubImage3D(this.binding, i, 0, 0, 0, width, height, depth, this.format, data[i]);
                     width = Math.max(width >> 1, 1);
@@ -270,8 +244,11 @@ export class Texture {
             this.gl.deleteSampler(this.sampler);
             this.texture = null;
             this.sampler = null;
-            this.appState.textures[this.currentUnit] = null;
-            this.currentUnit = -1;
+
+            if (this.currentUnit !== -1 && this.appState.textures[this.currentUnit] === this) {
+                this.appState.textures[this.currentUnit] = null;
+                this.currentUnit = -1;
+            }
         }
     }
 
