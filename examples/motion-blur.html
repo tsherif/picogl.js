@@ -266,12 +266,18 @@
         var blurFSSource =  document.getElementById("fragment-blur").text.trim();
         var blurProgram = app.createProgram(quadVSSource, blurFSSource);
 
+        var colorTarget = app.createTexture2D(app.width, app.height);
+        var velocityTarget = app.createTexture2D(app.width, app.height, { 
+            type: PicoGL.FLOAT,
+            format: PicoGL.RG
+        });
+        var depthTarget = app.createTexture2D(app.width, app.height, {
+            format: PicoGL.DEPTH_COMPONENT
+        });
         var framebuffer = app.createFramebuffer()
-        // COLOR BUFFER
-        .colorTarget(0)
-        // VELOCITY BUFFER  
-        .colorTarget(1, { type: PicoGL.FLOAT, format: PicoGL.RG })
-        .depthTarget();
+        .colorTarget(0, colorTarget)
+        .colorTarget(1, velocityTarget)
+        .depthTarget(depthTarget);
 
         // SET UP GEOMETRY
         var sphere = utils.createSphere({radius: 0.2})

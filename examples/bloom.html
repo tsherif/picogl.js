@@ -268,16 +268,24 @@
 
         // SET UP FRAMEBUFFERS AND TEXTURES
 
+        var colorTarget1 = app.createTexture2D(null, app.width, app.height, { type: PicoGL.FLOAT });
+        var colorTarget2 = app.createTexture2D(null, app.width, app.height, { type: PicoGL.FLOAT });
+        var depthTarget = app.createTexture2D(null, app.width, app.height, { format: PicoGL.DEPTH_COMPONENT });
+
         var colorBuffer = app.createFramebuffer()
-        .colorTarget(0, { type: PicoGL.FLOAT })
-        .colorTarget(1, { type: PicoGL.FLOAT })
-        .depthTarget();
+        .colorTarget(0, colorTarget1)
+        .colorTarget(1, colorTarget2)
+        .depthTarget(depthTarget);
+        
+        var blurTarget = app.createTexture2D(null, app.width, app.height, { type: PicoGL.FLOAT });
         
         var blurBuffer = app.createFramebuffer()
-        .colorTarget(0, { type: PicoGL.FLOAT });
+        .colorTarget(0, blurTarget);
         
+        var bloomTarget = app.createTexture2D(null, app.width, app.height, { type: PicoGL.FLOAT });
+
         var bloomBuffer = app.createFramebuffer()
-        .colorTarget(0, { type: PicoGL.FLOAT });
+        .colorTarget(0, bloomTarget);
 
         var blankTexture = app.createTexture2D(null, 1, 1);
 

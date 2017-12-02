@@ -216,9 +216,15 @@
         var blurProgram = app.createProgram(quadVsSource, blurFsSource);
 
         // FRAMEBUFFERS
-        var boxBuffer = app.createFramebuffer().colorTarget().depthTarget();
-        var hblurBuffer = app.createFramebuffer().colorTarget();
-        var blurBuffer = app.createFramebuffer().colorTarget();
+        var colorTargetA = app.createTexture2D(app.width, app.height);
+        var colorTargetB = app.createTexture2D(app.width, app.height);
+        var depthTarget = app.createTexture2D(app.width, app.height, {
+            format: PicoGL.DEPTH_COMPONENT
+        });
+
+        var boxBuffer = app.createFramebuffer().colorTarget(0, colorTargetA).depthTarget(depthTarget);
+        var hblurBuffer = app.createFramebuffer().colorTarget(0, colorTargetB);
+        var blurBuffer = app.createFramebuffer().colorTarget(0, colorTargetA);
 
         // INSTANCED BOX GEOMETRY
         var box = utils.createBox({dimensions: [1.0, 1.0, 1.0]})

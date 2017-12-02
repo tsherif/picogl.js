@@ -148,7 +148,13 @@
         var pickingVsSource = document.getElementById("picking-vs").text.trim();
         var pickingFsSource = document.getElementById("picking-fs").text.trim();
         var pickingProgram = app.createProgram(pickingVsSource, pickingFsSource);
-        var pickingBuffer = app.createFramebuffer().colorTarget().depthTarget();
+
+        var pickColorTarget = app.createTexture2D(app.width, app.height);
+        var pickDepthTarget = app.createTexture2D(app.width, app.height, {
+            format: PicoGL.DEPTH_COMPONENT
+        });
+
+        var pickingBuffer = app.createFramebuffer().colorTarget(0, pickColorTarget).depthTarget(pickDepthTarget);
 
         // SET UP MAIN PROGRAM
         var vsSource = document.getElementById("main-vs").text.trim();

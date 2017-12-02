@@ -101,13 +101,12 @@
         
         uniform SceneUniforms {
             mat4 uViewProj;
-            vec4 uEyePosition;
         };
         
         out vec3 vPosition;
         void main() {
             vec4 worldPosition = vec4(position.xyz * 5.0, 1.0);            
-            vPosition = worldPosition.xyz;
+            vPosition = position.xyz;
             gl_Position = uViewProj * worldPosition;
         }
     </script>
@@ -117,19 +116,12 @@
         
         layout(std140, column_major) uniform;
 
-        
-        uniform SceneUniforms {
-            mat4 uViewProj;
-            vec4 uEyePosition;
-        };
-
         uniform samplerCube cubemap;
         
         in vec3 vPosition;
         out vec4 fragColor;
         void main() {
-            vec3 viewDir = vPosition - uEyePosition.xyz;
-            vec3 color = texture(cubemap, normalize(viewDir)).rgb;
+            vec3 color = texture(cubemap, vPosition).rgb;
             fragColor = vec4(color, 1.0);
         }
     </script>
@@ -203,10 +195,8 @@
 
         var skyboxSceneUniforms = app.createUniformBuffer([
             PicoGL.FLOAT_MAT4,
-            PicoGL.FLOAT_VEC4
         ])
         .set(0, skyboxViewProjMatrix)
-        .set(1, eyePosition)
         .update();
 
         window.onresize = function() {

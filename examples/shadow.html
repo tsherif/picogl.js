@@ -141,7 +141,12 @@
         var shadowVsSource =  document.getElementById("shadow-vs").text.trim();
         var shadowFsSource =  document.getElementById("shadow-fs").text.trim();
         var shadowProgram = app.createProgram(shadowVsSource, shadowFsSource);
-        var shadowBuffer = app.createFramebuffer().depthTarget({compareMode: PicoGL.COMPARE_REF_TO_TEXTURE});
+
+        var shadowDepthTarget = app.createTexture2D(app.width, app.height, {
+            format: PicoGL.DEPTH_COMPONENT,
+            compareMode: PicoGL.COMPARE_REF_TO_TEXTURE
+        });
+        var shadowBuffer = app.createFramebuffer().depthTarget(shadowDepthTarget);
 
         // SET UP MAIN PROGRAM
         var vsSource =  document.getElementById("main-vs").text.trim();

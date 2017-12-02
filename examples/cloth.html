@@ -384,13 +384,27 @@
         ////////////////////
 
         // Store results of force update
+        var forceTarget1 = app.createTexture2D(DATA_TEXTURE_DIM, DATA_TEXTURE_DIM, { 
+            type: PicoGL.FLOAT,
+            internalFormat: PicoGL.RGBA32F
+        });
+        var forceTarget2 = app.createTexture2D(DATA_TEXTURE_DIM, DATA_TEXTURE_DIM, { 
+            type: PicoGL.FLOAT,
+            internalFormat: PicoGL.RGBA32F
+        });
+
         var updateForceFramebuffer = app.createFramebuffer(DATA_TEXTURE_DIM, DATA_TEXTURE_DIM)
-        .colorTarget(0, { type: PicoGL.FLOAT, internalFormat: PicoGL.RGBA32F })
-        .colorTarget(1, { type: PicoGL.FLOAT, internalFormat: PicoGL.RGBA32F });
+        .colorTarget(0, forceTarget1)
+        .colorTarget(1, forceTarget2);
 
         // Results of constraint satisfaction passes
+        var updateTarget = app.createTexture2D(DATA_TEXTURE_DIM, DATA_TEXTURE_DIM, { 
+            type: PicoGL.FLOAT,
+            internalFormat: PicoGL.RGBA32F
+        });
+
         var updateFramebuffer = app.createFramebuffer(DATA_TEXTURE_DIM, DATA_TEXTURE_DIM)
-        .colorTarget(0, { type: PicoGL.FLOAT, internalFormat: PicoGL.RGBA32F });
+        .colorTarget(0, updateTarget);
 
         ///////////////////////////
         // CLOTH GEOMETRY DATA
@@ -717,6 +731,8 @@
                 updateForceFramebuffer.replaceTexture(0, positionTextureB);
                 updateForceFramebuffer.replaceTexture(1, oldPositionTextureB);
 
+                app.viewport(0, 0, DATA_TEXTURE_DIM, DATA_TEXTURE_DIM);
+
                 app.drawFramebuffer(updateForceFramebuffer);
                 updateForceDrawCall.draw();
 
@@ -775,7 +791,7 @@
 
                 clothDrawCall.texture("uPositionBuffer", positionTextureA);
 
-                app.defaultDrawFramebuffer().clear();
+                app.defaultViewport().defaultDrawFramebuffer().clear();
                 clothDrawCall.draw();
                 ballDrawCall.draw();
 

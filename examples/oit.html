@@ -205,9 +205,16 @@
         var accumVsSource = document.getElementById("vertex-accum").text.trim();
         var accumFsSource = document.getElementById("fragment-accum").text.trim();
         var accumProgram = app.createProgram(accumVsSource, accumFsSource);
+
+        var accumulateTarget = app.createTexture2D(app.width, app.height, { 
+            type: PicoGL.FLOAT 
+        });
+        var accumulateAlphaTarget = app.createTexture2D(app.width, app.height, { 
+            type: PicoGL.FLOAT 
+        });
         var accumBuffer = app.createFramebuffer()
-        .colorTarget(0, { type: PicoGL.FLOAT })
-        .colorTarget(1, { type: PicoGL.FLOAT });
+        .colorTarget(0, accumulateTarget)
+        .colorTarget(1, accumulateAlphaTarget);
 
         // BLEND PROGRAM
         var blendVsSource = document.getElementById("vertex-quad").text.trim();

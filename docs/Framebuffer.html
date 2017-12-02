@@ -136,52 +136,6 @@
 
         <tr>
             
-                <td class="name"><code>width</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The width of the framebuffer.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>height</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The height of the framebuffer.</td>
-        </tr>
-
-    
-
-        <tr>
-            
                 <td class="name"><code>colorTextures</code></td>
             
 
@@ -329,7 +283,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="framebuffer.js.html">framebuffer.js</a>, <a href="framebuffer.js.html#line41">line 41</a>
+        <a href="framebuffer.js.html">framebuffer.js</a>, <a href="framebuffer.js.html#line38">line 38</a>
     </li></ul></dd>
     
 
@@ -383,7 +337,7 @@
     
 
     
-    <h4 class="name" id="colorTarget"><span class="type-signature"></span>colorTarget<span class="signature">(index<span class="signature-attributes">opt</span>, options<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="colorTarget"><span class="type-signature"></span>colorTarget<span class="signature">(index, texture, target<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
     
 
     
@@ -446,8 +400,6 @@
             
                 <td class="attributes">
                 
-                    &lt;optional><br>
-                
 
                 
 
@@ -457,8 +409,6 @@
 
             
                 <td class="default">
-                
-                    0
                 
                 </td>
             
@@ -470,13 +420,13 @@
 
         <tr>
             
-                <td class="name"><code>options</code></td>
+                <td class="name"><code>texture</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Object</span>
+<span class="param-type"><a href="Texture.html">Texture</a></span>
 
 
             
@@ -484,8 +434,6 @@
 
             
                 <td class="attributes">
-                
-                    &lt;optional><br>
                 
 
                 
@@ -500,37 +448,14 @@
                 </td>
             
 
-            <td class="description last">Texture options.
-                <h6>Properties</h6>
-                
+            <td class="description last">The texture to attach.</td>
+        </tr>
 
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Attributes</th>
-        
-
-        
-        <th>Default</th>
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
     
 
         <tr>
             
-                <td class="name"><code>type</code></td>
+                <td class="name"><code>target</code></td>
             
 
             <td class="type">
@@ -557,557 +482,12 @@
             
                 <td class="default">
                 
-                    UNSIGNED_BYTE
+                    TEXTURE_2D
                 
                 </td>
             
 
-            <td class="description last">Type of data stored in the texture.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>format</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">GLEnum</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    RGBA
-                
-                </td>
-            
-
-            <td class="description last">Texture data format.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>internalFormat</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">GLEnum</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    RGBA
-                
-                </td>
-            
-
-            <td class="description last">Texture data internal format.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>flipY</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    true
-                
-                </td>
-            
-
-            <td class="description last">Whether th y-axis be flipped when reading the texture.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>minFilter</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">GLEnum</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    NEAREST
-                
-                </td>
-            
-
-            <td class="description last">Minification filter.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>magFilter</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">GLEnum</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    NEAREST
-                
-                </td>
-            
-
-            <td class="description last">Magnification filter.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>wrapS</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">GLEnum</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    CLAMP_TO_EDGE
-                
-                </td>
-            
-
-            <td class="description last">Horizontal wrap mode.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>wrapT</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">GLEnum</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    CLAMP_TO_EDGE
-                
-                </td>
-            
-
-            <td class="description last">Vertical wrap mode.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>compareMode</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">GLEnum</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    NONE
-                
-                </td>
-            
-
-            <td class="description last">Comparison mode.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>compareFunc</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">GLEnum</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    LEQUAL
-                
-                </td>
-            
-
-            <td class="description last">Comparison function.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>baseLevel</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">GLEnum</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last">Base mipmap level.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>maxLevel</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">GLEnum</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last">Maximum mipmap level.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>minLOD</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">GLEnum</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last">Mimimum level of detail.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>maxLOD</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">GLEnum</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last">Maximum level of detail.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>generateMipmaps</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    false
-                
-                </td>
-            
-
-            <td class="description last">Should mipmaps be generated.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-            </td>
+            <td class="description last">The texture target to attach.</td>
         </tr>
 
     
@@ -1148,7 +528,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="framebuffer.js.html">framebuffer.js</a>, <a href="framebuffer.js.html#line85">line 85</a>
+        <a href="framebuffer.js.html">framebuffer.js</a>, <a href="framebuffer.js.html#line62">line 62</a>
     </li></ul></dd>
     
 
@@ -1190,8 +570,7 @@
 
 
 <div class="description">
-    Delete this framebuffer. NOTE: will delete any currently
-        attached textures.
+    Delete this framebuffer.
 </div>
 
 
@@ -1235,7 +614,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="framebuffer.js.html">framebuffer.js</a>, <a href="framebuffer.js.html#line230">line 230</a>
+        <a href="framebuffer.js.html">framebuffer.js</a>, <a href="framebuffer.js.html#line151">line 151</a>
     </li></ul></dd>
     
 
@@ -1269,7 +648,7 @@
     
 
     
-    <h4 class="name" id="depthTarget"><span class="type-signature"></span>depthTarget<span class="signature">(options<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="depthTarget"><span class="type-signature"></span>depthTarget<span class="signature">(texture, target<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
     
 
     
@@ -1305,60 +684,6 @@
         
 
         
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>options</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">Texture options.
-                <h6>Properties</h6>
-                
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Attributes</th>
-        
-
-        
         <th>Default</th>
         
 
@@ -1371,7 +696,42 @@
 
         <tr>
             
-                <td class="name"><code>type</code></td>
+                <td class="name"><code>texture</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Texture.html">Texture</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">The texture to attach.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>target</code></td>
             
 
             <td class="type">
@@ -1398,557 +758,12 @@
             
                 <td class="default">
                 
-                    UNSIGNED_BYTE
+                    TEXTURE_2D
                 
                 </td>
             
 
-            <td class="description last">Type of data stored in the texture.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>format</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">GLEnum</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    RGBA
-                
-                </td>
-            
-
-            <td class="description last">Texture data format.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>internalFormat</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">GLEnum</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    RGBA
-                
-                </td>
-            
-
-            <td class="description last">Texture data internal format.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>flipY</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    true
-                
-                </td>
-            
-
-            <td class="description last">Whether th y-axis be flipped when reading the texture.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>minFilter</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">GLEnum</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    NEAREST
-                
-                </td>
-            
-
-            <td class="description last">Minification filter.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>magFilter</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">GLEnum</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    NEAREST
-                
-                </td>
-            
-
-            <td class="description last">Magnification filter.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>wrapS</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">GLEnum</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    CLAMP_TO_EDGE
-                
-                </td>
-            
-
-            <td class="description last">Horizontal wrap mode.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>wrapT</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">GLEnum</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    CLAMP_TO_EDGE
-                
-                </td>
-            
-
-            <td class="description last">Vertical wrap mode.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>compareMode</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">GLEnum</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    NONE
-                
-                </td>
-            
-
-            <td class="description last">Comparison mode.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>compareFunc</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">GLEnum</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    LEQUAL
-                
-                </td>
-            
-
-            <td class="description last">Comparison function.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>baseLevel</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">GLEnum</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last">Base mipmap level.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>maxLevel</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">GLEnum</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last">Maximum mipmap level.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>minLOD</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">GLEnum</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last">Mimimum level of detail.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>maxLOD</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">GLEnum</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last">Maximum level of detail.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>generateMipmaps</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    false
-                
-                </td>
-            
-
-            <td class="description last">Should mipmaps be generated.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-            </td>
+            <td class="description last">The texture target to attach.</td>
         </tr>
 
     
@@ -1989,7 +804,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="framebuffer.js.html">framebuffer.js</a>, <a href="framebuffer.js.html#line141">line 141</a>
+        <a href="framebuffer.js.html">framebuffer.js</a>, <a href="framebuffer.js.html#line87">line 87</a>
     </li></ul></dd>
     
 
@@ -2023,7 +838,7 @@
     
 
     
-    <h4 class="name" id="replaceTexture"><span class="type-signature"></span>replaceTexture<span class="signature">(index, texture)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="replaceTexture"><span class="type-signature"></span>replaceTexture<span class="signature">(index, texture, target<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
     
 
     
@@ -2055,7 +870,11 @@
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
+        
+        <th>Default</th>
         
 
         <th class="last">Description</th>
@@ -2080,7 +899,19 @@
             </td>
 
             
+                <td class="attributes">
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last">Color attachment to bind the texture to.</td>
@@ -2103,10 +934,61 @@
             </td>
 
             
+                <td class="attributes">
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last">New texture to bind.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>target</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">GLEnum</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    TEXTURE_2D
+                
+                </td>
+            
+
+            <td class="description last">The texture target to attach.</td>
         </tr>
 
     
@@ -2147,7 +1029,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="framebuffer.js.html">framebuffer.js</a>, <a href="framebuffer.js.html#line179">line 179</a>
+        <a href="framebuffer.js.html">framebuffer.js</a>, <a href="framebuffer.js.html#line109">line 109</a>
     </li></ul></dd>
     
 
@@ -2189,8 +1071,7 @@
 
 
 <div class="description">
-    Resize framebuffer to current default drawing buffer
-        size. Should be called after calls to App.resize().
+    Resize all currently attached textures.
 </div>
 
 
@@ -2342,7 +1223,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="framebuffer.js.html">framebuffer.js</a>, <a href="framebuffer.js.html#line197">line 197</a>
+        <a href="framebuffer.js.html">framebuffer.js</a>, <a href="framebuffer.js.html#line127">line 127</a>
     </li></ul></dd>
     
 
@@ -2392,7 +1273,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sun Nov 26 2017 17:08:39 GMT-0500 (EST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sat Dec 02 2017 10:30:39 GMT-0500 (EST)
 </footer>
 
 <script> prettyPrint(); </script>

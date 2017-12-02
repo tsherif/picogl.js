@@ -21,8 +21,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-import { TEXTURE_FORMAT_DEFAULTS }  from "./texture-format-defaults.js";
-import { Texture }  from "./texture.js";
+import * as CONSTANTS from "./constants.js";
 
 /**
     Storage for vertex data.
@@ -30,8 +29,6 @@ import { Texture }  from "./texture.js";
     @class
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLFramebuffer} framebuffer Handle to the framebuffer.
-    @prop {number} width The width of the framebuffer.
-    @prop {number} height The height of the framebuffer.
     @prop {Array} colorTextures Array of color texture targets.
     @prop {number} numColorTargets Number of color texture targets.
     @prop {Texture} depthTexture Depth texture target.
@@ -40,75 +37,38 @@ import { Texture }  from "./texture.js";
 */
 export class Framebuffer {
 
-    constructor(gl, appState, width, height) {
+    constructor(gl, appState) {
         this.gl = gl;
         this.framebuffer = gl.createFramebuffer();
         this.appState = appState;
-
-        if (width && height) {
-            this.width = width;
-            this.height = height;
-        } else {
-            this.width = gl.drawingBufferWidth;
-            this.height = gl.drawingBufferHeight;
-        }
 
         this.numColorTargets = 0;
 
         this.colorTextures = [];
         this.colorAttachments = [];
+        this.colorsTextureTargets = [];
         this.depthTexture = null;
+        this.depthTextureTarget = null;
     }
 
     /**
         Add a color target to this framebuffer.
 
         @method
-        @param {number} [index=0] Color attachment index.
-        @param {Object} [options] Texture options.
-        @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
-        @param {GLEnum} [options.format=RGBA] Texture data format.
-        @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
-        @param {boolean} [options.flipY=true] Whether th y-axis be flipped when reading the texture.
-        @param {GLEnum} [options.minFilter=NEAREST] Minification filter.
-        @param {GLEnum} [options.magFilter=NEAREST] Magnification filter.
-        @param {GLEnum} [options.wrapS=CLAMP_TO_EDGE] Horizontal wrap mode.
-        @param {GLEnum} [options.wrapT=CLAMP_TO_EDGE] Vertical wrap mode.
-        @param {GLEnum} [options.compareMode=NONE] Comparison mode.
-        @param {GLEnum} [options.compareFunc=LEQUAL] Comparison function.
-        @param {GLEnum} [options.baseLevel] Base mipmap level.
-        @param {GLEnum} [options.maxLevel] Maximum mipmap level.
-        @param {GLEnum} [options.minLOD] Mimimum level of detail.
-        @param {GLEnum} [options.maxLOD] Maximum level of detail.
-        @param {boolean} [options.generateMipmaps=false] Should mipmaps be generated.
+        @param {number} index Color attachment index.
+        @param {Texture} texture The texture to attach.
+        @param {GLEnum} [target=TEXTURE_2D] The texture target to attach.
     */
-    colorTarget(index = 0, options = {}) {
-        options.type = options.type || this.gl.UNSIGNED_BYTE;
-        options.format = options.format || this.gl.RGBA;
-        options.internalFormat = options.internalFormat || TEXTURE_FORMAT_DEFAULTS[options.type][options.format];
-        options.minFilter = options.minFilter || this.gl.NEAREST;
-        options.magFilter = options.magFilter || this.gl.NEAREST;
-        options.wrapS = options.wrapS || this.gl.CLAMP_TO_EDGE;
-        options.wrapT = options.wrapT || this.gl.CLAMP_TO_EDGE;
-        options.generateMipmaps = options.generateMipmaps === undefined ? false : options.generateMipmaps;
+    colorTarget(index, texture, target = CONSTANTS.TEXTURE_2D) {
 
-        this.colorAttachments[index] = this.gl.COLOR_ATTACHMENT0 + index;
+        this.colorAttachments[index] = CONSTANTS.COLOR_ATTACHMENT0 + index;
 
         let currentFramebuffer = this.bindAndCaptureState();
 
-        this.colorTextures[index] = new Texture(
-            this.gl,
-            this.appState,
-            this.gl.TEXTURE_2D,
-            null,
-            this.width,
-            this.height,
-            null,
-            false,
-            options
-        );
+        this.colorTextures[index] = texture;
+        this.colorsTextureTargets[index] = target;
 
-        this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.colorAttachments[index], this.gl.TEXTURE_2D, this.colorTextures[index].texture, 0);
+        this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.colorAttachments[index], target, texture.texture, 0);
         this.gl.drawBuffers(this.colorAttachments);
         this.numColorTargets++;
 
@@ -121,48 +81,17 @@ export class Framebuffer {
         Add a depth target to this framebuffer.
 
         @method
-        @param {Object} [options] Texture options.
-        @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the texture.
-        @param {GLEnum} [options.format=RGBA] Texture data format.
-        @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
-        @param {boolean} [options.flipY=true] Whether th y-axis be flipped when reading the texture.
-        @param {GLEnum} [options.minFilter=NEAREST] Minification filter.
-        @param {GLEnum} [options.magFilter=NEAREST] Magnification filter.
-        @param {GLEnum} [options.wrapS=CLAMP_TO_EDGE] Horizontal wrap mode.
-        @param {GLEnum} [options.wrapT=CLAMP_TO_EDGE] Vertical wrap mode.
-        @param {GLEnum} [options.compareMode=NONE] Comparison mode.
-        @param {GLEnum} [options.compareFunc=LEQUAL] Comparison function.
-        @param {GLEnum} [options.baseLevel] Base mipmap level.
-        @param {GLEnum} [options.maxLevel] Maximum mipmap level.
-        @param {GLEnum} [options.minLOD] Mimimum level of detail.
-        @param {GLEnum} [options.maxLOD] Maximum level of detail.
-        @param {boolean} [options.generateMipmaps=false] Should mipmaps be generated.
+        @param {Texture} texture The texture to attach.
+        @param {GLEnum} [target=TEXTURE_2D] The texture target to attach.
     */
-    depthTarget(options = {}) {
-        options.format = this.gl.DEPTH_COMPONENT;
-        options.type = options.type || this.gl.UNSIGNED_SHORT;
-        options.internalFormat = options.internalFormat || TEXTURE_FORMAT_DEFAULTS[options.type][options.format];
-        options.minFilter = options.minFilter || this.gl.NEAREST;
-        options.magFilter = options.magFilter || this.gl.NEAREST;
-        options.wrapS = options.wrapS || this.gl.CLAMP_TO_EDGE;
-        options.wrapT = options.wrapT || this.gl.CLAMP_TO_EDGE;
-        options.generateMipmaps = options.generateMipmaps === undefined ? false : options.generateMipmaps;
+    depthTarget(texture, target = CONSTANTS.TEXTURE_2D) {
 
         let currentFramebuffer = this.bindAndCaptureState();
 
-        this.depthTexture = new Texture(
-            this.gl,
-            this.appState,
-            this.gl.TEXTURE_2D,
-            null,
-            this.width,
-            this.height,
-            null,
-            false,
-            options
-        );
+        this.depthTexture = texture;
+        this.depthTextureTarget = target;
 
-        this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, this.gl.DEPTH_ATTACHMENT, this.gl.TEXTURE_2D, this.depthTexture.texture, 0);
+        this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, this.gl.DEPTH_ATTACHMENT, target, texture.texture, 0);
 
         this.restoreState(currentFramebuffer);
 
@@ -175,45 +104,38 @@ export class Framebuffer {
         @method
         @param {number} index Color attachment to bind the texture to.
         @param {Texture} texture New texture to bind.
+        @param {GLEnum} [target=TEXTURE_2D] The texture target to attach.
     */
-    replaceTexture(index, texture) {
+    replaceTexture(index, texture, target = CONSTANTS.TEXTURE_2D) {
         this.colorTextures[index] = texture;
+        this.colorsTextureTargets[index] = target;
 
         let currentFramebuffer = this.bindAndCaptureState();
-        this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, this.colorAttachments[index], this.gl.TEXTURE_2D, this.colorTextures[index].texture, 0);
+        this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, this.colorAttachments[index], target, this.colorTextures[index].texture, 0);
         this.restoreState(currentFramebuffer);
 
         return this;
     }
 
     /**
-        Resize framebuffer to current default drawing buffer
-        size. Should be called after calls to App.resize().
+        Resize all currently attached textures.
 
         @method
         @param {number} [width=app.width] New width of the framebuffer.
         @param {number} [height=app.height] New height of the framebuffer.
     */
-    resize(width, height) {
-
-        if (width && height) {
-            this.width = width;
-            this.height = height;
-        } else {
-            this.width = this.gl.drawingBufferWidth;
-            this.height = this.gl.drawingBufferHeight;
-        }
+    resize(width = this.gl.drawingBufferWidth, height = this.gl.drawingBufferHeight) {
 
         let currentFramebuffer = this.bindAndCaptureState();
 
         for (let i = 0; i < this.numColorTargets; ++i) {
-            this.colorTextures[i].resize(this.width, this.height);
-            this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, this.colorAttachments[i], this.gl.TEXTURE_2D, this.colorTextures[i].texture, 0);
+            this.colorTextures[i].resize(width, height);
+            this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, this.colorAttachments[i], this.colorsTextureTargets[i], this.colorTextures[i].texture, 0);
         }
 
         if (this.depthTexture) {
-            this.depthTexture.resize(this.width, this.height);
-            this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, this.gl.DEPTH_ATTACHMENT, this.gl.TEXTURE_2D, this.depthTexture.texture, 0);
+            this.depthTexture.resize(width, height);
+            this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, this.gl.DEPTH_ATTACHMENT, this.depthTextureTarget, this.depthTexture.texture, 0);
         }
 
         this.restoreState(currentFramebuffer);
@@ -222,20 +144,11 @@ export class Framebuffer {
     }
 
     /**
-        Delete this framebuffer. NOTE: will delete any currently
-        attached textures.
+        Delete this framebuffer.
 
         @method
     */
     delete() {
-        for (let i = 0; i < this.numColorTargets; ++i) {
-            this.colorTextures[i].delete();
-        }
-
-        if (this.depthTexture) {
-            this.depthTexture.delete();
-        }
-
         if (this.framebuffer) {
             this.gl.deleteFramebuffer(this.framebuffer);
             this.framebuffer = null;
