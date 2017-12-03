@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.8.1
+PicoGL.js v$npm_package_version
 
 The MIT License (MIT)
 
@@ -2853,7 +2853,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     @namespace PicoGL
 */
 
-const version = "0.8.1";
+const version = "$npm_package_version";
 /* harmony export (immutable) */ __webpack_exports__["version"] = version;
 
 
@@ -4359,6 +4359,11 @@ class DrawCall {
 
         if (this.currentTransformFeedback) {
             this.gl.endTransformFeedback();
+            // TODO(Tarek): Need to rebind buffers due to bug in ANGLE.
+            // Remove this when that's fixed.
+            for (let i = 0, len = this.currentTransformFeedback.angleBugBuffers.length; i < len; ++i) {
+                this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, i, null);
+            }
         }
     }
 
@@ -5527,6 +5532,10 @@ class TransformFeedback {
         this.gl = gl;
         this.transformFeedback = gl.createTransformFeedback();
         this.appState = appState;
+
+        // TODO(Tarek): Need to rebind buffers due to bug in ANGLE.
+        // Remove this when that's fixed.
+        this.angleBugBuffers = [];
     }
 
     /**
@@ -5541,6 +5550,8 @@ class TransformFeedback {
         this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, index, buffer.buffer);
         this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, null);
         this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, index, null);
+
+        this.angleBugBuffers[index] = buffer;
 
         return this;
     }
@@ -5561,6 +5572,10 @@ class TransformFeedback {
     bind() {
         if (this.appState.transformFeedback !== this) {
             this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedback);
+
+            for (let i = 0, len = this.angleBugBuffers.length; i < len; ++i) {
+                this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, i, this.angleBugBuffers[i].buffer);
+            }
 
             this.appState.transformFeedback = this;
         }
