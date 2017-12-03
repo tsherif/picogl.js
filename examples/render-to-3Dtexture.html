@@ -145,6 +145,7 @@
         var app = PicoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0)
         .blendFunc(PicoGL.ONE, PicoGL.ONE_MINUS_SRC_ALPHA)
+        .cullBackfaces()
         .clear();
 
         var timer = app.createTimer();
@@ -159,13 +160,9 @@
         var program = app.createProgram(vsSource, fsSource);
 
         var colorTarget = app.createTexture3D(DIMENSIONS, DIMENSIONS, DIMENSIONS);
-        var depthTarget = app.createTexture2D(DIMENSIONS, DIMENSIONS, {
-            format: PicoGL.DEPTH_COMPONENT
-        });
 
         var framebuffer = app.createFramebuffer()
-        .colorTarget(0, colorTarget)
-        .depthTarget(depthTarget);
+        .colorTarget(0, colorTarget);
 
         // SET UP GEOMETRY
         var box = utils.createBox({dimensions: [1.0, 1.0, 1.0]})
