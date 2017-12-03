@@ -109,7 +109,7 @@
         void main() {
             vUV = position.xyz + 0.5;
             gl_Position = uMVP * position;
-            gl_PointSize = 4.0;
+            gl_PointSize = 2.0;
         }
     </script>
     <script type="x-shader/vf" id="fragment-draw">
@@ -138,12 +138,13 @@
             document.body.innerHTML = "This example requires WebGL 2 which is unavailable on this system."
         }
 
-        var DIMENSIONS = 64;
+        var DIMENSIONS = 128;
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         
         var app = PicoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0)
+        .blendFunc(PicoGL.ONE, PicoGL.ONE_MINUS_SRC_ALPHA)
         .clear();
 
         var timer = app.createTimer();
@@ -189,9 +190,9 @@
             for (var j = 0; j < DIMENSIONS; ++j) {
                 var z = -0.5;
                 for (var k = 0; k < DIMENSIONS; ++k) {
-                    positionData[positionIndex++] = x;
-                    positionData[positionIndex++] = y;
-                    positionData[positionIndex++] = z;
+                    positionData[positionIndex++] = x + (Math.random() - 0.5) / (DIMENSIONS);
+                    positionData[positionIndex++] = y + (Math.random() - 0.5) / (DIMENSIONS);
+                    positionData[positionIndex++] = z + (Math.random() - 0.5) / (DIMENSIONS);
                     z += INCREMENT;
                 }
                 y += INCREMENT;
@@ -211,7 +212,7 @@
         mat4.lookAt(tex3DViewMatrix, tex3DEyePosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
 
         var viewMatrix = mat4.create();
-        var eyePosition = vec3.fromValues(0.9, 0.9, 0.9);
+        var eyePosition = vec3.fromValues(0.6, 0.6, 0.6);
         mat4.lookAt(viewMatrix, eyePosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
 
         var tex3DProjMatrix = mat4.create();
@@ -269,41 +270,37 @@
             .texture("tex", colorTarget)
             .uniform("uMVP", mvpMatrix);;
 
-            var layer = 0;
-
+            app.drawFramebuffer(framebuffer)
+            .viewport(0, 0, DIMENSIONS, DIMENSIONS)
+            .depthTest()
+            .clearColor(0.0, 0.0, 0.0, 0.0)
+            
 
             function draw3Dtexture() {
-                angleX += Math.PI / DIMENSIONS;
-                angleY += 0.5 * Math.PI / DIMENSIONS;
 
-                mat4.fromXRotation(rotateXMatrix, angleX);
-                mat4.fromYRotation(rotateYMatrix, angleY);
-                mat4.multiply(modelMatrix, rotateXMatrix, rotateYMatrix);
+                for (var i = 0; i < DIMENSIONS; ++i) {
+                    angleX += Math.PI / DIMENSIONS;
+                    angleY += 0.5 * Math.PI / DIMENSIONS;
 
-                tex3DDrawCall.uniform("uModel", modelMatrix);
+                    mat4.fromXRotation(rotateXMatrix, angleX);
+                    mat4.fromYRotation(rotateYMatrix, angleY);
+                    mat4.multiply(modelMatrix, rotateXMatrix, rotateYMatrix);
 
-                framebuffer.replaceTexture(0, colorTarget, layer);
-                app.drawFramebuffer(framebuffer)
-                .viewport(0, 0, DIMENSIONS, DIMENSIONS)
-                .depthTest()
-                .clearColor(0.0, 0.0, 0.0, 0.0)
-                .clear();
-                tex3DDrawCall.draw();
 
+                    tex3DDrawCall.uniform("uModel", modelMatrix);
+
+                    framebuffer.replaceTexture(0, colorTarget, i);
+                    
+                    app.clear();
+                    tex3DDrawCall.draw(); 
+                }               
+            
                 app.defaultDrawFramebuffer()
                 .defaultViewport()
                 .noDepthTest()
                 .blend()
-                .blendFunc(PicoGL.ONE, PicoGL.ONE_MINUS_SRC_ALPHA)
                 .clearColor(0.0, 0.0, 0.0, 1.0)
-                .clear();
-                drawCall.draw();
-                
-                if (++layer < DIMENSIONS) {
-                    requestAnimationFrame(draw3Dtexture);
-                } else {
-                    requestAnimationFrame(drawMain);
-                }
+                requestAnimationFrame(drawMain);
             }
 
             function drawMain() {
