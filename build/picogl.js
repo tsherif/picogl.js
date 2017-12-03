@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.7.1
+PicoGL.js v0.8.0
 
 The MIT License (MIT)
 
@@ -2853,7 +2853,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     @namespace PicoGL
 */
 
-const version = "0.7.1";
+const version = "0.8.0";
 /* harmony export (immutable) */ __webpack_exports__["version"] = version;
 
 
@@ -4425,10 +4425,8 @@ class Framebuffer {
         this.colorTextures = [];
         this.colorAttachments = [];
         this.colorTextureTargets = [];
-        this.colorTextureLayers = [];
         this.depthTexture = null;
         this.depthTextureTarget = null;
-        this.depthTextureLayer = null;
     }
 
     /**
@@ -4437,7 +4435,7 @@ class Framebuffer {
         @method
         @param {number} index Color attachment index.
         @param {Texture} texture The texture to attach.
-        @param {GLEnum} [target=TEXTURE_2D] The texture target or layer to attach. If the texture is 3D or a texture array,
+        @param {GLEnum} [target] The texture target or layer to attach. If the texture is 3D or a texture array,
             defaults to 0, otherwise to TEXTURE_2D.
     */
     colorTarget(index, texture, target = texture.is3D ? 0 : __WEBPACK_IMPORTED_MODULE_0__constants_js__["_452" /* TEXTURE_2D */]) {
@@ -4495,7 +4493,7 @@ class Framebuffer {
         @method
         @param {number} index Color attachment to bind the texture to.
         @param {Texture} texture New texture to bind.
-        @param {GLEnum} [target=TEXTURE_2D] The texture target or layer to attach. If the texture is 3D or a texture array,
+        @param {GLEnum} [target] The texture target or layer to attach. If the texture is 3D or a texture array,
             defaults to 0, otherwise to TEXTURE_2D.
     */
     replaceTexture(index, texture, target = texture.is3D ? 0 : __WEBPACK_IMPORTED_MODULE_0__constants_js__["_452" /* TEXTURE_2D */]) {
@@ -4530,7 +4528,7 @@ class Framebuffer {
             var texture = this.colorTextures[i];
             texture.resize(width, height, depth);
             if (texture.is3D) {
-                this.gl.framebufferTextureLayer(this.gl.DRAW_FRAMEBUFFER, this.colorAttachments[i], texture.texture, 0, this.colorTextureLayers[i]);
+                this.gl.framebufferTextureLayer(this.gl.DRAW_FRAMEBUFFER, this.colorAttachments[i], texture.texture, 0, this.colorTextureTargets[i]);
             } else {
                 this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, this.colorAttachments[i], this.colorTextureTargets[i], texture.texture, 0);
             }
@@ -4539,7 +4537,7 @@ class Framebuffer {
         if (this.depthTexture) {
             this.depthTexture.resize(width, height, depth);
             if (this.depthTexture.is3D) {
-                this.gl.framebufferTextureLayer(this.gl.DRAW_FRAMEBUFFER, __WEBPACK_IMPORTED_MODULE_0__constants_js__["_77" /* DEPTH_ATTACHMENT */], this.depthTexture.texture, 0, this.depthTextureLayer);
+                this.gl.framebufferTextureLayer(this.gl.DRAW_FRAMEBUFFER, __WEBPACK_IMPORTED_MODULE_0__constants_js__["_77" /* DEPTH_ATTACHMENT */], this.depthTexture.texture, 0, this.depthTextureTarget);
             } else {
                 this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, __WEBPACK_IMPORTED_MODULE_0__constants_js__["_77" /* DEPTH_ATTACHMENT */], this.depthTextureTarget, this.depthTexture.texture, 0);
             }

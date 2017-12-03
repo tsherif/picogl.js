@@ -47,10 +47,8 @@ export class Framebuffer {
         this.colorTextures = [];
         this.colorAttachments = [];
         this.colorTextureTargets = [];
-        this.colorTextureLayers = [];
         this.depthTexture = null;
         this.depthTextureTarget = null;
-        this.depthTextureLayer = null;
     }
 
     /**
@@ -59,7 +57,7 @@ export class Framebuffer {
         @method
         @param {number} index Color attachment index.
         @param {Texture} texture The texture to attach.
-        @param {GLEnum} [target=TEXTURE_2D] The texture target or layer to attach. If the texture is 3D or a texture array,
+        @param {GLEnum} [target] The texture target or layer to attach. If the texture is 3D or a texture array,
             defaults to 0, otherwise to TEXTURE_2D.
     */
     colorTarget(index, texture, target = texture.is3D ? 0 : CONSTANTS.TEXTURE_2D) {
@@ -117,7 +115,7 @@ export class Framebuffer {
         @method
         @param {number} index Color attachment to bind the texture to.
         @param {Texture} texture New texture to bind.
-        @param {GLEnum} [target=TEXTURE_2D] The texture target or layer to attach. If the texture is 3D or a texture array,
+        @param {GLEnum} [target] The texture target or layer to attach. If the texture is 3D or a texture array,
             defaults to 0, otherwise to TEXTURE_2D.
     */
     replaceTexture(index, texture, target = texture.is3D ? 0 : CONSTANTS.TEXTURE_2D) {
@@ -152,7 +150,7 @@ export class Framebuffer {
             var texture = this.colorTextures[i];
             texture.resize(width, height, depth);
             if (texture.is3D) {
-                this.gl.framebufferTextureLayer(this.gl.DRAW_FRAMEBUFFER, this.colorAttachments[i], texture.texture, 0, this.colorTextureLayers[i]);
+                this.gl.framebufferTextureLayer(this.gl.DRAW_FRAMEBUFFER, this.colorAttachments[i], texture.texture, 0, this.colorTextureTargets[i]);
             } else {
                 this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, this.colorAttachments[i], this.colorTextureTargets[i], texture.texture, 0);
             }
@@ -161,7 +159,7 @@ export class Framebuffer {
         if (this.depthTexture) {
             this.depthTexture.resize(width, height, depth);
             if (this.depthTexture.is3D) {
-                this.gl.framebufferTextureLayer(this.gl.DRAW_FRAMEBUFFER, CONSTANTS.DEPTH_ATTACHMENT, this.depthTexture.texture, 0, this.depthTextureLayer);
+                this.gl.framebufferTextureLayer(this.gl.DRAW_FRAMEBUFFER, CONSTANTS.DEPTH_ATTACHMENT, this.depthTexture.texture, 0, this.depthTextureTarget);
             } else {
                 this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, CONSTANTS.DEPTH_ATTACHMENT, this.depthTextureTarget, this.depthTexture.texture, 0);
             }
