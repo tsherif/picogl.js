@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.7.1
+PicoGL.js v0.8.0
 
 The MIT License (MIT)
 
@@ -2853,7 +2853,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     @namespace PicoGL
 */
 
-const version = "0.7.1";
+const version = "0.8.0";
 /* harmony export (immutable) */ __webpack_exports__["version"] = version;
 
 
@@ -3882,6 +3882,14 @@ class App {
             a mipmap sampling filter is use and the mipmap levels aren't provided directly.
     */
     createTextureArray(image, width, height, depth, options) {
+        if (typeof image === "number") {
+            // Create empty texture just give width/height/depth.
+            options = depth;
+            depth = height;
+            height = width;
+            width = image;
+            image = null;    
+        }
         return new __WEBPACK_IMPORTED_MODULE_7__texture_js__["a" /* Texture */](this.gl, this.state, this.gl.TEXTURE_2D_ARRAY, image, width, height, depth, true, options);
     }
 
@@ -3918,6 +3926,14 @@ class App {
             a mipmap sampling filter is use and the mipmap levels aren't provided directly.
     */
     createTexture3D(image, width, height, depth, options) {
+        if (typeof image === "number") {
+            // Create empty texture just give width/height/depth.
+            options = depth;
+            depth = height;
+            height = width;
+            width = image;
+            image = null;    
+        }
         return new __WEBPACK_IMPORTED_MODULE_7__texture_js__["a" /* Texture */](this.gl, this.state, this.gl.TEXTURE_3D, image, width, height, depth, true, options);
     }
 
@@ -4408,7 +4424,7 @@ class Framebuffer {
 
         this.colorTextures = [];
         this.colorAttachments = [];
-        this.colorsTextureTargets = [];
+        this.colorTextureTargets = [];
         this.depthTexture = null;
         this.depthTextureTarget = null;
     }
@@ -4419,18 +4435,24 @@ class Framebuffer {
         @method
         @param {number} index Color attachment index.
         @param {Texture} texture The texture to attach.
-        @param {GLEnum} [target=TEXTURE_2D] The texture target to attach.
+        @param {GLEnum} [target] The texture target or layer to attach. If the texture is 3D or a texture array,
+            defaults to 0, otherwise to TEXTURE_2D.
     */
-    colorTarget(index, texture, target = __WEBPACK_IMPORTED_MODULE_0__constants_js__["_452" /* TEXTURE_2D */]) {
+    colorTarget(index, texture, target = texture.is3D ? 0 : __WEBPACK_IMPORTED_MODULE_0__constants_js__["_452" /* TEXTURE_2D */]) {
 
         this.colorAttachments[index] = __WEBPACK_IMPORTED_MODULE_0__constants_js__["L" /* COLOR_ATTACHMENT0 */] + index;
 
         let currentFramebuffer = this.bindAndCaptureState();
 
         this.colorTextures[index] = texture;
-        this.colorsTextureTargets[index] = target;
+        this.colorTextureTargets[index] = target;
 
-        this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.colorAttachments[index], target, texture.texture, 0);
+        if (texture.is3D) {
+            this.gl.framebufferTextureLayer(this.gl.DRAW_FRAMEBUFFER, this.colorAttachments[index], texture.texture, 0, target);
+        } else {
+            this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, this.colorAttachments[index], target, texture.texture, 0);
+        }
+
         this.gl.drawBuffers(this.colorAttachments);
         this.numColorTargets++;
 
@@ -4444,16 +4466,21 @@ class Framebuffer {
 
         @method
         @param {Texture} texture The texture to attach.
-        @param {GLEnum} [target=TEXTURE_2D] The texture target to attach.
+        @param {GLEnum} [target] The texture target or layer to attach. If the texture is 3D or a texture array,
+            defaults to 0, otherwise to TEXTURE_2D.
     */
-    depthTarget(texture, target = __WEBPACK_IMPORTED_MODULE_0__constants_js__["_452" /* TEXTURE_2D */]) {
+    depthTarget(texture, target = texture.is3D ? 0 : __WEBPACK_IMPORTED_MODULE_0__constants_js__["_452" /* TEXTURE_2D */]) {
 
         let currentFramebuffer = this.bindAndCaptureState();
 
         this.depthTexture = texture;
         this.depthTextureTarget = target;
 
-        this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, this.gl.DEPTH_ATTACHMENT, target, texture.texture, 0);
+        if (texture.is3D) {
+            this.gl.framebufferTextureLayer(this.gl.DRAW_FRAMEBUFFER, __WEBPACK_IMPORTED_MODULE_0__constants_js__["_77" /* DEPTH_ATTACHMENT */], texture.texture, 0, target);
+        } else {
+            this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, __WEBPACK_IMPORTED_MODULE_0__constants_js__["_77" /* DEPTH_ATTACHMENT */], target, texture.texture, 0);
+        }
 
         this.restoreState(currentFramebuffer);
 
@@ -4466,14 +4493,21 @@ class Framebuffer {
         @method
         @param {number} index Color attachment to bind the texture to.
         @param {Texture} texture New texture to bind.
-        @param {GLEnum} [target=TEXTURE_2D] The texture target to attach.
+        @param {GLEnum} [target] The texture target or layer to attach. If the texture is 3D or a texture array,
+            defaults to 0, otherwise to TEXTURE_2D.
     */
-    replaceTexture(index, texture, target = __WEBPACK_IMPORTED_MODULE_0__constants_js__["_452" /* TEXTURE_2D */]) {
+    replaceTexture(index, texture, target = texture.is3D ? 0 : __WEBPACK_IMPORTED_MODULE_0__constants_js__["_452" /* TEXTURE_2D */]) {
         this.colorTextures[index] = texture;
-        this.colorsTextureTargets[index] = target;
+        this.colorTextureTargets[index] = target;
 
         let currentFramebuffer = this.bindAndCaptureState();
-        this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, this.colorAttachments[index], target, this.colorTextures[index].texture, 0);
+        
+        if (texture.is3D) {
+            this.gl.framebufferTextureLayer(this.gl.DRAW_FRAMEBUFFER, this.colorAttachments[index], texture.texture, 0, target);
+        } else {
+            this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, this.colorAttachments[index], target, texture.texture, 0);
+        }
+
         this.restoreState(currentFramebuffer);
 
         return this;
@@ -4486,18 +4520,27 @@ class Framebuffer {
         @param {number} [width=app.width] New width of the framebuffer.
         @param {number} [height=app.height] New height of the framebuffer.
     */
-    resize(width = this.gl.drawingBufferWidth, height = this.gl.drawingBufferHeight) {
+    resize(width = this.gl.drawingBufferWidth, height = this.gl.drawingBufferHeight, depth) {
 
         let currentFramebuffer = this.bindAndCaptureState();
 
         for (let i = 0; i < this.numColorTargets; ++i) {
-            this.colorTextures[i].resize(width, height);
-            this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, this.colorAttachments[i], this.colorsTextureTargets[i], this.colorTextures[i].texture, 0);
+            var texture = this.colorTextures[i];
+            texture.resize(width, height, depth);
+            if (texture.is3D) {
+                this.gl.framebufferTextureLayer(this.gl.DRAW_FRAMEBUFFER, this.colorAttachments[i], texture.texture, 0, this.colorTextureTargets[i]);
+            } else {
+                this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, this.colorAttachments[i], this.colorTextureTargets[i], texture.texture, 0);
+            }
         }
 
         if (this.depthTexture) {
-            this.depthTexture.resize(width, height);
-            this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, this.gl.DEPTH_ATTACHMENT, this.depthTextureTarget, this.depthTexture.texture, 0);
+            this.depthTexture.resize(width, height, depth);
+            if (this.depthTexture.is3D) {
+                this.gl.framebufferTextureLayer(this.gl.DRAW_FRAMEBUFFER, __WEBPACK_IMPORTED_MODULE_0__constants_js__["_77" /* DEPTH_ATTACHMENT */], this.depthTexture.texture, 0, this.depthTextureTarget);
+            } else {
+                this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, __WEBPACK_IMPORTED_MODULE_0__constants_js__["_77" /* DEPTH_ATTACHMENT */], this.depthTextureTarget, this.depthTexture.texture, 0);
+            }
         }
 
         this.restoreState(currentFramebuffer);
