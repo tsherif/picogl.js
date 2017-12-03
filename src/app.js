@@ -939,7 +939,7 @@ export class App {
         @param {GLEnum} [options.minLOD] Mimimum level of detail.
         @param {GLEnum} [options.maxLOD] Maximum level of detail.
         @param {boolean} [options.generateMipmaps] Should mipmaps be generated. Defaults to generating mipmaps if
-            a mipmap sampling filter is use and the mipmap levels aren't provided directly.
+            a mipmap sampling filter is used and the mipmap levels aren't provided directly.
     */
     createTexture2D(image, width, height, options) {
         if (typeof image === "number") {
@@ -1081,7 +1081,7 @@ export class App {
         @param {GLEnum} [options.minLOD] Mimimum level of detail.
         @param {GLEnum} [options.maxLOD] Maximum level of detail.
         @param {boolean} [options.generateMipmaps] Should mipmaps be generated. Defaults to generating mipmaps if
-            a mipmap sampling filter is use and the mipmap levels aren't provided directly.
+            a mipmap sampling filter is usedd.
     */
     createCubemap(options) {
         return new Cubemap(this.gl, this.state, options);

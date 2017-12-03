@@ -209,7 +209,8 @@
         // FRAMEBUFFER
         var colorTarget = app.createCubemap({
             width: CUBEMAP_DIM,
-            height: CUBEMAP_DIM
+            height: CUBEMAP_DIM,
+            generateMipmaps: true  // Required for Firefox bug.
         });
         var depthTarget = app.createTexture2D(CUBEMAP_DIM, CUBEMAP_DIM, {
             format: PicoGL.DEPTH_COMPONENT

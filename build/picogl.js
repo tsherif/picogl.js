@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.8.0
+PicoGL.js v$npm_package_version
 
 The MIT License (MIT)
 
@@ -2853,7 +2853,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     @namespace PicoGL
 */
 
-const version = "0.8.0";
+const version = "$npm_package_version";
 /* harmony export (immutable) */ __webpack_exports__["version"] = version;
 
 
@@ -3830,7 +3830,7 @@ class App {
         @param {GLEnum} [options.minLOD] Mimimum level of detail.
         @param {GLEnum} [options.maxLOD] Maximum level of detail.
         @param {boolean} [options.generateMipmaps] Should mipmaps be generated. Defaults to generating mipmaps if
-            a mipmap sampling filter is use and the mipmap levels aren't provided directly.
+            a mipmap sampling filter is used and the mipmap levels aren't provided directly.
     */
     createTexture2D(image, width, height, options) {
         if (typeof image === "number") {
@@ -3972,7 +3972,7 @@ class App {
         @param {GLEnum} [options.minLOD] Mimimum level of detail.
         @param {GLEnum} [options.maxLOD] Maximum level of detail.
         @param {boolean} [options.generateMipmaps] Should mipmaps be generated. Defaults to generating mipmaps if
-            a mipmap sampling filter is use and the mipmap levels aren't provided directly.
+            a mipmap sampling filter is usedd.
     */
     createCubemap(options) {
         return new __WEBPACK_IMPORTED_MODULE_2__cubemap_js__["a" /* Cubemap */](this.gl, this.state, options);
@@ -4096,11 +4096,9 @@ class Cubemap {
             wrapS = gl.REPEAT,
             wrapT = gl.REPEAT,
             compareMode = gl.NONE,
-            compareFunc = gl.LEQUAL
+            compareFunc = gl.LEQUAL,
+            generateMipmaps = minFilter === gl.LINEAR_MIPMAP_NEAREST || minFilter === gl.LINEAR_MIPMAP_LINEAR
         } = options;
-
-        let generateMipmaps = negX && options.generateMipmaps !== false &&
-                            (minFilter === gl.LINEAR_MIPMAP_NEAREST || minFilter === gl.LINEAR_MIPMAP_LINEAR); 
         
         this.bind(0);
         gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY);
@@ -4133,12 +4131,11 @@ class Cubemap {
             gl.texSubImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Y, 0, 0, 0, width, height, this.format, this.type, posY);
             gl.texSubImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, 0, 0, width, height, this.format, this.type, negZ);
             gl.texSubImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Z, 0, 0, 0, width, height, this.format, this.type, posZ);
-
-            if (generateMipmaps) {
-                gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
-            }
         }
 
+        if (generateMipmaps) {
+            gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
+        }
 
     }
 
