@@ -991,6 +991,14 @@ export class App {
             a mipmap sampling filter is use and the mipmap levels aren't provided directly.
     */
     createTextureArray(image, width, height, depth, options) {
+        if (typeof image === "number") {
+            // Create empty texture just give width/height/depth.
+            options = depth;
+            depth = height;
+            height = width;
+            width = image;
+            image = null;    
+        }
         return new Texture(this.gl, this.state, this.gl.TEXTURE_2D_ARRAY, image, width, height, depth, true, options);
     }
 
@@ -1027,6 +1035,14 @@ export class App {
             a mipmap sampling filter is use and the mipmap levels aren't provided directly.
     */
     createTexture3D(image, width, height, depth, options) {
+        if (typeof image === "number") {
+            // Create empty texture just give width/height/depth.
+            options = depth;
+            depth = height;
+            height = width;
+            width = image;
+            image = null;    
+        }
         return new Texture(this.gl, this.state, this.gl.TEXTURE_3D, image, width, height, depth, true, options);
     }
 
