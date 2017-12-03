@@ -62,11 +62,9 @@ export class Cubemap {
             wrapS = gl.REPEAT,
             wrapT = gl.REPEAT,
             compareMode = gl.NONE,
-            compareFunc = gl.LEQUAL
+            compareFunc = gl.LEQUAL,
+            generateMipmaps = minFilter === gl.LINEAR_MIPMAP_NEAREST || minFilter === gl.LINEAR_MIPMAP_LINEAR
         } = options;
-
-        let generateMipmaps = negX && options.generateMipmaps !== false &&
-                            (minFilter === gl.LINEAR_MIPMAP_NEAREST || minFilter === gl.LINEAR_MIPMAP_LINEAR); 
         
         this.bind(0);
         gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY);
@@ -99,12 +97,11 @@ export class Cubemap {
             gl.texSubImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Y, 0, 0, 0, width, height, this.format, this.type, posY);
             gl.texSubImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, 0, 0, width, height, this.format, this.type, negZ);
             gl.texSubImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Z, 0, 0, 0, width, height, this.format, this.type, posZ);
-
-            if (generateMipmaps) {
-                gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
-            }
         }
 
+        if (generateMipmaps) {
+            gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
+        }
 
     }
 
