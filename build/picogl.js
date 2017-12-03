@@ -1,5 +1,5 @@
 /*
-PicoGL.js v$npm_package_version
+PicoGL.js v0.8.1
 
 The MIT License (MIT)
 
@@ -2853,7 +2853,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     @namespace PicoGL
 */
 
-const version = "$npm_package_version";
+const version = "0.8.1";
 /* harmony export (immutable) */ __webpack_exports__["version"] = version;
 
 
