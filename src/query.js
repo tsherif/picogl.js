@@ -73,7 +73,9 @@ export class Query {
     ready() {
         if (this.active && this.gl.getQueryParameter(this.query, this.gl.QUERY_RESULT_AVAILABLE)) {
             this.active = false;
-            this.result = this.gl.getQueryParameter(this.query, this.gl.QUERY_RESULT);
+            // Note(Tarek): Casting because FF incorrectly returns booleans.
+            // https://bugzilla.mozilla.org/show_bug.cgi?id=1422714 
+            this.result = Number(this.gl.getQueryParameter(this.query, this.gl.QUERY_RESULT));
             return true;
         }
 
