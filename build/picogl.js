@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.8.2
+PicoGL.js v0.8.3
 
 The MIT License (MIT)
 
@@ -2188,7 +2188,9 @@ class Query {
     ready() {
         if (this.active && this.gl.getQueryParameter(this.query, this.gl.QUERY_RESULT_AVAILABLE)) {
             this.active = false;
-            this.result = this.gl.getQueryParameter(this.query, this.gl.QUERY_RESULT);
+            // Note(Tarek): Casting because FF incorrectly returns booleans.
+            // https://bugzilla.mozilla.org/show_bug.cgi?id=1422714 
+            this.result = Number(this.gl.getQueryParameter(this.query, this.gl.QUERY_RESULT));
             return true;
         }
 
@@ -2853,7 +2855,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     @namespace PicoGL
 */
 
-const version = "0.8.2";
+const version = "0.8.3";
 /* harmony export (immutable) */ __webpack_exports__["version"] = version;
 
 

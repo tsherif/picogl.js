@@ -404,9 +404,7 @@
 
                         // Check query results here (will be from previous frame or earlier)
                         if (sphere.query.ready()) {
-                            // Note should return uints, but Firefox incorrectly returns booleans
-                            // https://bugzilla.mozilla.org/show_bug.cgi?id=1422714 
-                            sphere.occluded = sphere.query.result === 0 || sphere.query.result === false;
+                            sphere.occluded = sphere.query.result === 0;
                             if (sphere.occluded) {
                                 occludedSpheres++;
                             }
