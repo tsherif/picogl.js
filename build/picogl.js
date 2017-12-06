@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.8.3
+PicoGL.js v0.8.4
 
 The MIT License (MIT)
 
@@ -2855,7 +2855,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     @namespace PicoGL
 */
 
-const version = "0.8.3";
+const version = "0.8.4";
 /* harmony export (immutable) */ __webpack_exports__["version"] = version;
 
 
@@ -5150,7 +5150,7 @@ class Texture {
         // -1 indicates unbound
         this.currentUnit = -1;
 
-        // Sampler parameters
+        // Sampling parameters
         let {
             minFilter = image ? gl.LINEAR_MIPMAP_NEAREST : gl.NEAREST,
             magFilter = image ? gl.LINEAR : gl.NEAREST,
@@ -5160,28 +5160,24 @@ class Texture {
             compareMode = gl.NONE,
             compareFunc = gl.LEQUAL,
             minLOD = null,
-            maxLOD = null
+            maxLOD = null,
+            baseLevel = null,
+            maxLevel = null,
+            flipY = false
         } = options;
 
-        this.sampler = gl.createSampler();
-        gl.samplerParameteri(this.sampler, gl.TEXTURE_MIN_FILTER, minFilter);
-        gl.samplerParameteri(this.sampler, gl.TEXTURE_MAG_FILTER, magFilter);
-        gl.samplerParameteri(this.sampler, gl.TEXTURE_WRAP_S, wrapS);
-        gl.samplerParameteri(this.sampler, gl.TEXTURE_WRAP_T, wrapT);
-        gl.samplerParameteri(this.sampler, gl.TEXTURE_WRAP_R, wrapR);
-        gl.samplerParameteri(this.sampler, gl.TEXTURE_COMPARE_FUNC, compareFunc);
-        gl.samplerParameteri(this.sampler, gl.TEXTURE_COMPARE_MODE, compareMode);
-        if (minLOD !== null) {
-            gl.samplerParameterf(this.sampler, gl.TEXTURE_MIN_LOD, minLOD);
-        }
-        if (maxLOD !== null) {
-            gl.samplerParameterf(this.sampler, gl.TEXTURE_MAX_LOD, maxLOD);
-        }
-
-        // Texture parameters
-        this.flipY = options.flipY !== undefined ? options.flipY : false;
-        this.baseLevel = options.baseLevel !== undefined ? options.baseLevel : null;
-        this.maxLevel = options.maxLevel !== undefined ? options.maxLevel : null;
+        this.minFilter = minFilter;
+        this.magFilter = magFilter;
+        this.wrapS = wrapS;
+        this.wrapT = wrapT;
+        this.wrapR = wrapR;
+        this.compareMode = compareMode;
+        this.compareFunc = compareFunc;
+        this.minLOD = minLOD;
+        this.maxLOD = maxLOD;
+        this.baseLevel = baseLevel;
+        this.maxLevel = maxLevel;
+        this.flipY = flipY;
         this.mipmaps = (minFilter === gl.LINEAR_MIPMAP_NEAREST || minFilter === gl.LINEAR_MIPMAP_LINEAR);
 
         this.resize(width, height, depth);
@@ -5218,8 +5214,20 @@ class Texture {
         this.height = height;
         this.depth = depth;
 
+        this.gl.texParameteri(this.binding, this.gl.TEXTURE_MIN_FILTER, this.minFilter);
+        this.gl.texParameteri(this.binding, this.gl.TEXTURE_MAG_FILTER, this.magFilter);
+        this.gl.texParameteri(this.binding, this.gl.TEXTURE_WRAP_S, this.wrapS);
+        this.gl.texParameteri(this.binding, this.gl.TEXTURE_WRAP_T, this.wrapT);
+        this.gl.texParameteri(this.binding, this.gl.TEXTURE_WRAP_R, this.wrapR);
+        this.gl.texParameteri(this.binding, this.gl.TEXTURE_COMPARE_FUNC, this.compareFunc);
+        this.gl.texParameteri(this.binding, this.gl.TEXTURE_COMPARE_MODE, this.compareMode);
         this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, this.flipY);
-
+        if (this.minLOD !== null) {
+            this.gl.texParameterf(this.binding, this.gl.TEXTURE_MIN_LOD, this.minLOD);
+        }
+        if (this.maxLOD !== null) {
+            this.gl.texParameterf(this.binding, this.gl.TEXTURE_MAX_LOD, this.maxLOD);
+        }
         if (this.baseLevel !== null) {
             this.gl.texParameteri(this.binding, this.gl.TEXTURE_BASE_LEVEL, this.baseLevel);
         }
@@ -5316,9 +5324,7 @@ class Texture {
     delete() {
         if (this.texture) {
             this.gl.deleteTexture(this.texture);
-            this.gl.deleteSampler(this.sampler);
             this.texture = null;
-            this.sampler = null;
 
             if (this.currentUnit !== -1 && this.appState.textures[this.currentUnit] === this) {
                 this.appState.textures[this.currentUnit] = null;
@@ -5342,7 +5348,6 @@ class Texture {
 
             this.gl.activeTexture(this.gl.TEXTURE0 + unit);
             this.gl.bindTexture(this.binding, this.texture);
-            this.gl.bindSampler(unit, this.sampler);
 
             this.appState.textures[unit] = this;
             this.currentUnit = unit;
