@@ -148,10 +148,10 @@ export class Texture {
         this.gl.texParameteri(this.binding, this.gl.TEXTURE_COMPARE_MODE, this.compareMode);
         this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, this.flipY);
         if (this.minLOD !== null) {
-            gl.texParameterf(this.binding, gl.TEXTURE_MIN_LOD, this.minLOD);
+            this.gl.texParameterf(this.binding, this.gl.TEXTURE_MIN_LOD, this.minLOD);
         }
         if (this.maxLOD !== null) {
-            gl.texParameterf(this.binding, gl.TEXTURE_MAX_LOD, this.maxLOD);
+            this.gl.texParameterf(this.binding, this.gl.TEXTURE_MAX_LOD, this.maxLOD);
         }
         if (this.baseLevel !== null) {
             this.gl.texParameteri(this.binding, this.gl.TEXTURE_BASE_LEVEL, this.baseLevel);
