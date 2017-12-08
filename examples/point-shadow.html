@@ -266,17 +266,21 @@
         var boxes = [
             {
                 translate: [0, 0, 0],
-                rotate: [0, 0, 0],
+                rotate: [Math.random(), Math.random(), Math.random()],
                 scale: [6, 6, 6],
+                rotateVx: Math.random() * 0.005,
+                rotateVy: Math.random() * 0.005,
                 mvpMatrix: mat4.create(),
                 modelMatrix: mat4.create(),
                 mainDrawCall: null,
                 shadowDrawCall: null
             },
             {
-                translate: [-1.5, -1, 0],
-                rotate: [0, 0, 0],
+                translate: [-1, -1, 0.5],
+                rotate: [Math.random(), Math.random(), Math.random()],
                 scale: [0.5, 0.5, 0.5],
+                rotateVx: Math.random() * 0.02,
+                rotateVy: Math.random() * 0.02,
                 mvpMatrix: mat4.create(),
                 modelMatrix: mat4.create(),
                 mainDrawCall: null,
@@ -284,8 +288,10 @@
             },
             {
                 translate: [-1, 0.5, -1],
-                rotate: [0, 0, 0],
+                rotate: [Math.random(), Math.random(), Math.random()],
                 scale: [0.3, 0.3, 0.3],
+                rotateVx: Math.random() * 0.02,
+                rotateVy: Math.random() * 0.02,
                 mvpMatrix: mat4.create(),
                 modelMatrix: mat4.create(),
                 mainDrawCall: null,
@@ -293,8 +299,10 @@
             },
             {
                 translate: [0, 0, -2],
-                rotate: [0, 0, 0],
+                rotate: [Math.random(), Math.random(), Math.random()],
                 scale: [0.4, 0.4, 0.4],
+                rotateVx: Math.random() * 0.02,
+                rotateVy: Math.random() * 0.02,
                 mvpMatrix: mat4.create(),
                 modelMatrix: mat4.create(),
                 mainDrawCall: null,
@@ -310,109 +318,122 @@
         };
 
         var image = new Image();
+        var cobblesImage = new Image();
 
         image.onload = function() {
-            var texture = app.createTexture2D(image, { flipY: true });
+            cobblesImage.onload = function() {
+                var webglTexture = app.createTexture2D(image, { flipY: true });
+                var cobblesTexture = app.createTexture2D(cobblesImage, { flipY: true });
 
-            // DRAW CALLS
+                // DRAW CALLS
 
-            var lightDrawcall = app.createDrawCall(lightProgram, sphereArray)
-            .uniform("uMVP", viewProjMatrix);
+                var lightDrawcall = app.createDrawCall(lightProgram, sphereArray)
+                .uniform("uMVP", viewProjMatrix);
 
-            for (var i = 0, len = boxes.length; i < len; ++i) {
-                boxes[i].shadowDrawCall = app.createDrawCall(shadowProgram, boxArray)
+                boxes[0].shadowDrawCall = app.createDrawCall(shadowProgram, boxArray)
 
-                boxes[i].mainDrawCall = app.createDrawCall(mainProgram, boxArray)
+                boxes[0].mainDrawCall = app.createDrawCall(mainProgram, boxArray)
                 .uniform("uLightPosition", lightPosition)
                 .uniform("uEyePosition", eyePosition)
-                .texture("uTextureMap", texture)
+                .texture("uTextureMap", cobblesTexture)
                 .texture("uShadowMap", shadowTarget);
-            }
 
+                for (var i = 1, len = boxes.length; i < len; ++i) {
+                    boxes[i].shadowDrawCall = app.createDrawCall(shadowProgram, boxArray)
 
-            function draw() {
-                if (timer.ready()) {
-                    utils.updateTimerElement(timer.cpuTime, timer.gpuTime);
+                    boxes[i].mainDrawCall = app.createDrawCall(mainProgram, boxArray)
+                    .uniform("uLightPosition", lightPosition)
+                    .uniform("uEyePosition", eyePosition)
+                    .texture("uTextureMap", webglTexture)
+                    .texture("uShadowMap", shadowTarget);
                 }
 
-                timer.start();
 
-                // UPDATE TRANSFORMS
-                for (var i = 0, len = boxes.length; i < len; ++i) {
-                    boxes[i].rotate[0] += 0.01;
-                    boxes[i].rotate[1] += 0.02;
+                function draw() {
+                    if (timer.ready()) {
+                        utils.updateTimerElement(timer.cpuTime, timer.gpuTime);
+                    }
 
-                    utils.xformMatrix(boxes[i].modelMatrix, boxes[i].translate, boxes[i].rotate, boxes[i].scale);
-                    mat4.multiply(boxes[i].mvpMatrix, viewProjMatrix, boxes[i].modelMatrix);
-                    
-                    boxes[i].shadowDrawCall.uniform("uModelMatrix", boxes[i].modelMatrix);
+                    timer.start();
 
-                    boxes[i].mainDrawCall.uniform("uMVP", boxes[i].mvpMatrix)
-                    .uniform("uModelMatrix", boxes[i].modelMatrix);
+                    // UPDATE TRANSFORMS
+                    for (var i = 0, len = boxes.length; i < len; ++i) {
+                        boxes[i].rotate[0] += boxes[i].rotateVx;
+                        boxes[i].rotate[1] += boxes[i].rotateVy;
+
+                        utils.xformMatrix(boxes[i].modelMatrix, boxes[i].translate, boxes[i].rotate, boxes[i].scale);
+                        mat4.multiply(boxes[i].mvpMatrix, viewProjMatrix, boxes[i].modelMatrix);
+                        
+                        boxes[i].shadowDrawCall.uniform("uModelMatrix", boxes[i].modelMatrix);
+
+                        boxes[i].mainDrawCall.uniform("uMVP", boxes[i].mvpMatrix)
+                        .uniform("uModelMatrix", boxes[i].modelMatrix);
+                    }
+
+                    // DRAW TO SHADOW BUFFER
+                    app.drawFramebuffer(shadowBuffer).viewport(0, 0, CUBEMAP_DIM, CUBEMAP_DIM);
+
+                    shadowBuffer.colorTarget(0, shadowTarget, PicoGL.TEXTURE_CUBE_MAP_NEGATIVE_X);
+                    app.clear();
+                    for (var i = 0, len = boxes.length; i < len; ++i) {
+                        boxes[i].shadowDrawCall.uniform("uViewProj", lightViewProjMatrixNegX);
+                        boxes[i].shadowDrawCall.draw();
+                    }
+
+                    shadowBuffer.colorTarget(0, shadowTarget, PicoGL.TEXTURE_CUBE_MAP_POSITIVE_X);
+                    app.clear();
+                    for (var i = 0, len = boxes.length; i < len; ++i) {
+                        boxes[i].shadowDrawCall.uniform("uViewProj", lightViewProjMatrixPosX);
+                        boxes[i].shadowDrawCall.draw();
+                    }
+
+                    shadowBuffer.colorTarget(0, shadowTarget, PicoGL.TEXTURE_CUBE_MAP_NEGATIVE_Y);
+                    app.clear();
+                    for (var i = 0, len = boxes.length; i < len; ++i) {
+                        boxes[i].shadowDrawCall.uniform("uViewProj", lightViewProjMatrixNegY);
+                        boxes[i].shadowDrawCall.draw();
+                    }
+
+                    shadowBuffer.colorTarget(0, shadowTarget, PicoGL.TEXTURE_CUBE_MAP_POSITIVE_Y);
+                    app.clear();
+                    for (var i = 0, len = boxes.length; i < len; ++i) {
+                        boxes[i].shadowDrawCall.uniform("uViewProj", lightViewProjMatrixPosY);
+                        boxes[i].shadowDrawCall.draw();
+                    }
+
+                    shadowBuffer.colorTarget(0, shadowTarget, PicoGL.TEXTURE_CUBE_MAP_NEGATIVE_Z);
+                    app.clear();
+                    for (var i = 0, len = boxes.length; i < len; ++i) {
+                        boxes[i].shadowDrawCall.uniform("uViewProj", lightViewProjMatrixNegZ);
+                        boxes[i].shadowDrawCall.draw();
+                    }
+
+                    shadowBuffer.colorTarget(0, shadowTarget, PicoGL.TEXTURE_CUBE_MAP_POSITIVE_Z);
+                    app.clear();
+                    for (var i = 0, len = boxes.length; i < len; ++i) {
+                        boxes[i].shadowDrawCall.uniform("uViewProj", lightViewProjMatrixPosZ);
+                        boxes[i].shadowDrawCall.draw();
+                    }
+
+                    // DRAW TO SCREEN     
+                    app.defaultDrawFramebuffer().defaultViewport().clear()
+                    for (var i = 0, len = boxes.length; i < len; ++i) {
+                        boxes[i].mainDrawCall.draw();
+                    }
+                    lightDrawcall.draw();
+
+                    timer.end();
+
+                    requestAnimationFrame(draw);
                 }
-
-                // DRAW TO SHADOW BUFFER
-                app.drawFramebuffer(shadowBuffer).viewport(0, 0, CUBEMAP_DIM, CUBEMAP_DIM);
-
-                shadowBuffer.colorTarget(0, shadowTarget, PicoGL.TEXTURE_CUBE_MAP_NEGATIVE_X);
-                app.clear();
-                for (var i = 0, len = boxes.length; i < len; ++i) {
-                    boxes[i].shadowDrawCall.uniform("uViewProj", lightViewProjMatrixNegX);
-                    boxes[i].shadowDrawCall.draw();
-                }
-
-                shadowBuffer.colorTarget(0, shadowTarget, PicoGL.TEXTURE_CUBE_MAP_POSITIVE_X);
-                app.clear();
-                for (var i = 0, len = boxes.length; i < len; ++i) {
-                    boxes[i].shadowDrawCall.uniform("uViewProj", lightViewProjMatrixPosX);
-                    boxes[i].shadowDrawCall.draw();
-                }
-
-                shadowBuffer.colorTarget(0, shadowTarget, PicoGL.TEXTURE_CUBE_MAP_NEGATIVE_Y);
-                app.clear();
-                for (var i = 0, len = boxes.length; i < len; ++i) {
-                    boxes[i].shadowDrawCall.uniform("uViewProj", lightViewProjMatrixNegY);
-                    boxes[i].shadowDrawCall.draw();
-                }
-
-                shadowBuffer.colorTarget(0, shadowTarget, PicoGL.TEXTURE_CUBE_MAP_POSITIVE_Y);
-                app.clear();
-                for (var i = 0, len = boxes.length; i < len; ++i) {
-                    boxes[i].shadowDrawCall.uniform("uViewProj", lightViewProjMatrixPosY);
-                    boxes[i].shadowDrawCall.draw();
-                }
-
-                shadowBuffer.colorTarget(0, shadowTarget, PicoGL.TEXTURE_CUBE_MAP_NEGATIVE_Z);
-                app.clear();
-                for (var i = 0, len = boxes.length; i < len; ++i) {
-                    boxes[i].shadowDrawCall.uniform("uViewProj", lightViewProjMatrixNegZ);
-                    boxes[i].shadowDrawCall.draw();
-                }
-
-                shadowBuffer.colorTarget(0, shadowTarget, PicoGL.TEXTURE_CUBE_MAP_POSITIVE_Z);
-                app.clear();
-                for (var i = 0, len = boxes.length; i < len; ++i) {
-                    boxes[i].shadowDrawCall.uniform("uViewProj", lightViewProjMatrixPosZ);
-                    boxes[i].shadowDrawCall.draw();
-                }
-
-                // DRAW TO SCREEN     
-                app.defaultDrawFramebuffer().defaultViewport().clear()
-                for (var i = 0, len = boxes.length; i < len; ++i) {
-                    boxes[i].mainDrawCall.draw();
-                }
-                lightDrawcall.draw();
-
-                timer.end();
 
                 requestAnimationFrame(draw);
             }
-
-            requestAnimationFrame(draw);
             
         }
 
         image.src = "img/khronos_webgl.png";
+        cobblesImage.src = "img/cobblestone.jpg";
 
     </script>
     <a href="https://github.com/tsherif/picogl.js" id="github-ribbon"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"></a>
