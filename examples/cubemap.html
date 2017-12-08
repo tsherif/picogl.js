@@ -217,71 +217,64 @@
         var angleX = 0;
         var angleY = 0;
 
-        var image = new Image();
+        utils.loadImages([
+            "img/khronos_webgl.png",
+            "img/sky-negx.png",
+            "img/sky-posx.png",
+            "img/sky-negy.png",
+            "img/sky-posy.png",
+            "img/sky-negz.png",
+            "img/sky-posz.png"
+        ], function(images) {
+            // CREATE TEXTURE AND CUBEMAP
+            var texture = app.createTexture2D(images[0], { flipY: true });
+            var cubemap = app.createCubemap({
+                negX: images[1],
+                posX: images[2],
+                negY: images[3],
+                posY: images[4],
+                negZ: images[5],
+                posZ: images[6],
+                flipY: false
+            })
 
-        image.onload = function() {
-            utils.loadCubemapImages({
-                negX: "img/sky-negx.png",
-                posX: "img/sky-posx.png",
-                negY: "img/sky-negy.png",
-                posY: "img/sky-posy.png",
-                negZ: "img/sky-negz.png",
-                posZ: "img/sky-posz.png"
-            }, function(negX, posX, negY, posY, negZ, posZ) {
-                // CREATE TEXTURE AND CUBEMAP
-                var texture = app.createTexture2D(image, { flipY: true });
-                var cubemap = app.createCubemap({
-                    negX: negX,
-                    posX: posX,
-                    negY: negY,
-                    posY: posY,
-                    negZ: negZ,
-                    posZ: posZ,
-                    flipY: false
-                })
+            // CREATE DRAWCALLS FOR SKYBOX AND REFLECTIVE CUBE
+            var skyboxDrawcall = app.createDrawCall(skyboxProgram, boxArray)
+            .uniformBlock("SceneUniforms", skyboxSceneUniforms)
+            .texture("cubemap", cubemap);
 
-                // CREATE DRAWCALLS FOR SKYBOX AND REFLECTIVE CUBE
-                var skyboxDrawcall = app.createDrawCall(skyboxProgram, boxArray)
-                .uniformBlock("SceneUniforms", skyboxSceneUniforms)
-                .texture("cubemap", cubemap);
+            var drawCall = app.createDrawCall(program, boxArray)
+            .uniformBlock("SceneUniforms", sceneUniforms)
+            .texture("tex", texture)
+            .texture("cubemap", cubemap);
 
-                var drawCall = app.createDrawCall(program, boxArray)
-                .uniformBlock("SceneUniforms", sceneUniforms)
-                .texture("tex", texture)
-                .texture("cubemap", cubemap);
-
-                function draw() {
-                    if (timer.ready()) {
-                        utils.updateTimerElement(timer.cpuTime, timer.gpuTime);
-                    }
-
-                    timer.start();
-
-                    angleX += 0.01;
-                    angleY += 0.02;
-
-                    mat4.fromXRotation(rotateXMatrix, angleX);
-                    mat4.fromYRotation(rotateYMatrix, angleY);
-                    mat4.multiply(modelMatrix, rotateXMatrix, rotateYMatrix);
-
-                    drawCall.uniform("uModel", modelMatrix);
-
-                    app.clear();
-                    skyboxDrawcall.draw();
-                    drawCall.draw();
-                    
-                    timer.end();
-
-                    requestAnimationFrame(draw);
+            function draw() {
+                if (timer.ready()) {
+                    utils.updateTimerElement(timer.cpuTime, timer.gpuTime);
                 }
 
-                requestAnimationFrame(draw);
-            });
-            
-            
-        }
+                timer.start();
 
-        image.src = "img/khronos_webgl.png";
+                angleX += 0.01;
+                angleY += 0.02;
+
+                mat4.fromXRotation(rotateXMatrix, angleX);
+                mat4.fromYRotation(rotateYMatrix, angleY);
+                mat4.multiply(modelMatrix, rotateXMatrix, rotateYMatrix);
+
+                drawCall.uniform("uModel", modelMatrix);
+
+                app.clear();
+                skyboxDrawcall.draw();
+                drawCall.draw();
+                
+                timer.end();
+
+                requestAnimationFrame(draw);
+            }
+
+            requestAnimationFrame(draw);
+        });
 
     </script>
     <a href="https://github.com/tsherif/picogl.js" id="github-ribbon"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"></a>

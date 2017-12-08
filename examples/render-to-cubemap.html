@@ -305,100 +305,96 @@
             skyboxSceneUniforms.set(0, skyboxViewProjMatrix).update();
         };
 
-        var image = new Image();
+        utils.loadImages([
+            "img/khronos_webgl.png",
+            "img/sky-negx.png",
+            "img/sky-posx.png",
+            "img/sky-negy.png",
+            "img/sky-posy.png",
+            "img/sky-negz.png",
+            "img/sky-posz.png"
+        ], function(images) {
+            var texture = app.createTexture2D(images[0], { flipY: true });
 
-        image.onload = function() {
-            utils.loadCubemapImages({
-                negX: "img/sky-negx.png",
-                posX: "img/sky-posx.png",
-                negY: "img/sky-negy.png",
-                posY: "img/sky-posy.png",
-                negZ: "img/sky-negz.png",
-                posZ: "img/sky-posz.png"
-            }, function(negX, posX, negY, posY, negZ, posZ) {
-                var texture = app.createTexture2D(image, { flipY: true });
+            var skyCubemap = app.createCubemap({
+                negX: images[1],
+                posX: images[2],
+                negY: images[3],
+                posY: images[4],
+                negZ: images[5],
+                posZ: images[6],
+            });
 
-                var skyCubemap = app.createCubemap({
-                    negX: negX,
-                    posX: posX,
-                    negY: negY,
-                    posY: posY,
-                    negZ: negZ,
-                    posZ: posZ,
-                });
+            // PROGRAM
+            var vsSource =  document.getElementById("vertex-cube").text.trim();
+            var vShader = app.createShader(PicoGL.VERTEX_SHADER, vsSource);
 
-                // PROGRAM
-                var vsSource =  document.getElementById("vertex-cube").text.trim();
-                var vShader = app.createShader(PicoGL.VERTEX_SHADER, vsSource);
+            var cubemapFsSource =  document.getElementById("fragment-cubemap").text.trim();
+            var cubeMapProgram = app.createProgram(vShader, cubemapFsSource);
 
-                var cubemapFsSource =  document.getElementById("fragment-cubemap").text.trim();
-                var cubeMapProgram = app.createProgram(vShader, cubemapFsSource);
+            var fsSource =  document.getElementById("fragment-cube").text.trim();
+            var program = app.createProgram(vShader, fsSource);
 
-                var fsSource =  document.getElementById("fragment-cube").text.trim();
-                var program = app.createProgram(vShader, fsSource);
+            vShader.delete();
 
-                vShader.delete();
+            var skyboxVsSource =  document.getElementById("vertex-skybox").text.trim();
+            var skyboxFsSource =  document.getElementById("fragment-skybox").text.trim();
+            var skyboxProgram = app.createProgram(skyboxVsSource, skyboxFsSource);
 
-                var skyboxVsSource =  document.getElementById("vertex-skybox").text.trim();
-                var skyboxFsSource =  document.getElementById("fragment-skybox").text.trim();
-                var skyboxProgram = app.createProgram(skyboxVsSource, skyboxFsSource);
+            var cubemapDrawCall = app.createDrawCall(cubeMapProgram, boxArray)
+            .texture("tex", texture)
+            .uniformBlock("SceneUniforms", cubemapSceneUniformBuffer);
 
-                var cubemapDrawCall = app.createDrawCall(cubeMapProgram, boxArray)
-                .texture("tex", texture)
-                .uniformBlock("SceneUniforms", cubemapSceneUniformBuffer);
+            var cubeDrawCall = app.createDrawCall(program, boxArray)
+            .texture("renderCubemap", colorTarget)
+            .texture("skyCubemap", skyCubemap)
+            .uniformBlock("SceneUniforms", sceneUniformBuffer);
 
-                var cubeDrawCall = app.createDrawCall(program, boxArray)
-                .texture("renderCubemap", colorTarget)
-                .texture("skyCubemap", skyCubemap)
-                .uniformBlock("SceneUniforms", sceneUniformBuffer);
+            var skyboxDrawcall = app.createDrawCall(skyboxProgram, boxArray)
+            .texture("renderCubemap", colorTarget)
+            .texture("skyCubemap", skyCubemap)
+            .uniformBlock("SceneUniforms", skyboxSceneUniforms)
 
-                var skyboxDrawcall = app.createDrawCall(skyboxProgram, boxArray)
-                .texture("renderCubemap", colorTarget)
-                .texture("skyCubemap", skyCubemap)
-                .uniformBlock("SceneUniforms", skyboxSceneUniforms)
+            var angleX = 0;
+            var angleY = 0;
 
-                var angleX = 0;
-                var angleY = 0;
-
-                function draw() {
-                    if (timer.ready()) {
-                        utils.updateTimerElement(timer.cpuTime, timer.gpuTime);
-                    }
-
-                    timer.start();
-
-                    angleX += 0.01;
-                    angleY += 0.02;
-
-                    mat4.fromXRotation(rotateXMatrix, angleX);
-                    mat4.fromYRotation(rotateYMatrix, angleY);
-                    mat4.multiply(modelMatrix, rotateXMatrix, rotateYMatrix);
-
-                    cubemapDrawCall.uniform("uModel", modelMatrix);
-                    cubeDrawCall.uniform("uModel", modelMatrix);
-
-                    // DRAW SAME IMAGE TO ALL SIX FACES OF CUBEMAP
-                    app
-                    .drawFramebuffer(cubemapBuffer)
-                    .viewport(0, 0, CUBEMAP_DIM, CUBEMAP_DIM)
-                    .clear();
-                    cubemapDrawCall.draw();
-                    
-                    // RENDER TO SCREEN
-                    app.defaultDrawFramebuffer().defaultViewport();
-                    skyboxDrawcall.draw();
-                    cubeDrawCall.draw();
-
-                    timer.end(); 
-
-                    requestAnimationFrame(draw);
+            function draw() {
+                if (timer.ready()) {
+                    utils.updateTimerElement(timer.cpuTime, timer.gpuTime);
                 }
 
-                requestAnimationFrame(draw);
-            }); 
-        }
+                timer.start();
 
-        image.src = "img/khronos_webgl.png";
+                angleX += 0.01;
+                angleY += 0.02;
+
+                mat4.fromXRotation(rotateXMatrix, angleX);
+                mat4.fromYRotation(rotateYMatrix, angleY);
+                mat4.multiply(modelMatrix, rotateXMatrix, rotateYMatrix);
+
+                cubemapDrawCall.uniform("uModel", modelMatrix);
+                cubeDrawCall.uniform("uModel", modelMatrix);
+
+                // DRAW SAME IMAGE TO ALL SIX FACES OF CUBEMAP
+                app
+                .drawFramebuffer(cubemapBuffer)
+                .viewport(0, 0, CUBEMAP_DIM, CUBEMAP_DIM)
+                .clear();
+                cubemapDrawCall.draw();
+                
+                // RENDER TO SCREEN
+                app.defaultDrawFramebuffer().defaultViewport();
+                skyboxDrawcall.draw();
+                cubeDrawCall.draw();
+
+                timer.end(); 
+
+                requestAnimationFrame(draw);
+            }
+
+            requestAnimationFrame(draw);
+        }); 
+
     </script>
     <a href="https://github.com/tsherif/picogl.js" id="github-ribbon"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"></a>
     <script src="../site/js/iframe.js"></script>
