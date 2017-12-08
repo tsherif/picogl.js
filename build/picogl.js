@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.8.4
+PicoGL.js v0.8.5
 
 The MIT License (MIT)
 
@@ -2855,7 +2855,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     @namespace PicoGL
 */
 
-const version = "0.8.4";
+const version = "0.8.5";
 /* harmony export (immutable) */ __webpack_exports__["version"] = version;
 
 
@@ -4484,32 +4484,6 @@ class Framebuffer {
             this.gl.framebufferTextureLayer(this.gl.DRAW_FRAMEBUFFER, __WEBPACK_IMPORTED_MODULE_0__constants_js__["_77" /* DEPTH_ATTACHMENT */], texture.texture, 0, target);
         } else {
             this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, __WEBPACK_IMPORTED_MODULE_0__constants_js__["_77" /* DEPTH_ATTACHMENT */], target, texture.texture, 0);
-        }
-
-        this.restoreState(currentFramebuffer);
-
-        return this;
-    }
-
-    /**
-        Bind a new texture as a color target.
-
-        @method
-        @param {number} index Color attachment to bind the texture to.
-        @param {Texture} texture New texture to bind.
-        @param {GLEnum} [target] The texture target or layer to attach. If the texture is 3D or a texture array,
-            defaults to 0, otherwise to TEXTURE_2D.
-    */
-    replaceTexture(index, texture, target = texture.is3D ? 0 : __WEBPACK_IMPORTED_MODULE_0__constants_js__["_452" /* TEXTURE_2D */]) {
-        this.colorTextures[index] = texture;
-        this.colorTextureTargets[index] = target;
-
-        let currentFramebuffer = this.bindAndCaptureState();
-        
-        if (texture.is3D) {
-            this.gl.framebufferTextureLayer(this.gl.DRAW_FRAMEBUFFER, this.colorAttachments[index], texture.texture, 0, target);
-        } else {
-            this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, this.colorAttachments[index], target, texture.texture, 0);
         }
 
         this.restoreState(currentFramebuffer);

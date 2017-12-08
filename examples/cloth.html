@@ -728,8 +728,8 @@
 
                 updateForceDrawCall.texture("uPositionBuffer", positionTextureA);
                 updateForceDrawCall.texture("uOldPositionBuffer", oldPositionTextureA);
-                updateForceFramebuffer.replaceTexture(0, positionTextureB);
-                updateForceFramebuffer.replaceTexture(1, oldPositionTextureB);
+                updateForceFramebuffer.colorTarget(0, positionTextureB);
+                updateForceFramebuffer.colorTarget(1, oldPositionTextureB);
 
                 app.viewport(0, 0, DATA_TEXTURE_DIM, DATA_TEXTURE_DIM);
 
@@ -739,28 +739,28 @@
                 for (var i = 0; i < CONSTRAINT_ITERATIONS; ++i) {
                     app.drawFramebuffer(updateFramebuffer);
 
-                    updateFramebuffer.replaceTexture(0, positionTextureA);
+                    updateFramebuffer.colorTarget(0, positionTextureA);
                     updateHorizontal1DrawCall.texture("uPositionBuffer", positionTextureB).draw();
 
-                    updateFramebuffer.replaceTexture(0, positionTextureB);
+                    updateFramebuffer.colorTarget(0, positionTextureB);
                     updateHorizontal2DrawCall.texture("uPositionBuffer", positionTextureA).draw();
 
-                    updateFramebuffer.replaceTexture(0, positionTextureA);
+                    updateFramebuffer.colorTarget(0, positionTextureA);
                     updateVertical1DrawCall.texture("uPositionBuffer", positionTextureB).draw();
 
-                    updateFramebuffer.replaceTexture(0, positionTextureB);
+                    updateFramebuffer.colorTarget(0, positionTextureB);
                     updateVertical2DrawCall.texture("uPositionBuffer", positionTextureA).draw();
 
-                    updateFramebuffer.replaceTexture(0, positionTextureA);
+                    updateFramebuffer.colorTarget(0, positionTextureA);
                     updateShear1DrawCall.texture("uPositionBuffer", positionTextureB).draw();
 
-                    updateFramebuffer.replaceTexture(0, positionTextureB);
+                    updateFramebuffer.colorTarget(0, positionTextureB);
                     updateShear2DrawCall.texture("uPositionBuffer", positionTextureA).draw();
 
-                    updateFramebuffer.replaceTexture(0, positionTextureA);
+                    updateFramebuffer.colorTarget(0, positionTextureA);
                     updateShear3DrawCall.texture("uPositionBuffer", positionTextureB).draw();
 
-                    updateFramebuffer.replaceTexture(0, positionTextureB);
+                    updateFramebuffer.colorTarget(0, positionTextureB);
                     updateShear4DrawCall.texture("uPositionBuffer", positionTextureA).draw();   
                 }
 
@@ -783,10 +783,10 @@
                     }
                 }
 
-                updateFramebuffer.replaceTexture(0, positionTextureA);
+                updateFramebuffer.colorTarget(0, positionTextureA);
                 updateCollisionDrawCall.texture("uPositionBuffer", positionTextureB).draw();
 
-                updateFramebuffer.replaceTexture(0, normalTexture);
+                updateFramebuffer.colorTarget(0, normalTexture);
                 updateNormalDrawCall.texture("uPositionBuffer", positionTextureA).draw();
 
                 clothDrawCall.texture("uPositionBuffer", positionTextureA);

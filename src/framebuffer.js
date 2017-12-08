@@ -110,32 +110,6 @@ export class Framebuffer {
     }
 
     /**
-        Bind a new texture as a color target.
-
-        @method
-        @param {number} index Color attachment to bind the texture to.
-        @param {Texture} texture New texture to bind.
-        @param {GLEnum} [target] The texture target or layer to attach. If the texture is 3D or a texture array,
-            defaults to 0, otherwise to TEXTURE_2D.
-    */
-    replaceTexture(index, texture, target = texture.is3D ? 0 : CONSTANTS.TEXTURE_2D) {
-        this.colorTextures[index] = texture;
-        this.colorTextureTargets[index] = target;
-
-        let currentFramebuffer = this.bindAndCaptureState();
-        
-        if (texture.is3D) {
-            this.gl.framebufferTextureLayer(this.gl.DRAW_FRAMEBUFFER, this.colorAttachments[index], texture.texture, 0, target);
-        } else {
-            this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, this.colorAttachments[index], target, texture.texture, 0);
-        }
-
-        this.restoreState(currentFramebuffer);
-
-        return this;
-    }
-
-    /**
         Resize all currently attached textures.
 
         @method
