@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<!--
+  The MIT License (MIT)
+
+  Copyright (c) 2017 Tarek Sherif
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy of
+  this software and associated documentation files (the "Software"), to deal in
+  the Software without restriction, including without limitation the rights to
+  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+  the Software, and to permit persons to whom the Software is furnished to do so,
+  subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+  FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+  COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+  IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+<html>
+<head>
+    <title>PicoGL.js: Point Shadows</title>
+    <script src="utils/gl-matrix.js"></script>
+    <script src="../build/picogl.js"></script>
+    <script src="utils/utils.js"></script>
+    <link rel="stylesheet" href="../site/css/picogl-example.css"> 
+</head>
+<body>
+    <div id="example-title">
+        PicoGL.js Example: Point Shadows
+        <div>
+            <a href="https://github.com/tsherif/picogl.js/blob/master/examples/point-shadow.html">Source code</a>
+        </div>
+    </div>
+    <canvas id="gl-canvas"></canvas>
+    <script id="shadow-vs" type="x-vertex-shader">
+        #version 300 es
+
+        layout(location=0) in vec4 aPosition;
+
+        uniform mat4 uModelMatrix;
+        uniform mat4 uViewProj;
+        
+        out vec4 vWorldPos;
+        void main() {
+            vWorldPos = uModelMatrix * aPosition;
+            gl_Position = uViewProj * vWorldPos;
+        }
+    </script>
+    <script id="shadow-fs" type="x-fragment-shader">
+        #version 300 es
+        precision highp float;
+
+        in vec4 vWorldPos;
+
+        out float lightDistance;
+        void main() {
+            lightDistance = length(vWorldPos.xyz);
+        }
+    </script>
+    <script id="sphere-vs" type="x-vertex-shader">
+        #version 300 es
+
+        layout(location=0) in vec4 position;
+
+        uniform mat4 uMVP;
+        
+        void main() {
+            gl_Position = uMVP * position;
+        }
+    </script>
+    <script id="sphere-fs" type="x-fragment-shader">
+        #version 300 es
+        precision highp float;
+
+
+        out vec4 fragColor;
+        void main() {
+            fragColor = vec4(1.0);
+        }
+    </script>
+    <script id="main-vs" type="x-vertex-shader">
+        #version 300 es
+
+        layout(location=0) in vec4 aPosition;
+        layout(location=1) in vec3 aNormal;
+        layout(location=2) in vec2 aTexCoord;
+
+        uniform mat4 uModelMatrix;
+        uniform mat4 uMVP;
+        
+        out vec3 vPosition;
+        out vec3 vNormal;
+        out vec2 vTexCoord;
+        out vec3 vModelPosition;
+        void main() {
+            gl_Position = uMVP * aPosition;
+
+            vModelPosition = vec3(aPosition);
+            vPosition = vec3(uModelMatrix * aPosition);
+            vNormal = vec3(uModelMatrix * vec4(aNormal, 0.0));
+            vTexCoord = aTexCoord;
+        }
+    </script>
+    <script id="main-fs" type="x-fragment-shader">
+        #version 300 es
+        precision highp float;
+
+        uniform vec3 uLightPosition;
+        uniform vec3 uEyePosition;
+        uniform sampler2D uTextureMap;
+        uniform samplerCube uShadowMap;
+
+        in vec3 vPosition;
+        in vec3 vNormal;
+        in vec2 vTexCoord;
+        in vec4 vPositionFromLight;
+        in vec3 vModelPosition;
+
+        out vec4 fragColor;
+        void main() {
+            vec3 dir = vPosition - uLightPosition;
+            float shadow = texture(uShadowMap, dir).r < length(dir) - 0.01 ? 0.3 : 1.0;
+
+            vec4 baseColor = texture(uTextureMap, vTexCoord);
+
+            vec3 normal = normalize(vNormal);
+
+            if (!gl_FrontFacing) {
+                normal *= -1.0;
+            }
+
+            vec3 eyeDirection = normalize(uEyePosition - vPosition);
+            vec3 lightDirection = normalize(uLightPosition - vPosition);
+            vec3 reflectionDirection = reflect(-lightDirection, normal);
+            float diffuse = shadow * max(dot(lightDirection, normal), 0.0);
+            float ambient = 0.1;
+            float specular = shadow * pow(max(dot(reflectionDirection, eyeDirection), 0.0), 20.0);
+
+            fragColor = vec4((ambient + diffuse + specular) * baseColor.rgb, baseColor.a);
+        }
+    </script> 
+    <script type="text/javascript">
+        utils.addTimerElement();
+
+        var canvas = document.getElementById("gl-canvas");
+        if (!utils.testWebGL2()) {
+            console.error("WebGL 2 not available");
+            document.body.innerHTML = "This example requires WebGL 2 which is unavailable on this system."
+        }
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        var CUBEMAP_DIM = 1024;
+        var NEAR = 0.1;
+        var FAR = 20.0 
+        
+        var app = PicoGL.createApp(canvas)
+        .clearColor(0.0, 0.0, 0.0, 1.0)
+        .depthTest()
+        .floatRenderTargets();
+
+        var timer = app.createTimer();
+
+        // SET UP SHADOW PROGRAM
+        var shadowVsSource =  document.getElementById("shadow-vs").text.trim();
+        var shadowFsSource =  document.getElementById("shadow-fs").text.trim();
+        var shadowProgram = app.createProgram(shadowVsSource, shadowFsSource);
+
+        var shadowTarget = app.createCubemap({
+            format: PicoGL.RED,
+            type: PicoGL.FLOAT,
+            internalFormat: PicoGL.R16F,
+            width: CUBEMAP_DIM, 
+            height: CUBEMAP_DIM 
+        });
+        var depthTarget = app.createTexture2D(CUBEMAP_DIM, CUBEMAP_DIM, {
+            format: PicoGL.DEPTH_COMPONENT
+        });
+        var shadowBuffer = app.createFramebuffer()
+        .colorTarget(0, shadowTarget, PicoGL.TEXTURE_CUBE_MAP_NEGATIVE_X)
+        .depthTarget(depthTarget);
+
+        // SET UP LIGHT PROGRAM
+        var lightVsSource =  document.getElementById("sphere-vs").text.trim();
+        var lightFsSource =  document.getElementById("sphere-fs").text.trim();
+        var lightProgram = app.createProgram(lightVsSource, lightFsSource);
+
+        // SET UP MAIN PROGRAM
+        var vsSource =  document.getElementById("main-vs").text.trim();
+        var fsSource =  document.getElementById("main-fs").text.trim();
+        var mainProgram = app.createProgram(vsSource, fsSource);
+
+        // GEOMETRY
+        var positions, normals, uv, indices;
+
+        var box = utils.createBox({dimensions: [1.0, 1.0, 1.0]})
+        positions = app.createVertexBuffer(PicoGL.FLOAT, 3, box.positions);
+        normals = app.createVertexBuffer(PicoGL.FLOAT, 3, box.normals);
+        uv = app.createVertexBuffer(PicoGL.FLOAT, 2, box.uvs);
+
+        var boxArray = app.createVertexArray()
+        .vertexAttributeBuffer(0, positions)
+        .vertexAttributeBuffer(1, normals)
+        .vertexAttributeBuffer(2, uv);
+
+        var sphere = utils.createSphere({radius: 0.1});
+        positions = app.createVertexBuffer(PicoGL.FLOAT, 3, sphere.positions);
+        indices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, sphere.indices);
+
+        var sphereArray = app.createVertexArray()
+        .vertexAttributeBuffer(0, positions)
+        .indexBuffer(indices);
+
+        // UNIFORMS
+        var projMatrix = mat4.create();
+        mat4.perspective(projMatrix, Math.PI / 2, canvas.width / canvas.height, NEAR, FAR);
+
+        var viewMatrix = mat4.create();
+        var eyePosition = vec3.fromValues(1, 1, 1);
+        mat4.lookAt(viewMatrix, eyePosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
+
+        var viewProjMatrix = mat4.create();
+        mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
+
+        var lightPosition = vec3.fromValues(0, 0, 0);
+        var lightProjMatrix = mat4.create(); 
+        var lightViewMatrix = mat4.create();       
+        var lightViewProjMatrixNegX = mat4.create();
+        var lightViewProjMatrixPosX = mat4.create();
+        var lightViewProjMatrixNegY = mat4.create();
+        var lightViewProjMatrixPosY = mat4.create();
+        var lightViewProjMatrixNegZ = mat4.create();
+        var lightViewProjMatrixPosZ = mat4.create();
+
+        mat4.perspective(lightProjMatrix, Math.PI / 2, 1, NEAR, FAR);
+        
+        mat4.lookAt(lightViewMatrix, lightPosition, vec3.fromValues(-1, 0, 0), vec3.fromValues(0, -1, 0));
+        mat4.multiply(lightViewProjMatrixNegX, lightProjMatrix, lightViewMatrix);
+        
+        mat4.lookAt(lightViewMatrix, lightPosition, vec3.fromValues(1, 0, 0), vec3.fromValues(0, -1, 0));
+        mat4.multiply(lightViewProjMatrixPosX, lightProjMatrix, lightViewMatrix);
+        
+        mat4.lookAt(lightViewMatrix, lightPosition, vec3.fromValues( 0,-1, 0), vec3.fromValues(0, 0, -1));
+        mat4.multiply(lightViewProjMatrixNegY, lightProjMatrix, lightViewMatrix);
+        
+        mat4.lookAt(lightViewMatrix, lightPosition, vec3.fromValues(0, 1, 0), vec3.fromValues(0, 0, 1));
+        mat4.multiply(lightViewProjMatrixPosY, lightProjMatrix, lightViewMatrix);
+        
+        mat4.lookAt(lightViewMatrix, lightPosition, vec3.fromValues(0, 0, -1), vec3.fromValues(0, -1, 0));
+        mat4.multiply(lightViewProjMatrixNegZ, lightProjMatrix, lightViewMatrix);
+        
+        mat4.lookAt(lightViewMatrix, lightPosition, vec3.fromValues(0, 0, 1), vec3.fromValues(0, -1, 0));
+        mat4.multiply(lightViewProjMatrixPosZ, lightProjMatrix, lightViewMatrix);
+
+        ///////////////////////////////////////
+        // CONTINUE HERE FOR OTHER FACES
+        ///////////////////////////////////////
+
+        // OBJECT DESCRIPTIONS
+        var boxes = [
+            {
+                translate: [0, 0, 0],
+                rotate: [0, 0, 0],
+                scale: [6, 6, 6],
+                mvpMatrix: mat4.create(),
+                modelMatrix: mat4.create(),
+                mainDrawCall: null,
+                shadowDrawCall: null
+            },
+            {
+                translate: [-1.5, -1, 0],
+                rotate: [0, 0, 0],
+                scale: [0.5, 0.5, 0.5],
+                mvpMatrix: mat4.create(),
+                modelMatrix: mat4.create(),
+                mainDrawCall: null,
+                shadowDrawCall: null
+            },
+            {
+                translate: [-1, 0.5, -1],
+                rotate: [0, 0, 0],
+                scale: [0.3, 0.3, 0.3],
+                mvpMatrix: mat4.create(),
+                modelMatrix: mat4.create(),
+                mainDrawCall: null,
+                shadowDrawCall: null
+            },
+            {
+                translate: [0, 0, -2],
+                rotate: [0, 0, 0],
+                scale: [0.4, 0.4, 0.4],
+                mvpMatrix: mat4.create(),
+                modelMatrix: mat4.create(),
+                mainDrawCall: null,
+                shadowDrawCall: null
+            }
+        ];
+
+        window.onresize = function() {
+            app.resize(window.innerWidth, window.innerHeight);
+
+            mat4.perspective(projMatrix, Math.PI / 2, app.width / app.height, NEAR, FAR);
+            mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
+        };
+
+        var image = new Image();
+
+        image.onload = function() {
+            var texture = app.createTexture2D(image, { flipY: true });
+
+            // DRAW CALLS
+
+            var lightDrawcall = app.createDrawCall(lightProgram, sphereArray)
+            .uniform("uMVP", viewProjMatrix);
+
+            for (var i = 0, len = boxes.length; i < len; ++i) {
+                boxes[i].shadowDrawCall = app.createDrawCall(shadowProgram, boxArray)
+
+                boxes[i].mainDrawCall = app.createDrawCall(mainProgram, boxArray)
+                .uniform("uLightPosition", lightPosition)
+                .uniform("uEyePosition", eyePosition)
+                .texture("uTextureMap", texture)
+                .texture("uShadowMap", shadowTarget);
+            }
+
+
+            function draw() {
+                if (timer.ready()) {
+                    utils.updateTimerElement(timer.cpuTime, timer.gpuTime);
+                }
+
+                timer.start();
+
+                // UPDATE TRANSFORMS
+                for (var i = 0, len = boxes.length; i < len; ++i) {
+                    boxes[i].rotate[0] += 0.01;
+                    boxes[i].rotate[1] += 0.02;
+
+                    utils.xformMatrix(boxes[i].modelMatrix, boxes[i].translate, boxes[i].rotate, boxes[i].scale);
+                    mat4.multiply(boxes[i].mvpMatrix, viewProjMatrix, boxes[i].modelMatrix);
+                    
+                    boxes[i].shadowDrawCall.uniform("uModelMatrix", boxes[i].modelMatrix);
+
+                    boxes[i].mainDrawCall.uniform("uMVP", boxes[i].mvpMatrix)
+                    .uniform("uModelMatrix", boxes[i].modelMatrix);
+                }
+
+                // DRAW TO SHADOW BUFFER
+                app.drawFramebuffer(shadowBuffer).viewport(0, 0, CUBEMAP_DIM, CUBEMAP_DIM);
+
+                shadowBuffer.colorTarget(0, shadowTarget, PicoGL.TEXTURE_CUBE_MAP_NEGATIVE_X);
+                app.clear();
+                for (var i = 0, len = boxes.length; i < len; ++i) {
+                    boxes[i].shadowDrawCall.uniform("uViewProj", lightViewProjMatrixNegX);
+                    boxes[i].shadowDrawCall.draw();
+                }
+
+                shadowBuffer.colorTarget(0, shadowTarget, PicoGL.TEXTURE_CUBE_MAP_POSITIVE_X);
+                app.clear();
+                for (var i = 0, len = boxes.length; i < len; ++i) {
+                    boxes[i].shadowDrawCall.uniform("uViewProj", lightViewProjMatrixPosX);
+                    boxes[i].shadowDrawCall.draw();
+                }
+
+                shadowBuffer.colorTarget(0, shadowTarget, PicoGL.TEXTURE_CUBE_MAP_NEGATIVE_Y);
+                app.clear();
+                for (var i = 0, len = boxes.length; i < len; ++i) {
+                    boxes[i].shadowDrawCall.uniform("uViewProj", lightViewProjMatrixNegY);
+                    boxes[i].shadowDrawCall.draw();
+                }
+
+                shadowBuffer.colorTarget(0, shadowTarget, PicoGL.TEXTURE_CUBE_MAP_POSITIVE_Y);
+                app.clear();
+                for (var i = 0, len = boxes.length; i < len; ++i) {
+                    boxes[i].shadowDrawCall.uniform("uViewProj", lightViewProjMatrixPosY);
+                    boxes[i].shadowDrawCall.draw();
+                }
+
+                shadowBuffer.colorTarget(0, shadowTarget, PicoGL.TEXTURE_CUBE_MAP_NEGATIVE_Z);
+                app.clear();
+                for (var i = 0, len = boxes.length; i < len; ++i) {
+                    boxes[i].shadowDrawCall.uniform("uViewProj", lightViewProjMatrixNegZ);
+                    boxes[i].shadowDrawCall.draw();
+                }
+
+                shadowBuffer.colorTarget(0, shadowTarget, PicoGL.TEXTURE_CUBE_MAP_POSITIVE_Z);
+                app.clear();
+                for (var i = 0, len = boxes.length; i < len; ++i) {
+                    boxes[i].shadowDrawCall.uniform("uViewProj", lightViewProjMatrixPosZ);
+                    boxes[i].shadowDrawCall.draw();
+                }
+
+                // DRAW TO SCREEN     
+                app.defaultDrawFramebuffer().defaultViewport().clear()
+                for (var i = 0, len = boxes.length; i < len; ++i) {
+                    boxes[i].mainDrawCall.draw();
+                }
+                lightDrawcall.draw();
+
+                timer.end();
+
+                requestAnimationFrame(draw);
+            }
+
+            requestAnimationFrame(draw);
+            
+        }
+
+        image.src = "img/khronos_webgl.png";
+
+    </script>
+    <a href="https://github.com/tsherif/picogl.js" id="github-ribbon"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"></a>
+    <script src="../site/js/iframe.js"></script>
+</body>
+</html>
