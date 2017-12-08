@@ -286,7 +286,7 @@
 
                     tex3DDrawCall.uniform("uModel", modelMatrix);
 
-                    framebuffer.replaceTexture(0, colorTarget, i);
+                    framebuffer.colorTarget(0, colorTarget, i);
                     
                     app.clear();
                     tex3DDrawCall.draw(); 
