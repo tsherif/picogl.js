@@ -21,9 +21,16 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-import * as CONSTANTS from "./constants.js";
-import { Shader } from "./shader.js";
-import { SingleComponentUniform, MultiNumericUniform, MultiBoolUniform, MatrixUniform } from "./uniforms.js";
+"use strict";
+
+const CONSTANTS = require("./constants");
+const Shader = require("./shader");
+const Uniforms =  require("./uniforms");
+
+const SingleComponentUniform = Uniforms.SingleComponentUniform;
+const MultiNumericUniform = Uniforms.MultiNumericUniform;
+const MultiBoolUniform = Uniforms.MultiBoolUniform;
+const MatrixUniform = Uniforms.MatrixUniform;
 
 /**
     WebGL program consisting of compiled and linked vertex and fragment
@@ -36,7 +43,7 @@ import { SingleComponentUniform, MultiNumericUniform, MultiBoolUniform, MatrixUn
     @prop {Object} uniforms Map of uniform names to handles.
     @prop {Object} appState Tracked GL state.
 */
-export class Program {
+class Program {
 
     constructor(gl, appState, vsSource, fsSource, xformFeebackVars) {
         let i;
@@ -204,5 +211,6 @@ export class Program {
             this.appState.program = this;
         }
     }
-
 }
+
+module.exports = Program;

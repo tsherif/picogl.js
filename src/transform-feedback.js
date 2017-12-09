@@ -21,6 +21,8 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
+"use strict";
+
 /**
     Tranform feedback object.
 
@@ -29,7 +31,7 @@
     @prop {WebGLTransformFeedback} transformFeedback Transform feedback object.
     @prop {Object} appState Tracked GL state.
 */
-export class TransformFeedback {
+class TransformFeedback {
 
     constructor(gl, appState) {
         this.gl = gl;
@@ -87,3 +89,5 @@ export class TransformFeedback {
     }
 
 }
+
+module.exports = TransformFeedback;

@@ -21,6 +21,8 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
+"use strict";
+
 /**
     WebGL shader.
 
@@ -28,7 +30,7 @@
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLShader} shader The shader.
 */
-export class Shader {
+class Shader {
     
     constructor(gl, type, source) {
         this.gl = gl;
@@ -60,3 +62,5 @@ export class Shader {
     }
 
 }
+
+module.exports = Shader;

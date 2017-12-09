@@ -21,7 +21,9 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-import * as CONSTANTS from "./constants.js";
+"use strict";
+
+const CONSTANTS = require("./constants");
 
 // Classes to manage uniform value updates, including
 // caching current values.
@@ -139,7 +141,7 @@ UNIFORM_CACHE_CLASS[CONSTANTS.UNSIGNED_INT_VEC2] = Uint32Array;
 UNIFORM_CACHE_CLASS[CONSTANTS.UNSIGNED_INT_VEC3] = Uint32Array;
 UNIFORM_CACHE_CLASS[CONSTANTS.UNSIGNED_INT_VEC4] = Uint32Array;
 
-export class SingleComponentUniform {
+class SingleComponentUniform {
     
     constructor(gl, handle, type) {
         this.gl = gl;
@@ -157,7 +159,7 @@ export class SingleComponentUniform {
 
 }
 
-export class MultiNumericUniform {
+class MultiNumericUniform {
 
     constructor(gl, handle, type, count) {
         this.gl = gl;
@@ -179,7 +181,7 @@ export class MultiNumericUniform {
 
 }
 
-export class MultiBoolUniform {
+class MultiBoolUniform {
 
     constructor(gl, handle, type, count) {
         this.gl = gl;
@@ -203,7 +205,7 @@ export class MultiBoolUniform {
 
 }
 
-export class MatrixUniform {
+class MatrixUniform {
 
     constructor(gl, handle, type, count) {
         this.gl = gl;
@@ -224,3 +226,8 @@ export class MatrixUniform {
     }
 
 }
+
+module.exports.SingleComponentUniform = SingleComponentUniform;
+module.exports.MultiNumericUniform = MultiNumericUniform;
+module.exports.MultiBoolUniform = MultiBoolUniform;
+module.exports.MatrixUniform = MatrixUniform;
