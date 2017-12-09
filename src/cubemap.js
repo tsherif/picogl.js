@@ -21,8 +21,10 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-import * as CONSTANTS from "./constants.js";
-import { TEXTURE_FORMAT_DEFAULTS } from "./texture-format-defaults.js";
+"use strict";
+
+const CONSTANTS = require("./constants");
+const TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
 
 /**
     Cubemap for environment mapping.
@@ -36,7 +38,7 @@ import { TEXTURE_FORMAT_DEFAULTS } from "./texture-format-defaults.js";
     @prop {Number} currentUnit The current texture unit this cubemap is bound to.
     @prop {Object} appState Tracked GL state.
 */
-export class Cubemap {
+class Cubemap {
 
     constructor(gl, appState, options) {
         let { negX, posX, negY, posY, negZ, posZ } = options;
@@ -143,3 +145,5 @@ export class Cubemap {
     }
 
 }
+
+module.exports = Cubemap;

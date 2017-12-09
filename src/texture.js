@@ -21,8 +21,10 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-import * as CONSTANTS from "./constants.js";
-import { TEXTURE_FORMAT_DEFAULTS } from "./texture-format-defaults.js";
+"use strict";
+
+const CONSTANTS = require("./constants");
+const TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
 
 const DUMMY_ARRAY = new Array(1);
 
@@ -44,7 +46,7 @@ const DUMMY_ARRAY = new Array(1);
         (and thus should have a complete mipmap chain).
     @prop {Object} appState Tracked GL state.
 */
-export class Texture {
+class Texture {
     constructor(gl, appState, binding, image, width = image.width, height = image.height, depth, is3D, options = CONSTANTS.DUMMY_OBJECT) {
         let defaultType = options.format === CONSTANTS.DEPTH_COMPONENT ? CONSTANTS.UNSIGNED_SHORT : CONSTANTS.UNSIGNED_BYTE;
 
@@ -282,3 +284,5 @@ export class Texture {
     }
 
 }
+
+module.exports = Texture;

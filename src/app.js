@@ -21,20 +21,22 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-import * as CONSTANTS              from "./constants.js";
-import { TEXTURE_FORMAT_DEFAULTS } from "./texture-format-defaults.js";
-import { Cubemap }                 from "./cubemap.js";
-import { DrawCall }                from "./draw-call.js";
-import { Framebuffer }             from "./framebuffer.js";
-import { Program }                 from "./program.js";
-import { Shader }                  from "./shader.js";
-import { Texture }                 from "./texture.js";
-import { Timer }                   from "./timer.js";
-import { TransformFeedback }       from "./transform-feedback.js";
-import { UniformBuffer }           from "./uniform-buffer.js";
-import { VertexArray }             from "./vertex-array.js";
-import { VertexBuffer }            from "./vertex-buffer.js";
-import { Query }                   from "./query.js";
+"use strict";
+
+const CONSTANTS               = require("./constants");
+const TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
+const Cubemap                 = require("./cubemap");
+const DrawCall                = require("./draw-call");
+const Framebuffer             = require("./framebuffer");
+const Program                 = require("./program");
+const Shader                  = require("./shader");
+const Texture                 = require("./texture");
+const Timer                   = require("./timer");
+const TransformFeedback       = require("./transform-feedback");
+const UniformBuffer           = require("./uniform-buffer");
+const VertexArray             = require("./vertex-array");
+const VertexBuffer            = require("./vertex-buffer");
+const Query                   = require("./query");
 
 /**
     Primary entry point to PicoGL. An app will store all parts of the WebGL
@@ -55,7 +57,7 @@ import { Query }                   from "./query.js";
     @prop {Object} state Tracked GL state.
     @prop {GLEnum} clearBits Current clear mask to use with clear().    
 */
-export class App {
+class App {
     
     constructor(canvas, contextAttributes) {
         this.canvas = canvas;
@@ -1130,3 +1132,5 @@ export class App {
     }
 
 }
+
+module.exports = App;

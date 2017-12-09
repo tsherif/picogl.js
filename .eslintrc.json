@@ -32,7 +32,6 @@
         "no-new-object": "error",
         "no-nested-ternary": "error",
         "no-whitespace-before-property": "error",
-        "object-curly-newline": "error",
         "semi-spacing": "error",
         "semi-style": "error",
         "space-before-blocks": "error",

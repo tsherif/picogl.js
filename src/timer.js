@@ -21,7 +21,9 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-import { Query } from "./query.js";
+"use strict";
+
+const Query = require("./query");
 
 /**
     Rendering timer.
@@ -38,7 +40,7 @@ import { Query } from "./query.js";
     @prop {number} gpuTime Time spent on GPU during last timing. Only valid if ready() returns true.
             Will remain 0 if extension EXT_disjoint_timer_query_webgl2 is unavailable.
 */
-export class Timer {
+class Timer {
 
     constructor(gl) {
         this.gl = gl;
@@ -124,3 +126,5 @@ export class Timer {
     }
 
 }
+
+module.exports = Timer;

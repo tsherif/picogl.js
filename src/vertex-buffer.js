@@ -21,7 +21,9 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-import * as CONSTANTS from "./constants.js";
+"use strict";
+
+const CONSTANTS = require("./constants");
 
 /**
     Storage for vertex data.
@@ -37,7 +39,7 @@ import * as CONSTANTS from "./constants.js";
     @prop {GLEnum} binding GL binding point (ARRAY_BUFFER or ELEMENT_ARRAY_BUFFER).
     @prop {Object} appState Tracked GL state.
 */
-export class VertexBuffer {
+class VertexBuffer {
 
     constructor(gl, appState, type, itemSize, data, usage = gl.STATIC_DRAW, indexArray) {
         let numColumns;
@@ -144,3 +146,5 @@ export class VertexBuffer {
     }
 
 }
+
+module.exports = VertexBuffer;

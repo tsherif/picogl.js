@@ -21,7 +21,9 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-import * as CONSTANTS from "./constants.js";
+"use strict";
+
+const CONSTANTS = require("./constants");
 
 /**
     Storage for vertex data.
@@ -35,7 +37,7 @@ import * as CONSTANTS from "./constants.js";
     @prop {Array} colorAttachments Array of color attachment enums.
     @prop {Object} appState Tracked GL state.
 */
-export class Framebuffer {
+class Framebuffer {
 
     constructor(gl, appState) {
         this.gl = gl;
@@ -192,3 +194,5 @@ export class Framebuffer {
     }
 
 }
+
+module.exports = Framebuffer;
