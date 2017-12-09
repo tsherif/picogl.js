@@ -54,7 +54,7 @@ class Framebuffer {
     }
 
     /**
-        Add a color target to this framebuffer.
+        Attach a color target to this framebuffer.
 
         @method
         @param {number} index Color attachment index.
@@ -86,7 +86,7 @@ class Framebuffer {
     }
 
     /**
-        Add a depth target to this framebuffer.
+        Attach a depth target to this framebuffer.
 
         @method
         @param {Texture} texture The texture to attach.
