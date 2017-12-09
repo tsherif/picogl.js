@@ -23,6 +23,7 @@
 
 "use strict";
 
+const CONSTANTS = require("./constants");
 const Query = require("./query");
 
 /**
@@ -50,12 +51,10 @@ class Timer {
         var gpuTimerExtension = this.gl.getExtension("EXT_disjoint_timer_query_webgl2") || this.gl.getExtension("EXT_disjoint_timer_query");
         if (gpuTimerExtension) {
             this.gpuTimer = true;
-            this.gpuTimerQuery = new Query(this.gl, gpuTimerExtension.TIME_ELAPSED_EXT);
-            this.GPU_DISJOINT_EXT = gpuTimerExtension.GPU_DISJOINT_EXT;
+            this.gpuTimerQuery = new Query(this.gl, CONSTANTS.TIME_ELAPSED_EXT);
         } else {
             this.gpuTimer = false;
             this.gpuTimerQuery = null;
-            this.GPU_DISJOINT_EXT = null;
         }
 
         this.cpuStartTime = 0;
@@ -112,7 +111,7 @@ class Timer {
             }
 
             var gpuTimerAvailable = this.gpuTimerQuery.ready();
-            var gpuTimerDisjoint = this.gl.getParameter(this.GPU_DISJOINT_EXT);
+            var gpuTimerDisjoint = this.gl.getParameter(CONSTANTS.GPU_DISJOINT_EXT);
 
             if (gpuTimerAvailable && !gpuTimerDisjoint) {
                 this.gpuTime = this.gpuTimerQuery.result  / 1000000;
