@@ -23,7 +23,8 @@ Contributing
 2. Create a branch with an appropriate name in your fork.
 3. Maintain a similar style to the rest of the code base. 
 4. Make your updates.
-5. Run `npm run build` and ensure that all examples in `/examples/` and all tests on `/test/index.html` function properly.
-6. Commit your changes and push them to GitHub.
-7. Make a pull request against master. 
+5. You can run `npm run dev-build` to build and generate a source map that will simplify debugging.
+6. Run `npm run build` and ensure that all examples in `/examples/` and all tests on `/test/index.html` function properly.
+7. Commit your changes and push them to GitHub.
+8. Make a pull request against master. 
  
