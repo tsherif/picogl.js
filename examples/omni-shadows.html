@@ -307,7 +307,7 @@
             mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
         };
 
-        utils.loadImages(["img/khronos_webgl.png", "img/cobblestone.jpg"], function (images) {
+        utils.loadImages(["img/webgl-logo.png", "img/cobblestone.jpg"], function (images) {
             var webglTexture = app.createTexture2D(images[0], { flipY: true });
             var cobblesTexture = app.createTexture2D(images[1], { flipY: true });
 
