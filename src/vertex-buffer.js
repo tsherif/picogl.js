@@ -143,6 +143,8 @@ class VertexBuffer {
             this.gl.deleteBuffer(this.buffer);
             this.buffer = null;
         }
+
+        return this;
     }
 
 }

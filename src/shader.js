@@ -59,6 +59,8 @@ class Shader {
             this.gl.deleteShader(this.shader);
             this.shader = null;
         }
+
+        return this;
     }
 
 }

@@ -119,6 +119,8 @@ class Cubemap {
             this.appState.textures[this.currentUnit] = null;
             this.currentUnit = -1;
         }
+
+        return this;
     }
 
     // Bind this cubemap to a texture unit.

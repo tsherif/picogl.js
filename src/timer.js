@@ -77,6 +77,8 @@ class Timer {
         } else {
             this.cpuStartTime = this.cpuTimer.now();
         }
+
+        return this;
     }
 
 
@@ -94,6 +96,8 @@ class Timer {
         } else {
             this.cpuTime = this.cpuTimer.now() - this.cpuStartTime;
         }
+
+        return this;
     }
 
     /**
@@ -135,6 +139,8 @@ class Timer {
             this.gpuTimerQuery = null;
             this.gpuTimer = false;
         }
+
+        return this;
     }
 
 }

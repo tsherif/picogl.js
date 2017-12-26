@@ -52,7 +52,9 @@ class Query {
         if (!this.active) {
             this.gl.beginQuery(this.target, this.query);
             this.result = null;
-        }    
+        }
+
+        return this;
     }
 
     /**
@@ -65,6 +67,8 @@ class Query {
             this.gl.endQuery(this.target);
             this.active = true;
         }
+
+        return this;
     }
 
     /**
@@ -94,6 +98,8 @@ class Query {
             this.gl.deleteQuery(this.query);
             this.query = null;
         }
+
+        return this;
     }
 
 }

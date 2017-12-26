@@ -71,6 +71,8 @@ class TransformFeedback {
             this.gl.deleteTransformFeedback(this.transformFeedback);
             this.transformFeedback = null;
         }
+
+        return this;
     }
 
     // Bind this transform feedback.

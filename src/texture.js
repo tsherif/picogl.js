@@ -126,7 +126,7 @@ class Texture {
         depth = depth || 0;
 
         if (width === this.width && height === this.height && depth === this.depth) {
-            return; 
+            return this; 
         }
 
         this.gl.deleteTexture(this.texture);
@@ -179,6 +179,8 @@ class Texture {
             }
             this.gl.texStorage2D(this.binding, levels, this.internalFormat, this.width, this.height);
         }
+
+        return this;
     }
 
     /**
@@ -258,6 +260,8 @@ class Texture {
                 this.currentUnit = -1;
             }
         }
+
+        return this;
     }
 
     // Bind this texture to a texture unit.

@@ -223,6 +223,8 @@ class UniformBuffer {
                 this.appState.uniformBuffers[this.currentBase] = null;
             }
         }
+
+        return this;
     }
 
     // Bind this uniform buffer to the given base.

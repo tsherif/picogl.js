@@ -156,6 +156,8 @@ class Framebuffer {
             this.gl.deleteFramebuffer(this.framebuffer);
             this.framebuffer = null;
         }
+
+        return this;
     }
 
     // Bind as the draw framebuffer
@@ -164,6 +166,8 @@ class Framebuffer {
             this.gl.bindFramebuffer(this.gl.DRAW_FRAMEBUFFER, this.framebuffer);
             this.appState.drawFramebuffer = this;
         }
+
+        return this;
     }
 
     // Bind as the read framebuffer
@@ -172,6 +176,8 @@ class Framebuffer {
             this.gl.bindFramebuffer(this.gl.READ_FRAMEBUFFER, this.framebuffer);
             this.appState.readFramebuffer = this;
         }
+
+        return this;
     }
 
     // Bind for a framebuffer state update.
@@ -191,6 +197,8 @@ class Framebuffer {
         if (framebuffer !== this) {
             this.gl.bindFramebuffer(this.gl.DRAW_FRAMEBUFFER, framebuffer ? framebuffer.framebuffer : null);
         }
+
+        return this;
     }
 
 }

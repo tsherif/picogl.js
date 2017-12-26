@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.8.7
+PicoGL.js v$npm_package_version
 
 The MIT License (MIT)
 
@@ -32,7 +32,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 		exports["PicoGL"] = factory();
 	else
 		root["PicoGL"] = factory();
-})(this, function() {
+})(typeof self !== 'undefined' ? self : this, function() {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -903,6 +903,8 @@ class Shader {
             this.gl.deleteShader(this.shader);
             this.shader = null;
         }
+
+        return this;
     }
 
 }
@@ -969,7 +971,9 @@ class Query {
         if (!this.active) {
             this.gl.beginQuery(this.target, this.query);
             this.result = null;
-        }    
+        }
+
+        return this;
     }
 
     /**
@@ -982,6 +986,8 @@ class Query {
             this.gl.endQuery(this.target);
             this.active = true;
         }
+
+        return this;
     }
 
     /**
@@ -999,6 +1005,20 @@ class Query {
         }
 
         return false;
+    }
+
+    /**
+        Delete this query.
+
+        @method
+    */
+    delete() {
+        if (this.query) {
+            this.gl.deleteQuery(this.query);
+            this.query = null;
+        }
+
+        return this;
     }
 
 }
@@ -1045,7 +1065,7 @@ const App = __webpack_require__(5);
     @namespace PicoGL
 */
 const PicoGL = __webpack_require__(0);
-PicoGL.version = "0.8.7";
+PicoGL.version = "$npm_package_version";
 
 /**
     Create a PicoGL app. The app is the primary entry point to PicoGL. It stores
@@ -2331,6 +2351,8 @@ class Cubemap {
             this.appState.textures[this.currentUnit] = null;
             this.currentUnit = -1;
         }
+
+        return this;
     }
 
     // Bind this cubemap to a texture unit.
@@ -2546,6 +2568,8 @@ class DrawCall {
                 this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, i, null);
             }
         }
+
+        return this;
     }
 
 }
@@ -2716,6 +2740,8 @@ class Framebuffer {
             this.gl.deleteFramebuffer(this.framebuffer);
             this.framebuffer = null;
         }
+
+        return this;
     }
 
     // Bind as the draw framebuffer
@@ -2724,6 +2750,8 @@ class Framebuffer {
             this.gl.bindFramebuffer(this.gl.DRAW_FRAMEBUFFER, this.framebuffer);
             this.appState.drawFramebuffer = this;
         }
+
+        return this;
     }
 
     // Bind as the read framebuffer
@@ -2732,6 +2760,8 @@ class Framebuffer {
             this.gl.bindFramebuffer(this.gl.READ_FRAMEBUFFER, this.framebuffer);
             this.appState.readFramebuffer = this;
         }
+
+        return this;
     }
 
     // Bind for a framebuffer state update.
@@ -2751,6 +2781,8 @@ class Framebuffer {
         if (framebuffer !== this) {
             this.gl.bindFramebuffer(this.gl.DRAW_FRAMEBUFFER, framebuffer ? framebuffer.framebuffer : null);
         }
+
+        return this;
     }
 
 }
@@ -2962,11 +2994,15 @@ class Program {
             this.gl.deleteProgram(this.program);
             this.program = null;
         }
+
+        return this;
     }
 
     // Set the value of a uniform.
     uniform(name, value) {
         this.uniforms[name].set(value);
+
+        return this;
     }
 
     // Use this program.
@@ -2975,6 +3011,8 @@ class Program {
             this.gl.useProgram(this.program);
             this.appState.program = this;
         }
+
+        return this;
     }
 }
 
@@ -3354,7 +3392,7 @@ class Texture {
         depth = depth || 0;
 
         if (width === this.width && height === this.height && depth === this.depth) {
-            return; 
+            return this; 
         }
 
         this.gl.deleteTexture(this.texture);
@@ -3407,6 +3445,8 @@ class Texture {
             }
             this.gl.texStorage2D(this.binding, levels, this.internalFormat, this.width, this.height);
         }
+
+        return this;
     }
 
     /**
@@ -3486,6 +3526,8 @@ class Texture {
                 this.currentUnit = -1;
             }
         }
+
+        return this;
     }
 
     // Bind this texture to a texture unit.
@@ -3600,6 +3642,8 @@ class Timer {
         } else {
             this.cpuStartTime = this.cpuTimer.now();
         }
+
+        return this;
     }
 
 
@@ -3617,6 +3661,8 @@ class Timer {
         } else {
             this.cpuTime = this.cpuTimer.now() - this.cpuStartTime;
         }
+
+        return this;
     }
 
     /**
@@ -3645,6 +3691,21 @@ class Timer {
         } else {
             return !!this.cpuStartTime;
         }
+    }
+
+    /**
+        Delete this timer.
+
+        @method
+    */
+    delete() {
+        if (this.gpuTimerQuery) {
+            this.gpuTimerQuery.delete();
+            this.gpuTimerQuery = null;
+            this.gpuTimer = false;
+        }
+
+        return this;
     }
 
 }
@@ -3730,6 +3791,8 @@ class TransformFeedback {
             this.gl.deleteTransformFeedback(this.transformFeedback);
             this.transformFeedback = null;
         }
+
+        return this;
     }
 
     // Bind this transform feedback.
@@ -3982,6 +4045,8 @@ class UniformBuffer {
                 this.appState.uniformBuffers[this.currentBase] = null;
             }
         }
+
+        return this;
     }
 
     // Bind this uniform buffer to the given base.
@@ -4399,6 +4464,8 @@ class VertexBuffer {
             this.gl.deleteBuffer(this.buffer);
             this.buffer = null;
         }
+
+        return this;
     }
 
 }

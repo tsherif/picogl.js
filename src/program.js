@@ -197,11 +197,15 @@ class Program {
             this.gl.deleteProgram(this.program);
             this.program = null;
         }
+
+        return this;
     }
 
     // Set the value of a uniform.
     uniform(name, value) {
         this.uniforms[name].set(value);
+
+        return this;
     }
 
     // Use this program.
@@ -210,6 +214,8 @@ class Program {
             this.gl.useProgram(this.program);
             this.appState.program = this;
         }
+
+        return this;
     }
 }
 

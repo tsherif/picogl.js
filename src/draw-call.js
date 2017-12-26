@@ -178,6 +178,8 @@ class DrawCall {
                 this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, i, null);
             }
         }
+
+        return this;
     }
 
 }
