@@ -124,6 +124,19 @@ class Timer {
         }
     }
 
+    /**
+        Delete this timer.
+
+        @method
+    */
+    delete() {
+        if (this.gpuTimerQuery) {
+            this.gpuTimerQuery.delete();
+            this.gpuTimerQuery = null;
+            this.gpuTimer = false;
+        }
+    }
+
 }
 
 module.exports = Timer;
