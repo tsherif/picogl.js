@@ -84,6 +84,18 @@ class Query {
         return false;
     }
 
+    /**
+        Delete this query.
+
+        @method
+    */
+    delete() {
+        if (this.query) {
+            this.gl.deleteQuery(this.query);
+            this.query = null;
+        }
+    }
+
 }
 
 module.exports = Query;
