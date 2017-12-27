@@ -49,6 +49,7 @@ class TransformFeedback {
         @method
         @param {number} index Index of transform feedback varying to capture.
         @param {VertexBuffer} buffer Buffer to record output into.
+        @return {TransformFeedback} The TransformFeedback object.
     */
     feedbackBuffer(index, buffer) {
         this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedback);
@@ -65,6 +66,7 @@ class TransformFeedback {
         Delete this transform feedback.
 
         @method
+        @return {TransformFeedback} The TransformFeedback object.
     */
     delete() {
         if (this.transformFeedback) {
@@ -75,7 +77,12 @@ class TransformFeedback {
         return this;
     }
 
-    // Bind this transform feedback.
+    /**
+        Bind this transform feedback.
+
+        @method
+        @return {TransformFeedback} The TransformFeedback object.
+    */
     bind() {
         if (this.appState.transformFeedback !== this) {
             this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedback);

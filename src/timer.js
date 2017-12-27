@@ -67,6 +67,7 @@ class Timer {
         Start timing.
 
         @method
+        @return {Timer} The Timer object.
     */
     start() {
         if (this.gpuTimer) {
@@ -86,6 +87,7 @@ class Timer {
         Stop timing.
 
         @method
+        @return {Timer} The Timer object.
     */
     end() {
         if (this.gpuTimer) {
@@ -107,6 +109,7 @@ class Timer {
         values.
 
         @method
+        @return {boolean} If results are available.
     */
     ready() {
         if (this.gpuTimer) {
@@ -132,6 +135,7 @@ class Timer {
         Delete this timer.
 
         @method
+        @return {Timer} The Timer object.
     */
     delete() {
         if (this.gpuTimerQuery) {

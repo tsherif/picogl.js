@@ -41,6 +41,7 @@ PicoGL.version = "%%VERSION%%";
     @function PicoGL.createApp
     @param {DOMElement} canvas The canvas on which to create the WebGL context.
     @param {Object} [contextAttributes] Context attributes to pass when calling getContext().
+    @return {App} New App object.
 */
 PicoGL.createApp = function(canvas, contextAttributes) {
     return new App(canvas, contextAttributes);

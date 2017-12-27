@@ -47,6 +47,7 @@ class Query {
         Begin a query.
 
         @method
+        @return {Query} The Query object.
     */
     begin() {
         if (!this.active) {
@@ -61,6 +62,7 @@ class Query {
         End a query.
 
         @method
+        @return {Query} The Query object.
     */
     end() {
         if (!this.active) {
@@ -75,6 +77,7 @@ class Query {
         Check if query result is available.
 
         @method
+        @return {boolean} If results are available.
     */
     ready() {
         if (this.active && this.gl.getQueryParameter(this.query, this.gl.QUERY_RESULT_AVAILABLE)) {
@@ -92,6 +95,7 @@ class Query {
         Delete this query.
 
         @method
+        @return {Query} The Query object.
     */
     delete() {
         if (this.query) {

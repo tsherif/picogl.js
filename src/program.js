@@ -191,6 +191,7 @@ class Program {
         Delete this program.
 
         @method
+        @return {Program} The Program object.
     */
     delete() {
         if (this.program) {
@@ -200,15 +201,26 @@ class Program {
 
         return this;
     }
+    
+    /**
+        Set the value of a uniform.
 
-    // Set the value of a uniform.
+        @method
+        @return {Program} The Program object.
+    */
     uniform(name, value) {
         this.uniforms[name].set(value);
 
         return this;
     }
 
-    // Use this program.
+    // 
+    /**
+        Use this program.
+
+        @method
+        @return {Program} The Program object.
+    */
     bind() {
         if (this.appState.program !== this) {
             this.gl.useProgram(this.program);

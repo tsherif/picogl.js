@@ -53,6 +53,7 @@ class Shader {
         Delete this shader.
 
         @method
+        @return {Shader} The Shader object.
     */
     delete() {
         if (this.shader) {

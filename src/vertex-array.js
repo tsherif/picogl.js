@@ -54,6 +54,7 @@ class VertexArray {
         @method
         @param {number} attributeIndex The attribute location to bind to.
         @param {VertexBuffer} vertexBuffer The VertexBuffer to bind.
+        @return {VertexArray} The VertexArray object.
     */
     vertexAttributeBuffer(attributeIndex, vertexBuffer) {
         this.attributeBuffer(attributeIndex, vertexBuffer, false, false, false);
@@ -67,6 +68,7 @@ class VertexArray {
         @method
         @param {number} attributeIndex The attribute location to bind to.
         @param {VertexBuffer} vertexBuffer The VertexBuffer to bind.
+        @return {VertexArray} The VertexArray object.
     */
     instanceAttributeBuffer(attributeIndex, vertexBuffer) {
         this.attributeBuffer(attributeIndex, vertexBuffer, true, false, false);
@@ -82,6 +84,7 @@ class VertexArray {
         @method
         @param {number} attributeIndex The attribute location to bind to.
         @param {VertexBuffer} vertexBuffer The VertexBuffer to bind.
+        @return {VertexArray} The VertexArray object.
     */
     vertexIntegerAttributeBuffer(attributeIndex, vertexBuffer) {
         this.attributeBuffer(attributeIndex, vertexBuffer, false, true, false);
@@ -97,6 +100,7 @@ class VertexArray {
         @method
         @param {number} attributeIndex The attribute location to bind to.
         @param {VertexBuffer} vertexBuffer The VertexBuffer to bind.
+        @return {VertexArray} The VertexArray object.
     */
     instanceIntegerAttributeBuffer(attributeIndex, vertexBuffer) {
         this.attributeBuffer(attributeIndex, vertexBuffer, true, true, false);
@@ -112,6 +116,7 @@ class VertexArray {
         @method
         @param {number} attributeIndex The attribute location to bind to.
         @param {VertexBuffer} vertexBuffer The VertexBuffer to bind.
+        @return {VertexArray} The VertexArray object.
     */
     vertexNormalizedAttributeBuffer(attributeIndex, vertexBuffer) {
         this.attributeBuffer(attributeIndex, vertexBuffer, false, false, true);
@@ -127,6 +132,7 @@ class VertexArray {
         @method
         @param {number} attributeIndex The attribute location to bind to.
         @param {VertexBuffer} vertexBuffer The VertexBuffer to bind.
+        @return {VertexArray} The VertexArray object.
     */
     instanceNormalizedAttributeBuffer(attributeIndex, vertexBuffer) {
         this.attributeBuffer(attributeIndex, vertexBuffer, true, false, true);
@@ -139,6 +145,7 @@ class VertexArray {
 
         @method
         @param {VertexBuffer} vertexBuffer The VertexBuffer to bind.
+        @return {VertexArray} The VertexArray object.
     */
     indexBuffer(vertexBuffer) {
         this.gl.bindVertexArray(this.vertexArray);
@@ -158,6 +165,7 @@ class VertexArray {
         Delete this vertex array.
 
         @method
+        @return {VertexArray} The VertexArray object.
     */
     delete() {
         if (this.vertexArray) {
@@ -169,7 +177,12 @@ class VertexArray {
         return this;
     }
 
-    // Bind this vertex array.
+    /**
+        Bind this vertex array.
+
+        @method
+        @return {VertexArray} The VertexArray object.
+    */
     bind() {
         if (this.appState.vertexArray !== this) {
             this.gl.bindVertexArray(this.vertexArray);
@@ -179,7 +192,12 @@ class VertexArray {
         return this;
     }
 
-    // Attach an attribute buffer
+    /**
+        Attach an attribute buffer
+
+        @method
+        @return {VertexArray} The VertexArray object.
+    */
     attributeBuffer(attributeIndex, vertexBuffer, instanced, integer, normalized) {
         this.gl.bindVertexArray(this.vertexArray);
         this.gl.bindBuffer(vertexBuffer.binding, vertexBuffer.buffer);
