@@ -456,6 +456,52 @@
         </tr>
 
     
+
+        <tr>
+            
+                <td class="name"><code>numElements</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">GLsizei</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The number of element to draw.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>numInstances</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">GLsizei</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The number of instances to draw.</td>
+        </tr>
+
+    
     </tbody>
 </table>
 
@@ -491,7 +537,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="draw-call.js.html">draw-call.js</a>, <a href="draw-call.js.html#line50">line 50</a>
+        <a href="draw-call.js.html">draw-call.js</a>, <a href="draw-call.js.html#line52">line 52</a>
     </li></ul></dd>
     
 
@@ -545,7 +591,7 @@
     
 
     
-    <h4 class="name" id="draw"><span class="type-signature"></span>draw<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="draw"><span class="type-signature"></span>draw<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="DrawCall.html">DrawCall</a>}</span></h4>
     
 
     
@@ -597,7 +643,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="draw-call.js.html">draw-call.js</a>, <a href="draw-call.js.html#line133">line 133</a>
+        <a href="draw-call.js.html">draw-call.js</a>, <a href="draw-call.js.html#line183">line 183</a>
     </li></ul></dd>
     
 
@@ -620,6 +666,28 @@
 
 
 
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    The DrawCall object.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="DrawCall.html">DrawCall</a></span>
+
+
+    </dd>
+</dl>
+
+    
 
 
 
@@ -631,7 +699,361 @@
     
 
     
-    <h4 class="name" id="texture"><span class="type-signature"></span>texture<span class="signature">(name, texture)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="elementCount"><span class="type-signature"></span>elementCount<span class="signature">(count<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="DrawCall.html">DrawCall</a>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Set numElements property to allow number of elements to be drawn
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>count</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">GLsizei</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    0
+                
+                </td>
+            
+
+            <td class="description last">Number of element to draw, 0 set to all.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="draw-call.js.html">draw-call.js</a>, <a href="draw-call.js.html#line150">line 150</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    The DrawCall object.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="DrawCall.html">DrawCall</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="instanceCount"><span class="type-signature"></span>instanceCount<span class="signature">(count<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="DrawCall.html">DrawCall</a>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Set numInstances property to allow number of instances be drawn
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>count</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">GLsizei</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    0
+                
+                </td>
+            
+
+            <td class="description last">Number of instance to draw, 0 set to all.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="draw-call.js.html">draw-call.js</a>, <a href="draw-call.js.html#line167">line 167</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    The DrawCall object.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="DrawCall.html">DrawCall</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="texture"><span class="type-signature"></span>texture<span class="signature">(name, texture)</span><span class="type-signature"> &rarr; {<a href="DrawCall.html">DrawCall</a>}</span></h4>
     
 
     
@@ -755,7 +1177,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="draw-call.js.html">draw-call.js</a>, <a href="draw-call.js.html#line107">line 107</a>
+        <a href="draw-call.js.html">draw-call.js</a>, <a href="draw-call.js.html#line121">line 121</a>
     </li></ul></dd>
     
 
@@ -778,6 +1200,28 @@
 
 
 
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    The DrawCall object.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="DrawCall.html">DrawCall</a></span>
+
+
+    </dd>
+</dl>
+
+    
 
 
 
@@ -789,7 +1233,164 @@
     
 
     
-    <h4 class="name" id="uniform"><span class="type-signature"></span>uniform<span class="signature">(name, value)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="transformFeedback"><span class="type-signature"></span>transformFeedback<span class="signature">(transformFeedback)</span><span class="type-signature"> &rarr; {<a href="DrawCall.html">DrawCall</a>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Set the current TransformFeedback object for draw
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>transformFeedback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="TransformFeedback.html">TransformFeedback</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Transform Feedback to set.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="draw-call.js.html">draw-call.js</a>, <a href="draw-call.js.html#line85">line 85</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    The DrawCall object.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="DrawCall.html">DrawCall</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="uniform"><span class="type-signature"></span>uniform<span class="signature">(name, value)</span><span class="type-signature"> &rarr; {<a href="DrawCall.html">DrawCall</a>}</span></h4>
     
 
     
@@ -915,7 +1516,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="draw-call.js.html">draw-call.js</a>, <a href="draw-call.js.html#line88">line 88</a>
+        <a href="draw-call.js.html">draw-call.js</a>, <a href="draw-call.js.html#line101">line 101</a>
     </li></ul></dd>
     
 
@@ -938,6 +1539,28 @@
 
 
 
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    The DrawCall object.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="DrawCall.html">DrawCall</a></span>
+
+
+    </dd>
+</dl>
+
+    
 
 
 
@@ -949,7 +1572,7 @@
     
 
     
-    <h4 class="name" id="uniformBlock"><span class="type-signature"></span>uniformBlock<span class="signature">(name, buffer)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="uniformBlock"><span class="type-signature"></span>uniformBlock<span class="signature">(name, buffer)</span><span class="type-signature"> &rarr; {<a href="DrawCall.html">DrawCall</a>}</span></h4>
     
 
     
@@ -1073,7 +1696,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="draw-call.js.html">draw-call.js</a>, <a href="draw-call.js.html#line121">line 121</a>
+        <a href="draw-call.js.html">draw-call.js</a>, <a href="draw-call.js.html#line136">line 136</a>
     </li></ul></dd>
     
 
@@ -1096,6 +1719,28 @@
 
 
 
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    The DrawCall object.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="DrawCall.html">DrawCall</a></span>
+
+
+    </dd>
+</dl>
+
+    
 
 
 
@@ -1123,7 +1768,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sat Dec 09 2017 08:06:34 GMT-0500 (EST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Thu Dec 28 2017 10:18:02 GMT-0500 (EST)
 </footer>
 
 <script> prettyPrint(); </script>
