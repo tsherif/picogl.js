@@ -80,7 +80,7 @@ class TransformFeedback {
     /**
         Bind this transform feedback.
 
-        @method        
+        @method
         @ignore
         @return {TransformFeedback} The TransformFeedback object.
     */
