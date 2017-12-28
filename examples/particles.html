@@ -28,6 +28,13 @@
     <script src="../build/picogl.js"></script>
     <script src="utils/utils.js"></script>
     <link rel="stylesheet" href="../site/css/picogl-example.css"> 
+    <style>
+        #particle-controls {
+            position: absolute;
+            bottom: 20px;
+            right: 30px;
+        }
+    </style>
 </head>
 <body>
     <div id="example-title">
@@ -35,6 +42,11 @@
         <div>
             <a href="https://github.com/tsherif/picogl.js/blob/master/examples/particles.html">Source code</a>
         </div>
+    </div>
+    <div id="particle-controls">
+        <button onclick="setDrawRange(50000)">50,000 particles</button>
+        <button onclick="setDrawRange(100000)">100,000 particles</button>
+        <button onclick="setDrawRange(200000)">200,000 particles</button>
     </div>
     <canvas id="gl-canvas"></canvas>
     <script id="main-vs" type="x-shader/vs">
@@ -204,12 +216,19 @@
 
         var drawCall1 = app.createDrawCall(program, vertexArray1, PicoGL.POINTS)
         .transformFeedback(transformFeedback2)
-        .uniformBlock("Mass", massUniforms);
+        .uniformBlock("Mass", massUniforms)
+        .range(50000);
 
         var drawCall2 = app.createDrawCall(program, vertexArray2, PicoGL.POINTS)
         .transformFeedback(transformFeedback1)
-        .uniformBlock("Mass", massUniforms);
+        .uniformBlock("Mass", massUniforms)
+        .range(50000);
 
+        function setDrawRange(count) {
+            console.log(count);
+            drawCall1.range(count);
+            drawCall2.range(count);
+        }
 
         var currentDrawCall = drawCall1;
         function draw() {      
@@ -231,7 +250,6 @@
         }
 
         requestAnimationFrame(draw);
-            
 
     </script>
     <a href="https://github.com/tsherif/picogl.js" id="github-ribbon"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"></a>
