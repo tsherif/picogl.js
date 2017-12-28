@@ -121,12 +121,13 @@ class Texture {
         @param {number} width Image width.
         @param {number} height Image height.
         @param {number} [depth] Image depth or number of images. Required when passing 3D or texture array data.
+        @return {Texture} The Texture object.
     */
     resize(width, height, depth) {
         depth = depth || 0;
 
         if (width === this.width && height === this.height && depth === this.depth) {
-            return; 
+            return this; 
         }
 
         this.gl.deleteTexture(this.texture);
@@ -179,6 +180,8 @@ class Texture {
             }
             this.gl.texStorage2D(this.binding, levels, this.internalFormat, this.width, this.height);
         }
+
+        return this;
     }
 
     /**
@@ -190,6 +193,7 @@ class Texture {
         @method
         @param {ImageElement|ArrayBufferView|Array} data Image data. If an array is passed, it will be 
             used to set mip map levels.
+        @return {Texture} The Texture object.
     */
     data(data) {
         if (!Array.isArray(data)) {
@@ -247,6 +251,7 @@ class Texture {
         Delete this texture.
 
         @method
+        @return {Texture} The Texture object.
     */
     delete() {
         if (this.texture) {
@@ -258,9 +263,17 @@ class Texture {
                 this.currentUnit = -1;
             }
         }
+
+        return this;
     }
 
-    // Bind this texture to a texture unit.
+    /**
+        Bind this texture to a texture unit.
+
+        @method
+        @ignore
+        @return {Texture} The Texture object.
+    */
     bind(unit) {
         let currentTexture = this.appState.textures[unit];
         

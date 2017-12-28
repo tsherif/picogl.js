@@ -111,6 +111,7 @@ class Cubemap {
         Delete this cubemap.
 
         @method
+        @return {Cubemap} The Cubemap object.
     */
     delete() {
         if (this.texture) {
@@ -119,9 +120,17 @@ class Cubemap {
             this.appState.textures[this.currentUnit] = null;
             this.currentUnit = -1;
         }
+
+        return this;
     }
 
-    // Bind this cubemap to a texture unit.
+    /**
+        Bind this cubemap to a texture unit.
+
+        @method
+        @ignore
+        @return {Cubemap} The Cubemap object.
+    */
     bind(unit) {
         let currentTexture = this.appState.textures[unit];
         

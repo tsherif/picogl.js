@@ -75,6 +75,13 @@ class DrawCall {
         this.numInstances = this.currentVertexArray.numInstances;
     }
 
+    /**
+        Set the current TransformFeedback object for draw
+
+        @method
+        @param {TransformFeedback} transformFeedback Transform Feedback to set.
+        @return {DrawCall} The DrawCall object.
+    */
     transformFeedback(transformFeedback) {
         this.currentTransformFeedback = transformFeedback;
 
@@ -89,6 +96,7 @@ class DrawCall {
         @method
         @param {string} name Uniform name.
         @param {any} value Uniform value.
+        @return {DrawCall} The DrawCall object.
     */
     uniform(name, value) {
         let index = this.uniformIndices[name];
@@ -108,6 +116,7 @@ class DrawCall {
         @method
         @param {string} name Sampler uniform name.
         @param {Texture} texture Texture to bind.
+        @return {DrawCall} The DrawCall object.
     */
     texture(name, texture) {
         let unit = this.currentProgram.samplers[name];
@@ -122,6 +131,7 @@ class DrawCall {
         @method
         @param {string} name Uniform block name.
         @param {UniformBuffer} buffer Uniform buffer to bind.
+        @return {DrawCall} The DrawCall object.
     */
     uniformBlock(name, buffer) {
         let base = this.currentProgram.uniformBlocks[name];
@@ -168,6 +178,7 @@ class DrawCall {
         Draw based on current state.
 
         @method
+        @return {DrawCall} The DrawCall object.
     */
     draw() {
         let uniformNames = this.uniformNames;
@@ -217,6 +228,8 @@ class DrawCall {
                 this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, i, null);
             }
         }
+
+        return this;
     }
 
 }

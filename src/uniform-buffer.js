@@ -170,6 +170,7 @@ class UniformBuffer {
         @method
         @param {number} index Index in the layout of item to set.
         @param {ArrayBufferView} value Value to store at the layout location.
+        @return {UniformBuffer} The UniformBuffer object.
     */
     set(index, value) {
         let view = this.dataViews[this.types[index]];
@@ -186,8 +187,9 @@ class UniformBuffer {
     /**
         Send stored buffer data to the GPU.
 
-        @param {number} [index] Index in the layout of item to send to the GPU. If ommited, entire buffer is sent.
         @method
+        @param {number} [index] Index in the layout of item to send to the GPU. If ommited, entire buffer is sent.
+        @return {UniformBuffer} The UniformBuffer object.
     */
     update(index) {
         let data;
@@ -213,6 +215,7 @@ class UniformBuffer {
         Delete this uniform buffer.
 
         @method
+        @return {UniformBuffer} The UniformBuffer object.
     */
     delete() {
         if (this.buffer) {
@@ -223,9 +226,17 @@ class UniformBuffer {
                 this.appState.uniformBuffers[this.currentBase] = null;
             }
         }
+
+        return this;
     }
 
-    // Bind this uniform buffer to the given base.
+    /**
+        Bind this uniform buffer to the given base.
+
+        @method
+        @ignore
+        @return {UniformBuffer} The UniformBuffer object.
+    */
     bind(base) {
         let currentBuffer = this.appState.uniformBuffers[base];
 

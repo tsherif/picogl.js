@@ -191,25 +191,45 @@ class Program {
         Delete this program.
 
         @method
+        @return {Program} The Program object.
     */
     delete() {
         if (this.program) {
             this.gl.deleteProgram(this.program);
             this.program = null;
         }
-    }
 
-    // Set the value of a uniform.
+        return this;
+    }
+    
+    /**
+        Set the value of a uniform.
+
+        @method
+        @ignore
+        @return {Program} The Program object.
+    */
     uniform(name, value) {
         this.uniforms[name].set(value);
+
+        return this;
     }
 
-    // Use this program.
+    // 
+    /**
+        Use this program.
+
+        @method
+        @ignore
+        @return {Program} The Program object.
+    */
     bind() {
         if (this.appState.program !== this) {
             this.gl.useProgram(this.program);
             this.appState.program = this;
         }
+
+        return this;
     }
 }
 

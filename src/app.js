@@ -109,6 +109,7 @@ class App {
         @param {boolean} g Green channel.
         @param {boolean} b Blue channel.
         @param {boolean} a Alpha channel.
+        @return {App} The App object.
     */
     colorMask(r, g, b, a) {
         this.gl.colorMask(r, g, b, a);
@@ -124,6 +125,7 @@ class App {
         @param {number} g Green channel.
         @param {number} b Blue channel.
         @param {number} a Alpha channel.
+        @return {App} The App object.
     */
     clearColor(r, g, b, a) {
         this.gl.clearColor(r, g, b, a);
@@ -137,6 +139,7 @@ class App {
 
         @method
         @param {GLEnum} mask Bit mask of buffers to clear.
+        @return {App} The App object.
     */
     clearMask(mask) {
         this.clearBits = mask;
@@ -148,6 +151,7 @@ class App {
         Clear the canvas
 
         @method
+        @return {App} The App object.
     */
     clear() {
         this.gl.clear(this.clearBits);
@@ -161,6 +165,7 @@ class App {
         @method
         @param {Framebuffer} framebuffer The Framebuffer object to bind.
         @see Framebuffer
+        @return {App} The App object.
     */
     drawFramebuffer(framebuffer) {
         framebuffer.bindForDraw();
@@ -174,6 +179,7 @@ class App {
         @method
         @param {Framebuffer} framebuffer The Framebuffer object to bind.
         @see Framebuffer
+        @return {App} The App object.
     */
     readFramebuffer(framebuffer) {
         framebuffer.bindForRead();
@@ -186,6 +192,7 @@ class App {
         Note that this method resets the viewport to match the default framebuffer.
 
         @method
+        @return {App} The App object.
     */
     defaultDrawFramebuffer() {
         if (this.state.drawFramebuffer !== null) {
@@ -200,6 +207,7 @@ class App {
         Switch back to the default framebuffer for reading (i.e. read from the screen).
 
         @method
+        @return {App} The App object.
     */
     defaultReadFramebuffer() {
         if (this.state.readFramebuffer !== null) {
@@ -216,6 +224,7 @@ class App {
         @method
         @param {number} near Minimum depth value.
         @param {number} far Maximum depth value.
+        @return {App} The App object.
     */
     depthRange(near, far) {
         this.gl.depthRange(near, far);
@@ -227,6 +236,7 @@ class App {
         Enable depth testing.
 
         @method
+        @return {App} The App object.
     */
     depthTest() {
         this.gl.enable(this.gl.DEPTH_TEST);
@@ -238,6 +248,7 @@ class App {
         Disable depth testing.
 
         @method
+        @return {App} The App object.
     */
     noDepthTest() {
         this.gl.disable(this.gl.DEPTH_TEST);
@@ -250,6 +261,7 @@ class App {
 
         @method
         @param {Boolean} mask The depth mask.
+        @return {App} The App object.
     */
     depthMask(mask) {
         this.gl.depthMask(mask);
@@ -262,6 +274,7 @@ class App {
 
         @method
         @param {GLEnum} func The depth testing function to use.
+        @return {App} The App object.
     */
     depthFunc(func) {
         this.gl.depthFunc(func);
@@ -273,6 +286,7 @@ class App {
         Enable blending.
 
         @method
+        @return {App} The App object.
     */
     blend() {
         this.gl.enable(this.gl.BLEND);
@@ -284,6 +298,7 @@ class App {
         Disable blending
 
         @method
+        @return {App} The App object.
     */
     noBlend() {
         this.gl.disable(this.gl.BLEND);
@@ -297,6 +312,7 @@ class App {
         @method
         @param {GLEnum} src The source blending weight.
         @param {GLEnum} dest The destination blending weight.
+        @return {App} The App object.
     */
     blendFunc(src, dest) {
         this.gl.blendFunc(src, dest);
@@ -313,6 +329,7 @@ class App {
         @param {GLEnum} cdest The destination blending weight for the RGB channels.
         @param {GLEnum} asrc The source blending weight for the alpha channel.
         @param {GLEnum} adest The destination blending weight for the alpha channel.
+        @return {App} The App object.
     */
     blendFuncSeparate(csrc, cdest, asrc, adest) {
         this.gl.blendFuncSeparate(csrc, cdest, asrc, adest);
@@ -326,6 +343,7 @@ class App {
         context attribute when creating the App!
 
         @method
+        @return {App} The App object.
     */
     stencilTest() {
         this.gl.enable(this.gl.STENCIL_TEST);
@@ -337,6 +355,7 @@ class App {
         Disable stencil testing.
 
         @method
+        @return {App} The App object.
     */
     noStencilTest() {
         this.gl.disable(this.gl.STENCIL_TEST);
@@ -349,6 +368,7 @@ class App {
         Enable scissor testing.
 
         @method
+        @return {App} The App object.
     */
     scissorTest() {
         this.gl.enable(this.gl.SCISSOR_TEST);
@@ -360,6 +380,7 @@ class App {
         Disable scissor testing.
 
         @method
+        @return {App} The App object.
     */
     noScissorTest() {
         this.gl.disable(this.gl.SCISSOR_TEST);
@@ -371,6 +392,7 @@ class App {
         Define the scissor box.
 
         @method
+        @return {App} The App object.
     */
     scissor(x, y, width, height) {
         this.gl.scissor(x, y, width, height);
@@ -386,6 +408,7 @@ class App {
 
         @method
         @param {number} mask The mask value.
+        @return {App} The App object.
 
     */
     stencilMask(mask) {
@@ -403,7 +426,7 @@ class App {
         @method
         @param {GLEnum} face The face orientation to apply the mask to.
         @param {number} mask The mask value.
-
+        @return {App} The App object.
     */
     stencilMaskSeparate(face, mask) {
         this.gl.stencilMaskSeparate(face, mask);
@@ -422,6 +445,7 @@ class App {
         @param {number} ref The reference value.
         @param {GLEnum} mask The bitmask to use against tested values before applying
             the stencil function.
+        @return {App} The App object.
     */
     stencilFunc(func, ref, mask) {
         this.gl.stencilFunc(func, ref, mask);
@@ -441,6 +465,7 @@ class App {
         @param {number} ref The reference value.
         @param {GLEnum} mask The bitmask to use against tested values before applying
             the stencil function.
+        @return {App} The App object.
     */
     stencilFuncSeparate(face, func, ref, mask) {
         this.gl.stencilFuncSeparate(face, func, ref, mask);
@@ -458,6 +483,7 @@ class App {
         @param {GLEnum} stencilFail Operation to apply if the stencil test fails.
         @param {GLEnum} depthFail Operation to apply if the depth test fails.
         @param {GLEnum} pass Operation to apply if the both the depth and stencil tests pass.
+        @return {App} The App object.
     */
     stencilOp(stencilFail, depthFail, pass) {
         this.gl.stencilOp(stencilFail, depthFail, pass);
@@ -476,6 +502,7 @@ class App {
         @param {GLEnum} stencilFail Operation to apply if the stencil test fails.
         @param {GLEnum} depthFail Operation to apply if the depth test fails.
         @param {GLEnum} pass Operation to apply if the both the depth and stencil tests pass.
+        @return {App} The App object.
     */
     stencilOpSeparate(face, stencilFail, depthFail, pass) {
         this.gl.stencilOpSeparate(face, stencilFail, depthFail, pass);
@@ -487,6 +514,7 @@ class App {
         Enable rasterization step.
 
         @method
+        @return {App} The App object.
     */
     rasterize() {
         this.gl.disable(this.gl.RASTERIZER_DISCARD);
@@ -498,6 +526,7 @@ class App {
         Disable rasterization step.
 
         @method
+        @return {App} The App object.
     */
     noRasterize() {
         this.gl.enable(this.gl.RASTERIZER_DISCARD);
@@ -509,6 +538,7 @@ class App {
         Enable backface culling.
 
         @method
+        @return {App} The App object.
     */
     cullBackfaces() {
         this.gl.enable(this.gl.CULL_FACE);
@@ -520,6 +550,7 @@ class App {
         Disable backface culling.
 
         @method
+        @return {App} The App object.
     */
     drawBackfaces() {
         this.gl.disable(this.gl.CULL_FACE);
@@ -533,6 +564,7 @@ class App {
 
         @method
         @see Framebuffer
+        @return {App} The App object.
     */
     floatRenderTargets() {
         this.floatRenderTargetsEnabled = !!this.gl.getExtension("EXT_color_buffer_float");
@@ -545,6 +577,7 @@ class App {
 
         @method
         @see Framebuffer
+        @return {App} The App object.
     */
     linearFloatTextures() {
         this.linearFloatTexturesEnabled = !!this.gl.getExtension("OES_texture_float_linear");
@@ -569,6 +602,7 @@ class App {
         </ul>
 
         @method
+        @return {App} The App object.
     */
     s3tcTextures() {
         let ext = this.gl.getExtension("WEBGL_compressed_texture_s3tc");
@@ -615,6 +649,7 @@ class App {
         ETC1 textures can be loaded using COMPRESSED_RGB8_ETC2 as the format.
 
         @method
+        @return {App} The App object.
     */
     etcTextures() {
         let ext = this.gl.getExtension("WEBGL_compressed_texture_etc");
@@ -672,6 +707,7 @@ class App {
         </ul>
 
         @method
+        @return {App} The App object.
     */
     astcTextures() {
         let ext = this.gl.getExtension("WEBGL_compressed_texture_astc");
@@ -723,6 +759,7 @@ class App {
         </ul>
 
         @method
+        @return {App} The App object.
     */
     pvrtcTextures() {
         let ext = this.gl.getExtension("WEBGL_compressed_texture_pvrtc");
@@ -748,6 +785,7 @@ class App {
         @param {object} [options] Options.
         @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the read framebuffer.
         @param {GLEnum} [options.format=RGBA] Read framebuffer data format.
+        @return {App} The App object.
     */
     readPixel(x, y, outColor, options = CONSTANTS.DUMMY_OBJECT) {
         let {
@@ -768,6 +806,7 @@ class App {
         @param {number} y Lower bound of the viewport rectangle.
         @param {number} width Width of the viewport rectangle.
         @param {number} height Height of the viewport rectangle.
+        @return {App} The App object.
     */
     viewport(x, y, width, height) {
 
@@ -787,6 +826,7 @@ class App {
         Set the viewport to the full canvas.
 
         @method
+        @return {App} The App object.
     */
     defaultViewport() {
         this.viewport(0, 0, this.width, this.height);
@@ -800,6 +840,7 @@ class App {
         @method
         @param {number} width The new canvas width.
         @param {number} height The new canvas height.
+        @return {App} The App object.
     */
     resize(width, height) {
         this.canvas.width = width;
@@ -818,6 +859,7 @@ class App {
         @param {Shader|string} vertexShader Vertex shader object or source code.
         @param {Shader|string} fragmentShader Fragment shader object or source code.
         @param {Array} [xformFeedbackVars] Transform feedback varyings.
+        @return {Program} New Program object.
     */
     createProgram(vsSource, fsSource, xformFeedbackVars) {
         return new Program(this.gl, this.state, vsSource, fsSource, xformFeedbackVars);
@@ -830,6 +872,7 @@ class App {
         @method
         @param {GLEnum} type Shader type.
         @param {string} source Shader source.
+        @return {Shader} New Shader object.
     */
     createShader(type, source) {
         return new Shader(this.gl, type, source);
@@ -839,6 +882,7 @@ class App {
         Create a vertex array.
 
         @method
+        @return {VertexArray} New VertexArray object.
     */
     createVertexArray() {
         return new VertexArray(this.gl, this.state);
@@ -848,6 +892,7 @@ class App {
         Create a transform feedback object.
 
         @method
+        @return {TransformFeedback} New TransformFeedback object.
     */
     createTransformFeedback() {
         return new TransformFeedback(this.gl, this.state);
@@ -861,6 +906,7 @@ class App {
         @param {number} itemSize Number of elements per vertex.
         @param {ArrayBufferView} data Buffer data.
         @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
+        @return {VertexBuffer} New VertexBuffer object.
     */
     createVertexBuffer(type, itemSize, data, usage) {
         return new VertexBuffer(this.gl, this.state, type, itemSize, data, usage);
@@ -876,6 +922,7 @@ class App {
         FLOAT_MAT3x4, FLOAT_MAT2, FLOAT_MAT2x3, FLOAT_MAT2x4.
         @param {ArrayBufferView} data Matrix buffer data.
         @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
+        @return {VertexBuffer} New VertexBuffer object.
     */
     createMatrixBuffer(type, data, usage) {
         return new VertexBuffer(this.gl, this.state, type, 0, data, usage);
@@ -889,6 +936,7 @@ class App {
         @param {number} itemSize Number of elements per primitive.
         @param {ArrayBufferView} data Index buffer data.
         @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
+        @return {VertexBuffer} New VertexBuffer object.
     */
     createIndexBuffer(type, itemSize, data, usage) {
         return new VertexBuffer(this.gl, this.state, type, itemSize, data, usage, true);
@@ -903,6 +951,7 @@ class App {
         @param {Array} layout Array indicating the order and types of items to
                         be stored in the buffer.
         @param {GLEnum} [usage=DYNAMIC_DRAW] Buffer usage.
+        @return {UniformBuffer} New UniformBuffer object.
     */
     createUniformBuffer(layout, usage) {
         return new UniformBuffer(this.gl, this.state, layout, usage);
@@ -942,6 +991,7 @@ class App {
         @param {GLEnum} [options.maxLOD] Maximum level of detail.
         @param {boolean} [options.generateMipmaps] Should mipmaps be generated. Defaults to generating mipmaps if
             a mipmap sampling filter is used and the mipmap levels aren't provided directly.
+        @return {Texture} New Texture object.
     */
     createTexture2D(image, width, height, options) {
         if (typeof image === "number") {
@@ -991,6 +1041,7 @@ class App {
         @param {GLEnum} [options.maxLOD] Maximum level of detail.
         @param {boolean} [options.generateMipmaps] Should mipmaps be generated. Defaults to generating mipmaps if
             a mipmap sampling filter is use and the mipmap levels aren't provided directly.
+        @return {Texture} New Texture object.
     */
     createTextureArray(image, width, height, depth, options) {
         if (typeof image === "number") {
@@ -1035,6 +1086,7 @@ class App {
         @param {GLEnum} [options.maxLOD] Maximum level of detail.
         @param {boolean} [options.generateMipmaps] Should mipmaps be generated. Defaults to generating mipmaps if
             a mipmap sampling filter is use and the mipmap levels aren't provided directly.
+        @return {Texture} New Texture object.
     */
     createTexture3D(image, width, height, depth, options) {
         if (typeof image === "number") {
@@ -1084,6 +1136,7 @@ class App {
         @param {GLEnum} [options.maxLOD] Maximum level of detail.
         @param {boolean} [options.generateMipmaps] Should mipmaps be generated. Defaults to generating mipmaps if
             a mipmap sampling filter is usedd.
+        @return {Cubemap} New Cubemap object.
     */
     createCubemap(options) {
         return new Cubemap(this.gl, this.state, options);
@@ -1093,6 +1146,7 @@ class App {
         Create a framebuffer.
 
         @method
+        @return {Framebuffer} New Framebuffer object.
     */
     createFramebuffer() {
         return new Framebuffer(this.gl, this.state);
@@ -1103,6 +1157,7 @@ class App {
 
         @method
         @param {GLEnum} target Information to query.
+        @return {Query} New Query object.
     */
     createQuery(target) {
         return new Query(this.gl, target);
@@ -1112,6 +1167,7 @@ class App {
         Create a timer.
 
         @method
+        @return {Timer} New Timer object.
     */
     createTimer() {
         return new Timer(this.gl);
@@ -1126,6 +1182,7 @@ class App {
         @param {Program} program The program to use for this DrawCall.
         @param {VertexArray} vertexArray Vertex data to use for drawing.
         @param {GLEnum} [primitive=TRIANGLES] Type of primitive to draw.
+        @return {DrawCall} New DrawCall object.
     */
     createDrawCall(program, vertexArray, primitive) {
         return new DrawCall(this.gl, this.state, program, vertexArray, primitive);

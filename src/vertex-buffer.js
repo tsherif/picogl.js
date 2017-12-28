@@ -114,6 +114,7 @@ class VertexBuffer {
 
         @method
         @param {VertexBufferView} data Data to store in the buffer.
+        @return {VertexBuffer} The VertexBuffer object.
     */
     data(data) {
         // Don't want to update vertex array bindings
@@ -137,12 +138,15 @@ class VertexBuffer {
         Delete this array buffer.
 
         @method
+        @return {VertexBuffer} The VertexBuffer object.
     */
     delete() {
         if (this.buffer) {
             this.gl.deleteBuffer(this.buffer);
             this.buffer = null;
         }
+
+        return this;
     }
 
 }

@@ -47,30 +47,37 @@ class Query {
         Begin a query.
 
         @method
+        @return {Query} The Query object.
     */
     begin() {
         if (!this.active) {
             this.gl.beginQuery(this.target, this.query);
             this.result = null;
-        }    
+        }
+
+        return this;
     }
 
     /**
         End a query.
 
         @method
+        @return {Query} The Query object.
     */
     end() {
         if (!this.active) {
             this.gl.endQuery(this.target);
             this.active = true;
         }
+
+        return this;
     }
 
     /**
         Check if query result is available.
 
         @method
+        @return {boolean} If results are available.
     */
     ready() {
         if (this.active && this.gl.getQueryParameter(this.query, this.gl.QUERY_RESULT_AVAILABLE)) {
@@ -88,12 +95,15 @@ class Query {
         Delete this query.
 
         @method
+        @return {Query} The Query object.
     */
     delete() {
         if (this.query) {
             this.gl.deleteQuery(this.query);
             this.query = null;
         }
+
+        return this;
     }
 
 }

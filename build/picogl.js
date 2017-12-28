@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.8.7
+PicoGL.js v$npm_package_version
 
 The MIT License (MIT)
 
@@ -32,7 +32,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 		exports["PicoGL"] = factory();
 	else
 		root["PicoGL"] = factory();
-})(this, function() {
+})(typeof self !== 'undefined' ? self : this, function() {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -897,12 +897,15 @@ class Shader {
         Delete this shader.
 
         @method
+        @return {Shader} The Shader object.
     */
     delete() {
         if (this.shader) {
             this.gl.deleteShader(this.shader);
             this.shader = null;
         }
+
+        return this;
     }
 
 }
@@ -964,30 +967,37 @@ class Query {
         Begin a query.
 
         @method
+        @return {Query} The Query object.
     */
     begin() {
         if (!this.active) {
             this.gl.beginQuery(this.target, this.query);
             this.result = null;
-        }    
+        }
+
+        return this;
     }
 
     /**
         End a query.
 
         @method
+        @return {Query} The Query object.
     */
     end() {
         if (!this.active) {
             this.gl.endQuery(this.target);
             this.active = true;
         }
+
+        return this;
     }
 
     /**
         Check if query result is available.
 
         @method
+        @return {boolean} If results are available.
     */
     ready() {
         if (this.active && this.gl.getQueryParameter(this.query, this.gl.QUERY_RESULT_AVAILABLE)) {
@@ -999,6 +1009,21 @@ class Query {
         }
 
         return false;
+    }
+
+    /**
+        Delete this query.
+
+        @method
+        @return {Query} The Query object.
+    */
+    delete() {
+        if (this.query) {
+            this.gl.deleteQuery(this.query);
+            this.query = null;
+        }
+
+        return this;
     }
 
 }
@@ -1045,7 +1070,7 @@ const App = __webpack_require__(5);
     @namespace PicoGL
 */
 const PicoGL = __webpack_require__(0);
-PicoGL.version = "0.8.7";
+PicoGL.version = "$npm_package_version";
 
 /**
     Create a PicoGL app. The app is the primary entry point to PicoGL. It stores
@@ -1054,6 +1079,7 @@ PicoGL.version = "0.8.7";
     @function PicoGL.createApp
     @param {DOMElement} canvas The canvas on which to create the WebGL context.
     @param {Object} [contextAttributes] Context attributes to pass when calling getContext().
+    @return {App} New App object.
 */
 PicoGL.createApp = function(canvas, contextAttributes) {
     return new App(canvas, contextAttributes);
@@ -1178,6 +1204,7 @@ class App {
         @param {boolean} g Green channel.
         @param {boolean} b Blue channel.
         @param {boolean} a Alpha channel.
+        @return {App} The App object.
     */
     colorMask(r, g, b, a) {
         this.gl.colorMask(r, g, b, a);
@@ -1193,6 +1220,7 @@ class App {
         @param {number} g Green channel.
         @param {number} b Blue channel.
         @param {number} a Alpha channel.
+        @return {App} The App object.
     */
     clearColor(r, g, b, a) {
         this.gl.clearColor(r, g, b, a);
@@ -1206,6 +1234,7 @@ class App {
 
         @method
         @param {GLEnum} mask Bit mask of buffers to clear.
+        @return {App} The App object.
     */
     clearMask(mask) {
         this.clearBits = mask;
@@ -1217,6 +1246,7 @@ class App {
         Clear the canvas
 
         @method
+        @return {App} The App object.
     */
     clear() {
         this.gl.clear(this.clearBits);
@@ -1230,6 +1260,7 @@ class App {
         @method
         @param {Framebuffer} framebuffer The Framebuffer object to bind.
         @see Framebuffer
+        @return {App} The App object.
     */
     drawFramebuffer(framebuffer) {
         framebuffer.bindForDraw();
@@ -1243,6 +1274,7 @@ class App {
         @method
         @param {Framebuffer} framebuffer The Framebuffer object to bind.
         @see Framebuffer
+        @return {App} The App object.
     */
     readFramebuffer(framebuffer) {
         framebuffer.bindForRead();
@@ -1255,6 +1287,7 @@ class App {
         Note that this method resets the viewport to match the default framebuffer.
 
         @method
+        @return {App} The App object.
     */
     defaultDrawFramebuffer() {
         if (this.state.drawFramebuffer !== null) {
@@ -1269,6 +1302,7 @@ class App {
         Switch back to the default framebuffer for reading (i.e. read from the screen).
 
         @method
+        @return {App} The App object.
     */
     defaultReadFramebuffer() {
         if (this.state.readFramebuffer !== null) {
@@ -1285,6 +1319,7 @@ class App {
         @method
         @param {number} near Minimum depth value.
         @param {number} far Maximum depth value.
+        @return {App} The App object.
     */
     depthRange(near, far) {
         this.gl.depthRange(near, far);
@@ -1296,6 +1331,7 @@ class App {
         Enable depth testing.
 
         @method
+        @return {App} The App object.
     */
     depthTest() {
         this.gl.enable(this.gl.DEPTH_TEST);
@@ -1307,6 +1343,7 @@ class App {
         Disable depth testing.
 
         @method
+        @return {App} The App object.
     */
     noDepthTest() {
         this.gl.disable(this.gl.DEPTH_TEST);
@@ -1319,6 +1356,7 @@ class App {
 
         @method
         @param {Boolean} mask The depth mask.
+        @return {App} The App object.
     */
     depthMask(mask) {
         this.gl.depthMask(mask);
@@ -1331,6 +1369,7 @@ class App {
 
         @method
         @param {GLEnum} func The depth testing function to use.
+        @return {App} The App object.
     */
     depthFunc(func) {
         this.gl.depthFunc(func);
@@ -1342,6 +1381,7 @@ class App {
         Enable blending.
 
         @method
+        @return {App} The App object.
     */
     blend() {
         this.gl.enable(this.gl.BLEND);
@@ -1353,6 +1393,7 @@ class App {
         Disable blending
 
         @method
+        @return {App} The App object.
     */
     noBlend() {
         this.gl.disable(this.gl.BLEND);
@@ -1366,6 +1407,7 @@ class App {
         @method
         @param {GLEnum} src The source blending weight.
         @param {GLEnum} dest The destination blending weight.
+        @return {App} The App object.
     */
     blendFunc(src, dest) {
         this.gl.blendFunc(src, dest);
@@ -1382,6 +1424,7 @@ class App {
         @param {GLEnum} cdest The destination blending weight for the RGB channels.
         @param {GLEnum} asrc The source blending weight for the alpha channel.
         @param {GLEnum} adest The destination blending weight for the alpha channel.
+        @return {App} The App object.
     */
     blendFuncSeparate(csrc, cdest, asrc, adest) {
         this.gl.blendFuncSeparate(csrc, cdest, asrc, adest);
@@ -1395,6 +1438,7 @@ class App {
         context attribute when creating the App!
 
         @method
+        @return {App} The App object.
     */
     stencilTest() {
         this.gl.enable(this.gl.STENCIL_TEST);
@@ -1406,6 +1450,7 @@ class App {
         Disable stencil testing.
 
         @method
+        @return {App} The App object.
     */
     noStencilTest() {
         this.gl.disable(this.gl.STENCIL_TEST);
@@ -1418,6 +1463,7 @@ class App {
         Enable scissor testing.
 
         @method
+        @return {App} The App object.
     */
     scissorTest() {
         this.gl.enable(this.gl.SCISSOR_TEST);
@@ -1429,6 +1475,7 @@ class App {
         Disable scissor testing.
 
         @method
+        @return {App} The App object.
     */
     noScissorTest() {
         this.gl.disable(this.gl.SCISSOR_TEST);
@@ -1440,6 +1487,7 @@ class App {
         Define the scissor box.
 
         @method
+        @return {App} The App object.
     */
     scissor(x, y, width, height) {
         this.gl.scissor(x, y, width, height);
@@ -1455,6 +1503,7 @@ class App {
 
         @method
         @param {number} mask The mask value.
+        @return {App} The App object.
 
     */
     stencilMask(mask) {
@@ -1472,7 +1521,7 @@ class App {
         @method
         @param {GLEnum} face The face orientation to apply the mask to.
         @param {number} mask The mask value.
-
+        @return {App} The App object.
     */
     stencilMaskSeparate(face, mask) {
         this.gl.stencilMaskSeparate(face, mask);
@@ -1491,6 +1540,7 @@ class App {
         @param {number} ref The reference value.
         @param {GLEnum} mask The bitmask to use against tested values before applying
             the stencil function.
+        @return {App} The App object.
     */
     stencilFunc(func, ref, mask) {
         this.gl.stencilFunc(func, ref, mask);
@@ -1510,6 +1560,7 @@ class App {
         @param {number} ref The reference value.
         @param {GLEnum} mask The bitmask to use against tested values before applying
             the stencil function.
+        @return {App} The App object.
     */
     stencilFuncSeparate(face, func, ref, mask) {
         this.gl.stencilFuncSeparate(face, func, ref, mask);
@@ -1527,6 +1578,7 @@ class App {
         @param {GLEnum} stencilFail Operation to apply if the stencil test fails.
         @param {GLEnum} depthFail Operation to apply if the depth test fails.
         @param {GLEnum} pass Operation to apply if the both the depth and stencil tests pass.
+        @return {App} The App object.
     */
     stencilOp(stencilFail, depthFail, pass) {
         this.gl.stencilOp(stencilFail, depthFail, pass);
@@ -1545,6 +1597,7 @@ class App {
         @param {GLEnum} stencilFail Operation to apply if the stencil test fails.
         @param {GLEnum} depthFail Operation to apply if the depth test fails.
         @param {GLEnum} pass Operation to apply if the both the depth and stencil tests pass.
+        @return {App} The App object.
     */
     stencilOpSeparate(face, stencilFail, depthFail, pass) {
         this.gl.stencilOpSeparate(face, stencilFail, depthFail, pass);
@@ -1556,6 +1609,7 @@ class App {
         Enable rasterization step.
 
         @method
+        @return {App} The App object.
     */
     rasterize() {
         this.gl.disable(this.gl.RASTERIZER_DISCARD);
@@ -1567,6 +1621,7 @@ class App {
         Disable rasterization step.
 
         @method
+        @return {App} The App object.
     */
     noRasterize() {
         this.gl.enable(this.gl.RASTERIZER_DISCARD);
@@ -1578,6 +1633,7 @@ class App {
         Enable backface culling.
 
         @method
+        @return {App} The App object.
     */
     cullBackfaces() {
         this.gl.enable(this.gl.CULL_FACE);
@@ -1589,6 +1645,7 @@ class App {
         Disable backface culling.
 
         @method
+        @return {App} The App object.
     */
     drawBackfaces() {
         this.gl.disable(this.gl.CULL_FACE);
@@ -1602,6 +1659,7 @@ class App {
 
         @method
         @see Framebuffer
+        @return {App} The App object.
     */
     floatRenderTargets() {
         this.floatRenderTargetsEnabled = !!this.gl.getExtension("EXT_color_buffer_float");
@@ -1614,6 +1672,7 @@ class App {
 
         @method
         @see Framebuffer
+        @return {App} The App object.
     */
     linearFloatTextures() {
         this.linearFloatTexturesEnabled = !!this.gl.getExtension("OES_texture_float_linear");
@@ -1638,6 +1697,7 @@ class App {
         </ul>
 
         @method
+        @return {App} The App object.
     */
     s3tcTextures() {
         let ext = this.gl.getExtension("WEBGL_compressed_texture_s3tc");
@@ -1684,6 +1744,7 @@ class App {
         ETC1 textures can be loaded using COMPRESSED_RGB8_ETC2 as the format.
 
         @method
+        @return {App} The App object.
     */
     etcTextures() {
         let ext = this.gl.getExtension("WEBGL_compressed_texture_etc");
@@ -1741,6 +1802,7 @@ class App {
         </ul>
 
         @method
+        @return {App} The App object.
     */
     astcTextures() {
         let ext = this.gl.getExtension("WEBGL_compressed_texture_astc");
@@ -1792,6 +1854,7 @@ class App {
         </ul>
 
         @method
+        @return {App} The App object.
     */
     pvrtcTextures() {
         let ext = this.gl.getExtension("WEBGL_compressed_texture_pvrtc");
@@ -1817,6 +1880,7 @@ class App {
         @param {object} [options] Options.
         @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the read framebuffer.
         @param {GLEnum} [options.format=RGBA] Read framebuffer data format.
+        @return {App} The App object.
     */
     readPixel(x, y, outColor, options = CONSTANTS.DUMMY_OBJECT) {
         let {
@@ -1837,6 +1901,7 @@ class App {
         @param {number} y Lower bound of the viewport rectangle.
         @param {number} width Width of the viewport rectangle.
         @param {number} height Height of the viewport rectangle.
+        @return {App} The App object.
     */
     viewport(x, y, width, height) {
 
@@ -1856,6 +1921,7 @@ class App {
         Set the viewport to the full canvas.
 
         @method
+        @return {App} The App object.
     */
     defaultViewport() {
         this.viewport(0, 0, this.width, this.height);
@@ -1869,6 +1935,7 @@ class App {
         @method
         @param {number} width The new canvas width.
         @param {number} height The new canvas height.
+        @return {App} The App object.
     */
     resize(width, height) {
         this.canvas.width = width;
@@ -1887,6 +1954,7 @@ class App {
         @param {Shader|string} vertexShader Vertex shader object or source code.
         @param {Shader|string} fragmentShader Fragment shader object or source code.
         @param {Array} [xformFeedbackVars] Transform feedback varyings.
+        @return {Program} New Program object.
     */
     createProgram(vsSource, fsSource, xformFeedbackVars) {
         return new Program(this.gl, this.state, vsSource, fsSource, xformFeedbackVars);
@@ -1899,6 +1967,7 @@ class App {
         @method
         @param {GLEnum} type Shader type.
         @param {string} source Shader source.
+        @return {Shader} New Shader object.
     */
     createShader(type, source) {
         return new Shader(this.gl, type, source);
@@ -1908,6 +1977,7 @@ class App {
         Create a vertex array.
 
         @method
+        @return {VertexArray} New VertexArray object.
     */
     createVertexArray() {
         return new VertexArray(this.gl, this.state);
@@ -1917,6 +1987,7 @@ class App {
         Create a transform feedback object.
 
         @method
+        @return {TransformFeedback} New TransformFeedback object.
     */
     createTransformFeedback() {
         return new TransformFeedback(this.gl, this.state);
@@ -1930,6 +2001,7 @@ class App {
         @param {number} itemSize Number of elements per vertex.
         @param {ArrayBufferView} data Buffer data.
         @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
+        @return {VertexBuffer} New VertexBuffer object.
     */
     createVertexBuffer(type, itemSize, data, usage) {
         return new VertexBuffer(this.gl, this.state, type, itemSize, data, usage);
@@ -1945,6 +2017,7 @@ class App {
         FLOAT_MAT3x4, FLOAT_MAT2, FLOAT_MAT2x3, FLOAT_MAT2x4.
         @param {ArrayBufferView} data Matrix buffer data.
         @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
+        @return {VertexBuffer} New VertexBuffer object.
     */
     createMatrixBuffer(type, data, usage) {
         return new VertexBuffer(this.gl, this.state, type, 0, data, usage);
@@ -1958,6 +2031,7 @@ class App {
         @param {number} itemSize Number of elements per primitive.
         @param {ArrayBufferView} data Index buffer data.
         @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
+        @return {VertexBuffer} New VertexBuffer object.
     */
     createIndexBuffer(type, itemSize, data, usage) {
         return new VertexBuffer(this.gl, this.state, type, itemSize, data, usage, true);
@@ -1972,6 +2046,7 @@ class App {
         @param {Array} layout Array indicating the order and types of items to
                         be stored in the buffer.
         @param {GLEnum} [usage=DYNAMIC_DRAW] Buffer usage.
+        @return {UniformBuffer} New UniformBuffer object.
     */
     createUniformBuffer(layout, usage) {
         return new UniformBuffer(this.gl, this.state, layout, usage);
@@ -2011,6 +2086,7 @@ class App {
         @param {GLEnum} [options.maxLOD] Maximum level of detail.
         @param {boolean} [options.generateMipmaps] Should mipmaps be generated. Defaults to generating mipmaps if
             a mipmap sampling filter is used and the mipmap levels aren't provided directly.
+        @return {Texture} New Texture object.
     */
     createTexture2D(image, width, height, options) {
         if (typeof image === "number") {
@@ -2060,6 +2136,7 @@ class App {
         @param {GLEnum} [options.maxLOD] Maximum level of detail.
         @param {boolean} [options.generateMipmaps] Should mipmaps be generated. Defaults to generating mipmaps if
             a mipmap sampling filter is use and the mipmap levels aren't provided directly.
+        @return {Texture} New Texture object.
     */
     createTextureArray(image, width, height, depth, options) {
         if (typeof image === "number") {
@@ -2104,6 +2181,7 @@ class App {
         @param {GLEnum} [options.maxLOD] Maximum level of detail.
         @param {boolean} [options.generateMipmaps] Should mipmaps be generated. Defaults to generating mipmaps if
             a mipmap sampling filter is use and the mipmap levels aren't provided directly.
+        @return {Texture} New Texture object.
     */
     createTexture3D(image, width, height, depth, options) {
         if (typeof image === "number") {
@@ -2153,6 +2231,7 @@ class App {
         @param {GLEnum} [options.maxLOD] Maximum level of detail.
         @param {boolean} [options.generateMipmaps] Should mipmaps be generated. Defaults to generating mipmaps if
             a mipmap sampling filter is usedd.
+        @return {Cubemap} New Cubemap object.
     */
     createCubemap(options) {
         return new Cubemap(this.gl, this.state, options);
@@ -2162,6 +2241,7 @@ class App {
         Create a framebuffer.
 
         @method
+        @return {Framebuffer} New Framebuffer object.
     */
     createFramebuffer() {
         return new Framebuffer(this.gl, this.state);
@@ -2172,6 +2252,7 @@ class App {
 
         @method
         @param {GLEnum} target Information to query.
+        @return {Query} New Query object.
     */
     createQuery(target) {
         return new Query(this.gl, target);
@@ -2181,6 +2262,7 @@ class App {
         Create a timer.
 
         @method
+        @return {Timer} New Timer object.
     */
     createTimer() {
         return new Timer(this.gl);
@@ -2195,6 +2277,7 @@ class App {
         @param {Program} program The program to use for this DrawCall.
         @param {VertexArray} vertexArray Vertex data to use for drawing.
         @param {GLEnum} [primitive=TRIANGLES] Type of primitive to draw.
+        @return {DrawCall} New DrawCall object.
     */
     createDrawCall(program, vertexArray, primitive) {
         return new DrawCall(this.gl, this.state, program, vertexArray, primitive);
@@ -2323,6 +2406,7 @@ class Cubemap {
         Delete this cubemap.
 
         @method
+        @return {Cubemap} The Cubemap object.
     */
     delete() {
         if (this.texture) {
@@ -2331,9 +2415,16 @@ class Cubemap {
             this.appState.textures[this.currentUnit] = null;
             this.currentUnit = -1;
         }
+
+        return this;
     }
 
-    // Bind this cubemap to a texture unit.
+    /**
+        Bind this cubemap to a texture unit.
+
+        @method
+        @return {Cubemap} The Cubemap object.
+    */
     bind(unit) {
         let currentTexture = this.appState.textures[unit];
         
@@ -2438,6 +2529,13 @@ class DrawCall {
         this.primitive = primitive;
     }
 
+    /**
+        Set the current TransformFeedback object for draw
+
+        @method
+        @param {TransformFeedback} transformFeedback Transform Feedback to set.
+        @return {DrawCall} The DrawCall object.
+    */
     transformFeedback(transformFeedback) {
         this.currentTransformFeedback = transformFeedback;
 
@@ -2452,6 +2550,7 @@ class DrawCall {
         @method
         @param {string} name Uniform name.
         @param {any} value Uniform value.
+        @return {DrawCall} The DrawCall object.
     */
     uniform(name, value) {
         let index = this.uniformIndices[name];
@@ -2471,6 +2570,7 @@ class DrawCall {
         @method
         @param {string} name Sampler uniform name.
         @param {Texture} texture Texture to bind.
+        @return {DrawCall} The DrawCall object.
     */
     texture(name, texture) {
         let unit = this.currentProgram.samplers[name];
@@ -2485,6 +2585,7 @@ class DrawCall {
         @method
         @param {string} name Uniform block name.
         @param {UniformBuffer} buffer Uniform buffer to bind.
+        @return {DrawCall} The DrawCall object.
     */
     uniformBlock(name, buffer) {
         let base = this.currentProgram.uniformBlocks[name];
@@ -2497,6 +2598,7 @@ class DrawCall {
         Draw based on current state.
 
         @method
+        @return {DrawCall} The DrawCall object.
     */
     draw() {
         let uniformNames = this.uniformNames;
@@ -2546,6 +2648,8 @@ class DrawCall {
                 this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, i, null);
             }
         }
+
+        return this;
     }
 
 }
@@ -2621,6 +2725,7 @@ class Framebuffer {
         @param {Texture} texture The texture to attach.
         @param {GLEnum} [target] The texture target or layer to attach. If the texture is 3D or a texture array,
             defaults to 0, otherwise to TEXTURE_2D.
+        @return {Framebuffer} The Framebuffer object.
     */
     colorTarget(index, texture, target = texture.is3D ? 0 : CONSTANTS.TEXTURE_2D) {
 
@@ -2652,6 +2757,7 @@ class Framebuffer {
         @param {Texture} texture The texture to attach.
         @param {GLEnum} [target] The texture target or layer to attach. If the texture is 3D or a texture array,
             defaults to 0, otherwise to TEXTURE_2D.
+        @return {Framebuffer} The Framebuffer object.
     */
     depthTarget(texture, target = texture.is3D ? 0 : CONSTANTS.TEXTURE_2D) {
 
@@ -2677,6 +2783,7 @@ class Framebuffer {
         @method
         @param {number} [width=app.width] New width of the framebuffer.
         @param {number} [height=app.height] New height of the framebuffer.
+        @return {Framebuffer} The Framebuffer object.
     */
     resize(width = this.gl.drawingBufferWidth, height = this.gl.drawingBufferHeight, depth) {
 
@@ -2710,32 +2817,54 @@ class Framebuffer {
         Delete this framebuffer.
 
         @method
+        @return {Framebuffer} The Framebuffer object.
     */
     delete() {
         if (this.framebuffer) {
             this.gl.deleteFramebuffer(this.framebuffer);
             this.framebuffer = null;
         }
+
+        return this;
     }
 
-    // Bind as the draw framebuffer
+    /**
+        Bind as the draw framebuffer
+
+        @method
+        @return {Framebuffer} The Framebuffer object.
+    */
     bindForDraw() {
         if (this.appState.drawFramebuffer !== this) {
             this.gl.bindFramebuffer(this.gl.DRAW_FRAMEBUFFER, this.framebuffer);
             this.appState.drawFramebuffer = this;
         }
+
+        return this;
     }
 
-    // Bind as the read framebuffer
+    /**
+        Bind as the read framebuffer
+
+        @method
+        @return {Framebuffer} The Framebuffer object.
+    */
     bindForRead() {
         if (this.appState.readFramebuffer !== this) {
             this.gl.bindFramebuffer(this.gl.READ_FRAMEBUFFER, this.framebuffer);
             this.appState.readFramebuffer = this;
         }
+
+        return this;
     }
 
-    // Bind for a framebuffer state update.
-    // Capture current binding so we can restore it later.
+    /**
+        Bind for a framebuffer state update.
+        Capture current binding so we can restore it later.
+
+        @method
+        @return {Framebuffer} The Framebuffer object.
+    */
     bindAndCaptureState() {
         let currentFramebuffer = this.appState.drawFramebuffer;
 
@@ -2746,11 +2875,18 @@ class Framebuffer {
         return currentFramebuffer;
     }
 
-    // Bind restore previous binding after state update
+    /**
+        Bind restore previous binding after state update
+
+        @method
+        @return {Framebuffer} The Framebuffer object.
+    */
     restoreState(framebuffer) {
         if (framebuffer !== this) {
             this.gl.bindFramebuffer(this.gl.DRAW_FRAMEBUFFER, framebuffer ? framebuffer.framebuffer : null);
         }
+
+        return this;
     }
 
 }
@@ -2956,25 +3092,43 @@ class Program {
         Delete this program.
 
         @method
+        @return {Program} The Program object.
     */
     delete() {
         if (this.program) {
             this.gl.deleteProgram(this.program);
             this.program = null;
         }
-    }
 
-    // Set the value of a uniform.
+        return this;
+    }
+    
+    /**
+        Set the value of a uniform.
+
+        @method
+        @return {Program} The Program object.
+    */
     uniform(name, value) {
         this.uniforms[name].set(value);
+
+        return this;
     }
 
-    // Use this program.
+    // 
+    /**
+        Use this program.
+
+        @method
+        @return {Program} The Program object.
+    */
     bind() {
         if (this.appState.program !== this) {
             this.gl.useProgram(this.program);
             this.appState.program = this;
         }
+
+        return this;
     }
 }
 
@@ -3349,12 +3503,13 @@ class Texture {
         @param {number} width Image width.
         @param {number} height Image height.
         @param {number} [depth] Image depth or number of images. Required when passing 3D or texture array data.
+        @return {Texture} The Texture object.
     */
     resize(width, height, depth) {
         depth = depth || 0;
 
         if (width === this.width && height === this.height && depth === this.depth) {
-            return; 
+            return this; 
         }
 
         this.gl.deleteTexture(this.texture);
@@ -3407,6 +3562,8 @@ class Texture {
             }
             this.gl.texStorage2D(this.binding, levels, this.internalFormat, this.width, this.height);
         }
+
+        return this;
     }
 
     /**
@@ -3418,6 +3575,7 @@ class Texture {
         @method
         @param {ImageElement|ArrayBufferView|Array} data Image data. If an array is passed, it will be 
             used to set mip map levels.
+        @return {Texture} The Texture object.
     */
     data(data) {
         if (!Array.isArray(data)) {
@@ -3475,6 +3633,7 @@ class Texture {
         Delete this texture.
 
         @method
+        @return {Texture} The Texture object.
     */
     delete() {
         if (this.texture) {
@@ -3486,9 +3645,16 @@ class Texture {
                 this.currentUnit = -1;
             }
         }
+
+        return this;
     }
 
-    // Bind this texture to a texture unit.
+    /**
+        Bind this texture to a texture unit.
+
+        @method
+        @return {Texture} The Texture object.
+    */
     bind(unit) {
         let currentTexture = this.appState.textures[unit];
         
@@ -3590,6 +3756,7 @@ class Timer {
         Start timing.
 
         @method
+        @return {Timer} The Timer object.
     */
     start() {
         if (this.gpuTimer) {
@@ -3600,6 +3767,8 @@ class Timer {
         } else {
             this.cpuStartTime = this.cpuTimer.now();
         }
+
+        return this;
     }
 
 
@@ -3607,6 +3776,7 @@ class Timer {
         Stop timing.
 
         @method
+        @return {Timer} The Timer object.
     */
     end() {
         if (this.gpuTimer) {
@@ -3617,6 +3787,8 @@ class Timer {
         } else {
             this.cpuTime = this.cpuTimer.now() - this.cpuStartTime;
         }
+
+        return this;
     }
 
     /**
@@ -3626,6 +3798,7 @@ class Timer {
         values.
 
         @method
+        @return {boolean} If results are available.
     */
     ready() {
         if (this.gpuTimer) {
@@ -3645,6 +3818,22 @@ class Timer {
         } else {
             return !!this.cpuStartTime;
         }
+    }
+
+    /**
+        Delete this timer.
+
+        @method
+        @return {Timer} The Timer object.
+    */
+    delete() {
+        if (this.gpuTimerQuery) {
+            this.gpuTimerQuery.delete();
+            this.gpuTimerQuery = null;
+            this.gpuTimer = false;
+        }
+
+        return this;
     }
 
 }
@@ -3708,6 +3897,7 @@ class TransformFeedback {
         @method
         @param {number} index Index of transform feedback varying to capture.
         @param {VertexBuffer} buffer Buffer to record output into.
+        @return {TransformFeedback} The TransformFeedback object.
     */
     feedbackBuffer(index, buffer) {
         this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedback);
@@ -3724,15 +3914,23 @@ class TransformFeedback {
         Delete this transform feedback.
 
         @method
+        @return {TransformFeedback} The TransformFeedback object.
     */
     delete() {
         if (this.transformFeedback) {
             this.gl.deleteTransformFeedback(this.transformFeedback);
             this.transformFeedback = null;
         }
+
+        return this;
     }
 
-    // Bind this transform feedback.
+    /**
+        Bind this transform feedback.
+
+        @method
+        @return {TransformFeedback} The TransformFeedback object.
+    */
     bind() {
         if (this.appState.transformFeedback !== this) {
             this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedback);
@@ -3929,6 +4127,7 @@ class UniformBuffer {
         @method
         @param {number} index Index in the layout of item to set.
         @param {ArrayBufferView} value Value to store at the layout location.
+        @return {UniformBuffer} The UniformBuffer object.
     */
     set(index, value) {
         let view = this.dataViews[this.types[index]];
@@ -3945,8 +4144,9 @@ class UniformBuffer {
     /**
         Send stored buffer data to the GPU.
 
-        @param {number} [index] Index in the layout of item to send to the GPU. If ommited, entire buffer is sent.
         @method
+        @param {number} [index] Index in the layout of item to send to the GPU. If ommited, entire buffer is sent.
+        @return {UniformBuffer} The UniformBuffer object.
     */
     update(index) {
         let data;
@@ -3972,6 +4172,7 @@ class UniformBuffer {
         Delete this uniform buffer.
 
         @method
+        @return {UniformBuffer} The UniformBuffer object.
     */
     delete() {
         if (this.buffer) {
@@ -3982,9 +4183,16 @@ class UniformBuffer {
                 this.appState.uniformBuffers[this.currentBase] = null;
             }
         }
+
+        return this;
     }
 
-    // Bind this uniform buffer to the given base.
+    /**
+        Bind this uniform buffer to the given base.
+
+        @method
+        @return {UniformBuffer} The UniformBuffer object.
+    */
     bind(base) {
         let currentBuffer = this.appState.uniformBuffers[base];
 
@@ -4073,6 +4281,7 @@ class VertexArray {
         @method
         @param {number} attributeIndex The attribute location to bind to.
         @param {VertexBuffer} vertexBuffer The VertexBuffer to bind.
+        @return {VertexArray} The VertexArray object.
     */
     vertexAttributeBuffer(attributeIndex, vertexBuffer) {
         this.attributeBuffer(attributeIndex, vertexBuffer, false, false, false);
@@ -4086,6 +4295,7 @@ class VertexArray {
         @method
         @param {number} attributeIndex The attribute location to bind to.
         @param {VertexBuffer} vertexBuffer The VertexBuffer to bind.
+        @return {VertexArray} The VertexArray object.
     */
     instanceAttributeBuffer(attributeIndex, vertexBuffer) {
         this.attributeBuffer(attributeIndex, vertexBuffer, true, false, false);
@@ -4101,6 +4311,7 @@ class VertexArray {
         @method
         @param {number} attributeIndex The attribute location to bind to.
         @param {VertexBuffer} vertexBuffer The VertexBuffer to bind.
+        @return {VertexArray} The VertexArray object.
     */
     vertexIntegerAttributeBuffer(attributeIndex, vertexBuffer) {
         this.attributeBuffer(attributeIndex, vertexBuffer, false, true, false);
@@ -4116,6 +4327,7 @@ class VertexArray {
         @method
         @param {number} attributeIndex The attribute location to bind to.
         @param {VertexBuffer} vertexBuffer The VertexBuffer to bind.
+        @return {VertexArray} The VertexArray object.
     */
     instanceIntegerAttributeBuffer(attributeIndex, vertexBuffer) {
         this.attributeBuffer(attributeIndex, vertexBuffer, true, true, false);
@@ -4131,6 +4343,7 @@ class VertexArray {
         @method
         @param {number} attributeIndex The attribute location to bind to.
         @param {VertexBuffer} vertexBuffer The VertexBuffer to bind.
+        @return {VertexArray} The VertexArray object.
     */
     vertexNormalizedAttributeBuffer(attributeIndex, vertexBuffer) {
         this.attributeBuffer(attributeIndex, vertexBuffer, false, false, true);
@@ -4146,6 +4359,7 @@ class VertexArray {
         @method
         @param {number} attributeIndex The attribute location to bind to.
         @param {VertexBuffer} vertexBuffer The VertexBuffer to bind.
+        @return {VertexArray} The VertexArray object.
     */
     instanceNormalizedAttributeBuffer(attributeIndex, vertexBuffer) {
         this.attributeBuffer(attributeIndex, vertexBuffer, true, false, true);
@@ -4158,6 +4372,7 @@ class VertexArray {
 
         @method
         @param {VertexBuffer} vertexBuffer The VertexBuffer to bind.
+        @return {VertexArray} The VertexArray object.
     */
     indexBuffer(vertexBuffer) {
         this.gl.bindVertexArray(this.vertexArray);
@@ -4177,6 +4392,7 @@ class VertexArray {
         Delete this vertex array.
 
         @method
+        @return {VertexArray} The VertexArray object.
     */
     delete() {
         if (this.vertexArray) {
@@ -4188,7 +4404,12 @@ class VertexArray {
         return this;
     }
 
-    // Bind this vertex array.
+    /**
+        Bind this vertex array.
+
+        @method
+        @return {VertexArray} The VertexArray object.
+    */
     bind() {
         if (this.appState.vertexArray !== this) {
             this.gl.bindVertexArray(this.vertexArray);
@@ -4198,7 +4419,12 @@ class VertexArray {
         return this;
     }
 
-    // Attach an attribute buffer
+    /**
+        Attach an attribute buffer
+
+        @method
+        @return {VertexArray} The VertexArray object.
+    */
     attributeBuffer(attributeIndex, vertexBuffer, instanced, integer, normalized) {
         this.gl.bindVertexArray(this.vertexArray);
         this.gl.bindBuffer(vertexBuffer.binding, vertexBuffer.buffer);
@@ -4370,6 +4596,7 @@ class VertexBuffer {
 
         @method
         @param {VertexBufferView} data Data to store in the buffer.
+        @return {VertexBuffer} The VertexBuffer object.
     */
     data(data) {
         // Don't want to update vertex array bindings
@@ -4393,12 +4620,15 @@ class VertexBuffer {
         Delete this array buffer.
 
         @method
+        @return {VertexBuffer} The VertexBuffer object.
     */
     delete() {
         if (this.buffer) {
             this.gl.deleteBuffer(this.buffer);
             this.buffer = null;
         }
+
+        return this;
     }
 
 }

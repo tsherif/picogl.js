@@ -61,6 +61,7 @@ class Framebuffer {
         @param {Texture} texture The texture to attach.
         @param {GLEnum} [target] The texture target or layer to attach. If the texture is 3D or a texture array,
             defaults to 0, otherwise to TEXTURE_2D.
+        @return {Framebuffer} The Framebuffer object.
     */
     colorTarget(index, texture, target = texture.is3D ? 0 : CONSTANTS.TEXTURE_2D) {
 
@@ -92,6 +93,7 @@ class Framebuffer {
         @param {Texture} texture The texture to attach.
         @param {GLEnum} [target] The texture target or layer to attach. If the texture is 3D or a texture array,
             defaults to 0, otherwise to TEXTURE_2D.
+        @return {Framebuffer} The Framebuffer object.
     */
     depthTarget(texture, target = texture.is3D ? 0 : CONSTANTS.TEXTURE_2D) {
 
@@ -117,6 +119,7 @@ class Framebuffer {
         @method
         @param {number} [width=app.width] New width of the framebuffer.
         @param {number} [height=app.height] New height of the framebuffer.
+        @return {Framebuffer} The Framebuffer object.
     */
     resize(width = this.gl.drawingBufferWidth, height = this.gl.drawingBufferHeight, depth) {
 
@@ -150,32 +153,57 @@ class Framebuffer {
         Delete this framebuffer.
 
         @method
+        @return {Framebuffer} The Framebuffer object.
     */
     delete() {
         if (this.framebuffer) {
             this.gl.deleteFramebuffer(this.framebuffer);
             this.framebuffer = null;
         }
+
+        return this;
     }
 
-    // Bind as the draw framebuffer
+    /**
+        Bind as the draw framebuffer
+
+        @method
+        @ignore
+        @return {Framebuffer} The Framebuffer object.
+    */
     bindForDraw() {
         if (this.appState.drawFramebuffer !== this) {
             this.gl.bindFramebuffer(this.gl.DRAW_FRAMEBUFFER, this.framebuffer);
             this.appState.drawFramebuffer = this;
         }
+
+        return this;
     }
 
-    // Bind as the read framebuffer
+    /**
+        Bind as the read framebuffer
+
+        @method
+        @ignore
+        @return {Framebuffer} The Framebuffer object.
+    */
     bindForRead() {
         if (this.appState.readFramebuffer !== this) {
             this.gl.bindFramebuffer(this.gl.READ_FRAMEBUFFER, this.framebuffer);
             this.appState.readFramebuffer = this;
         }
+
+        return this;
     }
 
-    // Bind for a framebuffer state update.
-    // Capture current binding so we can restore it later.
+    /**
+        Bind for a framebuffer state update.
+        Capture current binding so we can restore it later.
+
+        @method
+        @ignore
+        @return {Framebuffer} The Framebuffer object.
+    */
     bindAndCaptureState() {
         let currentFramebuffer = this.appState.drawFramebuffer;
 
@@ -186,11 +214,19 @@ class Framebuffer {
         return currentFramebuffer;
     }
 
-    // Bind restore previous binding after state update
+    /**
+        Bind restore previous binding after state update
+
+        @method
+        @ignore
+        @return {Framebuffer} The Framebuffer object.
+    */
     restoreState(framebuffer) {
         if (framebuffer !== this) {
             this.gl.bindFramebuffer(this.gl.DRAW_FRAMEBUFFER, framebuffer ? framebuffer.framebuffer : null);
         }
+
+        return this;
     }
 
 }

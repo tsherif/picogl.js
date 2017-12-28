@@ -67,6 +67,7 @@ class Timer {
         Start timing.
 
         @method
+        @return {Timer} The Timer object.
     */
     start() {
         if (this.gpuTimer) {
@@ -77,6 +78,8 @@ class Timer {
         } else {
             this.cpuStartTime = this.cpuTimer.now();
         }
+
+        return this;
     }
 
 
@@ -84,6 +87,7 @@ class Timer {
         Stop timing.
 
         @method
+        @return {Timer} The Timer object.
     */
     end() {
         if (this.gpuTimer) {
@@ -94,6 +98,8 @@ class Timer {
         } else {
             this.cpuTime = this.cpuTimer.now() - this.cpuStartTime;
         }
+
+        return this;
     }
 
     /**
@@ -103,6 +109,7 @@ class Timer {
         values.
 
         @method
+        @return {boolean} If results are available.
     */
     ready() {
         if (this.gpuTimer) {
@@ -128,6 +135,7 @@ class Timer {
         Delete this timer.
 
         @method
+        @return {Timer} The Timer object.
     */
     delete() {
         if (this.gpuTimerQuery) {
@@ -135,6 +143,8 @@ class Timer {
             this.gpuTimerQuery = null;
             this.gpuTimer = false;
         }
+
+        return this;
     }
 
 }
