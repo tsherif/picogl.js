@@ -46,9 +46,8 @@ const CONSTANTS = require("./constants");
     @prop {number} textureCount The number of active textures for this draw call.
     @prop {GLEnum} primitive The primitive type being drawn.
     @prop {Object} appState Tracked GL state.
-    @prop {GLsizei} count The number of element/indices to draw.
-    @prop {GLsizei} instanceCount The number of instances to draw.
-    @prop {GLint} offset Starting offset to draw in array.
+    @prop {GLsizei} numElements The number of element to draw.
+    @prop {GLsizei} numInstances The number of instances to draw.
 */
 class DrawCall {
 
@@ -72,9 +71,8 @@ class DrawCall {
         this.textureCount = 0;
         this.primitive = primitive;
 
-        this.count = this.currentVertexArray.numElements;
-        this.instanceCount = this.currentVertexArray.numInstances;
-        this.offset = 0;
+        this.numElements = this.currentVertexArray.numElements;
+        this.numInstances = this.currentVertexArray.numInstances;
     }
 
     transformFeedback(transformFeedback) {
@@ -133,28 +131,35 @@ class DrawCall {
     }
 
     /**
-        Set the range of vertex array to be drawn
+        Set numElements property to allow number of elements to be drawn
 
         @method
-        @param {GLsizei} [count=0] Number of element/indices to render, 0 set to all.
-        @param {GLsizei} [instanceCount=0] Number of instance to render, 0 set to all.
-        @param {GLint} [offset=0] Starting offset to draw in array.
+        @param {GLsizei} [count=0] Number of element to draw, 0 set to all.
         @return {DrawCall} The DrawCall object.
     */
-    range(count = 0, instanceCount = 0, offset = 0) {
+    elementCount(count = 0) {
         if (count > 0) {
-            this.count = Math.min(count, this.currentVertexArray.numElements);
+            this.numElements = Math.min(count, this.currentVertexArray.numElements);
         } else {
-            this.count = this.currentVertexArray.numElements;
+            this.numElements = this.currentVertexArray.numElements;
         }
 
-        if (instanceCount > 0) {
-            this.instanceCount = Math.min(instanceCount, this.currentVertexArray.numInstances);
-        } else {
-            this.instanceCount = this.currentVertexArray.numInstances;
-        }
+        return this;
+    }
 
-        this.offset = Math.max(offset, 0);
+    /**
+        Set numInstances property to allow number of instances be drawn
+
+        @method
+        @param {GLsizei} [count=0] Number of instance to draw, 0 set to all.
+        @return {DrawCall} The DrawCall object.
+    */
+    instanceCount(count = 0) {
+        if (count > 0) {
+            this.numInstances = Math.min(count, this.currentVertexArray.numInstances);
+        } else {
+            this.numInstances = this.currentVertexArray.numInstances;
+        }
 
         return this;
     }
@@ -194,14 +199,14 @@ class DrawCall {
 
         if (this.currentVertexArray.instanced) {
             if (this.currentVertexArray.indexed) {
-                this.gl.drawElementsInstanced(this.primitive, this.count, this.currentVertexArray.indexType, this.offset, this.instanceCount);
+                this.gl.drawElementsInstanced(this.primitive, this.numElements, this.currentVertexArray.indexType, 0, this.numInstances);
             } else {
-                this.gl.drawArraysInstanced(this.primitive, this.offset, this.count, this.instanceCount);
+                this.gl.drawArraysInstanced(this.primitive, 0, this.numElements, this.numInstances);
             }
         } else if (this.currentVertexArray.indexed) {
-            this.gl.drawElements(this.primitive, this.count, this.currentVertexArray.indexType, this.offset);
+            this.gl.drawElements(this.primitive, this.numElements, this.currentVertexArray.indexType, 0);
         } else {
-            this.gl.drawArrays(this.primitive, this.offset, this.count);
+            this.gl.drawArrays(this.primitive, 0, this.numElements);
         }
 
         if (this.currentTransformFeedback) {

@@ -217,17 +217,16 @@
         var drawCall1 = app.createDrawCall(program, vertexArray1, PicoGL.POINTS)
         .transformFeedback(transformFeedback2)
         .uniformBlock("Mass", massUniforms)
-        .range(50000);
+        .elementCount(50000);
 
         var drawCall2 = app.createDrawCall(program, vertexArray2, PicoGL.POINTS)
         .transformFeedback(transformFeedback1)
         .uniformBlock("Mass", massUniforms)
-        .range(50000);
+        .elementCount(50000);
 
         function setDrawRange(count) {
-            console.log(count);
-            drawCall1.range(count);
-            drawCall2.range(count);
+            drawCall1.elementCount(count);
+            drawCall2.elementCount(count);
         }
 
         var currentDrawCall = drawCall1;
