@@ -168,6 +168,7 @@ class Framebuffer {
         Bind as the draw framebuffer
 
         @method
+        @ignore
         @return {Framebuffer} The Framebuffer object.
     */
     bindForDraw() {
@@ -183,6 +184,7 @@ class Framebuffer {
         Bind as the read framebuffer
 
         @method
+        @ignore
         @return {Framebuffer} The Framebuffer object.
     */
     bindForRead() {
@@ -199,6 +201,7 @@ class Framebuffer {
         Capture current binding so we can restore it later.
 
         @method
+        @ignore
         @return {Framebuffer} The Framebuffer object.
     */
     bindAndCaptureState() {
@@ -215,6 +218,7 @@ class Framebuffer {
         Bind restore previous binding after state update
 
         @method
+        @ignore
         @return {Framebuffer} The Framebuffer object.
     */
     restoreState(framebuffer) {

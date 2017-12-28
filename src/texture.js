@@ -271,6 +271,7 @@ class Texture {
         Bind this texture to a texture unit.
 
         @method
+        @ignore
         @return {Texture} The Texture object.
     */
     bind(unit) {

@@ -206,6 +206,7 @@ class Program {
         Set the value of a uniform.
 
         @method
+        @ignore
         @return {Program} The Program object.
     */
     uniform(name, value) {
@@ -219,6 +220,7 @@ class Program {
         Use this program.
 
         @method
+        @ignore
         @return {Program} The Program object.
     */
     bind() {

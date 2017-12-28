@@ -234,6 +234,7 @@ class UniformBuffer {
         Bind this uniform buffer to the given base.
 
         @method
+        @ignore
         @return {UniformBuffer} The UniformBuffer object.
     */
     bind(base) {

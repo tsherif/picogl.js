@@ -126,8 +126,9 @@ class Cubemap {
 
     /**
         Bind this cubemap to a texture unit.
-
+        
         @method
+        @ignore
         @return {Cubemap} The Cubemap object.
     */
     bind(unit) {

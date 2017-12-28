@@ -181,6 +181,7 @@ class VertexArray {
         Bind this vertex array.
 
         @method
+        @ignore
         @return {VertexArray} The VertexArray object.
     */
     bind() {
@@ -196,6 +197,7 @@ class VertexArray {
         Attach an attribute buffer
 
         @method
+        @ignore
         @return {VertexArray} The VertexArray object.
     */
     attributeBuffer(attributeIndex, vertexBuffer, instanced, integer, normalized) {
