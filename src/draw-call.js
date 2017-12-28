@@ -46,6 +46,8 @@ const CONSTANTS = require("./constants");
     @prop {number} textureCount The number of active textures for this draw call.
     @prop {GLEnum} primitive The primitive type being drawn.
     @prop {Object} appState Tracked GL state.
+    @prop {GLsizei} numElements The number of element to draw.
+    @prop {GLsizei} numInstances The number of instances to draw.
 */
 class DrawCall {
 
@@ -68,6 +70,9 @@ class DrawCall {
         this.textures = new Array(CONSTANTS.WEBGL_INFO.MAX_TEXTURE_UNITS);
         this.textureCount = 0;
         this.primitive = primitive;
+
+        this.numElements = this.currentVertexArray.numElements;
+        this.numInstances = this.currentVertexArray.numInstances;
     }
 
     transformFeedback(transformFeedback) {
@@ -126,6 +131,40 @@ class DrawCall {
     }
 
     /**
+        Set numElements property to allow number of elements to be drawn
+
+        @method
+        @param {GLsizei} [count=0] Number of element to draw, 0 set to all.
+        @return {DrawCall} The DrawCall object.
+    */
+    elementCount(count = 0) {
+        if (count > 0) {
+            this.numElements = Math.min(count, this.currentVertexArray.numElements);
+        } else {
+            this.numElements = this.currentVertexArray.numElements;
+        }
+
+        return this;
+    }
+
+    /**
+        Set numInstances property to allow number of instances be drawn
+
+        @method
+        @param {GLsizei} [count=0] Number of instance to draw, 0 set to all.
+        @return {DrawCall} The DrawCall object.
+    */
+    instanceCount(count = 0) {
+        if (count > 0) {
+            this.numInstances = Math.min(count, this.currentVertexArray.numInstances);
+        } else {
+            this.numInstances = this.currentVertexArray.numInstances;
+        }
+
+        return this;
+    }
+
+    /**
         Draw based on current state.
 
         @method
@@ -160,14 +199,14 @@ class DrawCall {
 
         if (this.currentVertexArray.instanced) {
             if (this.currentVertexArray.indexed) {
-                this.gl.drawElementsInstanced(this.primitive, this.currentVertexArray.numElements, this.currentVertexArray.indexType, 0, this.currentVertexArray.numInstances);
+                this.gl.drawElementsInstanced(this.primitive, this.numElements, this.currentVertexArray.indexType, 0, this.numInstances);
             } else {
-                this.gl.drawArraysInstanced(this.primitive, 0, this.currentVertexArray.numElements, this.currentVertexArray.numInstances);
+                this.gl.drawArraysInstanced(this.primitive, 0, this.numElements, this.numInstances);
             }
         } else if (this.currentVertexArray.indexed) {
-            this.gl.drawElements(this.primitive, this.currentVertexArray.numElements, this.currentVertexArray.indexType, 0);
+            this.gl.drawElements(this.primitive, this.numElements, this.currentVertexArray.indexType, 0);
         } else {
-            this.gl.drawArrays(this.primitive, 0, this.currentVertexArray.numElements);
+            this.gl.drawArrays(this.primitive, 0, this.numElements);
         }
 
         if (this.currentTransformFeedback) {
