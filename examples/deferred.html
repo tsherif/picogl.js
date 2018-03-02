@@ -180,6 +180,7 @@
         .colorTarget(1, normalTarget)
         .colorTarget(2, uvTarget)
         .depthTarget(depthTarget);
+        console.assert(gBuffer.getStatus() === PicoGL.FRAMEBUFFER_COMPLETE, "G-buffer framebuffer is not complete!");
 
         // SET UP MAIN PROGRAM
         var vsSource =  document.getElementById("main-vs").text.trim();
