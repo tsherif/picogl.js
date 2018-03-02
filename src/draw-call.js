@@ -115,7 +115,7 @@ class DrawCall {
 
         @method
         @param {string} name Sampler uniform name.
-        @param {Texture} texture Texture to bind.
+        @param {Texture|Cubemap} texture Texture or Cubemap to bind.
         @return {DrawCall} The DrawCall object.
     */
     texture(name, texture) {
