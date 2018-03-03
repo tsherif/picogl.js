@@ -172,7 +172,7 @@ class Framebuffer {
     */
     getStatus() {
         let currentFramebuffer = this.bindAndCaptureState();
-        var status = this.gl.checkFramebufferStatus(this.gl.DRAW_FRAMEBUFFER);
+        let status = this.gl.checkFramebufferStatus(this.gl.DRAW_FRAMEBUFFER);
         this.restoreState(currentFramebuffer);
 
         return status;
