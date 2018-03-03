@@ -2870,6 +2870,20 @@ class Framebuffer {
     }
 
     /**
+        Get the current status of this framebuffer.
+
+        @method
+        @return {GLEnum} The current status of this framebuffer.
+    */
+    getStatus() {
+        let currentFramebuffer = this.bindAndCaptureState();
+        let status = this.gl.checkFramebufferStatus(this.gl.DRAW_FRAMEBUFFER);
+        this.restoreState(currentFramebuffer);
+
+        return status;
+    }
+
+    /**
         Bind as the draw framebuffer
 
         @method
