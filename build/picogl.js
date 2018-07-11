@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.8.8
+PicoGL.js v0.8.9
 
 The MIT License (MIT)
 
@@ -32,7 +32,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 		exports["PicoGL"] = factory();
 	else
 		root["PicoGL"] = factory();
-})(typeof self !== 'undefined' ? self : this, function() {
+})(this, function() {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -1070,7 +1070,7 @@ const App = __webpack_require__(5);
     @namespace PicoGL
 */
 const PicoGL = __webpack_require__(0);
-PicoGL.version = "0.8.8";
+PicoGL.version = "0.8.9";
 
 /**
     Create a PicoGL app. The app is the primary entry point to PicoGL. It stores
