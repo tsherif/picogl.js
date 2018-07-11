@@ -58,7 +58,7 @@ class Framebuffer {
 
         @method
         @param {number} index Color attachment index.
-        @param {Texture} texture The texture to attach.
+        @param {Texture|Cubemap} texture The texture or cubemap to attach.
         @param {GLEnum} [target] The texture target or layer to attach. If the texture is 3D or a texture array,
             defaults to 0, otherwise to TEXTURE_2D.
         @return {Framebuffer} The Framebuffer object.
@@ -90,7 +90,7 @@ class Framebuffer {
         Attach a depth target to this framebuffer.
 
         @method
-        @param {Texture} texture The texture to attach.
+        @param {Texture|Cubemap} texture The texture or cubemap to attach.
         @param {GLEnum} [target] The texture target or layer to attach. If the texture is 3D or a texture array,
             defaults to 0, otherwise to TEXTURE_2D.
         @return {Framebuffer} The Framebuffer object.
@@ -162,6 +162,20 @@ class Framebuffer {
         }
 
         return this;
+    }
+
+    /**
+        Get the current status of this framebuffer.
+
+        @method
+        @return {GLEnum} The current status of this framebuffer.
+    */
+    getStatus() {
+        let currentFramebuffer = this.bindAndCaptureState();
+        let status = this.gl.checkFramebufferStatus(this.gl.DRAW_FRAMEBUFFER);
+        this.restoreState(currentFramebuffer);
+
+        return status;
     }
 
     /**

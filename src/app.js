@@ -1117,6 +1117,8 @@ class App {
                 Can be any format that would be accepted by texImage2D.
         @param {DOMElement|ArrayBufferView} [options.posZ] The image data for the positive Z direction.
                 Can be any format that would be accepted by texImage2D.
+        @param {number} [options.width] Cubemap side width. Defaults to the width of negX if negX is an image.
+        @param {number} [options.height] Cubemap side height. Defaults to the height of negX if negX is an image.
         @param {GLEnum} [options.type] Type of data stored in the texture. Defaults to UNSIGNED_SHORT 
             if format is DEPTH_COMPONENT, UNSIGNED_BYTE otherwise.
         @param {GLEnum} [options.format=RGBA] Texture data format.
