@@ -32,7 +32,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 		exports["PicoGL"] = factory();
 	else
 		root["PicoGL"] = factory();
-})(this, function() {
+})(typeof self !== 'undefined' ? self : this, function() {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -2212,6 +2212,8 @@ class App {
                 Can be any format that would be accepted by texImage2D.
         @param {DOMElement|ArrayBufferView} [options.posZ] The image data for the positive Z direction.
                 Can be any format that would be accepted by texImage2D.
+        @param {number} [options.width] Cubemap side width. Defaults to the width of negX if negX is an image.
+        @param {number} [options.height] Cubemap side height. Defaults to the height of negX if negX is an image.
         @param {GLEnum} [options.type] Type of data stored in the texture. Defaults to UNSIGNED_SHORT 
             if format is DEPTH_COMPONENT, UNSIGNED_BYTE otherwise.
         @param {GLEnum} [options.format=RGBA] Texture data format.
@@ -2575,7 +2577,7 @@ class DrawCall {
 
         @method
         @param {string} name Sampler uniform name.
-        @param {Texture} texture Texture to bind.
+        @param {Texture|Cubemap} texture Texture or Cubemap to bind.
         @return {DrawCall} The DrawCall object.
     */
     texture(name, texture) {
@@ -2761,7 +2763,7 @@ class Framebuffer {
 
         @method
         @param {number} index Color attachment index.
-        @param {Texture} texture The texture to attach.
+        @param {Texture|Cubemap} texture The texture or cubemap to attach.
         @param {GLEnum} [target] The texture target or layer to attach. If the texture is 3D or a texture array,
             defaults to 0, otherwise to TEXTURE_2D.
         @return {Framebuffer} The Framebuffer object.
@@ -2793,7 +2795,7 @@ class Framebuffer {
         Attach a depth target to this framebuffer.
 
         @method
-        @param {Texture} texture The texture to attach.
+        @param {Texture|Cubemap} texture The texture or cubemap to attach.
         @param {GLEnum} [target] The texture target or layer to attach. If the texture is 3D or a texture array,
             defaults to 0, otherwise to TEXTURE_2D.
         @return {Framebuffer} The Framebuffer object.
@@ -2865,6 +2867,20 @@ class Framebuffer {
         }
 
         return this;
+    }
+
+    /**
+        Get the current status of this framebuffer.
+
+        @method
+        @return {GLEnum} The current status of this framebuffer.
+    */
+    getStatus() {
+        let currentFramebuffer = this.bindAndCaptureState();
+        let status = this.gl.checkFramebufferStatus(this.gl.DRAW_FRAMEBUFFER);
+        this.restoreState(currentFramebuffer);
+
+        return status;
     }
 
     /**
