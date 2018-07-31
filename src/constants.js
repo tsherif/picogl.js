@@ -23,7 +23,7 @@
 
 "use strict";
 
-let canvas = document.createElement("canvas");
+let canvas = typeof document !== "undefined" ? document.createElement("canvas") : new OffscreenCanvas(1, 1);
 let gl = canvas.getContext("webgl2");
 
 // https://www.khronos.org/registry/webgl/specs/1.0/
