@@ -23,16 +23,6 @@
 
 "use strict";
 
-let canvas = null;
-if (typeof document !== "undefined") {
-    canvas = document.createElement("canvas");
-} else if (typeof OffscreenCanvas !== "undefined") {
-    canvas = new OffscreenCanvas(1, 1);
-} else {
-    throw new Error("PicoGL is running in a Web Worker, but OffscreenCanvas is unavailable");
-}
-let gl = canvas.getContext("webgl2");
-
 // https://www.khronos.org/registry/webgl/specs/1.0/
 // https://www.khronos.org/registry/webgl/specs/latest/2.0/#1.1
 const CONSTANTS = {
@@ -663,22 +653,19 @@ const CONSTANTS = {
     COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR: 0x93DC,
     COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR: 0x93DD,
 
-    TYPE_SIZE: {
-        [gl.BYTE]: 1,
-        [gl.UNSIGNED_BYTE]: 1,
-        [gl.SHORT]: 2,
-        [gl.UNSIGNED_SHORT]: 2,
-        [gl.INT]: 4,
-        [gl.UNSIGNED_INT]: 4,
-        [gl.FLOAT]: 4
-    },
+    TYPE_SIZE: {},
 
-    WEBGL_INFO: {
-        MAX_TEXTURE_UNITS: gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS),
-        MAX_UNIFORM_BUFFERS: gl.getParameter(gl.MAX_UNIFORM_BUFFER_BINDINGS)
-    },
+    WEBGL_INFO: {},
 
     DUMMY_OBJECT: {}
 };
+
+CONSTANTS.TYPE_SIZE[CONSTANTS.BYTE] = 1;
+CONSTANTS.TYPE_SIZE[CONSTANTS.UNSIGNED_BYTE] = 1;
+CONSTANTS.TYPE_SIZE[CONSTANTS.SHORT] = 2;
+CONSTANTS.TYPE_SIZE[CONSTANTS.UNSIGNED_SHORT] = 2;
+CONSTANTS.TYPE_SIZE[CONSTANTS.INT] = 4;
+CONSTANTS.TYPE_SIZE[CONSTANTS.UNSIGNED_INT] = 4;
+CONSTANTS.TYPE_SIZE[CONSTANTS.FLOAT] = 4;
 
 module.exports = CONSTANTS;

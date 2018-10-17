@@ -59,9 +59,9 @@ const Query                   = require("./query");
 */
 class App {
     
-    constructor(canvas, contextAttributes) {
+    constructor(gl, canvas, contextAttributes) {
         this.canvas = canvas;
-        this.gl = canvas.getContext("webgl2", contextAttributes);
+        this.gl = gl;
         this.width = this.gl.drawingBufferWidth;
         this.height = this.gl.drawingBufferHeight;
         this.viewportX = 0;
