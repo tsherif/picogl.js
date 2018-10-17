@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.8.9
+PicoGL.js v0.8.10
 
 The MIT License (MIT)
 
@@ -127,9 +127,6 @@ return /******/ (function(modules) { // webpackBootstrap
 ///////////////////////////////////////////////////////////////////////////////////
 
 
-
-let canvas = document.createElement("canvas");
-let gl = canvas.getContext("webgl2");
 
 // https://www.khronos.org/registry/webgl/specs/1.0/
 // https://www.khronos.org/registry/webgl/specs/latest/2.0/#1.1
@@ -761,23 +758,20 @@ const CONSTANTS = {
     COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR: 0x93DC,
     COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR: 0x93DD,
 
-    TYPE_SIZE: {
-        [gl.BYTE]: 1,
-        [gl.UNSIGNED_BYTE]: 1,
-        [gl.SHORT]: 2,
-        [gl.UNSIGNED_SHORT]: 2,
-        [gl.INT]: 4,
-        [gl.UNSIGNED_INT]: 4,
-        [gl.FLOAT]: 4
-    },
+    TYPE_SIZE: {},
 
-    WEBGL_INFO: {
-        MAX_TEXTURE_UNITS: gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS),
-        MAX_UNIFORM_BUFFERS: gl.getParameter(gl.MAX_UNIFORM_BUFFER_BINDINGS)
-    },
+    WEBGL_INFO: {},
 
     DUMMY_OBJECT: {}
 };
+
+CONSTANTS.TYPE_SIZE[CONSTANTS.BYTE] = 1;
+CONSTANTS.TYPE_SIZE[CONSTANTS.UNSIGNED_BYTE] = 1;
+CONSTANTS.TYPE_SIZE[CONSTANTS.SHORT] = 2;
+CONSTANTS.TYPE_SIZE[CONSTANTS.UNSIGNED_SHORT] = 2;
+CONSTANTS.TYPE_SIZE[CONSTANTS.INT] = 4;
+CONSTANTS.TYPE_SIZE[CONSTANTS.UNSIGNED_INT] = 4;
+CONSTANTS.TYPE_SIZE[CONSTANTS.FLOAT] = 4;
 
 module.exports = CONSTANTS;
 
@@ -1061,6 +1055,8 @@ module.exports = Query;
 
 
 
+let webglInfoInitialized = false;
+
 const App = __webpack_require__(5);
 
 /**
@@ -1070,7 +1066,7 @@ const App = __webpack_require__(5);
     @namespace PicoGL
 */
 const PicoGL = __webpack_require__(0);
-PicoGL.version = "0.8.9";
+PicoGL.version = "0.8.10";
 
 /**
     Create a PicoGL app. The app is the primary entry point to PicoGL. It stores
@@ -1082,7 +1078,13 @@ PicoGL.version = "0.8.9";
     @return {App} New App object.
 */
 PicoGL.createApp = function(canvas, contextAttributes) {
-    return new App(canvas, contextAttributes);
+    let gl = canvas.getContext("webgl2", contextAttributes);
+    if (!webglInfoInitialized) {
+        PicoGL.WEBGL_INFO.MAX_TEXTURE_UNITS = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
+        PicoGL.WEBGL_INFO.MAX_UNIFORM_BUFFERS = gl.getParameter(gl.MAX_UNIFORM_BUFFER_BINDINGS);
+        webglInfoInitialized = true;      
+    }
+    return new App(gl, canvas, contextAttributes);
 };
     
 module.exports = PicoGL;
@@ -1154,9 +1156,9 @@ const Query                   = __webpack_require__(3);
 */
 class App {
     
-    constructor(canvas, contextAttributes) {
+    constructor(gl, canvas) {
         this.canvas = canvas;
-        this.gl = canvas.getContext("webgl2", contextAttributes);
+        this.gl = gl;
         this.width = this.gl.drawingBufferWidth;
         this.height = this.gl.drawingBufferHeight;
         this.viewportX = 0;
@@ -3056,7 +3058,7 @@ class Program {
         this.samplers = {};
         this.samplerCount = 0;
 
-        gl.useProgram(program);
+        this.bind();
 
         let numUniforms = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
         let textureUnit;
@@ -3143,8 +3145,6 @@ class Program {
             this.gl.uniformBlockBinding(this.program, blockIndex, uniformBlockBase);
             this.uniformBlocks[blockName] = uniformBlockBase;
         }
-
-        gl.useProgram(null);
     }
 
     /**
