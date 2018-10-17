@@ -96,7 +96,7 @@ class Program {
         this.samplers = {};
         this.samplerCount = 0;
 
-        gl.useProgram(program);
+        this.bind();
 
         let numUniforms = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
         let textureUnit;
@@ -183,8 +183,6 @@ class Program {
             this.gl.uniformBlockBinding(this.program, blockIndex, uniformBlockBase);
             this.uniformBlocks[blockName] = uniformBlockBase;
         }
-
-        gl.useProgram(null);
     }
 
     /**
