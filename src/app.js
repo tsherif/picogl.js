@@ -59,7 +59,7 @@ const Query                   = require("./query");
 */
 class App {
     
-    constructor(gl, canvas, contextAttributes) {
+    constructor(gl, canvas) {
         this.canvas = canvas;
         this.gl = gl;
         this.width = this.gl.drawingBufferWidth;

@@ -1,5 +1,39 @@
-var PicoGL =
-/******/ (function(modules) { // webpackBootstrap
+/*
+PicoGL.js v0.8.9
+
+The MIT License (MIT)
+
+Copyright (c) 2017 Tarek Sherif
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
+
+(function webpackUniversalModuleDefinition(root, factory) {
+	if(typeof exports === 'object' && typeof module === 'object')
+		module.exports = factory();
+	else if(typeof define === 'function' && define.amd)
+		define([], factory);
+	else if(typeof exports === 'object')
+		exports["PicoGL"] = factory();
+	else
+		root["PicoGL"] = factory();
+})(this, function() {
+return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
 /******/
@@ -93,6 +127,9 @@ var PicoGL =
 ///////////////////////////////////////////////////////////////////////////////////
 
 
+
+let canvas = document.createElement("canvas");
+let gl = canvas.getContext("webgl2");
 
 // https://www.khronos.org/registry/webgl/specs/1.0/
 // https://www.khronos.org/registry/webgl/specs/latest/2.0/#1.1
@@ -724,20 +761,23 @@ const CONSTANTS = {
     COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR: 0x93DC,
     COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR: 0x93DD,
 
-    TYPE_SIZE: {},
+    TYPE_SIZE: {
+        [gl.BYTE]: 1,
+        [gl.UNSIGNED_BYTE]: 1,
+        [gl.SHORT]: 2,
+        [gl.UNSIGNED_SHORT]: 2,
+        [gl.INT]: 4,
+        [gl.UNSIGNED_INT]: 4,
+        [gl.FLOAT]: 4
+    },
 
-    WEBGL_INFO: {},
+    WEBGL_INFO: {
+        MAX_TEXTURE_UNITS: gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS),
+        MAX_UNIFORM_BUFFERS: gl.getParameter(gl.MAX_UNIFORM_BUFFER_BINDINGS)
+    },
 
     DUMMY_OBJECT: {}
 };
-
-CONSTANTS.TYPE_SIZE[CONSTANTS.BYTE] = 1;
-CONSTANTS.TYPE_SIZE[CONSTANTS.UNSIGNED_BYTE] = 1;
-CONSTANTS.TYPE_SIZE[CONSTANTS.SHORT] = 2;
-CONSTANTS.TYPE_SIZE[CONSTANTS.UNSIGNED_SHORT] = 2;
-CONSTANTS.TYPE_SIZE[CONSTANTS.INT] = 4;
-CONSTANTS.TYPE_SIZE[CONSTANTS.UNSIGNED_INT] = 4;
-CONSTANTS.TYPE_SIZE[CONSTANTS.FLOAT] = 4;
 
 module.exports = CONSTANTS;
 
@@ -1021,8 +1061,6 @@ module.exports = Query;
 
 
 
-let webglInfoInitialized = false;
-
 const App = __webpack_require__(5);
 
 /**
@@ -1032,7 +1070,7 @@ const App = __webpack_require__(5);
     @namespace PicoGL
 */
 const PicoGL = __webpack_require__(0);
-PicoGL.version = "DEV";
+PicoGL.version = "0.8.9";
 
 /**
     Create a PicoGL app. The app is the primary entry point to PicoGL. It stores
@@ -1044,13 +1082,7 @@ PicoGL.version = "DEV";
     @return {App} New App object.
 */
 PicoGL.createApp = function(canvas, contextAttributes) {
-    let gl = canvas.getContext("webgl2", contextAttributes);
-    if (!webglInfoInitialized) {
-        PicoGL.WEBGL_INFO.MAX_TEXTURE_UNITS = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
-        PicoGL.WEBGL_INFO.MAX_UNIFORM_BUFFERS = gl.getParameter(gl.MAX_UNIFORM_BUFFER_BINDINGS);
-        webglInfoInitialized = true;      
-    }
-    return new App(gl, canvas, contextAttributes);
+    return new App(canvas, contextAttributes);
 };
     
 module.exports = PicoGL;
@@ -1122,9 +1154,9 @@ const Query                   = __webpack_require__(3);
 */
 class App {
     
-    constructor(gl, canvas, contextAttributes) {
+    constructor(canvas, contextAttributes) {
         this.canvas = canvas;
-        this.gl = gl;
+        this.gl = canvas.getContext("webgl2", contextAttributes);
         this.width = this.gl.drawingBufferWidth;
         this.height = this.gl.drawingBufferHeight;
         this.viewportX = 0;
@@ -4672,4 +4704,4 @@ module.exports = VertexBuffer;
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=picogl.js.map
+});
