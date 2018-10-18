@@ -65,21 +65,35 @@ class Framebuffer {
     */
     colorTarget(index, texture, target = texture.is3D ? 0 : CONSTANTS.TEXTURE_2D) {
 
+        if (index >= this.numColorTargets) {
+            let numColorTargets = index + 1;
+            this.colorAttachments.length = numColorTargets;
+            this.colorTextures.length = numColorTargets;
+            this.colorTextureTargets.length = numColorTargets;
+
+            for (let i = this.numColorTargets; i < numColorTargets; ++i) {
+                this.colorAttachments[i] = CONSTANTS.NONE;
+                this.colorTextures[i] = null;
+                this.colorTextureTargets[i] = 0;
+            }
+
+            this.numColorTargets = numColorTargets;
+        }        
+
         this.colorAttachments[index] = CONSTANTS.COLOR_ATTACHMENT0 + index;
-
-        let currentFramebuffer = this.bindAndCaptureState();
-
         this.colorTextures[index] = texture;
         this.colorTextureTargets[index] = target;
 
+        let currentFramebuffer = this.bindAndCaptureState();
+
+
         if (texture.is3D) {
-            this.gl.framebufferTextureLayer(this.gl.DRAW_FRAMEBUFFER, this.colorAttachments[index], texture.texture, 0, target);
+            this.gl.framebufferTextureLayer(CONSTANTS.DRAW_FRAMEBUFFER, this.colorAttachments[index], texture.texture, 0, target);
         } else {
-            this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, this.colorAttachments[index], target, texture.texture, 0);
+            this.gl.framebufferTexture2D(CONSTANTS.DRAW_FRAMEBUFFER, this.colorAttachments[index], target, texture.texture, 0);
         }
 
         this.gl.drawBuffers(this.colorAttachments);
-        this.numColorTargets++;
 
         this.restoreState(currentFramebuffer);
 
@@ -103,9 +117,9 @@ class Framebuffer {
         this.depthTextureTarget = target;
 
         if (texture.is3D) {
-            this.gl.framebufferTextureLayer(this.gl.DRAW_FRAMEBUFFER, CONSTANTS.DEPTH_ATTACHMENT, texture.texture, 0, target);
+            this.gl.framebufferTextureLayer(CONSTANTS.DRAW_FRAMEBUFFER, CONSTANTS.DEPTH_ATTACHMENT, texture.texture, 0, target);
         } else {
-            this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, CONSTANTS.DEPTH_ATTACHMENT, target, texture.texture, 0);
+            this.gl.framebufferTexture2D(CONSTANTS.DRAW_FRAMEBUFFER, CONSTANTS.DEPTH_ATTACHMENT, target, texture.texture, 0);
         }
 
         this.restoreState(currentFramebuffer);
@@ -127,20 +141,25 @@ class Framebuffer {
 
         for (let i = 0; i < this.numColorTargets; ++i) {
             var texture = this.colorTextures[i];
+
+            if (!texture) {
+                continue;
+            }
+
             texture.resize(width, height, depth);
             if (texture.is3D) {
-                this.gl.framebufferTextureLayer(this.gl.DRAW_FRAMEBUFFER, this.colorAttachments[i], texture.texture, 0, this.colorTextureTargets[i]);
+                this.gl.framebufferTextureLayer(CONSTANTS.DRAW_FRAMEBUFFER, this.colorAttachments[i], texture.texture, 0, this.colorTextureTargets[i]);
             } else {
-                this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, this.colorAttachments[i], this.colorTextureTargets[i], texture.texture, 0);
+                this.gl.framebufferTexture2D(CONSTANTS.DRAW_FRAMEBUFFER, this.colorAttachments[i], this.colorTextureTargets[i], texture.texture, 0);
             }
         }
 
         if (this.depthTexture) {
             this.depthTexture.resize(width, height, depth);
             if (this.depthTexture.is3D) {
-                this.gl.framebufferTextureLayer(this.gl.DRAW_FRAMEBUFFER, CONSTANTS.DEPTH_ATTACHMENT, this.depthTexture.texture, 0, this.depthTextureTarget);
+                this.gl.framebufferTextureLayer(CONSTANTS.DRAW_FRAMEBUFFER, CONSTANTS.DEPTH_ATTACHMENT, this.depthTexture.texture, 0, this.depthTextureTarget);
             } else {
-                this.gl.framebufferTexture2D(this.gl.DRAW_FRAMEBUFFER, CONSTANTS.DEPTH_ATTACHMENT, this.depthTextureTarget, this.depthTexture.texture, 0);
+                this.gl.framebufferTexture2D(CONSTANTS.DRAW_FRAMEBUFFER, CONSTANTS.DEPTH_ATTACHMENT, this.depthTextureTarget, this.depthTexture.texture, 0);
             }
         }
 
@@ -172,7 +191,7 @@ class Framebuffer {
     */
     getStatus() {
         let currentFramebuffer = this.bindAndCaptureState();
-        let status = this.gl.checkFramebufferStatus(this.gl.DRAW_FRAMEBUFFER);
+        let status = this.gl.checkFramebufferStatus(CONSTANTS.DRAW_FRAMEBUFFER);
         this.restoreState(currentFramebuffer);
 
         return status;
@@ -187,7 +206,7 @@ class Framebuffer {
     */
     bindForDraw() {
         if (this.appState.drawFramebuffer !== this) {
-            this.gl.bindFramebuffer(this.gl.DRAW_FRAMEBUFFER, this.framebuffer);
+            this.gl.bindFramebuffer(CONSTANTS.DRAW_FRAMEBUFFER, this.framebuffer);
             this.appState.drawFramebuffer = this;
         }
 
@@ -222,7 +241,7 @@ class Framebuffer {
         let currentFramebuffer = this.appState.drawFramebuffer;
 
         if (currentFramebuffer !== this) {
-            this.gl.bindFramebuffer(this.gl.DRAW_FRAMEBUFFER, this.framebuffer);
+            this.gl.bindFramebuffer(CONSTANTS.DRAW_FRAMEBUFFER, this.framebuffer);
         }
 
         return currentFramebuffer;
@@ -237,7 +256,7 @@ class Framebuffer {
     */
     restoreState(framebuffer) {
         if (framebuffer !== this) {
-            this.gl.bindFramebuffer(this.gl.DRAW_FRAMEBUFFER, framebuffer ? framebuffer.framebuffer : null);
+            this.gl.bindFramebuffer(CONSTANTS.DRAW_FRAMEBUFFER, framebuffer ? framebuffer.framebuffer : null);
         }
 
         return this;
