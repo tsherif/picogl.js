@@ -69,7 +69,7 @@
 
         layout(location=0) out vec4 position;
         layout(location=1) out vec4 normal;
-        layout(location=2) out vec4 uv;
+        layout(location=3) out vec4 uv;
         void main() {
             position = vPosition;
             normal = vec4(normalize(vNormal.xyz), 0.0);
@@ -178,7 +178,7 @@
         var gBuffer = app.createFramebuffer()
         .colorTarget(0, positionTarget)
         .colorTarget(1, normalTarget)
-        .colorTarget(2, uvTarget)
+        .colorTarget(3, uvTarget)
         .depthTarget(depthTarget);
         console.assert(gBuffer.getStatus() === PicoGL.FRAMEBUFFER_COMPLETE, "G-buffer framebuffer is not complete!");
 
@@ -324,7 +324,7 @@
                 .texture("uTextureMap", texture)
                 .texture("uPositionBuffer", gBuffer.colorTextures[0])
                 .texture("uNormalBuffer", gBuffer.colorTextures[1])
-                .texture("uUVBuffer", gBuffer.colorTextures[2]);
+                .texture("uUVBuffer", gBuffer.colorTextures[3]);
             }
 
             function draw() {
