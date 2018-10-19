@@ -1,39 +1,5 @@
-/*
-PicoGL.js v0.8.12
-
-The MIT License (MIT)
-
-Copyright (c) 2017 Tarek Sherif
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
-the Software, and to permit persons to whom the Software is furnished to do so,
-subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/
-
-(function webpackUniversalModuleDefinition(root, factory) {
-	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory();
-	else if(typeof define === 'function' && define.amd)
-		define([], factory);
-	else if(typeof exports === 'object')
-		exports["PicoGL"] = factory();
-	else
-		root["PicoGL"] = factory();
-})(this, function() {
-return /******/ (function(modules) { // webpackBootstrap
+var PicoGL =
+/******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
 /******/
@@ -1066,7 +1032,7 @@ const App = __webpack_require__(5);
     @namespace PicoGL
 */
 const PicoGL = __webpack_require__(0);
-PicoGL.version = "0.8.12";
+PicoGL.version = "DEV";
 
 /**
     Create a PicoGL app. The app is the primary entry point to PicoGL. It stores
@@ -1195,6 +1161,58 @@ class App {
         this.pvrtcTexturesEnabled = false;
 
         this.viewport(0, 0, this.width, this.height);
+
+        this.contextRestoredHandler = null;
+        this.contextLostExt = null;
+    }
+
+    /**
+        Simulate context loss.
+    */
+    loseContext() {
+        if (!this.contextLostExt) {
+            this.contextLostExt = this.gl.getExtension("WEBGL_lose_context");
+        }
+
+        if (this.contextLostExt) {
+            this.contextLostExt.loseContext();
+        }
+
+        return this;
+    }
+
+    /**
+        Simulate context restoration.
+    */
+    restoreContext() {
+        if (this.contextLostExt) {
+            this.contextLostExt.restoreContext();
+        }
+
+        return this;
+    }
+
+    /**
+        Set function to handle context restoration after loss.
+
+        @method
+        @param {function} fn Context restored handler.
+
+    */
+    onContextRestored(fn) {
+        if (this.contextRestoredHandler) {
+            this.canvas.removeEventListener("webglcontextrestored", this.contextRestoredHandler);
+        } else {
+            this.canvas.addEventListener("webglcontextlost", (e) => {
+                console.log("LOSS")
+                e.preventDefault();
+            });
+        }
+        
+        this.canvas.addEventListener("webglcontextrestored", fn);
+        this.contextRestoredHandler = fn;
+
+        return this;
     }
 
     /**
@@ -4735,4 +4753,4 @@ module.exports = VertexBuffer;
 
 /***/ })
 /******/ ]);
-});
+//# sourceMappingURL=picogl.js.map
