@@ -195,6 +195,11 @@ class Program {
         if (this.program) {
             this.gl.deleteProgram(this.program);
             this.program = null;
+
+            if (this.appState.program === this) {
+                this.gl.useProgram(null);
+                this.appState.program = null;
+            }
         }
 
         return this;

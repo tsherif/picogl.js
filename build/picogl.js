@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.8.11
+PicoGL.js v0.8.12
 
 The MIT License (MIT)
 
@@ -1066,7 +1066,7 @@ const App = __webpack_require__(5);
     @namespace PicoGL
 */
 const PicoGL = __webpack_require__(0);
-PicoGL.version = "0.8.11";
+PicoGL.version = "0.8.12";
 
 /**
     Create a PicoGL app. The app is the primary entry point to PicoGL. It stores
@@ -2670,6 +2670,9 @@ class DrawCall {
         if (this.currentTransformFeedback) {
             this.currentTransformFeedback.bind();
             this.gl.beginTransformFeedback(this.primitive);
+        } else if (this.appState.transformFeedback) {
+            this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, null);
+            this.appState.transformFeedback = null;
         }
 
         if (this.currentVertexArray.instanced) {
@@ -2686,11 +2689,6 @@ class DrawCall {
 
         if (this.currentTransformFeedback) {
             this.gl.endTransformFeedback();
-            // TODO(Tarek): Need to rebind buffers due to bug in ANGLE.
-            // Remove this when that's fixed.
-            for (let i = 0, len = this.currentTransformFeedback.angleBugBuffers.length; i < len; ++i) {
-                this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, i, null);
-            }
         }
 
         return this;
@@ -2699,6 +2697,7 @@ class DrawCall {
 }
 
 module.exports = DrawCall;
+
 
 /***/ }),
 /* 8 */
@@ -2885,6 +2884,16 @@ class Framebuffer {
         if (this.framebuffer) {
             this.gl.deleteFramebuffer(this.framebuffer);
             this.framebuffer = null;
+
+            if (this.appState.drawFramebuffer === this) {
+                this.gl.bindFramebuffer(CONSTANTS.DRAW_FRAMEBUFFER, null);
+                this.appState.drawFramebuffer = null;
+            }
+
+            if (this.appState.readFramebuffer === this) {
+                this.gl.bindFramebuffer(CONSTANTS.READ_FRAMEBUFFER, null);
+                this.appState.readFramebuffer = null;
+            }
         }
 
         return this;
@@ -3176,6 +3185,11 @@ class Program {
         if (this.program) {
             this.gl.deleteProgram(this.program);
             this.program = null;
+
+            if (this.appState.program === this) {
+                this.gl.useProgram(null);
+                this.appState.program = null;
+            }
         }
 
         return this;
@@ -3966,10 +3980,6 @@ class TransformFeedback {
         this.gl = gl;
         this.transformFeedback = gl.createTransformFeedback();
         this.appState = appState;
-
-        // TODO(Tarek): Need to rebind buffers due to bug in ANGLE.
-        // Remove this when that's fixed.
-        this.angleBugBuffers = [];
     }
 
     /**
@@ -3986,8 +3996,6 @@ class TransformFeedback {
         this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, null);
         this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, index, null);
 
-        this.angleBugBuffers[index] = buffer;
-
         return this;
     }
 
@@ -4001,6 +4009,11 @@ class TransformFeedback {
         if (this.transformFeedback) {
             this.gl.deleteTransformFeedback(this.transformFeedback);
             this.transformFeedback = null;
+
+            if (this.appState.transformFeedback === this) {
+                this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, null);
+                this.appState.transformFeedback = null;
+            }
         }
 
         return this;
@@ -4016,11 +4029,6 @@ class TransformFeedback {
     bind() {
         if (this.appState.transformFeedback !== this) {
             this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedback);
-
-            for (let i = 0, len = this.angleBugBuffers.length; i < len; ++i) {
-                this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, i, this.angleBugBuffers[i].buffer);
-            }
-
             this.appState.transformFeedback = this;
         }
 
@@ -4481,8 +4489,12 @@ class VertexArray {
         if (this.vertexArray) {
             this.gl.deleteVertexArray(this.vertexArray);
             this.vertexArray = null;
+
+            if (this.appState.vertexArray === this) {
+                this.gl.bindVertexArray(null);
+                this.appState.vertexArray = null;
+            }
         }
-        this.gl.bindVertexArray(null);
 
         return this;
     }
