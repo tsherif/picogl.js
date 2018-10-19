@@ -1,5 +1,39 @@
-var PicoGL =
-/******/ (function(modules) { // webpackBootstrap
+/*
+PicoGL.js v0.8.12
+
+The MIT License (MIT)
+
+Copyright (c) 2017 Tarek Sherif
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
+
+(function webpackUniversalModuleDefinition(root, factory) {
+	if(typeof exports === 'object' && typeof module === 'object')
+		module.exports = factory();
+	else if(typeof define === 'function' && define.amd)
+		define([], factory);
+	else if(typeof exports === 'object')
+		exports["PicoGL"] = factory();
+	else
+		root["PicoGL"] = factory();
+})(this, function() {
+return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
 /******/
@@ -1032,7 +1066,7 @@ const App = __webpack_require__(5);
     @namespace PicoGL
 */
 const PicoGL = __webpack_require__(0);
-PicoGL.version = "DEV";
+PicoGL.version = "0.8.12";
 
 /**
     Create a PicoGL app. The app is the primary entry point to PicoGL. It stores
@@ -2850,6 +2884,16 @@ class Framebuffer {
         if (this.framebuffer) {
             this.gl.deleteFramebuffer(this.framebuffer);
             this.framebuffer = null;
+
+            if (this.appState.drawFramebuffer === this) {
+                this.gl.bindFramebuffer(CONSTANTS.DRAW_FRAMEBUFFER, null);
+                this.appState.drawFramebuffer = null;
+            }
+
+            if (this.appState.readFramebuffer === this) {
+                this.gl.bindFramebuffer(CONSTANTS.READ_FRAMEBUFFER, null);
+                this.appState.readFramebuffer = null;
+            }
         }
 
         return this;
@@ -3141,6 +3185,11 @@ class Program {
         if (this.program) {
             this.gl.deleteProgram(this.program);
             this.program = null;
+
+            if (this.appState.program === this) {
+                this.gl.useProgram(null);
+                this.appState.program = null;
+            }
         }
 
         return this;
@@ -3960,6 +4009,11 @@ class TransformFeedback {
         if (this.transformFeedback) {
             this.gl.deleteTransformFeedback(this.transformFeedback);
             this.transformFeedback = null;
+
+            if (this.appState.transformFeedback === this) {
+                this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, null);
+                this.appState.transformFeedback = null;
+            }
         }
 
         return this;
@@ -4435,8 +4489,12 @@ class VertexArray {
         if (this.vertexArray) {
             this.gl.deleteVertexArray(this.vertexArray);
             this.vertexArray = null;
+
+            if (this.appState.vertexArray === this) {
+                this.gl.bindVertexArray(null);
+                this.appState.vertexArray = null;
+            }
         }
-        this.gl.bindVertexArray(null);
 
         return this;
     }
@@ -4677,4 +4735,4 @@ module.exports = VertexBuffer;
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=picogl.js.map
+});
