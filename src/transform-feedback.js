@@ -66,6 +66,11 @@ class TransformFeedback {
         if (this.transformFeedback) {
             this.gl.deleteTransformFeedback(this.transformFeedback);
             this.transformFeedback = null;
+
+            if (this.appState.transformFeedback === this) {
+                this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, null);
+                this.appState.transformFeedback = null;
+            }
         }
 
         return this;

@@ -171,8 +171,12 @@ class VertexArray {
         if (this.vertexArray) {
             this.gl.deleteVertexArray(this.vertexArray);
             this.vertexArray = null;
+
+            if (this.appState.vertexArray === this) {
+                this.gl.bindVertexArray(null);
+                this.appState.vertexArray = null;
+            }
         }
-        this.gl.bindVertexArray(null);
 
         return this;
     }

@@ -178,6 +178,16 @@ class Framebuffer {
         if (this.framebuffer) {
             this.gl.deleteFramebuffer(this.framebuffer);
             this.framebuffer = null;
+
+            if (this.appState.drawFramebuffer === this) {
+                this.gl.bindFramebuffer(CONSTANTS.DRAW_FRAMEBUFFER, null);
+                this.appState.drawFramebuffer = null;
+            }
+
+            if (this.appState.readFramebuffer === this) {
+                this.gl.bindFramebuffer(CONSTANTS.READ_FRAMEBUFFER, null);
+                this.appState.readFramebuffer = null;
+            }
         }
 
         return this;
