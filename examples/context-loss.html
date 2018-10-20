@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<!--
+  The MIT License (MIT)
+
+  Copyright (c) 2017 Tarek Sherif
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy of
+  this software and associated documentation files (the "Software"), to deal in
+  the Software without restriction, including without limitation the rights to
+  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+  the Software, and to permit persons to whom the Software is furnished to do so,
+  subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+  FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+  COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+  IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+<html>
+<head>
+    <title>PicoGL.js: Context Loss and Recovery</title>
+    <script src="utils/gl-matrix.js"></script>
+    <script src="../build/picogl.js"></script>
+    <script src="utils/utils.js"></script>
+    <link rel="stylesheet" href="../site/css/picogl-example.css"> 
+</head>
+<body>
+    <div id="example-title">
+        PicoGL.js Example: Phong-shaded Cube
+        <div>
+            <a href="https://github.com/tsherif/picogl.js/blob/master/examples/context-loss.html">Source code</a>
+        </div>
+    </div>
+    <canvas id="gl-canvas"></canvas>
+    <script type="x-shader/vs" id="vertex-draw">
+        #version 300 es
+
+        layout(std140, column_major) uniform;
+
+        layout(location=0) in vec4 position;
+        layout(location=1) in vec2 uv;
+        layout(location=2) in vec4 normal;
+        
+        uniform SceneUniforms {
+            mat4 viewProj;
+            vec4 eyePosition;
+            vec4 lightPosition;
+        };
+
+        uniform mat4 uModel;
+        
+        out vec3 vPosition;
+        out vec2 vUV;
+        out vec3 vNormal;
+
+        void main() {
+            vec4 worldPosition = uModel * position;
+            vPosition = worldPosition.xyz;
+            vUV = uv;
+            vNormal = (uModel * normal).xyz;
+            gl_Position = viewProj * worldPosition;
+        }
+    </script>
+    <script type="x-shader/vf" id="fragment-draw">
+        #version 300 es
+        precision highp float;
+
+        layout(std140, column_major) uniform;
+
+        uniform SceneUniforms {
+            mat4 viewProj;
+            vec4 eyePosition;
+            vec4 lightPosition;
+        };
+
+        uniform sampler2D tex;
+        
+        in vec3 vPosition;
+        in vec2 vUV;
+        in vec3 vNormal;
+
+        out vec4 fragColor;
+        void main() {
+            vec3 color = texture(tex, vUV).rgb;
+
+            vec3 normal = normalize(vNormal);
+            vec3 eyeVec = normalize(eyePosition.xyz - vPosition);
+            vec3 incidentVec = normalize(vPosition - lightPosition.xyz);
+            vec3 lightVec = -incidentVec;
+            float diffuse = max(dot(lightVec, normal), 0.0);
+            float highlight = pow(max(dot(eyeVec, reflect(incidentVec, normal)), 0.0), 100.0);
+            float ambient = 0.1;
+            fragColor = vec4(color * (diffuse + highlight + ambient), 1.0);
+        }
+    </script>
+    <script type="text/javascript">
+        utils.addTimerElement();
+        
+        var canvas = document.getElementById("gl-canvas");
+
+        if (!utils.testWebGL2()) {
+            console.error("WebGL 2 not available");
+            document.body.innerHTML = "This example requires WebGL 2 which is unavailable on this system."
+        }
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        var app = PicoGL.createApp(canvas)
+        .clearColor(0.0, 0.0, 0.0, 1.0)
+        .depthTest();
+
+        var timer = app.createTimer();
+
+        // SET UP PROGRAM
+        var vsSource =  document.getElementById("vertex-draw").text.trim();
+        var fsSource =  document.getElementById("fragment-draw").text.trim();
+        var program = app.createProgram(vsSource, fsSource);
+
+        // SET UP GEOMETRY
+        var box = utils.createBox({dimensions: [1.0, 1.0, 1.0]})
+        var positions = app.createVertexBuffer(PicoGL.FLOAT, 3, box.positions);
+        var uv = app.createVertexBuffer(PicoGL.FLOAT, 2, box.uvs);
+        var normals = app.createVertexBuffer(PicoGL.FLOAT, 3, box.normals);
+
+        var boxArray = app.createVertexArray()
+        .vertexAttributeBuffer(0, positions)
+        .vertexAttributeBuffer(1, uv)
+        .vertexAttributeBuffer(2, normals)
+
+        // SET UP UNIFORM BUFFER
+        var projMatrix = mat4.create();
+        mat4.perspective(projMatrix, Math.PI / 2, canvas.width / canvas.height, 0.1, 10.0);
+
+        var viewMatrix = mat4.create();
+        var eyePosition = vec3.fromValues(1, 1, 1);
+        mat4.lookAt(viewMatrix, eyePosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
+
+        var viewProjMatrix = mat4.create();
+        mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
+
+        var lightPosition = vec3.fromValues(1, 1, 0.5);
+
+        var sceneUniformBuffer = app.createUniformBuffer([
+            PicoGL.FLOAT_MAT4,
+            PicoGL.FLOAT_VEC4,
+            PicoGL.FLOAT_VEC4
+        ])
+        .set(0, viewProjMatrix)
+        .set(1, eyePosition)
+        .set(2, lightPosition)
+        .update();
+
+        var modelMatrix = mat4.create();
+        var rotateXMatrix = mat4.create();
+        var rotateYMatrix = mat4.create();
+
+        var angleX = 0;
+        var angleY = 0;
+
+        window.onresize = function() {
+            app.resize(window.innerWidth, window.innerHeight);
+
+            mat4.perspective(projMatrix, Math.PI / 2, app.width / app.height, 0.1, 10.0);
+            mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
+            
+            sceneUniformBuffer.set(0, viewProjMatrix).update();
+        }
+
+        
+        utils.loadImages(["img/webgl-logo.png"], function(images) {
+            // CREATE TEXTURE
+            var texture = app.createTexture2D(images[0], { flipY: true });
+            // SET UP DRAW CALL
+            var drawCall = app.createDrawCall(program, boxArray)
+            .uniformBlock("SceneUniforms", sceneUniformBuffer)
+            .texture("tex", texture);
+
+            app.onContextRestored(() => {
+                app.clearColor(0.0, 0.0, 0.0, 1.0)
+                .depthTest();
+
+                sceneUniformBuffer.restore()
+                .set(0, viewProjMatrix)
+                .set(1, eyePosition)
+                .set(2, lightPosition)
+                .update();
+
+                program.restore(vsSource, fsSource);
+
+                positions.restore(box.positions);
+                uv.restore(box.uvs);
+                normals.restore(box.normals);
+
+                boxArray.restore()
+                .vertexAttributeBuffer(0, positions)
+                .vertexAttributeBuffer(1, uv)
+                .vertexAttributeBuffer(2, normals);
+
+                texture.restore(images[0]);
+
+                timer.restore();
+            });
+
+            var contextLost = false;
+            var lastContextLoss = Date.now();
+            function draw() {
+                requestAnimationFrame(draw);
+
+                var currentTime = Date.now();
+                if (contextLost) {
+                    app.restoreContext();
+                    lastContextLoss = currentTime;
+                    contextLost = false;
+                } else if (currentTime - lastContextLoss > 2000) {
+                    app.loseContext();
+                    contextLost = true;
+                    return;
+                }
+
+                if (timer.ready()) {
+                    utils.updateTimerElement(timer.cpuTime, timer.gpuTime);
+                }
+
+                timer.start()
+
+                angleX += 0.01;
+                angleY += 0.02;
+
+                mat4.fromXRotation(rotateXMatrix, angleX);
+                mat4.fromYRotation(rotateYMatrix, angleY);
+                mat4.multiply(modelMatrix, rotateXMatrix, rotateYMatrix);
+
+                drawCall.uniform("uModel", modelMatrix);
+
+                app.clear();
+                drawCall.draw()
+                
+                timer.end();
+            }
+
+            requestAnimationFrame(draw);
+            
+        });
+
+    </script>
+    <a href="https://github.com/tsherif/picogl.js" id="github-ribbon"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"></a>
+    <script src="../site/js/iframe.js"></script>
+</body>
+</html>

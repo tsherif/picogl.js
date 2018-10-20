@@ -827,6 +827,8 @@ module.exports = TEXTURE_FORMAT_DEFAULTS;
 
 
 
+const CONSTANTS = __webpack_require__(0);
+
 /**
     WebGL shader.
 
@@ -838,19 +840,28 @@ class Shader {
     
     constructor(gl, type, source) {
         this.gl = gl;
-        this.shader = gl.createShader(type);
-        gl.shaderSource(this.shader, source);
-        gl.compileShader(this.shader);
+        this.shader = null;
+        this.type = type;
 
-        if (!gl.getShaderParameter(this.shader, gl.COMPILE_STATUS)) {
+        this.restore(source);
+    }
+
+    restore(source) {
+        this.shader = this.gl.createShader(this.type);
+        this.gl.shaderSource(this.shader, source);
+        this.gl.compileShader(this.shader);
+
+        if (!this.gl.getShaderParameter(this.shader, CONSTANTS.COMPILE_STATUS)) {
             let i, lines;
 
-            console.error(gl.getShaderInfoLog(this.shader));
+            console.error(this.gl.getShaderInfoLog(this.shader));
             lines = source.split("\n");
             for (i = 0; i < lines.length; ++i) {
                 console.error(`${i + 1}: ${lines[i]}`);
             }
         }
+
+        return this;
     }
 
     /**
@@ -917,8 +928,16 @@ class Query {
 
     constructor(gl, target) {
         this.gl = gl;
-        this.query = gl.createQuery();
+        this.query = null;
         this.target = target;
+        this.active = false;
+        this.result = null;
+
+        this.restore();
+    }
+
+    restore() {
+        this.query = this.gl.createQuery();
         this.active = false;
         this.result = null;
     }
@@ -1204,7 +1223,6 @@ class App {
             this.canvas.removeEventListener("webglcontextrestored", this.contextRestoredHandler);
         } else {
             this.canvas.addEventListener("webglcontextlost", (e) => {
-                console.log("LOSS")
                 e.preventDefault();
             });
         }
@@ -2765,7 +2783,7 @@ class Framebuffer {
 
     constructor(gl, appState) {
         this.gl = gl;
-        this.framebuffer = gl.createFramebuffer();
+        this.framebuffer = null;
         this.appState = appState;
 
         this.numColorTargets = 0;
@@ -2775,6 +2793,12 @@ class Framebuffer {
         this.colorTextureTargets = [];
         this.depthTexture = null;
         this.depthTextureTarget = null;
+
+        this.restore();
+    }
+
+    restore() {
+        this.framebuffer = this.gl.createFramebuffer();
     }
 
     /**
@@ -3054,6 +3078,28 @@ const MatrixUniform = Uniforms.MatrixUniform;
 class Program {
 
     constructor(gl, appState, vsSource, fsSource, xformFeebackVars) {
+        this.gl = gl;
+        this.appState = appState;
+        this.program = null;
+        this.transformFeedbackVaryings = xformFeebackVars || null;
+        this.uniforms = {};
+        this.uniformBlocks = {};
+        this.uniformBlockCount = 0;
+        this.samplers = {};
+        this.samplerCount = 0;
+
+        this.restore(vsSource, fsSource);
+    }
+
+    restore(vsSource, fsSource) {
+        if (this.appState.program === this) {
+            this.gl.useProgram(null);
+            this.appState.program = null;
+        }
+
+        this.uniformBlockCount = 0;
+        this.samplerCount = 0;
+
         let i;
 
         let vShader, fShader;
@@ -3061,29 +3107,29 @@ class Program {
         let ownVertexShader = false;
         let ownFragmentShader = false;
         if (typeof vsSource === "string") {
-            vShader = new Shader(gl, gl.VERTEX_SHADER, vsSource);
+            vShader = new Shader(this.gl, CONSTANTS.VERTEX_SHADER, vsSource);
             ownVertexShader = true;
         } else {
             vShader = vsSource;
         }
 
         if (typeof fsSource === "string") {
-            fShader = new Shader(gl, gl.FRAGMENT_SHADER, fsSource);
+            fShader = new Shader(this.gl, CONSTANTS.FRAGMENT_SHADER, fsSource);
             ownFragmentShader = true;
         } else {
             fShader = fsSource;
         }
 
-        let program = gl.createProgram();
-        gl.attachShader(program, vShader.shader);
-        gl.attachShader(program, fShader.shader);
-        if (xformFeebackVars) {
-            gl.transformFeedbackVaryings(program, xformFeebackVars, gl.SEPARATE_ATTRIBS);
+        let program = this.gl.createProgram();
+        this.gl.attachShader(program, vShader.shader);
+        this.gl.attachShader(program, fShader.shader);
+        if (this.transformFeedbackVaryings) {
+            this.gl.transformFeedbackVaryings(program, this.transformFeedbackVaryings, CONSTANTS.SEPARATE_ATTRIBS);
         }
-        gl.linkProgram(program);
+        this.gl.linkProgram(program);
 
-        if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-            console.error(gl.getProgramInfoLog(program));
+        if (!this.gl.getProgramParameter(program, CONSTANTS.LINK_STATUS)) {
+            console.error(this.gl.getProgramInfoLog(program));
         }
 
         if (ownVertexShader) {
@@ -3094,24 +3140,15 @@ class Program {
             fShader.delete();
         }
 
-        this.gl = gl;
         this.program = program;
-        this.appState = appState;
-        this.transformFeedback = !!xformFeebackVars;
-        this.uniforms = {};
-        this.uniformBlocks = {};
-        this.uniformBlockCount = 0;
-        this.samplers = {};
-        this.samplerCount = 0;
-
         this.bind();
 
-        let numUniforms = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
+        let numUniforms = this.gl.getProgramParameter(program, CONSTANTS.ACTIVE_UNIFORMS);
         let textureUnit;
 
         for (i = 0; i < numUniforms; ++i) {
-            let uniformInfo = gl.getActiveUniform(program, i);
-            let uniformHandle = gl.getUniformLocation(this.program, uniformInfo.name);
+            let uniformInfo = this.gl.getActiveUniform(program, i);
+            let uniformHandle = this.gl.getUniformLocation(this.program, uniformInfo.name);
             let UniformClass = null;
             let type = uniformInfo.type;
             let numElements = uniformInfo.size;
@@ -3177,20 +3214,22 @@ class Program {
             }
 
             if (UniformClass) {
-                this.uniforms[uniformInfo.name] = new UniformClass(gl, uniformHandle, type, numElements);
+                this.uniforms[uniformInfo.name] = new UniformClass(this.gl, uniformHandle, type, numElements);
             }
         }
 
-        let numUniformBlocks = gl.getProgramParameter(program, gl.ACTIVE_UNIFORM_BLOCKS);
+        let numUniformBlocks = this.gl.getProgramParameter(program, CONSTANTS.ACTIVE_UNIFORM_BLOCKS);
 
         for (i = 0; i < numUniformBlocks; ++i) {
-            let blockName = gl.getActiveUniformBlockName(this.program, i);
-            let blockIndex = gl.getUniformBlockIndex(this.program, blockName);
+            let blockName = this.gl.getActiveUniformBlockName(this.program, i);
+            let blockIndex = this.gl.getUniformBlockIndex(this.program, blockName);
             
             let uniformBlockBase = this.uniformBlockCount++;
             this.gl.uniformBlockBinding(this.program, blockIndex, uniformBlockBase);
             this.uniformBlocks[blockName] = uniformBlockBase;
         }
+
+        return this;
     }
 
     /**
@@ -3547,9 +3586,9 @@ class Texture {
         this.gl = gl;
         this.binding = binding;
         this.texture = null;
-        this.width = -1;
-        this.height = -1;
-        this.depth = -1;
+        this.width = width || 0;
+        this.height = height || 0;
+        this.depth = depth || 0;
         this.type = options.type !== undefined ? options.type : defaultType;
         this.is3D = is3D;
         this.appState = appState;
@@ -3601,11 +3640,18 @@ class Texture {
         this.flipY = flipY;
         this.mipmaps = (minFilter === gl.LINEAR_MIPMAP_NEAREST || minFilter === gl.LINEAR_MIPMAP_LINEAR);
 
-        this.resize(width, height, depth);
+        this.restore(image);
+    }
+
+    restore(image) {
+        this.texture = null;
+        this.resize(this.width, this.height, this.depth);
 
         if (image) {
             this.data(image);
         }
+
+        return this;
     }
 
     /**
@@ -3620,7 +3666,7 @@ class Texture {
     resize(width, height, depth) {
         depth = depth || 0;
 
-        if (width === this.width && height === this.height && depth === this.depth) {
+        if (this.texture && width === this.width && height === this.height && depth === this.depth) {
             return this; 
         }
 
@@ -3849,14 +3895,25 @@ class Timer {
         this.gl = gl;
         this.cpuTimer = window.performance || window.Date;
 
-        // Note(Tarek): Firefox for some reason only supports EXT_disjoint_timer_query, so have to try both
-        var gpuTimerExtension = this.gl.getExtension("EXT_disjoint_timer_query_webgl2") || this.gl.getExtension("EXT_disjoint_timer_query");
-        if (gpuTimerExtension) {
-            this.gpuTimer = true;
-            this.gpuTimerQuery = new Query(this.gl, CONSTANTS.TIME_ELAPSED_EXT);
-        } else {
-            this.gpuTimer = false;
-            this.gpuTimerQuery = null;
+        this.gpuTimer = false;
+        this.gpuTimerQuery = null;
+
+        this.cpuStartTime = 0;
+        this.cpuTime = 0;
+        this.gpuTime = 0;
+
+        this.restore();
+    }
+
+    restore() {
+        this.gpuTimer = !!(this.gl.getExtension("EXT_disjoint_timer_query_webgl2") || this.gl.getExtension("EXT_disjoint_timer_query"));
+        
+        if (this.gpuTimer) {
+            if (this.gpuTimerQuery) {
+                this.gpuTimerQuery.restore();
+            } else {
+                this.gpuTimerQuery = new Query(this.gl, CONSTANTS.TIME_ELAPSED_EXT);
+            }
         }
 
         this.cpuStartTime = 0;
@@ -4108,7 +4165,7 @@ class UniformBuffer {
 
     constructor(gl, appState, layout, usage = gl.DYNAMIC_DRAW) {
         this.gl = gl;
-        this.buffer = gl.createBuffer();
+        this.buffer = null;
         this.dataViews = {};
         this.offsets = new Array(layout.length);
         this.sizes = new Array(layout.length);
@@ -4222,10 +4279,20 @@ class UniformBuffer {
         this.dataViews[CONSTANTS.INT] = new Int32Array(this.data.buffer);
         this.dataViews[CONSTANTS.UNSIGNED_INT] = new Uint32Array(this.data.buffer);
 
-        
-        this.gl.bindBuffer(this.gl.UNIFORM_BUFFER, this.buffer);
-        this.gl.bufferData(this.gl.UNIFORM_BUFFER, this.size * 4, this.usage);
-        this.gl.bindBuffer(this.gl.UNIFORM_BUFFER, null);
+        this.restore();
+    }
+
+    restore() {
+        if (this.currentBase !== -1 && this.appState.uniformBuffers[this.currentBase] === this) {
+            this.appState.uniformBuffers[this.currentBase] = null;
+        }
+
+        this.buffer = this.gl.createBuffer();
+        this.gl.bindBuffer(CONSTANTS.UNIFORM_BUFFER, this.buffer);
+        this.gl.bufferData(CONSTANTS.UNIFORM_BUFFER, this.size * 4, this.usage);
+        this.gl.bindBuffer(CONSTANTS.UNIFORM_BUFFER, null);
+
+        return this;
     }
 
     /**
@@ -4375,13 +4442,23 @@ class VertexArray {
     
     constructor(gl, appState) {
         this.gl = gl;
-        this.vertexArray = gl.createVertexArray();
         this.appState = appState;
+        this.vertexArray = null;
         this.numElements = 0;
         this.indexType = null;
         this.instancedBuffers = 0;
         this.indexed = false;
         this.numInstances = 0;
+    }
+
+    restore() {
+        if (this.appState.vertexArray === this) {
+            this.appState.vertexArray = null;
+        }
+
+        this.vertexArray = this.gl.createVertexArray();
+
+        return this;
     }
 
     /**
@@ -4690,7 +4767,7 @@ class VertexBuffer {
         }
 
         this.gl = gl;
-        this.buffer = gl.createBuffer();
+        this.buffer = null;
         this.appState = appState;
         this.type = type;
         this.itemSize = itemSize;
@@ -4700,9 +4777,16 @@ class VertexBuffer {
         this.indexArray = !!indexArray;
         this.binding = this.indexArray ? gl.ELEMENT_ARRAY_BUFFER : gl.ARRAY_BUFFER;
 
-        gl.bindBuffer(this.binding, this.buffer);
-        gl.bufferData(this.binding, data, this.usage);
-        gl.bindBuffer(this.binding, null);
+        this.restore(data);
+    }
+
+    restore(data) {
+        this.buffer = this.gl.createBuffer();
+        this.gl.bindBuffer(this.binding, this.buffer);
+        this.gl.bufferData(this.binding, data, this.usage);
+        this.gl.bindBuffer(this.binding, null);
+
+        return this;
     }
 
     /**

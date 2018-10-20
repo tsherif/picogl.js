@@ -43,7 +43,7 @@ class UniformBuffer {
 
     constructor(gl, appState, layout, usage = gl.DYNAMIC_DRAW) {
         this.gl = gl;
-        this.buffer = gl.createBuffer();
+        this.buffer = null;
         this.dataViews = {};
         this.offsets = new Array(layout.length);
         this.sizes = new Array(layout.length);
@@ -157,10 +157,20 @@ class UniformBuffer {
         this.dataViews[CONSTANTS.INT] = new Int32Array(this.data.buffer);
         this.dataViews[CONSTANTS.UNSIGNED_INT] = new Uint32Array(this.data.buffer);
 
-        
-        this.gl.bindBuffer(this.gl.UNIFORM_BUFFER, this.buffer);
-        this.gl.bufferData(this.gl.UNIFORM_BUFFER, this.size * 4, this.usage);
-        this.gl.bindBuffer(this.gl.UNIFORM_BUFFER, null);
+        this.restore();
+    }
+
+    restore() {
+        if (this.currentBase !== -1 && this.appState.uniformBuffers[this.currentBase] === this) {
+            this.appState.uniformBuffers[this.currentBase] = null;
+        }
+
+        this.buffer = this.gl.createBuffer();
+        this.gl.bindBuffer(CONSTANTS.UNIFORM_BUFFER, this.buffer);
+        this.gl.bufferData(CONSTANTS.UNIFORM_BUFFER, this.size * 4, this.usage);
+        this.gl.bindBuffer(CONSTANTS.UNIFORM_BUFFER, null);
+
+        return this;
     }
 
     /**
