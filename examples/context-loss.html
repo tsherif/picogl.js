@@ -28,13 +28,25 @@
     <script src="../build/picogl.js"></script>
     <script src="utils/utils.js"></script>
     <link rel="stylesheet" href="../site/css/picogl-example.css"> 
+    <style>
+        #context-loss {
+            position: absolute;
+            top: 80px;
+            left: 10px;
+            color: white;
+            background-color: gray;
+            padding: 0.5em;
+        }
+    </style>
 </head>
 <body>
     <div id="example-title">
-        PicoGL.js Example: Phong-shaded Cube
+        PicoGL.js Example: Context Loss and Recovery
         <div>
             <a href="https://github.com/tsherif/picogl.js/blob/master/examples/context-loss.html">Source code</a>
         </div>
+    </div>
+    <div id="context-loss">
     </div>
     <canvas id="gl-canvas"></canvas>
     <script type="x-shader/vs" id="vertex-draw">
@@ -172,6 +184,7 @@
             sceneUniformBuffer.set(0, viewProjMatrix).update();
         }
 
+        var contextLossDiv = document.getElementById("context-loss");
         
         utils.loadImages(["img/webgl-logo.png"], function(images) {
             // CREATE TEXTURE
@@ -214,13 +227,17 @@
 
                 var currentTime = Date.now();
                 if (contextLost) {
+                    contextLossDiv.innerHTML = "Context Restored!";
                     app.restoreContext();
                     lastContextLoss = currentTime;
                     contextLost = false;
                 } else if (currentTime - lastContextLoss > 2000) {
+                    contextLossDiv.innerHTML = "Context Lost!";
                     app.loseContext();
                     contextLost = true;
                     return;
+                } else {
+                    contextLossDiv.innerHTML = `Countdown to Context Loss: ${((2000 - currentTime + lastContextLoss) / 1000).toFixed(1)}`;
                 }
 
                 if (timer.ready()) {
