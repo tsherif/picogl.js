@@ -93,7 +93,7 @@ class VertexBuffer {
         }
 
         this.gl = gl;
-        this.buffer = gl.createBuffer();
+        this.buffer = null;
         this.appState = appState;
         this.type = type;
         this.itemSize = itemSize;
@@ -103,9 +103,16 @@ class VertexBuffer {
         this.indexArray = !!indexArray;
         this.binding = this.indexArray ? gl.ELEMENT_ARRAY_BUFFER : gl.ARRAY_BUFFER;
 
-        gl.bindBuffer(this.binding, this.buffer);
-        gl.bufferData(this.binding, data, this.usage);
-        gl.bindBuffer(this.binding, null);
+        this.restore(data);
+    }
+
+    restore(data) {
+        this.buffer = this.gl.createBuffer();
+        this.gl.bindBuffer(this.binding, this.buffer);
+        this.gl.bufferData(this.binding, data, this.usage);
+        this.gl.bindBuffer(this.binding, null);
+
+        return this;
     }
 
     /**

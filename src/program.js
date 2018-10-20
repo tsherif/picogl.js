@@ -46,6 +46,28 @@ const MatrixUniform = Uniforms.MatrixUniform;
 class Program {
 
     constructor(gl, appState, vsSource, fsSource, xformFeebackVars) {
+        this.gl = gl;
+        this.appState = appState;
+        this.program = null;
+        this.transformFeedbackVaryings = xformFeebackVars || null;
+        this.uniforms = {};
+        this.uniformBlocks = {};
+        this.uniformBlockCount = 0;
+        this.samplers = {};
+        this.samplerCount = 0;
+
+        this.restore(vsSource, fsSource);
+    }
+
+    restore(vsSource, fsSource) {
+        if (this.appState.program === this) {
+            this.gl.useProgram(null);
+            this.appState.program = null;
+        }
+
+        this.uniformBlockCount = 0;
+        this.samplerCount = 0;
+
         let i;
 
         let vShader, fShader;
@@ -53,29 +75,29 @@ class Program {
         let ownVertexShader = false;
         let ownFragmentShader = false;
         if (typeof vsSource === "string") {
-            vShader = new Shader(gl, gl.VERTEX_SHADER, vsSource);
+            vShader = new Shader(this.gl, CONSTANTS.VERTEX_SHADER, vsSource);
             ownVertexShader = true;
         } else {
             vShader = vsSource;
         }
 
         if (typeof fsSource === "string") {
-            fShader = new Shader(gl, gl.FRAGMENT_SHADER, fsSource);
+            fShader = new Shader(this.gl, CONSTANTS.FRAGMENT_SHADER, fsSource);
             ownFragmentShader = true;
         } else {
             fShader = fsSource;
         }
 
-        let program = gl.createProgram();
-        gl.attachShader(program, vShader.shader);
-        gl.attachShader(program, fShader.shader);
-        if (xformFeebackVars) {
-            gl.transformFeedbackVaryings(program, xformFeebackVars, gl.SEPARATE_ATTRIBS);
+        let program = this.gl.createProgram();
+        this.gl.attachShader(program, vShader.shader);
+        this.gl.attachShader(program, fShader.shader);
+        if (this.transformFeedbackVaryings) {
+            this.gl.transformFeedbackVaryings(program, this.transformFeedbackVaryings, CONSTANTS.SEPARATE_ATTRIBS);
         }
-        gl.linkProgram(program);
+        this.gl.linkProgram(program);
 
-        if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-            console.error(gl.getProgramInfoLog(program));
+        if (!this.gl.getProgramParameter(program, CONSTANTS.LINK_STATUS)) {
+            console.error(this.gl.getProgramInfoLog(program));
         }
 
         if (ownVertexShader) {
@@ -86,24 +108,15 @@ class Program {
             fShader.delete();
         }
 
-        this.gl = gl;
         this.program = program;
-        this.appState = appState;
-        this.transformFeedback = !!xformFeebackVars;
-        this.uniforms = {};
-        this.uniformBlocks = {};
-        this.uniformBlockCount = 0;
-        this.samplers = {};
-        this.samplerCount = 0;
-
         this.bind();
 
-        let numUniforms = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
+        let numUniforms = this.gl.getProgramParameter(program, CONSTANTS.ACTIVE_UNIFORMS);
         let textureUnit;
 
         for (i = 0; i < numUniforms; ++i) {
-            let uniformInfo = gl.getActiveUniform(program, i);
-            let uniformHandle = gl.getUniformLocation(this.program, uniformInfo.name);
+            let uniformInfo = this.gl.getActiveUniform(program, i);
+            let uniformHandle = this.gl.getUniformLocation(this.program, uniformInfo.name);
             let UniformClass = null;
             let type = uniformInfo.type;
             let numElements = uniformInfo.size;
@@ -169,20 +182,22 @@ class Program {
             }
 
             if (UniformClass) {
-                this.uniforms[uniformInfo.name] = new UniformClass(gl, uniformHandle, type, numElements);
+                this.uniforms[uniformInfo.name] = new UniformClass(this.gl, uniformHandle, type, numElements);
             }
         }
 
-        let numUniformBlocks = gl.getProgramParameter(program, gl.ACTIVE_UNIFORM_BLOCKS);
+        let numUniformBlocks = this.gl.getProgramParameter(program, CONSTANTS.ACTIVE_UNIFORM_BLOCKS);
 
         for (i = 0; i < numUniformBlocks; ++i) {
-            let blockName = gl.getActiveUniformBlockName(this.program, i);
-            let blockIndex = gl.getUniformBlockIndex(this.program, blockName);
+            let blockName = this.gl.getActiveUniformBlockName(this.program, i);
+            let blockIndex = this.gl.getUniformBlockIndex(this.program, blockName);
             
             let uniformBlockBase = this.uniformBlockCount++;
             this.gl.uniformBlockBinding(this.program, blockIndex, uniformBlockBase);
             this.uniformBlocks[blockName] = uniformBlockBase;
         }
+
+        return this;
     }
 
     /**

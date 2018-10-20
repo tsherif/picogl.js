@@ -23,6 +23,8 @@
 
 "use strict";
 
+const CONSTANTS = require("./constants");
+
 /**
     WebGL shader.
 
@@ -34,19 +36,28 @@ class Shader {
     
     constructor(gl, type, source) {
         this.gl = gl;
-        this.shader = gl.createShader(type);
-        gl.shaderSource(this.shader, source);
-        gl.compileShader(this.shader);
+        this.shader = null;
+        this.type = type;
 
-        if (!gl.getShaderParameter(this.shader, gl.COMPILE_STATUS)) {
+        this.restore(source);
+    }
+
+    restore(source) {
+        this.shader = this.gl.createShader(this.type);
+        this.gl.shaderSource(this.shader, source);
+        this.gl.compileShader(this.shader);
+
+        if (!this.gl.getShaderParameter(this.shader, CONSTANTS.COMPILE_STATUS)) {
             let i, lines;
 
-            console.error(gl.getShaderInfoLog(this.shader));
+            console.error(this.gl.getShaderInfoLog(this.shader));
             lines = source.split("\n");
             for (i = 0; i < lines.length; ++i) {
                 console.error(`${i + 1}: ${lines[i]}`);
             }
         }
+
+        return this;
     }
 
     /**

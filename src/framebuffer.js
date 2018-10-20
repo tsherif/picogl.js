@@ -41,7 +41,7 @@ class Framebuffer {
 
     constructor(gl, appState) {
         this.gl = gl;
-        this.framebuffer = gl.createFramebuffer();
+        this.framebuffer = null;
         this.appState = appState;
 
         this.numColorTargets = 0;
@@ -51,6 +51,12 @@ class Framebuffer {
         this.colorTextureTargets = [];
         this.depthTexture = null;
         this.depthTextureTarget = null;
+
+        this.restore();
+    }
+
+    restore() {
+        this.framebuffer = this.gl.createFramebuffer();
     }
 
     /**
