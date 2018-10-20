@@ -46,7 +46,7 @@ class TransformFeedback {
             this.appState.transformFeedback = null;
         }
 
-        this.transformFeedback = gl.createTransformFeedback();
+        this.transformFeedback = this.gl.createTransformFeedback();
     }
 
     /**
