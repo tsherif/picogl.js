@@ -35,8 +35,18 @@ class TransformFeedback {
 
     constructor(gl, appState) {
         this.gl = gl;
-        this.transformFeedback = gl.createTransformFeedback();
         this.appState = appState;
+        this.transformFeedback = null;
+
+        this.restore();
+    }
+
+    restore() {
+        if (this.appState.transformFeedback === this) {
+            this.appState.transformFeedback = null;
+        }
+
+        this.transformFeedback = gl.createTransformFeedback();
     }
 
     /**

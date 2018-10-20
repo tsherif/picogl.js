@@ -56,6 +56,14 @@ class Framebuffer {
     }
 
     restore() {
+        if (this.appState.drawFramebuffer === this) {
+            this.appState.drawFramebuffer = null;
+        }
+
+        if (this.appState.readFramebuffer === this) {
+            this.appState.readFramebuffer = null;
+        }
+
         this.framebuffer = this.gl.createFramebuffer();
     }
 
