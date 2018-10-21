@@ -35,8 +35,26 @@ class TransformFeedback {
 
     constructor(gl, appState) {
         this.gl = gl;
-        this.transformFeedback = gl.createTransformFeedback();
         this.appState = appState;
+        this.transformFeedback = null;
+
+        this.restore();
+    }
+
+    /**
+        Restore transform feedback after context loss.
+
+        @method
+        @return {TransformFeedback} The TransformFeedback object.
+    */
+    restore() {
+        if (this.appState.transformFeedback === this) {
+            this.appState.transformFeedback = null;
+        }
+
+        this.transformFeedback = this.gl.createTransformFeedback();
+
+        return this;
     }
 
     /**

@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.8.12
+PicoGL.js v0.9.0
 
 The MIT License (MIT)
 
@@ -861,6 +861,8 @@ module.exports = TEXTURE_FORMAT_DEFAULTS;
 
 
 
+const CONSTANTS = __webpack_require__(0);
+
 /**
     WebGL shader.
 
@@ -872,19 +874,35 @@ class Shader {
     
     constructor(gl, type, source) {
         this.gl = gl;
-        this.shader = gl.createShader(type);
-        gl.shaderSource(this.shader, source);
-        gl.compileShader(this.shader);
+        this.shader = null;
+        this.type = type;
 
-        if (!gl.getShaderParameter(this.shader, gl.COMPILE_STATUS)) {
+        this.restore(source);
+    }
+
+    /**
+        Restore shader after context loss.
+
+        @method
+        @param {string} source Shader source.
+        @return {Shader} The Shader object.
+    */
+    restore(source) {
+        this.shader = this.gl.createShader(this.type);
+        this.gl.shaderSource(this.shader, source);
+        this.gl.compileShader(this.shader);
+
+        if (!this.gl.getShaderParameter(this.shader, CONSTANTS.COMPILE_STATUS)) {
             let i, lines;
 
-            console.error(gl.getShaderInfoLog(this.shader));
+            console.error(this.gl.getShaderInfoLog(this.shader));
             lines = source.split("\n");
             for (i = 0; i < lines.length; ++i) {
                 console.error(`${i + 1}: ${lines[i]}`);
             }
         }
+
+        return this;
     }
 
     /**
@@ -951,10 +969,26 @@ class Query {
 
     constructor(gl, target) {
         this.gl = gl;
-        this.query = gl.createQuery();
+        this.query = null;
         this.target = target;
         this.active = false;
         this.result = null;
+
+        this.restore();
+    }
+
+    /**
+        Restore query after context loss.
+
+        @method
+        @return {Query} The Query object.
+    */
+    restore() {
+        this.query = this.gl.createQuery();
+        this.active = false;
+        this.result = null;
+
+        return this;
     }
 
     /**
@@ -1066,7 +1100,7 @@ const App = __webpack_require__(5);
     @namespace PicoGL
 */
 const PicoGL = __webpack_require__(0);
-PicoGL.version = "0.8.12";
+PicoGL.version = "0.9.0";
 
 /**
     Create a PicoGL app. The app is the primary entry point to PicoGL. It stores
@@ -1195,6 +1229,63 @@ class App {
         this.pvrtcTexturesEnabled = false;
 
         this.viewport(0, 0, this.width, this.height);
+
+        this.contextRestoredHandler = null;
+        this.contextLostExt = null;
+    }
+
+    /**
+        Simulate context loss.
+
+        @method
+        @return {App} The App object.
+    */
+    loseContext() {
+        if (!this.contextLostExt) {
+            this.contextLostExt = this.gl.getExtension("WEBGL_lose_context");
+        }
+
+        if (this.contextLostExt) {
+            this.contextLostExt.loseContext();
+        }
+
+        return this;
+    }
+
+    /**
+        Simulate context restoration.
+
+        @method
+        @return {App} The App object.
+    */
+    restoreContext() {
+        if (this.contextLostExt) {
+            this.contextLostExt.restoreContext();
+        }
+
+        return this;
+    }
+
+    /**
+        Set function to handle context restoration after loss.
+
+        @method
+        @param {function} fn Context restored handler.
+        @return {App} The App object.
+    */
+    onContextRestored(fn) {
+        if (this.contextRestoredHandler) {
+            this.canvas.removeEventListener("webglcontextrestored", this.contextRestoredHandler);
+        } else {
+            this.canvas.addEventListener("webglcontextlost", (e) => {
+                e.preventDefault();
+            });
+        }
+        
+        this.canvas.addEventListener("webglcontextrestored", fn);
+        this.contextRestoredHandler = fn;
+
+        return this;
     }
 
     /**
@@ -2001,7 +2092,8 @@ class App {
         @method
         @param {GLEnum} type The data type stored in the vertex buffer.
         @param {number} itemSize Number of elements per vertex.
-        @param {ArrayBufferView} data Buffer data.
+        @param {ArrayBufferView|number} data Buffer data itself or the total 
+            number of elements to be allocated.
         @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
         @return {VertexBuffer} New VertexBuffer object.
     */
@@ -2340,12 +2432,10 @@ const TEXTURE_FORMAT_DEFAULTS = __webpack_require__(1);
 class Cubemap {
 
     constructor(gl, appState, options) {
-        let { negX, posX, negY, posY, negZ, posZ } = options;
-
         let defaultType = options.format === CONSTANTS.DEPTH_COMPONENT ? CONSTANTS.UNSIGNED_SHORT : CONSTANTS.UNSIGNED_BYTE;
 
         this.gl = gl;
-        this.texture = gl.createTexture();
+        this.texture = null;
         this.format = options.format !== undefined ? options.format : gl.RGBA;
         this.type = options.type !== undefined ? options.type : defaultType;
         this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : TEXTURE_FORMAT_DEFAULTS[this.type][this.format];
@@ -2354,6 +2444,7 @@ class Cubemap {
         // -1 indicates unbound
         this.currentUnit = -1;
 
+        let negX = options.negX;
         let {
             width = negX.width,
             height = negX.height,
@@ -2364,46 +2455,96 @@ class Cubemap {
             wrapT = gl.REPEAT,
             compareMode = gl.NONE,
             compareFunc = gl.LEQUAL,
-            generateMipmaps = minFilter === gl.LINEAR_MIPMAP_NEAREST || minFilter === gl.LINEAR_MIPMAP_LINEAR
+            minLOD = null,
+            maxLOD = null,
+            baseLevel = null,
+            maxLevel = null
         } = options;
         
-        this.bind(0);
-        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY);
-        gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, magFilter);
-        gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, minFilter);
-        gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, wrapS);
-        gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, wrapT);
-        gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_COMPARE_FUNC, compareFunc);
-        gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_COMPARE_MODE, compareMode);
-        if (options.baseLevel !== undefined) {
-            gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_BASE_LEVEL, options.baseLevel);
-        }
-        if (options.maxLevel !== undefined) {
-            gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAX_LEVEL, options.maxLevel);
-        }
-        if (options.minLOD !== undefined) {
-            gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_LOD, options.minLOD);
-        }
-        if (options.maxLOD !== undefined) {
-            gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAX_LOD, options.maxLOD);
+        this.width = width;
+        this.height = height;
+        this.flipY = flipY;
+        this.minFilter = minFilter;
+        this.magFilter = magFilter;
+        this.wrapS = wrapS;
+        this.wrapT = wrapT;
+        this.compareMode = compareMode;
+        this.compareFunc = compareFunc;
+        this.minLOD = minLOD;
+        this.maxLOD = maxLOD;
+        this.baseLevel = baseLevel;
+        this.maxLevel = maxLevel;
+        this.mipmaps = (minFilter === gl.LINEAR_MIPMAP_NEAREST || minFilter === gl.LINEAR_MIPMAP_LINEAR);
+        this.levels = this.mipmaps ? Math.floor(Math.log2(Math.min(this.width, this.height))) + 1 : 1;
+
+        this.restore(options);
+    }
+
+    /**
+        Restore cubemap after context loss.
+
+        @method
+        @param {Object} [options] Texture options.
+        @param {DOMElement|ArrayBufferView} [options.negX] The image data for the negative X direction.
+                Can be any format that would be accepted by texImage2D.
+        @param {DOMElement|ArrayBufferView} [options.posX] The image data for the positive X direction.
+                Can be any format that would be accepted by texImage2D.
+        @param {DOMElement|ArrayBufferView} [options.negY] The image data for the negative Y direction.
+                Can be any format that would be accepted by texImage2D.
+        @param {DOMElement|ArrayBufferView} [options.posY] The image data for the positive Y direction.
+                Can be any format that would be accepted by texImage2D.
+        @param {DOMElement|ArrayBufferView} [options.negZ] The image data for the negative Z direction.
+                Can be any format that would be accepted by texImage2D.
+        @param {DOMElement|ArrayBufferView} [options.posZ] The image data for the positive Z direction.
+                Can be any format that would be accepted by texImage2D.
+        @return {Cubemap} The Cubemap object.
+    */
+    restore(options = CONSTANTS.DUMMY_OBJECT) {
+        this.texture = this.gl.createTexture();
+
+        if (this.currentUnit !== -1) {
+            this.appState.textures[this.currentUnit] = null;
         }
 
-        let levels = generateMipmaps ? Math.floor(Math.log2(Math.min(width, height))) + 1 : 1;
-        gl.texStorage2D(gl.TEXTURE_CUBE_MAP, levels, this.internalFormat, width, height);
+        this.bind(0);
+        this.gl.pixelStorei(CONSTANTS.UNPACK_FLIP_Y_WEBGL, this.flipY);
+        this.gl.texParameteri(CONSTANTS.TEXTURE_CUBE_MAP, CONSTANTS.TEXTURE_MAG_FILTER, this.magFilter);
+        this.gl.texParameteri(CONSTANTS.TEXTURE_CUBE_MAP, CONSTANTS.TEXTURE_MIN_FILTER, this.minFilter);
+        this.gl.texParameteri(CONSTANTS.TEXTURE_CUBE_MAP, CONSTANTS.TEXTURE_WRAP_S, this.wrapS);
+        this.gl.texParameteri(CONSTANTS.TEXTURE_CUBE_MAP, CONSTANTS.TEXTURE_WRAP_T, this.wrapT);
+        this.gl.texParameteri(CONSTANTS.TEXTURE_CUBE_MAP, CONSTANTS.TEXTURE_COMPARE_FUNC, this.compareFunc);
+        this.gl.texParameteri(CONSTANTS.TEXTURE_CUBE_MAP, CONSTANTS.TEXTURE_COMPARE_MODE, this.compareMode);
+        if (this.baseLevel !== null) {
+            this.gl.texParameteri(CONSTANTS.TEXTURE_CUBE_MAP, CONSTANTS.TEXTURE_BASE_LEVEL, this.baseLevel);
+        }
+        if (this.maxLevel !== null) {
+            this.gl.texParameteri(CONSTANTS.TEXTURE_CUBE_MAP, CONSTANTS.TEXTURE_MAX_LEVEL, this.maxLevel);
+        }
+        if (this.minLOD !== null) {
+            this.gl.texParameteri(CONSTANTS.TEXTURE_CUBE_MAP, CONSTANTS.TEXTURE_MIN_LOD, this.minLOD);
+        }
+        if (this.maxLOD !== null) {
+            this.gl.texParameteri(CONSTANTS.TEXTURE_CUBE_MAP, CONSTANTS.TEXTURE_MAX_LOD, this.maxLOD);
+        }
+
+        this.gl.texStorage2D(CONSTANTS.TEXTURE_CUBE_MAP, this.levels, this.internalFormat, this.width, this.height);
+
+        let { negX, posX, negY, posY, negZ, posZ } = options;
 
         if (negX) {
-            gl.texSubImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_X, 0, 0, 0, width, height, this.format, this.type, negX);
-            gl.texSubImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X, 0, 0, 0, width, height, this.format, this.type, posX);
-            gl.texSubImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, 0, 0, width, height, this.format, this.type, negY);
-            gl.texSubImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Y, 0, 0, 0, width, height, this.format, this.type, posY);
-            gl.texSubImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, 0, 0, width, height, this.format, this.type, negZ);
-            gl.texSubImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Z, 0, 0, 0, width, height, this.format, this.type, posZ);
+            this.gl.texSubImage2D(CONSTANTS.TEXTURE_CUBE_MAP_NEGATIVE_X, 0, 0, 0, this.width, this.height, this.format, this.type, negX);
+            this.gl.texSubImage2D(CONSTANTS.TEXTURE_CUBE_MAP_POSITIVE_X, 0, 0, 0, this.width, this.height, this.format, this.type, posX);
+            this.gl.texSubImage2D(CONSTANTS.TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, 0, 0, this.width, this.height, this.format, this.type, negY);
+            this.gl.texSubImage2D(CONSTANTS.TEXTURE_CUBE_MAP_POSITIVE_Y, 0, 0, 0, this.width, this.height, this.format, this.type, posY);
+            this.gl.texSubImage2D(CONSTANTS.TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, 0, 0, this.width, this.height, this.format, this.type, negZ);
+            this.gl.texSubImage2D(CONSTANTS.TEXTURE_CUBE_MAP_POSITIVE_Z, 0, 0, 0, this.width, this.height, this.format, this.type, posZ);
         }
 
-        if (generateMipmaps) {
-            gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
+        if (this.mipmaps) {
+            this.gl.generateMipmap(CONSTANTS.TEXTURE_CUBE_MAP);
         }
 
+        return this;
     }
 
     /**
@@ -2747,7 +2888,7 @@ class Framebuffer {
 
     constructor(gl, appState) {
         this.gl = gl;
-        this.framebuffer = gl.createFramebuffer();
+        this.framebuffer = null;
         this.appState = appState;
 
         this.numColorTargets = 0;
@@ -2757,6 +2898,28 @@ class Framebuffer {
         this.colorTextureTargets = [];
         this.depthTexture = null;
         this.depthTextureTarget = null;
+
+        this.restore();
+    }
+
+    /**
+        Restore framebuffer after context loss.
+
+        @method
+        @return {Framebuffer} The Framebuffer object.
+    */
+    restore() {
+        if (this.appState.drawFramebuffer === this) {
+            this.appState.drawFramebuffer = null;
+        }
+
+        if (this.appState.readFramebuffer === this) {
+            this.appState.readFramebuffer = null;
+        }
+
+        this.framebuffer = this.gl.createFramebuffer();
+
+        return this;
     }
 
     /**
@@ -3036,6 +3199,36 @@ const MatrixUniform = Uniforms.MatrixUniform;
 class Program {
 
     constructor(gl, appState, vsSource, fsSource, xformFeebackVars) {
+        this.gl = gl;
+        this.appState = appState;
+        this.program = null;
+        this.transformFeedbackVaryings = xformFeebackVars || null;
+        this.uniforms = {};
+        this.uniformBlocks = {};
+        this.uniformBlockCount = 0;
+        this.samplers = {};
+        this.samplerCount = 0;
+
+        this.restore(vsSource, fsSource);
+    }
+
+    /**
+        Restore program after context loss.
+
+        @method
+        @param {Shader|string} vertexShader Vertex shader object or source code.
+        @param {Shader|string} fragmentShader Fragment shader object or source code.
+        @return {Program} The Program object.
+    */
+    restore(vsSource, fsSource) {
+        if (this.appState.program === this) {
+            this.gl.useProgram(null);
+            this.appState.program = null;
+        }
+
+        this.uniformBlockCount = 0;
+        this.samplerCount = 0;
+
         let i;
 
         let vShader, fShader;
@@ -3043,29 +3236,29 @@ class Program {
         let ownVertexShader = false;
         let ownFragmentShader = false;
         if (typeof vsSource === "string") {
-            vShader = new Shader(gl, gl.VERTEX_SHADER, vsSource);
+            vShader = new Shader(this.gl, CONSTANTS.VERTEX_SHADER, vsSource);
             ownVertexShader = true;
         } else {
             vShader = vsSource;
         }
 
         if (typeof fsSource === "string") {
-            fShader = new Shader(gl, gl.FRAGMENT_SHADER, fsSource);
+            fShader = new Shader(this.gl, CONSTANTS.FRAGMENT_SHADER, fsSource);
             ownFragmentShader = true;
         } else {
             fShader = fsSource;
         }
 
-        let program = gl.createProgram();
-        gl.attachShader(program, vShader.shader);
-        gl.attachShader(program, fShader.shader);
-        if (xformFeebackVars) {
-            gl.transformFeedbackVaryings(program, xformFeebackVars, gl.SEPARATE_ATTRIBS);
+        let program = this.gl.createProgram();
+        this.gl.attachShader(program, vShader.shader);
+        this.gl.attachShader(program, fShader.shader);
+        if (this.transformFeedbackVaryings) {
+            this.gl.transformFeedbackVaryings(program, this.transformFeedbackVaryings, CONSTANTS.SEPARATE_ATTRIBS);
         }
-        gl.linkProgram(program);
+        this.gl.linkProgram(program);
 
-        if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-            console.error(gl.getProgramInfoLog(program));
+        if (!this.gl.getProgramParameter(program, CONSTANTS.LINK_STATUS)) {
+            console.error(this.gl.getProgramInfoLog(program));
         }
 
         if (ownVertexShader) {
@@ -3076,24 +3269,15 @@ class Program {
             fShader.delete();
         }
 
-        this.gl = gl;
         this.program = program;
-        this.appState = appState;
-        this.transformFeedback = !!xformFeebackVars;
-        this.uniforms = {};
-        this.uniformBlocks = {};
-        this.uniformBlockCount = 0;
-        this.samplers = {};
-        this.samplerCount = 0;
-
         this.bind();
 
-        let numUniforms = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
+        let numUniforms = this.gl.getProgramParameter(program, CONSTANTS.ACTIVE_UNIFORMS);
         let textureUnit;
 
         for (i = 0; i < numUniforms; ++i) {
-            let uniformInfo = gl.getActiveUniform(program, i);
-            let uniformHandle = gl.getUniformLocation(this.program, uniformInfo.name);
+            let uniformInfo = this.gl.getActiveUniform(program, i);
+            let uniformHandle = this.gl.getUniformLocation(this.program, uniformInfo.name);
             let UniformClass = null;
             let type = uniformInfo.type;
             let numElements = uniformInfo.size;
@@ -3159,20 +3343,22 @@ class Program {
             }
 
             if (UniformClass) {
-                this.uniforms[uniformInfo.name] = new UniformClass(gl, uniformHandle, type, numElements);
+                this.uniforms[uniformInfo.name] = new UniformClass(this.gl, uniformHandle, type, numElements);
             }
         }
 
-        let numUniformBlocks = gl.getProgramParameter(program, gl.ACTIVE_UNIFORM_BLOCKS);
+        let numUniformBlocks = this.gl.getProgramParameter(program, CONSTANTS.ACTIVE_UNIFORM_BLOCKS);
 
         for (i = 0; i < numUniformBlocks; ++i) {
-            let blockName = gl.getActiveUniformBlockName(this.program, i);
-            let blockIndex = gl.getUniformBlockIndex(this.program, blockName);
+            let blockName = this.gl.getActiveUniformBlockName(this.program, i);
+            let blockIndex = this.gl.getUniformBlockIndex(this.program, blockName);
             
             let uniformBlockBase = this.uniformBlockCount++;
             this.gl.uniformBlockBinding(this.program, blockIndex, uniformBlockBase);
             this.uniformBlocks[blockName] = uniformBlockBase;
         }
+
+        return this;
     }
 
     /**
@@ -3529,9 +3715,9 @@ class Texture {
         this.gl = gl;
         this.binding = binding;
         this.texture = null;
-        this.width = -1;
-        this.height = -1;
-        this.depth = -1;
+        this.width = width || 0;
+        this.height = height || 0;
+        this.depth = depth || 0;
         this.type = options.type !== undefined ? options.type : defaultType;
         this.is3D = is3D;
         this.appState = appState;
@@ -3583,11 +3769,27 @@ class Texture {
         this.flipY = flipY;
         this.mipmaps = (minFilter === gl.LINEAR_MIPMAP_NEAREST || minFilter === gl.LINEAR_MIPMAP_LINEAR);
 
-        this.resize(width, height, depth);
+        this.restore(image);
+    }
+
+    /**
+        Restore texture after context loss.
+
+        @method
+        @param {DOMElement|ArrayBufferView|Array} [image] Image data. An array can be passed to manually set all levels 
+            of the mipmap chain. If a single level is passed and mipmap filtering is being used,
+            generateMipmap() will be called to produce the remaining levels.
+        @return {Texture} The Texture object.
+    */
+    restore(image) {
+        this.texture = null;
+        this.resize(this.width, this.height, this.depth);
 
         if (image) {
             this.data(image);
         }
+
+        return this;
     }
 
     /**
@@ -3602,7 +3804,7 @@ class Texture {
     resize(width, height, depth) {
         depth = depth || 0;
 
-        if (width === this.width && height === this.height && depth === this.depth) {
+        if (this.texture && width === this.width && height === this.height && depth === this.depth) {
             return this; 
         }
 
@@ -3831,19 +4033,38 @@ class Timer {
         this.gl = gl;
         this.cpuTimer = window.performance || window.Date;
 
-        // Note(Tarek): Firefox for some reason only supports EXT_disjoint_timer_query, so have to try both
-        var gpuTimerExtension = this.gl.getExtension("EXT_disjoint_timer_query_webgl2") || this.gl.getExtension("EXT_disjoint_timer_query");
-        if (gpuTimerExtension) {
-            this.gpuTimer = true;
-            this.gpuTimerQuery = new Query(this.gl, CONSTANTS.TIME_ELAPSED_EXT);
-        } else {
-            this.gpuTimer = false;
-            this.gpuTimerQuery = null;
+        this.gpuTimer = false;
+        this.gpuTimerQuery = null;
+
+        this.cpuStartTime = 0;
+        this.cpuTime = 0;
+        this.gpuTime = 0;
+
+        this.restore();
+    }
+
+    /**
+        Restore timer after context loss.
+
+        @method
+        @return {Timer} The Timer object.
+    */
+    restore() {
+        this.gpuTimer = !!(this.gl.getExtension("EXT_disjoint_timer_query_webgl2") || this.gl.getExtension("EXT_disjoint_timer_query"));
+        
+        if (this.gpuTimer) {
+            if (this.gpuTimerQuery) {
+                this.gpuTimerQuery.restore();
+            } else {
+                this.gpuTimerQuery = new Query(this.gl, CONSTANTS.TIME_ELAPSED_EXT);
+            }
         }
 
         this.cpuStartTime = 0;
         this.cpuTime = 0;
         this.gpuTime = 0;
+
+        return this;
     }
 
 
@@ -3978,8 +4199,26 @@ class TransformFeedback {
 
     constructor(gl, appState) {
         this.gl = gl;
-        this.transformFeedback = gl.createTransformFeedback();
         this.appState = appState;
+        this.transformFeedback = null;
+
+        this.restore();
+    }
+
+    /**
+        Restore transform feedback after context loss.
+
+        @method
+        @return {TransformFeedback} The TransformFeedback object.
+    */
+    restore() {
+        if (this.appState.transformFeedback === this) {
+            this.appState.transformFeedback = null;
+        }
+
+        this.transformFeedback = this.gl.createTransformFeedback();
+
+        return this;
     }
 
     /**
@@ -4090,7 +4329,7 @@ class UniformBuffer {
 
     constructor(gl, appState, layout, usage = gl.DYNAMIC_DRAW) {
         this.gl = gl;
-        this.buffer = gl.createBuffer();
+        this.buffer = null;
         this.dataViews = {};
         this.offsets = new Array(layout.length);
         this.sizes = new Array(layout.length);
@@ -4204,10 +4443,26 @@ class UniformBuffer {
         this.dataViews[CONSTANTS.INT] = new Int32Array(this.data.buffer);
         this.dataViews[CONSTANTS.UNSIGNED_INT] = new Uint32Array(this.data.buffer);
 
-        
-        this.gl.bindBuffer(this.gl.UNIFORM_BUFFER, this.buffer);
-        this.gl.bufferData(this.gl.UNIFORM_BUFFER, this.size * 4, this.usage);
-        this.gl.bindBuffer(this.gl.UNIFORM_BUFFER, null);
+        this.restore();
+    }
+
+    /**
+        Restore uniform buffer after context loss.
+
+        @method
+        @return {UniformBuffer} The UniformBuffer object.
+    */
+    restore() {
+        if (this.currentBase !== -1 && this.appState.uniformBuffers[this.currentBase] === this) {
+            this.appState.uniformBuffers[this.currentBase] = null;
+        }
+
+        this.buffer = this.gl.createBuffer();
+        this.gl.bindBuffer(CONSTANTS.UNIFORM_BUFFER, this.buffer);
+        this.gl.bufferData(CONSTANTS.UNIFORM_BUFFER, this.size * 4, this.usage);
+        this.gl.bindBuffer(CONSTANTS.UNIFORM_BUFFER, null);
+
+        return this;
     }
 
     /**
@@ -4357,13 +4612,31 @@ class VertexArray {
     
     constructor(gl, appState) {
         this.gl = gl;
-        this.vertexArray = gl.createVertexArray();
         this.appState = appState;
+        this.vertexArray = null;
         this.numElements = 0;
         this.indexType = null;
         this.instancedBuffers = 0;
         this.indexed = false;
         this.numInstances = 0;
+
+        this.restore();
+    }
+
+    /**
+        Restore vertex array after context loss.
+
+        @method
+        @return {VertexArray} The VertexArray object.
+    */
+    restore() {
+        if (this.appState.vertexArray === this) {
+            this.appState.vertexArray = null;
+        }
+
+        this.vertexArray = this.gl.createVertexArray();
+
+        return this;
     }
 
     /**
@@ -4672,7 +4945,7 @@ class VertexBuffer {
         }
 
         this.gl = gl;
-        this.buffer = gl.createBuffer();
+        this.buffer = null;
         this.appState = appState;
         this.type = type;
         this.itemSize = itemSize;
@@ -4682,9 +4955,28 @@ class VertexBuffer {
         this.indexArray = !!indexArray;
         this.binding = this.indexArray ? gl.ELEMENT_ARRAY_BUFFER : gl.ARRAY_BUFFER;
 
-        gl.bindBuffer(this.binding, this.buffer);
-        gl.bufferData(this.binding, data, this.usage);
-        gl.bindBuffer(this.binding, null);
+        this.restore(data);
+    }
+
+    /**
+        Restore vertex buffer after context loss.
+
+        @method
+        @param {ArrayBufferView|number} data Buffer data itself or the total 
+            number of elements to be allocated.
+        @return {VertexBuffer} The VertexBuffer object.
+    */
+    restore(data) {
+        if (!data) {
+            data = this.numItems * this.itemSize * this.numColumns * CONSTANTS.TYPE_SIZE[this.type];
+        }
+
+        this.buffer = this.gl.createBuffer();
+        this.gl.bindBuffer(this.binding, this.buffer);
+        this.gl.bufferData(this.binding, data, this.usage);
+        this.gl.bindBuffer(this.binding, null);
+
+        return this;
     }
 
     /**

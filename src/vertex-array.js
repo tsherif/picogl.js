@@ -39,13 +39,31 @@ class VertexArray {
     
     constructor(gl, appState) {
         this.gl = gl;
-        this.vertexArray = gl.createVertexArray();
         this.appState = appState;
+        this.vertexArray = null;
         this.numElements = 0;
         this.indexType = null;
         this.instancedBuffers = 0;
         this.indexed = false;
         this.numInstances = 0;
+
+        this.restore();
+    }
+
+    /**
+        Restore vertex array after context loss.
+
+        @method
+        @return {VertexArray} The VertexArray object.
+    */
+    restore() {
+        if (this.appState.vertexArray === this) {
+            this.appState.vertexArray = null;
+        }
+
+        this.vertexArray = this.gl.createVertexArray();
+
+        return this;
     }
 
     /**

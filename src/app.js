@@ -98,6 +98,63 @@ class App {
         this.pvrtcTexturesEnabled = false;
 
         this.viewport(0, 0, this.width, this.height);
+
+        this.contextRestoredHandler = null;
+        this.contextLostExt = null;
+    }
+
+    /**
+        Simulate context loss.
+
+        @method
+        @return {App} The App object.
+    */
+    loseContext() {
+        if (!this.contextLostExt) {
+            this.contextLostExt = this.gl.getExtension("WEBGL_lose_context");
+        }
+
+        if (this.contextLostExt) {
+            this.contextLostExt.loseContext();
+        }
+
+        return this;
+    }
+
+    /**
+        Simulate context restoration.
+
+        @method
+        @return {App} The App object.
+    */
+    restoreContext() {
+        if (this.contextLostExt) {
+            this.contextLostExt.restoreContext();
+        }
+
+        return this;
+    }
+
+    /**
+        Set function to handle context restoration after loss.
+
+        @method
+        @param {function} fn Context restored handler.
+        @return {App} The App object.
+    */
+    onContextRestored(fn) {
+        if (this.contextRestoredHandler) {
+            this.canvas.removeEventListener("webglcontextrestored", this.contextRestoredHandler);
+        } else {
+            this.canvas.addEventListener("webglcontextlost", (e) => {
+                e.preventDefault();
+            });
+        }
+        
+        this.canvas.addEventListener("webglcontextrestored", fn);
+        this.contextRestoredHandler = fn;
+
+        return this;
     }
 
     /**
@@ -904,7 +961,8 @@ class App {
         @method
         @param {GLEnum} type The data type stored in the vertex buffer.
         @param {number} itemSize Number of elements per vertex.
-        @param {ArrayBufferView} data Buffer data.
+        @param {ArrayBufferView|number} data Buffer data itself or the total 
+            number of elements to be allocated.
         @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
         @return {VertexBuffer} New VertexBuffer object.
     */

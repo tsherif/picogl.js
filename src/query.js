@@ -37,10 +37,26 @@ class Query {
 
     constructor(gl, target) {
         this.gl = gl;
-        this.query = gl.createQuery();
+        this.query = null;
         this.target = target;
         this.active = false;
         this.result = null;
+
+        this.restore();
+    }
+
+    /**
+        Restore query after context loss.
+
+        @method
+        @return {Query} The Query object.
+    */
+    restore() {
+        this.query = this.gl.createQuery();
+        this.active = false;
+        this.result = null;
+
+        return this;
     }
 
     /**

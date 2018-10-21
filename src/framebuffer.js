@@ -41,7 +41,7 @@ class Framebuffer {
 
     constructor(gl, appState) {
         this.gl = gl;
-        this.framebuffer = gl.createFramebuffer();
+        this.framebuffer = null;
         this.appState = appState;
 
         this.numColorTargets = 0;
@@ -51,6 +51,28 @@ class Framebuffer {
         this.colorTextureTargets = [];
         this.depthTexture = null;
         this.depthTextureTarget = null;
+
+        this.restore();
+    }
+
+    /**
+        Restore framebuffer after context loss.
+
+        @method
+        @return {Framebuffer} The Framebuffer object.
+    */
+    restore() {
+        if (this.appState.drawFramebuffer === this) {
+            this.appState.drawFramebuffer = null;
+        }
+
+        if (this.appState.readFramebuffer === this) {
+            this.appState.readFramebuffer = null;
+        }
+
+        this.framebuffer = this.gl.createFramebuffer();
+
+        return this;
     }
 
     /**

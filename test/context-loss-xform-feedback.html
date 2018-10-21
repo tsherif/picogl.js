@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<!--
+  The MIT License (MIT)
+
+  Copyright (c) 2017 Tarek Sherif
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy of
+  this software and associated documentation files (the "Software"), to deal in
+  the Software without restriction, including without limitation the rights to
+  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+  the Software, and to permit persons to whom the Software is furnished to do so,
+  subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+  FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+  COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+  IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+<!-- 
+    Wandering algorithm based on Shrek Shao's WebGL 2 sample:
+    http://webglsamples.org/WebGL2Samples/#transform_feedback_instanced
+ -->
+<html>
+<head>
+    <meta charset="utf-8">
+    <script src="../build/picogl.js"></script>
+    <style>
+        html {
+            overflow: hidden;
+        }
+
+        body {
+            margin: 0;
+        }
+
+        #context-loss {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            background-color: gray;
+            padding: 0.5em;
+        }
+    </style>
+</head>
+<body>
+    <div id="context-loss"></div>
+    <canvas id="gl-canvas"></canvas>
+    <script id="vs-update" type="shader/vs">
+        #version 300 es
+
+        #define M_2PI 6.28318530718
+
+        // We simulate the wandering of agents using transform feedback in this vertex shader
+        // The simulation goes like this: 
+        // Assume there's a circle in front of the agent whose radius is WANDER_CIRCLE_R
+        // the origin of which has a offset to the agent's pivot point, which is WANDER_CIRCLE_OFFSET
+        // Each frame we pick a random point on this circle
+        // And the agent moves MOVE_DELTA toward this target point
+        // We also record the rotation facing this target point, so it will be the base rotation
+        // for our next frame, which means the WANDER_CIRCLE_OFFSET vector will be on this direction
+        // Thus we fake a smooth wandering behavior
+
+        #define MAP_HALF_LENGTH 1.01
+        #define WANDER_CIRCLE_R 0.01
+        #define WANDER_CIRCLE_OFFSET 0.04
+        #define MOVE_DELTA 0.001
+
+        layout(location=0) in vec2 aOffset;
+        layout(location=1) in float aRotation;
+
+        out vec2 vOffset;
+        out float vRotation;
+
+        float rand(vec2 co) {
+            return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
+        }
+
+        void main() {
+            float theta = M_2PI * rand(vec2(aRotation * aOffset.x / aOffset.y, aRotation + aOffset.x + aOffset.y));
+            
+            float cosR = cos(aRotation);
+            float sinR = sin(aRotation);
+            mat2 rot = mat2(
+                cosR, sinR,
+                -sinR, cosR
+            );
+            
+            vec2 p = WANDER_CIRCLE_R * vec2(cos(theta), sin(theta)) + vec2(WANDER_CIRCLE_OFFSET, 0.0);
+            vec2 move = normalize(rot * p);
+            vRotation = atan(move.y, move.x);
+
+            vOffset = aOffset + MOVE_DELTA * move;
+
+            // wrapping at edges
+            vOffset = vec2 ( 
+                vOffset.x > MAP_HALF_LENGTH ? - MAP_HALF_LENGTH : ( vOffset.x < - MAP_HALF_LENGTH ? MAP_HALF_LENGTH : vOffset.x ) , 
+                vOffset.y > MAP_HALF_LENGTH ? - MAP_HALF_LENGTH : ( vOffset.y < - MAP_HALF_LENGTH ? MAP_HALF_LENGTH : vOffset.y )
+            );
+        }
+    </script>
+    <!-- Unsused -->
+    <script id="fs-update" type="shader/fs">
+        #version 300 es
+
+        void main() {
+        }
+    </script>
+    <script id="vs-draw" type="shader/vs">
+        #version 300 es
+
+        #define OFFSET_LOCATION 0
+        #define ROTATION_LOCATION 1
+        #define POSITION_LOCATION 2
+        #define COLOR_LOCATION 3
+
+        layout(location=0) in vec2 aPosition;
+        layout(location=1) in vec3 aColor;
+        layout(location=2) in vec2 aOffset;
+        layout(location=3) in float aRotation;
+
+        flat out vec3 vColor;
+
+        void main() {
+            vColor = aColor;
+
+            float cosR = cos(aRotation);
+            float sinR = sin(aRotation);
+            mat2 rot = mat2(
+                cosR, sinR,
+                -sinR, cosR
+            );
+            gl_Position = vec4(rot * aPosition + aOffset, 0.0, 1.0);
+        }
+    </script>
+    <script id="fs-draw" type="shader/fs">
+        #version 300 es
+        precision highp float;
+
+        flat in vec3 vColor;
+
+        out vec4 fragColor;
+
+        void main() {
+            fragColor = vec4(vColor, 1.0);
+        }
+    </script>
+    <script type="text/javascript">
+        var canvas = document.getElementById("gl-canvas");
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        var app = PicoGL.createApp(canvas)
+        .clearColor(0.0, 0.0, 0.0, 1.0);
+
+        var timer = app.createTimer();
+
+        window.onresize = function() {
+            app.resize(window.innerWidth, window.innerHeight);
+        }
+
+        // TRANSFORM FEEDBACK PROGRAM
+        var updateVsSource =  document.getElementById("vs-update").text.trim();
+        var updateFsSource =  document.getElementById("fs-update").text.trim();
+              
+        // FINAL ARGUMENT IS TRANSFORM FEEDBACK VARYINGS
+        var updateProgram = app.createProgram(updateVsSource, updateFsSource, ["vOffset", "vRotation"]);
+
+        // DRAW PROGRAM
+        var drawVsSource =  document.getElementById("vs-draw").text.trim();
+        var drawFsSource =  document.getElementById("fs-draw").text.trim();
+              
+        var drawProgram = app.createProgram(drawVsSource, drawFsSource);
+
+
+        // GEO DATA
+        var NUM_INSTANCES = 50000;
+
+        var offsetData = new Float32Array(NUM_INSTANCES * 2);
+        var rotationData = new Float32Array(NUM_INSTANCES);
+        var colorData = new Uint8Array(NUM_INSTANCES * 3);
+        var positionData = new Float32Array([
+            0.012, 0.0, 
+            -0.008, 0.008, 
+            -0.008, -0.008,
+        ]);
+
+        for (var i = 0; i < NUM_INSTANCES; ++i) {
+            var oi = i * 2;
+            var ri = i;
+            var ci = i * 3;
+
+            offsetData[oi] = Math.random() * 2.0 - 1.0;
+            offsetData[oi + 1] = Math.random() * 2.0 - 1.0;
+
+            rotationData[i] = Math.random() * 2 * Math.PI;
+
+            colorData[ci]     = Math.floor(Math.random() * 256);
+            colorData[ci + 1] = Math.floor(Math.random() * 256);
+            colorData[ci + 2] = Math.floor(Math.random() * 256);
+        }
+
+        // INPUT AND OUTPUT VERTEX BUFFERS
+        var offsetsA = app.createVertexBuffer(PicoGL.FLOAT, 2, offsetData);
+        var offsetsB = app.createVertexBuffer(PicoGL.FLOAT, 2, offsetData.length);
+
+        var rotationsA = app.createVertexBuffer(PicoGL.FLOAT, 1, rotationData);
+        var rotationsB = app.createVertexBuffer(PicoGL.FLOAT, 1, rotationData.length);
+
+
+        // ATTRIBUTES FOR DRAWING
+        var positions = app.createVertexBuffer(PicoGL.FLOAT, 2, positionData);
+        var colors = app.createVertexBuffer(PicoGL.UNSIGNED_BYTE, 3, colorData);
+
+        
+        // COMBINE VERTEX BUFFERS INTO INPUT AND OUTPUT VERTEX ARRAYS
+        var updateArrayA = app.createVertexArray()
+        .vertexAttributeBuffer(0, offsetsA)
+        .vertexAttributeBuffer(1, rotationsA);
+
+        var updateArrayB = app.createVertexArray()
+        .vertexAttributeBuffer(0, offsetsB)
+        .vertexAttributeBuffer(1, rotationsB);
+
+        // CREATE TRANSFORM FEEDBACK FROM INPUT AND OUTPUT VERTEX ARRAYS
+        var transformFeedbackA = app.createTransformFeedback()
+        .feedbackBuffer(0, offsetsA)
+        .feedbackBuffer(1, rotationsA);
+
+        var transformFeedbackB = app.createTransformFeedback()
+        .feedbackBuffer(0, offsetsB)
+        .feedbackBuffer(1, rotationsB);
+
+        // VERTEX ARRAYS FOR DRAWING
+        var drawArrayA = app.createVertexArray()
+        .vertexAttributeBuffer(0, positions)
+        .instanceNormalizedAttributeBuffer(1, colors)
+        .instanceAttributeBuffer(2, offsetsA)
+        .instanceAttributeBuffer(3, rotationsA);
+
+        var drawArrayB = app.createVertexArray()
+        .vertexAttributeBuffer(0, positions)
+        .instanceNormalizedAttributeBuffer(1, colors)
+        .instanceAttributeBuffer(2, offsetsB)
+        .instanceAttributeBuffer(3, rotationsB);
+
+        // CREATE DRAW CALLS FOR SIMULATION
+        // A BUFFERS AS INPUT, UPDATE B BUFFERS
+        var updateDrawCallA = app.createDrawCall(updateProgram, updateArrayA, PicoGL.POINTS)
+        .transformFeedback(transformFeedbackB);
+
+        // B BUFFERS AS INPUT, UPDATE A BUFFERS
+        var updateDrawCallB = app.createDrawCall(updateProgram, updateArrayB, PicoGL.POINTS)
+        .transformFeedback(transformFeedbackA);
+
+        // DRAW USING CONTENTS OF A BUFFERS
+        var drawCallA = app.createDrawCall(drawProgram, drawArrayA);
+
+        // DRAW USING CONTENTS OF B BUFFERS
+        var drawCallB = app.createDrawCall(drawProgram, drawArrayB);
+
+        // START BY DRAWING B BUFFERS THAT ARE
+        // WRITTEN TO ON FIRST TRANSFORM FEEDBACK
+        // PASS 
+        var updateDrawCall = updateDrawCallA;
+        var mainDrawCall = drawCallB;
+
+        app.onContextRestored(function() {
+            app.clearColor(0.0, 0.0, 0.0, 1.0);
+
+            updateProgram.restore(updateVsSource, updateFsSource);
+            drawProgram.restore(drawVsSource, drawFsSource);
+
+            offsetsA.restore(offsetData);
+            offsetsB.restore();
+            rotationsA.restore(rotationData);
+            rotationsB.restore();
+            positions.restore(positionData);
+            colors.restore(colorData);
+
+            
+            // COMBINE VERTEX BUFFERS INTO INPUT AND OUTPUT VERTEX ARRAYS
+            updateArrayA.restore()
+            .vertexAttributeBuffer(0, offsetsA)
+            .vertexAttributeBuffer(1, rotationsA);
+
+            updateArrayB.restore()
+            .vertexAttributeBuffer(0, offsetsB)
+            .vertexAttributeBuffer(1, rotationsB);
+
+            // CREATE TRANSFORM FEEDBACK FROM INPUT AND OUTPUT VERTEX ARRAYS
+            transformFeedbackA.restore()
+            .feedbackBuffer(0, offsetsA)
+            .feedbackBuffer(1, rotationsA);
+
+            transformFeedbackB.restore()
+            .feedbackBuffer(0, offsetsB)
+            .feedbackBuffer(1, rotationsB);
+
+            // VERTEX ARRAYS FOR DRAWING
+            drawArrayA.restore()
+            .vertexAttributeBuffer(0, positions)
+            .instanceNormalizedAttributeBuffer(1, colors)
+            .instanceAttributeBuffer(2, offsetsA)
+            .instanceAttributeBuffer(3, rotationsA);
+
+            drawArrayB.restore()
+            .vertexAttributeBuffer(0, positions)
+            .instanceNormalizedAttributeBuffer(1, colors)
+            .instanceAttributeBuffer(2, offsetsB)
+            .instanceAttributeBuffer(3, rotationsB);
+
+            // Make sure to reset loop!
+            updateDrawCall = updateDrawCallA;
+            mainDrawCall = drawCallB;
+        });
+
+        var contextLossDiv = document.getElementById("context-loss");
+        var contextLost = false;
+        var lastContextLoss = Date.now();
+
+        function draw() {
+            requestAnimationFrame(draw);
+
+            var currentTime = Date.now();
+            if (contextLost) {
+                contextLossDiv.innerHTML = "Context Restored!";
+                app.restoreContext();
+                lastContextLoss = currentTime;
+                contextLost = false;
+            } else if (currentTime - lastContextLoss > 2000) {
+                contextLossDiv.innerHTML = "Context Lost!";
+                app.loseContext();
+                contextLost = true;
+                return;
+            } else {
+                contextLossDiv.innerHTML = `Countdown to Context Loss: ${((2000 - currentTime + lastContextLoss) / 1000).toFixed(1)}`;
+            }
+
+            // TRANSFORM FEEDBACK
+            app.noRasterize()
+            updateDrawCall.draw()
+
+            // DRAW
+            app.rasterize().clear()
+            mainDrawCall.draw();
+
+            // SWAP INPUT AND OUTPUT BUFFERS
+            updateDrawCall = updateDrawCall === updateDrawCallA ? updateDrawCallB : updateDrawCallA;
+            mainDrawCall = mainDrawCall === drawCallA ? drawCallB : drawCallA;
+
+        }
+
+        requestAnimationFrame(draw);
+
+    </script>
+</body>
+</html>
