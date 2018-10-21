@@ -65,6 +65,8 @@ class Framebuffer {
         }
 
         this.framebuffer = this.gl.createFramebuffer();
+
+        return this;
     }
 
     /**

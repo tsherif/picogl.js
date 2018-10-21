@@ -107,6 +107,10 @@ class VertexBuffer {
     }
 
     restore(data) {
+        if (!data) {
+            data = this.numItems * this.itemSize * this.numColumns * CONSTANTS.TYPE_SIZE[this.type];
+        }
+
         this.buffer = this.gl.createBuffer();
         this.gl.bindBuffer(this.binding, this.buffer);
         this.gl.bufferData(this.binding, data, this.usage);

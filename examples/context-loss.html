@@ -46,8 +46,7 @@
             <a href="https://github.com/tsherif/picogl.js/blob/master/examples/context-loss.html">Source code</a>
         </div>
     </div>
-    <div id="context-loss">
-    </div>
+    <div id="context-loss"></div>
     <canvas id="gl-canvas"></canvas>
     <script type="x-shader/vs" id="vertex-draw">
         #version 300 es
@@ -194,7 +193,7 @@
             .uniformBlock("SceneUniforms", sceneUniformBuffer)
             .texture("tex", texture);
 
-            app.onContextRestored(() => {
+            app.onContextRestored(function() {
                 app.clearColor(0.0, 0.0, 0.0, 1.0)
                 .depthTest();
 

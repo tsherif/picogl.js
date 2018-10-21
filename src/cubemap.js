@@ -130,6 +130,8 @@ class Cubemap {
         if (this.mipmaps) {
             this.gl.generateMipmap(CONSTANTS.TEXTURE_CUBE_MAP);
         }
+
+        return this;
     }
 
     /**

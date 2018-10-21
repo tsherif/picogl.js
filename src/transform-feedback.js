@@ -47,6 +47,8 @@ class TransformFeedback {
         }
 
         this.transformFeedback = this.gl.createTransformFeedback();
+
+        return this;
     }
 
     /**
