@@ -27,16 +27,20 @@
  -->
 <html>
 <head>
-    <title>PicoGL.js: Wandering Triangles</title>
     <meta charset="utf-8">
     <script src="../build/picogl.js"></script>
-    <script src="utils/gl-matrix.js"></script>
-    <script src="utils/utils.js"></script>
-    <link rel="stylesheet" href="../site/css/picogl-example.css"> 
     <style>
+        html {
+            overflow: hidden;
+        }
+
+        body {
+            margin: 0;
+        }
+
         #context-loss {
             position: absolute;
-            top: 80px;
+            top: 10px;
             left: 10px;
             color: white;
             background-color: gray;
@@ -45,12 +49,6 @@
     </style>
 </head>
 <body>
-    <div id="example-title">
-        PicoGL.js Example: Wandering Triangles<BR>(Transform Feedback and Instanced Drawing)
-        <div>
-            <a href="https://github.com/tsherif/picogl.js/blob/master/examples/wandering-triangles.html">Source code</a>
-        </div>
-    </div>
     <div id="context-loss"></div>
     <canvas id="gl-canvas"></canvas>
     <script id="vs-update" type="shader/vs">
@@ -153,15 +151,7 @@
         }
     </script>
     <script type="text/javascript">
-        utils.addTimerElement();
-
         var canvas = document.getElementById("gl-canvas");
-
-        if (!utils.testWebGL2()) {
-            console.error("WebGL 2 not available");
-            document.body.innerHTML = "This example requires WebGL 2 which is unavailable on this system."
-        }
-
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         
@@ -328,8 +318,6 @@
             // Make sure to reset loop!
             updateDrawCall = updateDrawCallA;
             mainDrawCall = drawCallB;
-
-            timer.restore();
         });
 
         var contextLossDiv = document.getElementById("context-loss");
@@ -354,12 +342,6 @@
                 contextLossDiv.innerHTML = `Countdown to Context Loss: ${((2000 - currentTime + lastContextLoss) / 1000).toFixed(1)}`;
             }
 
-            if (timer.ready()) {
-                utils.updateTimerElement(timer.cpuTime, timer.gpuTime);
-            }
-
-            timer.start();
-
             // TRANSFORM FEEDBACK
             app.noRasterize()
             updateDrawCall.draw()
@@ -372,13 +354,10 @@
             updateDrawCall = updateDrawCall === updateDrawCallA ? updateDrawCallB : updateDrawCallA;
             mainDrawCall = mainDrawCall === drawCallA ? drawCallB : drawCallA;
 
-            timer.end();
         }
 
         requestAnimationFrame(draw);
 
     </script>
-    <a href="https://github.com/tsherif/picogl.js" id="github-ribbon"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"></a>
-    <script src="../site/js/iframe.js"></script>
 </body>
 </html>

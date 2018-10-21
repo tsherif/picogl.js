@@ -2376,8 +2376,6 @@ const TEXTURE_FORMAT_DEFAULTS = __webpack_require__(1);
 class Cubemap {
 
     constructor(gl, appState, options) {
-        let { negX, posX, negY, posY, negZ, posZ } = options;
-
         let defaultType = options.format === CONSTANTS.DEPTH_COMPONENT ? CONSTANTS.UNSIGNED_SHORT : CONSTANTS.UNSIGNED_BYTE;
 
         this.gl = gl;
@@ -2390,6 +2388,7 @@ class Cubemap {
         // -1 indicates unbound
         this.currentUnit = -1;
 
+        let negX = options.negX;
         let {
             width = negX.width,
             height = negX.height,
@@ -2403,7 +2402,7 @@ class Cubemap {
             minLOD = null,
             maxLOD = null,
             baseLevel = null,
-            maxLevel = null,
+            maxLevel = null
         } = options;
         
         this.width = width;
@@ -2427,6 +2426,10 @@ class Cubemap {
 
     restore(options = CONSTANTS.DUMMY_OBJECT) {
         this.texture = this.gl.createTexture();
+
+        if (this.currentUnit !== -1) {
+            this.appState.textures[this.currentUnit] = null;
+        }
 
         this.bind(0);
         this.gl.pixelStorei(CONSTANTS.UNPACK_FLIP_Y_WEBGL, this.flipY);

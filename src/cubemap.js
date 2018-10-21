@@ -92,6 +92,10 @@ class Cubemap {
     restore(options = CONSTANTS.DUMMY_OBJECT) {
         this.texture = this.gl.createTexture();
 
+        if (this.currentUnit !== -1) {
+            this.appState.textures[this.currentUnit] = null;
+        }
+
         this.bind(0);
         this.gl.pixelStorei(CONSTANTS.UNPACK_FLIP_Y_WEBGL, this.flipY);
         this.gl.texParameteri(CONSTANTS.TEXTURE_CUBE_MAP, CONSTANTS.TEXTURE_MAG_FILTER, this.magFilter);
