@@ -41,8 +41,6 @@ const TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
 class Cubemap {
 
     constructor(gl, appState, options) {
-        let { negX, posX, negY, posY, negZ, posZ } = options;
-
         let defaultType = options.format === CONSTANTS.DEPTH_COMPONENT ? CONSTANTS.UNSIGNED_SHORT : CONSTANTS.UNSIGNED_BYTE;
 
         this.gl = gl;
@@ -55,6 +53,7 @@ class Cubemap {
         // -1 indicates unbound
         this.currentUnit = -1;
 
+        let negX = options.negX;
         let {
             width = negX.width,
             height = negX.height,
@@ -68,7 +67,7 @@ class Cubemap {
             minLOD = null,
             maxLOD = null,
             baseLevel = null,
-            maxLevel = null,
+            maxLevel = null
         } = options;
         
         this.width = width;
