@@ -46,7 +46,7 @@ class Cubemap {
         let defaultType = options.format === CONSTANTS.DEPTH_COMPONENT ? CONSTANTS.UNSIGNED_SHORT : CONSTANTS.UNSIGNED_BYTE;
 
         this.gl = gl;
-        this.texture = gl.createTexture();
+        this.texture = null;
         this.format = options.format !== undefined ? options.format : gl.RGBA;
         this.type = options.type !== undefined ? options.type : defaultType;
         this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : TEXTURE_FORMAT_DEFAULTS[this.type][this.format];
@@ -65,46 +65,71 @@ class Cubemap {
             wrapT = gl.REPEAT,
             compareMode = gl.NONE,
             compareFunc = gl.LEQUAL,
-            generateMipmaps = minFilter === gl.LINEAR_MIPMAP_NEAREST || minFilter === gl.LINEAR_MIPMAP_LINEAR
+            minLOD = null,
+            maxLOD = null,
+            baseLevel = null,
+            maxLevel = null,
         } = options;
         
+        this.width = width;
+        this.height = height;
+        this.flipY = flipY;
+        this.minFilter = minFilter;
+        this.magFilter = magFilter;
+        this.wrapS = wrapS;
+        this.wrapT = wrapT;
+        this.compareMode = compareMode;
+        this.compareFunc = compareFunc;
+        this.minLOD = minLOD;
+        this.maxLOD = maxLOD;
+        this.baseLevel = baseLevel;
+        this.maxLevel = maxLevel;
+        this.mipmaps = (minFilter === gl.LINEAR_MIPMAP_NEAREST || minFilter === gl.LINEAR_MIPMAP_LINEAR);
+        this.levels = this.mipmaps ? Math.floor(Math.log2(Math.min(this.width, this.height))) + 1 : 1;
+
+        this.restore(options);
+    }
+
+    restore(options = CONSTANTS.DUMMY_OBJECT) {
+        this.texture = this.gl.createTexture();
+
         this.bind(0);
-        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY);
-        gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, magFilter);
-        gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, minFilter);
-        gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, wrapS);
-        gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, wrapT);
-        gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_COMPARE_FUNC, compareFunc);
-        gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_COMPARE_MODE, compareMode);
-        if (options.baseLevel !== undefined) {
-            gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_BASE_LEVEL, options.baseLevel);
+        this.gl.pixelStorei(CONSTANTS.UNPACK_FLIP_Y_WEBGL, this.flipY);
+        this.gl.texParameteri(CONSTANTS.TEXTURE_CUBE_MAP, CONSTANTS.TEXTURE_MAG_FILTER, this.magFilter);
+        this.gl.texParameteri(CONSTANTS.TEXTURE_CUBE_MAP, CONSTANTS.TEXTURE_MIN_FILTER, this.minFilter);
+        this.gl.texParameteri(CONSTANTS.TEXTURE_CUBE_MAP, CONSTANTS.TEXTURE_WRAP_S, this.wrapS);
+        this.gl.texParameteri(CONSTANTS.TEXTURE_CUBE_MAP, CONSTANTS.TEXTURE_WRAP_T, this.wrapT);
+        this.gl.texParameteri(CONSTANTS.TEXTURE_CUBE_MAP, CONSTANTS.TEXTURE_COMPARE_FUNC, this.compareFunc);
+        this.gl.texParameteri(CONSTANTS.TEXTURE_CUBE_MAP, CONSTANTS.TEXTURE_COMPARE_MODE, this.compareMode);
+        if (this.baseLevel !== null) {
+            this.gl.texParameteri(CONSTANTS.TEXTURE_CUBE_MAP, CONSTANTS.TEXTURE_BASE_LEVEL, this.baseLevel);
         }
-        if (options.maxLevel !== undefined) {
-            gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAX_LEVEL, options.maxLevel);
+        if (this.maxLevel !== null) {
+            this.gl.texParameteri(CONSTANTS.TEXTURE_CUBE_MAP, CONSTANTS.TEXTURE_MAX_LEVEL, this.maxLevel);
         }
-        if (options.minLOD !== undefined) {
-            gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_LOD, options.minLOD);
+        if (this.minLOD !== null) {
+            this.gl.texParameteri(CONSTANTS.TEXTURE_CUBE_MAP, CONSTANTS.TEXTURE_MIN_LOD, this.minLOD);
         }
-        if (options.maxLOD !== undefined) {
-            gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAX_LOD, options.maxLOD);
+        if (this.maxLOD !== null) {
+            this.gl.texParameteri(CONSTANTS.TEXTURE_CUBE_MAP, CONSTANTS.TEXTURE_MAX_LOD, this.maxLOD);
         }
 
-        let levels = generateMipmaps ? Math.floor(Math.log2(Math.min(width, height))) + 1 : 1;
-        gl.texStorage2D(gl.TEXTURE_CUBE_MAP, levels, this.internalFormat, width, height);
+        this.gl.texStorage2D(CONSTANTS.TEXTURE_CUBE_MAP, this.levels, this.internalFormat, this.width, this.height);
+
+        let { negX, posX, negY, posY, negZ, posZ } = options;
 
         if (negX) {
-            gl.texSubImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_X, 0, 0, 0, width, height, this.format, this.type, negX);
-            gl.texSubImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X, 0, 0, 0, width, height, this.format, this.type, posX);
-            gl.texSubImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, 0, 0, width, height, this.format, this.type, negY);
-            gl.texSubImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Y, 0, 0, 0, width, height, this.format, this.type, posY);
-            gl.texSubImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, 0, 0, width, height, this.format, this.type, negZ);
-            gl.texSubImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Z, 0, 0, 0, width, height, this.format, this.type, posZ);
+            this.gl.texSubImage2D(CONSTANTS.TEXTURE_CUBE_MAP_NEGATIVE_X, 0, 0, 0, this.width, this.height, this.format, this.type, negX);
+            this.gl.texSubImage2D(CONSTANTS.TEXTURE_CUBE_MAP_POSITIVE_X, 0, 0, 0, this.width, this.height, this.format, this.type, posX);
+            this.gl.texSubImage2D(CONSTANTS.TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, 0, 0, this.width, this.height, this.format, this.type, negY);
+            this.gl.texSubImage2D(CONSTANTS.TEXTURE_CUBE_MAP_POSITIVE_Y, 0, 0, 0, this.width, this.height, this.format, this.type, posY);
+            this.gl.texSubImage2D(CONSTANTS.TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, 0, 0, this.width, this.height, this.format, this.type, negZ);
+            this.gl.texSubImage2D(CONSTANTS.TEXTURE_CUBE_MAP_POSITIVE_Z, 0, 0, 0, this.width, this.height, this.format, this.type, posZ);
         }
 
-        if (generateMipmaps) {
-            gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
+        if (this.mipmaps) {
+            this.gl.generateMipmap(CONSTANTS.TEXTURE_CUBE_MAP);
         }
-
     }
 
     /**

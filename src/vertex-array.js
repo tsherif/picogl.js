@@ -46,6 +46,8 @@ class VertexArray {
         this.instancedBuffers = 0;
         this.indexed = false;
         this.numInstances = 0;
+
+        this.restore();
     }
 
     restore() {
