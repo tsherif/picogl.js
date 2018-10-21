@@ -59,6 +59,14 @@ class Program {
         this.restore(vsSource, fsSource);
     }
 
+    /**
+        Restore program after context loss.
+
+        @method
+        @param {Shader|string} vertexShader Vertex shader object or source code.
+        @param {Shader|string} fragmentShader Fragment shader object or source code.
+        @return {Program} The Program object.
+    */
     restore(vsSource, fsSource) {
         if (this.appState.program === this) {
             this.gl.useProgram(null);

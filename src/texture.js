@@ -110,6 +110,15 @@ class Texture {
         this.restore(image);
     }
 
+    /**
+        Restore texture after context loss.
+
+        @method
+        @param {DOMElement|ArrayBufferView|Array} [image] Image data. An array can be passed to manually set all levels 
+            of the mipmap chain. If a single level is passed and mipmap filtering is being used,
+            generateMipmap() will be called to produce the remaining levels.
+        @return {Texture} The Texture object.
+    */
     restore(image) {
         this.texture = null;
         this.resize(this.width, this.height, this.depth);

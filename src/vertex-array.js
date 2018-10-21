@@ -50,6 +50,12 @@ class VertexArray {
         this.restore();
     }
 
+    /**
+        Restore vertex array after context loss.
+
+        @method
+        @return {VertexArray} The VertexArray object.
+    */
     restore() {
         if (this.appState.vertexArray === this) {
             this.appState.vertexArray = null;

@@ -57,6 +57,12 @@ class Timer {
         this.restore();
     }
 
+    /**
+        Restore timer after context loss.
+
+        @method
+        @return {Timer} The Timer object.
+    */
     restore() {
         this.gpuTimer = !!(this.gl.getExtension("EXT_disjoint_timer_query_webgl2") || this.gl.getExtension("EXT_disjoint_timer_query"));
         
@@ -71,6 +77,8 @@ class Timer {
         this.cpuStartTime = 0;
         this.cpuTime = 0;
         this.gpuTime = 0;
+
+        return this;
     }
 
 

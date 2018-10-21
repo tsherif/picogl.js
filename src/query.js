@@ -45,10 +45,18 @@ class Query {
         this.restore();
     }
 
+    /**
+        Restore query after context loss.
+
+        @method
+        @return {Query} The Query object.
+    */
     restore() {
         this.query = this.gl.createQuery();
         this.active = false;
         this.result = null;
+
+        return this;
     }
 
     /**

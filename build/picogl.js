@@ -1,5 +1,39 @@
-var PicoGL =
-/******/ (function(modules) { // webpackBootstrap
+/*
+PicoGL.js v0.9.0
+
+The MIT License (MIT)
+
+Copyright (c) 2017 Tarek Sherif
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
+
+(function webpackUniversalModuleDefinition(root, factory) {
+	if(typeof exports === 'object' && typeof module === 'object')
+		module.exports = factory();
+	else if(typeof define === 'function' && define.amd)
+		define([], factory);
+	else if(typeof exports === 'object')
+		exports["PicoGL"] = factory();
+	else
+		root["PicoGL"] = factory();
+})(this, function() {
+return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
 /******/
@@ -846,6 +880,13 @@ class Shader {
         this.restore(source);
     }
 
+    /**
+        Restore shader after context loss.
+
+        @method
+        @param {string} source Shader source.
+        @return {Shader} The Shader object.
+    */
     restore(source) {
         this.shader = this.gl.createShader(this.type);
         this.gl.shaderSource(this.shader, source);
@@ -936,10 +977,18 @@ class Query {
         this.restore();
     }
 
+    /**
+        Restore query after context loss.
+
+        @method
+        @return {Query} The Query object.
+    */
     restore() {
         this.query = this.gl.createQuery();
         this.active = false;
         this.result = null;
+
+        return this;
     }
 
     /**
@@ -1051,7 +1100,7 @@ const App = __webpack_require__(5);
     @namespace PicoGL
 */
 const PicoGL = __webpack_require__(0);
-PicoGL.version = "DEV";
+PicoGL.version = "0.9.0";
 
 /**
     Create a PicoGL app. The app is the primary entry point to PicoGL. It stores
@@ -1187,6 +1236,9 @@ class App {
 
     /**
         Simulate context loss.
+
+        @method
+        @return {App} The App object.
     */
     loseContext() {
         if (!this.contextLostExt) {
@@ -1202,6 +1254,9 @@ class App {
 
     /**
         Simulate context restoration.
+
+        @method
+        @return {App} The App object.
     */
     restoreContext() {
         if (this.contextLostExt) {
@@ -1216,7 +1271,7 @@ class App {
 
         @method
         @param {function} fn Context restored handler.
-
+        @return {App} The App object.
     */
     onContextRestored(fn) {
         if (this.contextRestoredHandler) {
@@ -2037,7 +2092,8 @@ class App {
         @method
         @param {GLEnum} type The data type stored in the vertex buffer.
         @param {number} itemSize Number of elements per vertex.
-        @param {ArrayBufferView} data Buffer data.
+        @param {ArrayBufferView|number} data Buffer data itself or the total 
+            number of elements to be allocated.
         @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
         @return {VertexBuffer} New VertexBuffer object.
     */
@@ -2424,6 +2480,25 @@ class Cubemap {
         this.restore(options);
     }
 
+    /**
+        Restore cubemap after context loss.
+
+        @method
+        @param {Object} [options] Texture options.
+        @param {DOMElement|ArrayBufferView} [options.negX] The image data for the negative X direction.
+                Can be any format that would be accepted by texImage2D.
+        @param {DOMElement|ArrayBufferView} [options.posX] The image data for the positive X direction.
+                Can be any format that would be accepted by texImage2D.
+        @param {DOMElement|ArrayBufferView} [options.negY] The image data for the negative Y direction.
+                Can be any format that would be accepted by texImage2D.
+        @param {DOMElement|ArrayBufferView} [options.posY] The image data for the positive Y direction.
+                Can be any format that would be accepted by texImage2D.
+        @param {DOMElement|ArrayBufferView} [options.negZ] The image data for the negative Z direction.
+                Can be any format that would be accepted by texImage2D.
+        @param {DOMElement|ArrayBufferView} [options.posZ] The image data for the positive Z direction.
+                Can be any format that would be accepted by texImage2D.
+        @return {Cubemap} The Cubemap object.
+    */
     restore(options = CONSTANTS.DUMMY_OBJECT) {
         this.texture = this.gl.createTexture();
 
@@ -2827,6 +2902,12 @@ class Framebuffer {
         this.restore();
     }
 
+    /**
+        Restore framebuffer after context loss.
+
+        @method
+        @return {Framebuffer} The Framebuffer object.
+    */
     restore() {
         if (this.appState.drawFramebuffer === this) {
             this.appState.drawFramebuffer = null;
@@ -3131,6 +3212,14 @@ class Program {
         this.restore(vsSource, fsSource);
     }
 
+    /**
+        Restore program after context loss.
+
+        @method
+        @param {Shader|string} vertexShader Vertex shader object or source code.
+        @param {Shader|string} fragmentShader Fragment shader object or source code.
+        @return {Program} The Program object.
+    */
     restore(vsSource, fsSource) {
         if (this.appState.program === this) {
             this.gl.useProgram(null);
@@ -3683,6 +3772,15 @@ class Texture {
         this.restore(image);
     }
 
+    /**
+        Restore texture after context loss.
+
+        @method
+        @param {DOMElement|ArrayBufferView|Array} [image] Image data. An array can be passed to manually set all levels 
+            of the mipmap chain. If a single level is passed and mipmap filtering is being used,
+            generateMipmap() will be called to produce the remaining levels.
+        @return {Texture} The Texture object.
+    */
     restore(image) {
         this.texture = null;
         this.resize(this.width, this.height, this.depth);
@@ -3945,6 +4043,12 @@ class Timer {
         this.restore();
     }
 
+    /**
+        Restore timer after context loss.
+
+        @method
+        @return {Timer} The Timer object.
+    */
     restore() {
         this.gpuTimer = !!(this.gl.getExtension("EXT_disjoint_timer_query_webgl2") || this.gl.getExtension("EXT_disjoint_timer_query"));
         
@@ -3959,6 +4063,8 @@ class Timer {
         this.cpuStartTime = 0;
         this.cpuTime = 0;
         this.gpuTime = 0;
+
+        return this;
     }
 
 
@@ -4099,6 +4205,12 @@ class TransformFeedback {
         this.restore();
     }
 
+    /**
+        Restore transform feedback after context loss.
+
+        @method
+        @return {TransformFeedback} The TransformFeedback object.
+    */
     restore() {
         if (this.appState.transformFeedback === this) {
             this.appState.transformFeedback = null;
@@ -4334,6 +4446,12 @@ class UniformBuffer {
         this.restore();
     }
 
+    /**
+        Restore uniform buffer after context loss.
+
+        @method
+        @return {UniformBuffer} The UniformBuffer object.
+    */
     restore() {
         if (this.currentBase !== -1 && this.appState.uniformBuffers[this.currentBase] === this) {
             this.appState.uniformBuffers[this.currentBase] = null;
@@ -4505,6 +4623,12 @@ class VertexArray {
         this.restore();
     }
 
+    /**
+        Restore vertex array after context loss.
+
+        @method
+        @return {VertexArray} The VertexArray object.
+    */
     restore() {
         if (this.appState.vertexArray === this) {
             this.appState.vertexArray = null;
@@ -4834,6 +4958,14 @@ class VertexBuffer {
         this.restore(data);
     }
 
+    /**
+        Restore vertex buffer after context loss.
+
+        @method
+        @param {ArrayBufferView|number} data Buffer data itself or the total 
+            number of elements to be allocated.
+        @return {VertexBuffer} The VertexBuffer object.
+    */
     restore(data) {
         if (!data) {
             data = this.numItems * this.itemSize * this.numColumns * CONSTANTS.TYPE_SIZE[this.type];
@@ -4895,4 +5027,4 @@ module.exports = VertexBuffer;
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=picogl.js.map
+});

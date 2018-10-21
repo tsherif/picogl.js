@@ -42,6 +42,13 @@ class Shader {
         this.restore(source);
     }
 
+    /**
+        Restore shader after context loss.
+
+        @method
+        @param {string} source Shader source.
+        @return {Shader} The Shader object.
+    */
     restore(source) {
         this.shader = this.gl.createShader(this.type);
         this.gl.shaderSource(this.shader, source);

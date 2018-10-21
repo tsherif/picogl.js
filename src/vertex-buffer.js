@@ -106,6 +106,14 @@ class VertexBuffer {
         this.restore(data);
     }
 
+    /**
+        Restore vertex buffer after context loss.
+
+        @method
+        @param {ArrayBufferView|number} data Buffer data itself or the total 
+            number of elements to be allocated.
+        @return {VertexBuffer} The VertexBuffer object.
+    */
     restore(data) {
         if (!data) {
             data = this.numItems * this.itemSize * this.numColumns * CONSTANTS.TYPE_SIZE[this.type];

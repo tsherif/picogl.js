@@ -55,6 +55,12 @@ class Framebuffer {
         this.restore();
     }
 
+    /**
+        Restore framebuffer after context loss.
+
+        @method
+        @return {Framebuffer} The Framebuffer object.
+    */
     restore() {
         if (this.appState.drawFramebuffer === this) {
             this.appState.drawFramebuffer = null;

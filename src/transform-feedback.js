@@ -41,6 +41,12 @@ class TransformFeedback {
         this.restore();
     }
 
+    /**
+        Restore transform feedback after context loss.
+
+        @method
+        @return {TransformFeedback} The TransformFeedback object.
+    */
     restore() {
         if (this.appState.transformFeedback === this) {
             this.appState.transformFeedback = null;

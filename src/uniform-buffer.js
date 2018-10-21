@@ -160,6 +160,12 @@ class UniformBuffer {
         this.restore();
     }
 
+    /**
+        Restore uniform buffer after context loss.
+
+        @method
+        @return {UniformBuffer} The UniformBuffer object.
+    */
     restore() {
         if (this.currentBase !== -1 && this.appState.uniformBuffers[this.currentBase] === this) {
             this.appState.uniformBuffers[this.currentBase] = null;
