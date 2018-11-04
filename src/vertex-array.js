@@ -37,17 +37,15 @@ const CONSTANTS = require("./constants");
 */
 class VertexArray {
     
-    constructor(gl, appState) {
+    constructor(gl, appState, numElements = 0, numInstances = 0) {
         this.gl = gl;
         this.appState = appState;
         this.vertexArray = null;
-        this.numElements = 0;
+        this.numElements = numElements;
         this.indexType = null;
         this.instancedBuffers = 0;
         this.indexed = false;
-        this.numInstances = 0;
-
-        this.restore();
+        this.numInstances = numInstances;
     }
 
     /**
@@ -61,10 +59,14 @@ class VertexArray {
             this.appState.vertexArray = null;
         }
 
-        this.vertexArray = this.gl.createVertexArray();
+        // re-allocate at gl level, if necessary
+        if (this.vertexArray !== null) {
+            this.vertexArray = this.gl.createVertexArray();
+        }
 
         return this;
     }
+
 
     /**
         Bind an per-vertex attribute buffer to this vertex array.
@@ -166,6 +168,11 @@ class VertexArray {
         @return {VertexArray} The VertexArray object.
     */
     indexBuffer(vertexBuffer) {
+        // allocate at gl level, if necessary
+        if (this.vertexArray === null) {
+            this.vertexArray = this.gl.createVertexArray();
+        }
+
         this.gl.bindVertexArray(this.vertexArray);
         this.gl.bindBuffer(vertexBuffer.binding, vertexBuffer.buffer);
 
@@ -224,6 +231,11 @@ class VertexArray {
         @return {VertexArray} The VertexArray object.
     */
     attributeBuffer(attributeIndex, vertexBuffer, instanced, integer, normalized) {
+        // allocate at gl level, if necessary
+        if (this.vertexArray === null) {
+            this.vertexArray = this.gl.createVertexArray();
+        }
+
         this.gl.bindVertexArray(this.vertexArray);
         this.gl.bindBuffer(vertexBuffer.binding, vertexBuffer.buffer);
 
@@ -268,7 +280,6 @@ class VertexArray {
 
         return this;
     }
-
 }
 
 module.exports = VertexArray;
