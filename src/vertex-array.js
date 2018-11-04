@@ -173,7 +173,7 @@ class VertexArray {
             this.vertexArray = this.gl.createVertexArray();
         }
 
-        this.bind()
+        this.bind();
         this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, vertexBuffer.buffer);
 
         this.numElements = vertexBuffer.numItems * 3;
