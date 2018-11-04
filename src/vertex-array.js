@@ -173,16 +173,12 @@ class VertexArray {
             this.vertexArray = this.gl.createVertexArray();
         }
 
-        this.gl.bindVertexArray(this.vertexArray);
-        this.gl.bindBuffer(vertexBuffer.binding, vertexBuffer.buffer);
+        this.bind()
+        this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, vertexBuffer.buffer);
 
         this.numElements = vertexBuffer.numItems * 3;
         this.indexType = vertexBuffer.type;
         this.indexed = true;
-
-        this.gl.bindVertexArray(null);
-        this.gl.bindBuffer(vertexBuffer.binding, null);
-        this.appState.vertexArray = null;
 
         return this;
     }
@@ -236,8 +232,8 @@ class VertexArray {
             this.vertexArray = this.gl.createVertexArray();
         }
 
-        this.gl.bindVertexArray(this.vertexArray);
-        this.gl.bindBuffer(vertexBuffer.binding, vertexBuffer.buffer);
+        this.bind();
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, vertexBuffer.buffer);
 
         let numColumns = vertexBuffer.numColumns;
 
@@ -274,9 +270,7 @@ class VertexArray {
             this.numElements = this.numElements || vertexBuffer.numItems;
         }
 
-        this.gl.bindVertexArray(null);
-        this.gl.bindBuffer(vertexBuffer.binding, null);
-        this.appState.vertexArray = null;
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, null);
 
         return this;
     }
