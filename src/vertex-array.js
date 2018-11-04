@@ -37,15 +37,15 @@ const CONSTANTS = require("./constants");
 */
 class VertexArray {
     
-    constructor(gl, appState) {
+    constructor(gl, appState, numElements = 0, numInstances = 0) {
         this.gl = gl;
         this.appState = appState;
         this.vertexArray = null;
-        this.numElements = 0;
+        this.numElements = numElements;
         this.indexType = null;
         this.instancedBuffers = 0;
         this.indexed = false;
-        this.numInstances = 0;
+        this.numInstances = numInstances;
 
         this.restore();
     }
