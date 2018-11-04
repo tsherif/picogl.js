@@ -169,7 +169,9 @@ class VertexArray {
     */
     indexBuffer(vertexBuffer) {
         // allocate at gl level, if necessary
-        if (this.vertexArray === null) this.vertexArray = this.gl.createVertexArray();
+        if (this.vertexArray === null) {
+            this.vertexArray = this.gl.createVertexArray();
+        }
 
         this.gl.bindVertexArray(this.vertexArray);
         this.gl.bindBuffer(vertexBuffer.binding, vertexBuffer.buffer);
@@ -229,7 +231,9 @@ class VertexArray {
     */
     attributeBuffer(attributeIndex, vertexBuffer, instanced, integer, normalized) {
         // allocate at gl level, if necessary
-        if (this.vertexArray === null) this.vertexArray = this.gl.createVertexArray();
+        if (this.vertexArray === null) {
+            this.vertexArray = this.gl.createVertexArray();
+        }
 
         this.gl.bindVertexArray(this.vertexArray);
         this.gl.bindBuffer(vertexBuffer.binding, vertexBuffer.buffer);
