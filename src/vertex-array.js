@@ -46,7 +46,6 @@ class VertexArray {
         this.instancedBuffers = 0;
         this.indexed = false;
         this.numInstances = numInstances;
-
     }
 
     /**
@@ -60,25 +59,13 @@ class VertexArray {
             this.appState.vertexArray = null;
         }
 
-        if (this.isAllocated()) {
+        // re-allocate at gl level, if necessary
+        if (this.vertexArray !== null) {
             this.vertexArray = this.gl.createVertexArray();
         }
 
         return this;
     }
-
-
-    /**
-        Query if the vertex array has been allocated.
-        Allocation is only necessary if there are buffers attached.
-
-        @method
-        @return {boolean} Allocation state
-     */
-    isAllocated() {
-        return this.vertexArray !== null;
-    }
-
 
 
     /**
@@ -181,6 +168,9 @@ class VertexArray {
         @return {VertexArray} The VertexArray object.
     */
     indexBuffer(vertexBuffer) {
+        // allocate at gl level, if necessary
+        if (this.vertexArray === null) this.vertexArray = this.gl.createVertexArray();
+
         this.gl.bindVertexArray(this.vertexArray);
         this.gl.bindBuffer(vertexBuffer.binding, vertexBuffer.buffer);
 
@@ -238,7 +228,9 @@ class VertexArray {
         @return {VertexArray} The VertexArray object.
     */
     attributeBuffer(attributeIndex, vertexBuffer, instanced, integer, normalized) {
-        this.ensureAllocated();
+        // allocate at gl level, if necessary
+        if (this.vertexArray === null) this.vertexArray = this.gl.createVertexArray();
+
         this.gl.bindVertexArray(this.vertexArray);
         this.gl.bindBuffer(vertexBuffer.binding, vertexBuffer.buffer);
 
@@ -282,19 +274,6 @@ class VertexArray {
 
         return this;
     }
-
-    /**
-     *
-     * @method
-     * @ignore
-     * @return {void}
-     */
-    ensureAllocated() {
-        if (!this.isAllocated()) {
-            this.vertexArray = this.gl.createVertexArray();
-        }
-    }
-
 }
 
 module.exports = VertexArray;
