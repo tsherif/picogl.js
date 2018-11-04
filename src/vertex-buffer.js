@@ -119,6 +119,12 @@ class VertexBuffer {
             data = this.numItems * this.itemSize * this.numColumns * CONSTANTS.TYPE_SIZE[this.type];
         }
 
+        // Don't want to update vertex array bindings
+        if (this.appState.vertexArray) {
+            this.gl.bindVertexArray(null);
+            this.appState.vertexArray = null;
+        }
+
         this.buffer = this.gl.createBuffer();
         this.gl.bindBuffer(this.binding, this.buffer);
         this.gl.bufferData(this.binding, data, this.usage);
@@ -137,18 +143,14 @@ class VertexBuffer {
     */
     data(data) {
         // Don't want to update vertex array bindings
-        let currentVertexArray = this.appState.vertexArray;
-        if (currentVertexArray) {
+        if (this.appState.vertexArray) {
             this.gl.bindVertexArray(null);
+            this.appState.vertexArray = null;
         }
 
         this.gl.bindBuffer(this.binding, this.buffer);
         this.gl.bufferSubData(this.binding, 0, data);
         this.gl.bindBuffer(this.binding, null);
-
-        if (currentVertexArray) {
-            this.gl.bindVertexArray(currentVertexArray.vertexArray);
-        }
 
         return this;
     }
