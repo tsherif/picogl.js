@@ -175,6 +175,7 @@ class VertexArray {
 
         this.gl.bindVertexArray(null);
         this.gl.bindBuffer(vertexBuffer.binding, null);
+        this.appState.vertexArray = null;
 
         return this;
     }
@@ -263,6 +264,7 @@ class VertexArray {
 
         this.gl.bindVertexArray(null);
         this.gl.bindBuffer(vertexBuffer.binding, null);
+        this.appState.vertexArray = null;
 
         return this;
     }

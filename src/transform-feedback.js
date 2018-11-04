@@ -70,6 +70,7 @@ class TransformFeedback {
         this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, index, buffer.buffer);
         this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, null);
         this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, index, null);
+        this.appState.transformFeedback = null;
 
         return this;
     }
