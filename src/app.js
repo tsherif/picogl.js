@@ -941,8 +941,8 @@ class App {
         @method
         @return {VertexArray} New VertexArray object.
     */
-    createVertexArray() {
-        return new VertexArray(this.gl, this.state);
+    createVertexArray(numElements = 0, numInstances = 0) {
+        return new VertexArray(this.gl, this.state, numElements, numInstances);
     }
 
     /**
