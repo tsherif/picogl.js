@@ -66,11 +66,9 @@ class TransformFeedback {
         @return {TransformFeedback} The TransformFeedback object.
     */
     feedbackBuffer(index, buffer) {
+        this.bind();
         this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedback);
         this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, index, buffer.buffer);
-        this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, null);
-        this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, index, null);
-        this.appState.transformFeedback = null;
 
         return this;
     }
