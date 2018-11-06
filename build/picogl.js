@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.9.0
+PicoGL.js v0.9.1
 
 The MIT License (MIT)
 
@@ -32,7 +32,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 		exports["PicoGL"] = factory();
 	else
 		root["PicoGL"] = factory();
-})(this, function() {
+})(typeof self !== 'undefined' ? self : this, function() {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -1100,7 +1100,7 @@ const App = __webpack_require__(5);
     @namespace PicoGL
 */
 const PicoGL = __webpack_require__(0);
-PicoGL.version = "0.9.0";
+PicoGL.version = "0.9.1";
 
 /**
     Create a PicoGL app. The app is the primary entry point to PicoGL. It stores
@@ -2072,8 +2072,8 @@ class App {
         @method
         @return {VertexArray} New VertexArray object.
     */
-    createVertexArray() {
-        return new VertexArray(this.gl, this.state);
+    createVertexArray(numElements = 0, numInstances = 0) {
+        return new VertexArray(this.gl, this.state, numElements, numInstances);
     }
 
     /**
@@ -4230,10 +4230,9 @@ class TransformFeedback {
         @return {TransformFeedback} The TransformFeedback object.
     */
     feedbackBuffer(index, buffer) {
+        this.bind();
         this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedback);
         this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, index, buffer.buffer);
-        this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, null);
-        this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, index, null);
 
         return this;
     }
@@ -4610,17 +4609,15 @@ const CONSTANTS = __webpack_require__(0);
 */
 class VertexArray {
     
-    constructor(gl, appState) {
+    constructor(gl, appState, numElements = 0, numInstances = 0) {
         this.gl = gl;
         this.appState = appState;
         this.vertexArray = null;
-        this.numElements = 0;
+        this.numElements = numElements;
         this.indexType = null;
         this.instancedBuffers = 0;
         this.indexed = false;
-        this.numInstances = 0;
-
-        this.restore();
+        this.numInstances = numInstances;
     }
 
     /**
@@ -4634,10 +4631,14 @@ class VertexArray {
             this.appState.vertexArray = null;
         }
 
-        this.vertexArray = this.gl.createVertexArray();
+        // re-allocate at gl level, if necessary
+        if (this.vertexArray !== null) {
+            this.vertexArray = this.gl.createVertexArray();
+        }
 
         return this;
     }
+
 
     /**
         Bind an per-vertex attribute buffer to this vertex array.
@@ -4739,15 +4740,17 @@ class VertexArray {
         @return {VertexArray} The VertexArray object.
     */
     indexBuffer(vertexBuffer) {
-        this.gl.bindVertexArray(this.vertexArray);
-        this.gl.bindBuffer(vertexBuffer.binding, vertexBuffer.buffer);
+        // allocate at gl level, if necessary
+        if (this.vertexArray === null) {
+            this.vertexArray = this.gl.createVertexArray();
+        }
+
+        this.bind();
+        this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, vertexBuffer.buffer);
 
         this.numElements = vertexBuffer.numItems * 3;
         this.indexType = vertexBuffer.type;
         this.indexed = true;
-
-        this.gl.bindVertexArray(null);
-        this.gl.bindBuffer(vertexBuffer.binding, null);
 
         return this;
     }
@@ -4796,8 +4799,13 @@ class VertexArray {
         @return {VertexArray} The VertexArray object.
     */
     attributeBuffer(attributeIndex, vertexBuffer, instanced, integer, normalized) {
-        this.gl.bindVertexArray(this.vertexArray);
-        this.gl.bindBuffer(vertexBuffer.binding, vertexBuffer.buffer);
+        // allocate at gl level, if necessary
+        if (this.vertexArray === null) {
+            this.vertexArray = this.gl.createVertexArray();
+        }
+
+        this.bind();
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, vertexBuffer.buffer);
 
         let numColumns = vertexBuffer.numColumns;
 
@@ -4834,12 +4842,10 @@ class VertexArray {
             this.numElements = this.numElements || vertexBuffer.numItems;
         }
 
-        this.gl.bindVertexArray(null);
-        this.gl.bindBuffer(vertexBuffer.binding, null);
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, null);
 
         return this;
     }
-
 }
 
 module.exports = VertexArray;
@@ -4971,6 +4977,12 @@ class VertexBuffer {
             data = this.numItems * this.itemSize * this.numColumns * CONSTANTS.TYPE_SIZE[this.type];
         }
 
+        // Don't want to update vertex array bindings
+        if (this.appState.vertexArray) {
+            this.gl.bindVertexArray(null);
+            this.appState.vertexArray = null;
+        }
+
         this.buffer = this.gl.createBuffer();
         this.gl.bindBuffer(this.binding, this.buffer);
         this.gl.bufferData(this.binding, data, this.usage);
@@ -4989,18 +5001,14 @@ class VertexBuffer {
     */
     data(data) {
         // Don't want to update vertex array bindings
-        let currentVertexArray = this.appState.vertexArray;
-        if (currentVertexArray) {
+        if (this.appState.vertexArray) {
             this.gl.bindVertexArray(null);
+            this.appState.vertexArray = null;
         }
 
         this.gl.bindBuffer(this.binding, this.buffer);
         this.gl.bufferSubData(this.binding, 0, data);
         this.gl.bindBuffer(this.binding, null);
-
-        if (currentVertexArray) {
-            this.gl.bindVertexArray(currentVertexArray.vertexArray);
-        }
 
         return this;
     }
