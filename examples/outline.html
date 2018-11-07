@@ -289,7 +289,7 @@
                 // SET STENCIL VALUE TO 1 FOR EVERY PIXEL
                 // THAT GETS DRAWN
                 .stencilFunc(PicoGL.ALWAYS, 1, 0xFF)
-                .stencilMask(0xFFFFFFFF);
+                .stencilMask(0xFFFF);
                 mainDrawcall.draw();
                 
                 app.noDepthTest()

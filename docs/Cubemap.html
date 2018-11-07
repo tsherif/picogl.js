@@ -389,7 +389,426 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="cubemap.js.html">cubemap.js</a>, <a href="cubemap.js.html#line116">line 116</a>
+        <a href="cubemap.js.html">cubemap.js</a>, <a href="cubemap.js.html#line165">line 165</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    The Cubemap object.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="Cubemap.html">Cubemap</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="restore"><span class="type-signature"></span>restore<span class="signature">(options<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="Cubemap.html">Cubemap</a>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Restore cubemap after context loss.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Texture options.
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>negX</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">DOMElement</span>
+|
+
+<span class="param-type">ArrayBufferView</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The image data for the negative X direction.
+                Can be any format that would be accepted by texImage2D.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>posX</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">DOMElement</span>
+|
+
+<span class="param-type">ArrayBufferView</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The image data for the positive X direction.
+                Can be any format that would be accepted by texImage2D.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>negY</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">DOMElement</span>
+|
+
+<span class="param-type">ArrayBufferView</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The image data for the negative Y direction.
+                Can be any format that would be accepted by texImage2D.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>posY</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">DOMElement</span>
+|
+
+<span class="param-type">ArrayBufferView</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The image data for the positive Y direction.
+                Can be any format that would be accepted by texImage2D.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>negZ</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">DOMElement</span>
+|
+
+<span class="param-type">ArrayBufferView</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The image data for the negative Z direction.
+                Can be any format that would be accepted by texImage2D.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>posZ</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">DOMElement</span>
+|
+
+<span class="param-type">ArrayBufferView</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The image data for the positive Z direction.
+                Can be any format that would be accepted by texImage2D.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="cubemap.js.html">cubemap.js</a>, <a href="cubemap.js.html#line111">line 111</a>
     </li></ul></dd>
     
 
@@ -461,7 +880,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sat Mar 03 2018 12:33:30 GMT+0100 (CET)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sun Oct 21 2018 13:58:50 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

@@ -47,19 +47,38 @@ class Timer {
         this.gl = gl;
         this.cpuTimer = window.performance || window.Date;
 
-        // Note(Tarek): Firefox for some reason only supports EXT_disjoint_timer_query, so have to try both
-        var gpuTimerExtension = this.gl.getExtension("EXT_disjoint_timer_query_webgl2") || this.gl.getExtension("EXT_disjoint_timer_query");
-        if (gpuTimerExtension) {
-            this.gpuTimer = true;
-            this.gpuTimerQuery = new Query(this.gl, CONSTANTS.TIME_ELAPSED_EXT);
-        } else {
-            this.gpuTimer = false;
-            this.gpuTimerQuery = null;
+        this.gpuTimer = false;
+        this.gpuTimerQuery = null;
+
+        this.cpuStartTime = 0;
+        this.cpuTime = 0;
+        this.gpuTime = 0;
+
+        this.restore();
+    }
+
+    /**
+        Restore timer after context loss.
+
+        @method
+        @return {Timer} The Timer object.
+    */
+    restore() {
+        this.gpuTimer = !!(this.gl.getExtension("EXT_disjoint_timer_query_webgl2") || this.gl.getExtension("EXT_disjoint_timer_query"));
+        
+        if (this.gpuTimer) {
+            if (this.gpuTimerQuery) {
+                this.gpuTimerQuery.restore();
+            } else {
+                this.gpuTimerQuery = new Query(this.gl, CONSTANTS.TIME_ELAPSED_EXT);
+            }
         }
 
         this.cpuStartTime = 0;
         this.cpuTime = 0;
         this.gpuTime = 0;
+
+        return this;
     }
 
 

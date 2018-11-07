@@ -23,6 +23,8 @@
 
 "use strict";
 
+let webglInfoInitialized = false;
+
 const App = require("./app");
 
 /**
@@ -44,7 +46,13 @@ PicoGL.version = "%%VERSION%%";
     @return {App} New App object.
 */
 PicoGL.createApp = function(canvas, contextAttributes) {
-    return new App(canvas, contextAttributes);
+    let gl = canvas.getContext("webgl2", contextAttributes);
+    if (!webglInfoInitialized) {
+        PicoGL.WEBGL_INFO.MAX_TEXTURE_UNITS = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
+        PicoGL.WEBGL_INFO.MAX_UNIFORM_BUFFERS = gl.getParameter(gl.MAX_UNIFORM_BUFFER_BINDINGS);
+        webglInfoInitialized = true;      
+    }
+    return new App(gl, canvas);
 };
     
 module.exports = PicoGL;

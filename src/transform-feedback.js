@@ -35,12 +35,26 @@ class TransformFeedback {
 
     constructor(gl, appState) {
         this.gl = gl;
-        this.transformFeedback = gl.createTransformFeedback();
         this.appState = appState;
+        this.transformFeedback = null;
 
-        // TODO(Tarek): Need to rebind buffers due to bug in ANGLE.
-        // Remove this when that's fixed.
-        this.angleBugBuffers = [];
+        this.restore();
+    }
+
+    /**
+        Restore transform feedback after context loss.
+
+        @method
+        @return {TransformFeedback} The TransformFeedback object.
+    */
+    restore() {
+        if (this.appState.transformFeedback === this) {
+            this.appState.transformFeedback = null;
+        }
+
+        this.transformFeedback = this.gl.createTransformFeedback();
+
+        return this;
     }
 
     /**
@@ -52,12 +66,9 @@ class TransformFeedback {
         @return {TransformFeedback} The TransformFeedback object.
     */
     feedbackBuffer(index, buffer) {
+        this.bind();
         this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedback);
         this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, index, buffer.buffer);
-        this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, null);
-        this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, index, null);
-
-        this.angleBugBuffers[index] = buffer;
 
         return this;
     }
@@ -72,6 +83,11 @@ class TransformFeedback {
         if (this.transformFeedback) {
             this.gl.deleteTransformFeedback(this.transformFeedback);
             this.transformFeedback = null;
+
+            if (this.appState.transformFeedback === this) {
+                this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, null);
+                this.appState.transformFeedback = null;
+            }
         }
 
         return this;
@@ -87,11 +103,6 @@ class TransformFeedback {
     bind() {
         if (this.appState.transformFeedback !== this) {
             this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedback);
-
-            for (let i = 0, len = this.angleBugBuffers.length; i < len; ++i) {
-                this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, i, this.angleBugBuffers[i].buffer);
-            }
-
             this.appState.transformFeedback = this;
         }
 

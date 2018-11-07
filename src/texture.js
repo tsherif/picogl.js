@@ -53,9 +53,9 @@ class Texture {
         this.gl = gl;
         this.binding = binding;
         this.texture = null;
-        this.width = -1;
-        this.height = -1;
-        this.depth = -1;
+        this.width = width || 0;
+        this.height = height || 0;
+        this.depth = depth || 0;
         this.type = options.type !== undefined ? options.type : defaultType;
         this.is3D = is3D;
         this.appState = appState;
@@ -107,11 +107,27 @@ class Texture {
         this.flipY = flipY;
         this.mipmaps = (minFilter === gl.LINEAR_MIPMAP_NEAREST || minFilter === gl.LINEAR_MIPMAP_LINEAR);
 
-        this.resize(width, height, depth);
+        this.restore(image);
+    }
+
+    /**
+        Restore texture after context loss.
+
+        @method
+        @param {DOMElement|ArrayBufferView|Array} [image] Image data. An array can be passed to manually set all levels 
+            of the mipmap chain. If a single level is passed and mipmap filtering is being used,
+            generateMipmap() will be called to produce the remaining levels.
+        @return {Texture} The Texture object.
+    */
+    restore(image) {
+        this.texture = null;
+        this.resize(this.width, this.height, this.depth);
 
         if (image) {
             this.data(image);
         }
+
+        return this;
     }
 
     /**
@@ -126,7 +142,7 @@ class Texture {
     resize(width, height, depth) {
         depth = depth || 0;
 
-        if (width === this.width && height === this.height && depth === this.depth) {
+        if (this.texture && width === this.width && height === this.height && depth === this.depth) {
             return this; 
         }
 
