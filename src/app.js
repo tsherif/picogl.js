@@ -28,6 +28,7 @@ const TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
 const Cubemap                 = require("./cubemap");
 const DrawCall                = require("./draw-call");
 const Framebuffer             = require("./framebuffer");
+const Renderbuffer            = require("./renderbuffer");
 const Program                 = require("./program");
 const Shader                  = require("./shader");
 const Texture                 = require("./texture");
@@ -1200,6 +1201,16 @@ class App {
     */
     createCubemap(options) {
         return new Cubemap(this.gl, this.state, options);
+    }
+
+    /**
+        Create a renderbuffer.
+
+        @method
+        @return {Framebuffer} New Framebuffer object.
+    */
+    createRenderbuffer(width, height, internalFormat, samples = 0) {
+        return new Renderbuffer(this.gl, width, height, internalFormat, samples);
     }
 
     /**

@@ -123,9 +123,7 @@
 
         // FRAMEBUFFER
         var colorTarget = app.createTexture2D(app.width, app.height);
-        var depthTarget = app.createTexture2D(app.width, app.height, {
-            format: PicoGL.DEPTH_COMPONENT
-        });
+        var depthTarget = app.createRenderbuffer(app.width, app.height, PicoGL.DEPTH_COMPONENT16);
 
         var rttBuffer = app.createFramebuffer().colorTarget(0, colorTarget).depthTarget(depthTarget);
 
