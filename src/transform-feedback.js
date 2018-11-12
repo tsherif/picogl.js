@@ -38,6 +38,10 @@ class TransformFeedback {
         this.appState = appState;
         this.transformFeedback = null;
 
+        // TODO(Tarek): Need to rebind buffers due to bug in ANGLE.
+        // Remove this when that's fixed.
+        this.angleBugBuffers = [];
+
         this.restore();
     }
 
@@ -54,6 +58,8 @@ class TransformFeedback {
 
         this.transformFeedback = this.gl.createTransformFeedback();
 
+        this.angleBugBuffers.length = 0;
+
         return this;
     }
 
@@ -69,6 +75,8 @@ class TransformFeedback {
         this.bind();
         this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedback);
         this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, index, buffer.buffer);
+
+        this.angleBugBuffers[index] = buffer;
 
         return this;
     }
@@ -104,6 +112,10 @@ class TransformFeedback {
         if (this.appState.transformFeedback !== this) {
             this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedback);
             this.appState.transformFeedback = this;
+
+            for (let i = 0, len = this.angleBugBuffers.length; i < len; ++i) {
+                this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, i, this.angleBugBuffers[i].buffer);
+            }
         }
 
         return this;

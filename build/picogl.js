@@ -1844,6 +1844,7 @@ class App {
         Copy data from framebuffer attached to READ_FRAMEBUFFER to framebuffer attached to DRAW_FRAMEBUFFER.
 
         @method
+        @param {GLEnum} mask Write mask (e.g. PicoGL.COLOR_BUFFER_BIT). 
         @param {Object} [options] Blit options.
         @param {number} [options.srcStartX=0] Source start x coordinate. 
         @param {number} [options.srcStartY=0] Source start y coordinate. 
@@ -1853,11 +1854,10 @@ class App {
         @param {number} [options.dstStartY=0] Destination start y coordinate. 
         @param {number} [options.dstEndX=Width of the draw framebuffer] Destination end x coordinate. 
         @param {number} [options.dstEndY=Height of the draw framebuffer] Destination end y coordinate. 
-        @param {number} [options.mask=COLOR_BUFFER_BIT | DEPTH_BUFFER_BIT] Write mask. 
         @param {number} [options.filter=NEAREST] Sampling filter. 
         @return {App} The App object.
     */  
-    blitFramebuffer(options = CONSTANTS.DUMMY_OBJECT) {
+    blitFramebuffer(mask, options = CONSTANTS.DUMMY_OBJECT) {
         let readFramebuffer = this.state.readFramebuffer;
         let drawFramebuffer = this.state.drawFramebuffer;
         let defaultReadWidth = readFramebuffer ? readFramebuffer.width : this.width;
@@ -1874,7 +1874,6 @@ class App {
             dstStartY = 0,
             dstEndX = defaultDrawWidth,
             dstEndY = defaultDrawHeight,
-            mask = CONSTANTS.COLOR_BUFFER_BIT | CONSTANTS.DEPTH_BUFFER_BIT,
             filter = CONSTANTS.NEAREST
         } = options;
 
@@ -3309,9 +3308,6 @@ class DrawCall {
         if (this.currentTransformFeedback) {
             this.currentTransformFeedback.bind();
             this.gl.beginTransformFeedback(this.primitive);
-        } else if (this.appState.transformFeedback) {
-            this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, null);
-            this.appState.transformFeedback = null;
         }
 
         if (this.currentVertexArray.instanced) {
@@ -3328,6 +3324,11 @@ class DrawCall {
 
         if (this.currentTransformFeedback) {
             this.gl.endTransformFeedback();
+            // TODO(Tarek): Need to rebind buffers due to bug in older version of ANGLE that FF is using.
+            // Remove this when that's fixed.
+            for (let i = 0, len = this.currentTransformFeedback.angleBugBuffers.length; i < len; ++i) {
+                this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, i, null);
+            }
         }
 
         return this;
@@ -4411,6 +4412,10 @@ class TransformFeedback {
         this.appState = appState;
         this.transformFeedback = null;
 
+        // TODO(Tarek): Need to rebind buffers due to bug in ANGLE.
+        // Remove this when that's fixed.
+        this.angleBugBuffers = [];
+
         this.restore();
     }
 
@@ -4427,6 +4432,8 @@ class TransformFeedback {
 
         this.transformFeedback = this.gl.createTransformFeedback();
 
+        this.angleBugBuffers.length = 0;
+
         return this;
     }
 
@@ -4442,6 +4449,8 @@ class TransformFeedback {
         this.bind();
         this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedback);
         this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, index, buffer.buffer);
+
+        this.angleBugBuffers[index] = buffer;
 
         return this;
     }
@@ -4477,6 +4486,10 @@ class TransformFeedback {
         if (this.appState.transformFeedback !== this) {
             this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedback);
             this.appState.transformFeedback = this;
+
+            for (let i = 0, len = this.angleBugBuffers.length; i < len; ++i) {
+                this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, i, this.angleBugBuffers[i].buffer);
+            }
         }
 
         return this;
