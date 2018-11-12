@@ -46,7 +46,7 @@ class Renderbuffer {
         this.height = height;
         this.gl.bindRenderbuffer(CONSTANTS.RENDERBUFFER, this.renderbuffer);
         this.gl.renderbufferStorageMultisample(CONSTANTS.RENDERBUFFER, this.samples, this.internalFormat, this.width, this.height);
-        this.gl.bindRenderbuffer(CONSTANTS.RENDERBUFFER, null)
+        this.gl.bindRenderbuffer(CONSTANTS.RENDERBUFFER, null);
     }
 
     delete() {

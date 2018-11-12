@@ -112,14 +112,11 @@ class Framebuffer {
 
 
         if (attachment instanceof Renderbuffer) {
-            // Renderbuffer
             this.gl.framebufferRenderbuffer(CONSTANTS.DRAW_FRAMEBUFFER, this.colorAttachmentPoints[index], CONSTANTS.RENDERBUFFER, attachment.renderbuffer);
+        } else if (attachment.is3D) {
+            this.gl.framebufferTextureLayer(CONSTANTS.DRAW_FRAMEBUFFER, this.colorAttachmentPoints[index], attachment.texture, 0, target);
         } else {
-            if (attachment.is3D) {
-                this.gl.framebufferTextureLayer(CONSTANTS.DRAW_FRAMEBUFFER, this.colorAttachmentPoints[index], attachment.texture, 0, target);
-            } else {
-                this.gl.framebufferTexture2D(CONSTANTS.DRAW_FRAMEBUFFER, this.colorAttachmentPoints[index], target, attachment.texture, 0);
-            }
+            this.gl.framebufferTexture2D(CONSTANTS.DRAW_FRAMEBUFFER, this.colorAttachmentPoints[index], target, attachment.texture, 0);
         }
 
         this.gl.drawBuffers(this.colorAttachmentPoints);
@@ -147,13 +144,10 @@ class Framebuffer {
 
         if (attachment instanceof Renderbuffer) {
             this.gl.framebufferRenderbuffer(CONSTANTS.DRAW_FRAMEBUFFER, CONSTANTS.DEPTH_ATTACHMENT, CONSTANTS.RENDERBUFFER, attachment.renderbuffer);
+        } else if (attachment.is3D) {
+            this.gl.framebufferTextureLayer(CONSTANTS.DRAW_FRAMEBUFFER, CONSTANTS.DEPTH_ATTACHMENT, attachment.texture, 0, target);
         } else {
-            // Texture or Cubemap
-            if (attachment.is3D) {
-                this.gl.framebufferTextureLayer(CONSTANTS.DRAW_FRAMEBUFFER, CONSTANTS.DEPTH_ATTACHMENT, attachment.texture, 0, target);
-            } else {
-                this.gl.framebufferTexture2D(CONSTANTS.DRAW_FRAMEBUFFER, CONSTANTS.DEPTH_ATTACHMENT, target, attachment.texture, 0);
-            }
+            this.gl.framebufferTexture2D(CONSTANTS.DRAW_FRAMEBUFFER, CONSTANTS.DEPTH_ATTACHMENT, target, attachment.texture, 0);
         }
 
         this.restoreState(currentFramebuffer);
@@ -193,7 +187,7 @@ class Framebuffer {
 
         if (this.depthAttachment) {
             this.depthAttachment.resize(width, height, depth);
-            if (attachment instanceof Texture) {
+            if (this.depthAttachment instanceof Texture) {
                 // Texture resizing recreates the texture object.
                 if (this.depthAttachment.is3D) {
                     this.gl.framebufferTextureLayer(CONSTANTS.DRAW_FRAMEBUFFER, CONSTANTS.DEPTH_ATTACHMENT, this.depthAttachment.texture, 0, this.depthAttachmentTarget);
@@ -312,12 +306,12 @@ class Framebuffer {
         return this;
     }
 
-    get colorTextures () {
+    get colorTextures() {
         console.error("Framebuffer.colorTextures is deprecated and will be removed. Please use Framebuffer.colorAttachments.");
         return this.colorAttachments;
     }
 
-    get depthTexture () {
+    get depthTexture() {
         console.error("Framebuffer.depthTexture is deprecated and will be removed. Please use Framebuffer.depthAttachment.");
         return this.depthAttachment;
     }
