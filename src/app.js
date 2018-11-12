@@ -300,7 +300,6 @@ class App {
         let defaultReadHeight = readFramebuffer ? readFramebuffer.height : this.height;
         let defaultDrawWidth = drawFramebuffer ? drawFramebuffer.width : this.width;
         let defaultDrawHeight = drawFramebuffer ? drawFramebuffer.height : this.height;
-        let defaultMask = CONSTANTS.COLOR_BUFFER_BIT;
 
         let {
             srcStartX = 0,
