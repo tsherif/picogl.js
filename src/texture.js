@@ -83,13 +83,13 @@ class Texture {
 
         // Sampling parameters
         let {
-            minFilter = image ? gl.LINEAR_MIPMAP_NEAREST : gl.NEAREST,
-            magFilter = image ? gl.LINEAR : gl.NEAREST,
-            wrapS = gl.REPEAT,
-            wrapT = gl.REPEAT,
-            wrapR = gl.REPEAT,
-            compareMode = gl.NONE,
-            compareFunc = gl.LEQUAL,
+            minFilter = image ? CONSTANTS.LINEAR_MIPMAP_NEAREST : CONSTANTS.NEAREST,
+            magFilter = image ? CONSTANTS.LINEAR : CONSTANTS.NEAREST,
+            wrapS = CONSTANTS.REPEAT,
+            wrapT = CONSTANTS.REPEAT,
+            wrapR = CONSTANTS.REPEAT,
+            compareMode = CONSTANTS.NONE,
+            compareFunc = CONSTANTS.LEQUAL,
             minLOD = null,
             maxLOD = null,
             baseLevel = null,
@@ -111,7 +111,7 @@ class Texture {
         this.maxLevel = maxLevel;
         this.flipY = flipY;
         this.premultiplyAlpha = premultiplyAlpha;
-        this.mipmaps = (minFilter === gl.LINEAR_MIPMAP_NEAREST || minFilter === gl.LINEAR_MIPMAP_LINEAR);
+        this.mipmaps = (minFilter === CONSTANTS.LINEAR_MIPMAP_NEAREST || minFilter === CONSTANTS.LINEAR_MIPMAP_LINEAR);
 
         this.restore(image);
     }
@@ -164,27 +164,27 @@ class Texture {
         this.height = height;
         this.depth = depth;
 
-        this.gl.texParameteri(this.binding, this.gl.TEXTURE_MIN_FILTER, this.minFilter);
-        this.gl.texParameteri(this.binding, this.gl.TEXTURE_MAG_FILTER, this.magFilter);
-        this.gl.texParameteri(this.binding, this.gl.TEXTURE_WRAP_S, this.wrapS);
-        this.gl.texParameteri(this.binding, this.gl.TEXTURE_WRAP_T, this.wrapT);
-        this.gl.texParameteri(this.binding, this.gl.TEXTURE_WRAP_R, this.wrapR);
-        this.gl.texParameteri(this.binding, this.gl.TEXTURE_COMPARE_FUNC, this.compareFunc);
-        this.gl.texParameteri(this.binding, this.gl.TEXTURE_COMPARE_MODE, this.compareMode);
-        this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, this.flipY);
-        this.gl.pixelStorei(this.gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, this.premultiplyAlpha);
+        this.gl.texParameteri(this.binding, CONSTANTS.TEXTURE_MIN_FILTER, this.minFilter);
+        this.gl.texParameteri(this.binding, CONSTANTS.TEXTURE_MAG_FILTER, this.magFilter);
+        this.gl.texParameteri(this.binding, CONSTANTS.TEXTURE_WRAP_S, this.wrapS);
+        this.gl.texParameteri(this.binding, CONSTANTS.TEXTURE_WRAP_T, this.wrapT);
+        this.gl.texParameteri(this.binding, CONSTANTS.TEXTURE_WRAP_R, this.wrapR);
+        this.gl.texParameteri(this.binding, CONSTANTS.TEXTURE_COMPARE_FUNC, this.compareFunc);
+        this.gl.texParameteri(this.binding, CONSTANTS.TEXTURE_COMPARE_MODE, this.compareMode);
+        this.gl.pixelStorei(CONSTANTS.UNPACK_FLIP_Y_WEBGL, this.flipY);
+        this.gl.pixelStorei(CONSTANTS.UNPACK_PREMULTIPLY_ALPHA_WEBGL, this.premultiplyAlpha);
         if (this.minLOD !== null) {
-            this.gl.texParameterf(this.binding, this.gl.TEXTURE_MIN_LOD, this.minLOD);
+            this.gl.texParameterf(this.binding, CONSTANTS.TEXTURE_MIN_LOD, this.minLOD);
         }
         if (this.maxLOD !== null) {
-            this.gl.texParameterf(this.binding, this.gl.TEXTURE_MAX_LOD, this.maxLOD);
+            this.gl.texParameterf(this.binding, CONSTANTS.TEXTURE_MAX_LOD, this.maxLOD);
         }
         if (this.baseLevel !== null) {
-            this.gl.texParameteri(this.binding, this.gl.TEXTURE_BASE_LEVEL, this.baseLevel);
+            this.gl.texParameteri(this.binding, CONSTANTS.TEXTURE_BASE_LEVEL, this.baseLevel);
         }
 
         if (this.maxLevel !== null) {
-            this.gl.texParameteri(this.binding, this.gl.TEXTURE_MAX_LEVEL, this.maxLevel);
+            this.gl.texParameteri(this.binding, CONSTANTS.TEXTURE_MAX_LEVEL, this.maxLevel);
         }
 
         let levels;
@@ -309,7 +309,7 @@ class Texture {
                 this.appState.textures[this.currentUnit] = null;
             }
 
-            this.gl.activeTexture(this.gl.TEXTURE0 + unit);
+            this.gl.activeTexture(CONSTANTS.TEXTURE0 + unit);
             this.gl.bindTexture(this.binding, this.texture);
 
             this.appState.textures[unit] = this;

@@ -1226,7 +1226,8 @@ class App {
             if format is DEPTH_COMPONENT, UNSIGNED_BYTE otherwise.
         @param {GLEnum} [options.format=RGBA] Texture data format.
         @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
-        @param {boolean} [options.flipY=false] Whether the y-axis should be flipped when unpacking the texture. 
+        @param {boolean} [options.flipY=false] Whether the y-axis should be flipped when unpacking the image. 
+        @param {boolean} [options.premultiplyAlpha=false] Whether the alpha channel should be pre-multiplied when unpacking the image. 
         @param {GLEnum} [options.minFilter] Minification filter. Defaults to 
             LINEAR_MIPMAP_NEAREST if image data is provided, NEAREST otherwise.
         @param {GLEnum} [options.magFilter] Magnification filter. Defaults to LINEAR
