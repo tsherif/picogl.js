@@ -276,6 +276,23 @@ class App {
         return this;
     }
 
+    /**
+        Copy data from framebuffer attached to READ_FRAMEBUFFER to framebuffer attached to DRAW_FRAMEBUFFER.
+
+        @method
+        @param {Object} [options] Blit options.
+        @param {number} [options.srcStartX=0] Source start x coordinate. 
+        @param {number} [options.srcStartY=0] Source start y coordinate. 
+        @param {number} [options.srcEndX=Width of the read framebuffer] Source end x coordinate. 
+        @param {number} [options.srcEndY=Height of the read framebuffer] Source end y coordinate. 
+        @param {number} [options.dstStartX=0] Destination start x coordinate. 
+        @param {number} [options.dstStartY=0] Destination start y coordinate. 
+        @param {number} [options.dstEndX=Width of the draw framebuffer] Destination end x coordinate. 
+        @param {number} [options.dstEndY=Height of the draw framebuffer] Destination end y coordinate. 
+        @param {number} [options.mask=COLOR_BUFFER_BIT | DEPTH_BUFFER_BIT] Write mask. 
+        @param {number} [options.filter=NEAREST] Sampling filter. 
+        @return {App} The App object.
+    */  
     blitFramebuffer(options = CONSTANTS.DUMMY_OBJECT) {
         let readFramebuffer = this.state.readFramebuffer;
         let drawFramebuffer = this.state.drawFramebuffer;
@@ -286,19 +303,19 @@ class App {
         let defaultMask = CONSTANTS.COLOR_BUFFER_BIT;
 
         let {
-            srcx0 = 0,
-            srcy0 = 0,
-            srcx1 = defaultReadWidth,
-            srcy1 = defaultReadHeight,
-            dstx0 = 0,
-            dsty0 = 0,
-            dstx1 = defaultDrawWidth,
-            dsty1 = defaultDrawHeight,
+            srcStartX = 0,
+            srcStartY = 0,
+            srcEndX = defaultReadWidth,
+            srcEndY = defaultReadHeight,
+            dstStartX = 0,
+            dstStartY = 0,
+            dstEndX = defaultDrawWidth,
+            dstEndY = defaultDrawHeight,
             mask = CONSTANTS.COLOR_BUFFER_BIT | CONSTANTS.DEPTH_BUFFER_BIT,
             filter = CONSTANTS.NEAREST
         } = options;
 
-        this.gl.blitFramebuffer(srcx0, srcy0, srcx1, srcy1, dstx0, dsty0, dstx1, dsty1, mask, filter);
+        this.gl.blitFramebuffer(srcStartX, srcStartY, srcEndX, srcEndY, dstStartX, dstStartY, dstEndX, dstEndY, mask, filter);
 
         return this;
     }
@@ -1234,7 +1251,11 @@ class App {
         Create a renderbuffer.
 
         @method
-        @return {Framebuffer} New Framebuffer object.
+        @param {number} width Renderbuffer width.
+        @param {number} height Renderbuffer height.
+        @param {GLEnum} internalFormat Internal arrangement of the renderbuffer data.
+        @param {number} [samples=0] Number of MSAA samples.
+        @return {Renderbuffer} New Renderbuffer object.
     */
     createRenderbuffer(width, height, internalFormat, samples = 0) {
         return new Renderbuffer(this.gl, width, height, internalFormat, samples);

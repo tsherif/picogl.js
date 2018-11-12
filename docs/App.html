@@ -422,7 +422,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line60">line 60</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line61">line 61</a>
     </li></ul></dd>
     
 
@@ -560,7 +560,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line769">line 769</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line814">line 814</a>
     </li></ul></dd>
     
 
@@ -668,7 +668,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line348">line 348</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line393">line 393</a>
     </li></ul></dd>
     
 
@@ -848,7 +848,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line374">line 374</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line419">line 419</a>
     </li></ul></dd>
     
 
@@ -1075,7 +1075,596 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line391">line 391</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line436">line 436</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    The App object.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="App.html">App</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="blitFramebuffer"><span class="type-signature"></span>blitFramebuffer<span class="signature">(options<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="App.html">App</a>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Copy data from framebuffer attached to READ_FRAMEBUFFER to framebuffer attached to DRAW_FRAMEBUFFER.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Blit options.
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>srcStartX</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    0
+                
+                </td>
+            
+
+            <td class="description last">Source start x coordinate.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>srcStartY</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    0
+                
+                </td>
+            
+
+            <td class="description last">Source start y coordinate.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>srcEndX</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    Width of the read framebuffer
+                
+                </td>
+            
+
+            <td class="description last">Source end x coordinate.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>srcEndY</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    Height of the read framebuffer
+                
+                </td>
+            
+
+            <td class="description last">Source end y coordinate.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>dstStartX</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    0
+                
+                </td>
+            
+
+            <td class="description last">Destination start x coordinate.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>dstStartY</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    0
+                
+                </td>
+            
+
+            <td class="description last">Destination start y coordinate.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>dstEndX</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    Width of the draw framebuffer
+                
+                </td>
+            
+
+            <td class="description last">Destination end x coordinate.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>dstEndY</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    Height of the draw framebuffer
+                
+                </td>
+            
+
+            <td class="description last">Destination end y coordinate.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>mask</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    COLOR_BUFFER_BIT | DEPTH_BUFFER_BIT
+                
+                </td>
+            
+
+            <td class="description last">Write mask.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>filter</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    NEAREST
+                
+                </td>
+            
+
+            <td class="description last">Sampling filter.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line296">line 296</a>
     </li></ul></dd>
     
 
@@ -1183,7 +1772,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line213">line 213</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line214">line 214</a>
     </li></ul></dd>
     
 
@@ -1409,7 +1998,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line187">line 187</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line188">line 188</a>
     </li></ul></dd>
     
 
@@ -1567,7 +2156,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line201">line 201</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line202">line 202</a>
     </li></ul></dd>
     
 
@@ -1794,7 +2383,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line171">line 171</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line172">line 172</a>
     </li></ul></dd>
     
 
@@ -2874,7 +3463,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1201">line 1201</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1246">line 1246</a>
     </li></ul></dd>
     
 
@@ -3123,7 +3712,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1247">line 1247</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1306">line 1306</a>
     </li></ul></dd>
     
 
@@ -3231,7 +3820,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1211">line 1211</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1270">line 1270</a>
     </li></ul></dd>
     
 
@@ -3513,7 +4102,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line999">line 999</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1044">line 1044</a>
     </li></ul></dd>
     
 
@@ -3763,7 +4352,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line985">line 985</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1030">line 1030</a>
     </li></ul></dd>
     
 
@@ -4000,7 +4589,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line921">line 921</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line966">line 966</a>
     </li></ul></dd>
     
 
@@ -4157,7 +4746,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1222">line 1222</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1281">line 1281</a>
     </li></ul></dd>
     
 
@@ -4196,6 +4785,288 @@
     <dd>
         
 <span class="param-type"><a href="Query.html">Query</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="createRenderbuffer"><span class="type-signature"></span>createRenderbuffer<span class="signature">(width, height, internalFormat, samples<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="Renderbuffer.html">Renderbuffer</a>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Create a renderbuffer.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>width</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">Renderbuffer width.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>height</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">Renderbuffer height.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>internalFormat</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">GLEnum</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">Internal arrangement of the renderbuffer data.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>samples</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    0
+                
+                </td>
+            
+
+            <td class="description last">Number of MSAA samples.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1260">line 1260</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    New Renderbuffer object.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="Renderbuffer.html">Renderbuffer</a></span>
 
 
     </dd>
@@ -4338,7 +5209,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line934">line 934</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line979">line 979</a>
     </li></ul></dd>
     
 
@@ -5222,7 +6093,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1054">line 1054</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1099">line 1099</a>
     </li></ul></dd>
     
 
@@ -6162,7 +7033,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1149">line 1149</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1194">line 1194</a>
     </li></ul></dd>
     
 
@@ -7102,7 +7973,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1104">line 1104</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1149">line 1149</a>
     </li></ul></dd>
     
 
@@ -7210,7 +8081,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1232">line 1232</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1291">line 1291</a>
     </li></ul></dd>
     
 
@@ -7318,7 +8189,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line954">line 954</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line999">line 999</a>
     </li></ul></dd>
     
 
@@ -7533,7 +8404,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1014">line 1014</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1059">line 1059</a>
     </li></ul></dd>
     
 
@@ -7641,7 +8512,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line944">line 944</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line989">line 989</a>
     </li></ul></dd>
     
 
@@ -7927,7 +8798,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line969">line 969</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1014">line 1014</a>
     </li></ul></dd>
     
 
@@ -8035,7 +8906,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line600">line 600</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line645">line 645</a>
     </li></ul></dd>
     
 
@@ -8144,7 +9015,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line254">line 254</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line255">line 255</a>
     </li></ul></dd>
     
 
@@ -8252,7 +9123,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line269">line 269</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line270">line 270</a>
     </li></ul></dd>
     
 
@@ -8360,7 +9231,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line888">line 888</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line933">line 933</a>
     </li></ul></dd>
     
 
@@ -8517,7 +9388,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line336">line 336</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line381">line 381</a>
     </li></ul></dd>
     
 
@@ -8674,7 +9545,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line323">line 323</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line368">line 368</a>
     </li></ul></dd>
     
 
@@ -8854,7 +9725,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line286">line 286</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line331">line 331</a>
     </li></ul></dd>
     
 
@@ -8962,7 +9833,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line298">line 298</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line343">line 343</a>
     </li></ul></dd>
     
 
@@ -9070,7 +9941,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line612">line 612</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line657">line 657</a>
     </li></ul></dd>
     
 
@@ -9227,7 +10098,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line227">line 227</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line228">line 228</a>
     </li></ul></dd>
     
 
@@ -9359,7 +10230,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line711">line 711</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line756">line 756</a>
     </li></ul></dd>
     
 
@@ -9468,7 +10339,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line626">line 626</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line671">line 671</a>
     </li></ul></dd>
     
 
@@ -9583,7 +10454,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line639">line 639</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line684">line 684</a>
     </li></ul></dd>
     
 
@@ -9698,7 +10569,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line112">line 112</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line113">line 113</a>
     </li></ul></dd>
     
 
@@ -9806,7 +10677,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line360">line 360</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line405">line 405</a>
     </li></ul></dd>
     
 
@@ -9914,7 +10785,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line310">line 310</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line355">line 355</a>
     </li></ul></dd>
     
 
@@ -10022,7 +10893,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line588">line 588</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line633">line 633</a>
     </li></ul></dd>
     
 
@@ -10130,7 +11001,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line442">line 442</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line487">line 487</a>
     </li></ul></dd>
     
 
@@ -10238,7 +11109,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line417">line 417</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line462">line 462</a>
     </li></ul></dd>
     
 
@@ -10395,7 +11266,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line145">line 145</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line146">line 146</a>
     </li></ul></dd>
     
 
@@ -10511,7 +11382,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line821">line 821</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line866">line 866</a>
     </li></ul></dd>
     
 
@@ -10619,7 +11490,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line576">line 576</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line621">line 621</a>
     </li></ul></dd>
     
 
@@ -10776,7 +11647,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line241">line 241</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line242">line 242</a>
     </li></ul></dd>
     
 
@@ -11153,7 +12024,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line847">line 847</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line892">line 892</a>
     </li></ul></dd>
     
 
@@ -11333,7 +12204,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line902">line 902</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line947">line 947</a>
     </li></ul></dd>
     
 
@@ -11441,7 +12312,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line130">line 130</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line131">line 131</a>
     </li></ul></dd>
     
 
@@ -11561,7 +12432,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line664">line 664</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line709">line 709</a>
     </li></ul></dd>
     
 
@@ -11669,7 +12540,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line454">line 454</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line499">line 499</a>
     </li></ul></dd>
     
 
@@ -11777,7 +12648,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line430">line 430</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line475">line 475</a>
     </li></ul></dd>
     
 
@@ -11984,7 +12855,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line507">line 507</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line552">line 552</a>
     </li></ul></dd>
     
 
@@ -12214,7 +13085,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line527">line 527</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line572">line 572</a>
     </li></ul></dd>
     
 
@@ -12374,7 +13245,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line471">line 471</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line516">line 516</a>
     </li></ul></dd>
     
 
@@ -12557,7 +13428,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line488">line 488</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line533">line 533</a>
     </li></ul></dd>
     
 
@@ -12763,7 +13634,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line545">line 545</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line590">line 590</a>
     </li></ul></dd>
     
 
@@ -12992,7 +13863,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line564">line 564</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line609">line 609</a>
     </li></ul></dd>
     
 
@@ -13102,7 +13973,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line405">line 405</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line450">line 450</a>
     </li></ul></dd>
     
 
@@ -13328,7 +14199,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line868">line 868</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line913">line 913</a>
     </li></ul></dd>
     
 
@@ -13394,13 +14265,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="App.html">App</a></li><li><a href="Cubemap.html">Cubemap</a></li><li><a href="DrawCall.html">DrawCall</a></li><li><a href="Framebuffer.html">Framebuffer</a></li><li><a href="Program.html">Program</a></li><li><a href="Query.html">Query</a></li><li><a href="Shader.html">Shader</a></li><li><a href="Texture.html">Texture</a></li><li><a href="Timer.html">Timer</a></li><li><a href="TransformFeedback.html">TransformFeedback</a></li><li><a href="UniformBuffer.html">UniformBuffer</a></li><li><a href="VertexArray.html">VertexArray</a></li><li><a href="VertexBuffer.html">VertexBuffer</a></li></ul><h3>Namespaces</h3><ul><li><a href="PicoGL.html">PicoGL</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="App.html">App</a></li><li><a href="Cubemap.html">Cubemap</a></li><li><a href="DrawCall.html">DrawCall</a></li><li><a href="Framebuffer.html">Framebuffer</a></li><li><a href="Program.html">Program</a></li><li><a href="Query.html">Query</a></li><li><a href="Renderbuffer.html">Renderbuffer</a></li><li><a href="Shader.html">Shader</a></li><li><a href="Texture.html">Texture</a></li><li><a href="Timer.html">Timer</a></li><li><a href="TransformFeedback.html">TransformFeedback</a></li><li><a href="UniformBuffer.html">UniformBuffer</a></li><li><a href="VertexArray.html">VertexArray</a></li><li><a href="VertexBuffer.html">VertexBuffer</a></li></ul><h3>Namespaces</h3><ul><li><a href="PicoGL.html">PicoGL</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sun Oct 21 2018 13:58:50 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sun Nov 11 2018 21:14:24 GMT-0500 (GMT-05:00)
 </footer>
 
 <script> prettyPrint(); </script>

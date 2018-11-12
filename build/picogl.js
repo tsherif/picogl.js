@@ -1,39 +1,5 @@
-/*
-PicoGL.js v0.9.1
-
-The MIT License (MIT)
-
-Copyright (c) 2017 Tarek Sherif
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
-the Software, and to permit persons to whom the Software is furnished to do so,
-subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/
-
-(function webpackUniversalModuleDefinition(root, factory) {
-	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory();
-	else if(typeof define === 'function' && define.amd)
-		define([], factory);
-	else if(typeof exports === 'object')
-		exports["PicoGL"] = factory();
-	else
-		root["PicoGL"] = factory();
-})(typeof self !== 'undefined' ? self : this, function() {
-return /******/ (function(modules) { // webpackBootstrap
+var PicoGL =
+/******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
 /******/
@@ -95,7 +61,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 4);
+/******/ 	return __webpack_require__(__webpack_require__.s = 6);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -862,6 +828,434 @@ module.exports = TEXTURE_FORMAT_DEFAULTS;
 
 
 const CONSTANTS = __webpack_require__(0);
+const TEXTURE_FORMAT_DEFAULTS = __webpack_require__(1);
+
+const DUMMY_ARRAY = new Array(1);
+
+/**
+    General-purpose texture.
+
+    @class
+    @prop {WebGLRenderingContext} gl The WebGL context.
+    @prop {WebGLTexture} texture Handle to the texture.
+    @prop {WebGLSamler} sampler Sampler object.
+    @prop {number} width Texture width.
+    @prop {number} height Texture height.
+    @prop {number} depth Texture depth.
+    @prop {GLEnum} binding Binding point for the texture.
+    @prop {GLEnum} type Type of data stored in the texture.
+    @prop {GLEnum} format Layout of texture data.
+    @prop {GLEnum} internalFormat Internal arrangement of the texture data.
+    @prop {number} currentUnit The current texture unit this texture is bound to.
+    @prop {boolean} is3D Whether this texture contains 3D data.
+    @prop {boolean} flipY Whether the y-axis is being flipped for this texture.
+    @prop {boolean} mipmaps Whether this texture is using mipmap filtering 
+        (and thus should have a complete mipmap chain).
+    @prop {Object} appState Tracked GL state.
+*/
+class Texture {
+    constructor(gl, appState, binding, image, width = image.width, height = image.height, depth, is3D, options = CONSTANTS.DUMMY_OBJECT) {
+        let defaultType = options.format === CONSTANTS.DEPTH_COMPONENT ? CONSTANTS.UNSIGNED_SHORT : CONSTANTS.UNSIGNED_BYTE;
+
+        this.gl = gl;
+        this.binding = binding;
+        this.texture = null;
+        this.width = width || 0;
+        this.height = height || 0;
+        this.depth = depth || 0;
+        this.type = options.type !== undefined ? options.type : defaultType;
+        this.is3D = is3D;
+        this.appState = appState;
+
+        this.format = null;
+        this.internalFormat = null;
+        this.compressed = !!(TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[options.format] || TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[options.internalFormat]);
+        
+        if (this.compressed) {
+            // For compressed textures, just need to provide one of format, internalFormat.
+            // The other will be the same.
+            this.format = options.format !== undefined ? options.format : options.internalFormat;
+            this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : options.format;
+        } else {
+            this.format = options.format !== undefined ? options.format : gl.RGBA;
+            this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : TEXTURE_FORMAT_DEFAULTS[this.type][this.format];
+        }
+
+        // -1 indicates unbound
+        this.currentUnit = -1;
+
+        // Sampling parameters
+        let {
+            minFilter = image ? gl.LINEAR_MIPMAP_NEAREST : gl.NEAREST,
+            magFilter = image ? gl.LINEAR : gl.NEAREST,
+            wrapS = gl.REPEAT,
+            wrapT = gl.REPEAT,
+            wrapR = gl.REPEAT,
+            compareMode = gl.NONE,
+            compareFunc = gl.LEQUAL,
+            minLOD = null,
+            maxLOD = null,
+            baseLevel = null,
+            maxLevel = null,
+            flipY = false
+        } = options;
+
+        this.minFilter = minFilter;
+        this.magFilter = magFilter;
+        this.wrapS = wrapS;
+        this.wrapT = wrapT;
+        this.wrapR = wrapR;
+        this.compareMode = compareMode;
+        this.compareFunc = compareFunc;
+        this.minLOD = minLOD;
+        this.maxLOD = maxLOD;
+        this.baseLevel = baseLevel;
+        this.maxLevel = maxLevel;
+        this.flipY = flipY;
+        this.mipmaps = (minFilter === gl.LINEAR_MIPMAP_NEAREST || minFilter === gl.LINEAR_MIPMAP_LINEAR);
+
+        this.restore(image);
+    }
+
+    /**
+        Restore texture after context loss.
+
+        @method
+        @param {DOMElement|ArrayBufferView|Array} [image] Image data. An array can be passed to manually set all levels 
+            of the mipmap chain. If a single level is passed and mipmap filtering is being used,
+            generateMipmap() will be called to produce the remaining levels.
+        @return {Texture} The Texture object.
+    */
+    restore(image) {
+        this.texture = null;
+        this.resize(this.width, this.height, this.depth);
+
+        if (image) {
+            this.data(image);
+        }
+
+        return this;
+    }
+
+    /**
+        Re-allocate texture storage.
+
+        @method
+        @param {number} width Image width.
+        @param {number} height Image height.
+        @param {number} [depth] Image depth or number of images. Required when passing 3D or texture array data.
+        @return {Texture} The Texture object.
+    */
+    resize(width, height, depth) {
+        depth = depth || 0;
+
+        if (this.texture && width === this.width && height === this.height && depth === this.depth) {
+            return this; 
+        }
+
+        this.gl.deleteTexture(this.texture);
+        if (this.currentUnit !== -1) {
+            this.appState.textures[this.currentUnit] = null;
+        }
+
+        this.texture = this.gl.createTexture();
+        this.bind(Math.max(this.currentUnit, 0));
+
+        this.width = width;
+        this.height = height;
+        this.depth = depth;
+
+        this.gl.texParameteri(this.binding, this.gl.TEXTURE_MIN_FILTER, this.minFilter);
+        this.gl.texParameteri(this.binding, this.gl.TEXTURE_MAG_FILTER, this.magFilter);
+        this.gl.texParameteri(this.binding, this.gl.TEXTURE_WRAP_S, this.wrapS);
+        this.gl.texParameteri(this.binding, this.gl.TEXTURE_WRAP_T, this.wrapT);
+        this.gl.texParameteri(this.binding, this.gl.TEXTURE_WRAP_R, this.wrapR);
+        this.gl.texParameteri(this.binding, this.gl.TEXTURE_COMPARE_FUNC, this.compareFunc);
+        this.gl.texParameteri(this.binding, this.gl.TEXTURE_COMPARE_MODE, this.compareMode);
+        this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, this.flipY);
+        if (this.minLOD !== null) {
+            this.gl.texParameterf(this.binding, this.gl.TEXTURE_MIN_LOD, this.minLOD);
+        }
+        if (this.maxLOD !== null) {
+            this.gl.texParameterf(this.binding, this.gl.TEXTURE_MAX_LOD, this.maxLOD);
+        }
+        if (this.baseLevel !== null) {
+            this.gl.texParameteri(this.binding, this.gl.TEXTURE_BASE_LEVEL, this.baseLevel);
+        }
+
+        if (this.maxLevel !== null) {
+            this.gl.texParameteri(this.binding, this.gl.TEXTURE_MAX_LEVEL, this.maxLevel);
+        }
+
+        let levels;
+        if (this.is3D) {
+            if (this.mipmaps) {
+                levels = Math.floor(Math.log2(Math.max(Math.max(this.width, this.height), this.depth))) + 1;
+            } else {
+                levels = 1;
+            }
+            this.gl.texStorage3D(this.binding, levels, this.internalFormat, this.width, this.height, this.depth);
+        } else {
+            if (this.mipmaps) {
+                levels = Math.floor(Math.log2(Math.max(this.width, this.height))) + 1;
+            } else {
+                levels = 1;
+            }
+            this.gl.texStorage2D(this.binding, levels, this.internalFormat, this.width, this.height);
+        }
+
+        return this;
+    }
+
+    /**
+        Set the image data for the texture. An array can be passed to manually set all levels 
+        of the mipmap chain. If a single level is passed and mipmap filtering is being used,
+        generateMipmap() will be called to produce the remaining levels.
+        NOTE: the data must fit the currently-allocated storage!
+
+        @method
+        @param {ImageElement|ArrayBufferView|Array} data Image data. If an array is passed, it will be 
+            used to set mip map levels.
+        @return {Texture} The Texture object.
+    */
+    data(data) {
+        if (!Array.isArray(data)) {
+            DUMMY_ARRAY[0] = data;
+            data = DUMMY_ARRAY;
+        }
+
+        let numLevels = this.mipmaps ? data.length : 1;
+        let width = this.width;
+        let height = this.height;
+        let depth = this.depth;
+        let generateMipmaps = this.mipmaps && data.length === 1;
+        let i;
+
+        this.bind(Math.max(this.currentUnit, 0));
+
+        if (this.compressed) {
+            if (this.is3D) {
+                for (i = 0; i < numLevels; ++i) {
+                    this.gl.compressedTexSubImage3D(this.binding, i, 0, 0, 0, width, height, depth, this.format, data[i]);
+                    width = Math.max(width >> 1, 1);
+                    height = Math.max(height >> 1, 1);
+                    depth = Math.max(depth >> 1, 1);
+                }
+            } else {
+                for (i = 0; i < numLevels; ++i) {
+                    this.gl.compressedTexSubImage2D(this.binding, i, 0, 0, width, height, this.format, data[i]);
+                    width = Math.max(width >> 1, 1);
+                    height = Math.max(height >> 1, 1);
+                }
+            }
+        } else if (this.is3D) {
+            for (i = 0; i < numLevels; ++i) {
+                this.gl.texSubImage3D(this.binding, i, 0, 0, 0, width, height, depth, this.format, this.type, data[i]);
+                width = Math.max(width >> 1, 1);
+                height = Math.max(height >> 1, 1);
+                depth = Math.max(depth >> 1, 1);
+            }
+        } else {
+            for (i = 0; i < numLevels; ++i) {
+                this.gl.texSubImage2D(this.binding, i, 0, 0, width, height, this.format, this.type, data[i]);
+                width = Math.max(width >> 1, 1);
+                height = Math.max(height >> 1, 1);
+            }
+        }
+
+        if (generateMipmaps) {
+            this.gl.generateMipmap(this.binding);
+        }
+
+        return this;
+    }
+
+    /**
+        Delete this texture.
+
+        @method
+        @return {Texture} The Texture object.
+    */
+    delete() {
+        if (this.texture) {
+            this.gl.deleteTexture(this.texture);
+            this.texture = null;
+
+            if (this.currentUnit !== -1 && this.appState.textures[this.currentUnit] === this) {
+                this.appState.textures[this.currentUnit] = null;
+                this.currentUnit = -1;
+            }
+        }
+
+        return this;
+    }
+
+    /**
+        Bind this texture to a texture unit.
+
+        @method
+        @ignore
+        @return {Texture} The Texture object.
+    */
+    bind(unit) {
+        let currentTexture = this.appState.textures[unit];
+        
+        if (currentTexture !== this) {
+            if (currentTexture) {
+                currentTexture.currentUnit = -1;
+            }
+
+            if (this.currentUnit !== -1) {
+                this.appState.textures[this.currentUnit] = null;
+            }
+
+            this.gl.activeTexture(this.gl.TEXTURE0 + unit);
+            this.gl.bindTexture(this.binding, this.texture);
+
+            this.appState.textures[unit] = this;
+            this.currentUnit = unit;
+        }
+
+        return this;
+    }
+
+}
+
+module.exports = Texture;
+
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+///////////////////////////////////////////////////////////////////////////////////
+// The MIT License (MIT)
+//
+// Copyright (c) 2017 Tarek Sherif
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy of
+// this software and associated documentation files (the "Software"), to deal in
+// the Software without restriction, including without limitation the rights to
+// use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+// the Software, and to permit persons to whom the Software is furnished to do so,
+// subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+// FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+// COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+// IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+// CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+///////////////////////////////////////////////////////////////////////////////////
+
+
+
+const CONSTANTS = __webpack_require__(0);
+
+/**
+    Offscreen drawing surface.
+
+    @class
+    @prop {WebGLRenderingContext} gl The WebGL context.
+    @prop {WebGLRenderbuffer} renderbuffer Handle to the renderbuffer.
+    @prop {number} width Renderbuffer width.
+    @prop {number} height Renderbuffer height.
+    @prop {GLEnum} internalFormat Internal arrangement of the renderbuffer data.
+    @prop {number} samples Number of MSAA samples.
+*/
+class Renderbuffer {
+    constructor(gl, width, height, internalFormat, samples = 0) {
+        this.gl = gl;
+        this.renderbuffer = null;
+        this.width = width;
+        this.height = height;
+        this.internalFormat = internalFormat;
+        this.samples = samples;
+        this.restore();
+    }
+
+    /**
+        Restore renderbuffer after context loss.
+
+        @method
+        @return {Renderbuffer} The Renderbuffer object.
+    */
+    restore() {
+        this.renderbuffer = this.gl.createRenderbuffer();
+        this.resize(this.width, this.height);
+
+        return this;
+    }
+
+    /**
+        Resize all attachments.
+
+        @method
+        @param {number} [width] New width of the renderbuffer.
+        @param {number} [height] New height of the renderbuffer.
+        @return {Renderbuffer} The Renderbuffer object.
+    */
+    resize(width, height) {
+        this.width = width;
+        this.height = height;
+        this.gl.bindRenderbuffer(CONSTANTS.RENDERBUFFER, this.renderbuffer);
+        this.gl.renderbufferStorageMultisample(CONSTANTS.RENDERBUFFER, this.samples, this.internalFormat, this.width, this.height);
+        this.gl.bindRenderbuffer(CONSTANTS.RENDERBUFFER, null);
+        
+        return this;
+    }
+
+    /**
+        Delete this renderbuffer.
+
+        @method
+        @return {Renderbuffer} The Renderbuffer object.
+    */
+    delete() {
+        this.gl.deleteRenderbuffer(this.renderbuffer);
+        this.renderbuffer = null;
+
+        return this;
+    }   
+}
+
+module.exports = Renderbuffer;
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+///////////////////////////////////////////////////////////////////////////////////
+// The MIT License (MIT)
+//
+// Copyright (c) 2017 Tarek Sherif
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy of
+// this software and associated documentation files (the "Software"), to deal in
+// the Software without restriction, including without limitation the rights to
+// use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+// the Software, and to permit persons to whom the Software is furnished to do so,
+// subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+// FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+// COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+// IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+// CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+///////////////////////////////////////////////////////////////////////////////////
+
+
+
+const CONSTANTS = __webpack_require__(0);
 
 /**
     WebGL shader.
@@ -926,7 +1320,7 @@ module.exports = Shader;
 
 
 /***/ }),
-/* 3 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1060,7 +1454,7 @@ module.exports = Query;
 
 
 /***/ }),
-/* 4 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1091,7 +1485,7 @@ module.exports = Query;
 
 let webglInfoInitialized = false;
 
-const App = __webpack_require__(5);
+const App = __webpack_require__(7);
 
 /**
     Global PicoGL module. For convenience, all WebGL enums are stored
@@ -1100,7 +1494,7 @@ const App = __webpack_require__(5);
     @namespace PicoGL
 */
 const PicoGL = __webpack_require__(0);
-PicoGL.version = "0.9.1";
+PicoGL.version = "DEV";
 
 /**
     Create a PicoGL app. The app is the primary entry point to PicoGL. It stores
@@ -1116,6 +1510,7 @@ PicoGL.createApp = function(canvas, contextAttributes) {
     if (!webglInfoInitialized) {
         PicoGL.WEBGL_INFO.MAX_TEXTURE_UNITS = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
         PicoGL.WEBGL_INFO.MAX_UNIFORM_BUFFERS = gl.getParameter(gl.MAX_UNIFORM_BUFFER_BINDINGS);
+        PicoGL.WEBGL_INFO.SAMPLES = gl.getParameter(gl.SAMPLES);
         webglInfoInitialized = true;      
     }
     return new App(gl, canvas);
@@ -1125,7 +1520,7 @@ module.exports = PicoGL;
 
 
 /***/ }),
-/* 5 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1156,18 +1551,19 @@ module.exports = PicoGL;
 
 const CONSTANTS               = __webpack_require__(0);
 const TEXTURE_FORMAT_DEFAULTS = __webpack_require__(1);
-const Cubemap                 = __webpack_require__(6);
-const DrawCall                = __webpack_require__(7);
-const Framebuffer             = __webpack_require__(8);
-const Program                 = __webpack_require__(9);
-const Shader                  = __webpack_require__(2);
-const Texture                 = __webpack_require__(11);
-const Timer                   = __webpack_require__(12);
-const TransformFeedback       = __webpack_require__(13);
-const UniformBuffer           = __webpack_require__(14);
-const VertexArray             = __webpack_require__(15);
-const VertexBuffer            = __webpack_require__(16);
-const Query                   = __webpack_require__(3);
+const Cubemap                 = __webpack_require__(8);
+const DrawCall                = __webpack_require__(9);
+const Framebuffer             = __webpack_require__(10);
+const Renderbuffer            = __webpack_require__(3);
+const Program                 = __webpack_require__(11);
+const Shader                  = __webpack_require__(4);
+const Texture                 = __webpack_require__(2);
+const Timer                   = __webpack_require__(13);
+const TransformFeedback       = __webpack_require__(14);
+const UniformBuffer           = __webpack_require__(15);
+const VertexArray             = __webpack_require__(16);
+const VertexBuffer            = __webpack_require__(17);
+const Query                   = __webpack_require__(5);
 
 /**
     Primary entry point to PicoGL. An app will store all parts of the WebGL
@@ -1402,6 +1798,50 @@ class App {
             this.gl.bindFramebuffer(this.gl.READ_FRAMEBUFFER, null);
             this.state.readFramebuffer = null;
         }
+
+        return this;
+    }
+
+    /**
+        Copy data from framebuffer attached to READ_FRAMEBUFFER to framebuffer attached to DRAW_FRAMEBUFFER.
+
+        @method
+        @param {Object} [options] Blit options.
+        @param {number} [options.srcStartX=0] Read start x coordinate. 
+        @param {number} [options.srcStartY=0] Read start y coordinate. 
+        @param {number} [options.srcEndX] Read end x coordinate. Defaults to width of the read framebuffer. 
+        @param {number} [options.srcEndY] Read end x coordinate. Defaults to width of the read framebuffer. 
+        @param {number} [options.dstStartX=0] Write start x coordinate. 
+        @param {number} [options.dstStartY=0] Write start y coordinate. 
+        @param {number} [options.dstEndX] Write end x coordinate. Defaults to width of the draw framebuffer. 
+        @param {number} [options.dstEndY] Write end x coordinate. Defaults to width of the draw framebuffer. 
+        @param {number} [options.mask=COLOR_BUFFER_BIT | DEPTH_BUFFER_BIT] Write mask. 
+        @param {number} [options.filter=NEAREST] Sampling filter. 
+        @return {App} The App object.
+    */  
+    blitFramebuffer(options = CONSTANTS.DUMMY_OBJECT) {
+        let readFramebuffer = this.state.readFramebuffer;
+        let drawFramebuffer = this.state.drawFramebuffer;
+        let defaultReadWidth = readFramebuffer ? readFramebuffer.width : this.width;
+        let defaultReadHeight = readFramebuffer ? readFramebuffer.height : this.height;
+        let defaultDrawWidth = drawFramebuffer ? drawFramebuffer.width : this.width;
+        let defaultDrawHeight = drawFramebuffer ? drawFramebuffer.height : this.height;
+        let defaultMask = CONSTANTS.COLOR_BUFFER_BIT;
+
+        let {
+            srcStartX = 0,
+            srcStartY = 0,
+            srcEndX = defaultReadWidth,
+            srcEndY = defaultReadHeight,
+            dstStartX = 0,
+            dstStartY = 0,
+            dstEndX = defaultDrawWidth,
+            dstEndY = defaultDrawHeight,
+            mask = CONSTANTS.COLOR_BUFFER_BIT | CONSTANTS.DEPTH_BUFFER_BIT,
+            filter = CONSTANTS.NEAREST
+        } = options;
+
+        this.gl.blitFramebuffer(srcStartX, srcStartY, srcEndX, srcEndY, dstStartX, dstStartY, dstEndX, dstEndY, mask, filter);
 
         return this;
     }
@@ -2334,6 +2774,20 @@ class App {
     }
 
     /**
+        Create a renderbuffer.
+
+        @method
+        @param {number} width Renderbuffer width.
+        @param {number} height Renderbuffer height.
+        @param {GLEnum} internalFormat Internal arrangement of the renderbuffer data.
+        @param {number} [samples=0] Number of MSAA samples.
+        @return {Framebuffer} New Framebuffer object.
+    */
+    createRenderbuffer(width, height, internalFormat, samples = 0) {
+        return new Renderbuffer(this.gl, width, height, internalFormat, samples);
+    }
+
+    /**
         Create a framebuffer.
 
         @method
@@ -2385,7 +2839,7 @@ module.exports = App;
 
 
 /***/ }),
-/* 6 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2599,7 +3053,7 @@ module.exports = Cubemap;
 
 
 /***/ }),
-/* 7 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2841,7 +3295,7 @@ module.exports = DrawCall;
 
 
 /***/ }),
-/* 8 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2871,17 +3325,20 @@ module.exports = DrawCall;
 
 
 const CONSTANTS = __webpack_require__(0);
+const Texture = __webpack_require__(2);
+const Renderbuffer = __webpack_require__(3);
 
 /**
-    Storage for vertex data.
+    Offscreen drawing surface.
 
     @class
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLFramebuffer} framebuffer Handle to the framebuffer.
-    @prop {Array} colorTextures Array of color texture targets.
-    @prop {number} numColorTargets Number of color texture targets.
-    @prop {Texture} depthTexture Depth texture target.
-    @prop {Array} colorAttachments Array of color attachment enums.
+    @prop {number} width Framebuffer width.
+    @prop {number} height Framebuffer height.
+    @prop {Array} colorAttachments Array of color attachments.
+    @prop {number} numColorTargets Number of color attachments.
+    @prop {Texture|Renderbuffer} depthAttachment Depth attachment.
     @prop {Object} appState Tracked GL state.
 */
 class Framebuffer {
@@ -2893,11 +3350,14 @@ class Framebuffer {
 
         this.numColorTargets = 0;
 
-        this.colorTextures = [];
         this.colorAttachments = [];
-        this.colorTextureTargets = [];
-        this.depthTexture = null;
-        this.depthTextureTarget = null;
+        this.colorAttachmentEnums = [];
+        this.colorAttachmentTargets = [];
+        this.depthAttachment = null;
+        this.depthAttachmentTarget = null;
+
+        this.width = 0;
+        this.height = 0;
 
         this.restore();
     }
@@ -2927,42 +3387,47 @@ class Framebuffer {
 
         @method
         @param {number} index Color attachment index.
-        @param {Texture|Cubemap} texture The texture or cubemap to attach.
+        @param {Texture|Cubemap|Renderbuffer} attachment The texture, cubemap or renderbuffer to attach.
         @param {GLEnum} [target] The texture target or layer to attach. If the texture is 3D or a texture array,
-            defaults to 0, otherwise to TEXTURE_2D.
+            defaults to 0, otherwise to TEXTURE_2D. Ignored for renderbuffers.
         @return {Framebuffer} The Framebuffer object.
     */
-    colorTarget(index, texture, target = texture.is3D ? 0 : CONSTANTS.TEXTURE_2D) {
+    colorTarget(index, attachment, target = attachment.is3D ? 0 : CONSTANTS.TEXTURE_2D) {
 
         if (index >= this.numColorTargets) {
             let numColorTargets = index + 1;
+            this.colorAttachmentEnums.length = numColorTargets;
             this.colorAttachments.length = numColorTargets;
-            this.colorTextures.length = numColorTargets;
-            this.colorTextureTargets.length = numColorTargets;
+            this.colorAttachmentTargets.length = numColorTargets;
 
-            for (let i = this.numColorTargets; i < numColorTargets; ++i) {
-                this.colorAttachments[i] = CONSTANTS.NONE;
-                this.colorTextures[i] = null;
-                this.colorTextureTargets[i] = 0;
+            for (let i = this.numColorTargets; i < numColorTargets - 1; ++i) {
+                this.colorAttachmentEnums[i] = CONSTANTS.NONE;
+                this.colorAttachments[i] = null;
+                this.colorAttachmentTargets[i] = 0;
             }
 
             this.numColorTargets = numColorTargets;
         }        
 
-        this.colorAttachments[index] = CONSTANTS.COLOR_ATTACHMENT0 + index;
-        this.colorTextures[index] = texture;
-        this.colorTextureTargets[index] = target;
+        this.colorAttachmentEnums[index] = CONSTANTS.COLOR_ATTACHMENT0 + index;
+        this.colorAttachments[index] = attachment;
+        this.colorAttachmentTargets[index] = target;
 
         let currentFramebuffer = this.bindAndCaptureState();
 
 
-        if (texture.is3D) {
-            this.gl.framebufferTextureLayer(CONSTANTS.DRAW_FRAMEBUFFER, this.colorAttachments[index], texture.texture, 0, target);
+        if (attachment instanceof Renderbuffer) {
+            this.gl.framebufferRenderbuffer(CONSTANTS.DRAW_FRAMEBUFFER, this.colorAttachmentEnums[index], CONSTANTS.RENDERBUFFER, attachment.renderbuffer);
+        } else if (attachment.is3D) {
+            this.gl.framebufferTextureLayer(CONSTANTS.DRAW_FRAMEBUFFER, this.colorAttachmentEnums[index], attachment.texture, 0, target);
         } else {
-            this.gl.framebufferTexture2D(CONSTANTS.DRAW_FRAMEBUFFER, this.colorAttachments[index], target, texture.texture, 0);
+            this.gl.framebufferTexture2D(CONSTANTS.DRAW_FRAMEBUFFER, this.colorAttachmentEnums[index], target, attachment.texture, 0);
         }
 
-        this.gl.drawBuffers(this.colorAttachments);
+        this.gl.drawBuffers(this.colorAttachmentEnums);
+
+        this.width = attachment.width;
+        this.height = attachment.height;
 
         this.restoreState(currentFramebuffer);
 
@@ -2973,23 +3438,28 @@ class Framebuffer {
         Attach a depth target to this framebuffer.
 
         @method
-        @param {Texture|Cubemap} texture The texture or cubemap to attach.
-        @param {GLEnum} [target] The texture target or layer to attach. If the texture is 3D or a texture array,
-            defaults to 0, otherwise to TEXTURE_2D.
+        @param {Texture|Cubemap|Renderbuffer} texture The texture, cubemap or renderbuffer to attach.
+        @param {GLEnum} [target] The texture target or layer to attach. If the texture is 3D or a texture array or renderbuffer,
+            defaults to 0, otherwise to TEXTURE_2D. Ignored for renderbuffers.
         @return {Framebuffer} The Framebuffer object.
     */
-    depthTarget(texture, target = texture.is3D ? 0 : CONSTANTS.TEXTURE_2D) {
+    depthTarget(attachment, target = attachment.is3D ? 0 : CONSTANTS.TEXTURE_2D) {
 
         let currentFramebuffer = this.bindAndCaptureState();
 
-        this.depthTexture = texture;
-        this.depthTextureTarget = target;
+        this.depthAttachment = attachment;
+        this.depthAttachmentTarget = target;
 
-        if (texture.is3D) {
-            this.gl.framebufferTextureLayer(CONSTANTS.DRAW_FRAMEBUFFER, CONSTANTS.DEPTH_ATTACHMENT, texture.texture, 0, target);
+        if (attachment instanceof Renderbuffer) {
+            this.gl.framebufferRenderbuffer(CONSTANTS.DRAW_FRAMEBUFFER, CONSTANTS.DEPTH_ATTACHMENT, CONSTANTS.RENDERBUFFER, attachment.renderbuffer);
+        } else if (attachment.is3D) {
+            this.gl.framebufferTextureLayer(CONSTANTS.DRAW_FRAMEBUFFER, CONSTANTS.DEPTH_ATTACHMENT, attachment.texture, 0, target);
         } else {
-            this.gl.framebufferTexture2D(CONSTANTS.DRAW_FRAMEBUFFER, CONSTANTS.DEPTH_ATTACHMENT, target, texture.texture, 0);
+            this.gl.framebufferTexture2D(CONSTANTS.DRAW_FRAMEBUFFER, CONSTANTS.DEPTH_ATTACHMENT, target, attachment.texture, 0);
         }
+
+        this.width = attachment.width;
+        this.height = attachment.height;
 
         this.restoreState(currentFramebuffer);
 
@@ -2997,40 +3467,49 @@ class Framebuffer {
     }
 
     /**
-        Resize all currently attached textures.
+        Resize all attachments.
 
         @method
         @param {number} [width=app.width] New width of the framebuffer.
         @param {number} [height=app.height] New height of the framebuffer.
         @return {Framebuffer} The Framebuffer object.
     */
-    resize(width = this.gl.drawingBufferWidth, height = this.gl.drawingBufferHeight, depth) {
+    resize(width = this.gl.drawingBufferWidth, height = this.gl.drawingBufferHeight) {
 
         let currentFramebuffer = this.bindAndCaptureState();
 
         for (let i = 0; i < this.numColorTargets; ++i) {
-            var texture = this.colorTextures[i];
+            let attachment = this.colorAttachments[i];
 
-            if (!texture) {
+            if (!attachment) {
                 continue;
             }
 
-            texture.resize(width, height, depth);
-            if (texture.is3D) {
-                this.gl.framebufferTextureLayer(CONSTANTS.DRAW_FRAMEBUFFER, this.colorAttachments[i], texture.texture, 0, this.colorTextureTargets[i]);
-            } else {
-                this.gl.framebufferTexture2D(CONSTANTS.DRAW_FRAMEBUFFER, this.colorAttachments[i], this.colorTextureTargets[i], texture.texture, 0);
+            attachment.resize(width, height);
+            if (attachment instanceof Texture) {
+                // Texture resizing recreates the texture object.
+                if (attachment.is3D) {
+                    this.gl.framebufferTextureLayer(CONSTANTS.DRAW_FRAMEBUFFER, this.colorAttachmentEnums[i], attachment.texture, 0, this.colorAttachmentTargets[i]);
+                } else {
+                    this.gl.framebufferTexture2D(CONSTANTS.DRAW_FRAMEBUFFER, this.colorAttachmentEnums[i], this.colorAttachmentTargets[i], attachment.texture, 0);
+                }
             }
         }
 
-        if (this.depthTexture) {
-            this.depthTexture.resize(width, height, depth);
-            if (this.depthTexture.is3D) {
-                this.gl.framebufferTextureLayer(CONSTANTS.DRAW_FRAMEBUFFER, CONSTANTS.DEPTH_ATTACHMENT, this.depthTexture.texture, 0, this.depthTextureTarget);
-            } else {
-                this.gl.framebufferTexture2D(CONSTANTS.DRAW_FRAMEBUFFER, CONSTANTS.DEPTH_ATTACHMENT, this.depthTextureTarget, this.depthTexture.texture, 0);
+        if (this.depthAttachment) {
+            this.depthAttachment.resize(width, height);
+            if (this.depthAttachment instanceof Texture) {
+                // Texture resizing recreates the texture object.
+                if (this.depthAttachment.is3D) {
+                    this.gl.framebufferTextureLayer(CONSTANTS.DRAW_FRAMEBUFFER, CONSTANTS.DEPTH_ATTACHMENT, this.depthAttachment.texture, 0, this.depthAttachmentTarget);
+                } else {
+                    this.gl.framebufferTexture2D(CONSTANTS.DRAW_FRAMEBUFFER, CONSTANTS.DEPTH_ATTACHMENT, this.depthAttachmentTarget, this.depthAttachment.texture, 0);
+                }
             }
         }
+
+        this.width = width;
+        this.height = height;
 
         this.restoreState(currentFramebuffer);
 
@@ -3141,13 +3620,24 @@ class Framebuffer {
         return this;
     }
 
+    // TODO(Tarek): Transitional support for deprecated properties.
+    get colorTextures() {
+        console.error("Framebuffer.colorTextures is deprecated and will be removed. Please use Framebuffer.colorAttachments.");
+        return this.colorAttachments;
+    }
+
+    get depthTexture() {
+        console.error("Framebuffer.depthTexture is deprecated and will be removed. Please use Framebuffer.depthAttachment.");
+        return this.depthAttachment;
+    }
+
 }
 
 module.exports = Framebuffer;
 
 
 /***/ }),
-/* 9 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3177,8 +3667,8 @@ module.exports = Framebuffer;
 
 
 const CONSTANTS = __webpack_require__(0);
-const Shader = __webpack_require__(2);
-const Uniforms =  __webpack_require__(10);
+const Shader = __webpack_require__(4);
+const Uniforms =  __webpack_require__(12);
 
 const SingleComponentUniform = Uniforms.SingleComponentUniform;
 const MultiNumericUniform = Uniforms.MultiNumericUniform;
@@ -3416,7 +3906,7 @@ module.exports = Program;
 
 
 /***/ }),
-/* 10 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3656,7 +4146,7 @@ module.exports.MatrixUniform = MatrixUniform;
 
 
 /***/ }),
-/* 11 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3686,331 +4176,7 @@ module.exports.MatrixUniform = MatrixUniform;
 
 
 const CONSTANTS = __webpack_require__(0);
-const TEXTURE_FORMAT_DEFAULTS = __webpack_require__(1);
-
-const DUMMY_ARRAY = new Array(1);
-
-/**
-    General-purpose texture.
-
-    @class
-    @prop {WebGLRenderingContext} gl The WebGL context.
-    @prop {WebGLTexture} texture Handle to the texture.
-    @prop {WebGLSamler} sampler Sampler object.
-    @prop {GLEnum} binding Binding point for the texture.
-    @prop {GLEnum} type Type of data stored in the texture.
-    @prop {GLEnum} format Layout of texture data.
-    @prop {GLEnum} internalFormat Internal arrangement of the texture data.
-    @prop {number} currentUnit The current texture unit this texture is bound to.
-    @prop {boolean} is3D Whether this texture contains 3D data.
-    @prop {boolean} flipY Whether the y-axis is being flipped for this texture.
-    @prop {boolean} mipmaps Whether this texture is using mipmap filtering 
-        (and thus should have a complete mipmap chain).
-    @prop {Object} appState Tracked GL state.
-*/
-class Texture {
-    constructor(gl, appState, binding, image, width = image.width, height = image.height, depth, is3D, options = CONSTANTS.DUMMY_OBJECT) {
-        let defaultType = options.format === CONSTANTS.DEPTH_COMPONENT ? CONSTANTS.UNSIGNED_SHORT : CONSTANTS.UNSIGNED_BYTE;
-
-        this.gl = gl;
-        this.binding = binding;
-        this.texture = null;
-        this.width = width || 0;
-        this.height = height || 0;
-        this.depth = depth || 0;
-        this.type = options.type !== undefined ? options.type : defaultType;
-        this.is3D = is3D;
-        this.appState = appState;
-
-        this.format = null;
-        this.internalFormat = null;
-        this.compressed = !!(TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[options.format] || TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[options.internalFormat]);
-        
-        if (this.compressed) {
-            // For compressed textures, just need to provide one of format, internalFormat.
-            // The other will be the same.
-            this.format = options.format !== undefined ? options.format : options.internalFormat;
-            this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : options.format;
-        } else {
-            this.format = options.format !== undefined ? options.format : gl.RGBA;
-            this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : TEXTURE_FORMAT_DEFAULTS[this.type][this.format];
-        }
-
-        // -1 indicates unbound
-        this.currentUnit = -1;
-
-        // Sampling parameters
-        let {
-            minFilter = image ? gl.LINEAR_MIPMAP_NEAREST : gl.NEAREST,
-            magFilter = image ? gl.LINEAR : gl.NEAREST,
-            wrapS = gl.REPEAT,
-            wrapT = gl.REPEAT,
-            wrapR = gl.REPEAT,
-            compareMode = gl.NONE,
-            compareFunc = gl.LEQUAL,
-            minLOD = null,
-            maxLOD = null,
-            baseLevel = null,
-            maxLevel = null,
-            flipY = false
-        } = options;
-
-        this.minFilter = minFilter;
-        this.magFilter = magFilter;
-        this.wrapS = wrapS;
-        this.wrapT = wrapT;
-        this.wrapR = wrapR;
-        this.compareMode = compareMode;
-        this.compareFunc = compareFunc;
-        this.minLOD = minLOD;
-        this.maxLOD = maxLOD;
-        this.baseLevel = baseLevel;
-        this.maxLevel = maxLevel;
-        this.flipY = flipY;
-        this.mipmaps = (minFilter === gl.LINEAR_MIPMAP_NEAREST || minFilter === gl.LINEAR_MIPMAP_LINEAR);
-
-        this.restore(image);
-    }
-
-    /**
-        Restore texture after context loss.
-
-        @method
-        @param {DOMElement|ArrayBufferView|Array} [image] Image data. An array can be passed to manually set all levels 
-            of the mipmap chain. If a single level is passed and mipmap filtering is being used,
-            generateMipmap() will be called to produce the remaining levels.
-        @return {Texture} The Texture object.
-    */
-    restore(image) {
-        this.texture = null;
-        this.resize(this.width, this.height, this.depth);
-
-        if (image) {
-            this.data(image);
-        }
-
-        return this;
-    }
-
-    /**
-        Re-allocate texture storage.
-
-        @method
-        @param {number} width Image width.
-        @param {number} height Image height.
-        @param {number} [depth] Image depth or number of images. Required when passing 3D or texture array data.
-        @return {Texture} The Texture object.
-    */
-    resize(width, height, depth) {
-        depth = depth || 0;
-
-        if (this.texture && width === this.width && height === this.height && depth === this.depth) {
-            return this; 
-        }
-
-        this.gl.deleteTexture(this.texture);
-        if (this.currentUnit !== -1) {
-            this.appState.textures[this.currentUnit] = null;
-        }
-
-        this.texture = this.gl.createTexture();
-        this.bind(Math.max(this.currentUnit, 0));
-
-        this.width = width;
-        this.height = height;
-        this.depth = depth;
-
-        this.gl.texParameteri(this.binding, this.gl.TEXTURE_MIN_FILTER, this.minFilter);
-        this.gl.texParameteri(this.binding, this.gl.TEXTURE_MAG_FILTER, this.magFilter);
-        this.gl.texParameteri(this.binding, this.gl.TEXTURE_WRAP_S, this.wrapS);
-        this.gl.texParameteri(this.binding, this.gl.TEXTURE_WRAP_T, this.wrapT);
-        this.gl.texParameteri(this.binding, this.gl.TEXTURE_WRAP_R, this.wrapR);
-        this.gl.texParameteri(this.binding, this.gl.TEXTURE_COMPARE_FUNC, this.compareFunc);
-        this.gl.texParameteri(this.binding, this.gl.TEXTURE_COMPARE_MODE, this.compareMode);
-        this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, this.flipY);
-        if (this.minLOD !== null) {
-            this.gl.texParameterf(this.binding, this.gl.TEXTURE_MIN_LOD, this.minLOD);
-        }
-        if (this.maxLOD !== null) {
-            this.gl.texParameterf(this.binding, this.gl.TEXTURE_MAX_LOD, this.maxLOD);
-        }
-        if (this.baseLevel !== null) {
-            this.gl.texParameteri(this.binding, this.gl.TEXTURE_BASE_LEVEL, this.baseLevel);
-        }
-
-        if (this.maxLevel !== null) {
-            this.gl.texParameteri(this.binding, this.gl.TEXTURE_MAX_LEVEL, this.maxLevel);
-        }
-
-        let levels;
-        if (this.is3D) {
-            if (this.mipmaps) {
-                levels = Math.floor(Math.log2(Math.max(Math.max(this.width, this.height), this.depth))) + 1;
-            } else {
-                levels = 1;
-            }
-            this.gl.texStorage3D(this.binding, levels, this.internalFormat, this.width, this.height, this.depth);
-        } else {
-            if (this.mipmaps) {
-                levels = Math.floor(Math.log2(Math.max(this.width, this.height))) + 1;
-            } else {
-                levels = 1;
-            }
-            this.gl.texStorage2D(this.binding, levels, this.internalFormat, this.width, this.height);
-        }
-
-        return this;
-    }
-
-    /**
-        Set the image data for the texture. An array can be passed to manually set all levels 
-        of the mipmap chain. If a single level is passed and mipmap filtering is being used,
-        generateMipmap() will be called to produce the remaining levels.
-        NOTE: the data must fit the currently-allocated storage!
-
-        @method
-        @param {ImageElement|ArrayBufferView|Array} data Image data. If an array is passed, it will be 
-            used to set mip map levels.
-        @return {Texture} The Texture object.
-    */
-    data(data) {
-        if (!Array.isArray(data)) {
-            DUMMY_ARRAY[0] = data;
-            data = DUMMY_ARRAY;
-        }
-
-        let numLevels = this.mipmaps ? data.length : 1;
-        let width = this.width;
-        let height = this.height;
-        let depth = this.depth;
-        let generateMipmaps = this.mipmaps && data.length === 1;
-        let i;
-
-        this.bind(Math.max(this.currentUnit, 0));
-
-        if (this.compressed) {
-            if (this.is3D) {
-                for (i = 0; i < numLevels; ++i) {
-                    this.gl.compressedTexSubImage3D(this.binding, i, 0, 0, 0, width, height, depth, this.format, data[i]);
-                    width = Math.max(width >> 1, 1);
-                    height = Math.max(height >> 1, 1);
-                    depth = Math.max(depth >> 1, 1);
-                }
-            } else {
-                for (i = 0; i < numLevels; ++i) {
-                    this.gl.compressedTexSubImage2D(this.binding, i, 0, 0, width, height, this.format, data[i]);
-                    width = Math.max(width >> 1, 1);
-                    height = Math.max(height >> 1, 1);
-                }
-            }
-        } else if (this.is3D) {
-            for (i = 0; i < numLevels; ++i) {
-                this.gl.texSubImage3D(this.binding, i, 0, 0, 0, width, height, depth, this.format, this.type, data[i]);
-                width = Math.max(width >> 1, 1);
-                height = Math.max(height >> 1, 1);
-                depth = Math.max(depth >> 1, 1);
-            }
-        } else {
-            for (i = 0; i < numLevels; ++i) {
-                this.gl.texSubImage2D(this.binding, i, 0, 0, width, height, this.format, this.type, data[i]);
-                width = Math.max(width >> 1, 1);
-                height = Math.max(height >> 1, 1);
-            }
-        }
-
-        if (generateMipmaps) {
-            this.gl.generateMipmap(this.binding);
-        }
-
-        return this;
-    }
-
-    /**
-        Delete this texture.
-
-        @method
-        @return {Texture} The Texture object.
-    */
-    delete() {
-        if (this.texture) {
-            this.gl.deleteTexture(this.texture);
-            this.texture = null;
-
-            if (this.currentUnit !== -1 && this.appState.textures[this.currentUnit] === this) {
-                this.appState.textures[this.currentUnit] = null;
-                this.currentUnit = -1;
-            }
-        }
-
-        return this;
-    }
-
-    /**
-        Bind this texture to a texture unit.
-
-        @method
-        @ignore
-        @return {Texture} The Texture object.
-    */
-    bind(unit) {
-        let currentTexture = this.appState.textures[unit];
-        
-        if (currentTexture !== this) {
-            if (currentTexture) {
-                currentTexture.currentUnit = -1;
-            }
-
-            if (this.currentUnit !== -1) {
-                this.appState.textures[this.currentUnit] = null;
-            }
-
-            this.gl.activeTexture(this.gl.TEXTURE0 + unit);
-            this.gl.bindTexture(this.binding, this.texture);
-
-            this.appState.textures[unit] = this;
-            this.currentUnit = unit;
-        }
-
-        return this;
-    }
-
-}
-
-module.exports = Texture;
-
-
-/***/ }),
-/* 12 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-///////////////////////////////////////////////////////////////////////////////////
-// The MIT License (MIT)
-//
-// Copyright (c) 2017 Tarek Sherif
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy of
-// this software and associated documentation files (the "Software"), to deal in
-// the Software without restriction, including without limitation the rights to
-// use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
-// the Software, and to permit persons to whom the Software is furnished to do so,
-// subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-// FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-// COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-// IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-// CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-///////////////////////////////////////////////////////////////////////////////////
-
-
-
-const CONSTANTS = __webpack_require__(0);
-const Query = __webpack_require__(3);
+const Query = __webpack_require__(5);
 
 /**
     Rendering timer.
@@ -4158,7 +4324,7 @@ module.exports = Timer;
 
 
 /***/ }),
-/* 13 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4279,7 +4445,7 @@ module.exports = TransformFeedback;
 
 
 /***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4566,7 +4732,7 @@ module.exports = UniformBuffer;
 
 
 /***/ }),
-/* 15 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4852,7 +5018,7 @@ module.exports = VertexArray;
 
 
 /***/ }),
-/* 16 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5035,4 +5201,4 @@ module.exports = VertexBuffer;
 
 /***/ })
 /******/ ]);
-});
+//# sourceMappingURL=picogl.js.map
