@@ -216,7 +216,7 @@
                 // Can't sample from renderbuffer so blit to a texture for sampling.
                 app.readFramebuffer(msaaFramebuffer)
                 .drawFramebuffer(textureFramebuffer)
-                .blitFramebuffer();
+                .blitFramebuffer(PicoGL.COLOR_BUFFER_BIT);
 
                 // RENDER TO SCREEN
                 app.defaultDrawFramebuffer().clearColor(0.0, 0.0, 0.0, 1.0).clear()
