@@ -272,9 +272,7 @@
             type: PicoGL.FLOAT,
             format: PicoGL.RG
         });
-        var depthTarget = app.createTexture2D(app.width, app.height, {
-            format: PicoGL.DEPTH_COMPONENT
-        });
+        var depthTarget = app.createRenderbuffer(app.width, app.height, PicoGL.DEPTH_COMPONENT16);
         var framebuffer = app.createFramebuffer()
         .colorTarget(0, colorTarget)
         .colorTarget(1, velocityTarget)
@@ -363,8 +361,8 @@
             }
 
             var blurDrawCall = app.createDrawCall(blurProgram, quadArray)
-            .texture("color", framebuffer.colorTextures[0])
-            .texture("velocity", framebuffer.colorTextures[1]);
+            .texture("color", framebuffer.colorAttachments[0])
+            .texture("velocity", framebuffer.colorAttachments[1]);
 
             var modelMatrix = mat4.create();
             var translationMatrix = mat4.create();

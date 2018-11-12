@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Class: TransformFeedback</title>
+    <title>JSDoc: Class: Renderbuffer</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Class: TransformFeedback</h1>
+    <h1 class="page-title">Class: Renderbuffer</h1>
 
     
 
@@ -28,9 +28,9 @@
 
 <header>
     
-        <h2><span class="attribs"><span class="type-signature"></span></span>TransformFeedback<span class="signature">()</span><span class="type-signature"></span></h2>
+        <h2><span class="attribs"><span class="type-signature"></span></span>Renderbuffer<span class="signature">()</span><span class="type-signature"></span></h2>
         
-            <div class="class-description">Tranform feedback object.</div>
+            <div class="class-description">Offscreen drawing attachment.</div>
         
     
 </header>
@@ -45,7 +45,7 @@
     
 
     
-    <h4 class="name" id="TransformFeedback"><span class="type-signature"></span>new TransformFeedback<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="Renderbuffer"><span class="type-signature"></span>new Renderbuffer<span class="signature">()</span><span class="type-signature"></span></h4>
     
 
     
@@ -113,13 +113,13 @@
 
         <tr>
             
-                <td class="name"><code>transformFeedback</code></td>
+                <td class="name"><code>renderbuffer</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">WebGLTransformFeedback</span>
+<span class="param-type">WebGLRenderbuffer</span>
 
 
             
@@ -129,20 +129,20 @@
 
             
 
-            <td class="description last">Transform feedback object.</td>
+            <td class="description last">Handle to the renderbuffer.</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>appState</code></td>
+                <td class="name"><code>width</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Object</span>
+<span class="param-type">number</span>
 
 
             
@@ -152,7 +152,76 @@
 
             
 
-            <td class="description last">Tracked GL state.</td>
+            <td class="description last">Renderbuffer width.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>height</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Renderbuffer height.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>internalFormat</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">GLEnum</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Internal arrangement of the renderbuffer data.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>samples</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Number of MSAA samples.</td>
         </tr>
 
     
@@ -191,7 +260,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="transform-feedback.js.html">transform-feedback.js</a>, <a href="transform-feedback.js.html#line34">line 34</a>
+        <a href="renderbuffer.js.html">renderbuffer.js</a>, <a href="renderbuffer.js.html#line39">line 39</a>
     </li></ul></dd>
     
 
@@ -245,7 +314,7 @@
     
 
     
-    <h4 class="name" id="delete"><span class="type-signature"></span>delete<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="TransformFeedback.html">TransformFeedback</a>}</span></h4>
+    <h4 class="name" id="delete"><span class="type-signature"></span>delete<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="Renderbuffer.html">Renderbuffer</a>}</span></h4>
     
 
     
@@ -253,7 +322,7 @@
 
 
 <div class="description">
-    Delete this transform feedback.
+    Delete this renderbuffer.
 </div>
 
 
@@ -297,7 +366,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="transform-feedback.js.html">transform-feedback.js</a>, <a href="transform-feedback.js.html#line82">line 82</a>
+        <a href="renderbuffer.js.html">renderbuffer.js</a>, <a href="renderbuffer.js.html#line87">line 87</a>
     </li></ul></dd>
     
 
@@ -324,7 +393,7 @@
 
         
 <div class="param-desc">
-    The TransformFeedback object.
+    The Renderbuffer object.
 </div>
 
 
@@ -335,7 +404,7 @@
     </dt>
     <dd>
         
-<span class="param-type"><a href="TransformFeedback.html">TransformFeedback</a></span>
+<span class="param-type"><a href="Renderbuffer.html">Renderbuffer</a></span>
 
 
     </dd>
@@ -353,7 +422,7 @@
     
 
     
-    <h4 class="name" id="feedbackBuffer"><span class="type-signature"></span>feedbackBuffer<span class="signature">(index, buffer)</span><span class="type-signature"> &rarr; {<a href="TransformFeedback.html">TransformFeedback</a>}</span></h4>
+    <h4 class="name" id="resize"><span class="type-signature"></span>resize<span class="signature">(width, height)</span><span class="type-signature"> &rarr; {<a href="Renderbuffer.html">Renderbuffer</a>}</span></h4>
     
 
     
@@ -361,7 +430,7 @@
 
 
 <div class="description">
-    Bind a feedback buffer to capture transform output.
+    Resize the renderbuffer.
 </div>
 
 
@@ -397,7 +466,7 @@
 
         <tr>
             
-                <td class="name"><code>index</code></td>
+                <td class="name"><code>width</code></td>
             
 
             <td class="type">
@@ -413,20 +482,20 @@
 
             
 
-            <td class="description last">Index of transform feedback varying to capture.</td>
+            <td class="description last">New width of the renderbuffer.</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>buffer</code></td>
+                <td class="name"><code>height</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type"><a href="VertexBuffer.html">VertexBuffer</a></span>
+<span class="param-type">number</span>
 
 
             
@@ -436,7 +505,7 @@
 
             
 
-            <td class="description last">Buffer to record output into.</td>
+            <td class="description last">New height of the renderbuffer.</td>
         </tr>
 
     
@@ -477,7 +546,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="transform-feedback.js.html">transform-feedback.js</a>, <a href="transform-feedback.js.html#line68">line 68</a>
+        <a href="renderbuffer.js.html">renderbuffer.js</a>, <a href="renderbuffer.js.html#line71">line 71</a>
     </li></ul></dd>
     
 
@@ -504,7 +573,7 @@
 
         
 <div class="param-desc">
-    The TransformFeedback object.
+    The Renderbuffer object.
 </div>
 
 
@@ -515,7 +584,7 @@
     </dt>
     <dd>
         
-<span class="param-type"><a href="TransformFeedback.html">TransformFeedback</a></span>
+<span class="param-type"><a href="Renderbuffer.html">Renderbuffer</a></span>
 
 
     </dd>
@@ -533,7 +602,7 @@
     
 
     
-    <h4 class="name" id="restore"><span class="type-signature"></span>restore<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="TransformFeedback.html">TransformFeedback</a>}</span></h4>
+    <h4 class="name" id="restore"><span class="type-signature"></span>restore<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="Renderbuffer.html">Renderbuffer</a>}</span></h4>
     
 
     
@@ -541,7 +610,7 @@
 
 
 <div class="description">
-    Restore transform feedback after context loss.
+    Restore renderbuffer after context loss.
 </div>
 
 
@@ -585,7 +654,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="transform-feedback.js.html">transform-feedback.js</a>, <a href="transform-feedback.js.html#line50">line 50</a>
+        <a href="renderbuffer.js.html">renderbuffer.js</a>, <a href="renderbuffer.js.html#line56">line 56</a>
     </li></ul></dd>
     
 
@@ -612,7 +681,7 @@
 
         
 <div class="param-desc">
-    The TransformFeedback object.
+    The Renderbuffer object.
 </div>
 
 
@@ -623,7 +692,7 @@
     </dt>
     <dd>
         
-<span class="param-type"><a href="TransformFeedback.html">TransformFeedback</a></span>
+<span class="param-type"><a href="Renderbuffer.html">Renderbuffer</a></span>
 
 
     </dd>

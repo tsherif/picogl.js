@@ -181,9 +181,7 @@
             width: CUBEMAP_DIM, 
             height: CUBEMAP_DIM 
         });
-        var depthTarget = app.createTexture2D(CUBEMAP_DIM, CUBEMAP_DIM, {
-            format: PicoGL.DEPTH_COMPONENT
-        });
+        var depthTarget = app.createRenderbuffer(CUBEMAP_DIM, CUBEMAP_DIM, PicoGL.DEPTH_COMPONENT16);
         var shadowBuffer = app.createFramebuffer()
         .colorTarget(0, shadowTarget, PicoGL.TEXTURE_CUBE_MAP_NEGATIVE_X)
         .depthTarget(depthTarget);
