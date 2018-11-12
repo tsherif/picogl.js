@@ -61,7 +61,7 @@ class Renderbuffer {
     }
 
     /**
-        Resize all attachments.
+        Resize the renderbuffer.
 
         @method
         @param {number} width New width of the renderbuffer.
