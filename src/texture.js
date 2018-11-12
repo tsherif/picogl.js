@@ -44,7 +44,8 @@ const DUMMY_ARRAY = new Array(1);
     @prop {GLEnum} internalFormat Internal arrangement of the texture data.
     @prop {number} currentUnit The current texture unit this texture is bound to.
     @prop {boolean} is3D Whether this texture contains 3D data.
-    @prop {boolean} flipY Whether the y-axis is being flipped for this texture.
+    @prop {boolean} flipY Whether the y-axis is flipped for this texture.
+    @prop {boolean} premultiplyAlpha Whether alpha should be pre-multiplied when loading this texture.
     @prop {boolean} mipmaps Whether this texture is using mipmap filtering 
         (and thus should have a complete mipmap chain).
     @prop {Object} appState Tracked GL state.
@@ -93,7 +94,8 @@ class Texture {
             maxLOD = null,
             baseLevel = null,
             maxLevel = null,
-            flipY = false
+            flipY = false,
+            premultiplyAlpha = false
         } = options;
 
         this.minFilter = minFilter;
@@ -108,6 +110,7 @@ class Texture {
         this.baseLevel = baseLevel;
         this.maxLevel = maxLevel;
         this.flipY = flipY;
+        this.premultiplyAlpha = premultiplyAlpha;
         this.mipmaps = (minFilter === gl.LINEAR_MIPMAP_NEAREST || minFilter === gl.LINEAR_MIPMAP_LINEAR);
 
         this.restore(image);
@@ -169,6 +172,7 @@ class Texture {
         this.gl.texParameteri(this.binding, this.gl.TEXTURE_COMPARE_FUNC, this.compareFunc);
         this.gl.texParameteri(this.binding, this.gl.TEXTURE_COMPARE_MODE, this.compareMode);
         this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, this.flipY);
+        this.gl.pixelStorei(this.gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, this.premultiplyAlpha);
         if (this.minLOD !== null) {
             this.gl.texParameterf(this.binding, this.gl.TEXTURE_MIN_LOD, this.minLOD);
         }
