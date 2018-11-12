@@ -54,6 +54,9 @@ class Framebuffer {
         this.depthAttachment = null;
         this.depthAttachmentTarget = null;
 
+        this.width = 0;
+        this.height = 0;
+
         this.restore();
     }
 
@@ -121,6 +124,9 @@ class Framebuffer {
 
         this.gl.drawBuffers(this.colorAttachmentPoints);
 
+        this.width = attachment.width;
+        this.height = attachment.height;
+
         this.restoreState(currentFramebuffer);
 
         return this;
@@ -150,6 +156,9 @@ class Framebuffer {
             this.gl.framebufferTexture2D(CONSTANTS.DRAW_FRAMEBUFFER, CONSTANTS.DEPTH_ATTACHMENT, target, attachment.texture, 0);
         }
 
+        this.width = attachment.width;
+        this.height = attachment.height;
+
         this.restoreState(currentFramebuffer);
 
         return this;
@@ -163,7 +172,7 @@ class Framebuffer {
         @param {number} [height=app.height] New height of the framebuffer.
         @return {Framebuffer} The Framebuffer object.
     */
-    resize(width = this.gl.drawingBufferWidth, height = this.gl.drawingBufferHeight, depth) {
+    resize(width = this.gl.drawingBufferWidth, height = this.gl.drawingBufferHeight) {
 
         let currentFramebuffer = this.bindAndCaptureState();
 
@@ -186,7 +195,7 @@ class Framebuffer {
         }
 
         if (this.depthAttachment) {
-            this.depthAttachment.resize(width, height, depth);
+            this.depthAttachment.resize(width, height);
             if (this.depthAttachment instanceof Texture) {
                 // Texture resizing recreates the texture object.
                 if (this.depthAttachment.is3D) {
@@ -196,6 +205,9 @@ class Framebuffer {
                 }
             }
         }
+
+        this.width = attachment.width;
+        this.height = attachment.width;
 
         this.restoreState(currentFramebuffer);
 

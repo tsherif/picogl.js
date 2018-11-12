@@ -276,6 +276,33 @@ class App {
         return this;
     }
 
+    blitFramebuffer(options = CONSTANTS.DUMMY_OBJECT) {
+        let readFramebuffer = this.state.readFramebuffer;
+        let drawFramebuffer = this.state.drawFramebuffer;
+        let defaultReadWidth = readFramebuffer ? readFramebuffer.width : this.width;
+        let defaultReadHeight = readFramebuffer ? readFramebuffer.height : this.height;
+        let defaultDrawWidth = drawFramebuffer ? drawFramebuffer.width : this.width;
+        let defaultDrawHeight = drawFramebuffer ? drawFramebuffer.height : this.height;
+        let defaultMask = CONSTANTS.COLOR_BUFFER_BIT;
+
+        let {
+            srcx0 = 0,
+            srcy0 = 0,
+            srcx1 = defaultReadWidth,
+            srcy1 = defaultReadHeight,
+            dstx0 = 0,
+            dsty0 = 0,
+            dstx1 = defaultDrawWidth,
+            dsty1 = defaultDrawHeight,
+            mask = CONSTANTS.COLOR_BUFFER_BIT | CONSTANTS.DEPTH_BUFFER_BIT,
+            filter = CONSTANTS.NEAREST
+        } = options;
+
+        this.gl.blitFramebuffer(srcx0, srcy0, srcx1, srcy1, dstx0, dsty0, dstx1, dsty1, mask, filter);
+
+        return this;
+    }
+
     /**
         Set the depth range.
 
