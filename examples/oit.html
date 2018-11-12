@@ -298,8 +298,8 @@
             .texture("uTexture", texture);
 
             var blendDrawCall = app.createDrawCall(blendProgram, quadArray)
-            .texture("uAccumulate", accumBuffer.colorTextures[0])
-            .texture("uAccumulateAlpha", accumBuffer.colorTextures[1]);
+            .texture("uAccumulate", accumBuffer.colorAttachments[0])
+            .texture("uAccumulateAlpha", accumBuffer.colorAttachments[1]);
 
             var rotationMatrix = mat4.create();
 

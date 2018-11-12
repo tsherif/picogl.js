@@ -122,7 +122,7 @@
             
             // RENDER TO SCREEN
             app.defaultDrawFramebuffer().clearColor(0.0, 0.0, 0.0, 1.0).clear();
-            drawCall.texture("tex", rttBuffer.colorTextures[0]).draw();
+            drawCall.texture("tex", rttBuffer.colorAttachments[0]).draw();
             
         }
 

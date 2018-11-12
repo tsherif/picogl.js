@@ -26,33 +26,33 @@
 const CONSTANTS = require("./constants");
 
 class Renderbuffer {
-	constructor(gl, width, height, internalFormat, samples = 0) {
-		this.gl = gl;
-		this.renderbuffer = null;
-		this.width = width;
-		this.height = height;
-		this.internalFormat = internalFormat;
-		this.samples = samples;
-		this.restore();
-	}
+    constructor(gl, width, height, internalFormat, samples = 0) {
+        this.gl = gl;
+        this.renderbuffer = null;
+        this.width = width;
+        this.height = height;
+        this.internalFormat = internalFormat;
+        this.samples = samples;
+        this.restore();
+    }
 
-	restore() {
-		this.renderbuffer = this.gl.createRenderbuffer();
-		this.resize(this.width, this.height);
-	}
+    restore() {
+        this.renderbuffer = this.gl.createRenderbuffer();
+        this.resize(this.width, this.height);
+    }
 
-	resize(width, height) {
-		this.width = width;
-		this.height = height;
-		this.gl.bindRenderbuffer(CONSTANTS.RENDERBUFFER, this.renderbuffer);
-		this.gl.renderbufferStorageMultisample(CONSTANTS.RENDERBUFFER, this.samples, this.internalFormat, this.width, this.height);
-		this.gl.bindRenderbuffer(CONSTANTS.RENDERBUFFER, null)
-	}
+    resize(width, height) {
+        this.width = width;
+        this.height = height;
+        this.gl.bindRenderbuffer(CONSTANTS.RENDERBUFFER, this.renderbuffer);
+        this.gl.renderbufferStorageMultisample(CONSTANTS.RENDERBUFFER, this.samples, this.internalFormat, this.width, this.height);
+        this.gl.bindRenderbuffer(CONSTANTS.RENDERBUFFER, null)
+    }
 
-	delete() {
-		this.gl.deleteRenderbuffer(this.renderbuffer);
-		this.renderbuffer = null;
-	}	
+    delete() {
+        this.gl.deleteRenderbuffer(this.renderbuffer);
+        this.renderbuffer = null;
+    }   
 }
 
 module.exports = Renderbuffer;

@@ -228,7 +228,7 @@
                 .uniform("uLightPosition", lightPosition)
                 .uniform("uEyePosition", eyePosition)
                 .texture("uTextureMap", texture)
-                .texture("uShadowMap", shadowBuffer.depthTexture);
+                .texture("uShadowMap", shadowBuffer.depthAttachment);
             }
 
 

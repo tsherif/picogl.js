@@ -328,14 +328,14 @@
             var hBlurDrawCall = app.createDrawCall(blurProgram, quadArray)
             .uniformBlock("DOFUniforms", dofUniforms)
             .uniform("uTexelOffset", hTexelOffset)
-            .texture("uColor", boxBuffer.colorTextures[0])
-            .texture("uDepth", boxBuffer.depthTexture);
+            .texture("uColor", boxBuffer.colorAttachments[0])
+            .texture("uDepth", boxBuffer.depthAttachment);
 
             var finalDrawCall = app.createDrawCall(blurProgram, quadArray)
             .uniformBlock("DOFUniforms", dofUniforms)
             .uniform("uTexelOffset", hTexelOffset)
-            .texture("uColor", hblurBuffer.colorTextures[0])
-            .texture("uDepth", boxBuffer.depthTexture);
+            .texture("uColor", hblurBuffer.colorAttachments[0])
+            .texture("uDepth", boxBuffer.depthAttachment);
 
             function draw() {
                 if (resized) {
