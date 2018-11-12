@@ -473,8 +473,8 @@
             wrapT: PicoGL.CLAMP_TO_EDGE
         });
 
-        var positionTextureB = updateForceFramebuffer.colorTextures[0];
-        var oldPositionTextureB = updateForceFramebuffer.colorTextures[1];
+        var positionTextureB = updateForceFramebuffer.colorAttachments[0];
+        var oldPositionTextureB = updateForceFramebuffer.colorAttachments[1];
 
         var normalTexture = app.createTexture2D(clothNormalData, DATA_TEXTURE_DIM, DATA_TEXTURE_DIM, {
             format: PicoGL.RGBA,

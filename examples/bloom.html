@@ -270,7 +270,7 @@
 
         var colorTarget1 = app.createTexture2D(null, app.width, app.height, { type: PicoGL.FLOAT });
         var colorTarget2 = app.createTexture2D(null, app.width, app.height, { type: PicoGL.FLOAT });
-        var depthTarget = app.createTexture2D(null, app.width, app.height, { format: PicoGL.DEPTH_COMPONENT });
+        var depthTarget = app.createRenderbuffer(app.width, app.height, PicoGL.DEPTH_COMPONENT16 );
 
         var colorBuffer = app.createFramebuffer()
         .colorTarget(0, colorTarget1)
@@ -408,19 +408,19 @@
     
             var hBlurDrawCall = app.createDrawCall(blurProgram, quadArray)
             .uniform("uTexelOffset", hTexelOffset)
-            .texture("uTexture", colorBuffer.colorTextures[1]);
+            .texture("uTexture", colorBuffer.colorAttachments[1]);
 
             var vBlurDrawCall = app.createDrawCall(blurProgram, quadArray)
             .uniform("uTexelOffset", vTexelOffset)
-            .texture("uTexture", blurBuffer.colorTextures[0]);
+            .texture("uTexture", blurBuffer.colorAttachments[0]);
 
             var blendDrawCall = app.createDrawCall(blendProgram, quadArray)
-            .texture("uColor", colorBuffer.colorTextures[0])
-            .texture("uBloom", bloomBuffer.colorTextures[0]);
+            .texture("uColor", colorBuffer.colorAttachments[0])
+            .texture("uBloom", bloomBuffer.colorAttachments[0]);
 
             // TEXTURES FOR PING PONGING THE BLUR
-            var blurTextureA = colorBuffer.colorTextures[1];
-            var blurTextureB = bloomBuffer.colorTextures[0];
+            var blurTextureA = colorBuffer.colorAttachments[1];
+            var blurTextureB = bloomBuffer.colorAttachments[0];
             var blurReadTexture = blurTextureA;
             var blurWriteTexture = blurTextureB;
 

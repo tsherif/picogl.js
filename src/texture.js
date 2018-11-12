@@ -35,13 +35,17 @@ const DUMMY_ARRAY = new Array(1);
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLTexture} texture Handle to the texture.
     @prop {WebGLSamler} sampler Sampler object.
+    @prop {number} width Texture width.
+    @prop {number} height Texture height.
+    @prop {number} depth Texture depth.
     @prop {GLEnum} binding Binding point for the texture.
     @prop {GLEnum} type Type of data stored in the texture.
     @prop {GLEnum} format Layout of texture data.
     @prop {GLEnum} internalFormat Internal arrangement of the texture data.
     @prop {number} currentUnit The current texture unit this texture is bound to.
     @prop {boolean} is3D Whether this texture contains 3D data.
-    @prop {boolean} flipY Whether the y-axis is being flipped for this texture.
+    @prop {boolean} flipY Whether the y-axis is flipped for this texture.
+    @prop {boolean} premultiplyAlpha Whether alpha should be pre-multiplied when loading this texture.
     @prop {boolean} mipmaps Whether this texture is using mipmap filtering 
         (and thus should have a complete mipmap chain).
     @prop {Object} appState Tracked GL state.
@@ -79,18 +83,19 @@ class Texture {
 
         // Sampling parameters
         let {
-            minFilter = image ? gl.LINEAR_MIPMAP_NEAREST : gl.NEAREST,
-            magFilter = image ? gl.LINEAR : gl.NEAREST,
-            wrapS = gl.REPEAT,
-            wrapT = gl.REPEAT,
-            wrapR = gl.REPEAT,
-            compareMode = gl.NONE,
-            compareFunc = gl.LEQUAL,
+            minFilter = image ? CONSTANTS.LINEAR_MIPMAP_NEAREST : CONSTANTS.NEAREST,
+            magFilter = image ? CONSTANTS.LINEAR : CONSTANTS.NEAREST,
+            wrapS = CONSTANTS.REPEAT,
+            wrapT = CONSTANTS.REPEAT,
+            wrapR = CONSTANTS.REPEAT,
+            compareMode = CONSTANTS.NONE,
+            compareFunc = CONSTANTS.LEQUAL,
             minLOD = null,
             maxLOD = null,
             baseLevel = null,
             maxLevel = null,
-            flipY = false
+            flipY = false,
+            premultiplyAlpha = false
         } = options;
 
         this.minFilter = minFilter;
@@ -105,7 +110,8 @@ class Texture {
         this.baseLevel = baseLevel;
         this.maxLevel = maxLevel;
         this.flipY = flipY;
-        this.mipmaps = (minFilter === gl.LINEAR_MIPMAP_NEAREST || minFilter === gl.LINEAR_MIPMAP_LINEAR);
+        this.premultiplyAlpha = premultiplyAlpha;
+        this.mipmaps = (minFilter === CONSTANTS.LINEAR_MIPMAP_NEAREST || minFilter === CONSTANTS.LINEAR_MIPMAP_LINEAR);
 
         this.restore(image);
     }
@@ -158,26 +164,27 @@ class Texture {
         this.height = height;
         this.depth = depth;
 
-        this.gl.texParameteri(this.binding, this.gl.TEXTURE_MIN_FILTER, this.minFilter);
-        this.gl.texParameteri(this.binding, this.gl.TEXTURE_MAG_FILTER, this.magFilter);
-        this.gl.texParameteri(this.binding, this.gl.TEXTURE_WRAP_S, this.wrapS);
-        this.gl.texParameteri(this.binding, this.gl.TEXTURE_WRAP_T, this.wrapT);
-        this.gl.texParameteri(this.binding, this.gl.TEXTURE_WRAP_R, this.wrapR);
-        this.gl.texParameteri(this.binding, this.gl.TEXTURE_COMPARE_FUNC, this.compareFunc);
-        this.gl.texParameteri(this.binding, this.gl.TEXTURE_COMPARE_MODE, this.compareMode);
-        this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, this.flipY);
+        this.gl.texParameteri(this.binding, CONSTANTS.TEXTURE_MIN_FILTER, this.minFilter);
+        this.gl.texParameteri(this.binding, CONSTANTS.TEXTURE_MAG_FILTER, this.magFilter);
+        this.gl.texParameteri(this.binding, CONSTANTS.TEXTURE_WRAP_S, this.wrapS);
+        this.gl.texParameteri(this.binding, CONSTANTS.TEXTURE_WRAP_T, this.wrapT);
+        this.gl.texParameteri(this.binding, CONSTANTS.TEXTURE_WRAP_R, this.wrapR);
+        this.gl.texParameteri(this.binding, CONSTANTS.TEXTURE_COMPARE_FUNC, this.compareFunc);
+        this.gl.texParameteri(this.binding, CONSTANTS.TEXTURE_COMPARE_MODE, this.compareMode);
+        this.gl.pixelStorei(CONSTANTS.UNPACK_FLIP_Y_WEBGL, this.flipY);
+        this.gl.pixelStorei(CONSTANTS.UNPACK_PREMULTIPLY_ALPHA_WEBGL, this.premultiplyAlpha);
         if (this.minLOD !== null) {
-            this.gl.texParameterf(this.binding, this.gl.TEXTURE_MIN_LOD, this.minLOD);
+            this.gl.texParameterf(this.binding, CONSTANTS.TEXTURE_MIN_LOD, this.minLOD);
         }
         if (this.maxLOD !== null) {
-            this.gl.texParameterf(this.binding, this.gl.TEXTURE_MAX_LOD, this.maxLOD);
+            this.gl.texParameterf(this.binding, CONSTANTS.TEXTURE_MAX_LOD, this.maxLOD);
         }
         if (this.baseLevel !== null) {
-            this.gl.texParameteri(this.binding, this.gl.TEXTURE_BASE_LEVEL, this.baseLevel);
+            this.gl.texParameteri(this.binding, CONSTANTS.TEXTURE_BASE_LEVEL, this.baseLevel);
         }
 
         if (this.maxLevel !== null) {
-            this.gl.texParameteri(this.binding, this.gl.TEXTURE_MAX_LEVEL, this.maxLevel);
+            this.gl.texParameteri(this.binding, CONSTANTS.TEXTURE_MAX_LEVEL, this.maxLevel);
         }
 
         let levels;
@@ -302,7 +309,7 @@ class Texture {
                 this.appState.textures[this.currentUnit] = null;
             }
 
-            this.gl.activeTexture(this.gl.TEXTURE0 + unit);
+            this.gl.activeTexture(CONSTANTS.TEXTURE0 + unit);
             this.gl.bindTexture(this.binding, this.texture);
 
             this.appState.textures[unit] = this;

@@ -151,9 +151,7 @@
         var pickingProgram = app.createProgram(pickingVsSource, pickingFsSource);
 
         var pickColorTarget = app.createTexture2D(app.width, app.height);
-        var pickDepthTarget = app.createTexture2D(app.width, app.height, {
-            format: PicoGL.DEPTH_COMPONENT
-        });
+        var pickDepthTarget = app.createRenderbuffer(app.width, app.height, PicoGL.DEPTH_COMPONENT16);
 
         var pickingBuffer = app.createFramebuffer().colorTarget(0, pickColorTarget).depthTarget(pickDepthTarget);
 

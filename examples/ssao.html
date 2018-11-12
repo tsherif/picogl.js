@@ -297,9 +297,7 @@
         var normalTarget = app.createTexture2D(app.width, app.height, { 
             type: PicoGL.FLOAT 
         });
-        var depthTarget = app.createTexture2D(app.width, app.height, {
-            format: PicoGL.DEPTH_COMPONENT
-        });
+        var depthTarget = app.createRenderbuffer(app.width, app.height, PicoGL.DEPTH_COMPONENT16);
         var colorGeoBuffer = app.createFramebuffer()
         .colorTarget(0, colorTarget)
         .colorTarget(1, positionTarget)
@@ -452,16 +450,16 @@
 
             var ssaoDrawCall = app.createDrawCall(ssaoProgram, quadArray)
             .uniformBlock("SSAOUniforms", ssaoUniforms)
-            .texture("uPositionBuffer", colorGeoBuffer.colorTextures[1])
-            .texture("uNormalBuffer", colorGeoBuffer.colorTextures[2])
+            .texture("uPositionBuffer", colorGeoBuffer.colorAttachments[1])
+            .texture("uNormalBuffer", colorGeoBuffer.colorAttachments[2])
             .texture("uNoiseBuffer", noiseTexture);
 
             var aoBlendDrawCall = app.createDrawCall(aoBlendProgram, quadArray)
-            .texture("uColorBuffer", colorGeoBuffer.colorTextures[0])
-            .texture("uOcclusionBuffer", ssaoBuffer.colorTextures[0]);
+            .texture("uColorBuffer", colorGeoBuffer.colorAttachments[0])
+            .texture("uOcclusionBuffer", ssaoBuffer.colorAttachments[0]);
 
             var noSSAODrawCall = app.createDrawCall(noSSAOProgram, quadArray)
-            .texture("uColorBuffer", colorGeoBuffer.colorTextures[0]);
+            .texture("uColorBuffer", colorGeoBuffer.colorAttachments[0]);
 
             var rotationMatrix = mat4.create();
 

@@ -23,7 +23,7 @@
 -->
 <html>
 <head>
-    <title>PicoGL.js: Render to Texture</title>
+    <title>PicoGL.js: Render to MSAA Renderbuffer</title>
     <meta charset="utf-8">
     <script src="utils/gl-matrix.js"></script>
     <script src="../build/picogl.js"></script>
@@ -32,9 +32,9 @@
 </head>
 <body>
     <div id="example-title">
-        PicoGL.js Example: Render to Texture
+        PicoGL.js Example: Render to MSAA Renderbuffer
         <div>
-            <a href="https://github.com/tsherif/picogl.js/blob/master/examples/rtt.html">Source code</a>
+            <a href="https://github.com/tsherif/picogl.js/blob/master/examples/rtt_msaa.html">Source code</a>
         </div>
     </div>
     <canvas id="gl-canvas"></canvas>
@@ -121,11 +121,16 @@
         var fsSource =  document.getElementById("fragment-draw").text.trim();
         var program = app.createProgram(vsSource, fsSource);
 
-        // FRAMEBUFFER
-        var colorTarget = app.createTexture2D(app.width, app.height);
-        var depthTarget = app.createRenderbuffer(app.width, app.height, PicoGL.DEPTH_COMPONENT16);
+        // FRAMEBUFFERS
 
-        var rttBuffer = app.createFramebuffer().colorTarget(0, colorTarget).depthTarget(depthTarget);
+        // Use maxium number of available samples.
+        var colorTarget = app.createRenderbuffer(app.width, app.height, PicoGL.RGBA8, PicoGL.WEBGL_INFO.SAMPLES);
+        var depthTarget = app.createRenderbuffer(app.width, app.height, PicoGL.DEPTH_COMPONENT16, PicoGL.WEBGL_INFO.SAMPLES);
+        var msaaFramebuffer = app.createFramebuffer().colorTarget(0, colorTarget).depthTarget(depthTarget);
+
+        var textureColorTarget = app.createTexture2D(app.width, app.height);
+        var textureFramebuffer = app.createFramebuffer().colorTarget(0, textureColorTarget);
+
 
         // GEOMETRY
         var box = utils.createBox({dimensions: [1.0, 1.0, 1.0]})
@@ -168,7 +173,8 @@
 
         window.onresize = function() {
             app.resize(window.innerWidth, window.innerHeight);
-            rttBuffer.resize();
+            msaaFramebuffer.resize();
+            textureFramebuffer.resize();
 
             mat4.perspective(projMatrix, Math.PI / 2, app.width / app.height, 0.1, 10.0);
             mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
@@ -204,12 +210,17 @@
                 drawCall.uniform("uModel", modelMatrix);
 
                 // RENDER TO OFFSCREEN TEXTURE
-                app.drawFramebuffer(rttBuffer).clearColor(0.4, 0.4, 0.4, 1.0).clear();
+                app.drawFramebuffer(msaaFramebuffer).clearColor(0.4, 0.4, 0.4, 1.0).clear();
                 drawCall.texture("tex", texture).draw();
                 
+                // Can't sample from renderbuffer so blit to a texture for sampling.
+                app.readFramebuffer(msaaFramebuffer)
+                .drawFramebuffer(textureFramebuffer)
+                .blitFramebuffer();
+
                 // RENDER TO SCREEN
                 app.defaultDrawFramebuffer().clearColor(0.0, 0.0, 0.0, 1.0).clear()
-                drawCall.texture("tex", rttBuffer.colorAttachments[0]).draw();
+                drawCall.texture("tex", textureFramebuffer.colorAttachments[0]).draw();
 
                 timer.end(); 
 

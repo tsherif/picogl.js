@@ -28,6 +28,7 @@ const TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
 const Cubemap                 = require("./cubemap");
 const DrawCall                = require("./draw-call");
 const Framebuffer             = require("./framebuffer");
+const Renderbuffer            = require("./renderbuffer");
 const Program                 = require("./program");
 const Shader                  = require("./shader");
 const Texture                 = require("./texture");
@@ -271,6 +272,49 @@ class App {
             this.gl.bindFramebuffer(this.gl.READ_FRAMEBUFFER, null);
             this.state.readFramebuffer = null;
         }
+
+        return this;
+    }
+
+    /**
+        Copy data from framebuffer attached to READ_FRAMEBUFFER to framebuffer attached to DRAW_FRAMEBUFFER.
+
+        @method
+        @param {Object} [options] Blit options.
+        @param {number} [options.srcStartX=0] Source start x coordinate. 
+        @param {number} [options.srcStartY=0] Source start y coordinate. 
+        @param {number} [options.srcEndX=Width of the read framebuffer] Source end x coordinate. 
+        @param {number} [options.srcEndY=Height of the read framebuffer] Source end y coordinate. 
+        @param {number} [options.dstStartX=0] Destination start x coordinate. 
+        @param {number} [options.dstStartY=0] Destination start y coordinate. 
+        @param {number} [options.dstEndX=Width of the draw framebuffer] Destination end x coordinate. 
+        @param {number} [options.dstEndY=Height of the draw framebuffer] Destination end y coordinate. 
+        @param {number} [options.mask=COLOR_BUFFER_BIT | DEPTH_BUFFER_BIT] Write mask. 
+        @param {number} [options.filter=NEAREST] Sampling filter. 
+        @return {App} The App object.
+    */  
+    blitFramebuffer(options = CONSTANTS.DUMMY_OBJECT) {
+        let readFramebuffer = this.state.readFramebuffer;
+        let drawFramebuffer = this.state.drawFramebuffer;
+        let defaultReadWidth = readFramebuffer ? readFramebuffer.width : this.width;
+        let defaultReadHeight = readFramebuffer ? readFramebuffer.height : this.height;
+        let defaultDrawWidth = drawFramebuffer ? drawFramebuffer.width : this.width;
+        let defaultDrawHeight = drawFramebuffer ? drawFramebuffer.height : this.height;
+
+        let {
+            srcStartX = 0,
+            srcStartY = 0,
+            srcEndX = defaultReadWidth,
+            srcEndY = defaultReadHeight,
+            dstStartX = 0,
+            dstStartY = 0,
+            dstEndX = defaultDrawWidth,
+            dstEndY = defaultDrawHeight,
+            mask = CONSTANTS.COLOR_BUFFER_BIT | CONSTANTS.DEPTH_BUFFER_BIT,
+            filter = CONSTANTS.NEAREST
+        } = options;
+
+        this.gl.blitFramebuffer(srcStartX, srcStartY, srcEndX, srcEndY, dstStartX, dstStartY, dstEndX, dstEndY, mask, filter);
 
         return this;
     }
@@ -1035,6 +1079,7 @@ class App {
         @param {GLEnum} [options.format=RGBA] Texture data format.
         @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
         @param {boolean} [options.flipY=false] Whether the y-axis should be flipped when unpacking the texture. 
+        @param {boolean} [options.premultiplyAlpha=false] Whether the alpha channel should be pre-multiplied when unpacking the texture. 
         @param {GLEnum} [options.minFilter] Minification filter. Defaults to 
             LINEAR_MIPMAP_NEAREST if image data is provided, NEAREST otherwise.
         @param {GLEnum} [options.magFilter] Magnification filter. Defaults to LINEAR
@@ -1181,7 +1226,8 @@ class App {
             if format is DEPTH_COMPONENT, UNSIGNED_BYTE otherwise.
         @param {GLEnum} [options.format=RGBA] Texture data format.
         @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
-        @param {boolean} [options.flipY=false] Whether the y-axis should be flipped when unpacking the texture. 
+        @param {boolean} [options.flipY=false] Whether the y-axis should be flipped when unpacking the image. 
+        @param {boolean} [options.premultiplyAlpha=false] Whether the alpha channel should be pre-multiplied when unpacking the image. 
         @param {GLEnum} [options.minFilter] Minification filter. Defaults to 
             LINEAR_MIPMAP_NEAREST if image data is provided, NEAREST otherwise.
         @param {GLEnum} [options.magFilter] Magnification filter. Defaults to LINEAR
@@ -1200,6 +1246,20 @@ class App {
     */
     createCubemap(options) {
         return new Cubemap(this.gl, this.state, options);
+    }
+
+    /**
+        Create a renderbuffer.
+
+        @method
+        @param {number} width Renderbuffer width.
+        @param {number} height Renderbuffer height.
+        @param {GLEnum} internalFormat Internal arrangement of the renderbuffer data.
+        @param {number} [samples=0] Number of MSAA samples.
+        @return {Renderbuffer} New Renderbuffer object.
+    */
+    createRenderbuffer(width, height, internalFormat, samples = 0) {
+        return new Renderbuffer(this.gl, width, height, internalFormat, samples);
     }
 
     /**

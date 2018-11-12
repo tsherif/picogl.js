@@ -36,6 +36,8 @@ const TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
     @prop {GLEnum} format Layout of texture data.
     @prop {GLEnum} internalFormat Internal arrangement of the texture data.
     @prop {Number} currentUnit The current texture unit this cubemap is bound to.
+    @prop {boolean} flipY Whether the y-axis is flipped for this cubemap.
+    @prop {boolean} premultiplyAlpha Whether alpha should be pre-multiplied when loading this cubemap.
     @prop {Object} appState Tracked GL state.
 */
 class Cubemap {
@@ -45,7 +47,7 @@ class Cubemap {
 
         this.gl = gl;
         this.texture = null;
-        this.format = options.format !== undefined ? options.format : gl.RGBA;
+        this.format = options.format !== undefined ? options.format : CONSTANTS.RGBA;
         this.type = options.type !== undefined ? options.type : defaultType;
         this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : TEXTURE_FORMAT_DEFAULTS[this.type][this.format];
         this.appState = appState;
@@ -58,12 +60,13 @@ class Cubemap {
             width = negX.width,
             height = negX.height,
             flipY = false,
-            minFilter = negX ? gl.LINEAR_MIPMAP_NEAREST : gl.NEAREST,
-            magFilter = negX ? gl.LINEAR : gl.NEAREST,
-            wrapS = gl.REPEAT,
-            wrapT = gl.REPEAT,
-            compareMode = gl.NONE,
-            compareFunc = gl.LEQUAL,
+            premultiplyAlpha = false,
+            minFilter = negX ? CONSTANTS.LINEAR_MIPMAP_NEAREST : CONSTANTS.NEAREST,
+            magFilter = negX ? CONSTANTS.LINEAR : CONSTANTS.NEAREST,
+            wrapS = CONSTANTS.REPEAT,
+            wrapT = CONSTANTS.REPEAT,
+            compareMode = CONSTANTS.NONE,
+            compareFunc = CONSTANTS.LEQUAL,
             minLOD = null,
             maxLOD = null,
             baseLevel = null,
@@ -73,6 +76,7 @@ class Cubemap {
         this.width = width;
         this.height = height;
         this.flipY = flipY;
+        this.premultiplyAlpha = premultiplyAlpha;
         this.minFilter = minFilter;
         this.magFilter = magFilter;
         this.wrapS = wrapS;
@@ -83,7 +87,7 @@ class Cubemap {
         this.maxLOD = maxLOD;
         this.baseLevel = baseLevel;
         this.maxLevel = maxLevel;
-        this.mipmaps = (minFilter === gl.LINEAR_MIPMAP_NEAREST || minFilter === gl.LINEAR_MIPMAP_LINEAR);
+        this.mipmaps = (minFilter === CONSTANTS.LINEAR_MIPMAP_NEAREST || minFilter === CONSTANTS.LINEAR_MIPMAP_LINEAR);
         this.levels = this.mipmaps ? Math.floor(Math.log2(Math.min(this.width, this.height))) + 1 : 1;
 
         this.restore(options);
@@ -117,6 +121,7 @@ class Cubemap {
 
         this.bind(0);
         this.gl.pixelStorei(CONSTANTS.UNPACK_FLIP_Y_WEBGL, this.flipY);
+        this.gl.pixelStorei(CONSTANTS.UNPACK_PREMULTIPLY_ALPHA_WEBGL, this.premultiplyAlpha);
         this.gl.texParameteri(CONSTANTS.TEXTURE_CUBE_MAP, CONSTANTS.TEXTURE_MAG_FILTER, this.magFilter);
         this.gl.texParameteri(CONSTANTS.TEXTURE_CUBE_MAP, CONSTANTS.TEXTURE_MIN_FILTER, this.minFilter);
         this.gl.texParameteri(CONSTANTS.TEXTURE_CUBE_MAP, CONSTANTS.TEXTURE_WRAP_S, this.wrapS);
@@ -192,8 +197,8 @@ class Cubemap {
                 this.appState.textures[this.currentUnit] = null;
             }
 
-            this.gl.activeTexture(this.gl.TEXTURE0 + unit);
-            this.gl.bindTexture(this.gl.TEXTURE_CUBE_MAP, this.texture);
+            this.gl.activeTexture(CONSTANTS.TEXTURE0 + unit);
+            this.gl.bindTexture(CONSTANTS.TEXTURE_CUBE_MAP, this.texture);
 
             this.appState.textures[unit] = this;
             this.currentUnit = unit;

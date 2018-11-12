@@ -24,17 +24,19 @@
 "use strict";
 
 const CONSTANTS = require("./constants");
+const Texture = require("./texture");
+const Renderbuffer = require("./renderbuffer");
 
 /**
-    Storage for vertex data.
+    Offscreen drawing surface.
 
     @class
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLFramebuffer} framebuffer Handle to the framebuffer.
-    @prop {Array} colorTextures Array of color texture targets.
-    @prop {number} numColorTargets Number of color texture targets.
-    @prop {Texture} depthTexture Depth texture target.
-    @prop {Array} colorAttachments Array of color attachment enums.
+    @prop {number} width Framebuffer width.
+    @prop {number} height Framebuffer height.
+    @prop {Array} colorAttachments Array of color attachments.
+    @prop {Texture|Renderbuffer} depthAttachment Depth attachment.
     @prop {Object} appState Tracked GL state.
 */
 class Framebuffer {
@@ -46,11 +48,14 @@ class Framebuffer {
 
         this.numColorTargets = 0;
 
-        this.colorTextures = [];
         this.colorAttachments = [];
-        this.colorTextureTargets = [];
-        this.depthTexture = null;
-        this.depthTextureTarget = null;
+        this.colorAttachmentEnums = [];
+        this.colorAttachmentTargets = [];
+        this.depthAttachment = null;
+        this.depthAttachmentTarget = null;
+
+        this.width = 0;
+        this.height = 0;
 
         this.restore();
     }
@@ -80,42 +85,47 @@ class Framebuffer {
 
         @method
         @param {number} index Color attachment index.
-        @param {Texture|Cubemap} texture The texture or cubemap to attach.
+        @param {Texture|Cubemap|Renderbuffer} attachment The texture, cubemap or renderbuffer to attach.
         @param {GLEnum} [target] The texture target or layer to attach. If the texture is 3D or a texture array,
-            defaults to 0, otherwise to TEXTURE_2D.
+            defaults to 0, otherwise to TEXTURE_2D. Ignored for renderbuffers.
         @return {Framebuffer} The Framebuffer object.
     */
-    colorTarget(index, texture, target = texture.is3D ? 0 : CONSTANTS.TEXTURE_2D) {
+    colorTarget(index, attachment, target = attachment.is3D ? 0 : CONSTANTS.TEXTURE_2D) {
 
         if (index >= this.numColorTargets) {
             let numColorTargets = index + 1;
+            this.colorAttachmentEnums.length = numColorTargets;
             this.colorAttachments.length = numColorTargets;
-            this.colorTextures.length = numColorTargets;
-            this.colorTextureTargets.length = numColorTargets;
+            this.colorAttachmentTargets.length = numColorTargets;
 
-            for (let i = this.numColorTargets; i < numColorTargets; ++i) {
-                this.colorAttachments[i] = CONSTANTS.NONE;
-                this.colorTextures[i] = null;
-                this.colorTextureTargets[i] = 0;
+            for (let i = this.numColorTargets; i < numColorTargets - 1; ++i) {
+                this.colorAttachmentEnums[i] = CONSTANTS.NONE;
+                this.colorAttachments[i] = null;
+                this.colorAttachmentTargets[i] = 0;
             }
 
             this.numColorTargets = numColorTargets;
         }        
 
-        this.colorAttachments[index] = CONSTANTS.COLOR_ATTACHMENT0 + index;
-        this.colorTextures[index] = texture;
-        this.colorTextureTargets[index] = target;
+        this.colorAttachmentEnums[index] = CONSTANTS.COLOR_ATTACHMENT0 + index;
+        this.colorAttachments[index] = attachment;
+        this.colorAttachmentTargets[index] = target;
 
         let currentFramebuffer = this.bindAndCaptureState();
 
 
-        if (texture.is3D) {
-            this.gl.framebufferTextureLayer(CONSTANTS.DRAW_FRAMEBUFFER, this.colorAttachments[index], texture.texture, 0, target);
+        if (attachment instanceof Renderbuffer) {
+            this.gl.framebufferRenderbuffer(CONSTANTS.DRAW_FRAMEBUFFER, this.colorAttachmentEnums[index], CONSTANTS.RENDERBUFFER, attachment.renderbuffer);
+        } else if (attachment.is3D) {
+            this.gl.framebufferTextureLayer(CONSTANTS.DRAW_FRAMEBUFFER, this.colorAttachmentEnums[index], attachment.texture, 0, target);
         } else {
-            this.gl.framebufferTexture2D(CONSTANTS.DRAW_FRAMEBUFFER, this.colorAttachments[index], target, texture.texture, 0);
+            this.gl.framebufferTexture2D(CONSTANTS.DRAW_FRAMEBUFFER, this.colorAttachmentEnums[index], target, attachment.texture, 0);
         }
 
-        this.gl.drawBuffers(this.colorAttachments);
+        this.gl.drawBuffers(this.colorAttachmentEnums);
+
+        this.width = attachment.width;
+        this.height = attachment.height;
 
         this.restoreState(currentFramebuffer);
 
@@ -126,23 +136,28 @@ class Framebuffer {
         Attach a depth target to this framebuffer.
 
         @method
-        @param {Texture|Cubemap} texture The texture or cubemap to attach.
-        @param {GLEnum} [target] The texture target or layer to attach. If the texture is 3D or a texture array,
-            defaults to 0, otherwise to TEXTURE_2D.
+        @param {Texture|Cubemap|Renderbuffer} texture The texture, cubemap or renderbuffer to attach.
+        @param {GLEnum} [target] The texture target or layer to attach. If the texture is 3D or a texture array or renderbuffer,
+            defaults to 0, otherwise to TEXTURE_2D. Ignored for renderbuffers.
         @return {Framebuffer} The Framebuffer object.
     */
-    depthTarget(texture, target = texture.is3D ? 0 : CONSTANTS.TEXTURE_2D) {
+    depthTarget(attachment, target = attachment.is3D ? 0 : CONSTANTS.TEXTURE_2D) {
 
         let currentFramebuffer = this.bindAndCaptureState();
 
-        this.depthTexture = texture;
-        this.depthTextureTarget = target;
+        this.depthAttachment = attachment;
+        this.depthAttachmentTarget = target;
 
-        if (texture.is3D) {
-            this.gl.framebufferTextureLayer(CONSTANTS.DRAW_FRAMEBUFFER, CONSTANTS.DEPTH_ATTACHMENT, texture.texture, 0, target);
+        if (attachment instanceof Renderbuffer) {
+            this.gl.framebufferRenderbuffer(CONSTANTS.DRAW_FRAMEBUFFER, CONSTANTS.DEPTH_ATTACHMENT, CONSTANTS.RENDERBUFFER, attachment.renderbuffer);
+        } else if (attachment.is3D) {
+            this.gl.framebufferTextureLayer(CONSTANTS.DRAW_FRAMEBUFFER, CONSTANTS.DEPTH_ATTACHMENT, attachment.texture, 0, target);
         } else {
-            this.gl.framebufferTexture2D(CONSTANTS.DRAW_FRAMEBUFFER, CONSTANTS.DEPTH_ATTACHMENT, target, texture.texture, 0);
+            this.gl.framebufferTexture2D(CONSTANTS.DRAW_FRAMEBUFFER, CONSTANTS.DEPTH_ATTACHMENT, target, attachment.texture, 0);
         }
+
+        this.width = attachment.width;
+        this.height = attachment.height;
 
         this.restoreState(currentFramebuffer);
 
@@ -150,40 +165,49 @@ class Framebuffer {
     }
 
     /**
-        Resize all currently attached textures.
+        Resize all attachments.
 
         @method
         @param {number} [width=app.width] New width of the framebuffer.
         @param {number} [height=app.height] New height of the framebuffer.
         @return {Framebuffer} The Framebuffer object.
     */
-    resize(width = this.gl.drawingBufferWidth, height = this.gl.drawingBufferHeight, depth) {
+    resize(width = this.gl.drawingBufferWidth, height = this.gl.drawingBufferHeight) {
 
         let currentFramebuffer = this.bindAndCaptureState();
 
         for (let i = 0; i < this.numColorTargets; ++i) {
-            var texture = this.colorTextures[i];
+            let attachment = this.colorAttachments[i];
 
-            if (!texture) {
+            if (!attachment) {
                 continue;
             }
 
-            texture.resize(width, height, depth);
-            if (texture.is3D) {
-                this.gl.framebufferTextureLayer(CONSTANTS.DRAW_FRAMEBUFFER, this.colorAttachments[i], texture.texture, 0, this.colorTextureTargets[i]);
-            } else {
-                this.gl.framebufferTexture2D(CONSTANTS.DRAW_FRAMEBUFFER, this.colorAttachments[i], this.colorTextureTargets[i], texture.texture, 0);
+            attachment.resize(width, height);
+            if (attachment instanceof Texture) {
+                // Texture resizing recreates the texture object.
+                if (attachment.is3D) {
+                    this.gl.framebufferTextureLayer(CONSTANTS.DRAW_FRAMEBUFFER, this.colorAttachmentEnums[i], attachment.texture, 0, this.colorAttachmentTargets[i]);
+                } else {
+                    this.gl.framebufferTexture2D(CONSTANTS.DRAW_FRAMEBUFFER, this.colorAttachmentEnums[i], this.colorAttachmentTargets[i], attachment.texture, 0);
+                }
             }
         }
 
-        if (this.depthTexture) {
-            this.depthTexture.resize(width, height, depth);
-            if (this.depthTexture.is3D) {
-                this.gl.framebufferTextureLayer(CONSTANTS.DRAW_FRAMEBUFFER, CONSTANTS.DEPTH_ATTACHMENT, this.depthTexture.texture, 0, this.depthTextureTarget);
-            } else {
-                this.gl.framebufferTexture2D(CONSTANTS.DRAW_FRAMEBUFFER, CONSTANTS.DEPTH_ATTACHMENT, this.depthTextureTarget, this.depthTexture.texture, 0);
+        if (this.depthAttachment) {
+            this.depthAttachment.resize(width, height);
+            if (this.depthAttachment instanceof Texture) {
+                // Texture resizing recreates the texture object.
+                if (this.depthAttachment.is3D) {
+                    this.gl.framebufferTextureLayer(CONSTANTS.DRAW_FRAMEBUFFER, CONSTANTS.DEPTH_ATTACHMENT, this.depthAttachment.texture, 0, this.depthAttachmentTarget);
+                } else {
+                    this.gl.framebufferTexture2D(CONSTANTS.DRAW_FRAMEBUFFER, CONSTANTS.DEPTH_ATTACHMENT, this.depthAttachmentTarget, this.depthAttachment.texture, 0);
+                }
             }
         }
+
+        this.width = width;
+        this.height = height;
 
         this.restoreState(currentFramebuffer);
 
@@ -292,6 +316,17 @@ class Framebuffer {
         }
 
         return this;
+    }
+
+    // TODO(Tarek): Transitional support for deprecated properties.
+    get colorTextures() {
+        console.error("Framebuffer.colorTextures is deprecated and will be removed. Please use Framebuffer.colorAttachments.");
+        return this.colorAttachments;
+    }
+
+    get depthTexture() {
+        console.error("Framebuffer.depthTexture is deprecated and will be removed. Please use Framebuffer.depthAttachment.");
+        return this.depthAttachment;
     }
 
 }
