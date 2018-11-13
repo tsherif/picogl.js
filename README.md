@@ -108,9 +108,9 @@ PicoGL.js simplifies usage of some more complex WebGL 2 features, such as multip
 
     // Bind main program texture samplers to framebuffer targets
     var mainDrawCall = app.createDrawCall(mainProgram, mainVAO)
-    .texture("texture1", framebuffer.colorTexture[0])
-    .texture("texture2", framebuffer.colorTexture[1])
-    .texture("depthTexture", framebuffer.depthTexture);
+    .texture("texture1", framebuffer.colorAttachments[0])
+    .texture("texture2", framebuffer.colorAttachments[1])
+    .texture("depthTexture", framebuffer.depthAttachment);
 
     // Offscreen pass
     app.drawFramebuffer(framebuffer).clear();
