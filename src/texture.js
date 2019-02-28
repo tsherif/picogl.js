@@ -171,8 +171,8 @@ class Texture {
         this.gl.texParameteri(this.binding, CONSTANTS.TEXTURE_WRAP_R, this.wrapR);
         this.gl.texParameteri(this.binding, CONSTANTS.TEXTURE_COMPARE_FUNC, this.compareFunc);
         this.gl.texParameteri(this.binding, CONSTANTS.TEXTURE_COMPARE_MODE, this.compareMode);
-        this.gl.pixelStorei(CONSTANTS.UNPACK_FLIP_Y_WEBGL, this.flipY);
-        this.gl.pixelStorei(CONSTANTS.UNPACK_PREMULTIPLY_ALPHA_WEBGL, this.premultiplyAlpha);
+        this.gl.pixelStorei(CONSTANTS.UNPACK_FLIP_Y_WEBGL, Number(this.flipY));
+        this.gl.pixelStorei(CONSTANTS.UNPACK_PREMULTIPLY_ALPHA_WEBGL, Number(this.premultiplyAlpha));
         if (this.minLOD !== null) {
             this.gl.texParameterf(this.binding, CONSTANTS.TEXTURE_MIN_LOD, this.minLOD);
         }

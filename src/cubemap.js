@@ -120,8 +120,8 @@ class Cubemap {
         }
 
         this.bind(0);
-        this.gl.pixelStorei(CONSTANTS.UNPACK_FLIP_Y_WEBGL, this.flipY);
-        this.gl.pixelStorei(CONSTANTS.UNPACK_PREMULTIPLY_ALPHA_WEBGL, this.premultiplyAlpha);
+        this.gl.pixelStorei(CONSTANTS.UNPACK_FLIP_Y_WEBGL, Number(this.flipY));
+        this.gl.pixelStorei(CONSTANTS.UNPACK_PREMULTIPLY_ALPHA_WEBGL, Number(this.premultiplyAlpha));
         this.gl.texParameteri(CONSTANTS.TEXTURE_CUBE_MAP, CONSTANTS.TEXTURE_MAG_FILTER, this.magFilter);
         this.gl.texParameteri(CONSTANTS.TEXTURE_CUBE_MAP, CONSTANTS.TEXTURE_MIN_FILTER, this.minFilter);
         this.gl.texParameteri(CONSTANTS.TEXTURE_CUBE_MAP, CONSTANTS.TEXTURE_WRAP_S, this.wrapS);
