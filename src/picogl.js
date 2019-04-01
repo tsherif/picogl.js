@@ -49,6 +49,10 @@ export const PicoGL = Object.assign({
         if (!webglInfoInitialized) {
             PicoGL.WEBGL_INFO.MAX_TEXTURE_UNITS = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
             PicoGL.WEBGL_INFO.MAX_UNIFORM_BUFFERS = gl.getParameter(gl.MAX_UNIFORM_BUFFER_BINDINGS);
+            PicoGL.WEBGL_INFO.MAX_UNIFORMS = Math.min(
+                gl.getParameter(gl.MAX_VERTEX_UNIFORM_VECTORS),
+                gl.getParameter(gl.MAX_FRAGMENT_UNIFORM_VECTORS)
+            );
             PicoGL.WEBGL_INFO.SAMPLES = gl.getParameter(gl.SAMPLES);
             webglInfoInitialized = true;      
         }
