@@ -3,6 +3,7 @@ module.exports = {
     output: {
         library: "PicoGL",
         filename: "build/temp.js",
-        libraryTarget: "umd"
+        libraryTarget: "umd",
+        libraryExport: "PicoGL"
     }
 };

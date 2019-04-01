@@ -21,8 +21,6 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-"use strict";
-
 /**
     Generic query object.
 
@@ -33,7 +31,7 @@
     @prop {boolean} active Whether or not a query is currently in progress.
     @prop {Any} result The result of the query (only available after a call to ready() returns true). 
 */
-class Query {
+export class Query {
 
     constructor(gl, target) {
         this.gl = gl;
@@ -123,5 +121,3 @@ class Query {
     }
 
 }
-
-module.exports = Query;

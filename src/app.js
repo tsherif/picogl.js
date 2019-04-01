@@ -21,23 +21,21 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-"use strict";
-
-const CONSTANTS               = require("./constants");
-const TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
-const Cubemap                 = require("./cubemap");
-const DrawCall                = require("./draw-call");
-const Framebuffer             = require("./framebuffer");
-const Renderbuffer            = require("./renderbuffer");
-const Program                 = require("./program");
-const Shader                  = require("./shader");
-const Texture                 = require("./texture");
-const Timer                   = require("./timer");
-const TransformFeedback       = require("./transform-feedback");
-const UniformBuffer           = require("./uniform-buffer");
-const VertexArray             = require("./vertex-array");
-const VertexBuffer            = require("./vertex-buffer");
-const Query                   = require("./query");
+import { CONSTANTS } from "./constants";
+import { TEXTURE_FORMAT_DEFAULTS } from "./texture-format-defaults";
+import { Cubemap } from "./cubemap";
+import { DrawCall } from "./draw-call";
+import { Framebuffer } from "./framebuffer";
+import { Renderbuffer } from "./renderbuffer";
+import { Program } from "./program";
+import { Shader } from "./shader";
+import { Texture } from "./texture";
+import { Timer } from "./timer";
+import { TransformFeedback } from "./transform-feedback";
+import { UniformBuffer } from "./uniform-buffer";
+import { VertexArray } from "./vertex-array";
+import { VertexBuffer } from "./vertex-buffer";
+import { Query } from "./query";
 
 /**
     Primary entry point to PicoGL. An app will store all parts of the WebGL
@@ -58,7 +56,7 @@ const Query                   = require("./query");
     @prop {Object} state Tracked GL state.
     @prop {GLEnum} clearBits Current clear mask to use with clear().    
 */
-class App {
+export class App {
     
     constructor(gl, canvas) {
         this.canvas = canvas;
@@ -1091,8 +1089,6 @@ class App {
         @param {GLEnum} [options.maxLevel] Maximum mipmap level.
         @param {GLEnum} [options.minLOD] Mimimum level of detail.
         @param {GLEnum} [options.maxLOD] Maximum level of detail.
-        @param {boolean} [options.generateMipmaps] Should mipmaps be generated. Defaults to generating mipmaps if
-            a mipmap sampling filter is used and the mipmap levels aren't provided directly.
         @return {Texture} New Texture object.
     */
     createTexture2D(image, width, height, options) {
@@ -1141,8 +1137,6 @@ class App {
         @param {GLEnum} [options.maxLevel] Maximum mipmap level.
         @param {GLEnum} [options.minLOD] Mimimum level of detail.
         @param {GLEnum} [options.maxLOD] Maximum level of detail.
-        @param {boolean} [options.generateMipmaps] Should mipmaps be generated. Defaults to generating mipmaps if
-            a mipmap sampling filter is use and the mipmap levels aren't provided directly.
         @return {Texture} New Texture object.
     */
     createTextureArray(image, width, height, depth, options) {
@@ -1186,8 +1180,6 @@ class App {
         @param {GLEnum} [options.maxLevel] Maximum mipmap level.
         @param {GLEnum} [options.minLOD] Mimimum level of detail.
         @param {GLEnum} [options.maxLOD] Maximum level of detail.
-        @param {boolean} [options.generateMipmaps] Should mipmaps be generated. Defaults to generating mipmaps if
-            a mipmap sampling filter is use and the mipmap levels aren't provided directly.
         @return {Texture} New Texture object.
     */
     createTexture3D(image, width, height, depth, options) {
@@ -1239,8 +1231,6 @@ class App {
         @param {GLEnum} [options.maxLevel] Maximum mipmap level.
         @param {GLEnum} [options.minLOD] Mimimum level of detail.
         @param {GLEnum} [options.maxLOD] Maximum level of detail.
-        @param {boolean} [options.generateMipmaps] Should mipmaps be generated. Defaults to generating mipmaps if
-            a mipmap sampling filter is usedd.
         @return {Cubemap} New Cubemap object.
     */
     createCubemap(options) {
@@ -1308,5 +1298,3 @@ class App {
     }
 
 }
-
-module.exports = App;

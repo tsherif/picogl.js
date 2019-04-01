@@ -18,11 +18,9 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-"use strict";
+import { CONSTANTS } from "./constants";
 
-const CONSTANTS = require("./constants");
-
-const TEXTURE_FORMAT_DEFAULTS = {
+export const TEXTURE_FORMAT_DEFAULTS = {
     [CONSTANTS.UNSIGNED_BYTE]: {
         [CONSTANTS.RED]: CONSTANTS.R8,
         [CONSTANTS.RG]: CONSTANTS.RG8,
@@ -44,5 +42,3 @@ const TEXTURE_FORMAT_DEFAULTS = {
 
     COMPRESSED_TYPES: {}
 };
-
-module.exports = TEXTURE_FORMAT_DEFAULTS;

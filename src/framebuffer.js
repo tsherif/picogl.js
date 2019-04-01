@@ -21,11 +21,9 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-"use strict";
-
-const CONSTANTS = require("./constants");
-const Texture = require("./texture");
-const Renderbuffer = require("./renderbuffer");
+import { CONSTANTS } from "./constants";
+import { Texture } from "./texture";
+import { Renderbuffer } from "./renderbuffer";
 
 /**
     Offscreen drawing surface.
@@ -39,7 +37,7 @@ const Renderbuffer = require("./renderbuffer");
     @prop {Texture|Renderbuffer} depthAttachment Depth attachment.
     @prop {Object} appState Tracked GL state.
 */
-class Framebuffer {
+export class Framebuffer {
 
     constructor(gl, appState) {
         this.gl = gl;
@@ -330,5 +328,3 @@ class Framebuffer {
     }
 
 }
-
-module.exports = Framebuffer;

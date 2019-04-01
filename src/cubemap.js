@@ -21,10 +21,8 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-"use strict";
-
-const CONSTANTS = require("./constants");
-const TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
+import { CONSTANTS } from "./constants";
+import { TEXTURE_FORMAT_DEFAULTS } from "./texture-format-defaults";
 
 /**
     Cubemap for environment mapping.
@@ -40,7 +38,7 @@ const TEXTURE_FORMAT_DEFAULTS = require("./texture-format-defaults");
     @prop {boolean} premultiplyAlpha Whether alpha should be pre-multiplied when loading this cubemap.
     @prop {Object} appState Tracked GL state.
 */
-class Cubemap {
+export class Cubemap {
 
     constructor(gl, appState, options) {
         let defaultType = options.format === CONSTANTS.DEPTH_COMPONENT ? CONSTANTS.UNSIGNED_SHORT : CONSTANTS.UNSIGNED_BYTE;
@@ -208,5 +206,3 @@ class Cubemap {
     }
 
 }
-
-module.exports = Cubemap;

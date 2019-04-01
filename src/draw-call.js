@@ -21,9 +21,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-"use strict";
-
-const CONSTANTS = require("./constants");
+import { CONSTANTS } from "./constants";
 
 /**
     A DrawCall represents the program and values of associated
@@ -49,7 +47,7 @@ const CONSTANTS = require("./constants");
     @prop {GLsizei} numElements The number of element to draw.
     @prop {GLsizei} numInstances The number of instances to draw.
 */
-class DrawCall {
+export class DrawCall {
 
     constructor(gl, appState, program, vertexArray, primitive = CONSTANTS.TRIANGLES) {
         this.gl = gl;
@@ -233,5 +231,3 @@ class DrawCall {
     }
 
 }
-
-module.exports = DrawCall;
