@@ -1,5 +1,39 @@
-var PicoGL =
-/******/ (function(modules) { // webpackBootstrap
+/*
+PicoGL.js v0.10.1
+
+The MIT License (MIT)
+
+Copyright (c) 2017 Tarek Sherif
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
+
+(function webpackUniversalModuleDefinition(root, factory) {
+	if(typeof exports === 'object' && typeof module === 'object')
+		module.exports = factory();
+	else if(typeof define === 'function' && define.amd)
+		define([], factory);
+	else if(typeof exports === 'object')
+		exports["PicoGL"] = factory();
+	else
+		root["PicoGL"] = factory();
+})(this, function() {
+return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
 /******/
@@ -1494,7 +1528,7 @@ let webglInfoInitialized = false;
     @namespace PicoGL
 */
 const PicoGL = Object.assign({ 
-    version: "DEV",
+    version: "0.10.1",
 
     /**
         Create a PicoGL app. The app is the primary entry point to PicoGL. It stores
@@ -2635,8 +2669,6 @@ class App {
         @param {GLEnum} [options.maxLevel] Maximum mipmap level.
         @param {GLEnum} [options.minLOD] Mimimum level of detail.
         @param {GLEnum} [options.maxLOD] Maximum level of detail.
-        @param {boolean} [options.generateMipmaps] Should mipmaps be generated. Defaults to generating mipmaps if
-            a mipmap sampling filter is used and the mipmap levels aren't provided directly.
         @return {Texture} New Texture object.
     */
     createTexture2D(image, width, height, options) {
@@ -2685,8 +2717,6 @@ class App {
         @param {GLEnum} [options.maxLevel] Maximum mipmap level.
         @param {GLEnum} [options.minLOD] Mimimum level of detail.
         @param {GLEnum} [options.maxLOD] Maximum level of detail.
-        @param {boolean} [options.generateMipmaps] Should mipmaps be generated. Defaults to generating mipmaps if
-            a mipmap sampling filter is use and the mipmap levels aren't provided directly.
         @return {Texture} New Texture object.
     */
     createTextureArray(image, width, height, depth, options) {
@@ -2730,8 +2760,6 @@ class App {
         @param {GLEnum} [options.maxLevel] Maximum mipmap level.
         @param {GLEnum} [options.minLOD] Mimimum level of detail.
         @param {GLEnum} [options.maxLOD] Maximum level of detail.
-        @param {boolean} [options.generateMipmaps] Should mipmaps be generated. Defaults to generating mipmaps if
-            a mipmap sampling filter is use and the mipmap levels aren't provided directly.
         @return {Texture} New Texture object.
     */
     createTexture3D(image, width, height, depth, options) {
@@ -2783,8 +2811,6 @@ class App {
         @param {GLEnum} [options.maxLevel] Maximum mipmap level.
         @param {GLEnum} [options.minLOD] Mimimum level of detail.
         @param {GLEnum} [options.maxLOD] Maximum level of detail.
-        @param {boolean} [options.generateMipmaps] Should mipmaps be generated. Defaults to generating mipmaps if
-            a mipmap sampling filter is usedd.
         @return {Cubemap} New Cubemap object.
     */
     createCubemap(options) {
@@ -5230,4 +5256,4 @@ class VertexBuffer {
 
 /***/ })
 /******/ ])["PicoGL"];
-//# sourceMappingURL=picogl.js.map
+});
