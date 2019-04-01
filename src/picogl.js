@@ -21,11 +21,10 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-"use strict";
-
 let webglInfoInitialized = false;
 
-const App = require("./app");
+import { CONSTANTS } from "./constants";
+import { App } from "./app";
 
 /**
     Global PicoGL module. For convenience, all WebGL enums are stored
@@ -33,27 +32,26 @@ const App = require("./app");
 
     @namespace PicoGL
 */
-const PicoGL = require("./constants");
-PicoGL.version = "%%VERSION%%";
+export const PicoGL = Object.assign({ 
+    version: "%%VERSION%%",
 
-/**
-    Create a PicoGL app. The app is the primary entry point to PicoGL. It stores
-    the canvas, the WebGL context and all WebGL state.
+    /**
+        Create a PicoGL app. The app is the primary entry point to PicoGL. It stores
+        the canvas, the WebGL context and all WebGL state.
 
-    @function PicoGL.createApp
-    @param {DOMElement} canvas The canvas on which to create the WebGL context.
-    @param {Object} [contextAttributes] Context attributes to pass when calling getContext().
-    @return {App} New App object.
-*/
-PicoGL.createApp = function(canvas, contextAttributes) {
-    let gl = canvas.getContext("webgl2", contextAttributes);
-    if (!webglInfoInitialized) {
-        PicoGL.WEBGL_INFO.MAX_TEXTURE_UNITS = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
-        PicoGL.WEBGL_INFO.MAX_UNIFORM_BUFFERS = gl.getParameter(gl.MAX_UNIFORM_BUFFER_BINDINGS);
-        PicoGL.WEBGL_INFO.SAMPLES = gl.getParameter(gl.SAMPLES);
-        webglInfoInitialized = true;      
+        @function PicoGL.createApp
+        @param {DOMElement} canvas The canvas on which to create the WebGL context.
+        @param {Object} [contextAttributes] Context attributes to pass when calling getContext().
+        @return {App} New App object.
+    */
+    createApp(canvas, contextAttributes) {
+        let gl = canvas.getContext("webgl2", contextAttributes);
+        if (!webglInfoInitialized) {
+            PicoGL.WEBGL_INFO.MAX_TEXTURE_UNITS = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
+            PicoGL.WEBGL_INFO.MAX_UNIFORM_BUFFERS = gl.getParameter(gl.MAX_UNIFORM_BUFFER_BINDINGS);
+            PicoGL.WEBGL_INFO.SAMPLES = gl.getParameter(gl.SAMPLES);
+            webglInfoInitialized = true;      
+        }
+        return new App(gl, canvas);
     }
-    return new App(gl, canvas);
-};
-    
-module.exports = PicoGL;
+}, CONSTANTS);

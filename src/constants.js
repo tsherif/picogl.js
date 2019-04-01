@@ -21,11 +21,9 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-"use strict";
-
 // https://www.khronos.org/registry/webgl/specs/1.0/
 // https://www.khronos.org/registry/webgl/specs/latest/2.0/#1.1
-const CONSTANTS = {
+export const CONSTANTS = {
     DEPTH_BUFFER_BIT: 0x00000100,
     STENCIL_BUFFER_BIT: 0x00000400,
     COLOR_BUFFER_BIT: 0x00004000,
@@ -667,5 +665,3 @@ CONSTANTS.TYPE_SIZE[CONSTANTS.UNSIGNED_SHORT] = 2;
 CONSTANTS.TYPE_SIZE[CONSTANTS.INT] = 4;
 CONSTANTS.TYPE_SIZE[CONSTANTS.UNSIGNED_INT] = 4;
 CONSTANTS.TYPE_SIZE[CONSTANTS.FLOAT] = 4;
-
-module.exports = CONSTANTS;

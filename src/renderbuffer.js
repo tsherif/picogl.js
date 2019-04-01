@@ -21,9 +21,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-"use strict";
-
-const CONSTANTS = require("./constants");
+import { CONSTANTS } from "./constants";
 
 /**
     Offscreen drawing attachment.
@@ -36,7 +34,7 @@ const CONSTANTS = require("./constants");
     @prop {GLEnum} internalFormat Internal arrangement of the renderbuffer data.
     @prop {number} samples Number of MSAA samples.
 */
-class Renderbuffer {
+export class Renderbuffer {
     constructor(gl, width, height, internalFormat, samples = 0) {
         this.gl = gl;
         this.renderbuffer = null;
@@ -91,5 +89,3 @@ class Renderbuffer {
         return this;
     }   
 }
-
-module.exports = Renderbuffer;
