@@ -18,9 +18,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-"use strict";
-
-const CONSTANTS = require("./constants");
+import { CONSTANTS } from "./constants";
 
 /**
     Organizes vertex buffer and attribute state.
@@ -35,7 +33,7 @@ const CONSTANTS = require("./constants");
     @prop {number} numInstances Number of instances to draw with this vertex array.
     @prop {Object} appState Tracked GL state.
 */
-class VertexArray {
+export class VertexArray {
     
     constructor(gl, appState, numElements = 0, numInstances = 0) {
         this.gl = gl;
@@ -275,5 +273,3 @@ class VertexArray {
         return this;
     }
 }
-
-module.exports = VertexArray;

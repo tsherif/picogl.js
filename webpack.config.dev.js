@@ -3,7 +3,8 @@ module.exports = {
     output: {
         library: "PicoGL",
         filename: "build/picogl.js",
-        libraryTarget: "var"
+        libraryTarget: "var",
+        libraryExport: "PicoGL"
     },
     devtool: "source-map"
 };

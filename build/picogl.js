@@ -1,5 +1,5 @@
 /*
-PicoGL.js v0.10.0
+PicoGL.js v0.10.1
 
 The MIT License (MIT)
 
@@ -32,7 +32,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 		exports["PicoGL"] = factory();
 	else
 		root["PicoGL"] = factory();
-})(typeof self !== 'undefined' ? self : this, function() {
+})(this, function() {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -100,7 +100,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 ///////////////////////////////////////////////////////////////////////////////////
@@ -125,8 +125,6 @@ return /******/ (function(modules) { // webpackBootstrap
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
-
-
 
 // https://www.khronos.org/registry/webgl/specs/1.0/
 // https://www.khronos.org/registry/webgl/specs/latest/2.0/#1.1
@@ -764,6 +762,8 @@ const CONSTANTS = {
 
     DUMMY_OBJECT: {}
 };
+/* harmony export (immutable) */ __webpack_exports__["a"] = CONSTANTS;
+
 
 CONSTANTS.TYPE_SIZE[CONSTANTS.BYTE] = 1;
 CONSTANTS.TYPE_SIZE[CONSTANTS.UNSIGNED_BYTE] = 1;
@@ -773,14 +773,13 @@ CONSTANTS.TYPE_SIZE[CONSTANTS.INT] = 4;
 CONSTANTS.TYPE_SIZE[CONSTANTS.UNSIGNED_INT] = 4;
 CONSTANTS.TYPE_SIZE[CONSTANTS.FLOAT] = 4;
 
-module.exports = CONSTANTS;
-
 
 /***/ }),
 /* 1 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constants__ = __webpack_require__(0);
 // Copyright (c) 2017 Tarek Sherif
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -803,39 +802,39 @@ module.exports = CONSTANTS;
 
 
 
-const CONSTANTS = __webpack_require__(0);
-
 const TEXTURE_FORMAT_DEFAULTS = {
-    [CONSTANTS.UNSIGNED_BYTE]: {
-        [CONSTANTS.RED]: CONSTANTS.R8,
-        [CONSTANTS.RG]: CONSTANTS.RG8,
-        [CONSTANTS.RGB]: CONSTANTS.RGB8,
-        [CONSTANTS.RGBA]: CONSTANTS.RGBA8
+    [__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNSIGNED_BYTE]: {
+        [__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].RED]: __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].R8,
+        [__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].RG]: __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].RG8,
+        [__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].RGB]: __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].RGB8,
+        [__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].RGBA]: __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].RGBA8
     },
 
-    [CONSTANTS.UNSIGNED_SHORT]: {
-        [CONSTANTS.DEPTH_COMPONENT]: CONSTANTS.DEPTH_COMPONENT16
+    [__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNSIGNED_SHORT]: {
+        [__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].DEPTH_COMPONENT]: __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].DEPTH_COMPONENT16
     },
 
-    [CONSTANTS.FLOAT]: {
-        [CONSTANTS.RED]: CONSTANTS.R16F,
-        [CONSTANTS.RG]: CONSTANTS.RG16F,
-        [CONSTANTS.RGB]: CONSTANTS.RGB16F,
-        [CONSTANTS.RGBA]: CONSTANTS.RGBA16F,
-        [CONSTANTS.DEPTH_COMPONENT]: CONSTANTS.DEPTH_COMPONENT32F
+    [__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT]: {
+        [__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].RED]: __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].R16F,
+        [__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].RG]: __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].RG16F,
+        [__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].RGB]: __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].RGB16F,
+        [__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].RGBA]: __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].RGBA16F,
+        [__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].DEPTH_COMPONENT]: __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].DEPTH_COMPONENT32F
     },
 
     COMPRESSED_TYPES: {}
 };
+/* harmony export (immutable) */ __webpack_exports__["a"] = TEXTURE_FORMAT_DEFAULTS;
 
-module.exports = TEXTURE_FORMAT_DEFAULTS;
 
 
 /***/ }),
 /* 2 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constants__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__ = __webpack_require__(1);
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -861,8 +860,6 @@ module.exports = TEXTURE_FORMAT_DEFAULTS;
 
 
 
-const CONSTANTS = __webpack_require__(0);
-const TEXTURE_FORMAT_DEFAULTS = __webpack_require__(1);
 
 const DUMMY_ARRAY = new Array(1);
 
@@ -889,8 +886,8 @@ const DUMMY_ARRAY = new Array(1);
     @prop {Object} appState Tracked GL state.
 */
 class Texture {
-    constructor(gl, appState, binding, image, width = image.width, height = image.height, depth, is3D, options = CONSTANTS.DUMMY_OBJECT) {
-        let defaultType = options.format === CONSTANTS.DEPTH_COMPONENT ? CONSTANTS.UNSIGNED_SHORT : CONSTANTS.UNSIGNED_BYTE;
+    constructor(gl, appState, binding, image, width = image.width, height = image.height, depth, is3D, options = __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].DUMMY_OBJECT) {
+        let defaultType = options.format === __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].DEPTH_COMPONENT ? __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNSIGNED_SHORT : __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNSIGNED_BYTE;
 
         this.gl = gl;
         this.binding = binding;
@@ -904,7 +901,7 @@ class Texture {
 
         this.format = null;
         this.internalFormat = null;
-        this.compressed = !!(TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[options.format] || TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[options.internalFormat]);
+        this.compressed = !!(__WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[options.format] || __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[options.internalFormat]);
         
         if (this.compressed) {
             // For compressed textures, just need to provide one of format, internalFormat.
@@ -913,7 +910,7 @@ class Texture {
             this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : options.format;
         } else {
             this.format = options.format !== undefined ? options.format : gl.RGBA;
-            this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : TEXTURE_FORMAT_DEFAULTS[this.type][this.format];
+            this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__["a" /* TEXTURE_FORMAT_DEFAULTS */][this.type][this.format];
         }
 
         // -1 indicates unbound
@@ -921,13 +918,13 @@ class Texture {
 
         // Sampling parameters
         let {
-            minFilter = image ? CONSTANTS.LINEAR_MIPMAP_NEAREST : CONSTANTS.NEAREST,
-            magFilter = image ? CONSTANTS.LINEAR : CONSTANTS.NEAREST,
-            wrapS = CONSTANTS.REPEAT,
-            wrapT = CONSTANTS.REPEAT,
-            wrapR = CONSTANTS.REPEAT,
-            compareMode = CONSTANTS.NONE,
-            compareFunc = CONSTANTS.LEQUAL,
+            minFilter = image ? __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].LINEAR_MIPMAP_NEAREST : __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].NEAREST,
+            magFilter = image ? __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].LINEAR : __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].NEAREST,
+            wrapS = __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].REPEAT,
+            wrapT = __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].REPEAT,
+            wrapR = __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].REPEAT,
+            compareMode = __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].NONE,
+            compareFunc = __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].LEQUAL,
             minLOD = null,
             maxLOD = null,
             baseLevel = null,
@@ -949,7 +946,7 @@ class Texture {
         this.maxLevel = maxLevel;
         this.flipY = flipY;
         this.premultiplyAlpha = premultiplyAlpha;
-        this.mipmaps = (minFilter === CONSTANTS.LINEAR_MIPMAP_NEAREST || minFilter === CONSTANTS.LINEAR_MIPMAP_LINEAR);
+        this.mipmaps = (minFilter === __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].LINEAR_MIPMAP_NEAREST || minFilter === __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].LINEAR_MIPMAP_LINEAR);
 
         this.restore(image);
     }
@@ -1002,27 +999,27 @@ class Texture {
         this.height = height;
         this.depth = depth;
 
-        this.gl.texParameteri(this.binding, CONSTANTS.TEXTURE_MIN_FILTER, this.minFilter);
-        this.gl.texParameteri(this.binding, CONSTANTS.TEXTURE_MAG_FILTER, this.magFilter);
-        this.gl.texParameteri(this.binding, CONSTANTS.TEXTURE_WRAP_S, this.wrapS);
-        this.gl.texParameteri(this.binding, CONSTANTS.TEXTURE_WRAP_T, this.wrapT);
-        this.gl.texParameteri(this.binding, CONSTANTS.TEXTURE_WRAP_R, this.wrapR);
-        this.gl.texParameteri(this.binding, CONSTANTS.TEXTURE_COMPARE_FUNC, this.compareFunc);
-        this.gl.texParameteri(this.binding, CONSTANTS.TEXTURE_COMPARE_MODE, this.compareMode);
-        this.gl.pixelStorei(CONSTANTS.UNPACK_FLIP_Y_WEBGL, this.flipY);
-        this.gl.pixelStorei(CONSTANTS.UNPACK_PREMULTIPLY_ALPHA_WEBGL, this.premultiplyAlpha);
+        this.gl.texParameteri(this.binding, __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].TEXTURE_MIN_FILTER, this.minFilter);
+        this.gl.texParameteri(this.binding, __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].TEXTURE_MAG_FILTER, this.magFilter);
+        this.gl.texParameteri(this.binding, __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].TEXTURE_WRAP_S, this.wrapS);
+        this.gl.texParameteri(this.binding, __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].TEXTURE_WRAP_T, this.wrapT);
+        this.gl.texParameteri(this.binding, __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].TEXTURE_WRAP_R, this.wrapR);
+        this.gl.texParameteri(this.binding, __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].TEXTURE_COMPARE_FUNC, this.compareFunc);
+        this.gl.texParameteri(this.binding, __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].TEXTURE_COMPARE_MODE, this.compareMode);
+        this.gl.pixelStorei(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNPACK_FLIP_Y_WEBGL, this.flipY);
+        this.gl.pixelStorei(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNPACK_PREMULTIPLY_ALPHA_WEBGL, this.premultiplyAlpha);
         if (this.minLOD !== null) {
-            this.gl.texParameterf(this.binding, CONSTANTS.TEXTURE_MIN_LOD, this.minLOD);
+            this.gl.texParameterf(this.binding, __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].TEXTURE_MIN_LOD, this.minLOD);
         }
         if (this.maxLOD !== null) {
-            this.gl.texParameterf(this.binding, CONSTANTS.TEXTURE_MAX_LOD, this.maxLOD);
+            this.gl.texParameterf(this.binding, __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].TEXTURE_MAX_LOD, this.maxLOD);
         }
         if (this.baseLevel !== null) {
-            this.gl.texParameteri(this.binding, CONSTANTS.TEXTURE_BASE_LEVEL, this.baseLevel);
+            this.gl.texParameteri(this.binding, __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].TEXTURE_BASE_LEVEL, this.baseLevel);
         }
 
         if (this.maxLevel !== null) {
-            this.gl.texParameteri(this.binding, CONSTANTS.TEXTURE_MAX_LEVEL, this.maxLevel);
+            this.gl.texParameteri(this.binding, __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].TEXTURE_MAX_LEVEL, this.maxLevel);
         }
 
         let levels;
@@ -1147,7 +1144,7 @@ class Texture {
                 this.appState.textures[this.currentUnit] = null;
             }
 
-            this.gl.activeTexture(CONSTANTS.TEXTURE0 + unit);
+            this.gl.activeTexture(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].TEXTURE0 + unit);
             this.gl.bindTexture(this.binding, this.texture);
 
             this.appState.textures[unit] = this;
@@ -1158,15 +1155,16 @@ class Texture {
     }
 
 }
+/* harmony export (immutable) */ __webpack_exports__["a"] = Texture;
 
-module.exports = Texture;
 
 
 /***/ }),
 /* 3 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constants__ = __webpack_require__(0);
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -1191,8 +1189,6 @@ module.exports = Texture;
 ///////////////////////////////////////////////////////////////////////////////////
 
 
-
-const CONSTANTS = __webpack_require__(0);
 
 /**
     Offscreen drawing attachment.
@@ -1240,9 +1236,9 @@ class Renderbuffer {
     resize(width, height) {
         this.width = width;
         this.height = height;
-        this.gl.bindRenderbuffer(CONSTANTS.RENDERBUFFER, this.renderbuffer);
-        this.gl.renderbufferStorageMultisample(CONSTANTS.RENDERBUFFER, this.samples, this.internalFormat, this.width, this.height);
-        this.gl.bindRenderbuffer(CONSTANTS.RENDERBUFFER, null);
+        this.gl.bindRenderbuffer(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].RENDERBUFFER, this.renderbuffer);
+        this.gl.renderbufferStorageMultisample(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].RENDERBUFFER, this.samples, this.internalFormat, this.width, this.height);
+        this.gl.bindRenderbuffer(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].RENDERBUFFER, null);
         
         return this;
     }
@@ -1260,14 +1256,16 @@ class Renderbuffer {
         return this;
     }   
 }
+/* harmony export (immutable) */ __webpack_exports__["a"] = Renderbuffer;
 
-module.exports = Renderbuffer;
+
 
 /***/ }),
 /* 4 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constants__ = __webpack_require__(0);
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -1292,8 +1290,6 @@ module.exports = Renderbuffer;
 ///////////////////////////////////////////////////////////////////////////////////
 
 
-
-const CONSTANTS = __webpack_require__(0);
 
 /**
     WebGL shader.
@@ -1324,7 +1320,7 @@ class Shader {
         this.gl.shaderSource(this.shader, source);
         this.gl.compileShader(this.shader);
 
-        if (!this.gl.getShaderParameter(this.shader, CONSTANTS.COMPILE_STATUS)) {
+        if (!this.gl.getShaderParameter(this.shader, __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].COMPILE_STATUS)) {
             let i, lines;
 
             console.error(this.gl.getShaderInfoLog(this.shader));
@@ -1353,13 +1349,13 @@ class Shader {
     }
 
 }
+/* harmony export (immutable) */ __webpack_exports__["a"] = Shader;
 
-module.exports = Shader;
 
 
 /***/ }),
 /* 5 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 ///////////////////////////////////////////////////////////////////////////////////
@@ -1384,8 +1380,6 @@ module.exports = Shader;
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
-
-
 
 /**
     Generic query object.
@@ -1487,15 +1481,18 @@ class Query {
     }
 
 }
+/* harmony export (immutable) */ __webpack_exports__["a"] = Query;
 
-module.exports = Query;
 
 
 /***/ }),
 /* 6 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constants__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__app__ = __webpack_require__(7);
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -1519,11 +1516,10 @@ module.exports = Query;
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-
-
 let webglInfoInitialized = false;
 
-const App = __webpack_require__(7);
+
+
 
 /**
     Global PicoGL module. For convenience, all WebGL enums are stored
@@ -1531,37 +1527,57 @@ const App = __webpack_require__(7);
 
     @namespace PicoGL
 */
-const PicoGL = __webpack_require__(0);
-PicoGL.version = "0.10.0";
+const PicoGL = Object.assign({ 
+    version: "0.10.1",
 
-/**
-    Create a PicoGL app. The app is the primary entry point to PicoGL. It stores
-    the canvas, the WebGL context and all WebGL state.
+    /**
+        Create a PicoGL app. The app is the primary entry point to PicoGL. It stores
+        the canvas, the WebGL context and all WebGL state.
 
-    @function PicoGL.createApp
-    @param {DOMElement} canvas The canvas on which to create the WebGL context.
-    @param {Object} [contextAttributes] Context attributes to pass when calling getContext().
-    @return {App} New App object.
-*/
-PicoGL.createApp = function(canvas, contextAttributes) {
-    let gl = canvas.getContext("webgl2", contextAttributes);
-    if (!webglInfoInitialized) {
-        PicoGL.WEBGL_INFO.MAX_TEXTURE_UNITS = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
-        PicoGL.WEBGL_INFO.MAX_UNIFORM_BUFFERS = gl.getParameter(gl.MAX_UNIFORM_BUFFER_BINDINGS);
-        PicoGL.WEBGL_INFO.SAMPLES = gl.getParameter(gl.SAMPLES);
-        webglInfoInitialized = true;      
+        @function PicoGL.createApp
+        @param {DOMElement} canvas The canvas on which to create the WebGL context.
+        @param {Object} [contextAttributes] Context attributes to pass when calling getContext().
+        @return {App} New App object.
+    */
+    createApp(canvas, contextAttributes) {
+        let gl = canvas.getContext("webgl2", contextAttributes);
+        if (!webglInfoInitialized) {
+            PicoGL.WEBGL_INFO.MAX_TEXTURE_UNITS = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
+            PicoGL.WEBGL_INFO.MAX_UNIFORM_BUFFERS = gl.getParameter(gl.MAX_UNIFORM_BUFFER_BINDINGS);
+            PicoGL.WEBGL_INFO.MAX_UNIFORMS = Math.min(
+                gl.getParameter(gl.MAX_VERTEX_UNIFORM_VECTORS),
+                gl.getParameter(gl.MAX_FRAGMENT_UNIFORM_VECTORS)
+            );
+            PicoGL.WEBGL_INFO.SAMPLES = gl.getParameter(gl.SAMPLES);
+            webglInfoInitialized = true;      
+        }
+        return new __WEBPACK_IMPORTED_MODULE_1__app__["a" /* App */](gl, canvas);
     }
-    return new App(gl, canvas);
-};
-    
-module.exports = PicoGL;
+}, __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */]);
+/* harmony export (immutable) */ __webpack_exports__["PicoGL"] = PicoGL;
+
 
 
 /***/ }),
 /* 7 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constants__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__cubemap__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__draw_call__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__framebuffer__ = __webpack_require__(10);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__renderbuffer__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__program__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__shader__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__texture__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__timer__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__transform_feedback__ = __webpack_require__(14);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__uniform_buffer__ = __webpack_require__(15);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__vertex_array__ = __webpack_require__(16);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__vertex_buffer__ = __webpack_require__(17);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__query__ = __webpack_require__(5);
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -1587,21 +1603,19 @@ module.exports = PicoGL;
 
 
 
-const CONSTANTS               = __webpack_require__(0);
-const TEXTURE_FORMAT_DEFAULTS = __webpack_require__(1);
-const Cubemap                 = __webpack_require__(8);
-const DrawCall                = __webpack_require__(9);
-const Framebuffer             = __webpack_require__(10);
-const Renderbuffer            = __webpack_require__(3);
-const Program                 = __webpack_require__(11);
-const Shader                  = __webpack_require__(4);
-const Texture                 = __webpack_require__(2);
-const Timer                   = __webpack_require__(13);
-const TransformFeedback       = __webpack_require__(14);
-const UniformBuffer           = __webpack_require__(15);
-const VertexArray             = __webpack_require__(16);
-const VertexBuffer            = __webpack_require__(17);
-const Query                   = __webpack_require__(5);
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /**
     Primary entry point to PicoGL. An app will store all parts of the WebGL
@@ -1641,8 +1655,8 @@ class App {
             vertexArray: null,
             transformFeedback: null,
             activeTexture: -1,
-            textures: new Array(CONSTANTS.WEBGL_INFO.MAX_TEXTURE_UNITS),
-            uniformBuffers: new Array(CONSTANTS.WEBGL_INFO.MAX_UNIFORM_BUFFERS),
+            textures: new Array(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].WEBGL_INFO.MAX_TEXTURE_UNITS),
+            uniformBuffers: new Array(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].WEBGL_INFO.MAX_UNIFORM_BUFFERS),
             freeUniformBufferBases: [],
             drawFramebuffer: null,
             readFramebuffer: null
@@ -1857,7 +1871,7 @@ class App {
         @param {number} [options.filter=NEAREST] Sampling filter. 
         @return {App} The App object.
     */  
-    blitFramebuffer(mask, options = CONSTANTS.DUMMY_OBJECT) {
+    blitFramebuffer(mask, options = __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].DUMMY_OBJECT) {
         let readFramebuffer = this.state.readFramebuffer;
         let drawFramebuffer = this.state.drawFramebuffer;
         let defaultReadWidth = readFramebuffer ? readFramebuffer.width : this.width;
@@ -1874,7 +1888,7 @@ class App {
             dstStartY = 0,
             dstEndX = defaultDrawWidth,
             dstEndY = defaultDrawHeight,
-            filter = CONSTANTS.NEAREST
+            filter = __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].NEAREST
         } = options;
 
         this.gl.blitFramebuffer(srcStartX, srcStartY, srcEndX, srcEndY, dstStartX, dstStartY, dstEndX, dstEndY, mask, filter);
@@ -2273,20 +2287,20 @@ class App {
         this.s3tcTexturesEnabled = !!ext;
         
         if (this.s3tcTexturesEnabled) {
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_RGB_S3TC_DXT1_EXT]  = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_RGBA_S3TC_DXT1_EXT] = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_RGBA_S3TC_DXT3_EXT] = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_RGBA_S3TC_DXT5_EXT] = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].COMPRESSED_RGB_S3TC_DXT1_EXT]  = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].COMPRESSED_RGBA_S3TC_DXT1_EXT] = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].COMPRESSED_RGBA_S3TC_DXT3_EXT] = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].COMPRESSED_RGBA_S3TC_DXT5_EXT] = true;
         }
 
         ext = this.gl.getExtension("WEBGL_compressed_texture_s3tc_srgb");
         this.s3tcSRGBTexturesEnabled = !!ext;
         
         if (this.s3tcSRGBTexturesEnabled) {
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_SRGB_S3TC_DXT1_EXT]       = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT] = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT] = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT] = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].COMPRESSED_SRGB_S3TC_DXT1_EXT]       = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT] = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT] = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT] = true;
         }
 
         return this;
@@ -2320,16 +2334,16 @@ class App {
         this.etcTexturesEnabled = !!ext;
 
         if (this.etcTexturesEnabled) {
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_R11_EAC]                        = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_SIGNED_R11_EAC]                 = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_RG11_EAC]                       = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_SIGNED_RG11_EAC]                = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_RGB8_ETC2]                      = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_SRGB8_ETC2]                     = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2]  = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2] = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_RGBA8_ETC2_EAC]                 = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ETC2_EAC]          = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].COMPRESSED_R11_EAC]                        = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].COMPRESSED_SIGNED_R11_EAC]                 = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].COMPRESSED_RG11_EAC]                       = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].COMPRESSED_SIGNED_RG11_EAC]                = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].COMPRESSED_RGB8_ETC2]                      = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].COMPRESSED_SRGB8_ETC2]                     = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2]  = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2] = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].COMPRESSED_RGBA8_ETC2_EAC]                 = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].COMPRESSED_SRGB8_ALPHA8_ETC2_EAC]          = true;
         }
 
         return this;
@@ -2378,34 +2392,34 @@ class App {
         this.astcTexturesEnabled = !!ext;
 
         if (this.astcTexturesEnabled) {
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_RGBA_ASTC_4x4_KHR]           = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_RGBA_ASTC_5x4_KHR]           = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_RGBA_ASTC_5x5_KHR]           = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_RGBA_ASTC_6x5_KHR]           = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_RGBA_ASTC_6x6_KHR]           = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_RGBA_ASTC_8x5_KHR]           = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_RGBA_ASTC_8x6_KHR]           = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_RGBA_ASTC_8x8_KHR]           = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_RGBA_ASTC_10x5_KHR]          = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_RGBA_ASTC_10x6_KHR]          = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_RGBA_ASTC_10x8_KHR]          = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_RGBA_ASTC_10x10_KHR]         = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_RGBA_ASTC_12x10_KHR]         = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_RGBA_ASTC_12x12_KHR]         = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR]   = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR]   = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR]   = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR]   = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR]   = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR]   = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR]   = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR]   = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR]  = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR]  = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR]  = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR] = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR] = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR] = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].COMPRESSED_RGBA_ASTC_4x4_KHR]           = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].COMPRESSED_RGBA_ASTC_5x4_KHR]           = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].COMPRESSED_RGBA_ASTC_5x5_KHR]           = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].COMPRESSED_RGBA_ASTC_6x5_KHR]           = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].COMPRESSED_RGBA_ASTC_6x6_KHR]           = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].COMPRESSED_RGBA_ASTC_8x5_KHR]           = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].COMPRESSED_RGBA_ASTC_8x6_KHR]           = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].COMPRESSED_RGBA_ASTC_8x8_KHR]           = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].COMPRESSED_RGBA_ASTC_10x5_KHR]          = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].COMPRESSED_RGBA_ASTC_10x6_KHR]          = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].COMPRESSED_RGBA_ASTC_10x8_KHR]          = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].COMPRESSED_RGBA_ASTC_10x10_KHR]         = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].COMPRESSED_RGBA_ASTC_12x10_KHR]         = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].COMPRESSED_RGBA_ASTC_12x12_KHR]         = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR]   = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR]   = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR]   = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR]   = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR]   = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR]   = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR]   = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR]   = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR]  = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR]  = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR]  = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR] = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR] = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR] = true;
         }
         
         return this;
@@ -2430,10 +2444,10 @@ class App {
         this.pvrtcTexturesEnabled = !!ext;
         
         if (this.pvrtcTexturesEnabled) {
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_RGB_PVRTC_4BPPV1_IMG] = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_RGB_PVRTC_2BPPV1_IMG] = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_RGBA_PVRTC_4BPPV1_IMG] = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_RGBA_PVRTC_2BPPV1_IMG] = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].COMPRESSED_RGB_PVRTC_4BPPV1_IMG] = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].COMPRESSED_RGB_PVRTC_2BPPV1_IMG] = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].COMPRESSED_RGBA_PVRTC_4BPPV1_IMG] = true;
+            __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__["a" /* TEXTURE_FORMAT_DEFAULTS */].COMPRESSED_TYPES[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].COMPRESSED_RGBA_PVRTC_2BPPV1_IMG] = true;
         }
 
         return this;
@@ -2451,10 +2465,10 @@ class App {
         @param {GLEnum} [options.format=RGBA] Read framebuffer data format.
         @return {App} The App object.
     */
-    readPixel(x, y, outColor, options = CONSTANTS.DUMMY_OBJECT) {
+    readPixel(x, y, outColor, options = __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].DUMMY_OBJECT) {
         let {
-            format = CONSTANTS.RGBA,
-            type = CONSTANTS.UNSIGNED_BYTE    
+            format = __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].RGBA,
+            type = __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNSIGNED_BYTE    
         } = options;
         
         this.gl.readPixels(x, y, 1, 1, format, type, outColor);
@@ -2526,7 +2540,7 @@ class App {
         @return {Program} New Program object.
     */
     createProgram(vsSource, fsSource, xformFeedbackVars) {
-        return new Program(this.gl, this.state, vsSource, fsSource, xformFeedbackVars);
+        return new __WEBPACK_IMPORTED_MODULE_6__program__["a" /* Program */](this.gl, this.state, vsSource, fsSource, xformFeedbackVars);
     }
 
     /**
@@ -2539,7 +2553,7 @@ class App {
         @return {Shader} New Shader object.
     */
     createShader(type, source) {
-        return new Shader(this.gl, type, source);
+        return new __WEBPACK_IMPORTED_MODULE_7__shader__["a" /* Shader */](this.gl, type, source);
     }
 
     /**
@@ -2549,7 +2563,7 @@ class App {
         @return {VertexArray} New VertexArray object.
     */
     createVertexArray(numElements = 0, numInstances = 0) {
-        return new VertexArray(this.gl, this.state, numElements, numInstances);
+        return new __WEBPACK_IMPORTED_MODULE_12__vertex_array__["a" /* VertexArray */](this.gl, this.state, numElements, numInstances);
     }
 
     /**
@@ -2559,7 +2573,7 @@ class App {
         @return {TransformFeedback} New TransformFeedback object.
     */
     createTransformFeedback() {
-        return new TransformFeedback(this.gl, this.state);
+        return new __WEBPACK_IMPORTED_MODULE_10__transform_feedback__["a" /* TransformFeedback */](this.gl, this.state);
     }
 
     /**
@@ -2574,7 +2588,7 @@ class App {
         @return {VertexBuffer} New VertexBuffer object.
     */
     createVertexBuffer(type, itemSize, data, usage) {
-        return new VertexBuffer(this.gl, this.state, type, itemSize, data, usage);
+        return new __WEBPACK_IMPORTED_MODULE_13__vertex_buffer__["a" /* VertexBuffer */](this.gl, this.state, type, itemSize, data, usage);
     }
 
     /**
@@ -2590,7 +2604,7 @@ class App {
         @return {VertexBuffer} New VertexBuffer object.
     */
     createMatrixBuffer(type, data, usage) {
-        return new VertexBuffer(this.gl, this.state, type, 0, data, usage);
+        return new __WEBPACK_IMPORTED_MODULE_13__vertex_buffer__["a" /* VertexBuffer */](this.gl, this.state, type, 0, data, usage);
     }
 
     /**
@@ -2604,7 +2618,7 @@ class App {
         @return {VertexBuffer} New VertexBuffer object.
     */
     createIndexBuffer(type, itemSize, data, usage) {
-        return new VertexBuffer(this.gl, this.state, type, itemSize, data, usage, true);
+        return new __WEBPACK_IMPORTED_MODULE_13__vertex_buffer__["a" /* VertexBuffer */](this.gl, this.state, type, itemSize, data, usage, true);
     }
 
     /**
@@ -2619,7 +2633,7 @@ class App {
         @return {UniformBuffer} New UniformBuffer object.
     */
     createUniformBuffer(layout, usage) {
-        return new UniformBuffer(this.gl, this.state, layout, usage);
+        return new __WEBPACK_IMPORTED_MODULE_11__uniform_buffer__["a" /* UniformBuffer */](this.gl, this.state, layout, usage);
     }
 
     /**
@@ -2655,8 +2669,6 @@ class App {
         @param {GLEnum} [options.maxLevel] Maximum mipmap level.
         @param {GLEnum} [options.minLOD] Mimimum level of detail.
         @param {GLEnum} [options.maxLOD] Maximum level of detail.
-        @param {boolean} [options.generateMipmaps] Should mipmaps be generated. Defaults to generating mipmaps if
-            a mipmap sampling filter is used and the mipmap levels aren't provided directly.
         @return {Texture} New Texture object.
     */
     createTexture2D(image, width, height, options) {
@@ -2673,7 +2685,7 @@ class App {
             height = image.height;
         }
 
-        return new Texture(this.gl, this.state, this.gl.TEXTURE_2D, image, width, height, undefined, false, options);
+        return new __WEBPACK_IMPORTED_MODULE_8__texture__["a" /* Texture */](this.gl, this.state, this.gl.TEXTURE_2D, image, width, height, undefined, false, options);
     }
 
     /**
@@ -2705,8 +2717,6 @@ class App {
         @param {GLEnum} [options.maxLevel] Maximum mipmap level.
         @param {GLEnum} [options.minLOD] Mimimum level of detail.
         @param {GLEnum} [options.maxLOD] Maximum level of detail.
-        @param {boolean} [options.generateMipmaps] Should mipmaps be generated. Defaults to generating mipmaps if
-            a mipmap sampling filter is use and the mipmap levels aren't provided directly.
         @return {Texture} New Texture object.
     */
     createTextureArray(image, width, height, depth, options) {
@@ -2718,7 +2728,7 @@ class App {
             width = image;
             image = null;    
         }
-        return new Texture(this.gl, this.state, this.gl.TEXTURE_2D_ARRAY, image, width, height, depth, true, options);
+        return new __WEBPACK_IMPORTED_MODULE_8__texture__["a" /* Texture */](this.gl, this.state, this.gl.TEXTURE_2D_ARRAY, image, width, height, depth, true, options);
     }
 
     /**
@@ -2750,8 +2760,6 @@ class App {
         @param {GLEnum} [options.maxLevel] Maximum mipmap level.
         @param {GLEnum} [options.minLOD] Mimimum level of detail.
         @param {GLEnum} [options.maxLOD] Maximum level of detail.
-        @param {boolean} [options.generateMipmaps] Should mipmaps be generated. Defaults to generating mipmaps if
-            a mipmap sampling filter is use and the mipmap levels aren't provided directly.
         @return {Texture} New Texture object.
     */
     createTexture3D(image, width, height, depth, options) {
@@ -2763,7 +2771,7 @@ class App {
             width = image;
             image = null;    
         }
-        return new Texture(this.gl, this.state, this.gl.TEXTURE_3D, image, width, height, depth, true, options);
+        return new __WEBPACK_IMPORTED_MODULE_8__texture__["a" /* Texture */](this.gl, this.state, this.gl.TEXTURE_3D, image, width, height, depth, true, options);
     }
 
     /**
@@ -2803,12 +2811,10 @@ class App {
         @param {GLEnum} [options.maxLevel] Maximum mipmap level.
         @param {GLEnum} [options.minLOD] Mimimum level of detail.
         @param {GLEnum} [options.maxLOD] Maximum level of detail.
-        @param {boolean} [options.generateMipmaps] Should mipmaps be generated. Defaults to generating mipmaps if
-            a mipmap sampling filter is usedd.
         @return {Cubemap} New Cubemap object.
     */
     createCubemap(options) {
-        return new Cubemap(this.gl, this.state, options);
+        return new __WEBPACK_IMPORTED_MODULE_2__cubemap__["a" /* Cubemap */](this.gl, this.state, options);
     }
 
     /**
@@ -2822,7 +2828,7 @@ class App {
         @return {Renderbuffer} New Renderbuffer object.
     */
     createRenderbuffer(width, height, internalFormat, samples = 0) {
-        return new Renderbuffer(this.gl, width, height, internalFormat, samples);
+        return new __WEBPACK_IMPORTED_MODULE_5__renderbuffer__["a" /* Renderbuffer */](this.gl, width, height, internalFormat, samples);
     }
 
     /**
@@ -2832,7 +2838,7 @@ class App {
         @return {Framebuffer} New Framebuffer object.
     */
     createFramebuffer() {
-        return new Framebuffer(this.gl, this.state);
+        return new __WEBPACK_IMPORTED_MODULE_4__framebuffer__["a" /* Framebuffer */](this.gl, this.state);
     }
 
     /**
@@ -2843,7 +2849,7 @@ class App {
         @return {Query} New Query object.
     */
     createQuery(target) {
-        return new Query(this.gl, target);
+        return new __WEBPACK_IMPORTED_MODULE_14__query__["a" /* Query */](this.gl, target);
     }
 
     /**
@@ -2853,7 +2859,7 @@ class App {
         @return {Timer} New Timer object.
     */
     createTimer() {
-        return new Timer(this.gl);
+        return new __WEBPACK_IMPORTED_MODULE_9__timer__["a" /* Timer */](this.gl);
     }
 
     /**
@@ -2868,19 +2874,21 @@ class App {
         @return {DrawCall} New DrawCall object.
     */
     createDrawCall(program, vertexArray, primitive) {
-        return new DrawCall(this.gl, this.state, program, vertexArray, primitive);
+        return new __WEBPACK_IMPORTED_MODULE_3__draw_call__["a" /* DrawCall */](this.gl, this.state, program, vertexArray, primitive);
     }
 
 }
+/* harmony export (immutable) */ __webpack_exports__["a"] = App;
 
-module.exports = App;
 
 
 /***/ }),
 /* 8 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constants__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__ = __webpack_require__(1);
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -2906,8 +2914,6 @@ module.exports = App;
 
 
 
-const CONSTANTS = __webpack_require__(0);
-const TEXTURE_FORMAT_DEFAULTS = __webpack_require__(1);
 
 /**
     Cubemap for environment mapping.
@@ -2926,13 +2932,13 @@ const TEXTURE_FORMAT_DEFAULTS = __webpack_require__(1);
 class Cubemap {
 
     constructor(gl, appState, options) {
-        let defaultType = options.format === CONSTANTS.DEPTH_COMPONENT ? CONSTANTS.UNSIGNED_SHORT : CONSTANTS.UNSIGNED_BYTE;
+        let defaultType = options.format === __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].DEPTH_COMPONENT ? __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNSIGNED_SHORT : __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNSIGNED_BYTE;
 
         this.gl = gl;
         this.texture = null;
-        this.format = options.format !== undefined ? options.format : CONSTANTS.RGBA;
+        this.format = options.format !== undefined ? options.format : __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].RGBA;
         this.type = options.type !== undefined ? options.type : defaultType;
-        this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : TEXTURE_FORMAT_DEFAULTS[this.type][this.format];
+        this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : __WEBPACK_IMPORTED_MODULE_1__texture_format_defaults__["a" /* TEXTURE_FORMAT_DEFAULTS */][this.type][this.format];
         this.appState = appState;
         
         // -1 indicates unbound
@@ -2944,12 +2950,12 @@ class Cubemap {
             height = negX.height,
             flipY = false,
             premultiplyAlpha = false,
-            minFilter = negX ? CONSTANTS.LINEAR_MIPMAP_NEAREST : CONSTANTS.NEAREST,
-            magFilter = negX ? CONSTANTS.LINEAR : CONSTANTS.NEAREST,
-            wrapS = CONSTANTS.REPEAT,
-            wrapT = CONSTANTS.REPEAT,
-            compareMode = CONSTANTS.NONE,
-            compareFunc = CONSTANTS.LEQUAL,
+            minFilter = negX ? __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].LINEAR_MIPMAP_NEAREST : __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].NEAREST,
+            magFilter = negX ? __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].LINEAR : __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].NEAREST,
+            wrapS = __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].REPEAT,
+            wrapT = __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].REPEAT,
+            compareMode = __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].NONE,
+            compareFunc = __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].LEQUAL,
             minLOD = null,
             maxLOD = null,
             baseLevel = null,
@@ -2970,7 +2976,7 @@ class Cubemap {
         this.maxLOD = maxLOD;
         this.baseLevel = baseLevel;
         this.maxLevel = maxLevel;
-        this.mipmaps = (minFilter === CONSTANTS.LINEAR_MIPMAP_NEAREST || minFilter === CONSTANTS.LINEAR_MIPMAP_LINEAR);
+        this.mipmaps = (minFilter === __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].LINEAR_MIPMAP_NEAREST || minFilter === __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].LINEAR_MIPMAP_LINEAR);
         this.levels = this.mipmaps ? Math.floor(Math.log2(Math.min(this.width, this.height))) + 1 : 1;
 
         this.restore(options);
@@ -2995,7 +3001,7 @@ class Cubemap {
                 Can be any format that would be accepted by texImage2D.
         @return {Cubemap} The Cubemap object.
     */
-    restore(options = CONSTANTS.DUMMY_OBJECT) {
+    restore(options = __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].DUMMY_OBJECT) {
         this.texture = this.gl.createTexture();
 
         if (this.currentUnit !== -1) {
@@ -3003,42 +3009,42 @@ class Cubemap {
         }
 
         this.bind(0);
-        this.gl.pixelStorei(CONSTANTS.UNPACK_FLIP_Y_WEBGL, this.flipY);
-        this.gl.pixelStorei(CONSTANTS.UNPACK_PREMULTIPLY_ALPHA_WEBGL, this.premultiplyAlpha);
-        this.gl.texParameteri(CONSTANTS.TEXTURE_CUBE_MAP, CONSTANTS.TEXTURE_MAG_FILTER, this.magFilter);
-        this.gl.texParameteri(CONSTANTS.TEXTURE_CUBE_MAP, CONSTANTS.TEXTURE_MIN_FILTER, this.minFilter);
-        this.gl.texParameteri(CONSTANTS.TEXTURE_CUBE_MAP, CONSTANTS.TEXTURE_WRAP_S, this.wrapS);
-        this.gl.texParameteri(CONSTANTS.TEXTURE_CUBE_MAP, CONSTANTS.TEXTURE_WRAP_T, this.wrapT);
-        this.gl.texParameteri(CONSTANTS.TEXTURE_CUBE_MAP, CONSTANTS.TEXTURE_COMPARE_FUNC, this.compareFunc);
-        this.gl.texParameteri(CONSTANTS.TEXTURE_CUBE_MAP, CONSTANTS.TEXTURE_COMPARE_MODE, this.compareMode);
+        this.gl.pixelStorei(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNPACK_FLIP_Y_WEBGL, this.flipY);
+        this.gl.pixelStorei(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNPACK_PREMULTIPLY_ALPHA_WEBGL, this.premultiplyAlpha);
+        this.gl.texParameteri(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].TEXTURE_CUBE_MAP, __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].TEXTURE_MAG_FILTER, this.magFilter);
+        this.gl.texParameteri(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].TEXTURE_CUBE_MAP, __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].TEXTURE_MIN_FILTER, this.minFilter);
+        this.gl.texParameteri(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].TEXTURE_CUBE_MAP, __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].TEXTURE_WRAP_S, this.wrapS);
+        this.gl.texParameteri(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].TEXTURE_CUBE_MAP, __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].TEXTURE_WRAP_T, this.wrapT);
+        this.gl.texParameteri(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].TEXTURE_CUBE_MAP, __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].TEXTURE_COMPARE_FUNC, this.compareFunc);
+        this.gl.texParameteri(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].TEXTURE_CUBE_MAP, __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].TEXTURE_COMPARE_MODE, this.compareMode);
         if (this.baseLevel !== null) {
-            this.gl.texParameteri(CONSTANTS.TEXTURE_CUBE_MAP, CONSTANTS.TEXTURE_BASE_LEVEL, this.baseLevel);
+            this.gl.texParameteri(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].TEXTURE_CUBE_MAP, __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].TEXTURE_BASE_LEVEL, this.baseLevel);
         }
         if (this.maxLevel !== null) {
-            this.gl.texParameteri(CONSTANTS.TEXTURE_CUBE_MAP, CONSTANTS.TEXTURE_MAX_LEVEL, this.maxLevel);
+            this.gl.texParameteri(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].TEXTURE_CUBE_MAP, __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].TEXTURE_MAX_LEVEL, this.maxLevel);
         }
         if (this.minLOD !== null) {
-            this.gl.texParameteri(CONSTANTS.TEXTURE_CUBE_MAP, CONSTANTS.TEXTURE_MIN_LOD, this.minLOD);
+            this.gl.texParameteri(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].TEXTURE_CUBE_MAP, __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].TEXTURE_MIN_LOD, this.minLOD);
         }
         if (this.maxLOD !== null) {
-            this.gl.texParameteri(CONSTANTS.TEXTURE_CUBE_MAP, CONSTANTS.TEXTURE_MAX_LOD, this.maxLOD);
+            this.gl.texParameteri(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].TEXTURE_CUBE_MAP, __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].TEXTURE_MAX_LOD, this.maxLOD);
         }
 
-        this.gl.texStorage2D(CONSTANTS.TEXTURE_CUBE_MAP, this.levels, this.internalFormat, this.width, this.height);
+        this.gl.texStorage2D(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].TEXTURE_CUBE_MAP, this.levels, this.internalFormat, this.width, this.height);
 
         let { negX, posX, negY, posY, negZ, posZ } = options;
 
         if (negX) {
-            this.gl.texSubImage2D(CONSTANTS.TEXTURE_CUBE_MAP_NEGATIVE_X, 0, 0, 0, this.width, this.height, this.format, this.type, negX);
-            this.gl.texSubImage2D(CONSTANTS.TEXTURE_CUBE_MAP_POSITIVE_X, 0, 0, 0, this.width, this.height, this.format, this.type, posX);
-            this.gl.texSubImage2D(CONSTANTS.TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, 0, 0, this.width, this.height, this.format, this.type, negY);
-            this.gl.texSubImage2D(CONSTANTS.TEXTURE_CUBE_MAP_POSITIVE_Y, 0, 0, 0, this.width, this.height, this.format, this.type, posY);
-            this.gl.texSubImage2D(CONSTANTS.TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, 0, 0, this.width, this.height, this.format, this.type, negZ);
-            this.gl.texSubImage2D(CONSTANTS.TEXTURE_CUBE_MAP_POSITIVE_Z, 0, 0, 0, this.width, this.height, this.format, this.type, posZ);
+            this.gl.texSubImage2D(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].TEXTURE_CUBE_MAP_NEGATIVE_X, 0, 0, 0, this.width, this.height, this.format, this.type, negX);
+            this.gl.texSubImage2D(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].TEXTURE_CUBE_MAP_POSITIVE_X, 0, 0, 0, this.width, this.height, this.format, this.type, posX);
+            this.gl.texSubImage2D(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, 0, 0, this.width, this.height, this.format, this.type, negY);
+            this.gl.texSubImage2D(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].TEXTURE_CUBE_MAP_POSITIVE_Y, 0, 0, 0, this.width, this.height, this.format, this.type, posY);
+            this.gl.texSubImage2D(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, 0, 0, this.width, this.height, this.format, this.type, negZ);
+            this.gl.texSubImage2D(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].TEXTURE_CUBE_MAP_POSITIVE_Z, 0, 0, 0, this.width, this.height, this.format, this.type, posZ);
         }
 
         if (this.mipmaps) {
-            this.gl.generateMipmap(CONSTANTS.TEXTURE_CUBE_MAP);
+            this.gl.generateMipmap(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].TEXTURE_CUBE_MAP);
         }
 
         return this;
@@ -3080,8 +3086,8 @@ class Cubemap {
                 this.appState.textures[this.currentUnit] = null;
             }
 
-            this.gl.activeTexture(CONSTANTS.TEXTURE0 + unit);
-            this.gl.bindTexture(CONSTANTS.TEXTURE_CUBE_MAP, this.texture);
+            this.gl.activeTexture(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].TEXTURE0 + unit);
+            this.gl.bindTexture(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].TEXTURE_CUBE_MAP, this.texture);
 
             this.appState.textures[unit] = this;
             this.currentUnit = unit;
@@ -3091,15 +3097,16 @@ class Cubemap {
     }
 
 }
+/* harmony export (immutable) */ __webpack_exports__["a"] = Cubemap;
 
-module.exports = Cubemap;
 
 
 /***/ }),
 /* 9 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constants__ = __webpack_require__(0);
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -3124,8 +3131,6 @@ module.exports = Cubemap;
 ///////////////////////////////////////////////////////////////////////////////////
 
 
-
-const CONSTANTS = __webpack_require__(0);
 
 /**
     A DrawCall represents the program and values of associated
@@ -3153,7 +3158,7 @@ const CONSTANTS = __webpack_require__(0);
 */
 class DrawCall {
 
-    constructor(gl, appState, program, vertexArray, primitive = CONSTANTS.TRIANGLES) {
+    constructor(gl, appState, program, vertexArray, primitive = __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].TRIANGLES) {
         this.gl = gl;
         this.currentProgram = program;
         this.currentVertexArray = vertexArray;
@@ -3161,15 +3166,15 @@ class DrawCall {
         this.appState = appState;
 
         this.uniformIndices = {};
-        this.uniformNames = new Array(CONSTANTS.WEBGL_INFO.MAX_UNIFORMS);
-        this.uniformValues = new Array(CONSTANTS.WEBGL_INFO.MAX_UNIFORMS);
+        this.uniformNames = new Array(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].WEBGL_INFO.MAX_UNIFORMS);
+        this.uniformValues = new Array(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].WEBGL_INFO.MAX_UNIFORMS);
         this.uniformCount = 0;
-        this.uniformBuffers = new Array(CONSTANTS.WEBGL_INFO.MAX_UNIFORM_BUFFERS);
-        this.uniformBlockNames = new Array(CONSTANTS.WEBGL_INFO.MAX_UNIFORM_BUFFERS);
+        this.uniformBuffers = new Array(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].WEBGL_INFO.MAX_UNIFORM_BUFFERS);
+        this.uniformBlockNames = new Array(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].WEBGL_INFO.MAX_UNIFORM_BUFFERS);
         this.uniformBlockBases = {};
         this.uniformBlockCount = 0;
         this.samplerIndices = {};
-        this.textures = new Array(CONSTANTS.WEBGL_INFO.MAX_TEXTURE_UNITS);
+        this.textures = new Array(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].WEBGL_INFO.MAX_TEXTURE_UNITS);
         this.textureCount = 0;
         this.primitive = primitive;
 
@@ -3335,15 +3340,18 @@ class DrawCall {
     }
 
 }
+/* harmony export (immutable) */ __webpack_exports__["a"] = DrawCall;
 
-module.exports = DrawCall;
 
 
 /***/ }),
 /* 10 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constants__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__texture__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__renderbuffer__ = __webpack_require__(3);
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -3369,9 +3377,7 @@ module.exports = DrawCall;
 
 
 
-const CONSTANTS = __webpack_require__(0);
-const Texture = __webpack_require__(2);
-const Renderbuffer = __webpack_require__(3);
+
 
 /**
     Offscreen drawing surface.
@@ -3436,7 +3442,7 @@ class Framebuffer {
             defaults to 0, otherwise to TEXTURE_2D. Ignored for renderbuffers.
         @return {Framebuffer} The Framebuffer object.
     */
-    colorTarget(index, attachment, target = attachment.is3D ? 0 : CONSTANTS.TEXTURE_2D) {
+    colorTarget(index, attachment, target = attachment.is3D ? 0 : __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].TEXTURE_2D) {
 
         if (index >= this.numColorTargets) {
             let numColorTargets = index + 1;
@@ -3445,7 +3451,7 @@ class Framebuffer {
             this.colorAttachmentTargets.length = numColorTargets;
 
             for (let i = this.numColorTargets; i < numColorTargets - 1; ++i) {
-                this.colorAttachmentEnums[i] = CONSTANTS.NONE;
+                this.colorAttachmentEnums[i] = __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].NONE;
                 this.colorAttachments[i] = null;
                 this.colorAttachmentTargets[i] = 0;
             }
@@ -3453,19 +3459,19 @@ class Framebuffer {
             this.numColorTargets = numColorTargets;
         }        
 
-        this.colorAttachmentEnums[index] = CONSTANTS.COLOR_ATTACHMENT0 + index;
+        this.colorAttachmentEnums[index] = __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].COLOR_ATTACHMENT0 + index;
         this.colorAttachments[index] = attachment;
         this.colorAttachmentTargets[index] = target;
 
         let currentFramebuffer = this.bindAndCaptureState();
 
 
-        if (attachment instanceof Renderbuffer) {
-            this.gl.framebufferRenderbuffer(CONSTANTS.DRAW_FRAMEBUFFER, this.colorAttachmentEnums[index], CONSTANTS.RENDERBUFFER, attachment.renderbuffer);
+        if (attachment instanceof __WEBPACK_IMPORTED_MODULE_2__renderbuffer__["a" /* Renderbuffer */]) {
+            this.gl.framebufferRenderbuffer(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].DRAW_FRAMEBUFFER, this.colorAttachmentEnums[index], __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].RENDERBUFFER, attachment.renderbuffer);
         } else if (attachment.is3D) {
-            this.gl.framebufferTextureLayer(CONSTANTS.DRAW_FRAMEBUFFER, this.colorAttachmentEnums[index], attachment.texture, 0, target);
+            this.gl.framebufferTextureLayer(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].DRAW_FRAMEBUFFER, this.colorAttachmentEnums[index], attachment.texture, 0, target);
         } else {
-            this.gl.framebufferTexture2D(CONSTANTS.DRAW_FRAMEBUFFER, this.colorAttachmentEnums[index], target, attachment.texture, 0);
+            this.gl.framebufferTexture2D(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].DRAW_FRAMEBUFFER, this.colorAttachmentEnums[index], target, attachment.texture, 0);
         }
 
         this.gl.drawBuffers(this.colorAttachmentEnums);
@@ -3487,19 +3493,19 @@ class Framebuffer {
             defaults to 0, otherwise to TEXTURE_2D. Ignored for renderbuffers.
         @return {Framebuffer} The Framebuffer object.
     */
-    depthTarget(attachment, target = attachment.is3D ? 0 : CONSTANTS.TEXTURE_2D) {
+    depthTarget(attachment, target = attachment.is3D ? 0 : __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].TEXTURE_2D) {
 
         let currentFramebuffer = this.bindAndCaptureState();
 
         this.depthAttachment = attachment;
         this.depthAttachmentTarget = target;
 
-        if (attachment instanceof Renderbuffer) {
-            this.gl.framebufferRenderbuffer(CONSTANTS.DRAW_FRAMEBUFFER, CONSTANTS.DEPTH_ATTACHMENT, CONSTANTS.RENDERBUFFER, attachment.renderbuffer);
+        if (attachment instanceof __WEBPACK_IMPORTED_MODULE_2__renderbuffer__["a" /* Renderbuffer */]) {
+            this.gl.framebufferRenderbuffer(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].DRAW_FRAMEBUFFER, __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].DEPTH_ATTACHMENT, __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].RENDERBUFFER, attachment.renderbuffer);
         } else if (attachment.is3D) {
-            this.gl.framebufferTextureLayer(CONSTANTS.DRAW_FRAMEBUFFER, CONSTANTS.DEPTH_ATTACHMENT, attachment.texture, 0, target);
+            this.gl.framebufferTextureLayer(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].DRAW_FRAMEBUFFER, __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].DEPTH_ATTACHMENT, attachment.texture, 0, target);
         } else {
-            this.gl.framebufferTexture2D(CONSTANTS.DRAW_FRAMEBUFFER, CONSTANTS.DEPTH_ATTACHMENT, target, attachment.texture, 0);
+            this.gl.framebufferTexture2D(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].DRAW_FRAMEBUFFER, __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].DEPTH_ATTACHMENT, target, attachment.texture, 0);
         }
 
         this.width = attachment.width;
@@ -3530,24 +3536,24 @@ class Framebuffer {
             }
 
             attachment.resize(width, height);
-            if (attachment instanceof Texture) {
+            if (attachment instanceof __WEBPACK_IMPORTED_MODULE_1__texture__["a" /* Texture */]) {
                 // Texture resizing recreates the texture object.
                 if (attachment.is3D) {
-                    this.gl.framebufferTextureLayer(CONSTANTS.DRAW_FRAMEBUFFER, this.colorAttachmentEnums[i], attachment.texture, 0, this.colorAttachmentTargets[i]);
+                    this.gl.framebufferTextureLayer(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].DRAW_FRAMEBUFFER, this.colorAttachmentEnums[i], attachment.texture, 0, this.colorAttachmentTargets[i]);
                 } else {
-                    this.gl.framebufferTexture2D(CONSTANTS.DRAW_FRAMEBUFFER, this.colorAttachmentEnums[i], this.colorAttachmentTargets[i], attachment.texture, 0);
+                    this.gl.framebufferTexture2D(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].DRAW_FRAMEBUFFER, this.colorAttachmentEnums[i], this.colorAttachmentTargets[i], attachment.texture, 0);
                 }
             }
         }
 
         if (this.depthAttachment) {
             this.depthAttachment.resize(width, height);
-            if (this.depthAttachment instanceof Texture) {
+            if (this.depthAttachment instanceof __WEBPACK_IMPORTED_MODULE_1__texture__["a" /* Texture */]) {
                 // Texture resizing recreates the texture object.
                 if (this.depthAttachment.is3D) {
-                    this.gl.framebufferTextureLayer(CONSTANTS.DRAW_FRAMEBUFFER, CONSTANTS.DEPTH_ATTACHMENT, this.depthAttachment.texture, 0, this.depthAttachmentTarget);
+                    this.gl.framebufferTextureLayer(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].DRAW_FRAMEBUFFER, __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].DEPTH_ATTACHMENT, this.depthAttachment.texture, 0, this.depthAttachmentTarget);
                 } else {
-                    this.gl.framebufferTexture2D(CONSTANTS.DRAW_FRAMEBUFFER, CONSTANTS.DEPTH_ATTACHMENT, this.depthAttachmentTarget, this.depthAttachment.texture, 0);
+                    this.gl.framebufferTexture2D(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].DRAW_FRAMEBUFFER, __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].DEPTH_ATTACHMENT, this.depthAttachmentTarget, this.depthAttachment.texture, 0);
                 }
             }
         }
@@ -3572,12 +3578,12 @@ class Framebuffer {
             this.framebuffer = null;
 
             if (this.appState.drawFramebuffer === this) {
-                this.gl.bindFramebuffer(CONSTANTS.DRAW_FRAMEBUFFER, null);
+                this.gl.bindFramebuffer(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].DRAW_FRAMEBUFFER, null);
                 this.appState.drawFramebuffer = null;
             }
 
             if (this.appState.readFramebuffer === this) {
-                this.gl.bindFramebuffer(CONSTANTS.READ_FRAMEBUFFER, null);
+                this.gl.bindFramebuffer(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].READ_FRAMEBUFFER, null);
                 this.appState.readFramebuffer = null;
             }
         }
@@ -3593,7 +3599,7 @@ class Framebuffer {
     */
     getStatus() {
         let currentFramebuffer = this.bindAndCaptureState();
-        let status = this.gl.checkFramebufferStatus(CONSTANTS.DRAW_FRAMEBUFFER);
+        let status = this.gl.checkFramebufferStatus(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].DRAW_FRAMEBUFFER);
         this.restoreState(currentFramebuffer);
 
         return status;
@@ -3608,7 +3614,7 @@ class Framebuffer {
     */
     bindForDraw() {
         if (this.appState.drawFramebuffer !== this) {
-            this.gl.bindFramebuffer(CONSTANTS.DRAW_FRAMEBUFFER, this.framebuffer);
+            this.gl.bindFramebuffer(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].DRAW_FRAMEBUFFER, this.framebuffer);
             this.appState.drawFramebuffer = this;
         }
 
@@ -3643,7 +3649,7 @@ class Framebuffer {
         let currentFramebuffer = this.appState.drawFramebuffer;
 
         if (currentFramebuffer !== this) {
-            this.gl.bindFramebuffer(CONSTANTS.DRAW_FRAMEBUFFER, this.framebuffer);
+            this.gl.bindFramebuffer(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].DRAW_FRAMEBUFFER, this.framebuffer);
         }
 
         return currentFramebuffer;
@@ -3658,7 +3664,7 @@ class Framebuffer {
     */
     restoreState(framebuffer) {
         if (framebuffer !== this) {
-            this.gl.bindFramebuffer(CONSTANTS.DRAW_FRAMEBUFFER, framebuffer ? framebuffer.framebuffer : null);
+            this.gl.bindFramebuffer(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].DRAW_FRAMEBUFFER, framebuffer ? framebuffer.framebuffer : null);
         }
 
         return this;
@@ -3676,15 +3682,18 @@ class Framebuffer {
     }
 
 }
+/* harmony export (immutable) */ __webpack_exports__["a"] = Framebuffer;
 
-module.exports = Framebuffer;
 
 
 /***/ }),
 /* 11 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constants__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__shader__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__uniforms__ = __webpack_require__(12);
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -3710,14 +3719,7 @@ module.exports = Framebuffer;
 
 
 
-const CONSTANTS = __webpack_require__(0);
-const Shader = __webpack_require__(4);
-const Uniforms =  __webpack_require__(12);
 
-const SingleComponentUniform = Uniforms.SingleComponentUniform;
-const MultiNumericUniform = Uniforms.MultiNumericUniform;
-const MultiBoolUniform = Uniforms.MultiBoolUniform;
-const MatrixUniform = Uniforms.MatrixUniform;
 
 /**
     WebGL program consisting of compiled and linked vertex and fragment
@@ -3770,14 +3772,14 @@ class Program {
         let ownVertexShader = false;
         let ownFragmentShader = false;
         if (typeof vsSource === "string") {
-            vShader = new Shader(this.gl, CONSTANTS.VERTEX_SHADER, vsSource);
+            vShader = new __WEBPACK_IMPORTED_MODULE_1__shader__["a" /* Shader */](this.gl, __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].VERTEX_SHADER, vsSource);
             ownVertexShader = true;
         } else {
             vShader = vsSource;
         }
 
         if (typeof fsSource === "string") {
-            fShader = new Shader(this.gl, CONSTANTS.FRAGMENT_SHADER, fsSource);
+            fShader = new __WEBPACK_IMPORTED_MODULE_1__shader__["a" /* Shader */](this.gl, __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FRAGMENT_SHADER, fsSource);
             ownFragmentShader = true;
         } else {
             fShader = fsSource;
@@ -3787,11 +3789,11 @@ class Program {
         this.gl.attachShader(program, vShader.shader);
         this.gl.attachShader(program, fShader.shader);
         if (this.transformFeedbackVaryings) {
-            this.gl.transformFeedbackVaryings(program, this.transformFeedbackVaryings, CONSTANTS.SEPARATE_ATTRIBS);
+            this.gl.transformFeedbackVaryings(program, this.transformFeedbackVaryings, __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].SEPARATE_ATTRIBS);
         }
         this.gl.linkProgram(program);
 
-        if (!this.gl.getProgramParameter(program, CONSTANTS.LINK_STATUS)) {
+        if (!this.gl.getProgramParameter(program, __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].LINK_STATUS)) {
             console.error(this.gl.getProgramInfoLog(program));
         }
 
@@ -3806,7 +3808,7 @@ class Program {
         this.program = program;
         this.bind();
 
-        let numUniforms = this.gl.getProgramParameter(program, CONSTANTS.ACTIVE_UNIFORMS);
+        let numUniforms = this.gl.getProgramParameter(program, __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].ACTIVE_UNIFORMS);
         let textureUnit;
 
         for (i = 0; i < numUniforms; ++i) {
@@ -3817,59 +3819,59 @@ class Program {
             let numElements = uniformInfo.size;
 
             switch (type) {
-                case CONSTANTS.SAMPLER_2D:
-                case CONSTANTS.INT_SAMPLER_2D:
-                case CONSTANTS.UNSIGNED_INT_SAMPLER_2D:
-                case CONSTANTS.SAMPLER_2D_SHADOW:
-                case CONSTANTS.SAMPLER_2D_ARRAY:
-                case CONSTANTS.INT_SAMPLER_2D_ARRAY:
-                case CONSTANTS.UNSIGNED_INT_SAMPLER_2D_ARRAY:
-                case CONSTANTS.SAMPLER_2D_ARRAY_SHADOW:
-                case CONSTANTS.SAMPLER_CUBE:
-                case CONSTANTS.INT_SAMPLER_CUBE:
-                case CONSTANTS.UNSIGNED_INT_SAMPLER_CUBE:
-                case CONSTANTS.SAMPLER_CUBE_SHADOW:
-                case CONSTANTS.SAMPLER_3D:
-                case CONSTANTS.INT_SAMPLER_3D:
-                case CONSTANTS.UNSIGNED_INT_SAMPLER_3D:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].SAMPLER_2D:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].INT_SAMPLER_2D:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNSIGNED_INT_SAMPLER_2D:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].SAMPLER_2D_SHADOW:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].SAMPLER_2D_ARRAY:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].INT_SAMPLER_2D_ARRAY:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNSIGNED_INT_SAMPLER_2D_ARRAY:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].SAMPLER_2D_ARRAY_SHADOW:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].SAMPLER_CUBE:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].INT_SAMPLER_CUBE:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNSIGNED_INT_SAMPLER_CUBE:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].SAMPLER_CUBE_SHADOW:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].SAMPLER_3D:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].INT_SAMPLER_3D:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNSIGNED_INT_SAMPLER_3D:
                     textureUnit = this.samplerCount++;
                     this.samplers[uniformInfo.name] = textureUnit;
                     this.gl.uniform1i(uniformHandle, textureUnit);
                     break;
-                case CONSTANTS.INT:
-                case CONSTANTS.UNSIGNED_INT:
-                case CONSTANTS.FLOAT:
-                    UniformClass = numElements > 1 ? MultiNumericUniform : SingleComponentUniform;
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].INT:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNSIGNED_INT:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT:
+                    UniformClass = numElements > 1 ? __WEBPACK_IMPORTED_MODULE_2__uniforms__["c" /* MultiNumericUniform */] : __WEBPACK_IMPORTED_MODULE_2__uniforms__["d" /* SingleComponentUniform */];
                     break;
-                case CONSTANTS.BOOL:
-                    UniformClass = numElements > 1 ? MultiBoolUniform : SingleComponentUniform;
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].BOOL:
+                    UniformClass = numElements > 1 ? __WEBPACK_IMPORTED_MODULE_2__uniforms__["b" /* MultiBoolUniform */] : __WEBPACK_IMPORTED_MODULE_2__uniforms__["d" /* SingleComponentUniform */];
                     break;
-                case CONSTANTS.FLOAT_VEC2:
-                case CONSTANTS.INT_VEC2:
-                case CONSTANTS.UNSIGNED_INT_VEC2:
-                case CONSTANTS.FLOAT_VEC3:
-                case CONSTANTS.INT_VEC3:
-                case CONSTANTS.UNSIGNED_INT_VEC3:
-                case CONSTANTS.FLOAT_VEC4:
-                case CONSTANTS.INT_VEC4:
-                case CONSTANTS.UNSIGNED_INT_VEC4:
-                    UniformClass = MultiNumericUniform;
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_VEC2:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].INT_VEC2:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNSIGNED_INT_VEC2:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_VEC3:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].INT_VEC3:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNSIGNED_INT_VEC3:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_VEC4:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].INT_VEC4:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNSIGNED_INT_VEC4:
+                    UniformClass = __WEBPACK_IMPORTED_MODULE_2__uniforms__["c" /* MultiNumericUniform */];
                     break;
-                case CONSTANTS.BOOL_VEC2:
-                case CONSTANTS.BOOL_VEC3:
-                case CONSTANTS.BOOL_VEC4:
-                    UniformClass = MultiBoolUniform;
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].BOOL_VEC2:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].BOOL_VEC3:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].BOOL_VEC4:
+                    UniformClass = __WEBPACK_IMPORTED_MODULE_2__uniforms__["b" /* MultiBoolUniform */];
                     break;
-                case CONSTANTS.FLOAT_MAT2:
-                case CONSTANTS.FLOAT_MAT3:
-                case CONSTANTS.FLOAT_MAT4:
-                case CONSTANTS.FLOAT_MAT2x3:
-                case CONSTANTS.FLOAT_MAT2x4:
-                case CONSTANTS.FLOAT_MAT3x2:
-                case CONSTANTS.FLOAT_MAT3x4:
-                case CONSTANTS.FLOAT_MAT4x2:
-                case CONSTANTS.FLOAT_MAT4x3:
-                    UniformClass = MatrixUniform;
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_MAT2:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_MAT3:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_MAT4:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_MAT2x3:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_MAT2x4:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_MAT3x2:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_MAT3x4:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_MAT4x2:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_MAT4x3:
+                    UniformClass = __WEBPACK_IMPORTED_MODULE_2__uniforms__["a" /* MatrixUniform */];
                     break;
                 default:
                     console.error("Unrecognized type for uniform ", uniformInfo.name);
@@ -3881,7 +3883,7 @@ class Program {
             }
         }
 
-        let numUniformBlocks = this.gl.getProgramParameter(program, CONSTANTS.ACTIVE_UNIFORM_BLOCKS);
+        let numUniformBlocks = this.gl.getProgramParameter(program, __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].ACTIVE_UNIFORM_BLOCKS);
 
         for (i = 0; i < numUniformBlocks; ++i) {
             let blockName = this.gl.getActiveUniformBlockName(this.program, i);
@@ -3945,15 +3947,16 @@ class Program {
         return this;
     }
 }
+/* harmony export (immutable) */ __webpack_exports__["a"] = Program;
 
-module.exports = Program;
 
 
 /***/ }),
 /* 12 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constants__ = __webpack_require__(0);
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -3979,123 +3982,121 @@ module.exports = Program;
 
 
 
-const CONSTANTS = __webpack_require__(0);
-
 // Classes to manage uniform value updates, including
 // caching current values.
 
 const UNIFORM_FUNC_NAME = {};
-UNIFORM_FUNC_NAME[CONSTANTS.BOOL] = "uniform1i";
-UNIFORM_FUNC_NAME[CONSTANTS.INT] = "uniform1i";
-UNIFORM_FUNC_NAME[CONSTANTS.SAMPLER_2D] = "uniform1i";
-UNIFORM_FUNC_NAME[CONSTANTS.INT_SAMPLER_2D] = "uniform1i";
-UNIFORM_FUNC_NAME[CONSTANTS.UNSIGNED_INT_SAMPLER_2D] = "uniform1i";
-UNIFORM_FUNC_NAME[CONSTANTS.SAMPLER_2D_SHADOW] = "uniform1i";
-UNIFORM_FUNC_NAME[CONSTANTS.SAMPLER_2D_ARRAY] = "uniform1i";
-UNIFORM_FUNC_NAME[CONSTANTS.INT_SAMPLER_2D_ARRAY] = "uniform1i";
-UNIFORM_FUNC_NAME[CONSTANTS.UNSIGNED_INT_SAMPLER_2D_ARRAY] = "uniform1i";
-UNIFORM_FUNC_NAME[CONSTANTS.SAMPLER_2D_ARRAY_SHADOW] = "uniform1i";
-UNIFORM_FUNC_NAME[CONSTANTS.SAMPLER_CUBE] = "uniform1i";
-UNIFORM_FUNC_NAME[CONSTANTS.INT_SAMPLER_CUBE] = "uniform1i";
-UNIFORM_FUNC_NAME[CONSTANTS.UNSIGNED_INT_SAMPLER_CUBE] = "uniform1i";
-UNIFORM_FUNC_NAME[CONSTANTS.SAMPLER_CUBE_SHADOW] = "uniform1i";
-UNIFORM_FUNC_NAME[CONSTANTS.SAMPLER_3D] = "uniform1i";
-UNIFORM_FUNC_NAME[CONSTANTS.INT_SAMPLER_3D] = "uniform1i";
-UNIFORM_FUNC_NAME[CONSTANTS.UNSIGNED_INT_SAMPLER_3D] = "uniform1i";
-UNIFORM_FUNC_NAME[CONSTANTS.UNSIGNED_INT] = "uniform1ui";
-UNIFORM_FUNC_NAME[CONSTANTS.FLOAT] = "uniform1f";
-UNIFORM_FUNC_NAME[CONSTANTS.FLOAT_VEC2] = "uniform2f";
-UNIFORM_FUNC_NAME[CONSTANTS.FLOAT_VEC3] = "uniform3f";
-UNIFORM_FUNC_NAME[CONSTANTS.FLOAT_VEC4] = "uniform4f";
-UNIFORM_FUNC_NAME[CONSTANTS.INT_VEC2] = "uniform2i";
-UNIFORM_FUNC_NAME[CONSTANTS.INT_VEC3] = "uniform3i";
-UNIFORM_FUNC_NAME[CONSTANTS.INT_VEC4] = "uniform4i";
-UNIFORM_FUNC_NAME[CONSTANTS.UNSIGNED_INT_VEC2] = "uniform2ui";
-UNIFORM_FUNC_NAME[CONSTANTS.UNSIGNED_INT_VEC3] = "uniform3ui";
-UNIFORM_FUNC_NAME[CONSTANTS.UNSIGNED_INT_VEC4] = "uniform4ui";
-UNIFORM_FUNC_NAME[CONSTANTS.BOOL_VEC2] = "uniform2i";
-UNIFORM_FUNC_NAME[CONSTANTS.BOOL_VEC3] = "uniform3i";
-UNIFORM_FUNC_NAME[CONSTANTS.BOOL_VEC4] = "uniform4i";
-UNIFORM_FUNC_NAME[CONSTANTS.FLOAT_MAT2] = "uniformMatrix2fv";
-UNIFORM_FUNC_NAME[CONSTANTS.FLOAT_MAT3] = "uniformMatrix3fv";
-UNIFORM_FUNC_NAME[CONSTANTS.FLOAT_MAT4] = "uniformMatrix4fv";
-UNIFORM_FUNC_NAME[CONSTANTS.FLOAT_MAT2x3] = "uniformMatrix2x3fv";
-UNIFORM_FUNC_NAME[CONSTANTS.FLOAT_MAT2x4] = "uniformMatrix2x4fv";
-UNIFORM_FUNC_NAME[CONSTANTS.FLOAT_MAT3x2] = "uniformMatrix3x2fv";
-UNIFORM_FUNC_NAME[CONSTANTS.FLOAT_MAT3x4] = "uniformMatrix3x4fv";
-UNIFORM_FUNC_NAME[CONSTANTS.FLOAT_MAT4x2] = "uniformMatrix4x2fv";
-UNIFORM_FUNC_NAME[CONSTANTS.FLOAT_MAT4x3] = "uniformMatrix4x3fv";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].BOOL] = "uniform1i";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].INT] = "uniform1i";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].SAMPLER_2D] = "uniform1i";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].INT_SAMPLER_2D] = "uniform1i";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNSIGNED_INT_SAMPLER_2D] = "uniform1i";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].SAMPLER_2D_SHADOW] = "uniform1i";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].SAMPLER_2D_ARRAY] = "uniform1i";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].INT_SAMPLER_2D_ARRAY] = "uniform1i";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNSIGNED_INT_SAMPLER_2D_ARRAY] = "uniform1i";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].SAMPLER_2D_ARRAY_SHADOW] = "uniform1i";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].SAMPLER_CUBE] = "uniform1i";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].INT_SAMPLER_CUBE] = "uniform1i";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNSIGNED_INT_SAMPLER_CUBE] = "uniform1i";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].SAMPLER_CUBE_SHADOW] = "uniform1i";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].SAMPLER_3D] = "uniform1i";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].INT_SAMPLER_3D] = "uniform1i";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNSIGNED_INT_SAMPLER_3D] = "uniform1i";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNSIGNED_INT] = "uniform1ui";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT] = "uniform1f";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_VEC2] = "uniform2f";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_VEC3] = "uniform3f";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_VEC4] = "uniform4f";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].INT_VEC2] = "uniform2i";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].INT_VEC3] = "uniform3i";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].INT_VEC4] = "uniform4i";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNSIGNED_INT_VEC2] = "uniform2ui";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNSIGNED_INT_VEC3] = "uniform3ui";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNSIGNED_INT_VEC4] = "uniform4ui";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].BOOL_VEC2] = "uniform2i";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].BOOL_VEC3] = "uniform3i";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].BOOL_VEC4] = "uniform4i";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_MAT2] = "uniformMatrix2fv";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_MAT3] = "uniformMatrix3fv";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_MAT4] = "uniformMatrix4fv";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_MAT2x3] = "uniformMatrix2x3fv";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_MAT2x4] = "uniformMatrix2x4fv";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_MAT3x2] = "uniformMatrix3x2fv";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_MAT3x4] = "uniformMatrix3x4fv";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_MAT4x2] = "uniformMatrix4x2fv";
+UNIFORM_FUNC_NAME[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_MAT4x3] = "uniformMatrix4x3fv";
 
 const UNIFORM_COMPONENT_COUNT = {};
-UNIFORM_COMPONENT_COUNT[CONSTANTS.BOOL] = 1;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.INT] = 1;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.SAMPLER_2D] = 1;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.INT_SAMPLER_2D] = 1;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.UNSIGNED_INT_SAMPLER_2D] = 1;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.SAMPLER_2D_SHADOW] = 1;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.SAMPLER_2D_ARRAY] = 1;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.INT_SAMPLER_2D_ARRAY] = 1;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.UNSIGNED_INT_SAMPLER_2D_ARRAY] = 1;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.SAMPLER_2D_ARRAY_SHADOW] = 1;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.SAMPLER_CUBE] = 1;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.INT_SAMPLER_CUBE] = 1;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.UNSIGNED_INT_SAMPLER_CUBE] = 1;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.SAMPLER_CUBE_SHADOW] = 1;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.SAMPLER_3D] = 1;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.INT_SAMPLER_3D] = 1;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.UNSIGNED_INT_SAMPLER_3D] = 1;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.UNSIGNED_INT] = 1;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.FLOAT] = 1;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.FLOAT_VEC2] = 2;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.FLOAT_VEC3] = 3;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.FLOAT_VEC4] = 4;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.INT_VEC2] = 2;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.INT_VEC3] = 3;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.INT_VEC4] = 4;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.UNSIGNED_INT_VEC2] = 2;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.UNSIGNED_INT_VEC3] = 3;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.UNSIGNED_INT_VEC4] = 4;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.BOOL_VEC2] = 2;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.BOOL_VEC3] = 3;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.BOOL_VEC4] = 4;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.FLOAT_MAT2] = 4;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.FLOAT_MAT3] = 9;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.FLOAT_MAT4] = 16;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.FLOAT_MAT2x3] = 6;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.FLOAT_MAT2x4] = 8;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.FLOAT_MAT3x2] = 6;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.FLOAT_MAT3x4] = 12;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.FLOAT_MAT4x2] = 8;
-UNIFORM_COMPONENT_COUNT[CONSTANTS.FLOAT_MAT4x3] = 12;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].BOOL] = 1;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].INT] = 1;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].SAMPLER_2D] = 1;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].INT_SAMPLER_2D] = 1;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNSIGNED_INT_SAMPLER_2D] = 1;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].SAMPLER_2D_SHADOW] = 1;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].SAMPLER_2D_ARRAY] = 1;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].INT_SAMPLER_2D_ARRAY] = 1;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNSIGNED_INT_SAMPLER_2D_ARRAY] = 1;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].SAMPLER_2D_ARRAY_SHADOW] = 1;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].SAMPLER_CUBE] = 1;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].INT_SAMPLER_CUBE] = 1;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNSIGNED_INT_SAMPLER_CUBE] = 1;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].SAMPLER_CUBE_SHADOW] = 1;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].SAMPLER_3D] = 1;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].INT_SAMPLER_3D] = 1;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNSIGNED_INT_SAMPLER_3D] = 1;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNSIGNED_INT] = 1;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT] = 1;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_VEC2] = 2;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_VEC3] = 3;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_VEC4] = 4;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].INT_VEC2] = 2;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].INT_VEC3] = 3;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].INT_VEC4] = 4;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNSIGNED_INT_VEC2] = 2;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNSIGNED_INT_VEC3] = 3;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNSIGNED_INT_VEC4] = 4;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].BOOL_VEC2] = 2;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].BOOL_VEC3] = 3;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].BOOL_VEC4] = 4;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_MAT2] = 4;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_MAT3] = 9;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_MAT4] = 16;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_MAT2x3] = 6;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_MAT2x4] = 8;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_MAT3x2] = 6;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_MAT3x4] = 12;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_MAT4x2] = 8;
+UNIFORM_COMPONENT_COUNT[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_MAT4x3] = 12;
 
 const UNIFORM_CACHE_CLASS = {};
-UNIFORM_CACHE_CLASS[CONSTANTS.INT] = Int32Array;
-UNIFORM_CACHE_CLASS[CONSTANTS.SAMPLER_2D] = Int32Array;
-UNIFORM_CACHE_CLASS[CONSTANTS.INT_SAMPLER_2D] = Int32Array;
-UNIFORM_CACHE_CLASS[CONSTANTS.UNSIGNED_INT_SAMPLER_2D] = Int32Array;
-UNIFORM_CACHE_CLASS[CONSTANTS.SAMPLER_2D_SHADOW] = Int32Array;
-UNIFORM_CACHE_CLASS[CONSTANTS.SAMPLER_2D_ARRAY] = Int32Array;
-UNIFORM_CACHE_CLASS[CONSTANTS.INT_SAMPLER_2D_ARRAY] = Int32Array;
-UNIFORM_CACHE_CLASS[CONSTANTS.UNSIGNED_INT_SAMPLER_2D_ARRAY] = Int32Array;
-UNIFORM_CACHE_CLASS[CONSTANTS.SAMPLER_2D_ARRAY_SHADOW] = Int32Array;
-UNIFORM_CACHE_CLASS[CONSTANTS.SAMPLER_CUBE] = Int32Array;
-UNIFORM_CACHE_CLASS[CONSTANTS.INT_SAMPLER_CUBE] = Int32Array;
-UNIFORM_CACHE_CLASS[CONSTANTS.UNSIGNED_INT_SAMPLER_CUBE] = Int32Array;
-UNIFORM_CACHE_CLASS[CONSTANTS.SAMPLER_CUBE_SHADOW] = Int32Array;
-UNIFORM_CACHE_CLASS[CONSTANTS.SAMPLER_3D] = Int32Array;
-UNIFORM_CACHE_CLASS[CONSTANTS.INT_SAMPLER_3D] = Int32Array;
-UNIFORM_CACHE_CLASS[CONSTANTS.UNSIGNED_INT_SAMPLER_3D] = Int32Array;
-UNIFORM_CACHE_CLASS[CONSTANTS.UNSIGNED_INT] = Uint32Array;
-UNIFORM_CACHE_CLASS[CONSTANTS.FLOAT] = Float32Array;
-UNIFORM_CACHE_CLASS[CONSTANTS.FLOAT_VEC2] = Float32Array;
-UNIFORM_CACHE_CLASS[CONSTANTS.FLOAT_VEC3] = Float32Array;
-UNIFORM_CACHE_CLASS[CONSTANTS.FLOAT_VEC4] = Float32Array;
-UNIFORM_CACHE_CLASS[CONSTANTS.INT_VEC2] = Int32Array;
-UNIFORM_CACHE_CLASS[CONSTANTS.INT_VEC3] = Int32Array;
-UNIFORM_CACHE_CLASS[CONSTANTS.INT_VEC4] = Int32Array;
-UNIFORM_CACHE_CLASS[CONSTANTS.UNSIGNED_INT_VEC2] = Uint32Array;
-UNIFORM_CACHE_CLASS[CONSTANTS.UNSIGNED_INT_VEC3] = Uint32Array;
-UNIFORM_CACHE_CLASS[CONSTANTS.UNSIGNED_INT_VEC4] = Uint32Array;
+UNIFORM_CACHE_CLASS[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].INT] = Int32Array;
+UNIFORM_CACHE_CLASS[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].SAMPLER_2D] = Int32Array;
+UNIFORM_CACHE_CLASS[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].INT_SAMPLER_2D] = Int32Array;
+UNIFORM_CACHE_CLASS[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNSIGNED_INT_SAMPLER_2D] = Int32Array;
+UNIFORM_CACHE_CLASS[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].SAMPLER_2D_SHADOW] = Int32Array;
+UNIFORM_CACHE_CLASS[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].SAMPLER_2D_ARRAY] = Int32Array;
+UNIFORM_CACHE_CLASS[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].INT_SAMPLER_2D_ARRAY] = Int32Array;
+UNIFORM_CACHE_CLASS[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNSIGNED_INT_SAMPLER_2D_ARRAY] = Int32Array;
+UNIFORM_CACHE_CLASS[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].SAMPLER_2D_ARRAY_SHADOW] = Int32Array;
+UNIFORM_CACHE_CLASS[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].SAMPLER_CUBE] = Int32Array;
+UNIFORM_CACHE_CLASS[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].INT_SAMPLER_CUBE] = Int32Array;
+UNIFORM_CACHE_CLASS[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNSIGNED_INT_SAMPLER_CUBE] = Int32Array;
+UNIFORM_CACHE_CLASS[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].SAMPLER_CUBE_SHADOW] = Int32Array;
+UNIFORM_CACHE_CLASS[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].SAMPLER_3D] = Int32Array;
+UNIFORM_CACHE_CLASS[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].INT_SAMPLER_3D] = Int32Array;
+UNIFORM_CACHE_CLASS[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNSIGNED_INT_SAMPLER_3D] = Int32Array;
+UNIFORM_CACHE_CLASS[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNSIGNED_INT] = Uint32Array;
+UNIFORM_CACHE_CLASS[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT] = Float32Array;
+UNIFORM_CACHE_CLASS[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_VEC2] = Float32Array;
+UNIFORM_CACHE_CLASS[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_VEC3] = Float32Array;
+UNIFORM_CACHE_CLASS[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_VEC4] = Float32Array;
+UNIFORM_CACHE_CLASS[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].INT_VEC2] = Int32Array;
+UNIFORM_CACHE_CLASS[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].INT_VEC3] = Int32Array;
+UNIFORM_CACHE_CLASS[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].INT_VEC4] = Int32Array;
+UNIFORM_CACHE_CLASS[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNSIGNED_INT_VEC2] = Uint32Array;
+UNIFORM_CACHE_CLASS[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNSIGNED_INT_VEC3] = Uint32Array;
+UNIFORM_CACHE_CLASS[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNSIGNED_INT_VEC4] = Uint32Array;
 
 class SingleComponentUniform {
     
@@ -4103,7 +4104,7 @@ class SingleComponentUniform {
         this.gl = gl;
         this.handle = handle;
         this.glFuncName = UNIFORM_FUNC_NAME[type];
-        this.cache = type === CONSTANTS.BOOL ? false : 0;
+        this.cache = type === __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].BOOL ? false : 0;
     }
 
     set(value) {
@@ -4114,6 +4115,8 @@ class SingleComponentUniform {
     }
 
 }
+/* harmony export (immutable) */ __webpack_exports__["d"] = SingleComponentUniform;
+
 
 class MultiNumericUniform {
 
@@ -4136,6 +4139,8 @@ class MultiNumericUniform {
     }
 
 }
+/* harmony export (immutable) */ __webpack_exports__["c"] = MultiNumericUniform;
+
 
 class MultiBoolUniform {
 
@@ -4160,6 +4165,8 @@ class MultiBoolUniform {
     }
 
 }
+/* harmony export (immutable) */ __webpack_exports__["b"] = MultiBoolUniform;
+
 
 class MatrixUniform {
 
@@ -4182,18 +4189,17 @@ class MatrixUniform {
     }
 
 }
+/* harmony export (immutable) */ __webpack_exports__["a"] = MatrixUniform;
 
-module.exports.SingleComponentUniform = SingleComponentUniform;
-module.exports.MultiNumericUniform = MultiNumericUniform;
-module.exports.MultiBoolUniform = MultiBoolUniform;
-module.exports.MatrixUniform = MatrixUniform;
 
 
 /***/ }),
 /* 13 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constants__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__query__ = __webpack_require__(5);
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -4219,8 +4225,6 @@ module.exports.MatrixUniform = MatrixUniform;
 
 
 
-const CONSTANTS = __webpack_require__(0);
-const Query = __webpack_require__(5);
 
 /**
     Rendering timer.
@@ -4266,7 +4270,7 @@ class Timer {
             if (this.gpuTimerQuery) {
                 this.gpuTimerQuery.restore();
             } else {
-                this.gpuTimerQuery = new Query(this.gl, CONSTANTS.TIME_ELAPSED_EXT);
+                this.gpuTimerQuery = new __WEBPACK_IMPORTED_MODULE_1__query__["a" /* Query */](this.gl, __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].TIME_ELAPSED_EXT);
             }
         }
 
@@ -4333,7 +4337,7 @@ class Timer {
             }
 
             var gpuTimerAvailable = this.gpuTimerQuery.ready();
-            var gpuTimerDisjoint = this.gl.getParameter(CONSTANTS.GPU_DISJOINT_EXT);
+            var gpuTimerDisjoint = this.gl.getParameter(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].GPU_DISJOINT_EXT);
 
             if (gpuTimerAvailable && !gpuTimerDisjoint) {
                 this.gpuTime = this.gpuTimerQuery.result  / 1000000;
@@ -4363,13 +4367,13 @@ class Timer {
     }
 
 }
+/* harmony export (immutable) */ __webpack_exports__["a"] = Timer;
 
-module.exports = Timer;
 
 
 /***/ }),
 /* 14 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 ///////////////////////////////////////////////////////////////////////////////////
@@ -4394,8 +4398,6 @@ module.exports = Timer;
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
-
-
 
 /**
     Tranform feedback object.
@@ -4496,15 +4498,16 @@ class TransformFeedback {
     }
 
 }
+/* harmony export (immutable) */ __webpack_exports__["a"] = TransformFeedback;
 
-module.exports = TransformFeedback;
 
 
 /***/ }),
 /* 15 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constants__ = __webpack_require__(0);
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -4529,8 +4532,6 @@ module.exports = TransformFeedback;
 ///////////////////////////////////////////////////////////////////////////////////
 
 
-
-const CONSTANTS = __webpack_require__(0);
 
 /**
     Storage for uniform data. Data is stored in std140 layout.
@@ -4565,90 +4566,90 @@ class UniformBuffer {
         for (let i = 0, len = layout.length; i < len; ++i) {
             let type = layout[i];
             switch(type) {
-                case CONSTANTS.FLOAT:
-                case CONSTANTS.INT:
-                case CONSTANTS.UNSIGNED_INT:
-                case CONSTANTS.BOOL:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].INT:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNSIGNED_INT:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].BOOL:
                     this.offsets[i] = this.size;
                     this.sizes[i] = 1;
 
-                    if (type === CONSTANTS.INT) {
-                        this.types[i] = CONSTANTS.INT;
-                    } else if (this.type === CONSTANTS.UNSIGNED_INT) {
-                        this.types[i] = CONSTANTS.UNSIGNED_INT;
+                    if (type === __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].INT) {
+                        this.types[i] = __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].INT;
+                    } else if (this.type === __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNSIGNED_INT) {
+                        this.types[i] = __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNSIGNED_INT;
                     } else {
-                        this.types[i] = CONSTANTS.FLOAT;
+                        this.types[i] = __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT;
                     }
 
                     this.size++;
                     break;
-                case CONSTANTS.FLOAT_VEC2:
-                case CONSTANTS.INT_VEC2:
-                case CONSTANTS.UNSIGNED_INT_VEC2:
-                case CONSTANTS.BOOL_VEC2:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_VEC2:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].INT_VEC2:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNSIGNED_INT_VEC2:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].BOOL_VEC2:
                     this.size += this.size % 2;
                     this.offsets[i] = this.size;
                     this.sizes[i] = 2;
 
-                    if (type === CONSTANTS.INT_VEC2) {
-                        this.types[i] = CONSTANTS.INT;
-                    } else if (this.type === CONSTANTS.UNSIGNED_INT_VEC2) {
-                        this.types[i] = CONSTANTS.UNSIGNED_INT;
+                    if (type === __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].INT_VEC2) {
+                        this.types[i] = __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].INT;
+                    } else if (this.type === __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNSIGNED_INT_VEC2) {
+                        this.types[i] = __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNSIGNED_INT;
                     } else {
-                        this.types[i] = CONSTANTS.FLOAT;
+                        this.types[i] = __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT;
                     }
 
                     this.size += 2;
                     break;
-                case CONSTANTS.FLOAT_VEC3:
-                case CONSTANTS.INT_VEC3:
-                case CONSTANTS.UNSIGNED_INT_VEC3:
-                case CONSTANTS.BOOL_VEC3:
-                case CONSTANTS.FLOAT_VEC4:
-                case CONSTANTS.INT_VEC4:
-                case CONSTANTS.UNSIGNED_INT_VEC4:
-                case CONSTANTS.BOOL_VEC4:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_VEC3:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].INT_VEC3:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNSIGNED_INT_VEC3:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].BOOL_VEC3:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_VEC4:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].INT_VEC4:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNSIGNED_INT_VEC4:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].BOOL_VEC4:
                     this.size += (4 - this.size % 4) % 4;
                     this.offsets[i] = this.size;
                     this.sizes[i] = 4;
 
-                    if (type === CONSTANTS.INT_VEC4 || type === CONSTANTS.INT_VEC3) {
-                        this.types[i] = CONSTANTS.INT;
-                    } else if (this.type === CONSTANTS.UNSIGNED_INT_VEC4 || this.type === CONSTANTS.UNSIGNED_INT_VEC3) {
-                        this.types[i] = CONSTANTS.UNSIGNED_INT;
+                    if (type === __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].INT_VEC4 || type === __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].INT_VEC3) {
+                        this.types[i] = __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].INT;
+                    } else if (this.type === __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNSIGNED_INT_VEC4 || this.type === __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNSIGNED_INT_VEC3) {
+                        this.types[i] = __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNSIGNED_INT;
                     } else {
-                        this.types[i] = CONSTANTS.FLOAT;
+                        this.types[i] = __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT;
                     }
 
                     this.size += 4;
                     break;
-                case CONSTANTS.FLOAT_MAT2:
-                case CONSTANTS.FLOAT_MAT2x3:
-                case CONSTANTS.FLOAT_MAT2x4:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_MAT2:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_MAT2x3:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_MAT2x4:
                     this.size += (4 - this.size % 4) % 4;
                     this.offsets[i] = this.size;
                     this.sizes[i] = 8;
-                    this.types[i] = CONSTANTS.FLOAT;
+                    this.types[i] = __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT;
 
                     this.size += 8;
                     break;
-                case CONSTANTS.FLOAT_MAT3:
-                case CONSTANTS.FLOAT_MAT3x2:
-                case CONSTANTS.FLOAT_MAT3x4:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_MAT3:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_MAT3x2:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_MAT3x4:
                     this.size += (4 - this.size % 4) % 4;
                     this.offsets[i] = this.size;
                     this.sizes[i] = 12;
-                    this.types[i] = CONSTANTS.FLOAT;
+                    this.types[i] = __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT;
 
                     this.size += 12;
                     break;
-                case CONSTANTS.FLOAT_MAT4:
-                case CONSTANTS.FLOAT_MAT4x2:
-                case CONSTANTS.FLOAT_MAT4x3:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_MAT4:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_MAT4x2:
+                case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_MAT4x3:
                     this.size += (4 - this.size % 4) % 4;
                     this.offsets[i] = this.size;
                     this.sizes[i] = 16;
-                    this.types[i] = CONSTANTS.FLOAT;
+                    this.types[i] = __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT;
 
                     this.size += 16;
                     break;
@@ -4660,9 +4661,9 @@ class UniformBuffer {
         this.size += (4 - this.size % 4) % 4;
 
         this.data = new Float32Array(this.size);
-        this.dataViews[CONSTANTS.FLOAT] = this.data;
-        this.dataViews[CONSTANTS.INT] = new Int32Array(this.data.buffer);
-        this.dataViews[CONSTANTS.UNSIGNED_INT] = new Uint32Array(this.data.buffer);
+        this.dataViews[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT] = this.data;
+        this.dataViews[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].INT] = new Int32Array(this.data.buffer);
+        this.dataViews[__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNSIGNED_INT] = new Uint32Array(this.data.buffer);
 
         this.restore();
     }
@@ -4679,9 +4680,9 @@ class UniformBuffer {
         }
 
         this.buffer = this.gl.createBuffer();
-        this.gl.bindBuffer(CONSTANTS.UNIFORM_BUFFER, this.buffer);
-        this.gl.bufferData(CONSTANTS.UNIFORM_BUFFER, this.size * 4, this.usage);
-        this.gl.bindBuffer(CONSTANTS.UNIFORM_BUFFER, null);
+        this.gl.bindBuffer(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNIFORM_BUFFER, this.buffer);
+        this.gl.bufferData(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNIFORM_BUFFER, this.size * 4, this.usage);
+        this.gl.bindBuffer(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].UNIFORM_BUFFER, null);
 
         return this;
     }
@@ -4783,15 +4784,16 @@ class UniformBuffer {
     }
 
 }
+/* harmony export (immutable) */ __webpack_exports__["a"] = UniformBuffer;
 
-module.exports = UniformBuffer;
 
 
 /***/ }),
 /* 16 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constants__ = __webpack_require__(0);
 // Copyright (c) 2017 Tarek Sherif
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -4813,8 +4815,6 @@ module.exports = UniformBuffer;
 ///////////////////////////////////////////////////////////////////////////////////
 
 
-
-const CONSTANTS = __webpack_require__(0);
 
 /**
     Organizes vertex buffer and attribute state.
@@ -5037,16 +5037,16 @@ class VertexArray {
                     attributeIndex + i,
                     vertexBuffer.itemSize,
                     vertexBuffer.type,
-                    numColumns * vertexBuffer.itemSize * CONSTANTS.TYPE_SIZE[vertexBuffer.type],
-                    i * vertexBuffer.itemSize * CONSTANTS.TYPE_SIZE[vertexBuffer.type]);
+                    numColumns * vertexBuffer.itemSize * __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].TYPE_SIZE[vertexBuffer.type],
+                    i * vertexBuffer.itemSize * __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].TYPE_SIZE[vertexBuffer.type]);
             } else {
                 this.gl.vertexAttribPointer(
                     attributeIndex + i,
                     vertexBuffer.itemSize,
                     vertexBuffer.type,
                     normalized,
-                    numColumns * vertexBuffer.itemSize * CONSTANTS.TYPE_SIZE[vertexBuffer.type],
-                    i * vertexBuffer.itemSize * CONSTANTS.TYPE_SIZE[vertexBuffer.type]);
+                    numColumns * vertexBuffer.itemSize * __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].TYPE_SIZE[vertexBuffer.type],
+                    i * vertexBuffer.itemSize * __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].TYPE_SIZE[vertexBuffer.type]);
             }
 
             if (instanced) {
@@ -5069,15 +5069,16 @@ class VertexArray {
         return this;
     }
 }
+/* harmony export (immutable) */ __webpack_exports__["a"] = VertexArray;
 
-module.exports = VertexArray;
 
 
 /***/ }),
 /* 17 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constants__ = __webpack_require__(0);
 ///////////////////////////////////////////////////////////////////////////////////
 // The MIT License (MIT)
 //
@@ -5103,8 +5104,6 @@ module.exports = VertexArray;
 
 
 
-const CONSTANTS = __webpack_require__(0);
-
 /**
     Storage for vertex data.
 
@@ -5124,19 +5123,19 @@ class VertexBuffer {
     constructor(gl, appState, type, itemSize, data, usage = gl.STATIC_DRAW, indexArray) {
         let numColumns;
         switch(type) {
-            case CONSTANTS.FLOAT_MAT4:
-            case CONSTANTS.FLOAT_MAT4x2:
-            case CONSTANTS.FLOAT_MAT4x3:
+            case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_MAT4:
+            case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_MAT4x2:
+            case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_MAT4x3:
                 numColumns = 4;
                 break;
-            case CONSTANTS.FLOAT_MAT3:
-            case CONSTANTS.FLOAT_MAT3x2:
-            case CONSTANTS.FLOAT_MAT3x4:
+            case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_MAT3:
+            case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_MAT3x2:
+            case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_MAT3x4:
                 numColumns = 3;
                 break;
-            case CONSTANTS.FLOAT_MAT2:
-            case CONSTANTS.FLOAT_MAT2x3:
-            case CONSTANTS.FLOAT_MAT2x4:
+            case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_MAT2:
+            case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_MAT2x3:
+            case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_MAT2x4:
                 numColumns = 2;
                 break;
             default:
@@ -5144,30 +5143,30 @@ class VertexBuffer {
         }
 
         switch(type) {
-            case CONSTANTS.FLOAT_MAT4:
-            case CONSTANTS.FLOAT_MAT3x4:
-            case CONSTANTS.FLOAT_MAT2x4:
+            case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_MAT4:
+            case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_MAT3x4:
+            case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_MAT2x4:
                 itemSize = 4;
-                type = CONSTANTS.FLOAT;
+                type = __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT;
                 break;
-            case CONSTANTS.FLOAT_MAT3:
-            case CONSTANTS.FLOAT_MAT4x3:
-            case CONSTANTS.FLOAT_MAT2x3:
+            case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_MAT3:
+            case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_MAT4x3:
+            case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_MAT2x3:
                 itemSize = 3;
-                type = CONSTANTS.FLOAT;
+                type = __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT;
                 break;
-            case CONSTANTS.FLOAT_MAT2:
-            case CONSTANTS.FLOAT_MAT3x2:
-            case CONSTANTS.FLOAT_MAT4x2:
+            case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_MAT2:
+            case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_MAT3x2:
+            case __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT_MAT4x2:
                 itemSize = 2;
-                type = CONSTANTS.FLOAT;
+                type = __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].FLOAT;
                 break;
         }
 
         let dataLength;
         if (typeof data === "number") {
             dataLength = data;
-            data *= CONSTANTS.TYPE_SIZE[type];
+            data *= __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].TYPE_SIZE[type];
         } else {
             dataLength = data.length;
         }
@@ -5196,7 +5195,7 @@ class VertexBuffer {
     */
     restore(data) {
         if (!data) {
-            data = this.numItems * this.itemSize * this.numColumns * CONSTANTS.TYPE_SIZE[this.type];
+            data = this.numItems * this.itemSize * this.numColumns * __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* CONSTANTS */].TYPE_SIZE[this.type];
         }
 
         // Don't want to update vertex array bindings
@@ -5251,10 +5250,10 @@ class VertexBuffer {
     }
 
 }
+/* harmony export (immutable) */ __webpack_exports__["a"] = VertexBuffer;
 
-module.exports = VertexBuffer;
 
 
 /***/ })
-/******/ ]);
+/******/ ])["PicoGL"];
 });
