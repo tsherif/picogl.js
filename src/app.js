@@ -1089,8 +1089,6 @@ export class App {
         @param {GLEnum} [options.maxLevel] Maximum mipmap level.
         @param {GLEnum} [options.minLOD] Mimimum level of detail.
         @param {GLEnum} [options.maxLOD] Maximum level of detail.
-        @param {boolean} [options.generateMipmaps] Should mipmaps be generated. Defaults to generating mipmaps if
-            a mipmap sampling filter is used and the mipmap levels aren't provided directly.
         @return {Texture} New Texture object.
     */
     createTexture2D(image, width, height, options) {
@@ -1139,8 +1137,6 @@ export class App {
         @param {GLEnum} [options.maxLevel] Maximum mipmap level.
         @param {GLEnum} [options.minLOD] Mimimum level of detail.
         @param {GLEnum} [options.maxLOD] Maximum level of detail.
-        @param {boolean} [options.generateMipmaps] Should mipmaps be generated. Defaults to generating mipmaps if
-            a mipmap sampling filter is use and the mipmap levels aren't provided directly.
         @return {Texture} New Texture object.
     */
     createTextureArray(image, width, height, depth, options) {
@@ -1184,8 +1180,6 @@ export class App {
         @param {GLEnum} [options.maxLevel] Maximum mipmap level.
         @param {GLEnum} [options.minLOD] Mimimum level of detail.
         @param {GLEnum} [options.maxLOD] Maximum level of detail.
-        @param {boolean} [options.generateMipmaps] Should mipmaps be generated. Defaults to generating mipmaps if
-            a mipmap sampling filter is use and the mipmap levels aren't provided directly.
         @return {Texture} New Texture object.
     */
     createTexture3D(image, width, height, depth, options) {
@@ -1237,8 +1231,6 @@ export class App {
         @param {GLEnum} [options.maxLevel] Maximum mipmap level.
         @param {GLEnum} [options.minLOD] Mimimum level of detail.
         @param {GLEnum} [options.maxLOD] Maximum level of detail.
-        @param {boolean} [options.generateMipmaps] Should mipmaps be generated. Defaults to generating mipmaps if
-            a mipmap sampling filter is usedd.
         @return {Cubemap} New Cubemap object.
     */
     createCubemap(options) {
