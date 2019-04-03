@@ -115,16 +115,16 @@
             255, 0, 0,
             0, 255, 0,
             0, 0, 255
-        ]));
+        ])).normalized();
 
         // COMBINE VERTEX BUFFERS INTO INPUT AND OUTPUT VERTEX ARRAYS
         var triangleArrayA = app.createVertexArray()
         .vertexAttributeBuffer(0, positions1)
-        .vertexNormalizedAttributeBuffer(1, colors);
+        .vertexAttributeBuffer(1, colors);
 
         var triangleArrayB = app.createVertexArray()
         .vertexAttributeBuffer(0, positions2)
-        .vertexNormalizedAttributeBuffer(1, colors);
+        .vertexAttributeBuffer(1, colors);
 
         // CREATE TRANSFORM FEEDBACK OBJECTS AND
         // INDICATE BUFFERS TO CAPTURE

@@ -94,12 +94,12 @@
             255, 0, 0,
             0, 255, 0,
             0, 0, 255
-        ]));
+        ])).normalized();
 
         // COMBINE VERTEX BUFFERS INTO VERTEX ARRAY
         var triangleArray = app.createVertexArray()
         .vertexAttributeBuffer(0, positions)
-        .vertexNormalizedAttributeBuffer(1, colors);
+        .vertexAttributeBuffer(1, colors);
 
         // CREATE DRAW CALL FROM PROGRAM AND VERTEX ARRAY
         var drawCall = app.createDrawCall(program, triangleArray);

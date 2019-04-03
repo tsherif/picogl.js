@@ -4391,9 +4391,11 @@ class TransformFeedback {
         this.gl.bindTransformFeedback(__WEBPACK_IMPORTED_MODULE_0__constants__["c" /* GL */].TRANSFORM_FEEDBACK, this.transformFeedback);
         this.gl.bindBufferBase(__WEBPACK_IMPORTED_MODULE_0__constants__["c" /* GL */].TRANSFORM_FEEDBACK_BUFFER, index, buffer.buffer);
 
+        // TODO(Tarek): Firefox doesn't properly unbind TRANSFORM_FEEDBACK_BUFFER
+        // bindings when TRANSFORM_FEEDBACK is unbound.
+        // https://bugzilla.mozilla.org/show_bug.cgi?id=1541396
         this.gl.bindTransformFeedback(__WEBPACK_IMPORTED_MODULE_0__constants__["c" /* GL */].TRANSFORM_FEEDBACK, null);
         this.gl.bindBufferBase(__WEBPACK_IMPORTED_MODULE_0__constants__["c" /* GL */].TRANSFORM_FEEDBACK_BUFFER, index, null);
-
 
         return this;
     }
@@ -4808,7 +4810,7 @@ class VertexArray {
         @return {VertexArray} The VertexArray object.
     */
     vertexAttributeBuffer(attributeIndex, vertexBuffer) {
-        this.attributeBuffer(attributeIndex, vertexBuffer, false, false, false);
+        this.attributeBuffer(attributeIndex, vertexBuffer, false);
 
         return this;
     }
@@ -4822,71 +4824,7 @@ class VertexArray {
         @return {VertexArray} The VertexArray object.
     */
     instanceAttributeBuffer(attributeIndex, vertexBuffer) {
-        this.attributeBuffer(attributeIndex, vertexBuffer, true, false, false);
-
-        return this;
-    }
-
-    /**
-        Bind an per-vertex integer attribute buffer to this vertex array.
-        Note that this refers to the attribute in the shader being an integer,
-        not the data stored in the vertex buffer.
-
-        @method
-        @param {number} attributeIndex The attribute location to bind to.
-        @param {VertexBuffer} vertexBuffer The VertexBuffer to bind.
-        @return {VertexArray} The VertexArray object.
-    */
-    vertexIntegerAttributeBuffer(attributeIndex, vertexBuffer) {
-        this.attributeBuffer(attributeIndex, vertexBuffer, false, true, false);
-
-        return this;
-    }
-
-    /**
-        Bind an per-instance integer attribute buffer to this vertex array.
-        Note that this refers to the attribute in the shader being an integer,
-        not the data stored in the vertex buffer.
-
-        @method
-        @param {number} attributeIndex The attribute location to bind to.
-        @param {VertexBuffer} vertexBuffer The VertexBuffer to bind.
-        @return {VertexArray} The VertexArray object.
-    */
-    instanceIntegerAttributeBuffer(attributeIndex, vertexBuffer) {
-        this.attributeBuffer(attributeIndex, vertexBuffer, true, true, false);
-
-        return this;
-    }
-
-    /**
-        Bind an per-vertex normalized attribute buffer to this vertex array.
-        Integer data in the vertex buffer will be normalized to [-1.0, 1.0] if
-        signed, [0.0, 1.0] if unsigned.
-
-        @method
-        @param {number} attributeIndex The attribute location to bind to.
-        @param {VertexBuffer} vertexBuffer The VertexBuffer to bind.
-        @return {VertexArray} The VertexArray object.
-    */
-    vertexNormalizedAttributeBuffer(attributeIndex, vertexBuffer) {
-        this.attributeBuffer(attributeIndex, vertexBuffer, false, false, true);
-
-        return this;
-    }
-
-    /**
-        Bind an per-instance normalized attribute buffer to this vertex array.
-        Integer data in the vertex buffer will be normalized to [-1.0, 1.0] if
-        signed, [0.0, 1.0] if unsigned.
-        
-        @method
-        @param {number} attributeIndex The attribute location to bind to.
-        @param {VertexBuffer} vertexBuffer The VertexBuffer to bind.
-        @return {VertexArray} The VertexArray object.
-    */
-    instanceNormalizedAttributeBuffer(attributeIndex, vertexBuffer) {
-        this.attributeBuffer(attributeIndex, vertexBuffer, true, false, true);
+        this.attributeBuffer(attributeIndex, vertexBuffer, true);
 
         return this;
     }
@@ -4957,7 +4895,7 @@ class VertexArray {
         @ignore
         @return {VertexArray} The VertexArray object.
     */
-    attributeBuffer(attributeIndex, vertexBuffer, instanced, integer, normalized) {
+    attributeBuffer(attributeIndex, vertexBuffer, instanced) {
         // allocate at gl level, if necessary
         if (this.vertexArray === null) {
             this.vertexArray = this.gl.createVertexArray();
@@ -4966,10 +4904,11 @@ class VertexArray {
         this.bind();
         this.gl.bindBuffer(__WEBPACK_IMPORTED_MODULE_0__constants__["c" /* GL */].ARRAY_BUFFER, vertexBuffer.buffer);
 
+        let iPointer = vertexBuffer.integer && !vertexBuffer.normalizedIntegers;
         let numColumns = vertexBuffer.numColumns;
 
         for (let i = 0; i < numColumns; ++i) {
-            if (integer) {
+            if (iPointer) {
                 this.gl.vertexAttribIPointer(
                     attributeIndex + i,
                     vertexBuffer.itemSize,
@@ -4981,7 +4920,7 @@ class VertexArray {
                     attributeIndex + i,
                     vertexBuffer.itemSize,
                     vertexBuffer.type,
-                    normalized,
+                    vertexBuffer.normalizedIntegers,
                     numColumns * vertexBuffer.itemSize * __WEBPACK_IMPORTED_MODULE_0__constants__["e" /* TYPE_SIZE */][vertexBuffer.type],
                     i * vertexBuffer.itemSize * __WEBPACK_IMPORTED_MODULE_0__constants__["e" /* TYPE_SIZE */][vertexBuffer.type]);
             }
@@ -5040,6 +4979,15 @@ class VertexArray {
 ///////////////////////////////////////////////////////////////////////////////////
 
 
+
+const INTEGER_TYPES = {
+    [__WEBPACK_IMPORTED_MODULE_0__constants__["c" /* GL */].BYTE]: true,
+    [__WEBPACK_IMPORTED_MODULE_0__constants__["c" /* GL */].UNSIGNED_BYTE]: true,
+    [__WEBPACK_IMPORTED_MODULE_0__constants__["c" /* GL */].SHORT]: true,
+    [__WEBPACK_IMPORTED_MODULE_0__constants__["c" /* GL */].UNSIGNED_SHORT]: true,
+    [__WEBPACK_IMPORTED_MODULE_0__constants__["c" /* GL */].INT]: true,
+    [__WEBPACK_IMPORTED_MODULE_0__constants__["c" /* GL */].UNSIGNED_INT]: true
+};
 
 /**
     Storage for vertex data.
@@ -5116,10 +5064,25 @@ class VertexBuffer {
         this.numItems = dataLength / (itemSize * numColumns);
         this.numColumns = numColumns;
         this.usage = usage;
-        this.indexArray = !!indexArray;
+        this.indexArray = Boolean(indexArray);
+        this.integer = Boolean(INTEGER_TYPES[this.type]);
+        this.normalizedIntegers = false;
         this.binding = this.indexArray ? __WEBPACK_IMPORTED_MODULE_0__constants__["c" /* GL */].ELEMENT_ARRAY_BUFFER : __WEBPACK_IMPORTED_MODULE_0__constants__["c" /* GL */].ARRAY_BUFFER;
 
         this.restore(data);
+    }
+
+    /**
+        Indicate that this buffer consists of normalized integers. Note
+        that this should be called before binding to a VertexArray.
+
+        @method
+        @return {VertexBuffer} The VertexBuffer object.
+    */
+    normalized() {
+        this.normalizedIntegers = true;
+
+        return this;
     }
 
     /**

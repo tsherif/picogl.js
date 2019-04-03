@@ -75,7 +75,7 @@ export class VertexArray {
         @return {VertexArray} The VertexArray object.
     */
     vertexAttributeBuffer(attributeIndex, vertexBuffer) {
-        this.attributeBuffer(attributeIndex, vertexBuffer, false, false, false);
+        this.attributeBuffer(attributeIndex, vertexBuffer, false);
 
         return this;
     }
@@ -89,71 +89,7 @@ export class VertexArray {
         @return {VertexArray} The VertexArray object.
     */
     instanceAttributeBuffer(attributeIndex, vertexBuffer) {
-        this.attributeBuffer(attributeIndex, vertexBuffer, true, false, false);
-
-        return this;
-    }
-
-    /**
-        Bind an per-vertex integer attribute buffer to this vertex array.
-        Note that this refers to the attribute in the shader being an integer,
-        not the data stored in the vertex buffer.
-
-        @method
-        @param {number} attributeIndex The attribute location to bind to.
-        @param {VertexBuffer} vertexBuffer The VertexBuffer to bind.
-        @return {VertexArray} The VertexArray object.
-    */
-    vertexIntegerAttributeBuffer(attributeIndex, vertexBuffer) {
-        this.attributeBuffer(attributeIndex, vertexBuffer, false, true, false);
-
-        return this;
-    }
-
-    /**
-        Bind an per-instance integer attribute buffer to this vertex array.
-        Note that this refers to the attribute in the shader being an integer,
-        not the data stored in the vertex buffer.
-
-        @method
-        @param {number} attributeIndex The attribute location to bind to.
-        @param {VertexBuffer} vertexBuffer The VertexBuffer to bind.
-        @return {VertexArray} The VertexArray object.
-    */
-    instanceIntegerAttributeBuffer(attributeIndex, vertexBuffer) {
-        this.attributeBuffer(attributeIndex, vertexBuffer, true, true, false);
-
-        return this;
-    }
-
-    /**
-        Bind an per-vertex normalized attribute buffer to this vertex array.
-        Integer data in the vertex buffer will be normalized to [-1.0, 1.0] if
-        signed, [0.0, 1.0] if unsigned.
-
-        @method
-        @param {number} attributeIndex The attribute location to bind to.
-        @param {VertexBuffer} vertexBuffer The VertexBuffer to bind.
-        @return {VertexArray} The VertexArray object.
-    */
-    vertexNormalizedAttributeBuffer(attributeIndex, vertexBuffer) {
-        this.attributeBuffer(attributeIndex, vertexBuffer, false, false, true);
-
-        return this;
-    }
-
-    /**
-        Bind an per-instance normalized attribute buffer to this vertex array.
-        Integer data in the vertex buffer will be normalized to [-1.0, 1.0] if
-        signed, [0.0, 1.0] if unsigned.
-        
-        @method
-        @param {number} attributeIndex The attribute location to bind to.
-        @param {VertexBuffer} vertexBuffer The VertexBuffer to bind.
-        @return {VertexArray} The VertexArray object.
-    */
-    instanceNormalizedAttributeBuffer(attributeIndex, vertexBuffer) {
-        this.attributeBuffer(attributeIndex, vertexBuffer, true, false, true);
+        this.attributeBuffer(attributeIndex, vertexBuffer, true);
 
         return this;
     }
@@ -224,7 +160,7 @@ export class VertexArray {
         @ignore
         @return {VertexArray} The VertexArray object.
     */
-    attributeBuffer(attributeIndex, vertexBuffer, instanced, integer, normalized) {
+    attributeBuffer(attributeIndex, vertexBuffer, instanced) {
         // allocate at gl level, if necessary
         if (this.vertexArray === null) {
             this.vertexArray = this.gl.createVertexArray();
@@ -233,10 +169,11 @@ export class VertexArray {
         this.bind();
         this.gl.bindBuffer(GL.ARRAY_BUFFER, vertexBuffer.buffer);
 
+        let iPointer = vertexBuffer.integer && !vertexBuffer.normalizedIntegers;
         let numColumns = vertexBuffer.numColumns;
 
         for (let i = 0; i < numColumns; ++i) {
-            if (integer) {
+            if (iPointer) {
                 this.gl.vertexAttribIPointer(
                     attributeIndex + i,
                     vertexBuffer.itemSize,
@@ -248,7 +185,7 @@ export class VertexArray {
                     attributeIndex + i,
                     vertexBuffer.itemSize,
                     vertexBuffer.type,
-                    normalized,
+                    vertexBuffer.normalizedIntegers,
                     numColumns * vertexBuffer.itemSize * TYPE_SIZE[vertexBuffer.type],
                     i * vertexBuffer.itemSize * TYPE_SIZE[vertexBuffer.type]);
             }

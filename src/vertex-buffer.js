@@ -23,6 +23,15 @@
 
 import { GL, TYPE_SIZE } from "./constants";
 
+const INTEGER_TYPES = {
+    [GL.BYTE]: true,
+    [GL.UNSIGNED_BYTE]: true,
+    [GL.SHORT]: true,
+    [GL.UNSIGNED_SHORT]: true,
+    [GL.INT]: true,
+    [GL.UNSIGNED_INT]: true
+};
+
 /**
     Storage for vertex data.
 
@@ -98,10 +107,25 @@ export class VertexBuffer {
         this.numItems = dataLength / (itemSize * numColumns);
         this.numColumns = numColumns;
         this.usage = usage;
-        this.indexArray = !!indexArray;
+        this.indexArray = Boolean(indexArray);
+        this.integer = Boolean(INTEGER_TYPES[this.type]);
+        this.normalizedIntegers = false;
         this.binding = this.indexArray ? GL.ELEMENT_ARRAY_BUFFER : GL.ARRAY_BUFFER;
 
         this.restore(data);
+    }
+
+    /**
+        Indicate that this buffer consists of normalized integers. Note
+        that this should be called before binding to a VertexArray.
+
+        @method
+        @return {VertexBuffer} The VertexBuffer object.
+    */
+    normalized() {
+        this.normalizedIntegers = true;
+
+        return this;
     }
 
     /**

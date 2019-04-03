@@ -71,6 +71,7 @@ export class TransformFeedback {
 
         // TODO(Tarek): Firefox doesn't properly unbind TRANSFORM_FEEDBACK_BUFFER
         // bindings when TRANSFORM_FEEDBACK is unbound.
+        // https://bugzilla.mozilla.org/show_bug.cgi?id=1541396
         this.gl.bindTransformFeedback(GL.TRANSFORM_FEEDBACK, null);
         this.gl.bindBufferBase(GL.TRANSFORM_FEEDBACK_BUFFER, index, null);
 
