@@ -204,6 +204,9 @@ export class DrawCall {
         if (this.currentTransformFeedback) {
             this.currentTransformFeedback.bind();
             this.gl.beginTransformFeedback(this.primitive);
+        } else if (this.appState.transformFeedback) {
+            this.gl.bindTransformFeedback(GL.TRANSFORM_FEEDBACK, null);
+            this.appState.transformFeedback = null;
         }
 
         if (this.currentVertexArray.instanced) {
@@ -220,11 +223,6 @@ export class DrawCall {
 
         if (this.currentTransformFeedback) {
             this.gl.endTransformFeedback();
-            // TODO(Tarek): Need to rebind buffers due to bug in older version of ANGLE that FF is using.
-            // Remove this when that's fixed.
-            for (let i = 0, len = this.currentTransformFeedback.angleBugBuffers.length; i < len; ++i) {
-                this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, i, null);
-            }
         }
 
         return this;

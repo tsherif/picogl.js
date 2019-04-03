@@ -38,10 +38,6 @@ export class TransformFeedback {
         this.appState = appState;
         this.transformFeedback = null;
 
-        // TODO(Tarek): Need to rebind buffers due to bug in ANGLE.
-        // Remove this when that's fixed.
-        this.angleBugBuffers = [];
-
         this.restore();
     }
 
@@ -58,8 +54,6 @@ export class TransformFeedback {
 
         this.transformFeedback = this.gl.createTransformFeedback();
 
-        this.angleBugBuffers.length = 0;
-
         return this;
     }
 
@@ -72,11 +66,13 @@ export class TransformFeedback {
         @return {TransformFeedback} The TransformFeedback object.
     */
     feedbackBuffer(index, buffer) {
-        this.bind();
         this.gl.bindTransformFeedback(GL.TRANSFORM_FEEDBACK, this.transformFeedback);
         this.gl.bindBufferBase(GL.TRANSFORM_FEEDBACK_BUFFER, index, buffer.buffer);
 
-        this.angleBugBuffers[index] = buffer;
+        // TODO(Tarek): Firefox doesn't properly unbind TRANSFORM_FEEDBACK_BUFFER
+        // bindings when TRANSFORM_FEEDBACK is unbound.
+        this.gl.bindTransformFeedback(GL.TRANSFORM_FEEDBACK, null);
+        this.gl.bindBufferBase(GL.TRANSFORM_FEEDBACK_BUFFER, index, null);
 
         return this;
     }
@@ -112,10 +108,6 @@ export class TransformFeedback {
         if (this.appState.transformFeedback !== this) {
             this.gl.bindTransformFeedback(GL.TRANSFORM_FEEDBACK, this.transformFeedback);
             this.appState.transformFeedback = this;
-
-            for (let i = 0, len = this.angleBugBuffers.length; i < len; ++i) {
-                this.gl.bindBufferBase(GL.TRANSFORM_FEEDBACK_BUFFER, i, this.angleBugBuffers[i].buffer);
-            }
         }
 
         return this;
