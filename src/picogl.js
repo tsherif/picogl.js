@@ -23,7 +23,7 @@
 
 let webglInfoInitialized = false;
 
-import { CONSTANTS } from "./constants";
+import { GL, WEBGL_INFO } from "./constants";
 import { App } from "./app";
 
 /**
@@ -34,6 +34,8 @@ import { App } from "./app";
 */
 export const PicoGL = Object.assign({ 
     version: "%%VERSION%%",
+
+    WEBGL_INFO,
 
     /**
         Create a PicoGL app. The app is the primary entry point to PicoGL. It stores
@@ -47,15 +49,15 @@ export const PicoGL = Object.assign({
     createApp(canvas, contextAttributes) {
         let gl = canvas.getContext("webgl2", contextAttributes);
         if (!webglInfoInitialized) {
-            PicoGL.WEBGL_INFO.MAX_TEXTURE_UNITS = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
-            PicoGL.WEBGL_INFO.MAX_UNIFORM_BUFFERS = gl.getParameter(gl.MAX_UNIFORM_BUFFER_BINDINGS);
-            PicoGL.WEBGL_INFO.MAX_UNIFORMS = Math.min(
-                gl.getParameter(gl.MAX_VERTEX_UNIFORM_VECTORS),
-                gl.getParameter(gl.MAX_FRAGMENT_UNIFORM_VECTORS)
+            WEBGL_INFO.MAX_TEXTURE_UNITS = gl.getParameter(GL.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
+            WEBGL_INFO.MAX_UNIFORM_BUFFERS = gl.getParameter(GL.MAX_UNIFORM_BUFFER_BINDINGS);
+            WEBGL_INFO.MAX_UNIFORMS = Math.min(
+                gl.getParameter(GL.MAX_VERTEX_UNIFORM_VECTORS),
+                gl.getParameter(GL.MAX_FRAGMENT_UNIFORM_VECTORS)
             );
-            PicoGL.WEBGL_INFO.SAMPLES = gl.getParameter(gl.SAMPLES);
+            WEBGL_INFO.SAMPLES = gl.getParameter(GL.SAMPLES);
             webglInfoInitialized = true;      
         }
         return new App(gl, canvas);
     }
-}, CONSTANTS);
+}, GL);

@@ -18,7 +18,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-import { CONSTANTS } from "./constants";
+import { GL, TYPE_SIZE } from "./constants";
 
 /**
     Organizes vertex buffer and attribute state.
@@ -172,7 +172,7 @@ export class VertexArray {
         }
 
         this.bind();
-        this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, vertexBuffer.buffer);
+        this.gl.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, vertexBuffer.buffer);
 
         this.numElements = vertexBuffer.numItems * 3;
         this.indexType = vertexBuffer.type;
@@ -231,7 +231,7 @@ export class VertexArray {
         }
 
         this.bind();
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, vertexBuffer.buffer);
+        this.gl.bindBuffer(GL.ARRAY_BUFFER, vertexBuffer.buffer);
 
         let numColumns = vertexBuffer.numColumns;
 
@@ -241,16 +241,16 @@ export class VertexArray {
                     attributeIndex + i,
                     vertexBuffer.itemSize,
                     vertexBuffer.type,
-                    numColumns * vertexBuffer.itemSize * CONSTANTS.TYPE_SIZE[vertexBuffer.type],
-                    i * vertexBuffer.itemSize * CONSTANTS.TYPE_SIZE[vertexBuffer.type]);
+                    numColumns * vertexBuffer.itemSize * TYPE_SIZE[vertexBuffer.type],
+                    i * vertexBuffer.itemSize * TYPE_SIZE[vertexBuffer.type]);
             } else {
                 this.gl.vertexAttribPointer(
                     attributeIndex + i,
                     vertexBuffer.itemSize,
                     vertexBuffer.type,
                     normalized,
-                    numColumns * vertexBuffer.itemSize * CONSTANTS.TYPE_SIZE[vertexBuffer.type],
-                    i * vertexBuffer.itemSize * CONSTANTS.TYPE_SIZE[vertexBuffer.type]);
+                    numColumns * vertexBuffer.itemSize * TYPE_SIZE[vertexBuffer.type],
+                    i * vertexBuffer.itemSize * TYPE_SIZE[vertexBuffer.type]);
             }
 
             if (instanced) {
@@ -268,7 +268,7 @@ export class VertexArray {
             this.numElements = this.numElements || vertexBuffer.numItems;
         }
 
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, null);
+        this.gl.bindBuffer(GL.ARRAY_BUFFER, null);
 
         return this;
     }

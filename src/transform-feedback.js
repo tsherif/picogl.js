@@ -21,6 +21,8 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
+import { GL } from "./constants";
+
 /**
     Tranform feedback object.
 
@@ -71,8 +73,8 @@ export class TransformFeedback {
     */
     feedbackBuffer(index, buffer) {
         this.bind();
-        this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedback);
-        this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, index, buffer.buffer);
+        this.gl.bindTransformFeedback(GL.TRANSFORM_FEEDBACK, this.transformFeedback);
+        this.gl.bindBufferBase(GL.TRANSFORM_FEEDBACK_BUFFER, index, buffer.buffer);
 
         this.angleBugBuffers[index] = buffer;
 
@@ -91,7 +93,7 @@ export class TransformFeedback {
             this.transformFeedback = null;
 
             if (this.appState.transformFeedback === this) {
-                this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, null);
+                this.gl.bindTransformFeedback(GL.TRANSFORM_FEEDBACK, null);
                 this.appState.transformFeedback = null;
             }
         }
@@ -108,11 +110,11 @@ export class TransformFeedback {
     */
     bind() {
         if (this.appState.transformFeedback !== this) {
-            this.gl.bindTransformFeedback(this.gl.TRANSFORM_FEEDBACK, this.transformFeedback);
+            this.gl.bindTransformFeedback(GL.TRANSFORM_FEEDBACK, this.transformFeedback);
             this.appState.transformFeedback = this;
 
             for (let i = 0, len = this.angleBugBuffers.length; i < len; ++i) {
-                this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, i, this.angleBugBuffers[i].buffer);
+                this.gl.bindBufferBase(GL.TRANSFORM_FEEDBACK_BUFFER, i, this.angleBugBuffers[i].buffer);
             }
         }
 

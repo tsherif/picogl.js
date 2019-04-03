@@ -21,7 +21,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-import { CONSTANTS } from "./constants";
+import { GL } from "./constants";
 
 /**
     WebGL shader.
@@ -52,7 +52,7 @@ export class Shader {
         this.gl.shaderSource(this.shader, source);
         this.gl.compileShader(this.shader);
 
-        if (!this.gl.getShaderParameter(this.shader, CONSTANTS.COMPILE_STATUS)) {
+        if (!this.gl.getShaderParameter(this.shader, GL.COMPILE_STATUS)) {
             let i, lines;
 
             console.error(this.gl.getShaderInfoLog(this.shader));

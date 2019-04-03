@@ -21,7 +21,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-import { CONSTANTS } from "./constants";
+import { GL } from "./constants";
 import { Texture } from "./texture";
 import { Renderbuffer } from "./renderbuffer";
 
@@ -88,7 +88,7 @@ export class Framebuffer {
             defaults to 0, otherwise to TEXTURE_2D. Ignored for renderbuffers.
         @return {Framebuffer} The Framebuffer object.
     */
-    colorTarget(index, attachment, target = attachment.is3D ? 0 : CONSTANTS.TEXTURE_2D) {
+    colorTarget(index, attachment, target = attachment.is3D ? 0 : GL.TEXTURE_2D) {
 
         if (index >= this.numColorTargets) {
             let numColorTargets = index + 1;
@@ -97,7 +97,7 @@ export class Framebuffer {
             this.colorAttachmentTargets.length = numColorTargets;
 
             for (let i = this.numColorTargets; i < numColorTargets - 1; ++i) {
-                this.colorAttachmentEnums[i] = CONSTANTS.NONE;
+                this.colorAttachmentEnums[i] = GL.NONE;
                 this.colorAttachments[i] = null;
                 this.colorAttachmentTargets[i] = 0;
             }
@@ -105,7 +105,7 @@ export class Framebuffer {
             this.numColorTargets = numColorTargets;
         }        
 
-        this.colorAttachmentEnums[index] = CONSTANTS.COLOR_ATTACHMENT0 + index;
+        this.colorAttachmentEnums[index] = GL.COLOR_ATTACHMENT0 + index;
         this.colorAttachments[index] = attachment;
         this.colorAttachmentTargets[index] = target;
 
@@ -113,11 +113,11 @@ export class Framebuffer {
 
 
         if (attachment instanceof Renderbuffer) {
-            this.gl.framebufferRenderbuffer(CONSTANTS.DRAW_FRAMEBUFFER, this.colorAttachmentEnums[index], CONSTANTS.RENDERBUFFER, attachment.renderbuffer);
+            this.gl.framebufferRenderbuffer(GL.DRAW_FRAMEBUFFER, this.colorAttachmentEnums[index], GL.RENDERBUFFER, attachment.renderbuffer);
         } else if (attachment.is3D) {
-            this.gl.framebufferTextureLayer(CONSTANTS.DRAW_FRAMEBUFFER, this.colorAttachmentEnums[index], attachment.texture, 0, target);
+            this.gl.framebufferTextureLayer(GL.DRAW_FRAMEBUFFER, this.colorAttachmentEnums[index], attachment.texture, 0, target);
         } else {
-            this.gl.framebufferTexture2D(CONSTANTS.DRAW_FRAMEBUFFER, this.colorAttachmentEnums[index], target, attachment.texture, 0);
+            this.gl.framebufferTexture2D(GL.DRAW_FRAMEBUFFER, this.colorAttachmentEnums[index], target, attachment.texture, 0);
         }
 
         this.gl.drawBuffers(this.colorAttachmentEnums);
@@ -139,7 +139,7 @@ export class Framebuffer {
             defaults to 0, otherwise to TEXTURE_2D. Ignored for renderbuffers.
         @return {Framebuffer} The Framebuffer object.
     */
-    depthTarget(attachment, target = attachment.is3D ? 0 : CONSTANTS.TEXTURE_2D) {
+    depthTarget(attachment, target = attachment.is3D ? 0 : GL.TEXTURE_2D) {
 
         let currentFramebuffer = this.bindAndCaptureState();
 
@@ -147,11 +147,11 @@ export class Framebuffer {
         this.depthAttachmentTarget = target;
 
         if (attachment instanceof Renderbuffer) {
-            this.gl.framebufferRenderbuffer(CONSTANTS.DRAW_FRAMEBUFFER, CONSTANTS.DEPTH_ATTACHMENT, CONSTANTS.RENDERBUFFER, attachment.renderbuffer);
+            this.gl.framebufferRenderbuffer(GL.DRAW_FRAMEBUFFER, GL.DEPTH_ATTACHMENT, GL.RENDERBUFFER, attachment.renderbuffer);
         } else if (attachment.is3D) {
-            this.gl.framebufferTextureLayer(CONSTANTS.DRAW_FRAMEBUFFER, CONSTANTS.DEPTH_ATTACHMENT, attachment.texture, 0, target);
+            this.gl.framebufferTextureLayer(GL.DRAW_FRAMEBUFFER, GL.DEPTH_ATTACHMENT, attachment.texture, 0, target);
         } else {
-            this.gl.framebufferTexture2D(CONSTANTS.DRAW_FRAMEBUFFER, CONSTANTS.DEPTH_ATTACHMENT, target, attachment.texture, 0);
+            this.gl.framebufferTexture2D(GL.DRAW_FRAMEBUFFER, GL.DEPTH_ATTACHMENT, target, attachment.texture, 0);
         }
 
         this.width = attachment.width;
@@ -185,9 +185,9 @@ export class Framebuffer {
             if (attachment instanceof Texture) {
                 // Texture resizing recreates the texture object.
                 if (attachment.is3D) {
-                    this.gl.framebufferTextureLayer(CONSTANTS.DRAW_FRAMEBUFFER, this.colorAttachmentEnums[i], attachment.texture, 0, this.colorAttachmentTargets[i]);
+                    this.gl.framebufferTextureLayer(GL.DRAW_FRAMEBUFFER, this.colorAttachmentEnums[i], attachment.texture, 0, this.colorAttachmentTargets[i]);
                 } else {
-                    this.gl.framebufferTexture2D(CONSTANTS.DRAW_FRAMEBUFFER, this.colorAttachmentEnums[i], this.colorAttachmentTargets[i], attachment.texture, 0);
+                    this.gl.framebufferTexture2D(GL.DRAW_FRAMEBUFFER, this.colorAttachmentEnums[i], this.colorAttachmentTargets[i], attachment.texture, 0);
                 }
             }
         }
@@ -197,9 +197,9 @@ export class Framebuffer {
             if (this.depthAttachment instanceof Texture) {
                 // Texture resizing recreates the texture object.
                 if (this.depthAttachment.is3D) {
-                    this.gl.framebufferTextureLayer(CONSTANTS.DRAW_FRAMEBUFFER, CONSTANTS.DEPTH_ATTACHMENT, this.depthAttachment.texture, 0, this.depthAttachmentTarget);
+                    this.gl.framebufferTextureLayer(GL.DRAW_FRAMEBUFFER, GL.DEPTH_ATTACHMENT, this.depthAttachment.texture, 0, this.depthAttachmentTarget);
                 } else {
-                    this.gl.framebufferTexture2D(CONSTANTS.DRAW_FRAMEBUFFER, CONSTANTS.DEPTH_ATTACHMENT, this.depthAttachmentTarget, this.depthAttachment.texture, 0);
+                    this.gl.framebufferTexture2D(GL.DRAW_FRAMEBUFFER, GL.DEPTH_ATTACHMENT, this.depthAttachmentTarget, this.depthAttachment.texture, 0);
                 }
             }
         }
@@ -224,12 +224,12 @@ export class Framebuffer {
             this.framebuffer = null;
 
             if (this.appState.drawFramebuffer === this) {
-                this.gl.bindFramebuffer(CONSTANTS.DRAW_FRAMEBUFFER, null);
+                this.gl.bindFramebuffer(GL.DRAW_FRAMEBUFFER, null);
                 this.appState.drawFramebuffer = null;
             }
 
             if (this.appState.readFramebuffer === this) {
-                this.gl.bindFramebuffer(CONSTANTS.READ_FRAMEBUFFER, null);
+                this.gl.bindFramebuffer(GL.READ_FRAMEBUFFER, null);
                 this.appState.readFramebuffer = null;
             }
         }
@@ -245,7 +245,7 @@ export class Framebuffer {
     */
     getStatus() {
         let currentFramebuffer = this.bindAndCaptureState();
-        let status = this.gl.checkFramebufferStatus(CONSTANTS.DRAW_FRAMEBUFFER);
+        let status = this.gl.checkFramebufferStatus(GL.DRAW_FRAMEBUFFER);
         this.restoreState(currentFramebuffer);
 
         return status;
@@ -260,7 +260,7 @@ export class Framebuffer {
     */
     bindForDraw() {
         if (this.appState.drawFramebuffer !== this) {
-            this.gl.bindFramebuffer(CONSTANTS.DRAW_FRAMEBUFFER, this.framebuffer);
+            this.gl.bindFramebuffer(GL.DRAW_FRAMEBUFFER, this.framebuffer);
             this.appState.drawFramebuffer = this;
         }
 
@@ -295,7 +295,7 @@ export class Framebuffer {
         let currentFramebuffer = this.appState.drawFramebuffer;
 
         if (currentFramebuffer !== this) {
-            this.gl.bindFramebuffer(CONSTANTS.DRAW_FRAMEBUFFER, this.framebuffer);
+            this.gl.bindFramebuffer(GL.DRAW_FRAMEBUFFER, this.framebuffer);
         }
 
         return currentFramebuffer;
@@ -310,7 +310,7 @@ export class Framebuffer {
     */
     restoreState(framebuffer) {
         if (framebuffer !== this) {
-            this.gl.bindFramebuffer(CONSTANTS.DRAW_FRAMEBUFFER, framebuffer ? framebuffer.framebuffer : null);
+            this.gl.bindFramebuffer(GL.DRAW_FRAMEBUFFER, framebuffer ? framebuffer.framebuffer : null);
         }
 
         return this;

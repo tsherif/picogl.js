@@ -21,7 +21,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-import { CONSTANTS } from "./constants";
+import { GL, TYPE_SIZE } from "./constants";
 
 /**
     Storage for vertex data.
@@ -42,19 +42,19 @@ export class VertexBuffer {
     constructor(gl, appState, type, itemSize, data, usage = gl.STATIC_DRAW, indexArray) {
         let numColumns;
         switch(type) {
-            case CONSTANTS.FLOAT_MAT4:
-            case CONSTANTS.FLOAT_MAT4x2:
-            case CONSTANTS.FLOAT_MAT4x3:
+            case GL.FLOAT_MAT4:
+            case GL.FLOAT_MAT4x2:
+            case GL.FLOAT_MAT4x3:
                 numColumns = 4;
                 break;
-            case CONSTANTS.FLOAT_MAT3:
-            case CONSTANTS.FLOAT_MAT3x2:
-            case CONSTANTS.FLOAT_MAT3x4:
+            case GL.FLOAT_MAT3:
+            case GL.FLOAT_MAT3x2:
+            case GL.FLOAT_MAT3x4:
                 numColumns = 3;
                 break;
-            case CONSTANTS.FLOAT_MAT2:
-            case CONSTANTS.FLOAT_MAT2x3:
-            case CONSTANTS.FLOAT_MAT2x4:
+            case GL.FLOAT_MAT2:
+            case GL.FLOAT_MAT2x3:
+            case GL.FLOAT_MAT2x4:
                 numColumns = 2;
                 break;
             default:
@@ -62,30 +62,30 @@ export class VertexBuffer {
         }
 
         switch(type) {
-            case CONSTANTS.FLOAT_MAT4:
-            case CONSTANTS.FLOAT_MAT3x4:
-            case CONSTANTS.FLOAT_MAT2x4:
+            case GL.FLOAT_MAT4:
+            case GL.FLOAT_MAT3x4:
+            case GL.FLOAT_MAT2x4:
                 itemSize = 4;
-                type = CONSTANTS.FLOAT;
+                type = GL.FLOAT;
                 break;
-            case CONSTANTS.FLOAT_MAT3:
-            case CONSTANTS.FLOAT_MAT4x3:
-            case CONSTANTS.FLOAT_MAT2x3:
+            case GL.FLOAT_MAT3:
+            case GL.FLOAT_MAT4x3:
+            case GL.FLOAT_MAT2x3:
                 itemSize = 3;
-                type = CONSTANTS.FLOAT;
+                type = GL.FLOAT;
                 break;
-            case CONSTANTS.FLOAT_MAT2:
-            case CONSTANTS.FLOAT_MAT3x2:
-            case CONSTANTS.FLOAT_MAT4x2:
+            case GL.FLOAT_MAT2:
+            case GL.FLOAT_MAT3x2:
+            case GL.FLOAT_MAT4x2:
                 itemSize = 2;
-                type = CONSTANTS.FLOAT;
+                type = GL.FLOAT;
                 break;
         }
 
         let dataLength;
         if (typeof data === "number") {
             dataLength = data;
-            data *= CONSTANTS.TYPE_SIZE[type];
+            data *= TYPE_SIZE[type];
         } else {
             dataLength = data.length;
         }
@@ -99,7 +99,7 @@ export class VertexBuffer {
         this.numColumns = numColumns;
         this.usage = usage;
         this.indexArray = !!indexArray;
-        this.binding = this.indexArray ? gl.ELEMENT_ARRAY_BUFFER : gl.ARRAY_BUFFER;
+        this.binding = this.indexArray ? GL.ELEMENT_ARRAY_BUFFER : GL.ARRAY_BUFFER;
 
         this.restore(data);
     }
@@ -114,7 +114,7 @@ export class VertexBuffer {
     */
     restore(data) {
         if (!data) {
-            data = this.numItems * this.itemSize * this.numColumns * CONSTANTS.TYPE_SIZE[this.type];
+            data = this.numItems * this.itemSize * this.numColumns * TYPE_SIZE[this.type];
         }
 
         // Don't want to update vertex array bindings
