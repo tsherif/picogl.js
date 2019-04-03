@@ -21,7 +21,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-import { GL, TEXTURE_FORMAT_DEFAULTS, COMPRESSED_TEXTURE_TYPES, WEBGL_INFO, DUMMY_OBJECT } from "./constants";
+import { GL, COMPRESSED_TEXTURE_TYPES, WEBGL_INFO, DUMMY_OBJECT } from "./constants";
 import { Cubemap } from "./cubemap";
 import { DrawCall } from "./draw-call";
 import { Framebuffer } from "./framebuffer";
