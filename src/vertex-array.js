@@ -153,7 +153,7 @@ export class VertexArray {
         return this;
     }
 
-    //Bind this vertex array.
+    // Bind this vertex array.
     bind() {
         if (this.appState.vertexArray !== this) {
             this.gl.bindVertexArray(this.vertexArray);
