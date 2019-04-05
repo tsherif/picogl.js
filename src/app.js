@@ -1027,6 +1027,21 @@ export class App {
     }
 
     /**
+        Create an buffer without any structure information. Structure
+        must be fully specified when binding to a VertexArray.
+
+        @method
+        @param {number} bytesPerVertex Number of bytes per vertex.
+        @param {ArrayBufferView|number} data Buffer data itself or the total 
+            number of bytes to be allocated.
+        @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
+        @return {VertexBuffer} New VertexBuffer object.
+    */
+    createInterleavedBuffer(bytesPerVertex, data, usage) {
+        return new VertexBuffer(this.gl, this.state, null, bytesPerVertex, data, usage);
+    }
+
+    /**
         Create an index buffer.
 
         @method

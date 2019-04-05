@@ -92,20 +92,26 @@ export class VertexBuffer {
         }
 
         let dataLength;
+        let byteLength;
         if (typeof data === "number") {
             dataLength = data;
-            data *= TYPE_SIZE[type];
+            if (type) {
+                data *= TYPE_SIZE[type];
+            }
+            byteLength = data;
         } else {
             dataLength = data.length;
+            byteLength = data.byteLength;
         }
 
         this.gl = gl;
         this.buffer = null;
         this.appState = appState;
         this.type = type;
-        this.itemSize = itemSize;
-        this.numItems = dataLength / (itemSize * numColumns);
+        this.itemSize = itemSize;  // In bytes for interleaved arrays.
+        this.numItems = type ? dataLength / (itemSize * numColumns) : byteLength / itemSize;
         this.numColumns = numColumns;
+        this.byteLength = byteLength;
         this.usage = usage;
         this.indexArray = Boolean(indexArray);
         this.integer = Boolean(INTEGER_TYPES[this.type]);
@@ -138,7 +144,7 @@ export class VertexBuffer {
     */
     restore(data) {
         if (!data) {
-            data = this.numItems * this.itemSize * this.numColumns * TYPE_SIZE[this.type];
+            data = this.byteLength;
         }
 
         // Don't want to update vertex array bindings

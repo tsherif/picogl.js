@@ -1,39 +1,5 @@
-/*
-PicoGL.js v0.11.0
-
-The MIT License (MIT)
-
-Copyright (c) 2017 Tarek Sherif
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
-the Software, and to permit persons to whom the Software is furnished to do so,
-subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/
-
-(function webpackUniversalModuleDefinition(root, factory) {
-	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory();
-	else if(typeof define === 'function' && define.amd)
-		define([], factory);
-	else if(typeof exports === 'object')
-		exports["PicoGL"] = factory();
-	else
-		root["PicoGL"] = factory();
-})(this, function() {
-return /******/ (function(modules) { // webpackBootstrap
+var PicoGL =
+/******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
 /******/
@@ -1509,7 +1475,7 @@ let webglInfoInitialized = false;
     @namespace PicoGL
 */
 const PicoGL = Object.assign({ 
-    version: "0.11.0",
+    version: "DEV",
 
     WEBGL_INFO: __WEBPACK_IMPORTED_MODULE_0__constants__["f" /* WEBGL_INFO */],
 
@@ -2586,6 +2552,21 @@ class App {
     */
     createMatrixBuffer(type, data, usage) {
         return new __WEBPACK_IMPORTED_MODULE_12__vertex_buffer__["a" /* VertexBuffer */](this.gl, this.state, type, 0, data, usage);
+    }
+
+    /**
+        Create an buffer without any structure information. Structure
+        must be fully specified when binding to a VertexArray.
+
+        @method
+        @param {number} bytesPerVertex Number of bytes per vertex.
+        @param {ArrayBufferView|number} data Buffer data itself or the total 
+            number of bytes to be allocated.
+        @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
+        @return {VertexBuffer} New VertexBuffer object.
+    */
+    createInterleavedBuffer(bytesPerVertex, data, usage) {
+        return new __WEBPACK_IMPORTED_MODULE_12__vertex_buffer__["a" /* VertexBuffer */](this.gl, this.state, null, bytesPerVertex, data, usage);
     }
 
     /**
@@ -4843,8 +4824,8 @@ class VertexArray {
         @param {VertexBuffer} vertexBuffer The VertexBuffer to bind.
         @return {VertexArray} The VertexArray object.
     */
-    vertexAttributeBuffer(attributeIndex, vertexBuffer) {
-        this.attributeBuffer(attributeIndex, vertexBuffer, false);
+    vertexAttributeBuffer(attributeIndex, vertexBuffer, options = __WEBPACK_IMPORTED_MODULE_0__constants__["b" /* DUMMY_OBJECT */]) {
+        this.attributeBuffer(attributeIndex, vertexBuffer, options, false);
 
         return this;
     }
@@ -4857,8 +4838,8 @@ class VertexArray {
         @param {VertexBuffer} vertexBuffer The VertexBuffer to bind.
         @return {VertexArray} The VertexArray object.
     */
-    instanceAttributeBuffer(attributeIndex, vertexBuffer) {
-        this.attributeBuffer(attributeIndex, vertexBuffer, true);
+    instanceAttributeBuffer(attributeIndex, vertexBuffer, options = __WEBPACK_IMPORTED_MODULE_0__constants__["b" /* DUMMY_OBJECT */]) {
+        this.attributeBuffer(attributeIndex, vertexBuffer, options, true);
 
         return this;
     }
@@ -4906,13 +4887,7 @@ class VertexArray {
         return this;
     }
 
-    /**
-        Bind this vertex array.
-
-        @method
-        @ignore
-        @return {VertexArray} The VertexArray object.
-    */
+    //Bind this vertex array.
     bind() {
         if (this.appState.vertexArray !== this) {
             this.gl.bindVertexArray(this.vertexArray);
@@ -4922,14 +4897,8 @@ class VertexArray {
         return this;
     }
 
-    /**
-        Attach an attribute buffer
-
-        @method
-        @ignore
-        @return {VertexArray} The VertexArray object.
-    */
-    attributeBuffer(attributeIndex, vertexBuffer, instanced) {
+    // Generic attribute buffer attachment
+    attributeBuffer(attributeIndex, vertexBuffer, options = {}, instanced) {
         // allocate at gl level, if necessary
         if (this.vertexArray === null) {
             this.vertexArray = this.gl.createVertexArray();
@@ -4938,25 +4907,38 @@ class VertexArray {
         this.bind();
         this.gl.bindBuffer(__WEBPACK_IMPORTED_MODULE_0__constants__["c" /* GL */].ARRAY_BUFFER, vertexBuffer.buffer);
 
-        let iPointer = vertexBuffer.integer && !vertexBuffer.normalizedIntegers;
+        let {
+            type = vertexBuffer.type,
+            size = vertexBuffer.itemSize,
+            stride = 0,
+            offset = 0,
+            normalized = vertexBuffer.normalizedIntegers,
+            integer = vertexBuffer.integer && !vertexBuffer.normalizedIntegers
+        } = options;
+
         let numColumns = vertexBuffer.numColumns;
 
+        if (stride === 0) {
+            // Set explicitly for matrix buffers
+            stride = numColumns * size * __WEBPACK_IMPORTED_MODULE_0__constants__["e" /* TYPE_SIZE */][type];
+        }
+
         for (let i = 0; i < numColumns; ++i) {
-            if (iPointer) {
+            if (integer) {
                 this.gl.vertexAttribIPointer(
                     attributeIndex + i,
-                    vertexBuffer.itemSize,
-                    vertexBuffer.type,
-                    numColumns * vertexBuffer.itemSize * __WEBPACK_IMPORTED_MODULE_0__constants__["e" /* TYPE_SIZE */][vertexBuffer.type],
-                    i * vertexBuffer.itemSize * __WEBPACK_IMPORTED_MODULE_0__constants__["e" /* TYPE_SIZE */][vertexBuffer.type]);
+                    size,
+                    type,
+                    stride,
+                    offset + i * size * __WEBPACK_IMPORTED_MODULE_0__constants__["e" /* TYPE_SIZE */][type]);
             } else {
                 this.gl.vertexAttribPointer(
                     attributeIndex + i,
-                    vertexBuffer.itemSize,
-                    vertexBuffer.type,
-                    vertexBuffer.normalizedIntegers,
-                    numColumns * vertexBuffer.itemSize * __WEBPACK_IMPORTED_MODULE_0__constants__["e" /* TYPE_SIZE */][vertexBuffer.type],
-                    i * vertexBuffer.itemSize * __WEBPACK_IMPORTED_MODULE_0__constants__["e" /* TYPE_SIZE */][vertexBuffer.type]);
+                    size,
+                    type,
+                    normalized,
+                    stride,
+                    offset + i * size * __WEBPACK_IMPORTED_MODULE_0__constants__["e" /* TYPE_SIZE */][type]);
             }
 
             if (instanced) {
@@ -5083,20 +5065,26 @@ class VertexBuffer {
         }
 
         let dataLength;
+        let byteLength;
         if (typeof data === "number") {
             dataLength = data;
-            data *= __WEBPACK_IMPORTED_MODULE_0__constants__["e" /* TYPE_SIZE */][type];
+            if (type) {
+                data *= __WEBPACK_IMPORTED_MODULE_0__constants__["e" /* TYPE_SIZE */][type];
+            }
+            byteLength = data;
         } else {
             dataLength = data.length;
+            byteLength = data.byteLength;
         }
 
         this.gl = gl;
         this.buffer = null;
         this.appState = appState;
         this.type = type;
-        this.itemSize = itemSize;
-        this.numItems = dataLength / (itemSize * numColumns);
+        this.itemSize = itemSize;  // In bytes for interleaved arrays.
+        this.numItems = type ? dataLength / (itemSize * numColumns) : byteLength / itemSize;
         this.numColumns = numColumns;
+        this.byteLength = byteLength;
         this.usage = usage;
         this.indexArray = Boolean(indexArray);
         this.integer = Boolean(INTEGER_TYPES[this.type]);
@@ -5129,7 +5117,7 @@ class VertexBuffer {
     */
     restore(data) {
         if (!data) {
-            data = this.numItems * this.itemSize * this.numColumns * __WEBPACK_IMPORTED_MODULE_0__constants__["e" /* TYPE_SIZE */][this.type];
+            data = this.byteLength;
         }
 
         // Don't want to update vertex array bindings
@@ -5190,4 +5178,4 @@ class VertexBuffer {
 
 /***/ })
 /******/ ])["PicoGL"];
-});
+//# sourceMappingURL=picogl.js.map

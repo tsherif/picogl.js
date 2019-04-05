@@ -18,7 +18,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-import { GL, TYPE_SIZE } from "./constants";
+import { GL, TYPE_SIZE, DUMMY_OBJECT } from "./constants";
 
 /**
     Organizes vertex buffer and attribute state.
@@ -74,8 +74,8 @@ export class VertexArray {
         @param {VertexBuffer} vertexBuffer The VertexBuffer to bind.
         @return {VertexArray} The VertexArray object.
     */
-    vertexAttributeBuffer(attributeIndex, vertexBuffer) {
-        this.attributeBuffer(attributeIndex, vertexBuffer, false);
+    vertexAttributeBuffer(attributeIndex, vertexBuffer, options = DUMMY_OBJECT) {
+        this.attributeBuffer(attributeIndex, vertexBuffer, options, false);
 
         return this;
     }
@@ -88,8 +88,8 @@ export class VertexArray {
         @param {VertexBuffer} vertexBuffer The VertexBuffer to bind.
         @return {VertexArray} The VertexArray object.
     */
-    instanceAttributeBuffer(attributeIndex, vertexBuffer) {
-        this.attributeBuffer(attributeIndex, vertexBuffer, true);
+    instanceAttributeBuffer(attributeIndex, vertexBuffer, options = DUMMY_OBJECT) {
+        this.attributeBuffer(attributeIndex, vertexBuffer, options, true);
 
         return this;
     }
@@ -137,13 +137,7 @@ export class VertexArray {
         return this;
     }
 
-    /**
-        Bind this vertex array.
-
-        @method
-        @ignore
-        @return {VertexArray} The VertexArray object.
-    */
+    //Bind this vertex array.
     bind() {
         if (this.appState.vertexArray !== this) {
             this.gl.bindVertexArray(this.vertexArray);
@@ -153,14 +147,8 @@ export class VertexArray {
         return this;
     }
 
-    /**
-        Attach an attribute buffer
-
-        @method
-        @ignore
-        @return {VertexArray} The VertexArray object.
-    */
-    attributeBuffer(attributeIndex, vertexBuffer, instanced) {
+    // Generic attribute buffer attachment
+    attributeBuffer(attributeIndex, vertexBuffer, options = {}, instanced) {
         // allocate at gl level, if necessary
         if (this.vertexArray === null) {
             this.vertexArray = this.gl.createVertexArray();
@@ -169,25 +157,38 @@ export class VertexArray {
         this.bind();
         this.gl.bindBuffer(GL.ARRAY_BUFFER, vertexBuffer.buffer);
 
-        let iPointer = vertexBuffer.integer && !vertexBuffer.normalizedIntegers;
+        let {
+            type = vertexBuffer.type,
+            size = vertexBuffer.itemSize,
+            stride = 0,
+            offset = 0,
+            normalized = vertexBuffer.normalizedIntegers,
+            integer = vertexBuffer.integer && !vertexBuffer.normalizedIntegers
+        } = options;
+
         let numColumns = vertexBuffer.numColumns;
 
+        if (stride === 0) {
+            // Set explicitly for matrix buffers
+            stride = numColumns * size * TYPE_SIZE[type];
+        }
+
         for (let i = 0; i < numColumns; ++i) {
-            if (iPointer) {
+            if (integer) {
                 this.gl.vertexAttribIPointer(
                     attributeIndex + i,
-                    vertexBuffer.itemSize,
-                    vertexBuffer.type,
-                    numColumns * vertexBuffer.itemSize * TYPE_SIZE[vertexBuffer.type],
-                    i * vertexBuffer.itemSize * TYPE_SIZE[vertexBuffer.type]);
+                    size,
+                    type,
+                    stride,
+                    offset + i * size * TYPE_SIZE[type]);
             } else {
                 this.gl.vertexAttribPointer(
                     attributeIndex + i,
-                    vertexBuffer.itemSize,
-                    vertexBuffer.type,
-                    vertexBuffer.normalizedIntegers,
-                    numColumns * vertexBuffer.itemSize * TYPE_SIZE[vertexBuffer.type],
-                    i * vertexBuffer.itemSize * TYPE_SIZE[vertexBuffer.type]);
+                    size,
+                    type,
+                    normalized,
+                    stride,
+                    offset + i * size * TYPE_SIZE[type]);
             }
 
             if (instanced) {
