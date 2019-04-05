@@ -135,6 +135,19 @@ export class VertexBuffer {
     }
 
     /**
+        Indicate that this buffer does not consist of normalized integers. Note
+        that this should be called before binding to a VertexArray.
+
+        @method
+        @return {VertexBuffer} The VertexBuffer object.
+    */
+    unnormalized() {
+        this.normalizedIntegers = false;
+
+        return this;
+    }
+
+    /**
         Restore vertex buffer after context loss.
 
         @method
