@@ -68,10 +68,10 @@ or it can be installed via [npm](https://www.npmjs.com/package/picogl):
     npm install picogl
 ```
 
-and loaded via CommonJS-style `require`:
+and loaded via ES6-style `import`:   
 
 ```JavaScript
-    var PicoGL = require("picogl");
+    import PicoGL from "picogl";
 ```
 
 Features
