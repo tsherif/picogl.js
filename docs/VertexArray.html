@@ -412,7 +412,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="vertex-array.js.html">vertex-array.js</a>, <a href="vertex-array.js.html#line190">line 190</a>
+        <a href="vertex-array.js.html">vertex-array.js</a>, <a href="vertex-array.js.html#line142">line 142</a>
     </li></ul></dd>
     
 
@@ -569,7 +569,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="vertex-array.js.html">vertex-array.js</a>, <a href="vertex-array.js.html#line168">line 168</a>
+        <a href="vertex-array.js.html">vertex-array.js</a>, <a href="vertex-array.js.html#line120">line 120</a>
     </li></ul></dd>
     
 
@@ -625,7 +625,7 @@
     
 
     
-    <h4 class="name" id="instanceAttributeBuffer"><span class="type-signature"></span>instanceAttributeBuffer<span class="signature">(attributeIndex, vertexBuffer)</span><span class="type-signature"> &rarr; {<a href="VertexArray.html">VertexArray</a>}</span></h4>
+    <h4 class="name" id="instanceAttributeBuffer"><span class="type-signature"></span>instanceAttributeBuffer<span class="signature">(attributeIndex, vertexBuffer, options<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="VertexArray.html">VertexArray</a>}</span></h4>
     
 
     
@@ -657,6 +657,8 @@
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
         
 
@@ -682,6 +684,14 @@
             </td>
 
             
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
 
             
 
@@ -705,6 +715,14 @@
             </td>
 
             
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
 
             
 
@@ -712,122 +730,39 @@
         </tr>
 
     
-    </tbody>
-</table>
 
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="vertex-array.js.html">vertex-array.js</a>, <a href="vertex-array.js.html#line91">line 91</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    The VertexArray object.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type"><a href="VertexArray.html">VertexArray</a></span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
+        <tr>
+            
+                <td class="name"><code>options</code></td>
             
 
-    
-
-    
-    <h4 class="name" id="instanceIntegerAttributeBuffer"><span class="type-signature"></span>instanceIntegerAttributeBuffer<span class="signature">(attributeIndex, vertexBuffer)</span><span class="type-signature"> &rarr; {<a href="VertexArray.html">VertexArray</a>}</span></h4>
-    
-
-    
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
 
 
+            
+            </td>
 
-<div class="description">
-    Bind an per-instance integer attribute buffer to this vertex array.
-        Note that this refers to the attribute in the shader being an integer,
-        not the data stored in the vertex buffer.
-</div>
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
 
+                
+                </td>
+            
 
+            
 
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
+            <td class="description last">Attribute pointer options. These will override those provided in the
+            VertexBuffer.
+                <h6>Properties</h6>
+                
 
 <table class="params">
     <thead>
@@ -839,6 +774,8 @@
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
         
 
@@ -851,46 +788,205 @@
 
         <tr>
             
-                <td class="name"><code>attributeIndex</code></td>
+                <td class="name"><code>type</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">number</span>
+<span class="param-type">GLEnum</span>
 
 
             
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
 
             
 
-            <td class="description last">The attribute location to bind to.</td>
+            <td class="description last">Type of data stored in the buffer.</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>vertexBuffer</code></td>
+                <td class="name"><code>size</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type"><a href="VertexBuffer.html">VertexBuffer</a></span>
+<span class="param-type">GLEnum</span>
 
 
             
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
 
             
 
-            <td class="description last">The VertexBuffer to bind.</td>
+            <td class="description last">Number of components per vertex.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>stride</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">GLEnum</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Number of bytes between the start of data for each vertex.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>offset</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">GLEnum</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Number of bytes before the start of data for the first vertex.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>normalized</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">GLEnum</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Data is integer data that should be normalized to a float.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>integer</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">GLEnum</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Pass data as integers.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
         </tr>
 
     
@@ -931,189 +1027,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="vertex-array.js.html">vertex-array.js</a>, <a href="vertex-array.js.html#line123">line 123</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    The VertexArray object.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type"><a href="VertexArray.html">VertexArray</a></span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="instanceNormalizedAttributeBuffer"><span class="type-signature"></span>instanceNormalizedAttributeBuffer<span class="signature">(attributeIndex, vertexBuffer)</span><span class="type-signature"> &rarr; {<a href="VertexArray.html">VertexArray</a>}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Bind an per-instance normalized attribute buffer to this vertex array.
-        Integer data in the vertex buffer will be normalized to [-1.0, 1.0] if
-        signed, [0.0, 1.0] if unsigned.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>attributeIndex</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The attribute location to bind to.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>vertexBuffer</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="VertexBuffer.html">VertexBuffer</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The VertexBuffer to bind.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="vertex-array.js.html">vertex-array.js</a>, <a href="vertex-array.js.html#line155">line 155</a>
+        <a href="vertex-array.js.html">vertex-array.js</a>, <a href="vertex-array.js.html#line107">line 107</a>
     </li></ul></dd>
     
 
@@ -1277,7 +1191,7 @@
     
 
     
-    <h4 class="name" id="vertexAttributeBuffer"><span class="type-signature"></span>vertexAttributeBuffer<span class="signature">(attributeIndex, vertexBuffer)</span><span class="type-signature"> &rarr; {<a href="VertexArray.html">VertexArray</a>}</span></h4>
+    <h4 class="name" id="vertexAttributeBuffer"><span class="type-signature"></span>vertexAttributeBuffer<span class="signature">(attributeIndex, vertexBuffer, options<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="VertexArray.html">VertexArray</a>}</span></h4>
     
 
     
@@ -1309,6 +1223,8 @@
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
         
 
@@ -1334,6 +1250,14 @@
             </td>
 
             
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
 
             
 
@@ -1357,6 +1281,14 @@
             </td>
 
             
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
 
             
 
@@ -1364,122 +1296,39 @@
         </tr>
 
     
-    </tbody>
-</table>
 
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="vertex-array.js.html">vertex-array.js</a>, <a href="vertex-array.js.html#line77">line 77</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    The VertexArray object.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type"><a href="VertexArray.html">VertexArray</a></span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
+        <tr>
+            
+                <td class="name"><code>options</code></td>
             
 
-    
-
-    
-    <h4 class="name" id="vertexIntegerAttributeBuffer"><span class="type-signature"></span>vertexIntegerAttributeBuffer<span class="signature">(attributeIndex, vertexBuffer)</span><span class="type-signature"> &rarr; {<a href="VertexArray.html">VertexArray</a>}</span></h4>
-    
-
-    
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
 
 
+            
+            </td>
 
-<div class="description">
-    Bind an per-vertex integer attribute buffer to this vertex array.
-        Note that this refers to the attribute in the shader being an integer,
-        not the data stored in the vertex buffer.
-</div>
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
 
+                
+                </td>
+            
 
+            
 
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
+            <td class="description last">Attribute pointer options. These will override those provided in the
+            VertexBuffer.
+                <h6>Properties</h6>
+                
 
 <table class="params">
     <thead>
@@ -1491,6 +1340,8 @@
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
         
 
@@ -1503,46 +1354,205 @@
 
         <tr>
             
-                <td class="name"><code>attributeIndex</code></td>
+                <td class="name"><code>type</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">number</span>
+<span class="param-type">GLEnum</span>
 
 
             
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
 
             
 
-            <td class="description last">The attribute location to bind to.</td>
+            <td class="description last">Type of data stored in the buffer.</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>vertexBuffer</code></td>
+                <td class="name"><code>size</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type"><a href="VertexBuffer.html">VertexBuffer</a></span>
+<span class="param-type">GLEnum</span>
 
 
             
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
 
             
 
-            <td class="description last">The VertexBuffer to bind.</td>
+            <td class="description last">Number of components per vertex.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>stride</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">GLEnum</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Number of bytes between the start of data for each vertex.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>offset</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">GLEnum</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Number of bytes before the start of data for the first vertex.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>normalized</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">GLEnum</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Data is integer data that should be normalized to a float.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>integer</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">GLEnum</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Pass data as integers.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
         </tr>
 
     
@@ -1583,189 +1593,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="vertex-array.js.html">vertex-array.js</a>, <a href="vertex-array.js.html#line107">line 107</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    The VertexArray object.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type"><a href="VertexArray.html">VertexArray</a></span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="vertexNormalizedAttributeBuffer"><span class="type-signature"></span>vertexNormalizedAttributeBuffer<span class="signature">(attributeIndex, vertexBuffer)</span><span class="type-signature"> &rarr; {<a href="VertexArray.html">VertexArray</a>}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Bind an per-vertex normalized attribute buffer to this vertex array.
-        Integer data in the vertex buffer will be normalized to [-1.0, 1.0] if
-        signed, [0.0, 1.0] if unsigned.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>attributeIndex</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The attribute location to bind to.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>vertexBuffer</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="VertexBuffer.html">VertexBuffer</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The VertexBuffer to bind.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="vertex-array.js.html">vertex-array.js</a>, <a href="vertex-array.js.html#line139">line 139</a>
+        <a href="vertex-array.js.html">vertex-array.js</a>, <a href="vertex-array.js.html#line85">line 85</a>
     </li></ul></dd>
     
 
@@ -1837,7 +1665,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Mon Apr 01 2019 09:07:02 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Apr 05 2019 07:34:10 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

@@ -72,6 +72,14 @@ export class VertexArray {
         @method
         @param {number} attributeIndex The attribute location to bind to.
         @param {VertexBuffer} vertexBuffer The VertexBuffer to bind.
+        @param {Object} [options] Attribute pointer options. These will override those provided in the
+            VertexBuffer.
+        @param {GLEnum} [options.type] Type of data stored in the buffer.
+        @param {GLEnum} [options.size] Number of components per vertex.
+        @param {GLEnum} [options.stride] Number of bytes between the start of data for each vertex.
+        @param {GLEnum} [options.offset] Number of bytes before the start of data for the first vertex.
+        @param {GLEnum} [options.normalized] Data is integer data that should be normalized to a float.
+        @param {GLEnum} [options.integer] Pass data as integers.
         @return {VertexArray} The VertexArray object.
     */
     vertexAttributeBuffer(attributeIndex, vertexBuffer, options = DUMMY_OBJECT) {
@@ -86,6 +94,14 @@ export class VertexArray {
         @method
         @param {number} attributeIndex The attribute location to bind to.
         @param {VertexBuffer} vertexBuffer The VertexBuffer to bind.
+        @param {Object} [options] Attribute pointer options. These will override those provided in the
+            VertexBuffer.
+        @param {GLEnum} [options.type] Type of data stored in the buffer.
+        @param {GLEnum} [options.size] Number of components per vertex.
+        @param {GLEnum} [options.stride] Number of bytes between the start of data for each vertex.
+        @param {GLEnum} [options.offset] Number of bytes before the start of data for the first vertex.
+        @param {GLEnum} [options.normalized] Data is integer data that should be normalized to a float.
+        @param {GLEnum} [options.integer] Pass data as integers.
         @return {VertexArray} The VertexArray object.
     */
     instanceAttributeBuffer(attributeIndex, vertexBuffer, options = DUMMY_OBJECT) {

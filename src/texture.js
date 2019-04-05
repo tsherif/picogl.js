@@ -31,7 +31,6 @@ const DUMMY_ARRAY = new Array(1);
     @class
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLTexture} texture Handle to the texture.
-    @prop {WebGLSamler} sampler Sampler object.
     @prop {number} width Texture width.
     @prop {number} height Texture height.
     @prop {number} depth Texture depth.
