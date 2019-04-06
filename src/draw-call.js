@@ -34,7 +34,6 @@ import { GL, WEBGL_INFO } from "./constants";
     @prop {TransformFeedback} currentTransformFeedback Transform feedback to use for this draw call.
     @prop {Array} uniformBuffers Ordered list of active uniform buffers.
     @prop {Array} uniformBlockNames Ordered list of uniform block names.
-    @prop {Object} uniformBlockBases Map of uniform blocks to uniform buffer bases.
     @prop {Number} uniformBlockCount Number of active uniform blocks for this draw call.
     @prop {Object} uniformIndices Map of uniform names to indices in the uniform arrays.
     @prop {Array} uniformNames Ordered list of uniform names.
@@ -62,9 +61,7 @@ export class DrawCall {
         this.uniformCount = 0;
         this.uniformBuffers = new Array(WEBGL_INFO.MAX_UNIFORM_BUFFERS);
         this.uniformBlockNames = new Array(WEBGL_INFO.MAX_UNIFORM_BUFFERS);
-        this.uniformBlockBases = {};
         this.uniformBlockCount = 0;
-        this.samplerIndices = {};
         this.textures = new Array(WEBGL_INFO.MAX_TEXTURE_UNITS);
         this.textureCount = 0;
         this.primitive = primitive;

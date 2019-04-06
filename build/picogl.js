@@ -1,5 +1,39 @@
-var PicoGL =
-/******/ (function(modules) { // webpackBootstrap
+/*
+PicoGL.js v0.11.0
+
+The MIT License (MIT)
+
+Copyright (c) 2017 Tarek Sherif
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
+
+(function webpackUniversalModuleDefinition(root, factory) {
+	if(typeof exports === 'object' && typeof module === 'object')
+		module.exports = factory();
+	else if(typeof define === 'function' && define.amd)
+		define([], factory);
+	else if(typeof exports === 'object')
+		exports["PicoGL"] = factory();
+	else
+		root["PicoGL"] = factory();
+})(this, function() {
+return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
 /******/
@@ -813,7 +847,6 @@ const DUMMY_ARRAY = new Array(1);
     @class
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLTexture} texture Handle to the texture.
-    @prop {WebGLSamler} sampler Sampler object.
     @prop {number} width Texture width.
     @prop {number} height Texture height.
     @prop {number} depth Texture depth.
@@ -1475,7 +1508,7 @@ let webglInfoInitialized = false;
     @namespace PicoGL
 */
 const PicoGL = Object.assign({ 
-    version: "DEV",
+    version: "0.11.0",
 
     WEBGL_INFO: __WEBPACK_IMPORTED_MODULE_0__constants__["f" /* WEBGL_INFO */],
 
@@ -3103,7 +3136,6 @@ class Cubemap {
     @prop {TransformFeedback} currentTransformFeedback Transform feedback to use for this draw call.
     @prop {Array} uniformBuffers Ordered list of active uniform buffers.
     @prop {Array} uniformBlockNames Ordered list of uniform block names.
-    @prop {Object} uniformBlockBases Map of uniform blocks to uniform buffer bases.
     @prop {Number} uniformBlockCount Number of active uniform blocks for this draw call.
     @prop {Object} uniformIndices Map of uniform names to indices in the uniform arrays.
     @prop {Array} uniformNames Ordered list of uniform names.
@@ -3131,9 +3163,7 @@ class DrawCall {
         this.uniformCount = 0;
         this.uniformBuffers = new Array(__WEBPACK_IMPORTED_MODULE_0__constants__["f" /* WEBGL_INFO */].MAX_UNIFORM_BUFFERS);
         this.uniformBlockNames = new Array(__WEBPACK_IMPORTED_MODULE_0__constants__["f" /* WEBGL_INFO */].MAX_UNIFORM_BUFFERS);
-        this.uniformBlockBases = {};
         this.uniformBlockCount = 0;
-        this.samplerIndices = {};
         this.textures = new Array(__WEBPACK_IMPORTED_MODULE_0__constants__["f" /* WEBGL_INFO */].MAX_TEXTURE_UNITS);
         this.textureCount = 0;
         this.primitive = primitive;
@@ -4822,6 +4852,14 @@ class VertexArray {
         @method
         @param {number} attributeIndex The attribute location to bind to.
         @param {VertexBuffer} vertexBuffer The VertexBuffer to bind.
+        @param {Object} [options] Attribute pointer options. These will override those provided in the
+            VertexBuffer.
+        @param {GLEnum} [options.type] Type of data stored in the buffer.
+        @param {GLEnum} [options.size] Number of components per vertex.
+        @param {GLEnum} [options.stride] Number of bytes between the start of data for each vertex.
+        @param {GLEnum} [options.offset] Number of bytes before the start of data for the first vertex.
+        @param {GLEnum} [options.normalized] Data is integer data that should be normalized to a float.
+        @param {GLEnum} [options.integer] Pass data as integers.
         @return {VertexArray} The VertexArray object.
     */
     vertexAttributeBuffer(attributeIndex, vertexBuffer, options = __WEBPACK_IMPORTED_MODULE_0__constants__["b" /* DUMMY_OBJECT */]) {
@@ -4836,6 +4874,14 @@ class VertexArray {
         @method
         @param {number} attributeIndex The attribute location to bind to.
         @param {VertexBuffer} vertexBuffer The VertexBuffer to bind.
+        @param {Object} [options] Attribute pointer options. These will override those provided in the
+            VertexBuffer.
+        @param {GLEnum} [options.type] Type of data stored in the buffer.
+        @param {GLEnum} [options.size] Number of components per vertex.
+        @param {GLEnum} [options.stride] Number of bytes between the start of data for each vertex.
+        @param {GLEnum} [options.offset] Number of bytes before the start of data for the first vertex.
+        @param {GLEnum} [options.normalized] Data is integer data that should be normalized to a float.
+        @param {GLEnum} [options.integer] Pass data as integers.
         @return {VertexArray} The VertexArray object.
     */
     instanceAttributeBuffer(attributeIndex, vertexBuffer, options = __WEBPACK_IMPORTED_MODULE_0__constants__["b" /* DUMMY_OBJECT */]) {
@@ -4887,7 +4933,7 @@ class VertexArray {
         return this;
     }
 
-    //Bind this vertex array.
+    // Bind this vertex array.
     bind() {
         if (this.appState.vertexArray !== this) {
             this.gl.bindVertexArray(this.vertexArray);
@@ -5108,6 +5154,19 @@ class VertexBuffer {
     }
 
     /**
+        Indicate that this buffer does not consist of normalized integers. Note
+        that this should be called before binding to a VertexArray.
+
+        @method
+        @return {VertexBuffer} The VertexBuffer object.
+    */
+    unnormalized() {
+        this.normalizedIntegers = false;
+
+        return this;
+    }
+
+    /**
         Restore vertex buffer after context loss.
 
         @method
@@ -5178,4 +5237,4 @@ class VertexBuffer {
 
 /***/ })
 /******/ ])["PicoGL"];
-//# sourceMappingURL=picogl.js.map
+});
