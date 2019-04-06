@@ -169,7 +169,7 @@
         out vec4 fragColor;
 
         void main() {
-            fragColor = vec4(1.0, 0.0, 0.0, 0.2);
+            fragColor = vec4(0.2, 0.1, 0.1, 0.2);
         }
     </script>
     <script type="text/javascript">
@@ -207,7 +207,7 @@
             app.height / 5
         ];
         app.depthTest()
-        .blendFunc(PicoGL.SRC_ALPHA, PicoGL.ONE_MINUS_SRC_ALPHA)
+        .blendFunc(PicoGL.ONE_MINUS_SRC_ALPHA, PicoGL.ONE_MINUS_SRC_ALPHA)
         .scissor(hudViewport[0], hudViewport[1], hudViewport[2], hudViewport[3]);
 
         var timer = app.createTimer();

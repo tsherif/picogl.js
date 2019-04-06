@@ -49,7 +49,16 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-import { CONSTANTS } from "./constants";
+import { GL, TYPE_SIZE } from "./constants";
+
+const INTEGER_TYPES = {
+    [GL.BYTE]: true,
+    [GL.UNSIGNED_BYTE]: true,
+    [GL.SHORT]: true,
+    [GL.UNSIGNED_SHORT]: true,
+    [GL.INT]: true,
+    [GL.UNSIGNED_INT]: true
+};
 
 /**
     Storage for vertex data.
@@ -70,19 +79,19 @@ export class VertexBuffer {
     constructor(gl, appState, type, itemSize, data, usage = gl.STATIC_DRAW, indexArray) {
         let numColumns;
         switch(type) {
-            case CONSTANTS.FLOAT_MAT4:
-            case CONSTANTS.FLOAT_MAT4x2:
-            case CONSTANTS.FLOAT_MAT4x3:
+            case GL.FLOAT_MAT4:
+            case GL.FLOAT_MAT4x2:
+            case GL.FLOAT_MAT4x3:
                 numColumns = 4;
                 break;
-            case CONSTANTS.FLOAT_MAT3:
-            case CONSTANTS.FLOAT_MAT3x2:
-            case CONSTANTS.FLOAT_MAT3x4:
+            case GL.FLOAT_MAT3:
+            case GL.FLOAT_MAT3x2:
+            case GL.FLOAT_MAT3x4:
                 numColumns = 3;
                 break;
-            case CONSTANTS.FLOAT_MAT2:
-            case CONSTANTS.FLOAT_MAT2x3:
-            case CONSTANTS.FLOAT_MAT2x4:
+            case GL.FLOAT_MAT2:
+            case GL.FLOAT_MAT2x3:
+            case GL.FLOAT_MAT2x4:
                 numColumns = 2;
                 break;
             default:
@@ -90,46 +99,80 @@ export class VertexBuffer {
         }
 
         switch(type) {
-            case CONSTANTS.FLOAT_MAT4:
-            case CONSTANTS.FLOAT_MAT3x4:
-            case CONSTANTS.FLOAT_MAT2x4:
+            case GL.FLOAT_MAT4:
+            case GL.FLOAT_MAT3x4:
+            case GL.FLOAT_MAT2x4:
                 itemSize = 4;
-                type = CONSTANTS.FLOAT;
+                type = GL.FLOAT;
                 break;
-            case CONSTANTS.FLOAT_MAT3:
-            case CONSTANTS.FLOAT_MAT4x3:
-            case CONSTANTS.FLOAT_MAT2x3:
+            case GL.FLOAT_MAT3:
+            case GL.FLOAT_MAT4x3:
+            case GL.FLOAT_MAT2x3:
                 itemSize = 3;
-                type = CONSTANTS.FLOAT;
+                type = GL.FLOAT;
                 break;
-            case CONSTANTS.FLOAT_MAT2:
-            case CONSTANTS.FLOAT_MAT3x2:
-            case CONSTANTS.FLOAT_MAT4x2:
+            case GL.FLOAT_MAT2:
+            case GL.FLOAT_MAT3x2:
+            case GL.FLOAT_MAT4x2:
                 itemSize = 2;
-                type = CONSTANTS.FLOAT;
+                type = GL.FLOAT;
                 break;
         }
 
         let dataLength;
+        let byteLength;
         if (typeof data === "number") {
             dataLength = data;
-            data *= CONSTANTS.TYPE_SIZE[type];
+            if (type) {
+                data *= TYPE_SIZE[type];
+            }
+            byteLength = data;
         } else {
             dataLength = data.length;
+            byteLength = data.byteLength;
         }
 
         this.gl = gl;
         this.buffer = null;
         this.appState = appState;
         this.type = type;
-        this.itemSize = itemSize;
-        this.numItems = dataLength / (itemSize * numColumns);
+        this.itemSize = itemSize;  // In bytes for interleaved arrays.
+        this.numItems = type ? dataLength / (itemSize * numColumns) : byteLength / itemSize;
         this.numColumns = numColumns;
+        this.byteLength = byteLength;
         this.usage = usage;
-        this.indexArray = !!indexArray;
-        this.binding = this.indexArray ? gl.ELEMENT_ARRAY_BUFFER : gl.ARRAY_BUFFER;
+        this.indexArray = Boolean(indexArray);
+        this.integer = Boolean(INTEGER_TYPES[this.type]);
+        this.normalizedIntegers = false;
+        this.binding = this.indexArray ? GL.ELEMENT_ARRAY_BUFFER : GL.ARRAY_BUFFER;
 
         this.restore(data);
+    }
+
+    /**
+        Indicate that this buffer consists of normalized integers. Note
+        that this should be called before binding to a VertexArray.
+
+        @method
+        @return {VertexBuffer} The VertexBuffer object.
+    */
+    normalized() {
+        this.normalizedIntegers = true;
+
+        return this;
+    }
+
+    /**
+        Indicate that this buffer does not consist of normalized integers. Note
+        that this should be called before binding to a VertexArray.
+
+        @method
+        @return {VertexBuffer} The VertexBuffer object.
+    */
+    unnormalized() {
+        this.normalizedIntegers = false;
+
+        return this;
     }
 
     /**
@@ -142,7 +185,7 @@ export class VertexBuffer {
     */
     restore(data) {
         if (!data) {
-            data = this.numItems * this.itemSize * this.numColumns * CONSTANTS.TYPE_SIZE[this.type];
+            data = this.byteLength;
         }
 
         // Don't want to update vertex array bindings
@@ -213,7 +256,7 @@ export class VertexBuffer {
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Mon Apr 01 2019 09:07:02 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sat Apr 06 2019 09:02:47 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>
