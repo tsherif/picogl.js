@@ -21,7 +21,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-import { CONSTANTS } from "./constants";
+import { GL } from "./constants";
 
 /**
     Offscreen drawing attachment.
@@ -69,9 +69,9 @@ export class Renderbuffer {
     resize(width, height) {
         this.width = width;
         this.height = height;
-        this.gl.bindRenderbuffer(CONSTANTS.RENDERBUFFER, this.renderbuffer);
-        this.gl.renderbufferStorageMultisample(CONSTANTS.RENDERBUFFER, this.samples, this.internalFormat, this.width, this.height);
-        this.gl.bindRenderbuffer(CONSTANTS.RENDERBUFFER, null);
+        this.gl.bindRenderbuffer(GL.RENDERBUFFER, this.renderbuffer);
+        this.gl.renderbufferStorageMultisample(GL.RENDERBUFFER, this.samples, this.internalFormat, this.width, this.height);
+        this.gl.bindRenderbuffer(GL.RENDERBUFFER, null);
         
         return this;
     }

@@ -49,8 +49,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-import { CONSTANTS } from "./constants";
-import { TEXTURE_FORMAT_DEFAULTS } from "./texture-format-defaults";
+import { GL, COMPRESSED_TEXTURE_TYPES, WEBGL_INFO, DUMMY_OBJECT } from "./constants";
 import { Cubemap } from "./cubemap";
 import { DrawCall } from "./draw-call";
 import { Framebuffer } from "./framebuffer";
@@ -103,8 +102,8 @@ export class App {
             vertexArray: null,
             transformFeedback: null,
             activeTexture: -1,
-            textures: new Array(CONSTANTS.WEBGL_INFO.MAX_TEXTURE_UNITS),
-            uniformBuffers: new Array(CONSTANTS.WEBGL_INFO.MAX_UNIFORM_BUFFERS),
+            textures: new Array(WEBGL_INFO.MAX_TEXTURE_UNITS),
+            uniformBuffers: new Array(WEBGL_INFO.MAX_UNIFORM_BUFFERS),
             freeUniformBufferBases: [],
             drawFramebuffer: null,
             readFramebuffer: null
@@ -319,7 +318,7 @@ export class App {
         @param {number} [options.filter=NEAREST] Sampling filter. 
         @return {App} The App object.
     */  
-    blitFramebuffer(mask, options = CONSTANTS.DUMMY_OBJECT) {
+    blitFramebuffer(mask, options = DUMMY_OBJECT) {
         let readFramebuffer = this.state.readFramebuffer;
         let drawFramebuffer = this.state.drawFramebuffer;
         let defaultReadWidth = readFramebuffer ? readFramebuffer.width : this.width;
@@ -336,7 +335,7 @@ export class App {
             dstStartY = 0,
             dstEndX = defaultDrawWidth,
             dstEndY = defaultDrawHeight,
-            filter = CONSTANTS.NEAREST
+            filter = GL.NEAREST
         } = options;
 
         this.gl.blitFramebuffer(srcStartX, srcStartY, srcEndX, srcEndY, dstStartX, dstStartY, dstEndX, dstEndY, mask, filter);
@@ -735,20 +734,20 @@ export class App {
         this.s3tcTexturesEnabled = !!ext;
         
         if (this.s3tcTexturesEnabled) {
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_RGB_S3TC_DXT1_EXT]  = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_RGBA_S3TC_DXT1_EXT] = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_RGBA_S3TC_DXT3_EXT] = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_RGBA_S3TC_DXT5_EXT] = true;
+            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGB_S3TC_DXT1_EXT]  = true;
+            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_S3TC_DXT1_EXT] = true;
+            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_S3TC_DXT3_EXT] = true;
+            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_S3TC_DXT5_EXT] = true;
         }
 
         ext = this.gl.getExtension("WEBGL_compressed_texture_s3tc_srgb");
         this.s3tcSRGBTexturesEnabled = !!ext;
         
         if (this.s3tcSRGBTexturesEnabled) {
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_SRGB_S3TC_DXT1_EXT]       = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT] = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT] = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT] = true;
+            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB_S3TC_DXT1_EXT]       = true;
+            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT] = true;
+            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT] = true;
+            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT] = true;
         }
 
         return this;
@@ -782,16 +781,16 @@ export class App {
         this.etcTexturesEnabled = !!ext;
 
         if (this.etcTexturesEnabled) {
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_R11_EAC]                        = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_SIGNED_R11_EAC]                 = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_RG11_EAC]                       = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_SIGNED_RG11_EAC]                = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_RGB8_ETC2]                      = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_SRGB8_ETC2]                     = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2]  = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2] = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_RGBA8_ETC2_EAC]                 = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ETC2_EAC]          = true;
+            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_R11_EAC]                        = true;
+            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SIGNED_R11_EAC]                 = true;
+            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RG11_EAC]                       = true;
+            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SIGNED_RG11_EAC]                = true;
+            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGB8_ETC2]                      = true;
+            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB8_ETC2]                     = true;
+            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2]  = true;
+            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2] = true;
+            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA8_ETC2_EAC]                 = true;
+            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB8_ALPHA8_ETC2_EAC]          = true;
         }
 
         return this;
@@ -840,34 +839,34 @@ export class App {
         this.astcTexturesEnabled = !!ext;
 
         if (this.astcTexturesEnabled) {
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_RGBA_ASTC_4x4_KHR]           = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_RGBA_ASTC_5x4_KHR]           = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_RGBA_ASTC_5x5_KHR]           = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_RGBA_ASTC_6x5_KHR]           = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_RGBA_ASTC_6x6_KHR]           = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_RGBA_ASTC_8x5_KHR]           = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_RGBA_ASTC_8x6_KHR]           = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_RGBA_ASTC_8x8_KHR]           = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_RGBA_ASTC_10x5_KHR]          = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_RGBA_ASTC_10x6_KHR]          = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_RGBA_ASTC_10x8_KHR]          = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_RGBA_ASTC_10x10_KHR]         = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_RGBA_ASTC_12x10_KHR]         = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_RGBA_ASTC_12x12_KHR]         = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR]   = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR]   = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR]   = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR]   = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR]   = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR]   = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR]   = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR]   = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR]  = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR]  = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR]  = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR] = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR] = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR] = true;
+            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_ASTC_4x4_KHR]           = true;
+            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_ASTC_5x4_KHR]           = true;
+            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_ASTC_5x5_KHR]           = true;
+            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_ASTC_6x5_KHR]           = true;
+            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_ASTC_6x6_KHR]           = true;
+            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_ASTC_8x5_KHR]           = true;
+            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_ASTC_8x6_KHR]           = true;
+            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_ASTC_8x8_KHR]           = true;
+            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_ASTC_10x5_KHR]          = true;
+            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_ASTC_10x6_KHR]          = true;
+            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_ASTC_10x8_KHR]          = true;
+            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_ASTC_10x10_KHR]         = true;
+            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_ASTC_12x10_KHR]         = true;
+            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_ASTC_12x12_KHR]         = true;
+            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR]   = true;
+            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR]   = true;
+            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR]   = true;
+            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR]   = true;
+            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR]   = true;
+            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR]   = true;
+            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR]   = true;
+            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR]   = true;
+            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR]  = true;
+            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR]  = true;
+            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR]  = true;
+            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR] = true;
+            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR] = true;
+            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR] = true;
         }
         
         return this;
@@ -892,10 +891,10 @@ export class App {
         this.pvrtcTexturesEnabled = !!ext;
         
         if (this.pvrtcTexturesEnabled) {
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_RGB_PVRTC_4BPPV1_IMG] = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_RGB_PVRTC_2BPPV1_IMG] = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_RGBA_PVRTC_4BPPV1_IMG] = true;
-            TEXTURE_FORMAT_DEFAULTS.COMPRESSED_TYPES[CONSTANTS.COMPRESSED_RGBA_PVRTC_2BPPV1_IMG] = true;
+            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGB_PVRTC_4BPPV1_IMG] = true;
+            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGB_PVRTC_2BPPV1_IMG] = true;
+            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_PVRTC_4BPPV1_IMG] = true;
+            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_PVRTC_2BPPV1_IMG] = true;
         }
 
         return this;
@@ -913,10 +912,10 @@ export class App {
         @param {GLEnum} [options.format=RGBA] Read framebuffer data format.
         @return {App} The App object.
     */
-    readPixel(x, y, outColor, options = CONSTANTS.DUMMY_OBJECT) {
+    readPixel(x, y, outColor, options = DUMMY_OBJECT) {
         let {
-            format = CONSTANTS.RGBA,
-            type = CONSTANTS.UNSIGNED_BYTE    
+            format = GL.RGBA,
+            type = GL.UNSIGNED_BYTE    
         } = options;
         
         this.gl.readPixels(x, y, 1, 1, format, type, outColor);
@@ -1053,6 +1052,21 @@ export class App {
     */
     createMatrixBuffer(type, data, usage) {
         return new VertexBuffer(this.gl, this.state, type, 0, data, usage);
+    }
+
+    /**
+        Create an buffer without any structure information. Structure
+        must be fully specified when binding to a VertexArray.
+
+        @method
+        @param {number} bytesPerVertex Number of bytes per vertex.
+        @param {ArrayBufferView|number} data Buffer data itself or the total 
+            number of bytes to be allocated.
+        @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
+        @return {VertexBuffer} New VertexBuffer object.
+    */
+    createInterleavedBuffer(bytesPerVertex, data, usage) {
+        return new VertexBuffer(this.gl, this.state, null, bytesPerVertex, data, usage);
     }
 
     /**
@@ -1342,7 +1356,7 @@ export class App {
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Mon Apr 01 2019 09:07:02 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sat Apr 06 2019 09:02:47 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

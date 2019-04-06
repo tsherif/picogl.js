@@ -21,7 +21,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-import { CONSTANTS } from "./constants";
+import { GL, WEBGL_INFO } from "./constants";
 
 /**
     A DrawCall represents the program and values of associated
@@ -34,7 +34,6 @@ import { CONSTANTS } from "./constants";
     @prop {TransformFeedback} currentTransformFeedback Transform feedback to use for this draw call.
     @prop {Array} uniformBuffers Ordered list of active uniform buffers.
     @prop {Array} uniformBlockNames Ordered list of uniform block names.
-    @prop {Object} uniformBlockBases Map of uniform blocks to uniform buffer bases.
     @prop {Number} uniformBlockCount Number of active uniform blocks for this draw call.
     @prop {Object} uniformIndices Map of uniform names to indices in the uniform arrays.
     @prop {Array} uniformNames Ordered list of uniform names.
@@ -49,7 +48,7 @@ import { CONSTANTS } from "./constants";
 */
 export class DrawCall {
 
-    constructor(gl, appState, program, vertexArray, primitive = CONSTANTS.TRIANGLES) {
+    constructor(gl, appState, program, vertexArray, primitive = GL.TRIANGLES) {
         this.gl = gl;
         this.currentProgram = program;
         this.currentVertexArray = vertexArray;
@@ -57,15 +56,13 @@ export class DrawCall {
         this.appState = appState;
 
         this.uniformIndices = {};
-        this.uniformNames = new Array(CONSTANTS.WEBGL_INFO.MAX_UNIFORMS);
-        this.uniformValues = new Array(CONSTANTS.WEBGL_INFO.MAX_UNIFORMS);
+        this.uniformNames = new Array(WEBGL_INFO.MAX_UNIFORMS);
+        this.uniformValues = new Array(WEBGL_INFO.MAX_UNIFORMS);
         this.uniformCount = 0;
-        this.uniformBuffers = new Array(CONSTANTS.WEBGL_INFO.MAX_UNIFORM_BUFFERS);
-        this.uniformBlockNames = new Array(CONSTANTS.WEBGL_INFO.MAX_UNIFORM_BUFFERS);
-        this.uniformBlockBases = {};
+        this.uniformBuffers = new Array(WEBGL_INFO.MAX_UNIFORM_BUFFERS);
+        this.uniformBlockNames = new Array(WEBGL_INFO.MAX_UNIFORM_BUFFERS);
         this.uniformBlockCount = 0;
-        this.samplerIndices = {};
-        this.textures = new Array(CONSTANTS.WEBGL_INFO.MAX_TEXTURE_UNITS);
+        this.textures = new Array(WEBGL_INFO.MAX_TEXTURE_UNITS);
         this.textureCount = 0;
         this.primitive = primitive;
 
@@ -204,6 +201,9 @@ export class DrawCall {
         if (this.currentTransformFeedback) {
             this.currentTransformFeedback.bind();
             this.gl.beginTransformFeedback(this.primitive);
+        } else if (this.appState.transformFeedback) {
+            this.gl.bindTransformFeedback(GL.TRANSFORM_FEEDBACK, null);
+            this.appState.transformFeedback = null;
         }
 
         if (this.currentVertexArray.instanced) {
@@ -220,11 +220,6 @@ export class DrawCall {
 
         if (this.currentTransformFeedback) {
             this.gl.endTransformFeedback();
-            // TODO(Tarek): Need to rebind buffers due to bug in older version of ANGLE that FF is using.
-            // Remove this when that's fixed.
-            for (let i = 0, len = this.currentTransformFeedback.angleBugBuffers.length; i < len; ++i) {
-                this.gl.bindBufferBase(this.gl.TRANSFORM_FEEDBACK_BUFFER, i, null);
-            }
         }
 
         return this;

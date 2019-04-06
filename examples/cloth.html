@@ -509,7 +509,7 @@
         var indices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, indexData);
 
         var clothArray = app.createVertexArray()
-        .vertexIntegerAttributeBuffer(0, dataIndex)
+        .vertexAttributeBuffer(0, dataIndex)
         .vertexAttributeBuffer(1, uv)
         .indexBuffer(indices);
 

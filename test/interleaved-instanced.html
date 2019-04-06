@@ -23,17 +23,16 @@
 -->
 <html>
 <head>
-    <title>PicoGL.js: Triangle</title>
+    <title>PicoGL.js: Instanced Drawing</title>
     <meta charset="utf-8">
     <script src="../build/picogl.js"></script>
-    <script src="utils/utils.js"></script>
     <link rel="stylesheet" href="../site/css/picogl-example.css"> 
 </head>
 <body>
     <div id="example-title">
-        PicoGL.js Example: Triangle
+        PicoGL.js Example: Instanced Drawing
         <div>
-            <a href="https://github.com/tsherif/picogl.js/blob/master/examples/triangle.html">Source code</a>
+            <a href="https://github.com/tsherif/picogl.js/blob/master/examples/instanced.html">Source code</a>
         </div>
     </div>
     <canvas id="gl-canvas"></canvas>
@@ -41,32 +40,30 @@
         #version 300 es
         
         layout(location=0) in vec4 position;
-        layout(location=1) in vec3 color;
+        layout(location=1) in vec2 offset;
+        layout(location=2) in vec4 color;
         
-        out vec3 vColor; 
+        out vec4 vColor;
         void main() {
             vColor = color;
             gl_Position = position;
+            gl_Position.xy += offset;
         }
     </script>
     <script type="shader/fs" id="fs">
         #version 300 es
         precision highp float;
-        
-        in vec3 vColor;
-        
+
+        in vec4 vColor;
+
         out vec4 fragColor;
         void main() {
-            fragColor = vec4(vColor, 1.0);
+            fragColor = vColor;
         }
     </script>
-    <script>
+    
+    <script type="text/javascript">
         var canvas = document.getElementById("gl-canvas");
-
-        if (!utils.testWebGL2()) {
-            console.error("WebGL 2 not available");
-            document.body.innerHTML = "This example requires WebGL 2 which is unavailable on this system."
-        }
 
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
@@ -78,40 +75,63 @@
             app.resize(window.innerWidth, window.innerHeight);
         }
 
-        // PROGRAM 
+        // PROGRAM
         var vsSource =  document.getElementById("vs").text.trim();
         var fsSource =  document.getElementById("fs").text.trim();
+                        
         var program = app.createProgram(vsSource, fsSource);
 
-        // GEOMETRY IN VERTEX BUFFERS
+        // PER-VERTEX POSITIONS
         var positions = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
-            -0.5, -0.5,
-             0.5, -0.5,
-             0.0, 0.5, 
+            -0.3, -0.3,
+             0.3, -0.3,
+             0.0, 0.3
         ]));
 
-        var colors = app.createVertexBuffer(PicoGL.UNSIGNED_BYTE, 3, new Uint8Array([
-            255, 0, 0,
-            0, 255, 0,
-            0, 0, 255
-        ])).normalized();
+        // PER-INSTANCE OFFSETS AND COLORS
+        var interleavedData = new Float32Array([
+            -0.4, -0.4,  // Offsets
+             0, // Color
+             0.4, -0.4,
+             0,
+             -0.4, 0.4,
+             0,
+             0.4, 0.4,
+             0
+        ]);
 
-        // COMBINE VERTEX BUFFERS INTO VERTEX ARRAY
+        var interleavedDataUByte = new Uint8Array(interleavedData.buffer);
+        interleavedDataUByte.set([255, 0, 0, 255], 8);
+        interleavedDataUByte.set([0, 255, 0, 255], 20);
+        interleavedDataUByte.set([0, 0, 255, 255], 32);
+        interleavedDataUByte.set([0, 255, 255, 255], 44);
+
+        var interleavedBuffer = app.createInterleavedBuffer(12, interleavedData);
+
         var triangleArray = app.createVertexArray()
         .vertexAttributeBuffer(0, positions)
-        .vertexAttributeBuffer(1, colors);
+        .instanceAttributeBuffer(1, interleavedBuffer, {
+            type: PicoGL.FLOAT,
+            size: 2,
+            stride: 12
+        })
+        .instanceAttributeBuffer(2, interleavedBuffer, {
+            type: PicoGL.UNSIGNED_BYTE,
+            size: 3,
+            offset: 8,
+            stride: 12,
+            normalized: true
+        });
 
-        // CREATE DRAW CALL FROM PROGRAM AND VERTEX ARRAY
         var drawCall = app.createDrawCall(program, triangleArray);
 
-        // DRAW
         app.clear();
         drawCall.draw();
 
         // CLEANUP
         program.delete();
         positions.delete();
-        colors.delete();
+        interleavedBuffer.delete();
         triangleArray.delete();
 
     </script>

@@ -21,7 +21,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-import { CONSTANTS } from "./constants";
+import { GL } from "./constants";
 import { Query } from "./query";
 
 /**
@@ -68,7 +68,7 @@ export class Timer {
             if (this.gpuTimerQuery) {
                 this.gpuTimerQuery.restore();
             } else {
-                this.gpuTimerQuery = new Query(this.gl, CONSTANTS.TIME_ELAPSED_EXT);
+                this.gpuTimerQuery = new Query(this.gl, GL.TIME_ELAPSED_EXT);
             }
         }
 
@@ -135,7 +135,7 @@ export class Timer {
             }
 
             var gpuTimerAvailable = this.gpuTimerQuery.ready();
-            var gpuTimerDisjoint = this.gl.getParameter(CONSTANTS.GPU_DISJOINT_EXT);
+            var gpuTimerDisjoint = this.gl.getParameter(GL.GPU_DISJOINT_EXT);
 
             if (gpuTimerAvailable && !gpuTimerDisjoint) {
                 this.gpuTime = this.gpuTimerQuery.result  / 1000000;

@@ -21,7 +21,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-import { CONSTANTS } from "./constants";
+import { GL } from "./constants";
 import { Shader } from "./shader";
 import { 
     SingleComponentUniform,
@@ -81,14 +81,14 @@ export class Program {
         let ownVertexShader = false;
         let ownFragmentShader = false;
         if (typeof vsSource === "string") {
-            vShader = new Shader(this.gl, CONSTANTS.VERTEX_SHADER, vsSource);
+            vShader = new Shader(this.gl, GL.VERTEX_SHADER, vsSource);
             ownVertexShader = true;
         } else {
             vShader = vsSource;
         }
 
         if (typeof fsSource === "string") {
-            fShader = new Shader(this.gl, CONSTANTS.FRAGMENT_SHADER, fsSource);
+            fShader = new Shader(this.gl, GL.FRAGMENT_SHADER, fsSource);
             ownFragmentShader = true;
         } else {
             fShader = fsSource;
@@ -98,11 +98,11 @@ export class Program {
         this.gl.attachShader(program, vShader.shader);
         this.gl.attachShader(program, fShader.shader);
         if (this.transformFeedbackVaryings) {
-            this.gl.transformFeedbackVaryings(program, this.transformFeedbackVaryings, CONSTANTS.SEPARATE_ATTRIBS);
+            this.gl.transformFeedbackVaryings(program, this.transformFeedbackVaryings, GL.SEPARATE_ATTRIBS);
         }
         this.gl.linkProgram(program);
 
-        if (!this.gl.getProgramParameter(program, CONSTANTS.LINK_STATUS)) {
+        if (!this.gl.getProgramParameter(program, GL.LINK_STATUS)) {
             console.error(this.gl.getProgramInfoLog(program));
         }
 
@@ -117,7 +117,7 @@ export class Program {
         this.program = program;
         this.bind();
 
-        let numUniforms = this.gl.getProgramParameter(program, CONSTANTS.ACTIVE_UNIFORMS);
+        let numUniforms = this.gl.getProgramParameter(program, GL.ACTIVE_UNIFORMS);
         let textureUnit;
 
         for (i = 0; i < numUniforms; ++i) {
@@ -128,58 +128,58 @@ export class Program {
             let numElements = uniformInfo.size;
 
             switch (type) {
-                case CONSTANTS.SAMPLER_2D:
-                case CONSTANTS.INT_SAMPLER_2D:
-                case CONSTANTS.UNSIGNED_INT_SAMPLER_2D:
-                case CONSTANTS.SAMPLER_2D_SHADOW:
-                case CONSTANTS.SAMPLER_2D_ARRAY:
-                case CONSTANTS.INT_SAMPLER_2D_ARRAY:
-                case CONSTANTS.UNSIGNED_INT_SAMPLER_2D_ARRAY:
-                case CONSTANTS.SAMPLER_2D_ARRAY_SHADOW:
-                case CONSTANTS.SAMPLER_CUBE:
-                case CONSTANTS.INT_SAMPLER_CUBE:
-                case CONSTANTS.UNSIGNED_INT_SAMPLER_CUBE:
-                case CONSTANTS.SAMPLER_CUBE_SHADOW:
-                case CONSTANTS.SAMPLER_3D:
-                case CONSTANTS.INT_SAMPLER_3D:
-                case CONSTANTS.UNSIGNED_INT_SAMPLER_3D:
+                case GL.SAMPLER_2D:
+                case GL.INT_SAMPLER_2D:
+                case GL.UNSIGNED_INT_SAMPLER_2D:
+                case GL.SAMPLER_2D_SHADOW:
+                case GL.SAMPLER_2D_ARRAY:
+                case GL.INT_SAMPLER_2D_ARRAY:
+                case GL.UNSIGNED_INT_SAMPLER_2D_ARRAY:
+                case GL.SAMPLER_2D_ARRAY_SHADOW:
+                case GL.SAMPLER_CUBE:
+                case GL.INT_SAMPLER_CUBE:
+                case GL.UNSIGNED_INT_SAMPLER_CUBE:
+                case GL.SAMPLER_CUBE_SHADOW:
+                case GL.SAMPLER_3D:
+                case GL.INT_SAMPLER_3D:
+                case GL.UNSIGNED_INT_SAMPLER_3D:
                     textureUnit = this.samplerCount++;
                     this.samplers[uniformInfo.name] = textureUnit;
                     this.gl.uniform1i(uniformHandle, textureUnit);
                     break;
-                case CONSTANTS.INT:
-                case CONSTANTS.UNSIGNED_INT:
-                case CONSTANTS.FLOAT:
+                case GL.INT:
+                case GL.UNSIGNED_INT:
+                case GL.FLOAT:
                     UniformClass = numElements > 1 ? MultiNumericUniform : SingleComponentUniform;
                     break;
-                case CONSTANTS.BOOL:
+                case GL.BOOL:
                     UniformClass = numElements > 1 ? MultiBoolUniform : SingleComponentUniform;
                     break;
-                case CONSTANTS.FLOAT_VEC2:
-                case CONSTANTS.INT_VEC2:
-                case CONSTANTS.UNSIGNED_INT_VEC2:
-                case CONSTANTS.FLOAT_VEC3:
-                case CONSTANTS.INT_VEC3:
-                case CONSTANTS.UNSIGNED_INT_VEC3:
-                case CONSTANTS.FLOAT_VEC4:
-                case CONSTANTS.INT_VEC4:
-                case CONSTANTS.UNSIGNED_INT_VEC4:
+                case GL.FLOAT_VEC2:
+                case GL.INT_VEC2:
+                case GL.UNSIGNED_INT_VEC2:
+                case GL.FLOAT_VEC3:
+                case GL.INT_VEC3:
+                case GL.UNSIGNED_INT_VEC3:
+                case GL.FLOAT_VEC4:
+                case GL.INT_VEC4:
+                case GL.UNSIGNED_INT_VEC4:
                     UniformClass = MultiNumericUniform;
                     break;
-                case CONSTANTS.BOOL_VEC2:
-                case CONSTANTS.BOOL_VEC3:
-                case CONSTANTS.BOOL_VEC4:
+                case GL.BOOL_VEC2:
+                case GL.BOOL_VEC3:
+                case GL.BOOL_VEC4:
                     UniformClass = MultiBoolUniform;
                     break;
-                case CONSTANTS.FLOAT_MAT2:
-                case CONSTANTS.FLOAT_MAT3:
-                case CONSTANTS.FLOAT_MAT4:
-                case CONSTANTS.FLOAT_MAT2x3:
-                case CONSTANTS.FLOAT_MAT2x4:
-                case CONSTANTS.FLOAT_MAT3x2:
-                case CONSTANTS.FLOAT_MAT3x4:
-                case CONSTANTS.FLOAT_MAT4x2:
-                case CONSTANTS.FLOAT_MAT4x3:
+                case GL.FLOAT_MAT2:
+                case GL.FLOAT_MAT3:
+                case GL.FLOAT_MAT4:
+                case GL.FLOAT_MAT2x3:
+                case GL.FLOAT_MAT2x4:
+                case GL.FLOAT_MAT3x2:
+                case GL.FLOAT_MAT3x4:
+                case GL.FLOAT_MAT4x2:
+                case GL.FLOAT_MAT4x3:
                     UniformClass = MatrixUniform;
                     break;
                 default:
@@ -192,7 +192,7 @@ export class Program {
             }
         }
 
-        let numUniformBlocks = this.gl.getProgramParameter(program, CONSTANTS.ACTIVE_UNIFORM_BLOCKS);
+        let numUniformBlocks = this.gl.getProgramParameter(program, GL.ACTIVE_UNIFORM_BLOCKS);
 
         for (i = 0; i < numUniformBlocks; ++i) {
             let blockName = this.gl.getActiveUniformBlockName(this.program, i);

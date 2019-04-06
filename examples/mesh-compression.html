@@ -66,7 +66,7 @@
     <script type="shader/vs" id="vs-compressed">
         #version 300 es
 
-        layout(location=0) in vec4 position;
+        layout(location=0) in uvec4 position;
         layout(location=1) in vec2 normal;
         
         uniform mat4 decode;
@@ -85,7 +85,7 @@
 
         void main() {
             vNormal = octDecode(normal);
-            gl_Position = model * decode * position;
+            gl_Position = model * decode * vec4(position);
         }
     </script>
     <script type="shader/fs" id="fs">
@@ -150,11 +150,11 @@
         var encodedNormals = octEncode(sphere.normals);
 
         var compressedPositions = app.createVertexBuffer(PicoGL.UNSIGNED_SHORT, 3, q.quantized);
-        var compressedNormals = app.createVertexBuffer(PicoGL.BYTE, 2, encodedNormals);
+        var compressedNormals = app.createVertexBuffer(PicoGL.BYTE, 2, encodedNormals).normalized();
 
         var compressedVertexArray = app.createVertexArray()
         .vertexAttributeBuffer(0, compressedPositions)
-        .vertexNormalizedAttributeBuffer(1, compressedNormals)
+        .vertexAttributeBuffer(1, compressedNormals)
         .indexBuffer(indices);
 
         // UNIFORMS

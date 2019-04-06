@@ -23,41 +23,30 @@
 -->
 <html>
 <head>
-    <title>PicoGL.js: Transform Feedback</title>
+    <title>PicoGL.js: Triangle</title>
     <meta charset="utf-8">
     <script src="../build/picogl.js"></script>
-    <script src="utils/gl-matrix.js"></script>
     <script src="utils/utils.js"></script>
     <link rel="stylesheet" href="../site/css/picogl-example.css"> 
 </head>
 <body>
     <div id="example-title">
-        PicoGL.js Example: Transform Feedback
+        PicoGL.js Example: Interleaved Triangle
         <div>
-            <a href="https://github.com/tsherif/picogl.js/blob/master/examples/transformfeedback.html">Source code</a>
+            <a href="https://github.com/tsherif/picogl.js/blob/master/examples/interleaved-triangle.html">Source code</a>
         </div>
     </div>
     <canvas id="gl-canvas"></canvas>
     <script type="shader/vs" id="vs">
         #version 300 es
-
-        #define SIN2 0.03489949
-        #define COS2 0.99939082
         
-        layout(location=0) in vec2 position;
+        layout(location=0) in vec4 position;
         layout(location=1) in vec3 color;
         
-        out vec2 vPosition;
         out vec3 vColor; 
         void main() {
-            mat2 rotation = mat2(
-                COS2, SIN2,
-                -SIN2, COS2
-            );
-
-            vPosition = rotation * position;
             vColor = color;
-            gl_Position = vec4(vPosition, 0.0, 1.0);
+            gl_Position = position;
         }
     </script>
     <script type="shader/fs" id="fs">
@@ -71,16 +60,14 @@
             fragColor = vec4(vColor, 1.0);
         }
     </script>
-    
-    <script type="text/javascript">
-        utils.addTimerElement();
-
-        var canvas = document.getElementById("gl-canvas");
-
+    <script>
+        
         if (!utils.testWebGL2()) {
             console.error("WebGL 2 not available");
             document.body.innerHTML = "This example requires WebGL 2 which is unavailable on this system."
         }
+
+        var canvas = document.getElementById("gl-canvas");
 
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
@@ -88,82 +75,60 @@
         var app = PicoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0);
 
-        var timer = app.createTimer();
-
         window.onresize = function() {
             app.resize(window.innerWidth, window.innerHeight);
         }
 
-        // TRANSFORM FEEDBACK PROGRAM
+        // PROGRAM 
         var vsSource =  document.getElementById("vs").text.trim();
         var fsSource =  document.getElementById("fs").text.trim();
-              
-        // FINAL ARGUMENT IS TRANSFORM FEEDBACK VARYINGS
-        var program = app.createProgram(vsSource, fsSource, ["vPosition"]);
+        var program = app.createProgram(vsSource, fsSource);
 
-        // INPUT AND OUTPUT VERTEX BUFFERS
-        var positions1 = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
-            -0.3, -0.3,
-             0.3, -0.3,
-             0.0, 0.3 
-        ]));
+        // INTERLEAVE FLOAT POSITION DATA
+        // WITH UNSIGNED BYTE COLOR DATA
+        var interleavedData = new Float32Array([
+            -0.5, -0.5, // Positions data
+             0,         // Color data
+             0.5, -0.5,
+             0,
+             0.0, 0.5,
+             0
+        ]);
 
-        var positions2 = app.createVertexBuffer(PicoGL.FLOAT, 2, 6);
+        var interleavedDataUByte = new Uint8Array(interleavedData.buffer);
+        interleavedDataUByte.set([255, 0, 0, 255], 8);
+        interleavedDataUByte.set([0, 255, 0, 255], 20);
+        interleavedDataUByte.set([0, 0, 255, 255], 32);
 
-        // COLOR BUFFER BECAUSE IT WON'T BE PART OF TRANSFORM FEEDBACK
-        var colors = app.createVertexBuffer(PicoGL.UNSIGNED_BYTE, 3, new Uint8Array([
-            255, 0, 0,
-            0, 255, 0,
-            0, 0, 255
-        ])).normalized();
+        // CREATE INTERLEAVED BUFFER (NO POINTER INFORMATION)
+        var interleavedBuffer = app.createInterleavedBuffer(12, interleavedData);
 
-        // COMBINE VERTEX BUFFERS INTO INPUT AND OUTPUT VERTEX ARRAYS
-        var triangleArrayA = app.createVertexArray()
-        .vertexAttributeBuffer(0, positions1)
-        .vertexAttributeBuffer(1, colors);
+        // FULLY SPECIFY POINTER INFORMATION IN VERTEX ARRAY
+        var triangleArray = app.createVertexArray()
+        .vertexAttributeBuffer(0, interleavedBuffer, {
+            type: PicoGL.FLOAT,
+            size: 2,
+            stride: 12
+        })
+        .vertexAttributeBuffer(1, interleavedBuffer, {
+            type: PicoGL.UNSIGNED_BYTE,
+            size: 3,
+            offset: 8,
+            stride: 12,
+            normalized: true
+        });
 
-        var triangleArrayB = app.createVertexArray()
-        .vertexAttributeBuffer(0, positions2)
-        .vertexAttributeBuffer(1, colors);
+        // CREATE DRAW CALL FROM PROGRAM AND VERTEX ARRAY
+        var drawCall = app.createDrawCall(program, triangleArray);
 
-        // CREATE TRANSFORM FEEDBACK OBJECTS AND
-        // INDICATE BUFFERS TO CAPTURE
-        var transformFeedbackA = app.createTransformFeedback()
-        .feedbackBuffer(0, positions1);
+        // DRAW
+        app.clear();
+        drawCall.draw();
 
-        var transformFeedbackB = app.createTransformFeedback()
-        .feedbackBuffer(0, positions2);
-
-        // CREATE DRAW CALLS FROM PROGRAM AND TRANSFORMFEEDBACK.
-        // EACH DRAW CALL REPRESENTS ONE DIRECTION OF DRAW/CAPTURE
-        var drawCallA = app.createDrawCall(program, triangleArrayA)
-        .transformFeedback(transformFeedbackB);
-        
-        var drawCallB = app.createDrawCall(program, triangleArrayB)
-        .transformFeedback(transformFeedbackA);
-
-        var currentDrawCall = drawCallA;
-        function draw() {
-            if (timer.ready()) {
-                utils.updateTimerElement(timer.cpuTime, timer.gpuTime);
-            }
-
-            timer.start();
-
-            // DRAW
-            app.clear();
-            currentDrawCall.draw();
-            
-            // SWAP INPUT AND OUTPUT
-            currentDrawCall = currentDrawCall === drawCallA ? drawCallB : drawCallA;
-
-            timer.end();
-
-
-            requestAnimationFrame(draw);
-        }
-
-        requestAnimationFrame(draw);
+        // CLEANUP
+        program.delete();
+        interleavedBuffer.delete();
+        triangleArray.delete();
 
     </script>
     <a href="https://github.com/tsherif/picogl.js" id="github-ribbon"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"></a>
