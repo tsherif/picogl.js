@@ -1,39 +1,5 @@
-/*
-PicoGL.js v0.11.0
-
-The MIT License (MIT)
-
-Copyright (c) 2017 Tarek Sherif
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
-the Software, and to permit persons to whom the Software is furnished to do so,
-subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/
-
-(function webpackUniversalModuleDefinition(root, factory) {
-	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory();
-	else if(typeof define === 'function' && define.amd)
-		define([], factory);
-	else if(typeof exports === 'object')
-		exports["PicoGL"] = factory();
-	else
-		root["PicoGL"] = factory();
-})(this, function() {
-return /******/ (function(modules) { // webpackBootstrap
+var PicoGL =
+/******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
 /******/
@@ -1508,7 +1474,7 @@ let webglInfoInitialized = false;
     @namespace PicoGL
 */
 const PicoGL = Object.assign({ 
-    version: "0.11.0",
+    version: "DEV",
 
     WEBGL_INFO: __WEBPACK_IMPORTED_MODULE_0__constants__["f" /* WEBGL_INFO */],
 
@@ -4649,6 +4615,9 @@ class UniformBuffer {
         this.dataViews[__WEBPACK_IMPORTED_MODULE_0__constants__["c" /* GL */].INT] = new Int32Array(this.data.buffer);
         this.dataViews[__WEBPACK_IMPORTED_MODULE_0__constants__["c" /* GL */].UNSIGNED_INT] = new Uint32Array(this.data.buffer);
 
+        this.dirtyStart = this.size;
+        this.dirtyEnd = 0;
+
         this.restore();
     }
 
@@ -4682,11 +4651,21 @@ class UniformBuffer {
     */
     set(index, value) {
         let view = this.dataViews[this.types[index]];
+        let offset = this.offsets[index];
+        let size = this.sizes[index];
 
         if (this.sizes[index] === 1)  {
-            view[this.offsets[index]] = value;
+            view[offset] = value;
         } else {
-            view.set(value, this.offsets[index]);
+            view.set(value, offset);
+        }
+
+        if (offset < this.dirtyStart) {
+            this.dirtyStart = offset;
+        }
+
+        if (this.dirtyEnd < offset + size) {
+            this.dirtyEnd = offset + size;
         }
 
         return this;
@@ -4696,25 +4675,22 @@ class UniformBuffer {
         Send stored buffer data to the GPU.
 
         @method
-        @param {number} [index] Index in the layout of item to send to the GPU. If ommited, entire buffer is sent.
         @return {UniformBuffer} The UniformBuffer object.
     */
-    update(index) {
-        let data;
-        let offset;
-        if (index === undefined) {
-            data = this.data;
-            offset = 0;
-        } else {
-            let begin = this.offsets[index];
-            let end = begin + this.sizes[index];
-            data = this.data.subarray(begin, end);
-            offset = begin * 4;
+    update() {
+        if (this.dirtyStart >= this.dirtyEnd) {
+            return this;
         }
+
+        let data = this.data.subarray(this.dirtyStart, this.dirtyEnd);
+        let offset = this.dirtyStart * 4;
 
         this.gl.bindBuffer(this.gl.UNIFORM_BUFFER, this.buffer);
         this.gl.bufferSubData(this.gl.UNIFORM_BUFFER, offset, data);
         this.gl.bindBuffer(this.gl.UNIFORM_BUFFER, null);
+
+        this.dirtyStart = this.size;
+        this.dirtyEnd = 0;
 
         return this;
     }
@@ -5237,4 +5213,4 @@ class VertexBuffer {
 
 /***/ })
 /******/ ])["PicoGL"];
-});
+//# sourceMappingURL=picogl.js.map
