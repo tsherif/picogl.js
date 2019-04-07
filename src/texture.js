@@ -21,9 +21,13 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-import { GL, TEXTURE_FORMAT_DEFAULTS, COMPRESSED_TEXTURE_TYPES, DUMMY_OBJECT } from "./constants";
-
-const DUMMY_ARRAY = new Array(1);
+import { 
+    GL,
+    TEXTURE_FORMAT_DEFAULTS,
+    COMPRESSED_TEXTURE_TYPES,
+    DUMMY_OBJECT,
+    DUMMY_UNIT_ARRAY
+} from "./constants";
 
 /**
     General-purpose texture.
@@ -216,8 +220,8 @@ export class Texture {
     */
     data(data) {
         if (!Array.isArray(data)) {
-            DUMMY_ARRAY[0] = data;
-            data = DUMMY_ARRAY;
+            DUMMY_UNIT_ARRAY[0] = data;
+            data = DUMMY_UNIT_ARRAY;
         }
 
         let numLevels = this.mipmaps ? data.length : 1;
