@@ -263,6 +263,32 @@
             }
         },
 
+        loadImageArray: function loadImages(urls, ok) {
+            this.loadImages(urls, function(images) {
+                var canvas = document.createElement("canvas");
+                var ctx = canvas.getContext("2d");
+                var width = images[0].width;
+                var height = images[0].height;
+                canvas.width = width;
+                canvas.height = height * images.length;
+
+                for (var i = 0, len = images.length; i < len; ++i) {
+                    ctx.drawImage(images[i], 0, i * height);
+                }
+
+                var image = new Image();
+                image.onload = function() {
+                    ok({
+                        data: image,
+                        width: width,
+                        height: height,
+                        length: images.length
+                    });
+                }
+                image.src = canvas.toDataURL();
+            });
+        },
+
         createBox: function createBox(options) {
             options = options || {};
 

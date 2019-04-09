@@ -1,4 +1,23 @@
 <!DOCTYPE html>
+<html>
+<head>
+    <title>PicoGL.js: Context Loss and Recovery</title>
+    <meta charset="utf-8">
+    <script src="utils/gl-matrix.js"></script>
+    <script src="../build/picogl.js"></script>
+    <script src="utils/utils.js"></script>
+    <link rel="stylesheet" href="../site/css/picogl-example.css"> 
+    <style>
+        #context-loss {
+            position: absolute;
+            top: 80px;
+            left: 10px;
+            color: white;
+            background-color: gray;
+            padding: 0.5em;
+        }
+    </style>
+</head>
 <!--
   The MIT License (MIT)
 
@@ -21,25 +40,6 @@
   IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
   CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -->
-<html>
-<head>
-    <title>PicoGL.js: Context Loss and Recovery</title>
-    <meta charset="utf-8">
-    <script src="utils/gl-matrix.js"></script>
-    <script src="../build/picogl.js"></script>
-    <script src="utils/utils.js"></script>
-    <link rel="stylesheet" href="../site/css/picogl-example.css"> 
-    <style>
-        #context-loss {
-            position: absolute;
-            top: 80px;
-            left: 10px;
-            color: white;
-            background-color: gray;
-            padding: 0.5em;
-        }
-    </style>
-</head>
 <body>
     <div id="example-title">
         PicoGL.js Example: Context Loss and Recovery

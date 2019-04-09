@@ -1,4 +1,28 @@
 <!DOCTYPE html>
+<html>
+<head>
+    <title>PicoGL.js: Motion Blur</title>
+    <meta charset="utf-8">
+    <script src="utils/gl-matrix.js"></script>
+    <script src="../build/picogl.js"></script>
+    <script src="utils/utils.js"></script>
+    <link rel="stylesheet" href="../site/css/picogl-example.css"> 
+    <style>
+        #blur-controls {
+            position: absolute;
+            bottom: 40px;
+            right: 20px;
+            color: white;
+        }
+
+        #slowmo-controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            color: white;
+        }
+    </style>
+</head>
 <!--
   The MIT License (MIT)
 
@@ -25,30 +49,6 @@
     Motion blur algorithm based on Stupid OpenGL Shader Tricks by Simon Green
     http://plaza.ufl.edu/sakib/docs/GDC2003_OpenGLShaderTricks.pdf
  -->
-<html>
-<head>
-    <title>PicoGL.js: Motion Blur</title>
-    <meta charset="utf-8">
-    <script src="utils/gl-matrix.js"></script>
-    <script src="../build/picogl.js"></script>
-    <script src="utils/utils.js"></script>
-    <link rel="stylesheet" href="../site/css/picogl-example.css"> 
-    <style>
-        #blur-controls {
-            position: absolute;
-            bottom: 40px;
-            right: 20px;
-            color: white;
-        }
-
-        #slowmo-controls {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            color: white;
-        }
-    </style>
-</head>
 <body>
     <div id="example-title">
         PicoGL.js Example: Motion Blur
