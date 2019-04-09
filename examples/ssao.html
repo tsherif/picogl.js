@@ -1,4 +1,21 @@
 <!DOCTYPE html>
+<html>
+<head>
+    <title>PicoGL.js: Screen Space Ambient Occlusion</title>
+    <meta charset="utf-8">
+    <script src="utils/gl-matrix.js"></script>
+    <script src="../build/picogl.js"></script>
+    <script src="utils/utils.js"></script>
+    <link rel="stylesheet" href="../site/css/picogl-example.css"> 
+    <style>
+        #ssao-controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            color: white;
+        }
+    </style>
+</head>
 <!--
   The MIT License (MIT)
 
@@ -24,23 +41,6 @@
 <!-- 
     SSAO algorithm from http://www.nutty.ca/?page_id=352&link=ssao
  -->
-<html>
-<head>
-    <title>PicoGL.js: Screen Space Ambient Occlusion</title>
-    <meta charset="utf-8">
-    <script src="utils/gl-matrix.js"></script>
-    <script src="../build/picogl.js"></script>
-    <script src="utils/utils.js"></script>
-    <link rel="stylesheet" href="../site/css/picogl-example.css"> 
-    <style>
-        #ssao-controls {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            color: white;
-        }
-    </style>
-</head>
 <body>
     <div id="example-title">
         PicoGL.js Example: Screen Space Ambient Occlusion

@@ -1,4 +1,21 @@
 <!DOCTYPE html>
+<html>
+<head>
+    <title>PicoGL.js: Bloom</title>
+    <meta charset="utf-8">
+    <script src="utils/gl-matrix.js"></script>
+    <script src="../build/picogl.js"></script>
+    <script src="utils/utils.js"></script>
+    <link rel="stylesheet" href="../site/css/picogl-example.css"> 
+    <style>
+        #bloom-controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            color: white;
+        }
+    </style>
+</head>
 <!--
   The MIT License (MIT)
 
@@ -24,22 +41,6 @@
 <!-- 
     Bloom algorithm from: https://learnopengl.com/#!Advanced-Lighting/Bloom
  -->
-<html>
-<head>
-    <title>PicoGL.js: Bloom</title>
-    <script src="utils/gl-matrix.js"></script>
-    <script src="../build/picogl.js"></script>
-    <script src="utils/utils.js"></script>
-    <link rel="stylesheet" href="../site/css/picogl-example.css"> 
-    <style>
-        #bloom-controls {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            color: white;
-        }
-    </style>
-</head>
 <body>
     <div id="example-title">
         PicoGL.js Example: Bloom
