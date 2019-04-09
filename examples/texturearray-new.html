@@ -26,6 +26,9 @@
     - carpet: freeware https://www.3dxo.com/textures/523_cotton_carpet
     - pavement: free for private use https://www.3dxo.com/textures/3049_concrete_pavement
     - grass: free for private use https://www.3dxo.com/textures/10524_wild_gras
+    - brick: free for private use https://www.3dxo.com/textures/10525_brick_work_50
+    - tile: free for private use https://www.3dxo.com/textures/10523_tile_pattern_3
+    - marble: free for private use https://www.3dxo.com/textures/10529_marble_125
 -->
 <html>
 <head>
@@ -137,8 +140,8 @@
 
         // SET UP GEOMETRY
         var box = utils.createBox({dimensions: [1.0, 1.0, 1.0]});
-        var modelMatrixData = new Float32Array(4 * 16);
-        var textureIndexData = new Uint8Array([0, 1, 2, 3]);
+        var modelMatrixData = new Float32Array(8 * 16);
+        var textureIndexData = new Uint8Array([0, 1, 2, 3, 4, 5, 6, 7]);
 
         var positions = app.createVertexBuffer(PicoGL.FLOAT, 3, box.positions);
         var uv = app.createVertexBuffer(PicoGL.FLOAT, 2, box.uvs);
@@ -155,10 +158,10 @@
 
         // SET UP UNIFORM BUFFER
         var projMatrix = mat4.create();
-        mat4.perspective(projMatrix, Math.PI / 2, canvas.width / canvas.height, 0.1, 10.0);
+        mat4.perspective(projMatrix, Math.PI / 3, canvas.width / canvas.height, 0.1, 10.0);
 
         var viewMatrix = mat4.create();
-        var eyePosition = vec3.fromValues(0, 0, 3);
+        var eyePosition = vec3.fromValues(0, 0, 5);
         mat4.lookAt(viewMatrix, eyePosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
 
         var viewProjMatrix = mat4.create();
@@ -179,27 +182,51 @@
         var boxes = [
             {
                 rotation: vec3.fromValues(Math.random(), Math.random(), Math.random()),
-                rv: vec3.fromValues(Math.random() * 0.01, Math.random() * 0.01, Math.random() * 0.01),
-                translation: vec3.fromValues(-1, 1, 0),
+                rv: vec3.fromValues(Math.random() * 0.02, Math.random() * 0.02, Math.random() * 0.02),
+                translation: vec3.fromValues(-3, 1, 0),
                 modelMatrix: new Float32Array(modelMatrixData.buffer, 0, 16),
             },
             {
                 rotation: vec3.fromValues(Math.random(), Math.random(), Math.random()),
-                rv: vec3.fromValues(Math.random() * 0.01, Math.random() * 0.01, Math.random() * 0.01),
-                translation: vec3.fromValues(1, 1, 0),
+                rv: vec3.fromValues(Math.random() * 0.02, Math.random() * 0.02, Math.random() * 0.02),
+                translation: vec3.fromValues(-1, 1, 0),
                 modelMatrix: new Float32Array(modelMatrixData.buffer, 16 * 4, 16),
             },
             {
                 rotation: vec3.fromValues(Math.random(), Math.random(), Math.random()),
-                rv: vec3.fromValues(Math.random() * 0.01, Math.random() * 0.01, Math.random() * 0.01),
-                translation: vec3.fromValues(-1, -1, 0),
+                rv: vec3.fromValues(Math.random() * 0.02, Math.random() * 0.02, Math.random() * 0.02),
+                translation: vec3.fromValues(1, 1, 0),
                 modelMatrix: new Float32Array(modelMatrixData.buffer, 32 * 4, 16),
             },
             {
                 rotation: vec3.fromValues(Math.random(), Math.random(), Math.random()),
-                rv: vec3.fromValues(Math.random() * 0.01, Math.random() * 0.01, Math.random() * 0.01),
-                translation: vec3.fromValues(1, -1, 0),
+                rv: vec3.fromValues(Math.random() * 0.02, Math.random() * 0.02, Math.random() * 0.02),
+                translation: vec3.fromValues(3, 1, 0),
                 modelMatrix: new Float32Array(modelMatrixData.buffer, 48 * 4, 16),
+            },
+            {
+                rotation: vec3.fromValues(Math.random(), Math.random(), Math.random()),
+                rv: vec3.fromValues(Math.random() * 0.02, Math.random() * 0.02, Math.random() * 0.02),
+                translation: vec3.fromValues(-3, -1, 0),
+                modelMatrix: new Float32Array(modelMatrixData.buffer, 64 * 4, 16),
+            },
+            {
+                rotation: vec3.fromValues(Math.random(), Math.random(), Math.random()),
+                rv: vec3.fromValues(Math.random() * 0.02, Math.random() * 0.02, Math.random() * 0.02),
+                translation: vec3.fromValues(-1, -1, 0),
+                modelMatrix: new Float32Array(modelMatrixData.buffer, 80 * 4, 16),
+            },
+            {
+                rotation: vec3.fromValues(Math.random(), Math.random(), Math.random()),
+                rv: vec3.fromValues(Math.random() * 0.02, Math.random() * 0.02, Math.random() * 0.02),
+                translation: vec3.fromValues(1, -1, 0),
+                modelMatrix: new Float32Array(modelMatrixData.buffer, 96 * 4, 16),
+            },
+            {
+                rotation: vec3.fromValues(Math.random(), Math.random(), Math.random()),
+                rv: vec3.fromValues(Math.random() * 0.02, Math.random() * 0.02, Math.random() * 0.02),
+                translation: vec3.fromValues(3, -1, 0),
+                modelMatrix: new Float32Array(modelMatrixData.buffer, 112 * 4, 16),
             }
         ]
 
@@ -218,7 +245,11 @@
             "img/webgl-logo.png",
             "img/carpet.jpg",
             "img/grass.png",
-            "img/pavement.jpg"
+            "img/pavement.jpg",
+            "img/brick.png",
+            "img/concrete.jpg",
+            "img/marble.png",
+            "img/tile.png",
         ], function (data) {
 
             var texture = app.createTextureArray(data.data, data.width, data.height, data.length);
