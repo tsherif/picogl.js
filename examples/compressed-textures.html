@@ -251,7 +251,7 @@
         }
 
         if (app.s3tcTexturesEnabled) {
-            utils.getBinary("img/s3tc-supported-dxt1.pvr", function(data) {
+            utils.getBinary("img/compressed/s3tc-supported-dxt1.pvr", function(data) {
                 var textureData = utils.parsePVR(data);
                 s3tcTexture = app.createTexture2D(textureData.data, textureData.width, textureData.height, {
                     format: PicoGL.COMPRESSED_RGB_S3TC_DXT1_EXT
@@ -267,11 +267,11 @@
                 checkDone();
             }
 
-            s3tcImage.src = "img/s3tc-unsupported.png";
+            s3tcImage.src = "img/compressed/s3tc-unsupported.png";
         }
 
         if (app.etcTexturesEnabled) {
-            utils.getBinary("img/etc-supported-etc2.pvr", function(data) {
+            utils.getBinary("img/compressed/etc-supported-etc2.pvr", function(data) {
                 var textureData = utils.parsePVR(data);
                 etcTexture = app.createTexture2D(textureData.data, textureData.width, textureData.height, {
                     format: PicoGL.COMPRESSED_RGB8_ETC2
@@ -287,11 +287,11 @@
                 checkDone();
             }
 
-            etcImage.src = "img/etc-unsupported.png";
+            etcImage.src = "img/compressed/etc-unsupported.png";
         }
 
         if (app.astcTexturesEnabled) {
-            utils.getBinary("img/astc-supported-astc.pvr", function(data) {
+            utils.getBinary("img/compressed/astc-supported-astc.pvr", function(data) {
                 var textureData = utils.parsePVR(data);
                 astcTexture = app.createTexture2D(textureData.data, textureData.width, textureData.height, {
                     format: PicoGL.COMPRESSED_RGBA_ASTC_4x4_KHR
@@ -307,11 +307,11 @@
                 checkDone();
             }
 
-            astcImage.src = "img/astc-unsupported.png";
+            astcImage.src = "img/compressed/astc-unsupported.png";
         }
 
         if (app.pvrtcTexturesEnabled) {
-            utils.getBinary("img/pvrtc-supported-pvrtc.pvr", function(data) {
+            utils.getBinary("img/compressed/pvrtc-supported-pvrtc.pvr", function(data) {
                 var textureData = utils.parsePVR(data);
                 pvrtcTexture = app.createTexture2D(textureData.data, textureData.width, textureData.height, {
                     format: PicoGL.COMPRESSED_RGB_PVRTC_4BPPV1_IMG
@@ -327,7 +327,7 @@
                 checkDone();
             }
 
-            pvrtcImage.src = "img/pvrtc-unsupported.png";
+            pvrtcImage.src = "img/compressed/pvrtc-unsupported.png";
         }
 
         

@@ -626,6 +626,24 @@
             xhr.send(null);
         },
 
+        getBinaries(urls, ok) {
+            var numRequests = urls.length;
+            var results = new Array(numRequests);
+
+            function checkDoneFunc(i) {
+                return function(result) {
+                    results[i] = result;
+                    if (--numRequests === 0) {
+                        ok(results);
+                    }
+                };
+            }
+
+            for (var i = 0; i < numRequests; ++i) {
+               this.getBinary(urls[i], checkDoneFunc(i)); 
+            }
+        },
+
         // http://cdn.imgtec.com/sdk-documentation/PVR+File+Format.Specification.pdf
         parsePVR: function(data) {
             var header = new Uint32Array(data, 0, PVR_CONSTANTS.HEADER_LENGTH);

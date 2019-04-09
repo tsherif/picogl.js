@@ -221,20 +221,10 @@
         var angleX = 0;
         var angleY = 0;
 
-        loadImages(function(compressedFormat, compressedData, image) {
+        loadImages(function(cubemapData, image) {
             // CREATE TEXTURE AND CUBEMAP
             var texture = app.createTexture2D(image, { flipY: true });
-            var cubemap = app.createCubemap({
-                width: compressedData.width,
-                height: compressedData.height,
-                negX: compressedData.data,
-                posX: compressedData.data,
-                negY: compressedData.data,
-                posY: compressedData.data,
-                negZ: compressedData.data,
-                posZ: compressedData.data,
-                format: compressedFormat
-            });
+            var cubemap = app.createCubemap(cubemapData);
 
             // CREATE DRAWCALLS FOR SKYBOX AND REFLECTIVE CUBE
             var skyboxDrawcall = app.createDrawCall(skyboxProgram, boxArray)
@@ -277,12 +267,12 @@
 
         function loadImages(ok) {
             var format = null;
-            var compressedData = null;
+            var cubemapData = null;
             var image = null;
 
             function checkDone() {
-                if (compressedData && image) {
-                    ok(format, compressedData, image);
+                if (cubemapData && image) {
+                    ok(cubemapData, image);
                 }
             }
 
@@ -291,31 +281,96 @@
                 checkDone();
             });
 
+            var compressedType = null;
             if (app.astcTexturesEnabled) {
-                utils.getBinary("img/astc-supported-astc.pvr", function(data) {
-                    format = PicoGL.COMPRESSED_RGBA_ASTC_4x4_KHR;
-                    compressedData = utils.parsePVR(data);
-                    checkDone();
-                });
+                compressedType = "astc";
+                format = PicoGL.COMPRESSED_RGBA_ASTC_4x4_KHR;
             } else if (app.s3tcTexturesEnabled) {
-                utils.getBinary("img/s3tc-supported-dxt1.pvr", function(data) {
-                    format = PicoGL.COMPRESSED_RGB_S3TC_DXT1_EXT;
-                    compressedData = utils.parsePVR(data);
-                    checkDone();
-                });
-            } else if (app.etcTexturesEnabled) {
-                utils.getBinary("img/etc-supported-etc2.pvr", function(data) {
-                    format = PicoGL.COMPRESSED_RGB8_ETC2;
-                    compressedData = utils.parsePVR(data);
-                    checkDone();
-                });
+                compressedType = "s3tc";
+                format = PicoGL.COMPRESSED_RGB_S3TC_DXT1_EXT;
             } else if (app.pvrtcTexturesEnabled) {
-                utils.getBinary("img/pvrtc-supported-pvrtc.pvr", function(data) {
-                    format = PicoGL.COMPRESSED_RGB_PVRTC_4BPPV1_IMG;
-                    compressedData = utils.parsePVR(data);
+                compressedType = "pvrtc";
+                format = PicoGL.COMPRESSED_RGB_PVRTC_4BPPV1_IMG;
+            } else if (app.etcTexturesEnabled) {
+                compressedType = "etc";
+                format = PicoGL.COMPRESSED_RGB8_ETC2;
+            }
+
+            if (compressedType) {
+                utils.getBinaries([
+                    "img/compressed/sky-negx-" + compressedType + ".pvr",
+                    "img/compressed/sky-posx-" + compressedType + ".pvr",
+                    "img/compressed/sky-negy-" + compressedType + ".pvr",
+                    "img/compressed/sky-posy-" + compressedType + ".pvr",
+                    "img/compressed/sky-negz-" + compressedType + ".pvr",
+                    "img/compressed/sky-posz-" + compressedType + ".pvr"
+                ], function(data) {
+                    for (var i = 0, len = data.length; i < len; ++i) {
+                        data[i] = utils.parsePVR(data[i]);
+                    }
+
+                    cubemapData = {
+                        width: data[0].width,
+                        height: data[0].height,
+                        negX: data[0].data,
+                        posX: data[1].data,
+                        negY: data[2].data,
+                        posY: data[3].data,
+                        negZ: data[4].data,
+                        posZ: data[5].data,
+                        format: format
+                    };
+
+                    checkDone();
+                })
+            } else {
+                utils.loadImages([
+                    "img/compressed/sky-negx-unsupported.png",
+                    "img/compressed/sky-posx-unsupported.png",
+                    "img/compressed/sky-negy-unsupported.png",
+                    "img/compressed/sky-posy-unsupported.png",
+                    "img/compressed/sky-negz-unsupported.png",
+                    "img/compressed/sky-posz-unsupported.png"
+                ], function(images) {
+                    cubemapData = {
+                        negX: images[0],
+                        posX: images[1],
+                        negY: images[2],
+                        posY: images[3],
+                        negZ: images[4],
+                        posZ: images[5]
+                    };
+
                     checkDone();
                 });
+
             }
+
+            // if (app.astcTexturesEnabled) {
+            //     utils.getBinary("img/astc-supported-astc.pvr", function(data) {
+            //         format = PicoGL.COMPRESSED_RGBA_ASTC_4x4_KHR;
+            //         compressedData = utils.parsePVR(data);
+            //         checkDone();
+            //     });
+            // } else if (app.s3tcTexturesEnabled) {
+            //     utils.getBinary("img/s3tc-supported-dxt1.pvr", function(data) {
+            //         format = PicoGL.COMPRESSED_RGB_S3TC_DXT1_EXT;
+            //         compressedData = utils.parsePVR(data);
+            //         checkDone();
+            //     });
+            // } else if (app.etcTexturesEnabled) {
+            //     utils.getBinary("img/etc-supported-etc2.pvr", function(data) {
+            //         format = PicoGL.COMPRESSED_RGB8_ETC2;
+            //         compressedData = utils.parsePVR(data);
+            //         checkDone();
+            //     });
+            // } else if (app.pvrtcTexturesEnabled) {
+            //     utils.getBinary("img/pvrtc-supported-pvrtc.pvr", function(data) {
+            //         format = PicoGL.COMPRESSED_RGB_PVRTC_4BPPV1_IMG;
+            //         compressedData = utils.parsePVR(data);
+            //         checkDone();
+            //     });
+            // }
         }
 
     </script>
