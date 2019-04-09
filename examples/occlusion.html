@@ -1,4 +1,21 @@
 <!DOCTYPE html>
+<html>
+<head>
+    <title>PicoGL.js Example: Occlusion Culling</title>
+    <meta charset="utf-8">
+    <script src="utils/gl-matrix.js"></script>
+    <script src="../build/picogl.js"></script>
+    <script src="utils/utils.js"></script>
+    <link rel="stylesheet" href="../site/css/picogl-example.css">
+    <style>
+        #occlusion-controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            color: white;
+        }
+    </style>
+</head>
 <!--
   The MIT License (MIT)
 
@@ -28,23 +45,6 @@
     Occlusion culling algorithm based on: 
     https://developer.nvidia.com/gpugems/GPUGems2/gpugems2_chapter06.html
  -->
-<html>
-<head>
-    <title>PicoGL.js Example: Occlusion Culling</title>
-    <meta charset="utf-8">
-    <script src="utils/gl-matrix.js"></script>
-    <script src="../build/picogl.js"></script>
-    <script src="utils/utils.js"></script>
-    <link rel="stylesheet" href="../site/css/picogl-example.css">
-    <style>
-        #occlusion-controls {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            color: white;
-        }
-    </style>
-</head>
 <body>
     <div id="example-title">
         PicoGL.js Example: Occlusion Culling
