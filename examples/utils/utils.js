@@ -223,10 +223,10 @@
 
     window.utils = {
         testWebGL2: function() {
-            return !!dummyGL;
+            return Boolean(dummyGL);
         },
         testExtension: function(ext) {
-            return !!dummyGL.getExtension(ext);
+            return Boolean(dummyGL.getExtension(ext));
         },
         xformMatrix: function xformMatrix(xform, translate, rotate, scale) {
             translate = translate || zeros;

@@ -846,7 +846,7 @@ class Texture {
 
         this.format = null;
         this.internalFormat = null;
-        this.compressed = !!(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][options.format] || __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][options.internalFormat]);
+        this.compressed = Boolean(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][options.format] || __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][options.internalFormat]);
         
         if (this.compressed) {
             // For compressed textures, just need to provide one of format, internalFormat.
@@ -2193,7 +2193,7 @@ class App {
         @return {App} The App object.
     */
     floatRenderTargets() {
-        this.floatRenderTargetsEnabled = !!this.gl.getExtension("EXT_color_buffer_float");
+        this.floatRenderTargetsEnabled = Boolean(this.gl.getExtension("EXT_color_buffer_float"));
 
         return this;
     }
@@ -2206,7 +2206,7 @@ class App {
         @return {App} The App object.
     */
     linearFloatTextures() {
-        this.linearFloatTexturesEnabled = !!this.gl.getExtension("OES_texture_float_linear");
+        this.linearFloatTexturesEnabled = Boolean(this.gl.getExtension("OES_texture_float_linear"));
 
         return this;
     }
@@ -2232,7 +2232,7 @@ class App {
     */
     s3tcTextures() {
         let ext = this.gl.getExtension("WEBGL_compressed_texture_s3tc");
-        this.s3tcTexturesEnabled = !!ext;
+        this.s3tcTexturesEnabled = Boolean(ext);
         
         if (this.s3tcTexturesEnabled) {
             __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPRESSED_RGB_S3TC_DXT1_EXT]  = true;
@@ -2242,7 +2242,7 @@ class App {
         }
 
         ext = this.gl.getExtension("WEBGL_compressed_texture_s3tc_srgb");
-        this.s3tcSRGBTexturesEnabled = !!ext;
+        this.s3tcSRGBTexturesEnabled = Boolean(ext);
         
         if (this.s3tcSRGBTexturesEnabled) {
             __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPRESSED_SRGB_S3TC_DXT1_EXT]       = true;
@@ -2279,7 +2279,7 @@ class App {
     */
     etcTextures() {
         let ext = this.gl.getExtension("WEBGL_compressed_texture_etc");
-        this.etcTexturesEnabled = !!ext;
+        this.etcTexturesEnabled = Boolean(ext);
 
         if (this.etcTexturesEnabled) {
             __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPRESSED_R11_EAC]                        = true;
@@ -2337,7 +2337,7 @@ class App {
     */
     astcTextures() {
         let ext = this.gl.getExtension("WEBGL_compressed_texture_astc");
-        this.astcTexturesEnabled = !!ext;
+        this.astcTexturesEnabled = Boolean(ext);
 
         if (this.astcTexturesEnabled) {
             __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPRESSED_RGBA_ASTC_4x4_KHR]           = true;
@@ -2389,7 +2389,7 @@ class App {
     */
     pvrtcTextures() {
         let ext = this.gl.getExtension("WEBGL_compressed_texture_pvrtc");
-        this.pvrtcTexturesEnabled = !!ext;
+        this.pvrtcTexturesEnabled = Boolean(ext);
         
         if (this.pvrtcTexturesEnabled) {
             __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPRESSED_RGB_PVRTC_4BPPV1_IMG] = true;
@@ -2902,7 +2902,7 @@ class Cubemap {
 
         this.format = null;
         this.internalFormat = null;
-        this.compressed = !!(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][options.format] || __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][options.internalFormat]);
+        this.compressed = Boolean(__WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][options.format] || __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][options.internalFormat]);
         
         if (this.compressed) {
             // For compressed textures, just need to provide one of format, internalFormat.
@@ -4258,7 +4258,7 @@ class Timer {
         @return {Timer} The Timer object.
     */
     restore() {
-        this.gpuTimer = !!(this.gl.getExtension("EXT_disjoint_timer_query_webgl2") || this.gl.getExtension("EXT_disjoint_timer_query"));
+        this.gpuTimer = Boolean(this.gl.getExtension("EXT_disjoint_timer_query_webgl2") || this.gl.getExtension("EXT_disjoint_timer_query"));
         
         if (this.gpuTimer) {
             if (this.gpuTimerQuery) {
@@ -4340,7 +4340,7 @@ class Timer {
                 return false;
             }
         } else {
-            return !!this.cpuStartTime;
+            return Boolean(this.cpuStartTime);
         }
     }
 
@@ -4974,8 +4974,8 @@ class VertexArray {
             size = vertexBuffer.itemSize,
             stride = 0,
             offset = 0,
-            normalized = vertexBuffer.normalizedIntegers,
-            integer = vertexBuffer.integer && !vertexBuffer.normalizedIntegers
+            normalized = false,
+            integer = Boolean(vertexBuffer.integer && !normalized)
         } = options;
 
         let numColumns = vertexBuffer.numColumns;
@@ -5150,36 +5150,9 @@ class VertexBuffer {
         this.usage = usage;
         this.indexArray = Boolean(indexArray);
         this.integer = Boolean(INTEGER_TYPES[this.type]);
-        this.normalizedIntegers = false;
         this.binding = this.indexArray ? __WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].ELEMENT_ARRAY_BUFFER : __WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].ARRAY_BUFFER;
 
         this.restore(data);
-    }
-
-    /**
-        Indicate that this buffer consists of normalized integers. Note
-        that this should be called before binding to a VertexArray.
-
-        @method
-        @return {VertexBuffer} The VertexBuffer object.
-    */
-    normalized() {
-        this.normalizedIntegers = true;
-
-        return this;
-    }
-
-    /**
-        Indicate that this buffer does not consist of normalized integers. Note
-        that this should be called before binding to a VertexArray.
-
-        @method
-        @return {VertexBuffer} The VertexBuffer object.
-    */
-    unnormalized() {
-        this.normalizedIntegers = false;
-
-        return this;
     }
 
     /**

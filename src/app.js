@@ -664,7 +664,7 @@ export class App {
         @return {App} The App object.
     */
     floatRenderTargets() {
-        this.floatRenderTargetsEnabled = !!this.gl.getExtension("EXT_color_buffer_float");
+        this.floatRenderTargetsEnabled = Boolean(this.gl.getExtension("EXT_color_buffer_float"));
 
         return this;
     }
@@ -677,7 +677,7 @@ export class App {
         @return {App} The App object.
     */
     linearFloatTextures() {
-        this.linearFloatTexturesEnabled = !!this.gl.getExtension("OES_texture_float_linear");
+        this.linearFloatTexturesEnabled = Boolean(this.gl.getExtension("OES_texture_float_linear"));
 
         return this;
     }
@@ -703,7 +703,7 @@ export class App {
     */
     s3tcTextures() {
         let ext = this.gl.getExtension("WEBGL_compressed_texture_s3tc");
-        this.s3tcTexturesEnabled = !!ext;
+        this.s3tcTexturesEnabled = Boolean(ext);
         
         if (this.s3tcTexturesEnabled) {
             COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGB_S3TC_DXT1_EXT]  = true;
@@ -713,7 +713,7 @@ export class App {
         }
 
         ext = this.gl.getExtension("WEBGL_compressed_texture_s3tc_srgb");
-        this.s3tcSRGBTexturesEnabled = !!ext;
+        this.s3tcSRGBTexturesEnabled = Boolean(ext);
         
         if (this.s3tcSRGBTexturesEnabled) {
             COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB_S3TC_DXT1_EXT]       = true;
@@ -750,7 +750,7 @@ export class App {
     */
     etcTextures() {
         let ext = this.gl.getExtension("WEBGL_compressed_texture_etc");
-        this.etcTexturesEnabled = !!ext;
+        this.etcTexturesEnabled = Boolean(ext);
 
         if (this.etcTexturesEnabled) {
             COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_R11_EAC]                        = true;
@@ -808,7 +808,7 @@ export class App {
     */
     astcTextures() {
         let ext = this.gl.getExtension("WEBGL_compressed_texture_astc");
-        this.astcTexturesEnabled = !!ext;
+        this.astcTexturesEnabled = Boolean(ext);
 
         if (this.astcTexturesEnabled) {
             COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_ASTC_4x4_KHR]           = true;
@@ -860,7 +860,7 @@ export class App {
     */
     pvrtcTextures() {
         let ext = this.gl.getExtension("WEBGL_compressed_texture_pvrtc");
-        this.pvrtcTexturesEnabled = !!ext;
+        this.pvrtcTexturesEnabled = Boolean(ext);
         
         if (this.pvrtcTexturesEnabled) {
             COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGB_PVRTC_4BPPV1_IMG] = true;

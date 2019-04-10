@@ -115,36 +115,9 @@ export class VertexBuffer {
         this.usage = usage;
         this.indexArray = Boolean(indexArray);
         this.integer = Boolean(INTEGER_TYPES[this.type]);
-        this.normalizedIntegers = false;
         this.binding = this.indexArray ? GL.ELEMENT_ARRAY_BUFFER : GL.ARRAY_BUFFER;
 
         this.restore(data);
-    }
-
-    /**
-        Indicate that this buffer consists of normalized integers. Note
-        that this should be called before binding to a VertexArray.
-
-        @method
-        @return {VertexBuffer} The VertexBuffer object.
-    */
-    normalized() {
-        this.normalizedIntegers = true;
-
-        return this;
-    }
-
-    /**
-        Indicate that this buffer does not consist of normalized integers. Note
-        that this should be called before binding to a VertexArray.
-
-        @method
-        @return {VertexBuffer} The VertexBuffer object.
-    */
-    unnormalized() {
-        this.normalizedIntegers = false;
-
-        return this;
     }
 
     /**

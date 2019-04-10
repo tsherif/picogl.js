@@ -160,18 +160,18 @@
         var velocities2 = app.createVertexBuffer(PicoGL.FLOAT, 3, positionData.length);
         
         // COLOR BUFFER NOT INVOLVED IN TRANSFORM FEEDBACK
-        var colors = app.createVertexBuffer(PicoGL.UNSIGNED_BYTE, 3, colorData).normalized();
+        var colors = app.createVertexBuffer(PicoGL.UNSIGNED_BYTE, 3, colorData);
 
         // INPUT AND OUTPUT VERTEX ARRAYS
         var vertexArray1 = app.createVertexArray()
         .vertexAttributeBuffer(0, positions1)
         .vertexAttributeBuffer(1, velocities1)
-        .vertexAttributeBuffer(2, colors);
+        .vertexAttributeBuffer(2, colors, { normalized: true });
 
         var vertexArray2 = app.createVertexArray()
         .vertexAttributeBuffer(0, positions2)
         .vertexAttributeBuffer(1, velocities2)
-        .vertexAttributeBuffer(2, colors);
+        .vertexAttributeBuffer(2, colors, { normalized: true });
 
         // TRANSFORM FEEDBACK OBJECTS
         var transformFeedback1 = app.createTransformFeedback()

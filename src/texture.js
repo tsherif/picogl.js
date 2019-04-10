@@ -66,7 +66,7 @@ export class Texture {
 
         this.format = null;
         this.internalFormat = null;
-        this.compressed = !!(COMPRESSED_TEXTURE_TYPES[options.format] || COMPRESSED_TEXTURE_TYPES[options.internalFormat]);
+        this.compressed = Boolean(COMPRESSED_TEXTURE_TYPES[options.format] || COMPRESSED_TEXTURE_TYPES[options.internalFormat]);
         
         if (this.compressed) {
             // For compressed textures, just need to provide one of format, internalFormat.

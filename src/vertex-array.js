@@ -178,8 +178,8 @@ export class VertexArray {
             size = vertexBuffer.itemSize,
             stride = 0,
             offset = 0,
-            normalized = vertexBuffer.normalizedIntegers,
-            integer = vertexBuffer.integer && !vertexBuffer.normalizedIntegers
+            normalized = false,
+            integer = Boolean(vertexBuffer.integer && !normalized)
         } = options;
 
         let numColumns = vertexBuffer.numColumns;
