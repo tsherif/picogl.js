@@ -2,7 +2,7 @@
 
 - Support for compressed cubemaps
 - UniformBuffers only send modified subrange of data to GPU on `update()`
-- Remove `VertexBuffer.normalized`, `VertexBuffer.unnormalized`.
+- Remove `VertexBuffer.normalized`, `VertexBuffer.unnormalized`
 
 
 ## v0.11.0
