@@ -215,7 +215,7 @@
 
         // ATTRIBUTES FOR DRAWING
         var positions = app.createVertexBuffer(PicoGL.FLOAT, 2, positionData);
-        var colors = app.createVertexBuffer(PicoGL.UNSIGNED_BYTE, 3, colorData).normalized();
+        var colors = app.createVertexBuffer(PicoGL.UNSIGNED_BYTE, 3, colorData);
 
         
         // COMBINE VERTEX BUFFERS INTO INPUT AND OUTPUT VERTEX ARRAYS
@@ -239,13 +239,13 @@
         // VERTEX ARRAYS FOR DRAWING
         var drawArrayA = app.createVertexArray()
         .vertexAttributeBuffer(0, positions)
-        .instanceAttributeBuffer(1, colors)
+        .instanceAttributeBuffer(1, colors, { normalized: true })
         .instanceAttributeBuffer(2, offsetsA)
         .instanceAttributeBuffer(3, rotationsA);
 
         var drawArrayB = app.createVertexArray()
         .vertexAttributeBuffer(0, positions)
-        .instanceAttributeBuffer(1, colors)
+        .instanceAttributeBuffer(1, colors, { normalized: true })
         .instanceAttributeBuffer(2, offsetsB)
         .instanceAttributeBuffer(3, rotationsB);
 
@@ -305,13 +305,13 @@
             // VERTEX ARRAYS FOR DRAWING
             drawArrayA.restore()
             .vertexAttributeBuffer(0, positions)
-            .instanceAttributeBuffer(1, colors)
+            .instanceAttributeBuffer(1, colors, { normalized: true })
             .instanceAttributeBuffer(2, offsetsA)
             .instanceAttributeBuffer(3, rotationsA);
 
             drawArrayB.restore()
             .vertexAttributeBuffer(0, positions)
-            .instanceAttributeBuffer(1, colors)
+            .instanceAttributeBuffer(1, colors, { normalized: true })
             .instanceAttributeBuffer(2, offsetsB)
             .instanceAttributeBuffer(3, rotationsB);
 

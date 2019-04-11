@@ -60,8 +60,8 @@
         layout(location=2) in vec4 normal;
         
         layout(std140) uniform SceneUniforms {
-            uniform mat4 uViewProj;
             uniform vec4 eyePosition;
+            uniform mat4 uViewProj;
             uniform vec4 lightPosition;
             uniform vec4 lightColor;
             uniform vec4 lightPosition2;
@@ -86,8 +86,8 @@
         precision highp float;
 
         layout(std140) uniform SceneUniforms {
-            uniform mat4 uViewProj;
             uniform vec4 eyePosition;
+            uniform mat4 uViewProj;
             uniform vec4 lightPosition;
             uniform vec4 lightColor;
             uniform vec4 lightPosition2;
@@ -377,15 +377,15 @@
         .update();
 
         var sceneUniforms = app.createUniformBuffer([
-            PicoGL.FLOAT_MAT4,
             PicoGL.FLOAT_VEC4,
+            PicoGL.FLOAT_MAT4,
             PicoGL.FLOAT_VEC4,
             PicoGL.FLOAT_VEC4,
             PicoGL.FLOAT_VEC4,
             PicoGL.FLOAT_VEC4
         ])
-        .set(0, viewProjMatrix)
-        .set(1, eyePosition)
+        .set(0, eyePosition)
+        .set(1, viewProjMatrix)
         .set(2, suns[0].position)
         .set(3, suns[0].color)
         .set(4, suns[1].position)
@@ -437,13 +437,13 @@
 
                 mat4.perspective(projMatrix, Math.PI / 2, app.width / app.height, 0.1, 10.0);
                 mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
-                sceneUniforms.set(0, viewProjMatrix).update(0);
+                sceneUniforms.set(1, viewProjMatrix).update();
 
                 mat4.multiply(suns[0].mvpMatrix, viewProjMatrix, suns[0].modelMatrix);
-                suns[0].uniforms.set(0, suns[0].mvpMatrix).update(0);
+                suns[0].uniforms.set(0, suns[0].mvpMatrix).update();
 
                 mat4.multiply(suns[1].mvpMatrix, viewProjMatrix, suns[1].modelMatrix);
-                suns[1].uniforms.set(0, suns[1].mvpMatrix).update(0);
+                suns[1].uniforms.set(0, suns[1].mvpMatrix).update();
             }
 
             function draw() {

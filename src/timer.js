@@ -62,7 +62,7 @@ export class Timer {
         @return {Timer} The Timer object.
     */
     restore() {
-        this.gpuTimer = !!(this.gl.getExtension("EXT_disjoint_timer_query_webgl2") || this.gl.getExtension("EXT_disjoint_timer_query"));
+        this.gpuTimer = Boolean(this.gl.getExtension("EXT_disjoint_timer_query_webgl2") || this.gl.getExtension("EXT_disjoint_timer_query"));
         
         if (this.gpuTimer) {
             if (this.gpuTimerQuery) {
@@ -144,7 +144,7 @@ export class Timer {
                 return false;
             }
         } else {
-            return !!this.cpuStartTime;
+            return Boolean(this.cpuStartTime);
         }
     }
 

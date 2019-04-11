@@ -150,11 +150,11 @@
         var encodedNormals = octEncode(sphere.normals);
 
         var compressedPositions = app.createVertexBuffer(PicoGL.UNSIGNED_SHORT, 3, q.quantized);
-        var compressedNormals = app.createVertexBuffer(PicoGL.BYTE, 2, encodedNormals).normalized();
+        var compressedNormals = app.createVertexBuffer(PicoGL.BYTE, 2, encodedNormals);
 
         var compressedVertexArray = app.createVertexArray()
         .vertexAttributeBuffer(0, compressedPositions)
-        .vertexAttributeBuffer(1, compressedNormals)
+        .vertexAttributeBuffer(1, compressedNormals, { normalized: true })
         .indexBuffer(indices);
 
         // UNIFORMS
