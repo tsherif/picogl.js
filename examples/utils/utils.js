@@ -223,10 +223,10 @@
 
     window.utils = {
         testWebGL2: function() {
-            return !!dummyGL;
+            return Boolean(dummyGL);
         },
         testExtension: function(ext) {
-            return !!dummyGL.getExtension(ext);
+            return Boolean(dummyGL.getExtension(ext));
         },
         xformMatrix: function xformMatrix(xform, translate, rotate, scale) {
             translate = translate || zeros;
@@ -650,6 +650,24 @@
             };
 
             xhr.send(null);
+        },
+
+        getBinaries(urls, ok) {
+            var numRequests = urls.length;
+            var results = new Array(numRequests);
+
+            function checkDoneFunc(i) {
+                return function(result) {
+                    results[i] = result;
+                    if (--numRequests === 0) {
+                        ok(results);
+                    }
+                };
+            }
+
+            for (var i = 0; i < numRequests; ++i) {
+               this.getBinary(urls[i], checkDoneFunc(i)); 
+            }
         },
 
         // http://cdn.imgtec.com/sdk-documentation/PVR+File+Format.Specification.pdf

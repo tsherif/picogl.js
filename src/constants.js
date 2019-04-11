@@ -688,4 +688,6 @@ export const COMPRESSED_TEXTURE_TYPES = {};
 
 export const WEBGL_INFO = {};
 
+export const DUMMY_UNIT_ARRAY = new Array(1);
+
 export const DUMMY_OBJECT = {};
