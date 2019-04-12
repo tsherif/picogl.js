@@ -177,7 +177,7 @@ export class DrawCall {
     */
     draw() {
         if (!this.currentProgram.linked) {
-            return;
+            return this;
         }
 
         let uniformNames = this.uniformNames;

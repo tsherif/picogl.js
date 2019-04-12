@@ -981,12 +981,12 @@ export class App {
                 let linked = 0;
                 for (let i = 0; i < numPending; ++i) {
                     if (pendingPrograms[i].linkFailed) {
-                        reject(new Error(`Program link failed`));
+                        reject(new Error("Program link failed"));
                         return;
                     } else if (pendingPrograms[i].linked) {
                         ++linked;
                     } else {
-                       pendingPrograms[i - linked] = pendingPrograms[i];
+                        pendingPrograms[i - linked] = pendingPrograms[i];
                     }
                 }
 
@@ -997,7 +997,7 @@ export class App {
                 } else {
                     requestAnimationFrame(poll);
                 }
-            }
+            };
 
             poll();
         });
