@@ -2499,7 +2499,7 @@ class App {
             let programs = new Array(sources.length);
             let numPrograms = programs.length;
             let pendingPrograms = new Array(numPrograms);
-            let numPending = 0;
+            let numPending = numPrograms;
 
             for (let i = 0; i < numPrograms; ++i) {
                 let source = sources[i];
@@ -2507,18 +2507,19 @@ class App {
                 let fsSource = source[1];
                 let xformFeedbackVars = source[2];
                 programs[i] = new __WEBPACK_IMPORTED_MODULE_5__program__["a" /* Program */](this.gl, this.state, vsSource, fsSource, xformFeedbackVars);
+                pendingPrograms[i] = programs[i];
             }
 
             let poll = () => {
                 let linked = 0;
                 for (let i = 0; i < numPending; ++i) {
                     if (pendingPrograms[i].linkFailed) {
-                        reject(new Error(`Program link failed`));
+                        reject(new Error("Program link failed"));
                         return;
                     } else if (pendingPrograms[i].linked) {
                         ++linked;
                     } else {
-                       pendingPrograms[i - linked] = pendingPrograms[i];
+                        pendingPrograms[i - linked] = pendingPrograms[i];
                     }
                 }
 
@@ -2529,7 +2530,7 @@ class App {
                 } else {
                     requestAnimationFrame(poll);
                 }
-            }
+            };
 
             poll();
         });
@@ -3329,7 +3330,7 @@ class DrawCall {
     */
     draw() {
         if (!this.currentProgram.linked) {
-            return;
+            return this;
         }
 
         let uniformNames = this.uniformNames;

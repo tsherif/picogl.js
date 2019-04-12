@@ -305,16 +305,14 @@
         var boxProgram;
         var blurProgram;
 
-        console.time("compile")
         app.createPrograms([boxVsSource, boxFsSource], [quadVsSource, blurFsSource]).then(function(programs) {
-            console.timeEnd("compile")
             boxProgram = programs[0];
             blurProgram = programs[1];
 
             programsReady = true;
 
             if (texturesReady) {
-                start();
+                requestAnimationFrame(start);
             }
         });
 
@@ -325,7 +323,7 @@
             texturesReady = true;
            
             if (programsReady) {
-                start();
+                requestAnimationFrame(start);
             } 
         });
 

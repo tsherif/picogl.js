@@ -967,7 +967,7 @@ export class App {
             let programs = new Array(sources.length);
             let numPrograms = programs.length;
             let pendingPrograms = new Array(numPrograms);
-            let numPending = 0;
+            let numPending = numPrograms;
 
             for (let i = 0; i < numPrograms; ++i) {
                 let source = sources[i];
@@ -975,6 +975,7 @@ export class App {
                 let fsSource = source[1];
                 let xformFeedbackVars = source[2];
                 programs[i] = new Program(this.gl, this.state, vsSource, fsSource, xformFeedbackVars);
+                pendingPrograms[i] = programs[i];
             }
 
             let poll = () => {
