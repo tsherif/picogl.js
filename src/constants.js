@@ -591,6 +591,9 @@ export const GL = {
     TIMESTAMP_EXT: 0x8E28,
     GPU_DISJOINT_EXT: 0x8FBB,
 
+    // https://www.khronos.org/registry/webgl/extensions/KHR_parallel_shader_compile/
+    COMPLETION_STATUS_KHR: 0x91B1,
+
     // https://www.khronos.org/registry/webgl/extensions/WEBGL_compressed_texture_s3tc/
     COMPRESSED_RGB_S3TC_DXT1_EXT: 0x83F0,
     COMPRESSED_RGBA_S3TC_DXT1_EXT: 0x83F1,
@@ -660,7 +663,7 @@ export const TYPE_SIZE = {
     [GL.UNSIGNED_SHORT]: 2,
     [GL.INT]: 4,
     [GL.UNSIGNED_INT]: 4,
-    [GL.FLOAT]: 4   
+    [GL.FLOAT]: 4
 };
 
 export const TEXTURE_FORMAT_DEFAULTS = {

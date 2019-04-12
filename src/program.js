@@ -23,7 +23,7 @@
 
 import { GL } from "./constants";
 import { Shader } from "./shader";
-import { 
+import {
     SingleComponentUniform,
     MultiNumericUniform,
     MultiBoolUniform,
@@ -53,6 +53,9 @@ export class Program {
         this.uniformBlockCount = 0;
         this.samplers = {};
         this.samplerCount = 0;
+        this.linked = false;
+        this.linkFailed = false;
+        this.parallelCompile = false;
 
         this.restore(vsSource, fsSource);
     }
@@ -71,10 +74,11 @@ export class Program {
             this.appState.program = null;
         }
 
+        this.parallelCompile = Boolean(this.gl.getExtension("KHR_parallel_shader_compile"));
+        this.linked = false;
+        this.linkFailed = false;
         this.uniformBlockCount = 0;
         this.samplerCount = 0;
-
-        let i;
 
         let vShader, fShader;
 
@@ -102,10 +106,6 @@ export class Program {
         }
         this.gl.linkProgram(program);
 
-        if (!this.gl.getProgramParameter(program, GL.LINK_STATUS)) {
-            console.error(this.gl.getProgramInfoLog(program));
-        }
-
         if (ownVertexShader) {
             vShader.delete();
         }
@@ -115,13 +115,45 @@ export class Program {
         }
 
         this.program = program;
+
+        if (this.parallelCompile) {
+            this.pollCompletion();
+        } else {
+            this.checkLinkage();
+        }
+
+        return this;
+    }
+
+    /**
+        Delete this program.
+
+        @method
+        @return {Program} The Program object.
+    */
+    delete() {
+        if (this.program) {
+            this.gl.deleteProgram(this.program);
+            this.program = null;
+
+            if (this.appState.program === this) {
+                this.gl.useProgram(null);
+                this.appState.program = null;
+            }
+        }
+
+        return this;
+    }
+
+    // Get variable handles from program
+    initVariables() {
         this.bind();
 
-        let numUniforms = this.gl.getProgramParameter(program, GL.ACTIVE_UNIFORMS);
+        let numUniforms = this.gl.getProgramParameter(this.program, GL.ACTIVE_UNIFORMS);
         let textureUnit;
 
-        for (i = 0; i < numUniforms; ++i) {
-            let uniformInfo = this.gl.getActiveUniform(program, i);
+        for (let i = 0; i < numUniforms; ++i) {
+            let uniformInfo = this.gl.getActiveUniform(this.program, i);
             let uniformHandle = this.gl.getUniformLocation(this.program, uniformInfo.name);
             let UniformClass = null;
             let type = uniformInfo.type;
@@ -192,61 +224,54 @@ export class Program {
             }
         }
 
-        let numUniformBlocks = this.gl.getProgramParameter(program, GL.ACTIVE_UNIFORM_BLOCKS);
+        let numUniformBlocks = this.gl.getProgramParameter(this.program, GL.ACTIVE_UNIFORM_BLOCKS);
 
-        for (i = 0; i < numUniformBlocks; ++i) {
+        for (let i = 0; i < numUniformBlocks; ++i) {
             let blockName = this.gl.getActiveUniformBlockName(this.program, i);
             let blockIndex = this.gl.getUniformBlockIndex(this.program, blockName);
-            
+
             let uniformBlockBase = this.uniformBlockCount++;
             this.gl.uniformBlockBinding(this.program, blockIndex, uniformBlockBase);
             this.uniformBlocks[blockName] = uniformBlockBase;
         }
-
-        return this;
     }
 
-    /**
-        Delete this program.
-
-        @method
-        @return {Program} The Program object.
-    */
-    delete() {
-        if (this.program) {
-            this.gl.deleteProgram(this.program);
-            this.program = null;
-
-            if (this.appState.program === this) {
-                this.gl.useProgram(null);
-                this.appState.program = null;
+    // Poll completion for parallel compiles
+    pollCompletion() {
+        let poll = () => {
+            if (!this.program) {
+                // Program was deleted
+                return;
             }
-        }
 
-        return this;
+            if (this.gl.getProgramParameter(this.program, GL.COMPLETION_STATUS_KHR)) {
+                this.checkLinkage();
+            } else {
+                requestAnimationFrame(poll);
+            }
+        };
+        poll();
     }
-    
-    /**
-        Set the value of a uniform.
 
-        @method
-        @ignore
-        @return {Program} The Program object.
-    */
+    // Check if program linked
+    checkLinkage() {
+        if (this.gl.getProgramParameter(this.program, GL.LINK_STATUS)) {
+            this.linked = true;
+            this.initVariables();
+        } else {
+            this.linkFailed = true;
+            console.error(this.gl.getProgramInfoLog(this.program));
+        }
+    }
+
+    // Set the value of a uniform.
     uniform(name, value) {
         this.uniforms[name].set(value);
 
         return this;
     }
 
-    // 
-    /**
-        Use this program.
-
-        @method
-        @ignore
-        @return {Program} The Program object.
-    */
+    // Use this program.
     bind() {
         if (this.appState.program !== this) {
             this.gl.useProgram(this.program);
