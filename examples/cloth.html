@@ -353,19 +353,15 @@
 
         // Update wind and gravity forces
         var updateForceFsSource = document.getElementById("update-force-fs").text.trim();
-        var updateForceProgram = app.createProgram(quadShader, updateForceFsSource);
 
         // Apply structural and shear constraints
         var updateConstraintFsSource = document.getElementById("update-constraint-fs").text.trim();
-        var updateConstraintProgram = app.createProgram(quadShader, updateConstraintFsSource);
 
         // Check for collision with ball
         var updateCollisionFsSource = document.getElementById("update-collision-fs").text.trim();
-        var updateCollisionProgram = app.createProgram(quadShader, updateCollisionFsSource);
-        
         // Calculate normals
         var updateNormalFsSource = document.getElementById("update-normal-fs").text.trim();
-        var updateNormalProgram = app.createProgram(quadShader, updateNormalFsSource);
+        
 
         // Generic phong shader used for drawing
         var phongSource = document.getElementById("phong-fs").text.trim();
@@ -373,12 +369,9 @@
 
         // Draw ball
         var ballVsSource = document.getElementById("ball-vs").text.trim();
-        var ballProgram = app.createProgram(ballVsSource, phongShader);
 
         // Draw cloth
         var clothVsSource = document.getElementById("cloth-vs").text.trim();
-        var clothProgram = app.createProgram(clothVsSource, phongShader);
-
 
         ////////////////////
         // FRAME BUFFERS
@@ -654,58 +647,100 @@
         };
 
 
-        ///////////////
-        // DRAW CALLS
-        ///////////////
-
-        // Update forces
-        var updateForceDrawCall = app.createDrawCall(updateForceProgram, quadArray)
-        .texture("uPositionBuffer", positionTextureA)
-        .texture("uNormalBuffer", normalTexture);
-
-        // Structural constraints
-        var updateHorizontal1DrawCall = app.createDrawCall(updateConstraintProgram, quadArray)
-        .uniformBlock("ConstraintUniforms", updateHorizontal1Uniforms);
-
-        var updateHorizontal2DrawCall  = app.createDrawCall(updateConstraintProgram, quadArray)
-        .uniformBlock("ConstraintUniforms", updateHorizontal2Uniforms);
-
-        var updateVertical1DrawCall = app.createDrawCall(updateConstraintProgram, quadArray)
-        .uniformBlock("ConstraintUniforms", updateVertical1Uniforms);
-
-        var updateVertical2DrawCall = app.createDrawCall(updateConstraintProgram, quadArray)
-        .uniformBlock("ConstraintUniforms", updateVertical2Uniforms);
-
-        // Shear constraints
-        var updateShear1DrawCall = app.createDrawCall(updateConstraintProgram, quadArray)
-        .uniformBlock("ConstraintUniforms", updateShear1Uniforms);
-
-        var updateShear2DrawCall = app.createDrawCall(updateConstraintProgram, quadArray)
-        .uniformBlock("ConstraintUniforms", updateShear2Uniforms);
-
-        var updateShear3DrawCall = app.createDrawCall(updateConstraintProgram, quadArray)
-        .uniformBlock("ConstraintUniforms", updateShear3Uniforms);
-
-        var updateShear4DrawCall = app.createDrawCall(updateConstraintProgram, quadArray)
-        .uniformBlock("ConstraintUniforms", updateShear4Uniforms);
-
-        var updateCollisionDrawCall = app.createDrawCall(updateCollisionProgram, quadArray)
-        .uniformBlock("BallUniforms", ballUniforms);
-
-        var updateNormalDrawCall = app.createDrawCall(updateNormalProgram, quadArray);
-
-
         var targetZ = null;
         var targetY = null;
         canvas.addEventListener("mousemove", function(event) {
             targetZ = -((event.clientX / canvas.width) * 2 - 1);
             targetY = ((canvas.height - event.clientY) / canvas.height) * 2 - 1;
         });
+
+        var updateForceProgram;
+        var updateConstraintProgram;
+        var updateCollisionProgram;
+        var updateNormalProgram;
+        var ballProgram;
+        var clothProgram;
+
+        var programsReady = false;
+
+        app.createPrograms(
+            [quadShader, updateForceFsSource],
+            [quadShader, updateConstraintFsSource],
+            [quadShader, updateCollisionFsSource],
+            [quadShader, updateNormalFsSource],
+            [ballVsSource, phongShader],
+            [clothVsSource, phongShader]
+        ).then(function(programs) {
+            updateForceProgram = programs[0];
+            updateConstraintProgram = programs[1];
+            updateCollisionProgram = programs[2];
+            updateNormalProgram = programs[3];
+            ballProgram = programs[4];
+            clothProgram = programs[5];
+
+            programsReady = true;
+
+            if (textureReady) {
+                requestAnimationFrame(start);
+            }
+        });
+
+        var texture;
+        var textureReady = false;
+
         
         utils.loadImages(["img/webgl-logo.png"], function(images) {
             // CREATE TEXTURE
-            var texture = app.createTexture2D(images[0]);
+            texture = app.createTexture2D(images[0]);
 
+            textureReady = true;
+
+            if (programsReady) {
+                requestAnimationFrame(start);
+            }
+        });
+
+        function start() {
+            ///////////////
+            // DRAW CALLS
+            ///////////////
+
+            // Update forces
+            var updateForceDrawCall = app.createDrawCall(updateForceProgram, quadArray)
+            .texture("uPositionBuffer", positionTextureA)
+            .texture("uNormalBuffer", normalTexture);
+
+            // Structural constraints
+            var updateHorizontal1DrawCall = app.createDrawCall(updateConstraintProgram, quadArray)
+            .uniformBlock("ConstraintUniforms", updateHorizontal1Uniforms);
+
+            var updateHorizontal2DrawCall  = app.createDrawCall(updateConstraintProgram, quadArray)
+            .uniformBlock("ConstraintUniforms", updateHorizontal2Uniforms);
+
+            var updateVertical1DrawCall = app.createDrawCall(updateConstraintProgram, quadArray)
+            .uniformBlock("ConstraintUniforms", updateVertical1Uniforms);
+
+            var updateVertical2DrawCall = app.createDrawCall(updateConstraintProgram, quadArray)
+            .uniformBlock("ConstraintUniforms", updateVertical2Uniforms);
+
+            // Shear constraints
+            var updateShear1DrawCall = app.createDrawCall(updateConstraintProgram, quadArray)
+            .uniformBlock("ConstraintUniforms", updateShear1Uniforms);
+
+            var updateShear2DrawCall = app.createDrawCall(updateConstraintProgram, quadArray)
+            .uniformBlock("ConstraintUniforms", updateShear2Uniforms);
+
+            var updateShear3DrawCall = app.createDrawCall(updateConstraintProgram, quadArray)
+            .uniformBlock("ConstraintUniforms", updateShear3Uniforms);
+
+            var updateShear4DrawCall = app.createDrawCall(updateConstraintProgram, quadArray)
+            .uniformBlock("ConstraintUniforms", updateShear4Uniforms);
+
+            var updateCollisionDrawCall = app.createDrawCall(updateCollisionProgram, quadArray)
+            .uniformBlock("BallUniforms", ballUniforms);
+
+            var updateNormalDrawCall = app.createDrawCall(updateNormalProgram, quadArray);
+            
             var clothDrawCall = app.createDrawCall(clothProgram, clothArray)
             .uniformBlock("SceneUniforms", sceneUniformBuffer)
             .texture("uDiffuse", texture)
@@ -805,8 +840,8 @@
                 requestAnimationFrame(draw);
             }
 
-            requestAnimationFrame(draw);
-        });
+            requestAnimationFrame(draw); 
+        }
 
     </script>
     <a href="https://github.com/tsherif/picogl.js" id="github-ribbon"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"></a>
