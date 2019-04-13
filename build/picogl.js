@@ -2485,19 +2485,16 @@ class App {
 
         return this;
     }
+
     /**
-        Create a program.
+        Create several programs. Will compile shaders in parallel where possible.
 
         @method
-        @param {Shader|string} vertexShader Vertex shader object or source code.
-        @param {Shader|string} fragmentShader Fragment shader object or source code.
-        @param {Array} [xformFeedbackVars] Transform feedback varyings.
+        @param {...Array} sources Variable number of 2 or 3 element arrays, each containing
+            the vertex shader source, the fragment shader source, and optionally,
+            an array of the transform feedback varyings.
         @return {Program} New Program object.
     */
-    createProgram(vsSource, fsSource, xformFeedbackVars) {
-        return new __WEBPACK_IMPORTED_MODULE_5__program__["a" /* Program */](this.gl, this.state, vsSource, fsSource, xformFeedbackVars);
-    }
-
     createPrograms(...sources) {
         return new Promise((resolve, reject) => {
             let programs = new Array(sources.length);
@@ -2559,8 +2556,8 @@ class App {
         @method
         @return {VertexArray} New VertexArray object.
     */
-    createVertexArray(numElements = 0, numInstances = 0) {
-        return new __WEBPACK_IMPORTED_MODULE_11__vertex_array__["a" /* VertexArray */](this.gl, this.state, numElements, numInstances);
+    createVertexArray() {
+        return new __WEBPACK_IMPORTED_MODULE_11__vertex_array__["a" /* VertexArray */](this.gl, this.state);
     }
 
     /**
@@ -2887,6 +2884,13 @@ class App {
     */
     createDrawCall(program, vertexArray, primitive) {
         return new __WEBPACK_IMPORTED_MODULE_2__draw_call__["a" /* DrawCall */](this.gl, this.state, program, vertexArray, primitive);
+    }
+
+
+    // Deprecated: create a program
+    createProgram(vsSource, fsSource, xformFeedbackVars) {
+        console.warn("DEPRECATION WARNING: 'App.createProgram' is deprecated and will be removed in a future release. Use 'App.createPrograms' instead.");
+        return new __WEBPACK_IMPORTED_MODULE_5__program__["a" /* Program */](this.gl, this.state, vsSource, fsSource, xformFeedbackVars);
     }
 
 }
@@ -4918,16 +4922,16 @@ class UniformBuffer {
     @prop {Object} appState Tracked GL state.
 */
 class VertexArray {
-    
-    constructor(gl, appState, numElements = 0, numInstances = 0) {
+
+    constructor(gl, appState) {
         this.gl = gl;
         this.appState = appState;
         this.vertexArray = null;
-        this.numElements = numElements;
+        this.numElements = 0;
         this.indexType = null;
         this.instancedBuffers = 0;
         this.indexed = false;
-        this.numInstances = numInstances;
+        this.numInstances = 0;
     }
 
     /**

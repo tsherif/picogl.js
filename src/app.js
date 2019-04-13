@@ -949,19 +949,16 @@ export class App {
 
         return this;
     }
+
     /**
-        Create a program.
+        Create several programs. Will compile shaders in parallel where possible.
 
         @method
-        @param {Shader|string} vertexShader Vertex shader object or source code.
-        @param {Shader|string} fragmentShader Fragment shader object or source code.
-        @param {Array} [xformFeedbackVars] Transform feedback varyings.
+        @param {...Array} sources Variable number of 2 or 3 element arrays, each containing
+            the vertex shader source, the fragment shader source, and optionally,
+            an array of the transform feedback varyings.
         @return {Program} New Program object.
     */
-    createProgram(vsSource, fsSource, xformFeedbackVars) {
-        return new Program(this.gl, this.state, vsSource, fsSource, xformFeedbackVars);
-    }
-
     createPrograms(...sources) {
         return new Promise((resolve, reject) => {
             let programs = new Array(sources.length);
@@ -1023,8 +1020,8 @@ export class App {
         @method
         @return {VertexArray} New VertexArray object.
     */
-    createVertexArray(numElements = 0, numInstances = 0) {
-        return new VertexArray(this.gl, this.state, numElements, numInstances);
+    createVertexArray() {
+        return new VertexArray(this.gl, this.state);
     }
 
     /**
@@ -1351,6 +1348,13 @@ export class App {
     */
     createDrawCall(program, vertexArray, primitive) {
         return new DrawCall(this.gl, this.state, program, vertexArray, primitive);
+    }
+
+
+    // Deprecated: create a program
+    createProgram(vsSource, fsSource, xformFeedbackVars) {
+        console.warn("DEPRECATION WARNING: 'App.createProgram' is deprecated and will be removed in a future release. Use 'App.createPrograms' instead.");
+        return new Program(this.gl, this.state, vsSource, fsSource, xformFeedbackVars);
     }
 
 }

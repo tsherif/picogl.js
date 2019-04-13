@@ -250,23 +250,17 @@
 
         var cubeVsSource =  document.getElementById("vertex-cube").text.trim();
         var cubeFsSource =  document.getElementById("fragment-cube").text.trim();
-        var cubeProgram = app.createProgram(cubeVsSource, cubeFsSource);
 
         var sunVsSource =  document.getElementById("vertex-sun").text.trim();
         var sunFsSource =  document.getElementById("fragment-sun").text.trim();
-        var sunProgram = app.createProgram(sunVsSource, sunFsSource);
 
         var quadVsSource =  document.getElementById("vertex-quad").text.trim();
         var quadVertexShader = app.createShader(PicoGL.VERTEX_SHADER, quadVsSource);
 
         var blurFsSource =  document.getElementById("fragment-blur").text.trim();
-        var blurProgram = app.createProgram(quadVertexShader, blurFsSource);
 
         var blendFsSource =  document.getElementById("fragment-blend").text.trim();
-        var blendProgram = app.createProgram(quadVertexShader, blendFsSource);
-
-        quadVertexShader.delete();
-
+ 
         // SET UP FRAMEBUFFERS AND TEXTURES
 
         var colorTarget1 = app.createTexture2D(null, app.width, app.height, { type: PicoGL.FLOAT });
@@ -392,10 +386,46 @@
         .set(5, suns[1].color)
         .update();
 
+        var texture;
+        var textureReady = false;
+
         utils.loadImages(["img/webgl-logo.png"], function(images) {
             // CREATE TEXTURE
-            var texture = app.createTexture2D(images[0], { flipY: true });
+            texture = app.createTexture2D(images[0], { flipY: true });
+           
+           textureReady = true;
 
+           if (programsReady) {
+               requestAnimationFrame(start);
+           } 
+        });
+
+        var cubeProgram;
+        var sunProgram;
+        var blurProgram;
+        var blendProgram;
+        var programsReady = false;
+
+        app.createPrograms(
+            [cubeVsSource, cubeFsSource],
+            [sunVsSource, sunFsSource],
+            [quadVertexShader, blurFsSource],
+            [quadVertexShader, blendFsSource]
+        ).then(function(programs) {
+            cubeProgram = programs[0];
+            sunProgram = programs[1];
+            blurProgram = programs[2];
+            blendProgram = programs[3];
+
+            programsReady = true;
+            quadVertexShader.delete();
+
+            if (textureReady) {
+                requestAnimationFrame(start);
+            }
+        });
+
+        function start() {
             // PREPARE DRAW CALLS
             var drawCall = app.createDrawCall(cubeProgram, cubeArray)
             .uniformBlock("SceneUniforms", sceneUniforms)
@@ -406,7 +436,7 @@
 
             var sun2DrawCall = app.createDrawCall(sunProgram, sunArray)
             .uniformBlock("SunUniforms", suns[1].uniforms);
-    
+            
             var hBlurDrawCall = app.createDrawCall(blurProgram, quadArray)
             .uniform("uTexelOffset", hTexelOffset)
             .texture("uTexture", colorBuffer.colorAttachments[1]);
@@ -503,8 +533,7 @@
             }
 
             requestAnimationFrame(draw);
-            
-        });
+        }
 
     </script>
     <a href="https://github.com/tsherif/picogl.js" id="github-ribbon"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"></a>

@@ -91,7 +91,6 @@
         // SET UP PROGRAM
         var vsSource =  document.getElementById("vertex-draw").text.trim();
         var fsSource =  document.getElementById("fragment-draw").text.trim();
-        var program = app.createProgram(vsSource, fsSource);
 
         // CREATE POINT CLOUD
         var DIMENSIONS = 128;
@@ -155,30 +154,34 @@
             mat4.multiply(mvpMatrix, projMatrix, viewMatrix);            
         }
 
-        // SET UP DRAW CALL
-        var drawCall = app.createDrawCall(program, pointArray, PicoGL.POINTS)
-        .texture("tex", texture)
-        .uniform("uMVP", mvpMatrix);
+        app.createPrograms([vsSource, fsSource]).then(function(programs) {
+            var program = programs[0];
 
-        var startTime = performance.now();
-        function draw() {
-            if (timer.ready()) {
-                utils.updateTimerElement(timer.cpuTime, timer.gpuTime);
+            // SET UP DRAW CALL
+            var drawCall = app.createDrawCall(program, pointArray, PicoGL.POINTS)
+            .texture("tex", texture)
+            .uniform("uMVP", mvpMatrix);
+
+            var startTime = performance.now();
+            function draw() {
+                if (timer.ready()) {
+                    utils.updateTimerElement(timer.cpuTime, timer.gpuTime);
+                }
+
+                timer.start();
+
+                drawCall.uniform("uTime", (performance.now() - startTime) / 1000);
+
+                app.clear();
+                drawCall.draw();
+                
+                timer.end();
+
+                requestAnimationFrame(draw);
             }
 
-            timer.start();
-
-            drawCall.uniform("uTime", (performance.now() - startTime) / 1000);
-
-            app.clear();
-            drawCall.draw();
-            
-            timer.end();
-
             requestAnimationFrame(draw);
-        }
-
-        requestAnimationFrame(draw);
+        });
             
 
     </script>
