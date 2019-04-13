@@ -1247,36 +1247,26 @@ class Renderbuffer {
     @prop {WebGLShader} shader The shader.
 */
 class Shader {
-    
+
     constructor(gl, type, source) {
         this.gl = gl;
         this.shader = null;
         this.type = type;
+        this.source = source;
 
-        this.restore(source);
+        this.restore();
     }
 
     /**
         Restore shader after context loss.
 
         @method
-        @param {string} source Shader source.
         @return {Shader} The Shader object.
     */
-    restore(source) {
+    restore() {
         this.shader = this.gl.createShader(this.type);
-        this.gl.shaderSource(this.shader, source);
+        this.gl.shaderSource(this.shader, this.source);
         this.gl.compileShader(this.shader);
-
-        if (!this.gl.getShaderParameter(this.shader, __WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPILE_STATUS)) {
-            let i, lines;
-
-            console.error(this.gl.getShaderInfoLog(this.shader));
-            lines = source.split("\n");
-            for (i = 0; i < lines.length; ++i) {
-                console.error(`${i + 1}: ${lines[i]}`);
-            }
-        }
 
         return this;
     }
@@ -1296,6 +1286,20 @@ class Shader {
         return this;
     }
 
+
+    checkCompilation() {
+        if (!this.gl.getShaderParameter(this.shader, __WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPILE_STATUS)) {
+            let i, lines;
+
+            console.error(this.gl.getShaderInfoLog(this.shader));
+            lines = this.source.split("\n");
+            for (i = 0; i < lines.length; ++i) {
+                console.error(`${i + 1}: ${lines[i]}`);
+            }
+        }
+
+        return this;
+    }
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = Shader;
 
@@ -3787,6 +3791,11 @@ class Program {
         this.uniformBlockCount = 0;
         this.samplers = {};
         this.samplerCount = 0;
+
+        this.vertexShader = null;
+        this.ownVertexShader = false;
+        this.fragmentShader = null;
+        this.ownFragmentShader = false;
         this.linked = false;
         this.linkFailed = false;
         this.parallelCompile = false;
@@ -3814,39 +3823,27 @@ class Program {
         this.uniformBlockCount = 0;
         this.samplerCount = 0;
 
-        let vShader, fShader;
-
-        let ownVertexShader = false;
-        let ownFragmentShader = false;
         if (typeof vsSource === "string") {
-            vShader = new __WEBPACK_IMPORTED_MODULE_1__shader__["a" /* Shader */](this.gl, __WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].VERTEX_SHADER, vsSource);
-            ownVertexShader = true;
+            this.vertexShader = new __WEBPACK_IMPORTED_MODULE_1__shader__["a" /* Shader */](this.gl, __WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].VERTEX_SHADER, vsSource);
+            this.ownVertexShader = true;
         } else {
-            vShader = vsSource;
+            this.vertexShader = vsSource;
         }
 
         if (typeof fsSource === "string") {
-            fShader = new __WEBPACK_IMPORTED_MODULE_1__shader__["a" /* Shader */](this.gl, __WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].FRAGMENT_SHADER, fsSource);
-            ownFragmentShader = true;
+            this.fragmentShader = new __WEBPACK_IMPORTED_MODULE_1__shader__["a" /* Shader */](this.gl, __WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].FRAGMENT_SHADER, fsSource);
+            this.ownFragmentShader = true;
         } else {
-            fShader = fsSource;
+            this.fragmentShader = fsSource;
         }
 
         let program = this.gl.createProgram();
-        this.gl.attachShader(program, vShader.shader);
-        this.gl.attachShader(program, fShader.shader);
+        this.gl.attachShader(program, this.vertexShader.shader);
+        this.gl.attachShader(program, this.fragmentShader.shader);
         if (this.transformFeedbackVaryings) {
             this.gl.transformFeedbackVaryings(program, this.transformFeedbackVaryings, __WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].SEPARATE_ATTRIBS);
         }
         this.gl.linkProgram(program);
-
-        if (ownVertexShader) {
-            vShader.delete();
-        }
-
-        if (ownFragmentShader) {
-            fShader.delete();
-        }
 
         this.program = program;
 
@@ -3995,7 +3992,22 @@ class Program {
         } else {
             this.linkFailed = true;
             console.error(this.gl.getProgramInfoLog(this.program));
+            this.vertexShader.checkCompilation();
+            this.fragmentShader.checkCompilation();
         }
+
+        if (this.ownVertexShader) {
+            this.vertexShader.delete();
+        }
+
+        if (this.ownFragmentShader) {
+            this.fragmentShader.delete();
+        }
+
+        this.vertexShader = null;
+        this.ownVertexShader = false;
+        this.fragmentShader = null;
+        this.ownFragmentShader = false;
     }
 
     // Set the value of a uniform.

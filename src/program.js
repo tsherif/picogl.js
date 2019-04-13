@@ -53,6 +53,11 @@ export class Program {
         this.uniformBlockCount = 0;
         this.samplers = {};
         this.samplerCount = 0;
+
+        this.vertexShader = null;
+        this.ownVertexShader = false;
+        this.fragmentShader = null;
+        this.ownFragmentShader = false;
         this.linked = false;
         this.linkFailed = false;
         this.parallelCompile = false;
@@ -80,39 +85,27 @@ export class Program {
         this.uniformBlockCount = 0;
         this.samplerCount = 0;
 
-        let vShader, fShader;
-
-        let ownVertexShader = false;
-        let ownFragmentShader = false;
         if (typeof vsSource === "string") {
-            vShader = new Shader(this.gl, GL.VERTEX_SHADER, vsSource);
-            ownVertexShader = true;
+            this.vertexShader = new Shader(this.gl, GL.VERTEX_SHADER, vsSource);
+            this.ownVertexShader = true;
         } else {
-            vShader = vsSource;
+            this.vertexShader = vsSource;
         }
 
         if (typeof fsSource === "string") {
-            fShader = new Shader(this.gl, GL.FRAGMENT_SHADER, fsSource);
-            ownFragmentShader = true;
+            this.fragmentShader = new Shader(this.gl, GL.FRAGMENT_SHADER, fsSource);
+            this.ownFragmentShader = true;
         } else {
-            fShader = fsSource;
+            this.fragmentShader = fsSource;
         }
 
         let program = this.gl.createProgram();
-        this.gl.attachShader(program, vShader.shader);
-        this.gl.attachShader(program, fShader.shader);
+        this.gl.attachShader(program, this.vertexShader.shader);
+        this.gl.attachShader(program, this.fragmentShader.shader);
         if (this.transformFeedbackVaryings) {
             this.gl.transformFeedbackVaryings(program, this.transformFeedbackVaryings, GL.SEPARATE_ATTRIBS);
         }
         this.gl.linkProgram(program);
-
-        if (ownVertexShader) {
-            vShader.delete();
-        }
-
-        if (ownFragmentShader) {
-            fShader.delete();
-        }
 
         this.program = program;
 
@@ -261,7 +254,22 @@ export class Program {
         } else {
             this.linkFailed = true;
             console.error(this.gl.getProgramInfoLog(this.program));
+            this.vertexShader.checkCompilation();
+            this.fragmentShader.checkCompilation();
         }
+
+        if (this.ownVertexShader) {
+            this.vertexShader.delete();
+        }
+
+        if (this.ownFragmentShader) {
+            this.fragmentShader.delete();
+        }
+
+        this.vertexShader = null;
+        this.ownVertexShader = false;
+        this.fragmentShader = null;
+        this.ownFragmentShader = false;
     }
 
     // Set the value of a uniform.

@@ -31,36 +31,26 @@ import { GL } from "./constants";
     @prop {WebGLShader} shader The shader.
 */
 export class Shader {
-    
+
     constructor(gl, type, source) {
         this.gl = gl;
         this.shader = null;
         this.type = type;
+        this.source = source;
 
-        this.restore(source);
+        this.restore();
     }
 
     /**
         Restore shader after context loss.
 
         @method
-        @param {string} source Shader source.
         @return {Shader} The Shader object.
     */
-    restore(source) {
+    restore() {
         this.shader = this.gl.createShader(this.type);
-        this.gl.shaderSource(this.shader, source);
+        this.gl.shaderSource(this.shader, this.source);
         this.gl.compileShader(this.shader);
-
-        if (!this.gl.getShaderParameter(this.shader, GL.COMPILE_STATUS)) {
-            let i, lines;
-
-            console.error(this.gl.getShaderInfoLog(this.shader));
-            lines = source.split("\n");
-            for (i = 0; i < lines.length; ++i) {
-                console.error(`${i + 1}: ${lines[i]}`);
-            }
-        }
 
         return this;
     }
@@ -80,4 +70,18 @@ export class Shader {
         return this;
     }
 
+
+    checkCompilation() {
+        if (!this.gl.getShaderParameter(this.shader, GL.COMPILE_STATUS)) {
+            let i, lines;
+
+            console.error(this.gl.getShaderInfoLog(this.shader));
+            lines = this.source.split("\n");
+            for (i = 0; i < lines.length; ++i) {
+                console.error(`${i + 1}: ${lines[i]}`);
+            }
+        }
+
+        return this;
+    }
 }
