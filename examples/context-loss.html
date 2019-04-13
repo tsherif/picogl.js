@@ -184,7 +184,6 @@
         var shadowVsSource =  document.getElementById("shadow-vs").text.trim();
         var shadowFsSource =  document.getElementById("shadow-fs").text.trim();
         var shadowVShader = app.createShader(PicoGL.VERTEX_SHADER, shadowVsSource);
-        var shadowProgram = app.createProgram(shadowVShader, shadowFsSource);
 
         var shadowTarget = app.createCubemap({
             format: PicoGL.RED,
@@ -201,13 +200,11 @@
         // SET UP LIGHT PROGRAM
         var lightVsSource =  document.getElementById("sphere-vs").text.trim();
         var lightFsSource =  document.getElementById("sphere-fs").text.trim();
-        var lightProgram = app.createProgram(lightVsSource, lightFsSource);
 
         // SET UP MAIN PROGRAM
         var vsSource =  document.getElementById("main-vs").text.trim();
         var fsSource =  document.getElementById("main-fs").text.trim();
-        var mainProgram = app.createProgram(vsSource, fsSource);
-
+        
         // GEOMETRY
         var positions, normals, uv, indices;
 
@@ -322,10 +319,48 @@
         var contextLost = false;
         var lastContextLoss = Date.now();
 
-        utils.loadImages(["img/webgl-logo.png", "img/cobblestone.jpg"], function (images) {
-            var webglTexture = app.createTexture2D(images[0], { flipY: true });
-            var cobblesTexture = app.createTexture2D(images[1], { flipY: true });
+        var shadowProgram;
+        var lightProgram;
+        var mainProgram;
+        var progamsReady = false;
 
+        var webglTexture;
+        var webglImage;
+        var cobblesTexture;
+        var cobblesImage;
+        var texturesReady = false;
+
+        app.createPrograms(
+            [shadowVShader, shadowFsSource],
+            [lightVsSource, lightFsSource],
+            [vsSource, fsSource], 
+            function(sp, lp, mp) {
+                shadowProgram = sp;
+                lightProgram = lp;
+                mainProgram = mp;
+
+                programsReady = true;
+
+                if (texturesReady) {
+                    requestAnimationFrame(start);
+                }
+            }
+        );
+
+        utils.loadImages(["img/webgl-logo.png", "img/cobblestone.jpg"], function (images) {
+            webglImage = images[0];
+            cobblesImage = images[1];
+            webglTexture = app.createTexture2D(webglImage, { flipY: true });
+            cobblesTexture = app.createTexture2D(cobblesImage, { flipY: true });
+
+            texturesReady = true;
+
+            if (programsReady) {
+                requestAnimationFrame(start);
+            }
+        });
+
+        function start() {
             // DRAW CALLS
 
             var lightDrawcall = app.createDrawCall(lightProgram, sphereArray)
@@ -386,8 +421,8 @@
                 .vertexAttributeBuffer(0, spherePositions)
                 .indexBuffer(sphereIndices);
 
-                webglTexture.restore(images[0]);
-                cobblesTexture.restore(images[1]);
+                webglTexture.restore(webglImage);
+                cobblesTexture.restore(cobblesImage);
             });
 
 
@@ -486,7 +521,7 @@
             }
 
             requestAnimationFrame(draw);
-        });
+        }
 
     </script>
     <a href="https://github.com/tsherif/picogl.js" id="github-ribbon"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"></a>

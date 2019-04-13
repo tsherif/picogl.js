@@ -152,12 +152,10 @@
         // SET UP PROGRAMS
         var vsSource =  document.getElementById("vertex-draw").text.trim();
         var fsSource =  document.getElementById("fragment-draw").text.trim();
-        var program = app.createProgram(vsSource, fsSource);
 
         var skyboxVsSource =  document.getElementById("vertex-skybox").text.trim();
         var skyboxFsSource =  document.getElementById("fragment-skybox").text.trim();
-        var skyboxProgram = app.createProgram(skyboxVsSource, skyboxFsSource);
-
+        
         // SET UP GEOMETRY
         var box = utils.createBox({dimensions: [1.0, 1.0, 1.0]})
         var positions = app.createVertexBuffer(PicoGL.FLOAT, 3, box.positions);
@@ -221,11 +219,38 @@
         var angleX = 0;
         var angleY = 0;
 
+        var program;
+        var skyboxProgram;
+        var programsReady = false;
+
+        var texture;
+        var cubemap;
+        var texturesReady = false;
+
+        app.createPrograms([vsSource, fsSource], [skyboxVsSource, skyboxFsSource], function(p, sbp) {
+            program = p;
+            skyboxProgram = sbp;
+
+            programsReady = true;
+
+            if (texturesReady) {
+                requestAnimationFrame(start);
+            }
+        });        
+
         loadImages(function(cubemapData, image) {
             // CREATE TEXTURE AND CUBEMAP
-            var texture = app.createTexture2D(image, { flipY: true });
-            var cubemap = app.createCubemap(cubemapData);
+            texture = app.createTexture2D(image, { flipY: true });
+            cubemap = app.createCubemap(cubemapData);
 
+            texturesReady = true;
+
+            if (programsReady) {
+                requestAnimationFrame(start);
+            }
+        });
+
+        function start() {
             // CREATE DRAWCALLS FOR SKYBOX AND REFLECTIVE CUBE
             var skyboxDrawcall = app.createDrawCall(skyboxProgram, boxArray)
             .uniformBlock("SceneUniforms", skyboxSceneUniforms)
@@ -262,7 +287,7 @@
             }
 
             requestAnimationFrame(draw);
-        });
+        }
 
 
         function loadImages(ok) {
@@ -343,34 +368,7 @@
 
                     checkDone();
                 });
-
             }
-
-            // if (app.astcTexturesEnabled) {
-            //     utils.getBinary("img/astc-supported-astc.pvr", function(data) {
-            //         format = PicoGL.COMPRESSED_RGBA_ASTC_4x4_KHR;
-            //         compressedData = utils.parsePVR(data);
-            //         checkDone();
-            //     });
-            // } else if (app.s3tcTexturesEnabled) {
-            //     utils.getBinary("img/s3tc-supported-dxt1.pvr", function(data) {
-            //         format = PicoGL.COMPRESSED_RGB_S3TC_DXT1_EXT;
-            //         compressedData = utils.parsePVR(data);
-            //         checkDone();
-            //     });
-            // } else if (app.etcTexturesEnabled) {
-            //     utils.getBinary("img/etc-supported-etc2.pvr", function(data) {
-            //         format = PicoGL.COMPRESSED_RGB8_ETC2;
-            //         compressedData = utils.parsePVR(data);
-            //         checkDone();
-            //     });
-            // } else if (app.pvrtcTexturesEnabled) {
-            //     utils.getBinary("img/pvrtc-supported-pvrtc.pvr", function(data) {
-            //         format = PicoGL.COMPRESSED_RGB_PVRTC_4BPPV1_IMG;
-            //         compressedData = utils.parsePVR(data);
-            //         checkDone();
-            //     });
-            // }
         }
 
     </script>

@@ -410,20 +410,21 @@
             [cubeVsSource, cubeFsSource],
             [sunVsSource, sunFsSource],
             [quadVertexShader, blurFsSource],
-            [quadVertexShader, blendFsSource]
-        ).then(function(programs) {
-            cubeProgram = programs[0];
-            sunProgram = programs[1];
-            blurProgram = programs[2];
-            blendProgram = programs[3];
+            [quadVertexShader, blendFsSource],
+            function(cp, sp, brp, bdp) {
+                cubeProgram = cp;
+                sunProgram = sp;
+                blurProgram = brp;
+                blendProgram = bdp;
 
-            programsReady = true;
-            quadVertexShader.delete();
+                programsReady = true;
+                quadVertexShader.delete();
 
-            if (textureReady) {
-                requestAnimationFrame(start);
+                if (textureReady) {
+                    requestAnimationFrame(start);
+                }
             }
-        });
+        );
 
         function start() {
             // PREPARE DRAW CALLS

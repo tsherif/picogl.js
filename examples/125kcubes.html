@@ -286,9 +286,9 @@
             }
         });
 
-        app.createPrograms([vsSource, fsSource], [updateVsSource, updateFsSource, ["vRotation"]]).then(function(programs) {
-            program = programs[0];
-            updateProgram = programs[1];
+        app.createPrograms([vsSource, fsSource], [updateVsSource, updateFsSource, ["vRotation"]], function(p, up) {
+            program = p;
+            updateProgram = up;
 
             programsReady = true;
 

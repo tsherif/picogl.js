@@ -669,21 +669,22 @@
             [quadShader, updateCollisionFsSource],
             [quadShader, updateNormalFsSource],
             [ballVsSource, phongShader],
-            [clothVsSource, phongShader]
-        ).then(function(programs) {
-            updateForceProgram = programs[0];
-            updateConstraintProgram = programs[1];
-            updateCollisionProgram = programs[2];
-            updateNormalProgram = programs[3];
-            ballProgram = programs[4];
-            clothProgram = programs[5];
+            [clothVsSource, phongShader],
+            function(ufp, ucnp, uclp, unp, bp, cp) {
+                updateForceProgram = ufp;
+                updateConstraintProgram = ucnp;
+                updateCollisionProgram = uclp;
+                updateNormalProgram = unp;
+                ballProgram = bp;
+                clothProgram = cp;
 
-            programsReady = true;
+                programsReady = true;
 
-            if (textureReady) {
-                requestAnimationFrame(start);
+                if (textureReady) {
+                    requestAnimationFrame(start);
+                }
             }
-        });
+        );
 
         var texture;
         var textureReady = false;
@@ -740,7 +741,7 @@
             .uniformBlock("BallUniforms", ballUniforms);
 
             var updateNormalDrawCall = app.createDrawCall(updateNormalProgram, quadArray);
-            
+
             var clothDrawCall = app.createDrawCall(clothProgram, clothArray)
             .uniformBlock("SceneUniforms", sceneUniformBuffer)
             .texture("uDiffuse", texture)

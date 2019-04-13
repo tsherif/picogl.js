@@ -125,7 +125,6 @@
         // SET UP PROGRAM
         var vsSource =  document.getElementById("vertex-draw").text.trim();
         var fsSource =  document.getElementById("fragment-draw").text.trim();
-        var program = app.createProgram(vsSource, fsSource);
 
         // SET UP GEOMETRY
         var box = utils.createBox({dimensions: [1.0, 1.0, 1.0]})
@@ -197,8 +196,6 @@
             sceneUniformBuffer.set(0, viewProjMatrix).update();
         }
 
-        var s3tcTexture, etcTexture, astcTexture, pvrtcTexture;
-
         function startRender() {
             // SET UP DRAW CALL
             boxes[0].drawCall = app.createDrawCall(program, boxArray)
@@ -243,11 +240,31 @@
             requestAnimationFrame(draw);
         }
 
+        var program;
+        var programsReady = false;
+
+        var s3tcTexture, etcTexture, astcTexture, pvrtcTexture;
+        var texturesReady = false;
+
+        app.createPrograms([vsSource, fsSource], function(p) {
+            program = p;
+
+            programsReady = true;
+
+            if (texturesReady) {
+                requestAnimationFrame(startRender());
+            }
+        });
+
         var texturesRequested = 4;
 
         function checkDone () {
             if (--texturesRequested === 0) {
-                startRender();
+
+                texturesReady = true;
+                if (programsReady) {
+                    startRender();
+                }
             }
         }
 

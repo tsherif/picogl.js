@@ -154,8 +154,8 @@
             mat4.multiply(mvpMatrix, projMatrix, viewMatrix);            
         }
 
-        app.createPrograms([vsSource, fsSource]).then(function(programs) {
-            var program = programs[0];
+        app.createPrograms([vsSource, fsSource], function(p) {
+            var program = p;
 
             // SET UP DRAW CALL
             var drawCall = app.createDrawCall(program, pointArray, PicoGL.POINTS)

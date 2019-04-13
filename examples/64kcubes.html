@@ -185,8 +185,8 @@
             }
         });
 
-        app.createPrograms([vsSource, fsSource]).then(function(programs) {
-            program = programs[0];
+        app.createPrograms([vsSource, fsSource]).then(function(p) {
+            program = p;
 
             programReady = true;
 
