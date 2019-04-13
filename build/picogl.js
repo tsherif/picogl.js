@@ -3794,10 +3794,8 @@ class Program {
 
         this.vertexSource = null;
         this.vertexShader = null;
-        this.ownVertexShader = false;
         this.fragmentSource = null;
         this.fragmentShader = null;
-        this.ownFragmentShader = false;
         this.linked = false;
         this.linkFailed = false;
         this.parallelCompile = false;
@@ -3835,14 +3833,12 @@ class Program {
         this.uniformBlockCount = 0;
         this.samplerCount = 0;
 
-        if (typeof this.vertexSource === "string") {
+        if (this.vertexSource) {
             this.vertexShader = new __WEBPACK_IMPORTED_MODULE_1__shader__["a" /* Shader */](this.gl, __WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].VERTEX_SHADER, this.vertexSource);
-            this.ownVertexShader = true;
         }
 
-        if (typeof this.fragmentSource === "string") {
+        if (this.fragmentSource) {
             this.fragmentShader = new __WEBPACK_IMPORTED_MODULE_1__shader__["a" /* Shader */](this.gl, __WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].FRAGMENT_SHADER, this.fragmentSource);
-            this.ownFragmentShader = true;
         }
 
         let program = this.gl.createProgram();
@@ -4004,16 +4000,14 @@ class Program {
             this.fragmentShader.checkCompilation();
         }
 
-        if (this.ownVertexShader) {
+        if (this.vertexSource) {
             this.vertexShader.delete();
             this.vertexShader = null;
-            this.ownVertexShader = false;
         }
 
-        if (this.ownFragmentShader) {
+        if (this.fragmentSource) {
             this.fragmentShader.delete();
             this.fragmentShader = null;
-            this.ownFragmentShader = false;
         }
 
     }
