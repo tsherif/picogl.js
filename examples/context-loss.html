@@ -330,6 +330,8 @@
         var cobblesImage;
         var texturesReady = false;
 
+        // USE PARALLEL SHADER COMPILATION IF AVAILABLE
+        // https://www.khronos.org/registry/webgl/extensions/KHR_parallel_shader_compile/
         app.createPrograms(
             [shadowVShader, shadowFsSource],
             [lightVsSource, lightFsSource],

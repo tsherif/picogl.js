@@ -154,6 +154,8 @@
             mat4.multiply(mvpMatrix, projMatrix, viewMatrix);            
         }
 
+        // USE PARALLEL SHADER COMPILATION IF AVAILABLE
+        // https://www.khronos.org/registry/webgl/extensions/KHR_parallel_shader_compile/
         app.createPrograms([vsSource, fsSource], function(p) {
             var program = p;
 

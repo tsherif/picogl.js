@@ -161,7 +161,6 @@
         // SET UP GBUFFER PROGRAM
         var geoVsSource =  document.getElementById("geo-vs").text.trim();
         var geoFsSource =  document.getElementById("geo-fs").text.trim();
-        var geoProgram = app.createProgram(geoVsSource, geoFsSource);
 
         var positionTarget = app.createTexture2D(app.width, app.height, { 
             type: PicoGL.FLOAT 
@@ -184,8 +183,7 @@
         // SET UP MAIN PROGRAM
         var vsSource =  document.getElementById("main-vs").text.trim();
         var fsSource =  document.getElementById("main-fs").text.trim();
-        var mainProgram = app.createProgram(vsSource, fsSource);
-
+        
         // GEOMETRY
         var box = utils.createBox();
         var positions = app.createVertexBuffer(PicoGL.FLOAT, 3, box.positions);
@@ -216,67 +214,6 @@
         var viewProjMatrix = mat4.create();
         mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
 
-        // BOX DESCRIPTIONS FOR GEO PASS
-        var boxes = [
-            {
-                scale: [1, 1, 1],
-                rotate: [0, 0, 0],
-                translate: [0, 0, 0],
-                modelMatrix: mat4.create(),
-                mvpMatrix: mat4.create(),
-                matrixUniforms: app.createUniformBuffer([
-                    PicoGL.FLOAT_MAT4,
-                    PicoGL.FLOAT_MAT4
-                ]),
-                drawCall: null
-            },
-            {
-                scale: [0.1, 0.1, 0.1],
-                rotate: [0, 0, Math.PI / 3],
-                translate: [0.8, 0.8, 0.4],
-                modelMatrix: mat4.create(),
-                mvpMatrix: mat4.create(),
-                matrixUniforms: app.createUniformBuffer([
-                    PicoGL.FLOAT_MAT4,
-                    PicoGL.FLOAT_MAT4
-                ]),
-                drawCall: null
-            }
-        ];
-
-        for (var i = 0, len = boxes.length; i < len; ++i) {
-            boxes[i].drawCall = app.createDrawCall(geoProgram, boxArray)
-            .uniformBlock("BoxUniforms", boxes[i].matrixUniforms);
-        }
-
-        // LIGHT DESCRIPTIONS FOR DRAW PASS
-        var lights = [
-            {
-                position: vec3.fromValues(0, 1, 0.5),
-                color:    vec3.fromValues(0.8, 0.0, 0.0),
-                uniforms: null,
-                drawCall: null
-            },
-            {
-                position: vec3.fromValues(1, 1, 0.5),
-                color:    vec3.fromValues(0.0, 0.0, 0.8),
-                uniforms: null,
-                drawCall: null
-            },
-            {
-                position: vec3.fromValues(1, 0, 0.5),
-                color:    vec3.fromValues(0.0, 0.8, 0.0),
-                uniforms: null,
-                drawCall: null
-            },
-            {
-                position: vec3.fromValues(0.5, 0, 1),
-                color:    vec3.fromValues(0.0, 0.8, 0.8),
-                uniforms: null,
-                drawCall: null
-            }
-        ];
-
         window.onresize = function() {
             app.resize(window.innerWidth, window.innerHeight);
             gBuffer.resize();
@@ -294,11 +231,98 @@
             }
         }
 
-        
+        var geoProgram;
+        var mainProgram;
+        var programsReady = false;
+        var texture;
+        var textureReady = false;
+
+        // USE PARALLEL SHADER COMPILATION IF AVAILABLE
+        // https://www.khronos.org/registry/webgl/extensions/KHR_parallel_shader_compile/
+        app.createPrograms([geoVsSource, geoFsSource], [vsSource, fsSource], function(gp, mp) {
+            geoProgram = gp;
+            mainProgram = mp;
+
+            programsReady = true;
+
+            if (textureReady) {
+                requestAnimationFrame(start);
+            }
+        });
+
         utils.loadImages(["img/webgl-logo.png"], function(images) {
             // CREATE TEXTURE
-            var texture = app.createTexture2D(images[0], { flipY: true });
-            
+            texture = app.createTexture2D(images[0], { flipY: true });
+        
+            textureReady = true;
+
+            if (programsReady) {
+                requestAnimationFrame(start);
+            }
+        });
+
+        function start() {
+            // BOX DESCRIPTIONS FOR GEO PASS
+            var boxes = [
+                {
+                    scale: [1, 1, 1],
+                    rotate: [0, 0, 0],
+                    translate: [0, 0, 0],
+                    modelMatrix: mat4.create(),
+                    mvpMatrix: mat4.create(),
+                    matrixUniforms: app.createUniformBuffer([
+                        PicoGL.FLOAT_MAT4,
+                        PicoGL.FLOAT_MAT4
+                    ]),
+                    drawCall: null
+                },
+                {
+                    scale: [0.1, 0.1, 0.1],
+                    rotate: [0, 0, Math.PI / 3],
+                    translate: [0.8, 0.8, 0.4],
+                    modelMatrix: mat4.create(),
+                    mvpMatrix: mat4.create(),
+                    matrixUniforms: app.createUniformBuffer([
+                        PicoGL.FLOAT_MAT4,
+                        PicoGL.FLOAT_MAT4
+                    ]),
+                    drawCall: null
+                }
+            ];
+
+            for (var i = 0, len = boxes.length; i < len; ++i) {
+                boxes[i].drawCall = app.createDrawCall(geoProgram, boxArray)
+                .uniformBlock("BoxUniforms", boxes[i].matrixUniforms);
+            }
+
+            // LIGHT DESCRIPTIONS FOR DRAW PASS
+            var lights = [
+                {
+                    position: vec3.fromValues(0, 1, 0.5),
+                    color:    vec3.fromValues(0.8, 0.0, 0.0),
+                    uniforms: null,
+                    drawCall: null
+                },
+                {
+                    position: vec3.fromValues(1, 1, 0.5),
+                    color:    vec3.fromValues(0.0, 0.0, 0.8),
+                    uniforms: null,
+                    drawCall: null
+                },
+                {
+                    position: vec3.fromValues(1, 0, 0.5),
+                    color:    vec3.fromValues(0.0, 0.8, 0.0),
+                    uniforms: null,
+                    drawCall: null
+                },
+                {
+                    position: vec3.fromValues(0.5, 0, 1),
+                    color:    vec3.fromValues(0.0, 0.8, 0.8),
+                    uniforms: null,
+                    drawCall: null
+                }
+            ];
+
             // LIGHT UNIFORMS AND DRAW CALLS    
             var lightMatrix;
 
@@ -371,8 +395,7 @@
             }
 
             requestAnimationFrame(draw);
-            
-        });
+        }
 
     </script>
     <a href="https://github.com/tsherif/picogl.js" id="github-ribbon"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"></a>

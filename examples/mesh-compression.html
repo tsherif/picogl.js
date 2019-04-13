@@ -112,8 +112,7 @@
         canvas.height = window.innerHeight;
         
         var app = PicoGL.createApp(canvas)
-        .clearColor(0.0, 0.0, 0.0, 1.0)
-        .clear();
+        .clearColor(0.0, 0.0, 0.0, 1.0);
 
         window.onresize = function() {
             app.resize(window.innerWidth, window.innerHeight);
@@ -125,11 +124,9 @@
 
         // PROGRAM PASSES UNCOMPRESSED GEOMETRY
         var uncompressedVsSource =  document.getElementById("vs-uncompressed").text.trim();
-        var uncompressedProgram = app.createProgram(uncompressedVsSource, fShader);
 
         // PROGRAM DECODES COMPRESSED GEOMETRY
         var compressedVsSource =  document.getElementById("vs-compressed").text.trim();
-        var compressedProgram = app.createProgram(compressedVsSource, fShader);
 
         // GEOMETRY DATA
         var sphere = utils.createSphere({ radius: 0.48 });
@@ -164,28 +161,34 @@
         var compressedTransform = mat4.create();
         mat4.fromTranslation(compressedTransform, vec3.fromValues(0.5, 0.0, 0.0))
 
-        // DRAW CALLS
-        var uncompressedDrawCall = app.createDrawCall(uncompressedProgram, uncompressedVertexArray)
-        .uniform("model", uncompressedTransform);
 
-        var compressedDrawCall = app.createDrawCall(compressedProgram, compressedVertexArray)
-        .uniform("decode", q.decode)
-        .uniform("model", compressedTransform);
+        // USE PARALLEL SHADER COMPILATION IF AVAILABLE
+        // https://www.khronos.org/registry/webgl/extensions/KHR_parallel_shader_compile/
+        app.createPrograms([uncompressedVsSource, fShader], [compressedVsSource, fShader], function(uncompressedProgram, compressedProgram) {
+            // DRAW CALLS
+            var uncompressedDrawCall = app.createDrawCall(uncompressedProgram, uncompressedVertexArray)
+            .uniform("model", uncompressedTransform);
 
-        // DRAW
-        uncompressedDrawCall.draw();
-        compressedDrawCall.draw();
+            var compressedDrawCall = app.createDrawCall(compressedProgram, compressedVertexArray)
+            .uniform("decode", q.decode)
+            .uniform("model", compressedTransform);
 
-        // CLEANUP
-        fShader.delete();
-        uncompressedProgram.delete();
-        compressedProgram.delete();
-        uncompressedPositions.delete();
-        uncompressedNormals.delete();
-        uncompressedVertexArray.delete();
-        compressedPositions.delete();
-        compressedNormals.delete();
-        compressedVertexArray.delete();
+            // DRAW
+            app.clear();
+            uncompressedDrawCall.draw();
+            compressedDrawCall.draw();
+
+            // CLEANUP
+            fShader.delete();
+            uncompressedProgram.delete();
+            compressedProgram.delete();
+            uncompressedPositions.delete();
+            uncompressedNormals.delete();
+            uncompressedVertexArray.delete();
+            compressedPositions.delete();
+            compressedNormals.delete();
+            compressedVertexArray.delete();
+        });
 
         document.getElementById("compression").innerText = ((1 - (q.quantized.byteLength + encodedNormals.byteLength) / (sphere.positions.byteLength + sphere.normals.byteLength)) * 100).toFixed(1);
 

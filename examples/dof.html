@@ -305,6 +305,8 @@
         var boxProgram;
         var blurProgram;
 
+        // USE PARALLEL SHADER COMPILATION IF AVAILABLE
+        // https://www.khronos.org/registry/webgl/extensions/KHR_parallel_shader_compile/
         app.createPrograms([boxVsSource, boxFsSource], [quadVsSource, blurFsSource]).then(function(programs) {
             boxProgram = programs[0];
             blurProgram = programs[1];

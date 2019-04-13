@@ -149,12 +149,10 @@
         // SET UP PROGRAMS
         var vsSource =  document.getElementById("vertex-draw").text.trim();
         var fsSource =  document.getElementById("fragment-draw").text.trim();
-        var program = app.createProgram(vsSource, fsSource);
 
         var skyboxVsSource =  document.getElementById("vertex-skybox").text.trim();
         var skyboxFsSource =  document.getElementById("fragment-skybox").text.trim();
-        var skyboxProgram = app.createProgram(skyboxVsSource, skyboxFsSource);
-
+        
         // SET UP GEOMETRY
         var box = utils.createBox({dimensions: [1.0, 1.0, 1.0]})
         var positions = app.createVertexBuffer(PicoGL.FLOAT, 3, box.positions);
@@ -218,6 +216,26 @@
         var angleX = 0;
         var angleY = 0;
 
+        var program;
+        var skyboxProgram;
+        var programsReady = false;
+        var texture;
+        var cubemap;
+        var texturesReady = false;
+
+        // USE PARALLEL SHADER COMPILATION IF AVAILABLE
+        // https://www.khronos.org/registry/webgl/extensions/KHR_parallel_shader_compile/
+        app.createPrograms([vsSource, fsSource], [skyboxVsSource, skyboxFsSource], function(p, sbp) {
+            program = p;
+            skyboxProgram = sbp;
+
+            programsReady = true;
+
+            if (texturesReady) {
+                requestAnimationFrame(start);
+            }
+        });
+
         utils.loadImages([
             "img/webgl-logo.png",
             "img/sky-negx.png",
@@ -228,8 +246,8 @@
             "img/sky-posz.png"
         ], function(images) {
             // CREATE TEXTURE AND CUBEMAP
-            var texture = app.createTexture2D(images[0], { flipY: true });
-            var cubemap = app.createCubemap({
+            texture = app.createTexture2D(images[0], { flipY: true });
+            cubemap = app.createCubemap({
                 negX: images[1],
                 posX: images[2],
                 negY: images[3],
@@ -237,8 +255,16 @@
                 negZ: images[5],
                 posZ: images[6],
                 flipY: false
-            })
+            });
 
+            texturesReady = true;
+
+            if (programsReady) {
+                requestAnimationFrame(start);
+            }
+        });
+
+        function start() {
             // CREATE DRAWCALLS FOR SKYBOX AND REFLECTIVE CUBE
             var skyboxDrawcall = app.createDrawCall(skyboxProgram, boxArray)
             .uniformBlock("SceneUniforms", skyboxSceneUniforms)
@@ -275,7 +301,7 @@
             }
 
             requestAnimationFrame(draw);
-        });
+        }
 
     </script>
     <a href="https://github.com/tsherif/picogl.js" id="github-ribbon"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"></a>

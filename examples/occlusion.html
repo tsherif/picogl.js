@@ -218,18 +218,15 @@
 
         var drawVsSource =  document.getElementById("vertex-draw").text.trim();
         var drawFsSource =  document.getElementById("fragment-draw").text.trim();
-        var drawProgram = app.createProgram(drawVsSource, drawFsSource);
 
 
         var boundingBoxVSource =  document.getElementById("vertex-boundingBox").text.trim();
         var boundingBoxFSource =  document.getElementById("fragment-boundingBox").text.trim();
-        var boundingBoxProgram = app.createProgram(boundingBoxVSource, boundingBoxFSource);
         
 
         var hudVSSource =  document.getElementById("vertex-hud").text.trim();
-        var hudFSSoure =  document.getElementById("fragment-hud").text.trim();
-        var hudProgram = app.createProgram(hudVSSource, hudFSSoure);
-
+        var hudFSSource =  document.getElementById("fragment-hud").text.trim();
+        
         /////////////////////
         // SET UP GEOMETRY 
         /////////////////////
@@ -326,11 +323,44 @@
         var firstFrame = true;
         var occludedSpheres = 0;
 
+        var drawProgram;
+        var boundingBoxProgram;
+        var hudProgram;
+        var programsReady = false;
+        var texture;
+        var texturesReady = false;
+
+        // USE PARALLEL SHADER COMPILATION IF AVAILABLE
+        // https://www.khronos.org/registry/webgl/extensions/KHR_parallel_shader_compile/
+        app.createPrograms(
+            [drawVsSource, drawFsSource],
+            [boundingBoxVSource, boundingBoxFSource],
+            [hudVSSource, hudFSSource],
+            function(dp, bp, hp) {
+                drawProgram = dp;
+                boundingBoxProgram = bp;
+                hudProgram = hp;
+
+                programsReady = true;
+
+                if (texturesReady) {
+                    requestAnimationFrame(start);
+                }
+            }
+        );
         
         utils.loadImages(["img/webgl-logo.png"], function(images) {
             // CREATE TEXTURE
-            var texture = app.createTexture2D(images[0], { flipY: true });
+            texture = app.createTexture2D(images[0], { flipY: true });
         
+            texturesReady = true;
+
+            if (programsReady) {
+                requestAnimationFrame(start);
+            }
+        });
+
+        function start() {
             // Object definitions
             var GRID_DIM = 6;
             var GRID_OFFSET = GRID_DIM / 2 - 0.5;
@@ -411,7 +441,7 @@
                                 occludedSpheres++;
                             }
                         }
-    
+            
                         // Query is initiated here by drawing the bounding box of the sphere
                         if (!sphere.query.active) {
                             app.colorMask(false, false, false, false)
@@ -469,8 +499,7 @@
             }
 
             requestAnimationFrame(draw);
-            
-        });
+        }
 
     </script>
     <a href="https://github.com/tsherif/picogl.js" id="github-ribbon"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"></a>
