@@ -3792,26 +3792,38 @@ class Program {
         this.samplers = {};
         this.samplerCount = 0;
 
+        this.vertexSource = null;
         this.vertexShader = null;
         this.ownVertexShader = false;
+        this.fragmentSource = null;
         this.fragmentShader = null;
         this.ownFragmentShader = false;
         this.linked = false;
         this.linkFailed = false;
         this.parallelCompile = false;
 
-        this.restore(vsSource, fsSource);
+        if (typeof vsSource === "string") {
+            this.vertexSource = vsSource;
+        } else {
+            this.vertexShader = vsSource;
+        }
+
+        if (typeof fsSource === "string") {
+            this.fragmentSource = fsSource;
+        } else {
+            this.fragmentShader = fsSource;
+        }
+
+        this.restore();
     }
 
     /**
         Restore program after context loss.
 
         @method
-        @param {Shader|string} vertexShader Vertex shader object or source code.
-        @param {Shader|string} fragmentShader Fragment shader object or source code.
         @return {Program} The Program object.
     */
-    restore(vsSource, fsSource) {
+    restore() {
         if (this.appState.program === this) {
             this.gl.useProgram(null);
             this.appState.program = null;
@@ -3823,18 +3835,14 @@ class Program {
         this.uniformBlockCount = 0;
         this.samplerCount = 0;
 
-        if (typeof vsSource === "string") {
-            this.vertexShader = new __WEBPACK_IMPORTED_MODULE_1__shader__["a" /* Shader */](this.gl, __WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].VERTEX_SHADER, vsSource);
+        if (typeof this.vertexSource === "string") {
+            this.vertexShader = new __WEBPACK_IMPORTED_MODULE_1__shader__["a" /* Shader */](this.gl, __WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].VERTEX_SHADER, this.vertexSource);
             this.ownVertexShader = true;
-        } else {
-            this.vertexShader = vsSource;
         }
 
-        if (typeof fsSource === "string") {
-            this.fragmentShader = new __WEBPACK_IMPORTED_MODULE_1__shader__["a" /* Shader */](this.gl, __WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].FRAGMENT_SHADER, fsSource);
+        if (typeof this.fragmentSource === "string") {
+            this.fragmentShader = new __WEBPACK_IMPORTED_MODULE_1__shader__["a" /* Shader */](this.gl, __WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].FRAGMENT_SHADER, this.fragmentSource);
             this.ownFragmentShader = true;
-        } else {
-            this.fragmentShader = fsSource;
         }
 
         let program = this.gl.createProgram();
@@ -3998,16 +4006,16 @@ class Program {
 
         if (this.ownVertexShader) {
             this.vertexShader.delete();
+            this.vertexShader = null;
+            this.ownVertexShader = false;
         }
 
         if (this.ownFragmentShader) {
             this.fragmentShader.delete();
+            this.fragmentShader = null;
+            this.ownFragmentShader = false;
         }
 
-        this.vertexShader = null;
-        this.ownVertexShader = false;
-        this.fragmentShader = null;
-        this.ownFragmentShader = false;
     }
 
     // Set the value of a uniform.
