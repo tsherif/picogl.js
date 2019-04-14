@@ -214,39 +214,13 @@
         let angleX = 0;
         let angleY = 0;
 
-        let program;
-        let skyboxProgram;
-        let programsReady = false;
+        Promise.all([
+            app.createPrograms([vsSource, fsSource], [skyboxVsSource, skyboxFsSource]),
+            loadImages()  
+        ]).then(([[program, skyboxProgram], [image, cubemapData]]) => {
+            let texture = app.createTexture2D(image, { flipY: true });
+            let cubemap = app.createCubemap(cubemapData);
 
-        let texture;
-        let cubemap;
-        let texturesReady = false;
-
-        // USE PARALLEL SHADER COMPILATION IF AVAILABLE
-        // https://www.khronos.org/registry/webgl/extensions/KHR_parallel_shader_compile/
-        app.createPrograms([vsSource, fsSource], [skyboxVsSource, skyboxFsSource]).then((programs) => {
-            [program, skyboxProgram] = programs;
-
-            programsReady = true;
-
-            if (texturesReady) {
-                requestAnimationFrame(start);
-            }
-        });        
-
-        loadImages(function(cubemapData, image) {
-            // CREATE TEXTURE AND CUBEMAP
-            texture = app.createTexture2D(image, { flipY: true });
-            cubemap = app.createCubemap(cubemapData);
-
-            texturesReady = true;
-
-            if (programsReady) {
-                requestAnimationFrame(start);
-            }
-        });
-
-        function start() {
             // CREATE DRAWCALLS FOR SKYBOX AND REFLECTIVE CUBE
             let skyboxDrawcall = app.createDrawCall(skyboxProgram, boxArray)
             .uniformBlock("SceneUniforms", skyboxSceneUniforms)
@@ -283,24 +257,19 @@
             }
 
             requestAnimationFrame(draw);
+        });
+
+        function start() {
+            
         }
 
 
         function loadImages(ok) {
             let format = null;
-            let cubemapData = null;
-            let image = null;
 
-            function checkDone() {
-                if (cubemapData && image) {
-                    ok(cubemapData, image);
-                }
-            }
 
-            utils.loadImages(["img/webgl-logo.png"], function(images) {
-                image = images[0];
-                checkDone();
-            });
+            let imagePromise = utils.loadImages(["img/webgl-logo.png"]).then(images => images[0]);
+            let cubemapPromise;
 
             let compressedType = null;
             if (app.astcTexturesEnabled) {
@@ -318,19 +287,19 @@
             }
 
             if (compressedType) {
-                utils.getBinaries([
+                cubemapPromise = utils.loadBinaries([
                     "img/compressed/sky-negx-" + compressedType + ".pvr",
                     "img/compressed/sky-posx-" + compressedType + ".pvr",
                     "img/compressed/sky-negy-" + compressedType + ".pvr",
                     "img/compressed/sky-posy-" + compressedType + ".pvr",
                     "img/compressed/sky-negz-" + compressedType + ".pvr",
                     "img/compressed/sky-posz-" + compressedType + ".pvr"
-                ], function(data) {
+                ]).then((data) => {
                     for (let i = 0, len = data.length; i < len; ++i) {
                         data[i] = utils.parsePVR(data[i]);
                     }
 
-                    cubemapData = {
+                    return {
                         width: data[0].width,
                         height: data[0].height,
                         negX: data[0].data,
@@ -341,19 +310,17 @@
                         posZ: data[5].data,
                         format: format
                     };
-
-                    checkDone();
-                })
+                });
             } else {
-                utils.loadImages([
+                cubemapPromise = utils.loadImages([
                     "img/compressed/sky-negx-unsupported.png",
                     "img/compressed/sky-posx-unsupported.png",
                     "img/compressed/sky-negy-unsupported.png",
                     "img/compressed/sky-posy-unsupported.png",
                     "img/compressed/sky-negz-unsupported.png",
                     "img/compressed/sky-posz-unsupported.png"
-                ], function(images) {
-                    cubemapData = {
+                ]).then((images) => {
+                    return {
                         negX: images[0],
                         posX: images[1],
                         negY: images[2],
@@ -361,10 +328,10 @@
                         negZ: images[4],
                         posZ: images[5]
                     };
-
-                    checkDone();
                 });
             }
+
+            return Promise.all([imagePromise, cubemapPromise]);
         }
 
     </script>

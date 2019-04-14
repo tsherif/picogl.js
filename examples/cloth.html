@@ -649,41 +649,6 @@
             targetY = ((canvas.height - event.clientY) / canvas.height) * 2 - 1;
         });
 
-        let updateForceProgram;
-        let updateConstraintProgram;
-        let updateCollisionProgram;
-        let updateNormalProgram;
-        let ballProgram;
-        let clothProgram;
-
-        let programsReady = false;
-
-        // USE PARALLEL SHADER COMPILATION IF AVAILABLE
-        // https://www.khronos.org/registry/webgl/extensions/KHR_parallel_shader_compile/
-        .then((programs) => {
-             = programs;
-
-            programsReady = true;
-
-            if (textureReady) {
-                requestAnimationFrame(start);
-            }
-        });
-
-        let texture;
-        let textureReady = false;
-
-        
-        , function(images) {
-            // CREATE TEXTURE
-
-            textureReady = true;
-
-            if (programsReady) {
-                requestAnimationFrame(start);
-            }
-        });
-
         Promise.all([
             app.createPrograms(
                 [quadShader, updateForceFsSource],
