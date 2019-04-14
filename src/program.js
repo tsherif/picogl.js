@@ -278,7 +278,6 @@ export class Program {
             this.fragmentShader.delete();
             this.fragmentShader = null;
         }
-
     }
 
     // Set the value of a uniform.

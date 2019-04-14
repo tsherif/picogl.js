@@ -486,7 +486,7 @@
 <div class="description">
     Enable the WEBGL_compressed_texture_astc extension, which allows the following enums to
         be used as texture formats:
-        
+
         <ul>
           <li>PicoGL.COMPRESSED_RGBA_ASTC_4x4_KHR
           <li>PicoGL.COMPRESSED_RGBA_ASTC_5x4_KHR
@@ -2871,7 +2871,7 @@
                 </td>
             
 
-            <td class="description last">Type of data stored in the texture. Defaults to UNSIGNED_SHORT 
+            <td class="description last">Type of data stored in the texture. Defaults to UNSIGNED_SHORT
             if format is DEPTH_COMPONENT, UNSIGNED_BYTE otherwise.</td>
         </tr>
 
@@ -3065,7 +3065,7 @@
                 </td>
             
 
-            <td class="description last">Minification filter. Defaults to 
+            <td class="description last">Minification filter. Defaults to
             LINEAR_MIPMAP_NEAREST if image data is provided, NEAREST otherwise.</td>
         </tr>
 
@@ -3456,7 +3456,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1250">line 1250</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1307">line 1307</a>
     </li></ul></dd>
     
 
@@ -3705,7 +3705,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1310">line 1310</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1367">line 1367</a>
     </li></ul></dd>
     
 
@@ -3813,7 +3813,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1274">line 1274</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1331">line 1331</a>
     </li></ul></dd>
     
 
@@ -4095,7 +4095,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1054">line 1054</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1111">line 1111</a>
     </li></ul></dd>
     
 
@@ -4266,7 +4266,7 @@
                 </td>
             
 
-            <td class="description last">Buffer data itself or the total 
+            <td class="description last">Buffer data itself or the total
             number of bytes to be allocated.</td>
         </tr>
 
@@ -4347,7 +4347,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1040">line 1040</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1097">line 1097</a>
     </li></ul></dd>
     
 
@@ -4597,7 +4597,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1025">line 1025</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1082">line 1082</a>
     </li></ul></dd>
     
 
@@ -4661,7 +4661,8 @@
 
 
 <div class="description">
-    Create a program.
+    Create a program synchronously. It is highly recommended to use <b>createPrograms</b> instead as
+            that method will compile shaders in parallel where possible.
 </div>
 
 
@@ -4834,7 +4835,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line961">line 961</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line962">line 962</a>
     </li></ul></dd>
     
 
@@ -4873,6 +4874,182 @@
     <dd>
         
 <span class="param-type"><a href="Program.html">Program</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="createPrograms"><span class="type-signature"></span>createPrograms<span class="signature">(&hellip;sources)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Create several programs. Preferred method for program creation as it will compile shaders
+        in parallel where possible.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>sources</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">sources</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                    &lt;repeatable><br>
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Variable number of 2 or 3 element arrays, each containing:
+            <ul>
+                <li> (Shader|string) Vertex shader object or source code.
+                <li> (Shader|string) Fragment shader object or source code.
+                <li> (Array - optional) Array of names of transform feedback varyings.
+            </ul></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line980">line 980</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    Promise that will resolve to an array of Programs when compilation and
+            linking are complete for all programs.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
 
 
     </dd>
@@ -4991,7 +5168,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1285">line 1285</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1342">line 1342</a>
     </li></ul></dd>
     
 
@@ -5273,7 +5450,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1264">line 1264</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1321">line 1321</a>
     </li></ul></dd>
     
 
@@ -5454,7 +5631,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line974">line 974</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1031">line 1031</a>
     </li></ul></dd>
     
 
@@ -5593,7 +5770,7 @@
 
             
 
-            <td class="description last">Image data. An array can be passed to manually set all levels 
+            <td class="description last">Image data. An array can be passed to manually set all levels
             of the mipmap chain. If a single level is passed and mipmap filtering is being used,
             generateMipmap() will be called to produce the remaining levels.</td>
         </tr>
@@ -5754,7 +5931,7 @@
                 </td>
             
 
-            <td class="description last">Type of data stored in the texture. Defaults to UNSIGNED_SHORT 
+            <td class="description last">Type of data stored in the texture. Defaults to UNSIGNED_SHORT
             if format is DEPTH_COMPONENT, UNSIGNED_BYTE otherwise.</td>
         </tr>
 
@@ -5948,7 +6125,7 @@
                 </td>
             
 
-            <td class="description last">Minification filter. Defaults to 
+            <td class="description last">Minification filter. Defaults to
             LINEAR_MIPMAP_NEAREST if image data is provided, NEAREST otherwise.</td>
         </tr>
 
@@ -6339,7 +6516,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1108">line 1108</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1165">line 1165</a>
     </li></ul></dd>
     
 
@@ -6468,7 +6645,7 @@
 
             
 
-            <td class="description last">Pixel data. An array can be passed to manually set all levels 
+            <td class="description last">Pixel data. An array can be passed to manually set all levels
             of the mipmap chain. If a single level is passed and mipmap filtering is being used,
             generateMipmap() will be called to produce the remaining levels.</td>
         </tr>
@@ -6656,7 +6833,7 @@
                 </td>
             
 
-            <td class="description last">Type of data stored in the texture. Defaults to UNSIGNED_SHORT 
+            <td class="description last">Type of data stored in the texture. Defaults to UNSIGNED_SHORT
             if format is DEPTH_COMPONENT, UNSIGNED_BYTE otherwise.</td>
         </tr>
 
@@ -6811,7 +6988,7 @@
                 </td>
             
 
-            <td class="description last">Minification filter. Defaults to 
+            <td class="description last">Minification filter. Defaults to
             LINEAR_MIPMAP_NEAREST if image data is provided, NEAREST otherwise.</td>
         </tr>
 
@@ -7241,7 +7418,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1199">line 1199</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1256">line 1256</a>
     </li></ul></dd>
     
 
@@ -7370,7 +7547,7 @@
 
             
 
-            <td class="description last">Pixel data. An array can be passed to manually set all levels 
+            <td class="description last">Pixel data. An array can be passed to manually set all levels
             of the mipmap chain. If a single level is passed and mipmap filtering is being used,
             generateMipmap() will be called to produce the remaining levels.</td>
         </tr>
@@ -7558,7 +7735,7 @@
                 </td>
             
 
-            <td class="description last">Type of data stored in the texture. Defaults to UNSIGNED_SHORT 
+            <td class="description last">Type of data stored in the texture. Defaults to UNSIGNED_SHORT
             if format is DEPTH_COMPONENT, UNSIGNED_BYTE otherwise.</td>
         </tr>
 
@@ -7713,7 +7890,7 @@
                 </td>
             
 
-            <td class="description last">Minification filter. Defaults to 
+            <td class="description last">Minification filter. Defaults to
             LINEAR_MIPMAP_NEAREST if image data is provided, NEAREST otherwise.</td>
         </tr>
 
@@ -8143,7 +8320,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1156">line 1156</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1213">line 1213</a>
     </li></ul></dd>
     
 
@@ -8251,7 +8428,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1295">line 1295</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1352">line 1352</a>
     </li></ul></dd>
     
 
@@ -8359,7 +8536,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line994">line 994</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1051">line 1051</a>
     </li></ul></dd>
     
 
@@ -8574,7 +8751,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1069">line 1069</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1126">line 1126</a>
     </li></ul></dd>
     
 
@@ -8682,7 +8859,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line984">line 984</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1041">line 1041</a>
     </li></ul></dd>
     
 
@@ -8887,7 +9064,7 @@
                 </td>
             
 
-            <td class="description last">Buffer data itself or the total 
+            <td class="description last">Buffer data itself or the total
             number of elements to be allocated.</td>
         </tr>
 
@@ -8968,7 +9145,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1009">line 1009</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1066">line 1066</a>
     </li></ul></dd>
     
 
@@ -10341,7 +10518,7 @@
 <div class="description">
     Enable the WEBGL_compressed_texture_etc extension, which allows the following enums to
         be used as texture formats:
-        
+
         <ul>
           <li>PicoGL.COMPRESSED_R11_EAC
           <li>PicoGL.COMPRESSED_SIGNED_R11_EAC
@@ -12546,7 +12723,7 @@
 
 
 <div class="description">
-    Enable the WEBGL_compressed_texture_s3tc and WEBGL_compressed_texture_s3tc_srgb extensions, which 
+    Enable the WEBGL_compressed_texture_s3tc and WEBGL_compressed_texture_s3tc_srgb extensions, which
         allow the following enums to be used as texture formats:
 
         <ul>
@@ -14441,7 +14618,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sat Apr 06 2019 09:02:47 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sun Apr 14 2019 17:58:20 GMT-0500 (GMT-05:00)
 </footer>
 
 <script> prettyPrint(); </script>

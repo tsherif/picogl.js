@@ -951,7 +951,7 @@ export class App {
     }
 
     /**
-        Create a program synchronously. It is highly recommended to use "createPrograms" instead as
+        Create a program synchronously. It is highly recommended to use <b>createPrograms</b> instead as
             that method will compile shaders in parallel where possible.
         @method
         @param {Shader|string} vertexShader Vertex shader object or source code.

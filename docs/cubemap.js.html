@@ -49,7 +49,13 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-import { GL, TEXTURE_FORMAT_DEFAULTS, DUMMY_OBJECT } from "./constants";
+import { 
+    GL,
+    TEXTURE_FORMAT_DEFAULTS,
+    COMPRESSED_TEXTURE_TYPES,
+    DUMMY_OBJECT,
+    DUMMY_UNIT_ARRAY
+} from "./constants";
 
 /**
     Cubemap for environment mapping.
@@ -72,15 +78,29 @@ export class Cubemap {
 
         this.gl = gl;
         this.texture = null;
-        this.format = options.format !== undefined ? options.format : GL.RGBA;
         this.type = options.type !== undefined ? options.type : defaultType;
-        this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : TEXTURE_FORMAT_DEFAULTS[this.type][this.format];
         this.appState = appState;
+
+        this.format = null;
+        this.internalFormat = null;
+        this.compressed = Boolean(COMPRESSED_TEXTURE_TYPES[options.format] || COMPRESSED_TEXTURE_TYPES[options.internalFormat]);
+        
+        if (this.compressed) {
+            // For compressed textures, just need to provide one of format, internalFormat.
+            // The other will be the same.
+            this.format = options.format !== undefined ? options.format : options.internalFormat;
+            this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : options.format;
+        } else {
+            this.format = options.format !== undefined ? options.format : gl.RGBA;
+            this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : TEXTURE_FORMAT_DEFAULTS[this.type][this.format];
+        }
         
         // -1 indicates unbound
         this.currentUnit = -1;
 
-        let negX = options.negX;
+        let arrayData = Array.isArray(options.negX);
+        let negX = arrayData ? options.negX[0] : options.negX;
+
         let {
             width = negX.width,
             height = negX.height,
@@ -113,6 +133,7 @@ export class Cubemap {
         this.baseLevel = baseLevel;
         this.maxLevel = maxLevel;
         this.mipmaps = (minFilter === GL.LINEAR_MIPMAP_NEAREST || minFilter === GL.LINEAR_MIPMAP_LINEAR);
+        this.miplevelsProvided = arrayData &amp;&amp; options.negX.length > 1;
         this.levels = this.mipmaps ? Math.floor(Math.log2(Math.min(this.width, this.height))) + 1 : 1;
 
         this.restore(options);
@@ -171,15 +192,15 @@ export class Cubemap {
         let { negX, posX, negY, posY, negZ, posZ } = options;
 
         if (negX) {
-            this.gl.texSubImage2D(GL.TEXTURE_CUBE_MAP_NEGATIVE_X, 0, 0, 0, this.width, this.height, this.format, this.type, negX);
-            this.gl.texSubImage2D(GL.TEXTURE_CUBE_MAP_POSITIVE_X, 0, 0, 0, this.width, this.height, this.format, this.type, posX);
-            this.gl.texSubImage2D(GL.TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, 0, 0, this.width, this.height, this.format, this.type, negY);
-            this.gl.texSubImage2D(GL.TEXTURE_CUBE_MAP_POSITIVE_Y, 0, 0, 0, this.width, this.height, this.format, this.type, posY);
-            this.gl.texSubImage2D(GL.TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, 0, 0, this.width, this.height, this.format, this.type, negZ);
-            this.gl.texSubImage2D(GL.TEXTURE_CUBE_MAP_POSITIVE_Z, 0, 0, 0, this.width, this.height, this.format, this.type, posZ);
+            this.faceData(GL.TEXTURE_CUBE_MAP_NEGATIVE_X, negX);
+            this.faceData(GL.TEXTURE_CUBE_MAP_POSITIVE_X, posX);
+            this.faceData(GL.TEXTURE_CUBE_MAP_NEGATIVE_Y, negY);
+            this.faceData(GL.TEXTURE_CUBE_MAP_POSITIVE_Y, posY);
+            this.faceData(GL.TEXTURE_CUBE_MAP_NEGATIVE_Z, negZ);
+            this.faceData(GL.TEXTURE_CUBE_MAP_POSITIVE_Z, posZ);
         }
 
-        if (this.mipmaps) {
+        if (this.mipmaps &amp;&amp; !this.miplevelsProvided) {
             this.gl.generateMipmap(GL.TEXTURE_CUBE_MAP);
         }
 
@@ -203,13 +224,36 @@ export class Cubemap {
         return this;
     }
 
-    /**
-        Bind this cubemap to a texture unit.
+    // Input data for one cubemap face.
+    faceData(face, data) {
+        if (!Array.isArray(data)) {
+            DUMMY_UNIT_ARRAY[0] = data;
+            data = DUMMY_UNIT_ARRAY;
+        }
 
-        @method
-        @ignore
-        @return {Cubemap} The Cubemap object.
-    */
+        let numLevels = this.mipmaps ? data.length : 1;
+        let width = this.width;
+        let height = this.height;
+        let i;
+
+        if (this.compressed) {
+            for (i = 0; i &lt; numLevels; ++i) {
+                this.gl.compressedTexSubImage2D(face, i, 0, 0, width, height, this.format, data[i]);
+                width = Math.max(width >> 1, 1);
+                height = Math.max(height >> 1, 1);
+            }
+        } else {
+            for (i = 0; i &lt; numLevels; ++i) {
+                this.gl.texSubImage2D(face, i, 0, 0, width, height, this.format, this.type, data[i]);
+                width = Math.max(width >> 1, 1);
+                height = Math.max(height >> 1, 1);
+            }
+        }
+
+        return this;
+    }
+
+    // Bind this cubemap to a texture unit.
     bind(unit) {
         let currentTexture = this.appState.textures[unit];
         
@@ -249,7 +293,7 @@ export class Cubemap {
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sat Apr 06 2019 09:02:47 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sun Apr 14 2019 17:58:20 GMT-0500 (GMT-05:00)
 </footer>
 
 <script> prettyPrint(); </script>
