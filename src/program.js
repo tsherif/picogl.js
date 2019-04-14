@@ -43,7 +43,7 @@ import {
 */
 export class Program {
 
-    constructor(gl, appState, vsSource, fsSource, xformFeebackVars) {
+    constructor(gl, appState, vsSource, fsSource, xformFeebackVars, forceSync) {
         this.gl = gl;
         this.appState = appState;
         this.program = null;
@@ -61,6 +61,8 @@ export class Program {
         this.linked = false;
         this.linkFailed = false;
         this.parallelCompile = false;
+        this.forceSync = Boolean(forceSync);
+        this.pollHandle = null;
 
         if (typeof vsSource === "string") {
             this.vertexSource = vsSource;
@@ -89,7 +91,12 @@ export class Program {
             this.appState.program = null;
         }
 
-        this.parallelCompile = Boolean(this.gl.getExtension("KHR_parallel_shader_compile"));
+        if (this.pollHandle) {
+            cancelAnimationFrame(this.pollHandle);
+            this.pollHandle = null;
+        }
+
+        this.parallelCompile = !this.forceSync && Boolean(this.gl.getExtension("KHR_parallel_shader_compile"));
         this.linked = false;
         this.linkFailed = false;
         this.uniformBlockCount = 0;
@@ -244,7 +251,7 @@ export class Program {
             if (this.gl.getProgramParameter(this.program, GL.COMPLETION_STATUS_KHR)) {
                 this.checkLinkage();
             } else {
-                requestAnimationFrame(poll);
+                this.pollHandle = requestAnimationFrame(poll);
             }
         };
         poll();
