@@ -176,10 +176,6 @@ export class DrawCall {
         @return {DrawCall} The DrawCall object.
     */
     draw() {
-        if (!this.currentProgram.linked) {
-            return this;
-        }
-
         let uniformNames = this.uniformNames;
         let uniformValues = this.uniformValues;
         let uniformBuffers = this.uniformBuffers;
