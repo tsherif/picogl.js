@@ -2496,43 +2496,45 @@ class App {
         @return {Program} New Program object.
     */
     createPrograms(...sources) {
-        let ok = sources[sources.length - 1];
-        let numPrograms = sources.length - 1;
-        let programs = new Array(numPrograms);
-        let pendingPrograms = new Array(numPrograms);
-        let numPending = numPrograms;
+        return new Promise((resolve, reject) => {
+            let numPrograms = sources.length;
+            let programs = new Array(numPrograms);
+            let pendingPrograms = new Array(numPrograms);
+            let numPending = numPrograms;
 
-        for (let i = 0; i < numPrograms; ++i) {
-            let source = sources[i];
-            let vsSource = source[0];
-            let fsSource = source[1];
-            let xformFeedbackVars = source[2];
-            programs[i] = new __WEBPACK_IMPORTED_MODULE_5__program__["a" /* Program */](this.gl, this.state, vsSource, fsSource, xformFeedbackVars);
-            pendingPrograms[i] = programs[i];
-        }
+            for (let i = 0; i < numPrograms; ++i) {
+                let source = sources[i];
+                let vsSource = source[0];
+                let fsSource = source[1];
+                let xformFeedbackVars = source[2];
+                programs[i] = new __WEBPACK_IMPORTED_MODULE_5__program__["a" /* Program */](this.gl, this.state, vsSource, fsSource, xformFeedbackVars);
+                pendingPrograms[i] = programs[i];
+            }
 
-        let poll = () => {
-            let linked = 0;
-            for (let i = 0; i < numPending; ++i) {
-                if (pendingPrograms[i].linkFailed) {
-                    return;
-                } else if (pendingPrograms[i].linked) {
-                    ++linked;
-                } else {
-                    pendingPrograms[i - linked] = pendingPrograms[i];
+            let poll = () => {
+                let linked = 0;
+                for (let i = 0; i < numPending; ++i) {
+                    if (pendingPrograms[i].linkFailed) {
+                        reject(new Error("Program linkage failed"));
+                        return;
+                    } else if (pendingPrograms[i].linked) {
+                        ++linked;
+                    } else {
+                        pendingPrograms[i - linked] = pendingPrograms[i];
+                    }
                 }
-            }
 
-            numPending -= linked;
+                numPending -= linked;
 
-            if (numPending === 0) {
-                ok(...programs);
-            } else {
-                requestAnimationFrame(poll);
-            }
-        };
+                if (numPending === 0) {
+                    resolve(programs);
+                } else {
+                    requestAnimationFrame(poll);
+                }
+            };
 
-        poll();
+            poll();
+        });
     }
 
     /**

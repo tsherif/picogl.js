@@ -22,7 +22,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 (function() {
-    var dummyGL = document.createElement("canvas").getContext("webgl2");
 
     if (window.mat4) {
         var translateMat = mat4.create();
@@ -59,7 +58,7 @@
 
     // https://www.khronos.org/registry/webgl/extensions/WEBGL_compressed_texture_s3tc/
     // https://www.khronos.org/registry/webgl/extensions/WEBGL_compressed_texture_etc/
-    // Size for: 
+    // Size for:
     // COMPRESSED_RGB_S3TC_DXT1_EXT
     // COMPRESSED_R11_EAC
     // COMPRESSED_SIGNED_R11_EAC
@@ -74,7 +73,7 @@
     // https://www.khronos.org/registry/webgl/extensions/WEBGL_compressed_texture_s3tc/
     // https://www.khronos.org/registry/webgl/extensions/WEBGL_compressed_texture_etc/
     // https://www.khronos.org/registry/webgl/extensions/WEBGL_compressed_texture_astc/
-    // Size for: 
+    // Size for:
     // COMPRESSED_RGBA_S3TC_DXT3_EXT
     // COMPRESSED_RGBA_S3TC_DXT5_EXT
     // COMPRESSED_RG11_EAC
@@ -222,9 +221,6 @@
     };
 
     window.utils = {
-        testWebGL2: function() {
-            return Boolean(dummyGL);
-        },
         testExtension: function(ext) {
             return Boolean(dummyGL.getExtension(ext));
         },
@@ -412,51 +408,51 @@
 
             var normals = new Float32Array([
                 // front
-                0, 0, 1, 
-                0, 0, 1, 
-                0, 0, 1, 
-                0, 0, 1, 
-                0, 0, 1, 
+                0, 0, 1,
+                0, 0, 1,
+                0, 0, 1,
+                0, 0, 1,
+                0, 0, 1,
                 0, 0, 1,
 
                 // right
-                1, 0, 0, 
-                1, 0, 0, 
-                1, 0, 0, 
-                1, 0, 0, 
-                1, 0, 0, 
+                1, 0, 0,
+                1, 0, 0,
+                1, 0, 0,
+                1, 0, 0,
+                1, 0, 0,
                 1, 0, 0,
 
-                // back 
-                0, 0, -1, 
-                0, 0, -1, 
-                0, 0, -1, 
-                0, 0, -1, 
-                0, 0, -1, 
-                0, 0, -1, 
+                // back
+                0, 0, -1,
+                0, 0, -1,
+                0, 0, -1,
+                0, 0, -1,
+                0, 0, -1,
+                0, 0, -1,
 
                 // left
-                -1, 0, 0, 
-                -1, 0, 0, 
-                -1, 0, 0, 
-                -1, 0, 0, 
-                -1, 0, 0, 
+                -1, 0, 0,
+                -1, 0, 0,
+                -1, 0, 0,
+                -1, 0, 0,
+                -1, 0, 0,
                 -1, 0, 0,
 
-                // top 
-                0, 1, 0, 
-                0, 1, 0, 
-                0, 1, 0, 
-                0, 1, 0, 
-                0, 1, 0, 
+                // top
+                0, 1, 0,
+                0, 1, 0,
+                0, 1, 0,
+                0, 1, 0,
+                0, 1, 0,
                 0, 1, 0,
 
                 // bottom
-                0, -1, 0, 
-                0, -1, 0, 
-                0, -1, 0, 
-                0, -1, 0, 
-                0, -1, 0, 
+                0, -1, 0,
+                0, -1, 0,
+                0, -1, 0,
+                0, -1, 0,
+                0, -1, 0,
                 0, -1, 0
             ]);
 
@@ -513,47 +509,47 @@
                     vi = k * 3;
                     ti = k * 2;
 
-                    positions[vi] = x1 * radius; 
-                    positions[vi+1] = y1 * radius; 
+                    positions[vi] = x1 * radius;
+                    positions[vi+1] = y1 * radius;
                     positions[vi+2] = z1 * radius; //v0
 
-                    positions[vi+3] = x2 * radius; 
-                    positions[vi+4] = y1 * radius; 
+                    positions[vi+3] = x2 * radius;
+                    positions[vi+4] = y1 * radius;
                     positions[vi+5] = z2 * radius; //v1
 
-                    positions[vi+6] = x3 * radius; 
-                    positions[vi+7] = y2 * radius; 
+                    positions[vi+6] = x3 * radius;
+                    positions[vi+7] = y2 * radius;
                     positions[vi+8] = z3 * radius; // v2
 
 
-                    positions[vi+9] = x4 * radius; 
-                    positions[vi+10] = y2 * radius; 
+                    positions[vi+9] = x4 * radius;
+                    positions[vi+10] = y2 * radius;
                     positions[vi+11] = z4 * radius; // v3
 
                     normals[vi] = x1;
-                    normals[vi+1] = y1; 
+                    normals[vi+1] = y1;
                     normals[vi+2] = z1;
 
                     normals[vi+3] = x2;
-                    normals[vi+4] = y1; 
+                    normals[vi+4] = y1;
                     normals[vi+5] = z2;
 
                     normals[vi+6] = x3;
-                    normals[vi+7] = y2; 
+                    normals[vi+7] = y2;
                     normals[vi+8] = z3;
 
                     normals[vi+9] = x4;
-                    normals[vi+10] = y2; 
+                    normals[vi+10] = y2;
                     normals[vi+11] = z4;
 
-                    uvs[ti] = u1; 
-                    uvs[ti+1] = v1; 
+                    uvs[ti] = u1;
+                    uvs[ti+1] = v1;
 
-                    uvs[ti+2] = u2; 
+                    uvs[ti+2] = u2;
                     uvs[ti+3] = v1;
 
                     uvs[ti+4] = u1;
-                    uvs[ti+5] = v2; 
+                    uvs[ti+5] = v2;
 
                     uvs[ti+6] = u2;
                     uvs[ti+7] = v2;
@@ -666,7 +662,7 @@
             }
 
             for (var i = 0; i < numRequests; ++i) {
-               this.getBinary(urls[i], checkDoneFunc(i)); 
+               this.getBinary(urls[i], checkDoneFunc(i));
             }
         },
 

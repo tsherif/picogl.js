@@ -37,6 +37,7 @@ export class Shader {
         this.shader = null;
         this.type = type;
         this.source = source;
+        this.parallelCompile = false;
 
         this.restore();
     }
@@ -48,6 +49,7 @@ export class Shader {
         @return {Shader} The Shader object.
     */
     restore() {
+        this.parallelCompile = Boolean(this.gl.getExtension("KHR_parallel_shader_compile"));
         this.shader = this.gl.createShader(this.type);
         this.gl.shaderSource(this.shader, this.source);
         this.gl.compileShader(this.shader);

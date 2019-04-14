@@ -3,6 +3,7 @@
 <head>
     <title>PicoGL.js: Omni-directional Shadows</title>
     <meta charset="utf-8">
+    <script src="utils/compatibility.js"></script>
     <script src="utils/gl-matrix.js"></script>
     <script src="../build/picogl.js"></script>
     <script src="utils/utils.js"></script>
@@ -150,11 +151,6 @@
         utils.addTimerElement();
 
         var canvas = document.getElementById("gl-canvas");
-        if (!utils.testWebGL2()) {
-            console.error("WebGL 2 not available");
-            document.body.innerHTML = "This example requires WebGL 2 which is unavailable on this system."
-        }
-
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
@@ -313,19 +309,18 @@
         app.createPrograms(
             [shadowVsSource, shadowFsSource],
             [lightVsSource, lightFsSource],
-            [vsSource, fsSource],
-            function(sp, lp, mp) {
-                shadowProgram = sp;
-                lightProgram = lp;
-                mainProgram = mp;
+            [vsSource, fsSource]
+        ).then((programs) => {
+            shadowProgram = sp;
+            lightProgram = lp;
+            mainProgram = mp;
 
-                programsReady = true;
+            programsReady = true;
 
-                if (texturesReady) {
-                    requestAnimationFrame(start);
-                }
+            if (texturesReady) {
+                requestAnimationFrame(start);
             }
-        );
+        });
 
         var webglTexture;
         var cobblesTexture;

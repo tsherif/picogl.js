@@ -3,6 +3,7 @@
 <head>
     <title>PicoGL.js Example: Occlusion Culling</title>
     <meta charset="utf-8">
+    <script src="utils/compatibility.js"></script>
     <script src="utils/gl-matrix.js"></script>
     <script src="../build/picogl.js"></script>
     <script src="utils/utils.js"></script>
@@ -175,11 +176,6 @@
     <script type="text/javascript">
         utils.addTimerElement();
 
-        if (!utils.testWebGL2()) {
-            console.error("WebGL 2 not available");
-            document.body.innerHTML = "This example requires WebGL 2 which is unavailable on this system."
-        }
-
         var occlusionCullingEnabled = true;
         var showHUD = true;
 
@@ -335,19 +331,16 @@
         app.createPrograms(
             [drawVsSource, drawFsSource],
             [boundingBoxVSource, boundingBoxFSource],
-            [hudVSSource, hudFSSource],
-            function(dp, bp, hp) {
-                drawProgram = dp;
-                boundingBoxProgram = bp;
-                hudProgram = hp;
+            [hudVSSource, hudFSSource]
+        ).then((programs) => {
+            [drawProgram, boundingBoxProgram, hudProgram] = programs;
 
-                programsReady = true;
+            programsReady = true;
 
-                if (texturesReady) {
-                    requestAnimationFrame(start);
-                }
+            if (texturesReady) {
+                requestAnimationFrame(start);
             }
-        );
+        });
         
         utils.loadImages(["img/webgl-logo.png"], function(images) {
             // CREATE TEXTURE

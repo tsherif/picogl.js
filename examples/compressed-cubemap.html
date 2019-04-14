@@ -1,4 +1,12 @@
 <!DOCTYPE html>
+<head>
+    <title>PicoGL.js: Compressed Cubemap</title>
+    <script src="utils/compatibility.js"></script>
+    <script src="utils/gl-matrix.js"></script>
+    <script src="../build/picogl.js"></script>
+    <script src="utils/utils.js"></script>
+    <link rel="stylesheet" href="../site/css/picogl-example.css"> 
+</head>
 <!--
   The MIT License (MIT)
 
@@ -22,13 +30,6 @@
   CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -->
 <html>
-<head>
-    <title>PicoGL.js: Compressed Cubemap</title>
-    <script src="utils/gl-matrix.js"></script>
-    <script src="../build/picogl.js"></script>
-    <script src="utils/utils.js"></script>
-    <link rel="stylesheet" href="../site/css/picogl-example.css"> 
-</head>
 <body>
     <div id="example-title">
         PicoGL.js Example: Compressed Cubemap
@@ -130,12 +131,6 @@
         utils.timerDiv.style.color = "black";
 
         var canvas = document.getElementById("gl-canvas");
-
-        if (!utils.testWebGL2()) {
-            console.error("WebGL 2 not available");
-            document.body.innerHTML = "This example requires WebGL 2 which is unavailable on this system."
-        }
-
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         
@@ -229,9 +224,8 @@
 
         // USE PARALLEL SHADER COMPILATION IF AVAILABLE
         // https://www.khronos.org/registry/webgl/extensions/KHR_parallel_shader_compile/
-        app.createPrograms([vsSource, fsSource], [skyboxVsSource, skyboxFsSource], function(p, sbp) {
-            program = p;
-            skyboxProgram = sbp;
+        app.createPrograms([vsSource, fsSource], [skyboxVsSource, skyboxFsSource]).then((programs) => {
+            [program, skyboxProgram] = programs;
 
             programsReady = true;
 

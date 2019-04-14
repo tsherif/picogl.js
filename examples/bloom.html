@@ -3,6 +3,7 @@
 <head>
     <title>PicoGL.js: Bloom</title>
     <meta charset="utf-8">
+    <script src="utils/compatibility.js"></script>
     <script src="utils/gl-matrix.js"></script>
     <script src="../build/picogl.js"></script>
     <script src="utils/utils.js"></script>
@@ -221,12 +222,6 @@
         });
 
         var canvas = document.getElementById("gl-canvas");
-
-        if (!utils.testWebGL2()) {
-            console.error("WebGL 2 not available");
-            document.body.innerHTML = "This example requires WebGL 2 which is unavailable on this system."
-        }
-
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
@@ -238,7 +233,7 @@
         .depthTest()
         .floatRenderTargets();
 
-        if (!utils.testExtension("EXT_color_buffer_float")) {
+        if (!testExtension("EXT_color_buffer_float")) {
             document.body.innerHTML = "This example requires extension EXT_color_buffer_float which is not supported on this system."
         }
 
@@ -413,20 +408,16 @@
             [sunVsSource, sunFsSource],
             [quadVertexShader, blurFsSource],
             [quadVertexShader, blendFsSource],
-            function(cp, sp, brp, bdp) {
-                cubeProgram = cp;
-                sunProgram = sp;
-                blurProgram = brp;
-                blendProgram = bdp;
+        ).then((programs) => {
+            [cubeProgram, sunProgram, blurProgram, blendProgram] = programs;
 
-                programsReady = true;
-                quadVertexShader.delete();
+            programsReady = true;
+            quadVertexShader.delete();
 
-                if (textureReady) {
-                    requestAnimationFrame(start);
-                }
+            if (textureReady) {
+                requestAnimationFrame(start);
             }
-        );
+        });
 
         function start() {
             // PREPARE DRAW CALLS

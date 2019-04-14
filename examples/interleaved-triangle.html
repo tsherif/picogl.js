@@ -3,6 +3,7 @@
 <head>
     <title>PicoGL.js: Triangle</title>
     <meta charset="utf-8">
+    <script src="utils/compatibility.js"></script>
     <script src="../build/picogl.js"></script>
     <script src="utils/utils.js"></script>
     <link rel="stylesheet" href="../site/css/picogl-example.css"> 
@@ -61,14 +62,7 @@
         }
     </script>
     <script>
-        
-        if (!utils.testWebGL2()) {
-            console.error("WebGL 2 not available");
-            document.body.innerHTML = "This example requires WebGL 2 which is unavailable on this system."
-        }
-
         var canvas = document.getElementById("gl-canvas");
-
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         
@@ -119,7 +113,7 @@
 
         // USE PARALLEL SHADER COMPILATION IF AVAILABLE
         // https://www.khronos.org/registry/webgl/extensions/KHR_parallel_shader_compile/
-        app.createPrograms([vsSource, fsSource], function(program) {
+        app.createPrograms([vsSource, fsSource]).then(([program]) => {
             // CREATE DRAW CALL FROM PROGRAM AND VERTEX ARRAY
             var drawCall = app.createDrawCall(program, triangleArray);
 

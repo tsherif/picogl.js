@@ -3,6 +3,7 @@
 <head>
     <title>PicoGL.js: Cloth</title>
     <meta charset="utf-8">
+    <script src="utils/compatibility.js"></script>
     <script src="utils/gl-matrix.js"></script>
     <script src="../build/picogl.js"></script>
     <script src="utils/utils.js"></script>
@@ -313,17 +314,11 @@
     <script type="text/javascript">
         utils.addTimerElement();
 
-        var canvas = document.getElementById("gl-canvas");
-
-        if (!utils.testWebGL2()) {
-            console.error("WebGL 2 not available");
-            document.body.innerHTML = "This example requires WebGL 2 which is unavailable on this system."
-        }
-
-        if (!utils.testExtension("EXT_color_buffer_float")) {
+        if (!testExtension("EXT_color_buffer_float")) {
             document.body.innerHTML = "This example requires extension EXT_color_buffer_float which is not supported on this system."
         }
         
+        var canvas = document.getElementById("gl-canvas");
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         
@@ -671,22 +666,23 @@
             [quadShader, updateCollisionFsSource],
             [quadShader, updateNormalFsSource],
             [ballVsSource, phongShader],
-            [clothVsSource, phongShader],
-            function(ufp, ucnp, uclp, unp, bp, cp) {
-                updateForceProgram = ufp;
-                updateConstraintProgram = ucnp;
-                updateCollisionProgram = uclp;
-                updateNormalProgram = unp;
-                ballProgram = bp;
-                clothProgram = cp;
+            [clothVsSource, phongShader]
+        ).then((programs) => {
+            [
+                updateForceProgram,
+                updateConstraintProgram,
+                updateCollisionProgram,
+                updateNormalProgram,
+                ballProgram,
+                clothProgram
+            ] = programs;
 
-                programsReady = true;
+            programsReady = true;
 
-                if (textureReady) {
-                    requestAnimationFrame(start);
-                }
+            if (textureReady) {
+                requestAnimationFrame(start);
             }
-        );
+        });
 
         var texture;
         var textureReady = false;

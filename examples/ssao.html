@@ -3,6 +3,8 @@
 <head>
     <title>PicoGL.js: Screen Space Ambient Occlusion</title>
     <meta charset="utf-8">
+    <script src="utils/compatibility.js"></script>
+    <script src="utils/gl-matrix.js"></script>
     <script src="utils/gl-matrix.js"></script>
     <script src="../build/picogl.js"></script>
     <script src="utils/utils.js"></script>
@@ -247,17 +249,11 @@
         var NUM_PER_ROW = 8;
         var SPHERE_RADIUS = 0.6;
 
-        var canvas = document.getElementById("gl-canvas");
-
-        if (!utils.testWebGL2()) {
-            console.error("WebGL 2 not available");
-            document.body.innerHTML = "This example requires WebGL 2 which is unavailable on this system."
-        }
-
-        if (!utils.testExtension("EXT_color_buffer_float")) {
+        if (!testExtension("EXT_color_buffer_float")) {
             document.body.innerHTML = "This example requires extension EXT_color_buffer_float which is not supported on this system."
         }
 
+        var canvas = document.getElementById("gl-canvas");
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
@@ -288,7 +284,6 @@
         // SET UP COLOR/GEO PROGRAM
         var colorGeoVsSource =  document.getElementById("vertex-colorgeo").text.trim();
         var colorGeoFsSource =  document.getElementById("fragment-colorgeo").text.trim();
-        var colorGeoProgram = app.createProgram(colorGeoVsSource, colorGeoFsSource);
         
         var colorTarget = app.createTexture2D(app.width, app.height);
         var positionTarget = app.createTexture2D(app.width, app.height, { 
@@ -310,7 +305,6 @@
 
         // SET UP SSAO PROGRAM
         var ssaoFsSource =  document.getElementById("fragment-ssao").text.trim();
-        var ssaoProgram = app.createProgram(quadShader, ssaoFsSource);
         var ssaoTarget = app.createTexture2D(app.width, app.height, { 
             type: PicoGL.FLOAT 
         });
@@ -318,13 +312,9 @@
 
         // SET UP AO BLEND PROGRAM
         var aoBlendFsSource =  document.getElementById("fragment-aoblend").text.trim();
-        var aoBlendProgram = app.createProgram(quadShader, aoBlendFsSource);
 
         // DRAW WITHOUT SSAO
         var noSSAOFsSource =  document.getElementById("fragment-color").text.trim();
-        var noSSAOProgram = app.createProgram(quadShader, noSSAOFsSource);
-
-        quadShader.delete();
 
         // INSTANCED SPHERE GEOMETRY
         var sphere = utils.createSphere({radius: 0.5});
@@ -438,11 +428,43 @@
             sceneUniforms.set(1, projMatrix).update();
         };
 
+        let colorGeoProgram;
+        let ssaoProgram;
+        let aoBlendProgram;
+        let noSSAOProgram;
+        let texture;
+        let programsReady = false;
+        let texturesReady = false;
+
+
+        app.createPrograms(
+            [colorGeoVsSource, colorGeoFsSource],
+            [quadShader, ssaoFsSource],
+            [quadShader, aoBlendFsSource],
+            [quadShader, noSSAOFsSource]
+        ).then((programs) => {
+            [colorGeoProgram, ssaoProgram, aoBlendProgram, noSSAOProgram] = programs;
+            quadShader.delete();
+
+            programsReady = true;
+
+            if (texturesReady) {
+                requestAnimationFrame(start);
+            }
+        });
         
         utils.loadImages(["img/webgl-logo.png"], function(images) {
             // CREATE TEXTURE
-            var texture = app.createTexture2D(images[0], { flipY: true });
+            texture = app.createTexture2D(images[0], { flipY: true });
 
+            texturesReady = true;
+
+            if (programsReady) {
+                requestAnimationFrame(start);
+            }    
+        });
+
+        function start() {
             // DRAW CALLS
             var colorGeoDrawcall = app.createDrawCall(colorGeoProgram, sphereArray)
             .uniformBlock("SceneUniforms", sceneUniforms)
@@ -506,8 +528,7 @@
             }
 
             requestAnimationFrame(draw);
-            
-        });
+        }
 
     </script>
     <a href="https://github.com/tsherif/picogl.js" id="github-ribbon"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"></a>

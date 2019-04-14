@@ -3,6 +3,7 @@
 <head>
     <title>PicoGL.js: Deferred Rendering</title>
     <meta charset="utf-8">
+    <script src="utils/compatibility.js"></script>
     <script src="utils/gl-matrix.js"></script>
     <script src="../build/picogl.js"></script>
     <script src="utils/utils.js"></script>
@@ -135,17 +136,11 @@
     <script type="text/javascript">
         utils.addTimerElement();
 
-        var canvas = document.getElementById("gl-canvas");
-
-        if (!utils.testWebGL2()) {
-            console.error("WebGL 2 not available");
-            document.body.innerHTML = "This example requires WebGL 2 which is unavailable on this system."
-        }
-
-        if (!utils.testExtension("EXT_color_buffer_float")) {
+        if (!testExtension("EXT_color_buffer_float")) {
             document.body.innerHTML = "This example requires extension EXT_color_buffer_float which is not supported on this system."
         }
         
+        var canvas = document.getElementById("gl-canvas");
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
@@ -239,9 +234,8 @@
 
         // USE PARALLEL SHADER COMPILATION IF AVAILABLE
         // https://www.khronos.org/registry/webgl/extensions/KHR_parallel_shader_compile/
-        app.createPrograms([geoVsSource, geoFsSource], [vsSource, fsSource], function(gp, mp) {
-            geoProgram = gp;
-            mainProgram = mp;
+        app.createPrograms([geoVsSource, geoFsSource], [vsSource, fsSource]).then((programs) => {
+            [geoProgram, mainProgram] = programs;
 
             programsReady = true;
 

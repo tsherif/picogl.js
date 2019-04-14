@@ -3,6 +3,7 @@
 <head>
     <title>PicoGL.js: Compressed Textures</title>
     <meta charset="utf-8">
+    <script src="utils/compatibility.js"></script>
     <script src="utils/gl-matrix.js"></script>
     <script src="../build/picogl.js"></script>
     <script src="utils/utils.js"></script>
@@ -103,12 +104,6 @@
         utils.addTimerElement();
         
         var canvas = document.getElementById("gl-canvas");
-
-        if (!utils.testWebGL2()) {
-            console.error("WebGL 2 not available");
-            document.body.innerHTML = "This example requires WebGL 2 which is unavailable on this system."
-        }
-
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         
@@ -248,7 +243,7 @@
 
         // USE PARALLEL SHADER COMPILATION IF AVAILABLE
         // https://www.khronos.org/registry/webgl/extensions/KHR_parallel_shader_compile/
-        app.createPrograms([vsSource, fsSource], function(p) {
+        app.createPrograms([vsSource, fsSource]).then(([p]) => {
             program = p;
 
             programsReady = true;

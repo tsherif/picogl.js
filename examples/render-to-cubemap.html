@@ -3,6 +3,7 @@
 <head>
     <title>PicoGL.js: Render to Cubemap</title>
     <meta charset="utf-8">
+    <script src="utils/compatibility.js"></script>
     <script src="utils/gl-matrix.js"></script>
     <script src="../build/picogl.js"></script>
     <script src="utils/utils.js"></script>
@@ -190,12 +191,6 @@
         utils.timerDiv.style.color = "black";
         
         var canvas = document.getElementById("gl-canvas");
-
-        if (!utils.testWebGL2()) {
-            console.error("WebGL 2 not available");
-            document.body.innerHTML = "This example requires WebGL 2 which is unavailable on this system."
-        }
-
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
@@ -328,20 +323,17 @@
         app.createPrograms(
             [vShader, fsSource],
             [vShader, cubemapFsSource],
-            [skyboxVsSource, skyboxFsSource],
-            function(p, cp, sbp) {
-                program = p;
-                cubemapProgram = cp;
-                skyboxProgram = sbp;
-                vShader.delete();
+            [skyboxVsSource, skyboxFsSource]
+        ).then((programs) => {
+            [program, cubemapProgram, skyboxProgram] = programs;
+            vShader.delete();
 
-                programsReady = true;
+            programsReady = true;
 
-                if (texturesReady) {
-                    requestAnimationFrame(start);
-                }
-            } 
-        );
+            if (texturesReady) {
+                requestAnimationFrame(start);
+            }
+        });
 
 
         utils.loadImages([

@@ -3,6 +3,7 @@
 <head>
     <title>PicoGL.js: Motion Blur</title>
     <meta charset="utf-8">
+    <script src="utils/compatibility.js"></script>
     <script src="utils/gl-matrix.js"></script>
     <script src="../build/picogl.js"></script>
     <script src="utils/utils.js"></script>
@@ -228,14 +229,8 @@
         });
 
         utils.addTimerElement();
-        
 
-        if (!utils.testWebGL2()) {
-            console.error("WebGL 2 not available");
-            document.body.innerHTML = "This example requires WebGL 2 which is unavailable on this system."
-        }
-
-        if (!utils.testExtension("EXT_color_buffer_float")) {
+        if (!testExtension("EXT_color_buffer_float")) {
             document.body.innerHTML = "This example requires extension EXT_color_buffer_float which is not supported on this system."
         }
 
@@ -342,19 +337,16 @@
         app.createPrograms(
             [velocityVsSource, drawFShader],
             [noVelocityVsSource, drawFShader], 
-            [quadVSSource, blurFSSource], 
-            function(p, nvp, bp) {
-                program = p;
-                noVelocityProgram = nvp;
-                blurProgram = bp;
+            [quadVSSource, blurFSSource]
+        ).then((programs) => {
+            [program, noVelocityProgram, blurProgram] = programs;
 
-                programsReady = true;
+            programsReady = true;
 
-                if (texturesReady) {
-                    requestAnimationFrame(start);
-                }
+            if (texturesReady) {
+                requestAnimationFrame(start);
             }
-        );
+        });
         
         var texture;
         var texturesReady = false;
