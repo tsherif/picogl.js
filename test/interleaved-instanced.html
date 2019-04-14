@@ -63,12 +63,12 @@
     </script>
     
     <script type="text/javascript">
-        var canvas = document.getElementById("gl-canvas");
+        let canvas = document.getElementById("gl-canvas");
 
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         
-        var app = PicoGL.createApp(canvas)
+        let app = PicoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0);
 
         window.onresize = function() {
@@ -76,20 +76,18 @@
         }
 
         // PROGRAM
-        var vsSource =  document.getElementById("vs").text.trim();
-        var fsSource =  document.getElementById("fs").text.trim();
+        let vsSource =  document.getElementById("vs").text.trim();
+        let fsSource =  document.getElementById("fs").text.trim();
                         
-        var program = app.createProgram(vsSource, fsSource);
-
         // PER-VERTEX POSITIONS
-        var positions = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
+        let positions = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
             -0.3, -0.3,
              0.3, -0.3,
              0.0, 0.3
         ]));
 
         // PER-INSTANCE OFFSETS AND COLORS
-        var interleavedData = new Float32Array([
+        let interleavedData = new Float32Array([
             -0.4, -0.4,  // Offsets
              0, // Color
              0.4, -0.4,
@@ -100,15 +98,15 @@
              0
         ]);
 
-        var interleavedDataUByte = new Uint8Array(interleavedData.buffer);
+        let interleavedDataUByte = new Uint8Array(interleavedData.buffer);
         interleavedDataUByte.set([255, 0, 0, 255], 8);
         interleavedDataUByte.set([0, 255, 0, 255], 20);
         interleavedDataUByte.set([0, 0, 255, 255], 32);
         interleavedDataUByte.set([0, 255, 255, 255], 44);
 
-        var interleavedBuffer = app.createInterleavedBuffer(12, interleavedData);
+        let interleavedBuffer = app.createInterleavedBuffer(12, interleavedData);
 
-        var triangleArray = app.createVertexArray()
+        let triangleArray = app.createVertexArray()
         .vertexAttributeBuffer(0, positions)
         .instanceAttributeBuffer(1, interleavedBuffer, {
             type: PicoGL.FLOAT,
@@ -123,16 +121,18 @@
             normalized: true
         });
 
-        var drawCall = app.createDrawCall(program, triangleArray);
+        app.createPrograms([vsSource, fsSource]).then(([program]) => {
+          let drawCall = app.createDrawCall(program, triangleArray);
 
-        app.clear();
-        drawCall.draw();
+          app.clear();
+          drawCall.draw();
 
-        // CLEANUP
-        program.delete();
-        positions.delete();
-        interleavedBuffer.delete();
-        triangleArray.delete();
+          // CLEANUP
+          program.delete();
+          positions.delete();
+          interleavedBuffer.delete();
+          triangleArray.delete();
+        })
 
     </script>
     <a href="https://github.com/tsherif/picogl.js" id="github-ribbon"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"></a>

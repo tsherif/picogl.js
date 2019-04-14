@@ -62,7 +62,7 @@
         }
     </script>
     <script type="text/javascript">
-        var canvas = document.getElementById("gl-canvas");
+        let canvas = document.getElementById("gl-canvas");
 
         if (!canvas.getContext("webgl2")) {
             console.error("WebGL 2 not available");
@@ -72,23 +72,23 @@
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         
-        var app = PicoGL.createApp(canvas);
+        let app = PicoGL.createApp(canvas);
 
         // PROGRAM
-        var vsSource =  document.getElementById("vertex-draw").text.trim();
-        var fsSource =  document.getElementById("fragment-draw").text.trim();
-        var program = app.createProgram(vsSource, fsSource);
+        let vsSource =  document.getElementById("vertex-draw").text.trim();
+        let fsSource =  document.getElementById("fragment-draw").text.trim();
+        let program = app.createProgram(vsSource, fsSource);
 
         // FRAMEBUFFER
-        var colorTarget = app.createTexture2D(app.width, app.height);
-        var depthTarget = app.createTexture2D(app.width, app.height, {
+        let colorTarget = app.createTexture2D(app.width, app.height);
+        let depthTarget = app.createTexture2D(app.width, app.height, {
             format: PicoGL.DEPTH_COMPONENT
         });
 
-        var rttBuffer = app.createFramebuffer().colorTarget(0, colorTarget).depthTarget(depthTarget);
+        let rttBuffer = app.createFramebuffer().colorTarget(0, colorTarget).depthTarget(depthTarget);
 
         // GEOMETRY
-        var positions = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
+        let positions = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
             -0.5, 0.5,
             -0.5, -0.5,
             0.5, -0.5,
@@ -96,7 +96,7 @@
             0.5, -0.5,
             0.5, 0.5
         ]));
-        var uv = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
+        let uv = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
             0, 1,
             0, 0,
             1, 0,
@@ -105,16 +105,16 @@
             1, 1
         ]));
 
-        var quadArray = app.createVertexArray()
+        let quadArray = app.createVertexArray()
         .vertexAttributeBuffer(0, positions)
         .vertexAttributeBuffer(1, uv);
 
-        var image = new Image();
+        let image = new Image();
 
         image.onload = function() {
-            var texture = app.createTexture2D(image, { flipY: true });
+            let texture = app.createTexture2D(image, { flipY: true });
 
-            var drawCall = app.createDrawCall(program, quadArray);
+            let drawCall = app.createDrawCall(program, quadArray);
 
             // RENDER TO OFFSCREEN TEXTURE
             app.drawFramebuffer(rttBuffer).clearColor(0.4, 0.4, 0.4, 1.0).clear();

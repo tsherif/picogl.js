@@ -130,7 +130,7 @@
     </script>
     
     <script type="text/javascript">
-        var canvas = document.getElementById("gl-canvas");
+        let canvas = document.getElementById("gl-canvas");
 
         if (!canvas.getContext("webgl2")) {
             console.error("WebGL 2 not available");
@@ -140,7 +140,7 @@
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         
-        var app = PicoGL.createApp(canvas)
+        let app = PicoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0);
 
         window.onresize = function() {
@@ -148,71 +148,71 @@
         }
 
         // PROGRAM
-        var vsSource =  document.getElementById("vs-mats").text.trim();
-        var fsSource =  document.getElementById("fs-mats").text.trim();                        
-        var matProgram = app.createProgram(vsSource, fsSource);
+        let vsSource =  document.getElementById("vs-mats").text.trim();
+        let fsSource =  document.getElementById("fs-mats").text.trim();                        
+        let matProgram = app.createProgram(vsSource, fsSource);
 
         vsSource =  document.getElementById("vs-arrays").text.trim();
         fsSource =  document.getElementById("fs-arrays").text.trim();                        
-        var arrayProgram = app.createProgram(vsSource, fsSource);
+        let arrayProgram = app.createProgram(vsSource, fsSource);
 
         vsSource =  document.getElementById("vs-tex-bool").text.trim();
         fsSource =  document.getElementById("fs-tex-bool").text.trim();                        
-        var texBoolProgram = app.createProgram(vsSource, fsSource);
+        let texBoolProgram = app.createProgram(vsSource, fsSource);
 
         // GEOMETRY
-        var positions = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
+        let positions = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
             -0.15, -0.15,
              0.15, -0.15,
              0.0, 0.15
         ]));
 
-        var uv = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
+        let uv = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
              0, 0,
              1, 0,
              0.5, 1
         ]));
 
-        var triangleArray = app.createVertexArray()
+        let triangleArray = app.createVertexArray()
         .vertexAttributeBuffer(0, positions)
         .vertexAttributeBuffer(1, uv);
 
-        var offsets1 = new Float32Array([
+        let offsets1 = new Float32Array([
             -0.6, 0.5,
             -0.2, 0.5,
             0.2, 0.5,
             0.6, 0.5,
         ]);
 
-        var offsets2 = new Float32Array([
+        let offsets2 = new Float32Array([
             -0.6, 0.0,
             -0.2, 0.0,
             0.2, 0.0,
             0.6, 0.0,
         ]);
 
-        var offsets3 = new Float32Array([
+        let offsets3 = new Float32Array([
             -0.6, -0.5, 0.0,
             -0.2, -0.5, 0.0,
             0.2, -0.5, 0.0,
             0.6, -0.5, 0.0
         ]);
 
-        var colors1 = new Float32Array([
+        let colors1 = new Float32Array([
             1.0, 0.0, 0.0,
             0.0, 1.0, 0.0,
             0.0, 0.0, 1.0,
             0.0, 1.0, 1.0
         ]);
 
-        var colors2 = new Float32Array([
+        let colors2 = new Float32Array([
             1.0, 0.0, 0.0, 1.0,
             0.0, 1.0, 0.0, 1.0,
             0.0, 0.0, 1.0, 1.0,
             0.0, 1.0, 1.0, 1.0
         ]);
 
-        var useTexture = [
+        let useTexture = [
             false,
             true,
             false,
@@ -221,73 +221,73 @@
     
 
         // DRAW CALLS WITH DIFFERENT UNIFORM BUFFERS
-        var drawCall1 = app.createDrawCall(matProgram, triangleArray)
+        let drawCall1 = app.createDrawCall(matProgram, triangleArray)
         .uniform("offsets", offsets1)
         .uniform("colors", colors1)
         .uniform("index", 0);
 
-        var drawCall2 = app.createDrawCall(matProgram, triangleArray)
+        let drawCall2 = app.createDrawCall(matProgram, triangleArray)
         .uniform("offsets", offsets1)
         .uniform("colors", colors1)
         .uniform("index", 1);
 
-        var drawCall3 = app.createDrawCall(matProgram, triangleArray)
+        let drawCall3 = app.createDrawCall(matProgram, triangleArray)
         .uniform("offsets", offsets1)
         .uniform("colors", colors1)
         .uniform("index", 2);
 
-        var drawCall4 = app.createDrawCall(matProgram, triangleArray)
+        let drawCall4 = app.createDrawCall(matProgram, triangleArray)
         .uniform("offsets", offsets1)
         .uniform("colors", colors1)
         .uniform("index", 3);
 
-        var drawCall5 = app.createDrawCall(arrayProgram, triangleArray)
+        let drawCall5 = app.createDrawCall(arrayProgram, triangleArray)
         .uniform("offsets[0]", offsets2)
         .uniform("colors[0]", colors1)
         .uniform("index", 0);
 
-        var drawCall6 = app.createDrawCall(arrayProgram, triangleArray)
+        let drawCall6 = app.createDrawCall(arrayProgram, triangleArray)
         .uniform("offsets[0]", offsets2)
         .uniform("colors[0]", colors1)
         .uniform("index", 1);
 
-        var drawCall7 = app.createDrawCall(arrayProgram, triangleArray)
+        let drawCall7 = app.createDrawCall(arrayProgram, triangleArray)
         .uniform("offsets[0]", offsets2)
         .uniform("colors[0]", colors1)
         .uniform("index", 2);
 
-        var drawCall8 = app.createDrawCall(arrayProgram, triangleArray)
+        let drawCall8 = app.createDrawCall(arrayProgram, triangleArray)
         .uniform("offsets[0]", offsets2)
         .uniform("colors[0]", colors1)
         .uniform("index", 3);
 
-        var image = new Image();
+        let image = new Image();
 
         image.onload = function() {
-            var texture = app.createTexture2D(image, { flipY: true });
+            let texture = app.createTexture2D(image, { flipY: true });
 
-            var drawCall9 = app.createDrawCall(texBoolProgram, triangleArray)
+            let drawCall9 = app.createDrawCall(texBoolProgram, triangleArray)
             .uniform("offsets[0]", offsets3)
             .uniform("colors[0]", colors2)
             .uniform("useTexture[0]", useTexture)
             .uniform("index", 0)
             .texture("tex", texture);
 
-            var drawCall10 = app.createDrawCall(texBoolProgram, triangleArray)
+            let drawCall10 = app.createDrawCall(texBoolProgram, triangleArray)
             .uniform("offsets[0]", offsets3)
             .uniform("colors[0]", colors2)
             .uniform("useTexture[0]", useTexture)
             .uniform("index", 1)
             .texture("tex", texture);
 
-            var drawCall11 = app.createDrawCall(texBoolProgram, triangleArray)
+            let drawCall11 = app.createDrawCall(texBoolProgram, triangleArray)
             .uniform("offsets[0]", offsets3)
             .uniform("colors[0]", colors2)
             .uniform("useTexture[0]", useTexture)
             .uniform("index", 2)
             .texture("tex", texture);
 
-            var drawCall12 = app.createDrawCall(texBoolProgram, triangleArray)
+            let drawCall12 = app.createDrawCall(texBoolProgram, triangleArray)
             .uniform("offsets[0]", offsets3)
             .uniform("colors[0]", colors2)
             .uniform("useTexture[0]", useTexture)
