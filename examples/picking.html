@@ -148,7 +148,6 @@
         // SET UP PICKING PROGRAM
         var pickingVsSource = document.getElementById("picking-vs").text.trim();
         var pickingFsSource = document.getElementById("picking-fs").text.trim();
-        var pickingProgram = app.createProgram(pickingVsSource, pickingFsSource);
 
         var pickColorTarget = app.createTexture2D(app.width, app.height);
         var pickDepthTarget = app.createRenderbuffer(app.width, app.height, PicoGL.DEPTH_COMPONENT16);
@@ -158,8 +157,7 @@
         // SET UP MAIN PROGRAM
         var vsSource = document.getElementById("main-vs").text.trim();
         var fsSource = document.getElementById("main-fs").text.trim();
-        var mainProgram = app.createProgram(vsSource, fsSource);
-
+        
         // GEOMETRY
         var box = utils.createBox({dimensions: [1.0, 1.0, 1.0]})
         var positions = app.createVertexBuffer(PicoGL.FLOAT, 3, box.positions);
@@ -237,11 +235,37 @@
             }
         ];
 
+        var pickingProgram;
+        var mainProgram;
+        var programsReady = false;
+        var texture;
+        var texturesReady = false;
+
+        // USE PARALLEL SHADER COMPILATION IF AVAILABLE
+        // https://www.khronos.org/registry/webgl/extensions/KHR_parallel_shader_compile/
+        app.createPrograms([pickingVsSource, pickingFsSource], [vsSource, fsSource], function(pp, mp) {
+            pickingProgram = pp;
+            mainProgram = mp;
+
+            programsReady = true;
+
+            if (texturesReady) {
+                requestAnimationFrame(start);
+            }
+        });
         
         utils.loadImages(["img/webgl-logo.png"], function(images) {
             // CREATE TEXTURE
-            var texture = app.createTexture2D(images[0], { flipY: true });
+            texture = app.createTexture2D(images[0], { flipY: true });
 
+            texturesReady = true;
+
+            if (programsReady) {
+                requestAnimationFrame(start);
+            }
+        });
+
+        function start() {
             for (var i = 0, len = boxes.length; i < len; ++i) {
                 boxes[i].pickingDrawCall = app.createDrawCall(pickingProgram, boxArray)
                 .uniform("uPickColor", boxes[i].pickColor);
@@ -328,8 +352,7 @@
             }
 
             requestAnimationFrame(draw);
-            
-        });
+        }
 
     </script>
     <a href="https://github.com/tsherif/picogl.js" id="github-ribbon"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"></a>
