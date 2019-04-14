@@ -95,9 +95,7 @@
         .vertexAttributeBuffer(0, positions)
         .vertexAttributeBuffer(1, colors, { normalized: true });
 
-        app.createPrograms([vsSource, fsSource]).then(function(programs) {
-            var program = programs[0];
-
+        app.createPrograms([vsSource, fsSource]).then(function([program]) {
             // CREATE DRAW CALL FROM PROGRAM AND VERTEX ARRAY
             var drawCall = app.createDrawCall(program, triangleArray);
 

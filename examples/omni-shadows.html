@@ -311,10 +311,8 @@
             [lightVsSource, lightFsSource],
             [vsSource, fsSource]
         ).then((programs) => {
-            shadowProgram = sp;
-            lightProgram = lp;
-            mainProgram = mp;
-
+            [shadowProgram, lightProgram, mainProgram] = programs;
+            
             programsReady = true;
 
             if (texturesReady) {

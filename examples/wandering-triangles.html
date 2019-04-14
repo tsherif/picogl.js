@@ -162,15 +162,10 @@
         var updateVsSource =  document.getElementById("vs-update").text.trim();
         var updateFsSource =  document.getElementById("fs-update").text.trim();
               
-        // FINAL ARGUMENT IS TRANSFORM FEEDBACK VARYINGS
-        var updateProgram = app.createProgram(updateVsSource, updateFsSource, ["vOffset", "vRotation"]);
 
         // DRAW PROGRAM
         var drawVsSource =  document.getElementById("vs-draw").text.trim();
         var drawFsSource =  document.getElementById("fs-draw").text.trim();
-              
-        var drawProgram = app.createProgram(drawVsSource, drawFsSource);
-
 
         // GEO DATA
         var NUM_INSTANCES = 50000;
@@ -243,51 +238,56 @@
         .instanceAttributeBuffer(2, offsetsB)
         .instanceAttributeBuffer(3, rotationsB);
 
-        // CREATE DRAW CALLS FOR SIMULATION
-        // A BUFFERS AS INPUT, UPDATE B BUFFERS
-        var updateDrawCallA = app.createDrawCall(updateProgram, updateArrayA, PicoGL.POINTS)
-        .transformFeedback(transformFeedbackB);
+        app.createPrograms(
+            [drawVsSource, drawFsSource],
+            [updateVsSource, updateFsSource, ["vOffset", "vRotation"]]
+        ).then(([drawProgram, updateProgram]) => {
+            // CREATE DRAW CALLS FOR SIMULATION
+            // A BUFFERS AS INPUT, UPDATE B BUFFERS
+            var updateDrawCallA = app.createDrawCall(updateProgram, updateArrayA, PicoGL.POINTS)
+            .transformFeedback(transformFeedbackB);
 
-        // B BUFFERS AS INPUT, UPDATE A BUFFERS
-        var updateDrawCallB = app.createDrawCall(updateProgram, updateArrayB, PicoGL.POINTS)
-        .transformFeedback(transformFeedbackA);
+            // B BUFFERS AS INPUT, UPDATE A BUFFERS
+            var updateDrawCallB = app.createDrawCall(updateProgram, updateArrayB, PicoGL.POINTS)
+            .transformFeedback(transformFeedbackA);
 
-        // DRAW USING CONTENTS OF A BUFFERS
-        var drawCallA = app.createDrawCall(drawProgram, drawArrayA);
+            // DRAW USING CONTENTS OF A BUFFERS
+            var drawCallA = app.createDrawCall(drawProgram, drawArrayA);
 
-        // DRAW USING CONTENTS OF B BUFFERS
-        var drawCallB = app.createDrawCall(drawProgram, drawArrayB);
+            // DRAW USING CONTENTS OF B BUFFERS
+            var drawCallB = app.createDrawCall(drawProgram, drawArrayB);
 
-        // START BY DRAWING B BUFFERS THAT ARE
-        // WRITTEN TO ON FIRST TRANSFORM FEEDBACK
-        // PASS 
-        var updateDrawCall = updateDrawCallA;
-        var mainDrawCall = drawCallB;
-        function draw() {
-            if (timer.ready()) {
-                utils.updateTimerElement(timer.cpuTime, timer.gpuTime);
+            // START BY DRAWING B BUFFERS THAT ARE
+            // WRITTEN TO ON FIRST TRANSFORM FEEDBACK
+            // PASS 
+            var updateDrawCall = updateDrawCallA;
+            var mainDrawCall = drawCallB;
+            function draw() {
+                if (timer.ready()) {
+                    utils.updateTimerElement(timer.cpuTime, timer.gpuTime);
+                }
+
+                timer.start();
+
+                // TRANSFORM FEEDBACK
+                app.noRasterize()
+                updateDrawCall.draw()
+
+                // DRAW
+                app.rasterize().clear()
+                mainDrawCall.draw();
+
+                // SWAP INPUT AND OUTPUT BUFFERS
+                updateDrawCall = updateDrawCall === updateDrawCallA ? updateDrawCallB : updateDrawCallA;
+                mainDrawCall = mainDrawCall === drawCallA ? drawCallB : drawCallA;
+
+                timer.end();
+
+                requestAnimationFrame(draw);
             }
 
-            timer.start();
-
-            // TRANSFORM FEEDBACK
-            app.noRasterize()
-            updateDrawCall.draw()
-
-            // DRAW
-            app.rasterize().clear()
-            mainDrawCall.draw();
-
-            // SWAP INPUT AND OUTPUT BUFFERS
-            updateDrawCall = updateDrawCall === updateDrawCallA ? updateDrawCallB : updateDrawCallA;
-            mainDrawCall = mainDrawCall === drawCallA ? drawCallB : drawCallA;
-
-            timer.end();
-
             requestAnimationFrame(draw);
-        }
-
-        requestAnimationFrame(draw);
+        });
 
     </script>
     <a href="https://github.com/tsherif/picogl.js" id="github-ribbon"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"></a>

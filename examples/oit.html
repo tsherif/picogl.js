@@ -289,7 +289,7 @@
         
         // USE PARALLEL SHADER COMPILATION IF AVAILABLE
         // https://www.khronos.org/registry/webgl/extensions/KHR_parallel_shader_compile/
-        app.createPrograms([accumVsSource, accumFsSource], [blendVsSource, blendFsSource]).then((ap, bp) => {
+        app.createPrograms([accumVsSource, accumFsSource], [blendVsSource, blendFsSource]).then((programs) => {
             [accumProgram, blendProgram] = programs;
 
             programsReady = true;
