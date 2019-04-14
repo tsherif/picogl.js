@@ -103,11 +103,11 @@
     <script type="text/javascript">
         utils.addTimerElement();
         
-        var canvas = document.getElementById("gl-canvas");
+        let canvas = document.getElementById("gl-canvas");
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         
-        var app = PicoGL.createApp(canvas)
+        let app = PicoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0)
         .depthTest()
         .s3tcTextures()
@@ -115,37 +115,37 @@
         .astcTextures()
         .pvrtcTextures();
 
-        var timer = app.createTimer();
+        let timer = app.createTimer();
 
         // SET UP PROGRAM
-        var vsSource =  document.getElementById("vertex-draw").text.trim();
-        var fsSource =  document.getElementById("fragment-draw").text.trim();
+        let vsSource =  document.getElementById("vertex-draw").text.trim();
+        let fsSource =  document.getElementById("fragment-draw").text.trim();
 
         // SET UP GEOMETRY
-        var box = utils.createBox({dimensions: [1.0, 1.0, 1.0]})
-        var positions = app.createVertexBuffer(PicoGL.FLOAT, 3, box.positions);
-        var uv = app.createVertexBuffer(PicoGL.FLOAT, 2, box.uvs);
-        var normals = app.createVertexBuffer(PicoGL.FLOAT, 3, box.normals);
+        let box = utils.createBox({dimensions: [1.0, 1.0, 1.0]})
+        let positions = app.createVertexBuffer(PicoGL.FLOAT, 3, box.positions);
+        let uv = app.createVertexBuffer(PicoGL.FLOAT, 2, box.uvs);
+        let normals = app.createVertexBuffer(PicoGL.FLOAT, 3, box.normals);
 
-        var boxArray = app.createVertexArray()
+        let boxArray = app.createVertexArray()
         .vertexAttributeBuffer(0, positions)
         .vertexAttributeBuffer(1, uv)
         .vertexAttributeBuffer(2, normals)
 
         // SET UP UNIFORM BUFFER
-        var projMatrix = mat4.create();
+        let projMatrix = mat4.create();
         mat4.perspective(projMatrix, Math.PI / 2, canvas.width / canvas.height, 0.1, 10.0);
 
-        var viewMatrix = mat4.create();
-        var eyePosition = vec3.fromValues(0, 0, 3);
+        let viewMatrix = mat4.create();
+        let eyePosition = vec3.fromValues(0, 0, 3);
         mat4.lookAt(viewMatrix, eyePosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
 
-        var viewProjMatrix = mat4.create();
+        let viewProjMatrix = mat4.create();
         mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
 
-        var lightPosition = vec3.fromValues(0, 0, 2);
+        let lightPosition = vec3.fromValues(0, 0, 2);
 
-        var sceneUniformBuffer = app.createUniformBuffer([
+        let sceneUniformBuffer = app.createUniformBuffer([
             PicoGL.FLOAT_MAT4,
             PicoGL.FLOAT_VEC4,
             PicoGL.FLOAT_VEC4
@@ -155,7 +155,7 @@
         .set(2, lightPosition)
         .update();
 
-        var boxes = [
+        let boxes = [
             {
                 rotation: vec3.fromValues(0, Math.random(), 0),
                 translation: vec3.fromValues(-1, 1, 0),
@@ -218,7 +218,7 @@
 
                 app.clear();
 
-                for (var i = 0, len = boxes.length; i < len; ++i) {
+                for (let i = 0, len = boxes.length; i < len; ++i) {
                     boxes[i].rotation[1] += 0.01;
 
                     utils.xformMatrix(boxes[i].modelMatrix, boxes[i].translation, boxes[i].rotation, null);
@@ -235,11 +235,11 @@
             requestAnimationFrame(draw);
         }
 
-        var program;
-        var programsReady = false;
+        let program;
+        let programsReady = false;
 
-        var s3tcTexture, etcTexture, astcTexture, pvrtcTexture;
-        var texturesReady = false;
+        let s3tcTexture, etcTexture, astcTexture, pvrtcTexture;
+        let texturesReady = false;
 
         // USE PARALLEL SHADER COMPILATION IF AVAILABLE
         // https://www.khronos.org/registry/webgl/extensions/KHR_parallel_shader_compile/
@@ -253,7 +253,7 @@
             }
         });
 
-        var texturesRequested = 4;
+        let texturesRequested = 4;
 
         function checkDone () {
             if (--texturesRequested === 0) {
@@ -267,7 +267,7 @@
 
         if (app.s3tcTexturesEnabled) {
             utils.getBinary("img/compressed/s3tc-supported-dxt1.pvr", function(data) {
-                var textureData = utils.parsePVR(data);
+                let textureData = utils.parsePVR(data);
                 s3tcTexture = app.createTexture2D(textureData.data, textureData.width, textureData.height, {
                     format: PicoGL.COMPRESSED_RGB_S3TC_DXT1_EXT
                 });
@@ -275,7 +275,7 @@
                 checkDone();
             });
         } else {
-            var s3tcImage = new Image();
+            let s3tcImage = new Image();
 
             s3tcImage.onload = function() {
                 s3tcTexture = app.createTexture2D(s3tcImage);
@@ -287,7 +287,7 @@
 
         if (app.etcTexturesEnabled) {
             utils.getBinary("img/compressed/etc-supported-etc2.pvr", function(data) {
-                var textureData = utils.parsePVR(data);
+                let textureData = utils.parsePVR(data);
                 etcTexture = app.createTexture2D(textureData.data, textureData.width, textureData.height, {
                     format: PicoGL.COMPRESSED_RGB8_ETC2
                 });
@@ -295,7 +295,7 @@
                 checkDone();
             });
         } else {
-            var etcImage = new Image();
+            let etcImage = new Image();
 
             etcImage.onload = function() {
                 etcTexture = app.createTexture2D(etcImage);
@@ -307,7 +307,7 @@
 
         if (app.astcTexturesEnabled) {
             utils.getBinary("img/compressed/astc-supported-astc.pvr", function(data) {
-                var textureData = utils.parsePVR(data);
+                let textureData = utils.parsePVR(data);
                 astcTexture = app.createTexture2D(textureData.data, textureData.width, textureData.height, {
                     format: PicoGL.COMPRESSED_RGBA_ASTC_4x4_KHR
                 });
@@ -315,7 +315,7 @@
                 checkDone();
             });
         } else {
-            var astcImage = new Image();
+            let astcImage = new Image();
 
             astcImage.onload = function() {
                 astcTexture = app.createTexture2D(astcImage);
@@ -327,7 +327,7 @@
 
         if (app.pvrtcTexturesEnabled) {
             utils.getBinary("img/compressed/pvrtc-supported-pvrtc.pvr", function(data) {
-                var textureData = utils.parsePVR(data);
+                let textureData = utils.parsePVR(data);
                 pvrtcTexture = app.createTexture2D(textureData.data, textureData.width, textureData.height, {
                     format: PicoGL.COMPRESSED_RGB_PVRTC_4BPPV1_IMG
                 });
@@ -335,7 +335,7 @@
                 checkDone();
             });
         } else {
-            var pvrtcImage = new Image();
+            let pvrtcImage = new Image();
 
             pvrtcImage.onload = function() {
                 pvrtcTexture = app.createTexture2D(pvrtcImage);

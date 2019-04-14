@@ -215,20 +215,20 @@
     <script>
         utils.addTimerElement();   
         
-        var bloomEnabled = true;
+        let bloomEnabled = true;
 
         document.getElementById("bloom-toggle").addEventListener("change", function() {
             bloomEnabled = this.checked;
         });
 
-        var canvas = document.getElementById("gl-canvas");
+        let canvas = document.getElementById("gl-canvas");
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
-        var hTexelOffset = new Int32Array([1, 0]);
-        var vTexelOffset = new Int32Array([0, 1]);
+        let hTexelOffset = new Int32Array([1, 0]);
+        let vTexelOffset = new Int32Array([0, 1]);
 
-        var app = PicoGL.createApp(canvas)
+        let app = PicoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0)
         .depthTest()
         .floatRenderTargets();
@@ -237,69 +237,69 @@
             document.body.innerHTML = "This example requires extension EXT_color_buffer_float which is not supported on this system."
         }
 
-        var timer = app.createTimer();
+        let timer = app.createTimer();
 
-        var resolution = new Int32Array([app.width, app.height]);
+        let resolution = new Int32Array([app.width, app.height]);
 
         // SET UP PROGRAMS
 
-        var cubeVsSource =  document.getElementById("vertex-cube").text.trim();
-        var cubeFsSource =  document.getElementById("fragment-cube").text.trim();
+        let cubeVsSource =  document.getElementById("vertex-cube").text.trim();
+        let cubeFsSource =  document.getElementById("fragment-cube").text.trim();
 
-        var sunVsSource =  document.getElementById("vertex-sun").text.trim();
-        var sunFsSource =  document.getElementById("fragment-sun").text.trim();
+        let sunVsSource =  document.getElementById("vertex-sun").text.trim();
+        let sunFsSource =  document.getElementById("fragment-sun").text.trim();
 
-        var quadVsSource =  document.getElementById("vertex-quad").text.trim();
-        var quadVertexShader = app.createShader(PicoGL.VERTEX_SHADER, quadVsSource);
+        let quadVsSource =  document.getElementById("vertex-quad").text.trim();
+        let quadVertexShader = app.createShader(PicoGL.VERTEX_SHADER, quadVsSource);
 
-        var blurFsSource =  document.getElementById("fragment-blur").text.trim();
+        let blurFsSource =  document.getElementById("fragment-blur").text.trim();
 
-        var blendFsSource =  document.getElementById("fragment-blend").text.trim();
+        let blendFsSource =  document.getElementById("fragment-blend").text.trim();
  
         // SET UP FRAMEBUFFERS AND TEXTURES
 
-        var colorTarget1 = app.createTexture2D(null, app.width, app.height, { type: PicoGL.FLOAT });
-        var colorTarget2 = app.createTexture2D(null, app.width, app.height, { type: PicoGL.FLOAT });
-        var depthTarget = app.createRenderbuffer(app.width, app.height, PicoGL.DEPTH_COMPONENT16 );
+        let colorTarget1 = app.createTexture2D(null, app.width, app.height, { type: PicoGL.FLOAT });
+        let colorTarget2 = app.createTexture2D(null, app.width, app.height, { type: PicoGL.FLOAT });
+        let depthTarget = app.createRenderbuffer(app.width, app.height, PicoGL.DEPTH_COMPONENT16 );
 
-        var colorBuffer = app.createFramebuffer()
+        let colorBuffer = app.createFramebuffer()
         .colorTarget(0, colorTarget1)
         .colorTarget(1, colorTarget2)
         .depthTarget(depthTarget);
         
-        var blurTarget = app.createTexture2D(null, app.width, app.height, { type: PicoGL.FLOAT });
+        let blurTarget = app.createTexture2D(null, app.width, app.height, { type: PicoGL.FLOAT });
         
-        var blurBuffer = app.createFramebuffer()
+        let blurBuffer = app.createFramebuffer()
         .colorTarget(0, blurTarget);
         
-        var bloomTarget = app.createTexture2D(null, app.width, app.height, { type: PicoGL.FLOAT });
+        let bloomTarget = app.createTexture2D(null, app.width, app.height, { type: PicoGL.FLOAT });
 
-        var bloomBuffer = app.createFramebuffer()
+        let bloomBuffer = app.createFramebuffer()
         .colorTarget(0, bloomTarget);
 
-        var blankTexture = app.createTexture2D(null, 1, 1);
+        let blankTexture = app.createTexture2D(null, 1, 1);
 
         // SET UP GEOMETRY
 
-        var cube = utils.createBox({dimensions: [1.0, 1.0, 1.0]})
-        var cubePositions = app.createVertexBuffer(PicoGL.FLOAT, 3, cube.positions);
-        var cubeUVs = app.createVertexBuffer(PicoGL.FLOAT, 2, cube.uvs);
-        var cubeNormals = app.createVertexBuffer(PicoGL.FLOAT, 3, cube.normals);
+        let cubeData = utils.createBox({dimensions: [1.0, 1.0, 1.0]})
+        let cubePositions = app.createVertexBuffer(PicoGL.FLOAT, 3, cubeData.positions);
+        let cubeUVs = app.createVertexBuffer(PicoGL.FLOAT, 2, cubeData.uvs);
+        let cubeNormals = app.createVertexBuffer(PicoGL.FLOAT, 3, cubeData.normals);
 
-        var cubeArray = app.createVertexArray()
+        let cubeArray = app.createVertexArray()
         .vertexAttributeBuffer(0, cubePositions)
         .vertexAttributeBuffer(1, cubeUVs)
         .vertexAttributeBuffer(2, cubeNormals);
 
-        var sun = utils.createSphere({radius: 0.1});
-        var sunPositions = app.createVertexBuffer(PicoGL.FLOAT, 3, sun.positions);
-        var sunIndices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, sun.indices);
+        let sun = utils.createSphere({radius: 0.1});
+        let sunPositions = app.createVertexBuffer(PicoGL.FLOAT, 3, sun.positions);
+        let sunIndices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, sun.indices);
 
-        var sunArray = app.createVertexArray()
+        let sunArray = app.createVertexArray()
         .vertexAttributeBuffer(0, sunPositions)
         .indexBuffer(sunIndices);
 
-        var quadPositions = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
+        let quadPositions = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
             -1, 1,
             -1, -1,
             1, -1,
@@ -308,28 +308,28 @@
             1, 1,
         ]));
 
-        var quadArray = app.createVertexArray().vertexAttributeBuffer(0, quadPositions);
+        let quadArray = app.createVertexArray().vertexAttributeBuffer(0, quadPositions);
 
 
         // SET UP OTHER DATA
 
-        var projMatrix = mat4.create();
+        let projMatrix = mat4.create();
         mat4.perspective(projMatrix, Math.PI / 2, app.width / app.height, 0.1, 10.0);
 
-        var viewMatrix = mat4.create();
-        var eyePosition = vec3.fromValues(1, 1, 1);
+        let viewMatrix = mat4.create();
+        let eyePosition = vec3.fromValues(1, 1, 1);
         mat4.lookAt(viewMatrix, eyePosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
 
-        var viewProjMatrix = mat4.create();
+        let viewProjMatrix = mat4.create();
         mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
 
-        var cube = {
+        let cube = {
             rotation: vec3.create(),
             modelMatrix: mat4.create(),
             mvpMatrix: mat4.create()
         };
 
-        var suns = [
+        let suns = [
             {
                 position: vec3.fromValues(0.7, 0.75, 0.3),
                 color: vec3.fromValues(1, 1, 1),
@@ -365,7 +365,7 @@
         .set(1, suns[1].color)
         .update();
 
-        var sceneUniforms = app.createUniformBuffer([
+        let sceneUniforms = app.createUniformBuffer([
             PicoGL.FLOAT_VEC4,
             PicoGL.FLOAT_MAT4,
             PicoGL.FLOAT_VEC4,
@@ -381,73 +381,47 @@
         .set(5, suns[1].color)
         .update();
 
-        var texture;
-        var textureReady = false;
-
-        utils.loadImages(["img/webgl-logo.png"], function(images) {
-            // CREATE TEXTURE
-            texture = app.createTexture2D(images[0], { flipY: true });
-           
-           textureReady = true;
-
-           if (programsReady) {
-               requestAnimationFrame(start);
-           } 
-        });
-
-        var cubeProgram;
-        var sunProgram;
-        var blurProgram;
-        var blendProgram;
-        var programsReady = false;
-
-        // USE PARALLEL SHADER COMPILATION IF AVAILABLE
-        // https://www.khronos.org/registry/webgl/extensions/KHR_parallel_shader_compile/
-        app.createPrograms(
-            [cubeVsSource, cubeFsSource],
-            [sunVsSource, sunFsSource],
-            [quadVertexShader, blurFsSource],
-            [quadVertexShader, blendFsSource],
-        ).then((programs) => {
-            [cubeProgram, sunProgram, blurProgram, blendProgram] = programs;
-
-            programsReady = true;
+        Promise.all([
+            app.createPrograms(
+                [cubeVsSource, cubeFsSource],
+                [sunVsSource, sunFsSource],
+                [quadVertexShader, blurFsSource],
+                [quadVertexShader, blendFsSource],
+            ),
+            utils.loadImages(["img/webgl-logo.png"])
+        ]).then(([[cubeProgram, sunProgram, blurProgram, blendProgram], [image]]) => {
             quadVertexShader.delete();
+            
+            let texture = app.createTexture2D(image, { flipY: true });
 
-            if (textureReady) {
-                requestAnimationFrame(start);
-            }
-        });
-
-        function start() {
             // PREPARE DRAW CALLS
-            var drawCall = app.createDrawCall(cubeProgram, cubeArray)
+            let drawCall = app.createDrawCall(cubeProgram, cubeArray)
             .uniformBlock("SceneUniforms", sceneUniforms)
             .texture("tex", texture);
 
-            var sunDrawCall = app.createDrawCall(sunProgram, sunArray)
+            let sunDrawCall = app.createDrawCall(sunProgram, sunArray)
             .uniformBlock("SunUniforms", suns[0].uniforms);
 
-            var sun2DrawCall = app.createDrawCall(sunProgram, sunArray)
+            let sun2DrawCall = app.createDrawCall(sunProgram, sunArray)
             .uniformBlock("SunUniforms", suns[1].uniforms);
             
-            var hBlurDrawCall = app.createDrawCall(blurProgram, quadArray)
+            let hBlurDrawCall = app.createDrawCall(blurProgram, quadArray)
             .uniform("uTexelOffset", hTexelOffset)
             .texture("uTexture", colorBuffer.colorAttachments[1]);
 
-            var vBlurDrawCall = app.createDrawCall(blurProgram, quadArray)
+            let vBlurDrawCall = app.createDrawCall(blurProgram, quadArray)
             .uniform("uTexelOffset", vTexelOffset)
             .texture("uTexture", blurBuffer.colorAttachments[0]);
 
-            var blendDrawCall = app.createDrawCall(blendProgram, quadArray)
+            let blendDrawCall = app.createDrawCall(blendProgram, quadArray)
             .texture("uColor", colorBuffer.colorAttachments[0])
             .texture("uBloom", bloomBuffer.colorAttachments[0]);
 
             // TEXTURES FOR PING PONGING THE BLUR
-            var blurTextureA = colorBuffer.colorAttachments[1];
-            var blurTextureB = bloomBuffer.colorAttachments[0];
-            var blurReadTexture = blurTextureA;
-            var blurWriteTexture = blurTextureB;
+            let blurTextureA = colorBuffer.colorAttachments[1];
+            let blurTextureB = bloomBuffer.colorAttachments[0];
+            let blurReadTexture = blurTextureA;
+            let blurWriteTexture = blurTextureB;
 
             window.onresize = function() {
                 app.resize(window.innerWidth, window.innerHeight);
@@ -492,7 +466,7 @@
                 sun2DrawCall.draw();
 
                 if (bloomEnabled) {
-                    for (var i = 0; i < 4; ++i) {
+                    for (let i = 0; i < 4; ++i) {
                         hBlurDrawCall.texture("uTexture", blurReadTexture);
                         bloomBuffer.colorTarget(0, blurWriteTexture);
 
@@ -527,7 +501,7 @@
             }
 
             requestAnimationFrame(draw);
-        }
+        });
 
     </script>
     <a href="https://github.com/tsherif/picogl.js" id="github-ribbon"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"></a>

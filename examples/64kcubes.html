@@ -103,52 +103,52 @@
     <script type="text/javascript">
         utils.addTimerElement();
         
-        var BOX_GRID_DIM = 40;
-        var NUM_BOXES = BOX_GRID_DIM * BOX_GRID_DIM * BOX_GRID_DIM;
-        var NEAR = 0.1;
-        var FAR = 100.0;
+        const BOX_GRID_DIM = 40;
+        const NUM_BOXES = BOX_GRID_DIM * BOX_GRID_DIM * BOX_GRID_DIM;
+        const NEAR = 0.1;
+        const FAR = 100.0;
 
-        var canvas = document.getElementById("gl-canvas");
+        let canvas = document.getElementById("gl-canvas");
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         
-        var app = PicoGL.createApp(canvas)
+        let app = PicoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0)
         .depthTest()
         .depthFunc(PicoGL.LEQUAL)
         .cullBackfaces();
 
-        var timer = app.createTimer();
+        let timer = app.createTimer();
 
         // SET UP PROGRAM
-        var vsSource =  document.getElementById("vertex-draw").text.trim();
-        var fsSource =  document.getElementById("fragment-draw").text.trim();
+        let vsSource =  document.getElementById("vertex-draw").text.trim();
+        let fsSource =  document.getElementById("fragment-draw").text.trim();
 
         // INSTANCED CUBE GEOMETRY
-        var box = utils.createBox({dimensions: [0.5, 0.5, 0.5]})
-        var positions = app.createVertexBuffer(PicoGL.FLOAT, 3, box.positions);
-        var uv = app.createVertexBuffer(PicoGL.FLOAT, 2, box.uvs);
-        var normals = app.createVertexBuffer(PicoGL.FLOAT, 3, box.normals);
+        let box = utils.createBox({dimensions: [0.5, 0.5, 0.5]})
+        let positions = app.createVertexBuffer(PicoGL.FLOAT, 3, box.positions);
+        let uv = app.createVertexBuffer(PicoGL.FLOAT, 2, box.uvs);
+        let normals = app.createVertexBuffer(PicoGL.FLOAT, 3, box.normals);
 
-        var modelMatrixData = new Float32Array(NUM_BOXES * 16);
-        var modelMatrices = app.createMatrixBuffer(PicoGL.FLOAT_MAT4, modelMatrixData);
+        let modelMatrixData = new Float32Array(NUM_BOXES * 16);
+        let modelMatrices = app.createMatrixBuffer(PicoGL.FLOAT_MAT4, modelMatrixData);
 
-        var boxArray = app.createVertexArray()
+        let boxArray = app.createVertexArray()
         .vertexAttributeBuffer(0, positions)
         .vertexAttributeBuffer(1, uv)
         .vertexAttributeBuffer(2, normals)
         .instanceAttributeBuffer(3, modelMatrices)
 
         // SET UP UNIFORM BUFFER
-        var projMatrix = mat4.create();
+        let projMatrix = mat4.create();
         mat4.perspective(projMatrix, Math.PI / 2, canvas.width / canvas.height, NEAR, FAR);
 
-        var viewMatrix = mat4.create();
-        var eyePosition = vec3.fromValues(0, 22, 0);
-        var viewProjMatrix = mat4.create();
-        var lightPosition = vec3.create();
+        let viewMatrix = mat4.create();
+        let eyePosition = vec3.fromValues(0, 22, 0);
+        let viewProjMatrix = mat4.create();
+        let lightPosition = vec3.create();
 
-        var sceneUniformBuffer = app.createUniformBuffer([
+        let sceneUniformBuffer = app.createUniformBuffer([
             PicoGL.FLOAT_MAT4,
             PicoGL.FLOAT_VEC4,
             PicoGL.FLOAT_VEC4
@@ -163,50 +163,26 @@
             sceneUniformBuffer.set(0, viewProjMatrix).update();
         }
 
-        var texture;
-        var textureReady = false;
-        var program;
-        var programReady = false;
+        Promise.all([
+            app.createPrograms([vsSource, fsSource]),
+            utils.loadImages(["img/webgl-logo.png"])
+        ]).then(([[program], [image]]) => {
+            let texture = app.createTexture2D(image, { flipY: true });
 
-
-        utils.loadImages(["img/webgl-logo.png"], function(images) {
-            // CREATE TEXTURE
-            texture = app.createTexture2D(images[0], { flipY: true });
-            
-            textureReady = true;
-
-            if (programReady) {
-                requestAnimationFrame(start);
-            }
-        });
-
-        // USE PARALLEL SHADER COMPILATION IF AVAILABLE
-        // https://www.khronos.org/registry/webgl/extensions/KHR_parallel_shader_compile/
-        app.createPrograms([vsSource, fsSource]).then(([p]) => {
-            program = p;
-
-            programReady = true;
-
-            if (textureReady) {
-                requestAnimationFrame(start);
-            }
-        });
-
-        function start() {
             // SINGLE DRAW CALL FOR ALL BOXES
-            var boxes = new Array(NUM_BOXES);
-            var boxesDrawCall = app.createDrawCall(program, boxArray)
+            let boxes = new Array(NUM_BOXES);
+            let boxesDrawCall = app.createDrawCall(program, boxArray)
             .uniformBlock("SceneUniforms", sceneUniformBuffer)
             .texture("uTexture", texture);
 
-            var rotationAxis = vec3.fromValues(1, 1, 1);
+            let rotationAxis = vec3.fromValues(1, 1, 1);
             vec3.normalize(rotationAxis, rotationAxis);
 
-            var boxI = 0;
-            var offset = -Math.floor(BOX_GRID_DIM / 2);
-            for (var i = 0; i < BOX_GRID_DIM; ++i) {
-                for (var j = 0; j < BOX_GRID_DIM; ++j) {
-                    for (var k = 0; k < BOX_GRID_DIM; ++k) {
+            let boxI = 0;
+            let offset = -Math.floor(BOX_GRID_DIM / 2);
+            for (let i = 0; i < BOX_GRID_DIM; ++i) {
+                for (let j = 0; j < BOX_GRID_DIM; ++j) {
+                    for (let k = 0; k < BOX_GRID_DIM; ++k) {
                         boxes[boxI] = {
                             rotate: boxI / Math.PI,
                             rotationMatrix: mat4.create(),
@@ -222,8 +198,8 @@
                 }
             }
 
-            var eyeRadius = 30;
-            var eyeRotation = 0;
+            let eyeRadius = 30;
+            let eyeRotation = 0;
             function draw() {
                 if (timer.ready()) {
                     utils.updateTimerElement(timer.cpuTime, timer.gpuTime);
@@ -247,8 +223,8 @@
                 .set(2, lightPosition)
                 .update();
 
-                for (var i = 0, len = boxes.length; i < len; ++i) {
-                    var box = boxes[i];
+                for (let i = 0, len = boxes.length; i < len; ++i) {
+                    let box = boxes[i];
 
                     mat4.rotate(box.rotationMatrix, box.rotationMatrix, 0.02, rotationAxis);
                     mat4.multiply(box.modelMatrix, box.translationMatrix, box.rotationMatrix)
@@ -264,7 +240,7 @@
             }
 
             requestAnimationFrame(draw);
-        }
+        });
 
     </script>
     <a href="https://github.com/tsherif/picogl.js" id="github-ribbon"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"></a>

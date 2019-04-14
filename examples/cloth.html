@@ -318,103 +318,103 @@
             document.body.innerHTML = "This example requires extension EXT_color_buffer_float which is not supported on this system."
         }
         
-        var canvas = document.getElementById("gl-canvas");
+        let canvas = document.getElementById("gl-canvas");
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         
-        var app = PicoGL.createApp(canvas)
+        let app = PicoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0)
         .depthTest()
         .floatRenderTargets();
 
-        var timer = app.createTimer();
+        let timer = app.createTimer();
 
-        var CONSTRAINT_ITERATIONS = 20;
-        var DATA_TEXTURE_DIM = 60;
-        var NUM_PARTICLES = DATA_TEXTURE_DIM * DATA_TEXTURE_DIM;
-        var STRUCTURAL_REST = 1 / DATA_TEXTURE_DIM;
-        var SHEAR_REST = Math.sqrt(2 * STRUCTURAL_REST * STRUCTURAL_REST);
-        var BALL_RADIUS = 0.15;
-        var BALL_SPEED = 0.004;    
-        var BALL_RANGE = 0.9;
+        const CONSTRAINT_ITERATIONS = 20;
+        const DATA_TEXTURE_DIM = 60;
+        const NUM_PARTICLES = DATA_TEXTURE_DIM * DATA_TEXTURE_DIM;
+        const STRUCTURAL_REST = 1 / DATA_TEXTURE_DIM;
+        const SHEAR_REST = Math.sqrt(2 * STRUCTURAL_REST * STRUCTURAL_REST);
+        const BALL_RADIUS = 0.15;
+        const BALL_SPEED = 0.004;    
+        const BALL_RANGE = 0.9;
 
         ///////////////////
         // PROGRAMS
         ///////////////////
 
         // Generic quad vertex shader
-        var quadVsSource = document.getElementById("quad-vs").text.trim();
-        var quadShader = app.createShader(PicoGL.VERTEX_SHADER, quadVsSource);
+        let quadVsSource = document.getElementById("quad-vs").text.trim();
+        let quadShader = app.createShader(PicoGL.VERTEX_SHADER, quadVsSource);
 
         // Update wind and gravity forces
-        var updateForceFsSource = document.getElementById("update-force-fs").text.trim();
+        let updateForceFsSource = document.getElementById("update-force-fs").text.trim();
 
         // Apply structural and shear constraints
-        var updateConstraintFsSource = document.getElementById("update-constraint-fs").text.trim();
+        let updateConstraintFsSource = document.getElementById("update-constraint-fs").text.trim();
 
         // Check for collision with ball
-        var updateCollisionFsSource = document.getElementById("update-collision-fs").text.trim();
+        let updateCollisionFsSource = document.getElementById("update-collision-fs").text.trim();
         // Calculate normals
-        var updateNormalFsSource = document.getElementById("update-normal-fs").text.trim();
+        let updateNormalFsSource = document.getElementById("update-normal-fs").text.trim();
         
 
         // Generic phong shader used for drawing
-        var phongSource = document.getElementById("phong-fs").text.trim();
-        var phongShader = app.createShader(PicoGL.FRAGMENT_SHADER, phongSource);
+        let phongSource = document.getElementById("phong-fs").text.trim();
+        let phongShader = app.createShader(PicoGL.FRAGMENT_SHADER, phongSource);
 
         // Draw ball
-        var ballVsSource = document.getElementById("ball-vs").text.trim();
+        let ballVsSource = document.getElementById("ball-vs").text.trim();
 
         // Draw cloth
-        var clothVsSource = document.getElementById("cloth-vs").text.trim();
+        let clothVsSource = document.getElementById("cloth-vs").text.trim();
 
         ////////////////////
         // FRAME BUFFERS
         ////////////////////
 
         // Store results of force update
-        var forceTarget1 = app.createTexture2D(DATA_TEXTURE_DIM, DATA_TEXTURE_DIM, { 
+        let forceTarget1 = app.createTexture2D(DATA_TEXTURE_DIM, DATA_TEXTURE_DIM, { 
             type: PicoGL.FLOAT,
             internalFormat: PicoGL.RGBA32F
         });
-        var forceTarget2 = app.createTexture2D(DATA_TEXTURE_DIM, DATA_TEXTURE_DIM, { 
+        let forceTarget2 = app.createTexture2D(DATA_TEXTURE_DIM, DATA_TEXTURE_DIM, { 
             type: PicoGL.FLOAT,
             internalFormat: PicoGL.RGBA32F
         });
 
-        var updateForceFramebuffer = app.createFramebuffer(DATA_TEXTURE_DIM, DATA_TEXTURE_DIM)
+        let updateForceFramebuffer = app.createFramebuffer(DATA_TEXTURE_DIM, DATA_TEXTURE_DIM)
         .colorTarget(0, forceTarget1)
         .colorTarget(1, forceTarget2);
 
         // Results of constraint satisfaction passes
-        var updateTarget = app.createTexture2D(DATA_TEXTURE_DIM, DATA_TEXTURE_DIM, { 
+        let updateTarget = app.createTexture2D(DATA_TEXTURE_DIM, DATA_TEXTURE_DIM, { 
             type: PicoGL.FLOAT,
             internalFormat: PicoGL.RGBA32F
         });
 
-        var updateFramebuffer = app.createFramebuffer(DATA_TEXTURE_DIM, DATA_TEXTURE_DIM)
+        let updateFramebuffer = app.createFramebuffer(DATA_TEXTURE_DIM, DATA_TEXTURE_DIM)
         .colorTarget(0, updateTarget);
 
         ///////////////////////////
         // CLOTH GEOMETRY DATA
         ///////////////////////////
 
-        var clothPositionData = new Float32Array(NUM_PARTICLES * 4);
-        var clothNormalData = new Float32Array(NUM_PARTICLES * 4);
-        var uvData = new Float32Array(NUM_PARTICLES * 2);
-        var dataTextureIndex = new Int16Array(NUM_PARTICLES * 2);
-        var indexData = new Uint16Array((DATA_TEXTURE_DIM - 1) * (DATA_TEXTURE_DIM - 1) * 6);
+        let clothPositionData = new Float32Array(NUM_PARTICLES * 4);
+        let clothNormalData = new Float32Array(NUM_PARTICLES * 4);
+        let uvData = new Float32Array(NUM_PARTICLES * 2);
+        let dataTextureIndex = new Int16Array(NUM_PARTICLES * 2);
+        let indexData = new Uint16Array((DATA_TEXTURE_DIM - 1) * (DATA_TEXTURE_DIM - 1) * 6);
 
-        var indexI = 0;
-        for (var i = 0; i < NUM_PARTICLES; ++i) {
-            var vec4i = i * 4;
-            var vec2i = i * 2;
+        let indexI = 0;
+        for (let i = 0; i < NUM_PARTICLES; ++i) {
+            let vec4i = i * 4;
+            let vec2i = i * 2;
 
-            var x = (i % DATA_TEXTURE_DIM);
-            var y = Math.floor(i / DATA_TEXTURE_DIM);
+            let x = (i % DATA_TEXTURE_DIM);
+            let y = Math.floor(i / DATA_TEXTURE_DIM);
 
-            var u = x / DATA_TEXTURE_DIM;
-            var v = y / DATA_TEXTURE_DIM;
+            let u = x / DATA_TEXTURE_DIM;
+            let v = y / DATA_TEXTURE_DIM;
 
             clothPositionData[vec4i] = u - 0.5;
             clothPositionData[vec4i + 1] = v + 0.8;
@@ -442,7 +442,7 @@
         // SIM DATA TEXTURES
         ///////////////////////////
 
-        var positionTextureA = app.createTexture2D(clothPositionData, DATA_TEXTURE_DIM, DATA_TEXTURE_DIM, {
+        let positionTextureA = app.createTexture2D(clothPositionData, DATA_TEXTURE_DIM, DATA_TEXTURE_DIM, {
             format: PicoGL.RGBA,
             internalFormat: PicoGL.RGBA32F,
             type: PicoGL.FLOAT,
@@ -452,7 +452,7 @@
             wrapT: PicoGL.CLAMP_TO_EDGE
         });
 
-        var oldPositionTextureA = app.createTexture2D(clothPositionData, DATA_TEXTURE_DIM, DATA_TEXTURE_DIM, {
+        let oldPositionTextureA = app.createTexture2D(clothPositionData, DATA_TEXTURE_DIM, DATA_TEXTURE_DIM, {
             format: PicoGL.RGBA,
             internalFormat: PicoGL.RGBA32F,
             type: PicoGL.FLOAT,
@@ -462,10 +462,10 @@
             wrapT: PicoGL.CLAMP_TO_EDGE
         });
 
-        var positionTextureB = updateForceFramebuffer.colorAttachments[0];
-        var oldPositionTextureB = updateForceFramebuffer.colorAttachments[1];
+        let positionTextureB = updateForceFramebuffer.colorAttachments[0];
+        let oldPositionTextureB = updateForceFramebuffer.colorAttachments[1];
 
-        var normalTexture = app.createTexture2D(clothNormalData, DATA_TEXTURE_DIM, DATA_TEXTURE_DIM, {
+        let normalTexture = app.createTexture2D(clothNormalData, DATA_TEXTURE_DIM, DATA_TEXTURE_DIM, {
             format: PicoGL.RGBA,
             internalFormat: PicoGL.RGBA32F,
             type: PicoGL.FLOAT,
@@ -480,7 +480,7 @@
         /////////////////////////
         
         // Quad for simulation passes
-        var quadPositions = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
+        let quadPositions = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
             -1, 1,
             -1, -1,
             1, -1,
@@ -489,26 +489,26 @@
             1, 1,
         ]));
 
-        var quadArray = app.createVertexArray()
+        let quadArray = app.createVertexArray()
         .vertexAttributeBuffer(0, quadPositions);
 
         // Cloth geometry for drawing
-        var dataIndex = app.createVertexBuffer(PicoGL.SHORT, 2, dataTextureIndex);
-        var uv = app.createVertexBuffer(PicoGL.FLOAT, 2, uvData);
-        var indices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, indexData);
+        let dataIndex = app.createVertexBuffer(PicoGL.SHORT, 2, dataTextureIndex);
+        let uv = app.createVertexBuffer(PicoGL.FLOAT, 2, uvData);
+        let indices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, indexData);
 
-        var clothArray = app.createVertexArray()
+        let clothArray = app.createVertexArray()
         .vertexAttributeBuffer(0, dataIndex)
         .vertexAttributeBuffer(1, uv)
         .indexBuffer(indices);
 
         // Ball geometry
-        var ballGeo = utils.createSphere({radius: BALL_RADIUS});
-        var ballPositions = app.createVertexBuffer(PicoGL.FLOAT, 3, ballGeo.positions);
-        var ballNormals = app.createVertexBuffer(PicoGL.FLOAT, 3, ballGeo.normals);
-        var ballIndices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, ballGeo.indices);
+        let ballGeo = utils.createSphere({radius: BALL_RADIUS});
+        let ballPositions = app.createVertexBuffer(PicoGL.FLOAT, 3, ballGeo.positions);
+        let ballNormals = app.createVertexBuffer(PicoGL.FLOAT, 3, ballGeo.normals);
+        let ballIndices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, ballGeo.indices);
 
-        var ballArray = app.createVertexArray()
+        let ballArray = app.createVertexArray()
         .vertexAttributeBuffer(0, ballPositions)
         .vertexAttributeBuffer(1, ballNormals)
         .indexBuffer(ballIndices);
@@ -519,7 +519,7 @@
         ////////////////
 
         // Constraint uniforms
-        var updateHorizontal1Uniforms = app.createUniformBuffer([
+        let updateHorizontal1Uniforms = app.createUniformBuffer([
             PicoGL.INT_VEC2,
             PicoGL.INT,
             PicoGL.FLOAT
@@ -529,7 +529,7 @@
         .set(2, STRUCTURAL_REST)
         .update();
 
-        var updateHorizontal2Uniforms = app.createUniformBuffer([
+        let updateHorizontal2Uniforms = app.createUniformBuffer([
             PicoGL.INT_VEC2,
             PicoGL.INT,
             PicoGL.FLOAT
@@ -539,7 +539,7 @@
         .set(2, STRUCTURAL_REST)
         .update();
 
-        var updateVertical1Uniforms = app.createUniformBuffer([
+        let updateVertical1Uniforms = app.createUniformBuffer([
             PicoGL.INT_VEC2,
             PicoGL.INT,
             PicoGL.FLOAT
@@ -549,7 +549,7 @@
         .set(2, STRUCTURAL_REST)
         .update();
 
-        var updateVertical2Uniforms = app.createUniformBuffer([
+        let updateVertical2Uniforms = app.createUniformBuffer([
             PicoGL.INT_VEC2,
             PicoGL.INT,
             PicoGL.FLOAT
@@ -559,7 +559,7 @@
         .set(2, STRUCTURAL_REST)
         .update();
 
-        var updateShear1Uniforms = app.createUniformBuffer([
+        let updateShear1Uniforms = app.createUniformBuffer([
             PicoGL.INT_VEC2,
             PicoGL.INT,
             PicoGL.FLOAT
@@ -569,7 +569,7 @@
         .set(2, SHEAR_REST)
         .update();
 
-        var updateShear2Uniforms = app.createUniformBuffer([
+        let updateShear2Uniforms = app.createUniformBuffer([
             PicoGL.INT_VEC2,
             PicoGL.INT,
             PicoGL.FLOAT
@@ -579,7 +579,7 @@
         .set(2, SHEAR_REST)
         .update();
 
-        var updateShear3Uniforms = app.createUniformBuffer([
+        let updateShear3Uniforms = app.createUniformBuffer([
             PicoGL.INT_VEC2,
             PicoGL.INT,
             PicoGL.FLOAT
@@ -589,7 +589,7 @@
         .set(2, SHEAR_REST)
         .update();
 
-        var updateShear4Uniforms = app.createUniformBuffer([
+        let updateShear4Uniforms = app.createUniformBuffer([
             PicoGL.INT_VEC2,
             PicoGL.INT,
             PicoGL.FLOAT
@@ -600,8 +600,8 @@
         .update();
 
         // Draw uniforms
-        var ballPosition = vec3.fromValues(0, 0.15, -0.8);
-        var ballUniforms = app.createUniformBuffer([
+        let ballPosition = vec3.fromValues(0, 0.15, -0.8);
+        let ballUniforms = app.createUniformBuffer([
             PicoGL.FLOAT_VEC4,
             PicoGL.FLOAT
         ])
@@ -609,22 +609,22 @@
         .set(1, BALL_RADIUS)
         .update();
         
-        var ballColor = new Uint8Array([255, 20, 20]);
-        var ballTexture = app.createTexture2D(ballColor, 1, 1, { format: PicoGL.RGB });
+        let ballColor = new Uint8Array([255, 20, 20]);
+        let ballTexture = app.createTexture2D(ballColor, 1, 1, { format: PicoGL.RGB });
 
-        var projMatrix = mat4.create();
+        let projMatrix = mat4.create();
         mat4.perspective(projMatrix, Math.PI / 2, canvas.width / canvas.height, 0.1, 3.0);
 
-        var viewMatrix = mat4.create();
-        var eyePosition = vec3.fromValues(0.5, 0.7, 1.2);
+        let viewMatrix = mat4.create();
+        let eyePosition = vec3.fromValues(0.5, 0.7, 1.2);
         mat4.lookAt(viewMatrix, eyePosition, vec3.fromValues(0, 0.1, 0), vec3.fromValues(0, 1, 0));
 
-        var viewProjMatrix = mat4.create();
+        let viewProjMatrix = mat4.create();
         mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
 
-        var lightPosition = vec3.fromValues(1, 1, 1);
+        let lightPosition = vec3.fromValues(1, 1, 1);
 
-        var sceneUniformBuffer = app.createUniformBuffer([
+        let sceneUniformBuffer = app.createUniformBuffer([
             PicoGL.FLOAT_MAT4,
             PicoGL.FLOAT_VEC4
         ])
@@ -642,40 +642,26 @@
         };
 
 
-        var targetZ = null;
-        var targetY = null;
+        let targetZ = null;
+        let targetY = null;
         canvas.addEventListener("mousemove", function(event) {
             targetZ = -((event.clientX / canvas.width) * 2 - 1);
             targetY = ((canvas.height - event.clientY) / canvas.height) * 2 - 1;
         });
 
-        var updateForceProgram;
-        var updateConstraintProgram;
-        var updateCollisionProgram;
-        var updateNormalProgram;
-        var ballProgram;
-        var clothProgram;
+        let updateForceProgram;
+        let updateConstraintProgram;
+        let updateCollisionProgram;
+        let updateNormalProgram;
+        let ballProgram;
+        let clothProgram;
 
-        var programsReady = false;
+        let programsReady = false;
 
         // USE PARALLEL SHADER COMPILATION IF AVAILABLE
         // https://www.khronos.org/registry/webgl/extensions/KHR_parallel_shader_compile/
-        app.createPrograms(
-            [quadShader, updateForceFsSource],
-            [quadShader, updateConstraintFsSource],
-            [quadShader, updateCollisionFsSource],
-            [quadShader, updateNormalFsSource],
-            [ballVsSource, phongShader],
-            [clothVsSource, phongShader]
-        ).then((programs) => {
-            [
-                updateForceProgram,
-                updateConstraintProgram,
-                updateCollisionProgram,
-                updateNormalProgram,
-                ballProgram,
-                clothProgram
-            ] = programs;
+        .then((programs) => {
+             = programs;
 
             programsReady = true;
 
@@ -684,13 +670,12 @@
             }
         });
 
-        var texture;
-        var textureReady = false;
+        let texture;
+        let textureReady = false;
 
         
-        utils.loadImages(["img/webgl-logo.png"], function(images) {
+        , function(images) {
             // CREATE TEXTURE
-            texture = app.createTexture2D(images[0]);
 
             textureReady = true;
 
@@ -699,53 +684,68 @@
             }
         });
 
-        function start() {
+        Promise.all([
+            app.createPrograms(
+                [quadShader, updateForceFsSource],
+                [quadShader, updateConstraintFsSource],
+                [quadShader, updateCollisionFsSource],
+                [quadShader, updateNormalFsSource],
+                [ballVsSource, phongShader],
+                [clothVsSource, phongShader]
+            ),
+            utils.loadImages(["img/webgl-logo.png"])
+        ]).then(([
+            [updateForceProgram, updateConstraintProgram, updateCollisionProgram, updateNormalProgram, ballProgram, clothProgram]
+            [image]
+        ]) => {
+            let texture = app.createTexture2D(image);
+            
             ///////////////
             // DRAW CALLS
             ///////////////
 
             // Update forces
-            var updateForceDrawCall = app.createDrawCall(updateForceProgram, quadArray)
+            let updateForceDrawCall = app.createDrawCall(updateForceProgram, quadArray)
             .texture("uPositionBuffer", positionTextureA)
             .texture("uNormalBuffer", normalTexture);
 
             // Structural constraints
-            var updateHorizontal1DrawCall = app.createDrawCall(updateConstraintProgram, quadArray)
+            let updateHorizontal1DrawCall = app.createDrawCall(updateConstraintProgram, quadArray)
             .uniformBlock("ConstraintUniforms", updateHorizontal1Uniforms);
 
-            var updateHorizontal2DrawCall  = app.createDrawCall(updateConstraintProgram, quadArray)
+            let updateHorizontal2DrawCall  = app.createDrawCall(updateConstraintProgram, quadArray)
             .uniformBlock("ConstraintUniforms", updateHorizontal2Uniforms);
 
-            var updateVertical1DrawCall = app.createDrawCall(updateConstraintProgram, quadArray)
+            let updateVertical1DrawCall = app.createDrawCall(updateConstraintProgram, quadArray)
             .uniformBlock("ConstraintUniforms", updateVertical1Uniforms);
 
-            var updateVertical2DrawCall = app.createDrawCall(updateConstraintProgram, quadArray)
+            let updateVertical2DrawCall = app.createDrawCall(updateConstraintProgram, quadArray)
             .uniformBlock("ConstraintUniforms", updateVertical2Uniforms);
 
             // Shear constraints
-            var updateShear1DrawCall = app.createDrawCall(updateConstraintProgram, quadArray)
+            let updateShear1DrawCall = app.createDrawCall(updateConstraintProgram, quadArray)
             .uniformBlock("ConstraintUniforms", updateShear1Uniforms);
 
-            var updateShear2DrawCall = app.createDrawCall(updateConstraintProgram, quadArray)
+            let updateShear2DrawCall = app.createDrawCall(updateConstraintProgram, quadArray)
             .uniformBlock("ConstraintUniforms", updateShear2Uniforms);
 
-            var updateShear3DrawCall = app.createDrawCall(updateConstraintProgram, quadArray)
+            let updateShear3DrawCall = app.createDrawCall(updateConstraintProgram, quadArray)
             .uniformBlock("ConstraintUniforms", updateShear3Uniforms);
 
-            var updateShear4DrawCall = app.createDrawCall(updateConstraintProgram, quadArray)
+            let updateShear4DrawCall = app.createDrawCall(updateConstraintProgram, quadArray)
             .uniformBlock("ConstraintUniforms", updateShear4Uniforms);
 
-            var updateCollisionDrawCall = app.createDrawCall(updateCollisionProgram, quadArray)
+            let updateCollisionDrawCall = app.createDrawCall(updateCollisionProgram, quadArray)
             .uniformBlock("BallUniforms", ballUniforms);
 
-            var updateNormalDrawCall = app.createDrawCall(updateNormalProgram, quadArray);
+            let updateNormalDrawCall = app.createDrawCall(updateNormalProgram, quadArray);
 
-            var clothDrawCall = app.createDrawCall(clothProgram, clothArray)
+            let clothDrawCall = app.createDrawCall(clothProgram, clothArray)
             .uniformBlock("SceneUniforms", sceneUniformBuffer)
             .texture("uDiffuse", texture)
             .texture("uNormalBuffer", normalTexture);
             
-            var ballDrawCall = app.createDrawCall(ballProgram, ballArray)
+            let ballDrawCall = app.createDrawCall(ballProgram, ballArray)
             .uniformBlock("SceneUniforms", sceneUniformBuffer)
             .uniformBlock("BallUniforms", ballUniforms)
             .texture("uDiffuse", ballTexture);
@@ -771,7 +771,7 @@
                 app.drawFramebuffer(updateForceFramebuffer);
                 updateForceDrawCall.draw();
 
-                for (var i = 0; i < CONSTRAINT_ITERATIONS; ++i) {
+                for (let i = 0; i < CONSTRAINT_ITERATIONS; ++i) {
                     app.drawFramebuffer(updateFramebuffer);
 
                     updateFramebuffer.colorTarget(0, positionTextureA);
@@ -808,8 +808,8 @@
 
                     ballUniforms.set(0, ballPosition).update();
                 } else {
-                    var zDiff = targetZ - ballPosition[2];
-                    var yDiff = targetY - ballPosition[1];
+                    let zDiff = targetZ - ballPosition[2];
+                    let yDiff = targetY - ballPosition[1];
 
                     if (Math.abs(zDiff) > 0.001 || Math.abs(yDiff) > 0.001) {
                         ballPosition[2] += zDiff * 0.02;
@@ -830,7 +830,7 @@
                 clothDrawCall.draw();
                 ballDrawCall.draw();
 
-                var temp = oldPositionTextureA;
+                let temp = oldPositionTextureA;
                 oldPositionTextureA = oldPositionTextureB;
                 oldPositionTextureB = temp;
 
@@ -840,7 +840,7 @@
             }
 
             requestAnimationFrame(draw); 
-        }
+        });
 
     </script>
     <a href="https://github.com/tsherif/picogl.js" id="github-ribbon"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"></a>

@@ -190,26 +190,26 @@
         utils.addTimerElement();
         utils.timerDiv.style.color = "black";
         
-        var canvas = document.getElementById("gl-canvas");
+        let canvas = document.getElementById("gl-canvas");
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
-        var CUBEMAP_DIM = 2048;
+        const CUBEMAP_DIM = 2048;
         
-        var app = PicoGL.createApp(canvas)
+        let app = PicoGL.createApp(canvas)
         .clearColor(1.0, 1.0, 1.0, 1.0)
         .depthTest();
 
-        var timer = app.createTimer();
+        let timer = app.createTimer();
 
         // FRAMEBUFFER
-        var colorTarget = app.createCubemap({
+        let colorTarget = app.createCubemap({
             width: CUBEMAP_DIM,
             height: CUBEMAP_DIM
         });
-        var depthTarget = app.createRenderbuffer(CUBEMAP_DIM, CUBEMAP_DIM, PicoGL.DEPTH_COMPONENT16);
+        let depthTarget = app.createRenderbuffer(CUBEMAP_DIM, CUBEMAP_DIM, PicoGL.DEPTH_COMPONENT16);
 
-        var cubemapBuffer = app.createFramebuffer()
+        let cubemapBuffer = app.createFramebuffer()
         .colorTarget(0, colorTarget, PicoGL.TEXTURE_CUBE_MAP_NEGATIVE_X)
         .colorTarget(1, colorTarget, PicoGL.TEXTURE_CUBE_MAP_POSITIVE_X)
         .colorTarget(2, colorTarget, PicoGL.TEXTURE_CUBE_MAP_NEGATIVE_Y)
@@ -219,48 +219,48 @@
         .depthTarget(depthTarget);
 
         // GEOMETRY
-        var box = utils.createBox({dimensions: [1.0, 1.0, 1.0]})
-        var positions = app.createVertexBuffer(PicoGL.FLOAT, 3, box.positions);
-        var uv = app.createVertexBuffer(PicoGL.FLOAT, 2, box.uvs);
-        var normals = app.createVertexBuffer(PicoGL.FLOAT, 3, box.normals);
+        let box = utils.createBox({dimensions: [1.0, 1.0, 1.0]})
+        let positions = app.createVertexBuffer(PicoGL.FLOAT, 3, box.positions);
+        let uv = app.createVertexBuffer(PicoGL.FLOAT, 2, box.uvs);
+        let normals = app.createVertexBuffer(PicoGL.FLOAT, 3, box.normals);
 
-        var boxArray = app.createVertexArray()
+        let boxArray = app.createVertexArray()
         .vertexAttributeBuffer(0, positions)
         .vertexAttributeBuffer(1, uv)
         .vertexAttributeBuffer(2, normals);
 
         // UNIFORMS
-        var cubemapProjMatrix = mat4.create();
+        let cubemapProjMatrix = mat4.create();
         mat4.perspective(cubemapProjMatrix, Math.PI / 2, 1, 0.1, 10.0);
 
-        var cubemapViewMatrix = mat4.create();
-        var cubemapEyePosition = vec3.fromValues(1.2, 0, 1.2);
+        let cubemapViewMatrix = mat4.create();
+        let cubemapEyePosition = vec3.fromValues(1.2, 0, 1.2);
         mat4.lookAt(cubemapViewMatrix, cubemapEyePosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
 
-        var cubemapViewProjMatrix = mat4.create();
+        let cubemapViewProjMatrix = mat4.create();
         mat4.multiply(cubemapViewProjMatrix, cubemapProjMatrix, cubemapViewMatrix);
 
-        var projMatrix = mat4.create();
+        let projMatrix = mat4.create();
         mat4.perspective(projMatrix, Math.PI / 2, canvas.width / canvas.height, 0.1, 10.0);
 
-        var viewMatrix = mat4.create();
-        var eyePosition = vec3.fromValues(1.3, -1.3, 1.3);
+        let viewMatrix = mat4.create();
+        let eyePosition = vec3.fromValues(1.3, -1.3, 1.3);
         mat4.lookAt(viewMatrix, eyePosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
 
-        var viewProjMatrix = mat4.create();
+        let viewProjMatrix = mat4.create();
         mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
 
-        var skyboxViewMatrix = mat4.create();
+        let skyboxViewMatrix = mat4.create();
         skyboxViewMatrix.set(viewMatrix);
         skyboxViewMatrix[12] = 0;
         skyboxViewMatrix[13] = 0;
         skyboxViewMatrix[14] = 0;
 
-        var skyboxViewProjMatrix = mat4.create();
+        let skyboxViewProjMatrix = mat4.create();
         mat4.multiply(skyboxViewProjMatrix, projMatrix, skyboxViewMatrix);
 
         // UNIFORM BUFFER
-        var cubemapSceneUniformBuffer = app.createUniformBuffer([
+        let cubemapSceneUniformBuffer = app.createUniformBuffer([
             PicoGL.FLOAT_MAT4,
             PicoGL.FLOAT_VEC4
         ])
@@ -268,7 +268,7 @@
         .set(1, cubemapEyePosition)
         .update();
 
-        var sceneUniformBuffer = app.createUniformBuffer([
+        let sceneUniformBuffer = app.createUniformBuffer([
             PicoGL.FLOAT_MAT4,
             PicoGL.FLOAT_VEC4
         ])
@@ -276,7 +276,7 @@
         .set(1, eyePosition)
         .update();
 
-        var skyboxSceneUniforms = app.createUniformBuffer([
+        let skyboxSceneUniforms = app.createUniformBuffer([
             PicoGL.FLOAT_MAT4,
             PicoGL.FLOAT_VEC4
         ])
@@ -284,9 +284,9 @@
         .set(1, eyePosition)
         .update();
 
-        var modelMatrix = mat4.create();
-        var rotateXMatrix = mat4.create();
-        var rotateYMatrix = mat4.create();
+        let modelMatrix = mat4.create();
+        let rotateXMatrix = mat4.create();
+        let rotateYMatrix = mat4.create();
 
         window.onresize = function() {
             app.resize(window.innerWidth, window.innerHeight);
@@ -300,23 +300,23 @@
         };
 
         // PROGRAM
-        var vsSource =  document.getElementById("vertex-cube").text.trim();
-        var vShader = app.createShader(PicoGL.VERTEX_SHADER, vsSource);
+        let vsSource =  document.getElementById("vertex-cube").text.trim();
+        let vShader = app.createShader(PicoGL.VERTEX_SHADER, vsSource);
 
-        var cubemapFsSource =  document.getElementById("fragment-cubemap").text.trim();
+        let cubemapFsSource =  document.getElementById("fragment-cubemap").text.trim();
         
-        var fsSource =  document.getElementById("fragment-cube").text.trim();
+        let fsSource =  document.getElementById("fragment-cube").text.trim();
 
-        var skyboxVsSource =  document.getElementById("vertex-skybox").text.trim();
-        var skyboxFsSource =  document.getElementById("fragment-skybox").text.trim();
+        let skyboxVsSource =  document.getElementById("vertex-skybox").text.trim();
+        let skyboxFsSource =  document.getElementById("fragment-skybox").text.trim();
 
-        var program;
-        var cubemapProgram;
-        var skyboxProgram;
-        var programsReady = false;
-        var texture;
-        var skyCubemap;
-        var texturesReady = false;
+        let program;
+        let cubemapProgram;
+        let skyboxProgram;
+        let programsReady = false;
+        let texture;
+        let skyCubemap;
+        let texturesReady = false;
 
         // USE PARALLEL SHADER COMPILATION IF AVAILABLE
         // https://www.khronos.org/registry/webgl/extensions/KHR_parallel_shader_compile/
@@ -364,22 +364,22 @@
         }); 
 
         function start() {
-            var cubemapDrawCall = app.createDrawCall(cubemapProgram, boxArray)
+            let cubemapDrawCall = app.createDrawCall(cubemapProgram, boxArray)
             .texture("tex", texture)
             .uniformBlock("SceneUniforms", cubemapSceneUniformBuffer);
 
-            var cubeDrawCall = app.createDrawCall(program, boxArray)
+            let cubeDrawCall = app.createDrawCall(program, boxArray)
             .texture("renderCubemap", colorTarget)
             .texture("skyCubemap", skyCubemap)
             .uniformBlock("SceneUniforms", sceneUniformBuffer);
 
-            var skyboxDrawcall = app.createDrawCall(skyboxProgram, boxArray)
+            let skyboxDrawcall = app.createDrawCall(skyboxProgram, boxArray)
             .texture("renderCubemap", colorTarget)
             .texture("skyCubemap", skyCubemap)
             .uniformBlock("SceneUniforms", skyboxSceneUniforms)
 
-            var angleX = 0;
-            var angleY = 0;
+            let angleX = 0;
+            let angleY = 0;
 
             function draw() {
                 if (timer.ready()) {

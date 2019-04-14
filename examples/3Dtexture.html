@@ -73,34 +73,34 @@
     <script type="text/javascript">
         utils.addTimerElement();
 
-        var canvas = document.getElementById("gl-canvas");
+        let canvas = document.getElementById("gl-canvas");
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         
-        var app = PicoGL.createApp(canvas)
+        let app = PicoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0)
         .blend()
         .blendFunc(PicoGL.ONE, PicoGL.ONE_MINUS_SRC_ALPHA);
 
-        var timer = app.createTimer();
+        let timer = app.createTimer();
 
         // SET UP PROGRAM
-        var vsSource =  document.getElementById("vertex-draw").text.trim();
-        var fsSource =  document.getElementById("fragment-draw").text.trim();
+        let vsSource =  document.getElementById("vertex-draw").text.trim();
+        let fsSource =  document.getElementById("fragment-draw").text.trim();
 
         // CREATE POINT CLOUD
-        var DIMENSIONS = 128;
-        var INCREMENT = 1 / DIMENSIONS;
+        const DIMENSIONS = 128;
+        const INCREMENT = 1 / DIMENSIONS;
 
-        var positionData = new Float32Array(DIMENSIONS * DIMENSIONS * DIMENSIONS * 3);
+        let positionData = new Float32Array(DIMENSIONS * DIMENSIONS * DIMENSIONS * 3);
 
-        var positionIndex = 0;
-        var x = -0.5;
-        for (var i = 0; i < DIMENSIONS; ++i) {
-            var y = -0.5;
-            for (var j = 0; j < DIMENSIONS; ++j) {
-                var z = -0.5;
-                for (var k = 0; k < DIMENSIONS; ++k) {
+        let positionIndex = 0;
+        let x = -0.5;
+        for (let i = 0; i < DIMENSIONS; ++i) {
+            let y = -0.5;
+            for (let j = 0; j < DIMENSIONS; ++j) {
+                let z = -0.5;
+                for (let k = 0; k < DIMENSIONS; ++k) {
                     positionData[positionIndex++] = x;
                     positionData[positionIndex++] = y;
                     positionData[positionIndex++] = z;
@@ -111,35 +111,35 @@
             x += INCREMENT;
         }
 
-        var positions = app.createVertexBuffer(PicoGL.FLOAT, 3, positionData)
+        let positions = app.createVertexBuffer(PicoGL.FLOAT, 3, positionData)
 
-        var pointArray = app.createVertexArray()
+        let pointArray = app.createVertexArray()
         .vertexAttributeBuffer(0, positions);
 
         // CREATE 3D TEXTURE
-        var TEXTURE_DIMENSIONS = 16;
-        var textureData = new Uint8Array(TEXTURE_DIMENSIONS * TEXTURE_DIMENSIONS * TEXTURE_DIMENSIONS);
-        var textureIndex = 0;
-        for (var i = 0; i < TEXTURE_DIMENSIONS; ++i) {
-            for (var j = 0; j < TEXTURE_DIMENSIONS; ++j) {
-                for (var k = 0; k < TEXTURE_DIMENSIONS; ++k) {
-                    var val = snoise([i, j, k]) * 255
+        const TEXTURE_DIMENSIONS = 16;
+        let textureData = new Uint8Array(TEXTURE_DIMENSIONS * TEXTURE_DIMENSIONS * TEXTURE_DIMENSIONS);
+        let textureIndex = 0;
+        for (let i = 0; i < TEXTURE_DIMENSIONS; ++i) {
+            for (let j = 0; j < TEXTURE_DIMENSIONS; ++j) {
+                for (let k = 0; k < TEXTURE_DIMENSIONS; ++k) {
+                    let val = snoise([i, j, k]) * 255
                     textureData[textureIndex++] = val;
                 }
             }
         }
 
-        var texture = app.createTexture3D(textureData, TEXTURE_DIMENSIONS, TEXTURE_DIMENSIONS, TEXTURE_DIMENSIONS, { format: PicoGL.RED });
+        let texture = app.createTexture3D(textureData, TEXTURE_DIMENSIONS, TEXTURE_DIMENSIONS, TEXTURE_DIMENSIONS, { format: PicoGL.RED });
 
         // UNIFORM DATA
-        var projMatrix = mat4.create();
+        let projMatrix = mat4.create();
         mat4.perspective(projMatrix, Math.PI / 2, canvas.width / canvas.height, 0.1, 10.0);
 
-        var viewMatrix = mat4.create();
-        var eyePosition = vec3.fromValues(1, 1, 1);
+        let viewMatrix = mat4.create();
+        let eyePosition = vec3.fromValues(1, 1, 1);
         mat4.lookAt(viewMatrix, eyePosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
 
-        var mvpMatrix = mat4.create();
+        let mvpMatrix = mat4.create();
         mat4.multiply(mvpMatrix, projMatrix, viewMatrix);
         
 
@@ -153,13 +153,12 @@
         // USE PARALLEL SHADER COMPILATION IF AVAILABLE
         // https://www.khronos.org/registry/webgl/extensions/KHR_parallel_shader_compile/
         app.createPrograms([vsSource, fsSource]).then(([program]) => {
-
             // SET UP DRAW CALL
-            var drawCall = app.createDrawCall(program, pointArray, PicoGL.POINTS)
+            let drawCall = app.createDrawCall(program, pointArray, PicoGL.POINTS)
             .texture("tex", texture)
             .uniform("uMVP", mvpMatrix);
 
-            var startTime = performance.now();
+            let startTime = performance.now();
             function draw() {
                 if (timer.ready()) {
                     utils.updateTimerElement(timer.cpuTime, timer.gpuTime);

@@ -115,28 +115,28 @@
     <script>
         utils.addTimerElement();
 
-        var canvas = document.getElementById("gl-canvas");
+        let canvas = document.getElementById("gl-canvas");
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         
-        var app = PicoGL.createApp(canvas)
+        let app = PicoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0)
         .blend()
         .blendFunc(PicoGL.ONE, PicoGL.ONE_MINUS_SRC_ALPHA);
 
-        var timer = app.createTimer();
+        let timer = app.createTimer();
 
         // PROGRAM
-        var vsSource = document.getElementById("main-vs").text.trim();
-        var fsSource = document.getElementById("main-fs").text.trim();
+        let vsSource = document.getElementById("main-vs").text.trim();
+        let fsSource = document.getElementById("main-fs").text.trim();
 
         // GEOMETRY DATA
-        var NUM_PARTICLES = 200000;
-        var positionData = new Float32Array(NUM_PARTICLES * 3);
-        var colorData = new Uint8Array(NUM_PARTICLES * 3);
+        const NUM_PARTICLES = 200000;
+        let positionData = new Float32Array(NUM_PARTICLES * 3);
+        let colorData = new Uint8Array(NUM_PARTICLES * 3);
 
-        for (var i = 0; i < NUM_PARTICLES; ++i) {
-            var vec3i = i * 3;
+        for (let i = 0; i < NUM_PARTICLES; ++i) {
+            let vec3i = i * 3;
 
             positionData[vec3i] = Math.random() * 2 - 1;
             positionData[vec3i + 1] = Math.random() * 2 - 1;
@@ -148,36 +148,36 @@
         }
 
         // INPUT AND OUTPUT POSITION AND VELOCITY BUFFERS
-        var positions1 = app.createVertexBuffer(PicoGL.FLOAT, 3, positionData);
-        var velocities1 = app.createVertexBuffer(PicoGL.FLOAT, 3, positionData.length);
-        var positions2 = app.createVertexBuffer(PicoGL.FLOAT, 3, positionData.length);
-        var velocities2 = app.createVertexBuffer(PicoGL.FLOAT, 3, positionData.length);
+        let positions1 = app.createVertexBuffer(PicoGL.FLOAT, 3, positionData);
+        let velocities1 = app.createVertexBuffer(PicoGL.FLOAT, 3, positionData.length);
+        let positions2 = app.createVertexBuffer(PicoGL.FLOAT, 3, positionData.length);
+        let velocities2 = app.createVertexBuffer(PicoGL.FLOAT, 3, positionData.length);
         
         // COLOR BUFFER NOT INVOLVED IN TRANSFORM FEEDBACK
-        var colors = app.createVertexBuffer(PicoGL.UNSIGNED_BYTE, 3, colorData);
+        let colors = app.createVertexBuffer(PicoGL.UNSIGNED_BYTE, 3, colorData);
 
         // INPUT AND OUTPUT VERTEX ARRAYS
-        var vertexArray1 = app.createVertexArray()
+        let vertexArray1 = app.createVertexArray()
         .vertexAttributeBuffer(0, positions1)
         .vertexAttributeBuffer(1, velocities1)
         .vertexAttributeBuffer(2, colors, { normalized: true });
 
-        var vertexArray2 = app.createVertexArray()
+        let vertexArray2 = app.createVertexArray()
         .vertexAttributeBuffer(0, positions2)
         .vertexAttributeBuffer(1, velocities2)
         .vertexAttributeBuffer(2, colors, { normalized: true });
 
         // TRANSFORM FEEDBACK OBJECTS
-        var transformFeedback1 = app.createTransformFeedback()
+        let transformFeedback1 = app.createTransformFeedback()
         .feedbackBuffer(0, positions1)
         .feedbackBuffer(1, velocities1);
 
-        var transformFeedback2 = app.createTransformFeedback()
+        let transformFeedback2 = app.createTransformFeedback()
         .feedbackBuffer(0, positions2)
         .feedbackBuffer(1, velocities2);
 
         // UNIFORM BUFFER FOR SIMULATION PARAMETERS
-        var massUniforms = app.createUniformBuffer([
+        let massUniforms = app.createUniformBuffer([
             PicoGL.FLOAT_VEC4,
             PicoGL.FLOAT_VEC4,
             PicoGL.FLOAT_VEC4,
@@ -212,12 +212,12 @@
         // USE PARALLEL SHADER COMPILATION IF AVAILABLE
         // https://www.khronos.org/registry/webgl/extensions/KHR_parallel_shader_compile/
         app.createPrograms([vsSource, fsSource, ["vPosition", "vVelocity"]]).then(([program]) => {
-            var drawCall1 = app.createDrawCall(program, vertexArray1, PicoGL.POINTS)
+            let drawCall1 = app.createDrawCall(program, vertexArray1, PicoGL.POINTS)
             .transformFeedback(transformFeedback2)
             .uniformBlock("Mass", massUniforms)
             .elementCount(50000);
 
-            var drawCall2 = app.createDrawCall(program, vertexArray2, PicoGL.POINTS)
+            let drawCall2 = app.createDrawCall(program, vertexArray2, PicoGL.POINTS)
             .transformFeedback(transformFeedback1)
             .uniformBlock("Mass", massUniforms)
             .elementCount(50000);
@@ -227,7 +227,7 @@
                 drawCall2.elementCount(count);
             }
 
-            var currentDrawCall = drawCall1;
+            let currentDrawCall = drawCall1;
             function draw() {      
                 if (timer.ready()) {
                     utils.updateTimerElement(timer.cpuTime, timer.gpuTime);

@@ -62,11 +62,11 @@
         }
     </script>
     <script>
-        var canvas = document.getElementById("gl-canvas");
+        let canvas = document.getElementById("gl-canvas");
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         
-        var app = PicoGL.createApp(canvas)
+        let app = PicoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0);
 
         window.onresize = function() {
@@ -74,12 +74,12 @@
         }
 
         // PROGRAM 
-        var vsSource =  document.getElementById("vs").text.trim();
-        var fsSource =  document.getElementById("fs").text.trim();
+        let vsSource =  document.getElementById("vs").text.trim();
+        let fsSource =  document.getElementById("fs").text.trim();
 
         // INTERLEAVE FLOAT POSITION DATA
         // WITH UNSIGNED BYTE COLOR DATA
-        var interleavedData = new Float32Array([
+        let interleavedData = new Float32Array([
             -0.5, -0.5, // Positions data
              0,         // Color data
              0.5, -0.5,
@@ -88,16 +88,16 @@
              0
         ]);
 
-        var interleavedDataUByte = new Uint8Array(interleavedData.buffer);
+        let interleavedDataUByte = new Uint8Array(interleavedData.buffer);
         interleavedDataUByte.set([255, 0, 0, 255], 8);
         interleavedDataUByte.set([0, 255, 0, 255], 20);
         interleavedDataUByte.set([0, 0, 255, 255], 32);
 
         // CREATE INTERLEAVED BUFFER (NO POINTER INFORMATION)
-        var interleavedBuffer = app.createInterleavedBuffer(12, interleavedData);
+        let interleavedBuffer = app.createInterleavedBuffer(12, interleavedData);
 
         // FULLY SPECIFY POINTER INFORMATION IN VERTEX ARRAY
-        var triangleArray = app.createVertexArray()
+        let triangleArray = app.createVertexArray()
         .vertexAttributeBuffer(0, interleavedBuffer, {
             type: PicoGL.FLOAT,
             size: 2,
@@ -115,7 +115,7 @@
         // https://www.khronos.org/registry/webgl/extensions/KHR_parallel_shader_compile/
         app.createPrograms([vsSource, fsSource]).then(([program]) => {
             // CREATE DRAW CALL FROM PROGRAM AND VERTEX ARRAY
-            var drawCall = app.createDrawCall(program, triangleArray);
+            let drawCall = app.createDrawCall(program, triangleArray);
 
             // DRAW
             app.clear();

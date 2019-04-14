@@ -133,55 +133,55 @@
     <script type="text/javascript">
         utils.addTimerElement();
         
-        var DIMENSIONS = 128;
+        const DIMENSIONS = 128;
         
-        var canvas = document.getElementById("gl-canvas");
+        let canvas = document.getElementById("gl-canvas");
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         
-        var app = PicoGL.createApp(canvas)
+        let app = PicoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0)
         .blendFunc(PicoGL.ONE, PicoGL.ONE_MINUS_SRC_ALPHA)
         .cullBackfaces()
         .clear();
 
-        var timer = app.createTimer();
+        let timer = app.createTimer();
 
         // SET UP PROGRAM
-        var tex3DVsSource =  document.getElementById("vertex-3dtexture").text.trim();
-        var tex3DFsSource =  document.getElementById("fragment-3dtexture").text.trim();
+        let tex3DVsSource =  document.getElementById("vertex-3dtexture").text.trim();
+        let tex3DFsSource =  document.getElementById("fragment-3dtexture").text.trim();
 
-        var vsSource =  document.getElementById("vertex-draw").text.trim();
-        var fsSource =  document.getElementById("fragment-draw").text.trim();
+        let vsSource =  document.getElementById("vertex-draw").text.trim();
+        let fsSource =  document.getElementById("fragment-draw").text.trim();
         
-        var colorTarget = app.createTexture3D(DIMENSIONS, DIMENSIONS, DIMENSIONS);
+        let colorTarget = app.createTexture3D(DIMENSIONS, DIMENSIONS, DIMENSIONS);
 
-        var framebuffer = app.createFramebuffer()
+        let framebuffer = app.createFramebuffer()
         .colorTarget(0, colorTarget);
 
         // SET UP GEOMETRY
-        var box = utils.createBox({dimensions: [1.0, 1.0, 1.0]})
-        var positions = app.createVertexBuffer(PicoGL.FLOAT, 3, box.positions);
-        var uv = app.createVertexBuffer(PicoGL.FLOAT, 2, box.uvs);
-        var normals = app.createVertexBuffer(PicoGL.FLOAT, 3, box.normals);
+        let box = utils.createBox({dimensions: [1.0, 1.0, 1.0]})
+        let positions = app.createVertexBuffer(PicoGL.FLOAT, 3, box.positions);
+        let uv = app.createVertexBuffer(PicoGL.FLOAT, 2, box.uvs);
+        let normals = app.createVertexBuffer(PicoGL.FLOAT, 3, box.normals);
 
-        var boxArray = app.createVertexArray()
+        let boxArray = app.createVertexArray()
         .vertexAttributeBuffer(0, positions)
         .vertexAttributeBuffer(1, uv)
         .vertexAttributeBuffer(2, normals);
 
         // CREATE POINT CLOUD
-        var INCREMENT = 1 / DIMENSIONS;
+        const INCREMENT = 1 / DIMENSIONS;
 
-        var positionData = new Float32Array(DIMENSIONS * DIMENSIONS * DIMENSIONS * 3);
+        let positionData = new Float32Array(DIMENSIONS * DIMENSIONS * DIMENSIONS * 3);
 
-        var positionIndex = 0;
-        var x = -0.5;
-        for (var i = 0; i < DIMENSIONS; ++i) {
-            var y = -0.5;
-            for (var j = 0; j < DIMENSIONS; ++j) {
-                var z = -0.5;
-                for (var k = 0; k < DIMENSIONS; ++k) {
+        let positionIndex = 0;
+        let x = -0.5;
+        for (let i = 0; i < DIMENSIONS; ++i) {
+            let y = -0.5;
+            for (let j = 0; j < DIMENSIONS; ++j) {
+                let z = -0.5;
+                for (let k = 0; k < DIMENSIONS; ++k) {
                     positionData[positionIndex++] = x + (Math.random() - 0.5) / (DIMENSIONS);
                     positionData[positionIndex++] = y + (Math.random() - 0.5) / (DIMENSIONS);
                     positionData[positionIndex++] = z + (Math.random() - 0.5) / (DIMENSIONS);
@@ -192,36 +192,36 @@
             x += INCREMENT;
         }
 
-        var pointPositions = app.createVertexBuffer(PicoGL.FLOAT, 3, positionData)
+        let pointPositions = app.createVertexBuffer(PicoGL.FLOAT, 3, positionData)
 
-        var pointArray = app.createVertexArray()
+        let pointArray = app.createVertexArray()
         .vertexAttributeBuffer(0, pointPositions);
 
         // SET UP UNIFORM BUFFER
 
-        var tex3DViewMatrix = mat4.create();
-        var tex3DEyePosition = vec3.fromValues(0.7, 0.7, 0.7);
+        let tex3DViewMatrix = mat4.create();
+        let tex3DEyePosition = vec3.fromValues(0.7, 0.7, 0.7);
         mat4.lookAt(tex3DViewMatrix, tex3DEyePosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
 
-        var viewMatrix = mat4.create();
-        var eyePosition = vec3.fromValues(0.6, 0.6, 0.6);
+        let viewMatrix = mat4.create();
+        let eyePosition = vec3.fromValues(0.6, 0.6, 0.6);
         mat4.lookAt(viewMatrix, eyePosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
 
-        var tex3DProjMatrix = mat4.create();
+        let tex3DProjMatrix = mat4.create();
         mat4.perspective(tex3DProjMatrix, Math.PI / 2, 1, 0.1, 10.0);
 
-        var projMatrix = mat4.create();
+        let projMatrix = mat4.create();
         mat4.perspective(projMatrix, Math.PI / 2, canvas.width / canvas.height, 0.1, 10.0);
         
-        var tex3DViewProjMatrix = mat4.create();
+        let tex3DViewProjMatrix = mat4.create();
         mat4.multiply(tex3DViewProjMatrix, tex3DProjMatrix, tex3DViewMatrix);
 
-        var mvpMatrix = mat4.create();
+        let mvpMatrix = mat4.create();
         mat4.multiply(mvpMatrix, projMatrix, viewMatrix);
 
-        var lightPosition = vec3.fromValues(1, 1, 0.5);
+        let lightPosition = vec3.fromValues(1, 1, 0.5);
 
-        var sceneUniformBuffer = app.createUniformBuffer([
+        let sceneUniformBuffer = app.createUniformBuffer([
             PicoGL.FLOAT_MAT4,
             PicoGL.FLOAT_VEC4,
             PicoGL.FLOAT_VEC4
@@ -231,12 +231,12 @@
         .set(2, lightPosition)
         .update();
 
-        var modelMatrix = mat4.create();
-        var rotateXMatrix = mat4.create();
-        var rotateYMatrix = mat4.create();
+        let modelMatrix = mat4.create();
+        let rotateXMatrix = mat4.create();
+        let rotateYMatrix = mat4.create();
 
-        var angleX = 0;
-        var angleY = 0;
+        let angleX = 0;
+        let angleY = 0;
 
         window.onresize = function() {
             app.resize(window.innerWidth, window.innerHeight);
@@ -245,10 +245,10 @@
             mat4.multiply(mvpMatrix, projMatrix, viewMatrix);            
         }
 
-        var tex3DProgram;
-        var program;
-        var texturesReady = false;
-        var programsReady = false;
+        let tex3DProgram;
+        let program;
+        let texturesReady = false;
+        let programsReady = false;
         
         // USE PARALLEL SHADER COMPILATION IF AVAILABLE
         // https://www.khronos.org/registry/webgl/extensions/KHR_parallel_shader_compile/
@@ -277,13 +277,13 @@
 
         function start() {
             // SET UP DRAW CALL
-            var tex3DDrawCall = app.createDrawCall(tex3DProgram, boxArray)
+            let tex3DDrawCall = app.createDrawCall(tex3DProgram, boxArray)
             .uniformBlock("SceneUniforms", sceneUniformBuffer)
             .texture("tex", texture);
 
-            var startTime = performance.now();
+            let startTime = performance.now();
 
-            var drawCall = app.createDrawCall(program, pointArray, PicoGL.POINTS)
+            let drawCall = app.createDrawCall(program, pointArray, PicoGL.POINTS)
             .texture("tex", colorTarget)
             .uniform("uMVP", mvpMatrix);;
 
@@ -295,7 +295,7 @@
 
             function draw3Dtexture() {
 
-                for (var i = 0; i < DIMENSIONS; ++i) {
+                for (let i = 0; i < DIMENSIONS; ++i) {
                     angleX += Math.PI / DIMENSIONS;
                     angleY += 0.5 * Math.PI / DIMENSIONS;
 

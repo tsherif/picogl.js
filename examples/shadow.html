@@ -122,61 +122,61 @@
     <script type="text/javascript">
         utils.addTimerElement();
 
-        var canvas = document.getElementById("gl-canvas");
+        let canvas = document.getElementById("gl-canvas");
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         
-        var app = PicoGL.createApp(canvas)
+        let app = PicoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0)
         .depthTest()
         .cullBackfaces();
 
-        var timer = app.createTimer();
+        let timer = app.createTimer();
 
         // SET UP SHADOW PROGRAM
-        var shadowVsSource =  document.getElementById("shadow-vs").text.trim();
-        var shadowFsSource =  document.getElementById("shadow-fs").text.trim();
+        let shadowVsSource =  document.getElementById("shadow-vs").text.trim();
+        let shadowFsSource =  document.getElementById("shadow-fs").text.trim();
 
-        var shadowDepthTarget = app.createTexture2D(app.width, app.height, {
+        let shadowDepthTarget = app.createTexture2D(app.width, app.height, {
             format: PicoGL.DEPTH_COMPONENT,
             compareMode: PicoGL.COMPARE_REF_TO_TEXTURE
         });
-        var shadowBuffer = app.createFramebuffer().depthTarget(shadowDepthTarget);
+        let shadowBuffer = app.createFramebuffer().depthTarget(shadowDepthTarget);
 
         // SET UP MAIN PROGRAM
-        var vsSource =  document.getElementById("main-vs").text.trim();
-        var fsSource =  document.getElementById("main-fs").text.trim();
+        let vsSource =  document.getElementById("main-vs").text.trim();
+        let fsSource =  document.getElementById("main-fs").text.trim();
        
         // GEOMETRY
-        var box = utils.createBox({dimensions: [1.0, 1.0, 1.0]})
-        var positions = app.createVertexBuffer(PicoGL.FLOAT, 3, box.positions);
-        var normals = app.createVertexBuffer(PicoGL.FLOAT, 3, box.normals);
-        var uv = app.createVertexBuffer(PicoGL.FLOAT, 2, box.uvs);
+        let box = utils.createBox({dimensions: [1.0, 1.0, 1.0]})
+        let positions = app.createVertexBuffer(PicoGL.FLOAT, 3, box.positions);
+        let normals = app.createVertexBuffer(PicoGL.FLOAT, 3, box.normals);
+        let uv = app.createVertexBuffer(PicoGL.FLOAT, 2, box.uvs);
 
-        var boxArray = app.createVertexArray()
+        let boxArray = app.createVertexArray()
         .vertexAttributeBuffer(0, positions)
         .vertexAttributeBuffer(1, normals)
         .vertexAttributeBuffer(2, uv);
 
         // UNIFORMS
-        var projMatrix = mat4.create();
+        let projMatrix = mat4.create();
         mat4.perspective(projMatrix, Math.PI / 2, canvas.width / canvas.height, 0.1, 2.0);
 
-        var viewMatrix = mat4.create();
-        var eyePosition = vec3.fromValues(1, 1, 1);
+        let viewMatrix = mat4.create();
+        let eyePosition = vec3.fromValues(1, 1, 1);
         mat4.lookAt(viewMatrix, eyePosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
 
-        var viewProjMatrix = mat4.create();
+        let viewProjMatrix = mat4.create();
         mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
 
-        var lightPosition = vec3.fromValues(1, 1, 0.5);        
-        var lightViewMatrix = mat4.create();
-        var lightViewProjMatrix = mat4.create();
+        let lightPosition = vec3.fromValues(1, 1, 0.5);        
+        let lightViewMatrix = mat4.create();
+        let lightViewProjMatrix = mat4.create();
         mat4.lookAt(lightViewMatrix, lightPosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
         mat4.multiply(lightViewProjMatrix, projMatrix, lightViewMatrix);
 
         // OBJECT DESCRIPTIONS
-        var boxes = [
+        let boxes = [
             {
                 translate: [0, 0, 0],
                 rotate: [0, 0, 0],
@@ -237,7 +237,7 @@
         function start() {
             // DRAW CALLS
 
-            for (var i = 0, len = boxes.length; i < len; ++i) {
+            for (let i = 0, len = boxes.length; i < len; ++i) {
                 boxes[i].shadowDrawCall = app.createDrawCall(shadowProgram, boxArray)
 
                 boxes[i].mainDrawCall = app.createDrawCall(mainProgram, boxArray)
@@ -256,7 +256,7 @@
                 timer.start();
 
                 // UPDATE TRANSFORMS
-                for (var i = 0, len = boxes.length; i < len; ++i) {
+                for (let i = 0, len = boxes.length; i < len; ++i) {
                     boxes[i].rotate[0] += 0.01;
                     boxes[i].rotate[1] += 0.02;
 
@@ -272,13 +272,13 @@
 
                 // DRAW TO SHADOW BUFFER
                 app.drawFramebuffer(shadowBuffer).clear();
-                for (var i = 0, len = boxes.length; i < len; ++i) {
+                for (let i = 0, len = boxes.length; i < len; ++i) {
                     boxes[i].shadowDrawCall.draw();
                 }
 
                 // DRAW TO SCREEN     
                 app.defaultDrawFramebuffer().clear()
-                for (var i = 0, len = boxes.length; i < len; ++i) {
+                for (let i = 0, len = boxes.length; i < len; ++i) {
                     boxes[i].mainDrawCall.draw();
                 }
 

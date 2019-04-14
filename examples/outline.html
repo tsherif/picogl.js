@@ -136,24 +136,24 @@
     <script type="text/javascript">
         utils.addTimerElement();
 
-        var NUM_SPHERES = 32;
-        var NUM_PER_ROW = 8;
-        var SPHERE_RADIUS = 0.6;
-        var NEAR = 0.1;
-        var FAR = 10.0;
+        const NUM_SPHERES = 32;
+        const NUM_PER_ROW = 8;
+        const SPHERE_RADIUS = 0.6;
+        const NEAR = 0.1;
+        const FAR = 10.0;
 
-        var canvas = document.getElementById("gl-canvas");
+        let canvas = document.getElementById("gl-canvas");
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
-        var spheres = new Array(NUM_SPHERES);
-        var modelMatrixData = new Float32Array(NUM_SPHERES * 16);
+        let spheres = new Array(NUM_SPHERES);
+        let modelMatrixData = new Float32Array(NUM_SPHERES * 16);
 
-        for (var i = 0; i < NUM_SPHERES; ++i) {
-            var angle = 2 * Math.PI * (i % NUM_PER_ROW) / NUM_PER_ROW;
-            var x = Math.sin(angle) * SPHERE_RADIUS;
-            var y = Math.floor(i / NUM_PER_ROW) / (NUM_PER_ROW / 4) - 0.75;
-            var z = Math.cos(angle) * SPHERE_RADIUS;
+        for (let i = 0; i < NUM_SPHERES; ++i) {
+            let angle = 2 * Math.PI * (i % NUM_PER_ROW) / NUM_PER_ROW;
+            let x = Math.sin(angle) * SPHERE_RADIUS;
+            let y = Math.floor(i / NUM_PER_ROW) / (NUM_PER_ROW / 4) - 0.75;
+            let z = Math.cos(angle) * SPHERE_RADIUS;
             spheres[i] = {
                 scale: [0.8, 0.8, 0.8],
                 rotate: [0, 0, 0], // Will be used for global rotation
@@ -163,7 +163,7 @@
         }
 
         // CREATE APP WITH STENCIL BUFFER
-        var app = PicoGL.createApp(canvas, { stencil: true })
+        let app = PicoGL.createApp(canvas, { stencil: true })
         .clearColor(0.0, 0.0, 0.0, 1.0)
         .clearMask(PicoGL.COLOR_BUFFER_BIT | PicoGL.DEPTH_BUFFER_BIT | PicoGL.STENCIL_BUFFER_BIT)
         .depthFunc(PicoGL.LEQUAL)
@@ -173,29 +173,29 @@
         // DEPTH AND STENCIL TESTS PASS
         .stencilOp(PicoGL.KEEP, PicoGL.KEEP, PicoGL.REPLACE);
 
-        var timer = app.createTimer();
+        let timer = app.createTimer();
 
         // SET UP MAIN DRAW PROGRAM
-        var mainVsSource =  document.getElementById("vertex-main").text.trim();
-        var mainFsSource =  document.getElementById("fragment-main").text.trim();
+        let mainVsSource =  document.getElementById("vertex-main").text.trim();
+        let mainFsSource =  document.getElementById("fragment-main").text.trim();
 
         // SET UP OUTLINE PROGRAM, WHICH SCALES UP GEOMETRY AND DRAWS
         // IN SOLID YELLOW 
-        var outlineVsSource =  document.getElementById("vertex-outline").text.trim();
-        var outlineFsSource =  document.getElementById("fragment-outline").text.trim();
+        let outlineVsSource =  document.getElementById("vertex-outline").text.trim();
+        let outlineFsSource =  document.getElementById("fragment-outline").text.trim();
         
 
         // INSTANCED SPHERE GEOMETRY
-        var sphere = utils.createSphere({radius: 0.5});
-        var positions = app.createVertexBuffer(PicoGL.FLOAT, 3, sphere.positions);
-        var uv = app.createVertexBuffer(PicoGL.FLOAT, 2, sphere.uvs);
-        var normals = app.createVertexBuffer(PicoGL.FLOAT, 3, sphere.normals);
-        var indices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, sphere.indices);
+        let sphere = utils.createSphere({radius: 0.5});
+        let positions = app.createVertexBuffer(PicoGL.FLOAT, 3, sphere.positions);
+        let uv = app.createVertexBuffer(PicoGL.FLOAT, 2, sphere.uvs);
+        let normals = app.createVertexBuffer(PicoGL.FLOAT, 3, sphere.normals);
+        let indices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, sphere.indices);
 
         // PER-INSTANCE MODEL MATRICES
-        var modelMatrices = app.createMatrixBuffer(PicoGL.FLOAT_MAT4, modelMatrixData);
+        let modelMatrices = app.createMatrixBuffer(PicoGL.FLOAT_MAT4, modelMatrixData);
 
-        var sphereArray = app.createVertexArray()
+        let sphereArray = app.createVertexArray()
         .vertexAttributeBuffer(0, positions)
         .vertexAttributeBuffer(1, uv)
         .vertexAttributeBuffer(2, normals)
@@ -203,20 +203,20 @@
         .indexBuffer(indices);
 
         // UNIFORM DATA
-        var projMatrix = mat4.create();
+        let projMatrix = mat4.create();
         mat4.perspective(projMatrix, Math.PI / 2, canvas.width / canvas.height, NEAR, FAR);
 
-        var viewMatrix = mat4.create();
-        var eyePosition = vec3.fromValues(0, 0.8, 2);
+        let viewMatrix = mat4.create();
+        let eyePosition = vec3.fromValues(0, 0.8, 2);
         mat4.lookAt(viewMatrix, eyePosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
 
-        var viewProjMatrix = mat4.create();
+        let viewProjMatrix = mat4.create();
         mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
 
-        var lightPosition = vec3.fromValues(0.5, 1, 2); 
+        let lightPosition = vec3.fromValues(0.5, 1, 2); 
 
         // UNIFORM BUFFERS
-        var sceneUniforms = app.createUniformBuffer([
+        let sceneUniforms = app.createUniformBuffer([
             PicoGL.FLOAT_MAT4,
             PicoGL.FLOAT_VEC4,
             PicoGL.FLOAT_VEC4
@@ -234,9 +234,9 @@
             sceneUniforms.set(0, viewProjMatrix).update();
         };
 
-        var mainProgram;
-        var outlineProgram;
-        var programsReady = false;
+        let mainProgram;
+        let outlineProgram;
+        let programsReady = false;
 
         // USE PARALLEL SHADER COMPILATION IF AVAILABLE
         // https://www.khronos.org/registry/webgl/extensions/KHR_parallel_shader_compile/
@@ -250,8 +250,8 @@
             }
         });
 
-        var texture;
-        var texturesReady = false;
+        let texture;
+        let texturesReady = false;
         
         utils.loadImages(["img/webgl-logo.png"], function(images) {
             // CREATE TEXTURE
@@ -266,14 +266,14 @@
 
         function start() {
             // DRAW CALLS
-            var mainDrawcall = app.createDrawCall(mainProgram, sphereArray)
+            let mainDrawcall = app.createDrawCall(mainProgram, sphereArray)
             .uniformBlock("SceneUniforms", sceneUniforms)
             .texture("uTexture", texture);
 
-            var outlineDrawcall = app.createDrawCall(outlineProgram, sphereArray)
+            let outlineDrawcall = app.createDrawCall(outlineProgram, sphereArray)
             .uniformBlock("SceneUniforms", sceneUniforms);
 
-            var rotationMatrix = mat4.create();
+            let rotationMatrix = mat4.create();
 
             function draw() {
                 if (timer.ready()) {
@@ -283,7 +283,7 @@
                 timer.start();
 
                 // UPDATE TRANSFORMS
-                for (var i = 0, len = spheres.length; i < len; ++i) {
+                for (let i = 0, len = spheres.length; i < len; ++i) {
                     spheres[i].rotate[1] += 0.002;
 
                     utils.xformMatrix(spheres[i].modelMatrix, spheres[i].translate, null, spheres[i].scale);

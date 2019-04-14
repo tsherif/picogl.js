@@ -65,11 +65,11 @@
     </script>
     
     <script type="text/javascript">
-        var canvas = document.getElementById("gl-canvas");
+        let canvas = document.getElementById("gl-canvas");
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         
-        var app = PicoGL.createApp(canvas)
+        let app = PicoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0);
 
         window.onresize = function() {
@@ -77,32 +77,32 @@
         }
 
         // PROGRAM
-        var vsSource =  document.getElementById("vs").text.trim();
-        var fsSource =  document.getElementById("fs").text.trim();
+        let vsSource =  document.getElementById("vs").text.trim();
+        let fsSource =  document.getElementById("fs").text.trim();
                         
         // PER-VERTEX POSITIONS
-        var positions = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
+        let positions = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
             -0.3, -0.3,
              0.3, -0.3,
              0.0, 0.3
         ]));
 
         // PER-INSTANCE OFFSETS AND COLORS
-        var offsets = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
+        let offsets = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
             -0.4, -0.4,
              0.4, -0.4,
              -0.4, 0.4,
              0.4, 0.4
         ]));
 
-        var colors = app.createVertexBuffer(PicoGL.UNSIGNED_BYTE, 3, new Uint8Array([
+        let colors = app.createVertexBuffer(PicoGL.UNSIGNED_BYTE, 3, new Uint8Array([
             255, 0, 0,
             0, 255, 0,
             0, 0, 255,
             0, 255, 255
         ]));
 
-        var triangleArray = app.createVertexArray()
+        let triangleArray = app.createVertexArray()
         .vertexAttributeBuffer(0, positions)
         .instanceAttributeBuffer(1, offsets)
         .instanceAttributeBuffer(2, colors, { normalized: true });
@@ -110,7 +110,7 @@
         // USE PARALLEL SHADER COMPILATION IF AVAILABLE
         // https://www.khronos.org/registry/webgl/extensions/KHR_parallel_shader_compile/
         app.createPrograms([vsSource, fsSource]).then(([program]) => {
-          var drawCall = app.createDrawCall(program, triangleArray);
+          let drawCall = app.createDrawCall(program, triangleArray);
 
           app.clear();
           drawCall.draw();

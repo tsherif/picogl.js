@@ -217,8 +217,8 @@
         }
     </script>
     <script type="text/javascript">
-        var blurEnabled = true;
-        var slowMoReset = 1;
+        let blurEnabled = true;
+        let slowMoReset = 1;
 
         document.getElementById("blur-toggle").addEventListener("change", function() {
             blurEnabled = this.checked;
@@ -234,56 +234,56 @@
             document.body.innerHTML = "This example requires extension EXT_color_buffer_float which is not supported on this system."
         }
 
-        var EASING = 0.8;
-        var STOP_THRESHOLD = 0.0001;
+        const EASING = 0.8;
+        const STOP_THRESHOLD = 0.0001;
 
-        var canvas = document.getElementById("gl-canvas");
+        let canvas = document.getElementById("gl-canvas");
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         
-        var app = PicoGL.createApp(canvas)
+        let app = PicoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0)
         .depthTest()
         .floatRenderTargets();
 
-        var timer = app.createTimer();
+        let timer = app.createTimer();
 
         // SET UP PROGRAM
-        var drawFsSource =  document.getElementById("fragment-draw").text.trim();
-        var drawFShader = app.createShader(PicoGL.FRAGMENT_SHADER, drawFsSource)
+        let drawFsSource =  document.getElementById("fragment-draw").text.trim();
+        let drawFShader = app.createShader(PicoGL.FRAGMENT_SHADER, drawFsSource)
 
-        var velocityVsSource =  document.getElementById("vertex-velocity").text.trim();
+        let velocityVsSource =  document.getElementById("vertex-velocity").text.trim();
 
-        var noVelocityVsSource =  document.getElementById("vertex-no-velocity").text.trim();
+        let noVelocityVsSource =  document.getElementById("vertex-no-velocity").text.trim();
 
-        var quadVSSource =  document.getElementById("vertex-quad").text.trim();
-        var blurFSSource =  document.getElementById("fragment-blur").text.trim();
+        let quadVSSource =  document.getElementById("vertex-quad").text.trim();
+        let blurFSSource =  document.getElementById("fragment-blur").text.trim();
         
-        var colorTarget = app.createTexture2D(app.width, app.height);
-        var velocityTarget = app.createTexture2D(app.width, app.height, { 
+        let colorTarget = app.createTexture2D(app.width, app.height);
+        let velocityTarget = app.createTexture2D(app.width, app.height, { 
             type: PicoGL.FLOAT,
             format: PicoGL.RG
         });
-        var depthTarget = app.createRenderbuffer(app.width, app.height, PicoGL.DEPTH_COMPONENT16);
-        var framebuffer = app.createFramebuffer()
+        let depthTarget = app.createRenderbuffer(app.width, app.height, PicoGL.DEPTH_COMPONENT16);
+        let framebuffer = app.createFramebuffer()
         .colorTarget(0, colorTarget)
         .colorTarget(1, velocityTarget)
         .depthTarget(depthTarget);
 
         // SET UP GEOMETRY
-        var sphere = utils.createSphere({radius: 0.2})
-        var positions = app.createVertexBuffer(PicoGL.FLOAT, 3, sphere.positions);
-        var uv = app.createVertexBuffer(PicoGL.FLOAT, 2, sphere.uvs);
-        var normals = app.createVertexBuffer(PicoGL.FLOAT, 3, sphere.normals);
-        var indices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, sphere.indices);
+        let sphere = utils.createSphere({radius: 0.2})
+        let positions = app.createVertexBuffer(PicoGL.FLOAT, 3, sphere.positions);
+        let uv = app.createVertexBuffer(PicoGL.FLOAT, 2, sphere.uvs);
+        let normals = app.createVertexBuffer(PicoGL.FLOAT, 3, sphere.normals);
+        let indices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, sphere.indices);
 
-        var sphereArray = app.createVertexArray()
+        let sphereArray = app.createVertexArray()
         .vertexAttributeBuffer(0, positions)
         .vertexAttributeBuffer(1, uv)
         .vertexAttributeBuffer(2, normals)
         .indexBuffer(indices);
 
-        var quadPositions = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
+        let quadPositions = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
             -1, 1,
             -1, -1,
             1, -1,
@@ -292,22 +292,22 @@
             1, 1,
         ]));
 
-        var quadArray = app.createVertexArray().vertexAttributeBuffer(0, quadPositions);
+        let quadArray = app.createVertexArray().vertexAttributeBuffer(0, quadPositions);
 
         // SET UP UNIFORM BUFFER
-        var projMatrix = mat4.create();
+        let projMatrix = mat4.create();
         mat4.perspective(projMatrix, Math.PI / 2, canvas.width / canvas.height, 0.1, 10.0);
 
-        var viewMatrix = mat4.create();
-        var eyePosition = vec3.fromValues(0, 0, 1.5);
+        let viewMatrix = mat4.create();
+        let eyePosition = vec3.fromValues(0, 0, 1.5);
         mat4.lookAt(viewMatrix, eyePosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
 
-        var viewProjMatrix = mat4.create();
+        let viewProjMatrix = mat4.create();
         mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
 
-        var lightPosition = vec3.fromValues(0.5, 0, 2);
+        let lightPosition = vec3.fromValues(0.5, 0, 2);
 
-        var sceneUniformBuffer = app.createUniformBuffer([
+        let sceneUniformBuffer = app.createUniformBuffer([
             PicoGL.FLOAT_MAT4,
             PicoGL.FLOAT_VEC4,
             PicoGL.FLOAT_VEC4
@@ -327,10 +327,10 @@
             sceneUniformBuffer.set(0, viewProjMatrix).update();
         }
 
-        var program;
-        var noVelocityProgram;
-        var blurProgram;
-        var programsReady = false;
+        let program;
+        let noVelocityProgram;
+        let blurProgram;
+        let programsReady = false;
 
         // USE PARALLEL SHADER COMPILATION IF AVAILABLE
         // https://www.khronos.org/registry/webgl/extensions/KHR_parallel_shader_compile/
@@ -348,8 +348,8 @@
             }
         });
         
-        var texture;
-        var texturesReady = false;
+        let texture;
+        let texturesReady = false;
 
         utils.loadImages(["img/webgl-logo.png"], function(images) {
             // CREATE TEXTURE
@@ -363,11 +363,11 @@
         });
 
         function start() {
-            var NUM_SPHERES = 10;
-            var spheres = new Array(NUM_SPHERES);
+            const NUM_SPHERES = 10;
+            let spheres = new Array(NUM_SPHERES);
 
             // OBJECT DESCRIPTIONS
-            for (var i = 0, len = spheres.length; i < len; ++i) {
+            for (let i = 0, len = spheres.length; i < len; ++i) {
                 spheres[i] = {
                     rotation: 1.8,
                     translation: [Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1],
@@ -383,15 +383,15 @@
                 }
             }
 
-            var blurDrawCall = app.createDrawCall(blurProgram, quadArray)
+            let blurDrawCall = app.createDrawCall(blurProgram, quadArray)
             .texture("color", framebuffer.colorAttachments[0])
             .texture("velocity", framebuffer.colorAttachments[1]);
 
-            var modelMatrix = mat4.create();
-            var translationMatrix = mat4.create();
-            var rotationMatrix = mat4.create();
+            let modelMatrix = mat4.create();
+            let translationMatrix = mat4.create();
+            let rotationMatrix = mat4.create();
 
-            var slowMoCounter = 0;
+            let slowMoCounter = 0;
 
             window.draw = function draw() {
                 if (timer.ready()) {
@@ -412,14 +412,14 @@
                 }
                 app.clear();
 
-                for (var i = 0, len = spheres.length; i < len; ++i) {
-                    var sphere = spheres[i];
+                for (let i = 0, len = spheres.length; i < len; ++i) {
+                    let sphere = spheres[i];
                     sphere.previousModelMatrix.set(sphere.modelMatrix);
 
                     // EASE OUT TO TARGET POSITION
-                    var diff = vec3.create();
+                    let diff = vec3.create();
                     vec3.subtract(diff, sphere.translation, sphere.translationTarget);
-                    var distance = vec3.length(diff);
+                    let distance = vec3.length(diff);
 
                     if (distance < STOP_THRESHOLD) {
                         sphere.translationTarget[0] = Math.random() * 2 - 1;

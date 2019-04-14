@@ -129,59 +129,59 @@
     <script type="text/javascript">
         utils.addTimerElement();
 
-        var canvas = document.getElementById("gl-canvas");
+        let canvas = document.getElementById("gl-canvas");
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         
-        var app = PicoGL.createApp(canvas)
+        let app = PicoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0)
         .depthTest()
         .cullBackfaces();
 
-        var timer = app.createTimer();
+        let timer = app.createTimer();
 
         // SET UP PICKING PROGRAM
-        var pickingVsSource = document.getElementById("picking-vs").text.trim();
-        var pickingFsSource = document.getElementById("picking-fs").text.trim();
+        let pickingVsSource = document.getElementById("picking-vs").text.trim();
+        let pickingFsSource = document.getElementById("picking-fs").text.trim();
 
-        var pickColorTarget = app.createTexture2D(app.width, app.height);
-        var pickDepthTarget = app.createRenderbuffer(app.width, app.height, PicoGL.DEPTH_COMPONENT16);
+        let pickColorTarget = app.createTexture2D(app.width, app.height);
+        let pickDepthTarget = app.createRenderbuffer(app.width, app.height, PicoGL.DEPTH_COMPONENT16);
 
-        var pickingBuffer = app.createFramebuffer().colorTarget(0, pickColorTarget).depthTarget(pickDepthTarget);
+        let pickingBuffer = app.createFramebuffer().colorTarget(0, pickColorTarget).depthTarget(pickDepthTarget);
 
         // SET UP MAIN PROGRAM
-        var vsSource = document.getElementById("main-vs").text.trim();
-        var fsSource = document.getElementById("main-fs").text.trim();
+        let vsSource = document.getElementById("main-vs").text.trim();
+        let fsSource = document.getElementById("main-fs").text.trim();
         
         // GEOMETRY
-        var box = utils.createBox({dimensions: [1.0, 1.0, 1.0]})
-        var positions = app.createVertexBuffer(PicoGL.FLOAT, 3, box.positions);
-        var uv = app.createVertexBuffer(PicoGL.FLOAT, 2, box.uvs);
-        var normals = app.createVertexBuffer(PicoGL.FLOAT, 3, box.normals);
+        let box = utils.createBox({dimensions: [1.0, 1.0, 1.0]})
+        let positions = app.createVertexBuffer(PicoGL.FLOAT, 3, box.positions);
+        let uv = app.createVertexBuffer(PicoGL.FLOAT, 2, box.uvs);
+        let normals = app.createVertexBuffer(PicoGL.FLOAT, 3, box.normals);
 
-        var boxArray = app.createVertexArray()
+        let boxArray = app.createVertexArray()
         .vertexAttributeBuffer(0, positions)
         .vertexAttributeBuffer(1, normals)
         .vertexAttributeBuffer(2, uv);
 
         // UNIFORMS
-        var projMatrix = mat4.create();
+        let projMatrix = mat4.create();
         mat4.perspective(projMatrix, Math.PI / 2, canvas.width / canvas.height, 0.1, 2.0);
 
-        var viewMatrix = mat4.create();
-        var eyePosition = vec3.fromValues(1, 1, 1);
+        let viewMatrix = mat4.create();
+        let eyePosition = vec3.fromValues(1, 1, 1);
         mat4.lookAt(viewMatrix, eyePosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
 
-        var viewProjMatrix = mat4.create();
+        let viewProjMatrix = mat4.create();
         mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
 
-        var lightPosition = vec3.fromValues(1, 1, 0.5);  
+        let lightPosition = vec3.fromValues(1, 1, 0.5);  
 
-        var highlightColor = vec3.fromValues(1.5, 1.5, 0.5);
-        var unhighlightColor = vec3.fromValues(1.0, 1.0, 1.0);
+        let highlightColor = vec3.fromValues(1.5, 1.5, 0.5);
+        let unhighlightColor = vec3.fromValues(1.0, 1.0, 1.0);
 
         // UNIFORM BUFFER
-        var sceneUniforms = app.createUniformBuffer([
+        let sceneUniforms = app.createUniformBuffer([
             PicoGL.FLOAT_VEC4,
             PicoGL.FLOAT_VEC4
         ]).set(0, lightPosition)
@@ -197,7 +197,7 @@
         };
 
         // OBJECT DESCRIPTIONS
-        var boxes = [
+        let boxes = [
             {
                 translate: [0, 0, 0],
                 rotate: [0, 0, 0],
@@ -230,11 +230,11 @@
             }
         ];
 
-        var pickingProgram;
-        var mainProgram;
-        var programsReady = false;
-        var texture;
-        var texturesReady = false;
+        let pickingProgram;
+        let mainProgram;
+        let programsReady = false;
+        let texture;
+        let texturesReady = false;
 
         // USE PARALLEL SHADER COMPILATION IF AVAILABLE
         // https://www.khronos.org/registry/webgl/extensions/KHR_parallel_shader_compile/
@@ -260,7 +260,7 @@
         });
 
         function start() {
-            for (var i = 0, len = boxes.length; i < len; ++i) {
+            for (let i = 0, len = boxes.length; i < len; ++i) {
                 boxes[i].pickingDrawCall = app.createDrawCall(pickingProgram, boxArray)
                 .uniform("uPickColor", boxes[i].pickColor);
 
@@ -271,10 +271,10 @@
             }
 
             // MOUSE HANDLER FOR PICKING
-            var mouseX = 0;
-            var mouseY = 0;
-            var picked = false;
-            var pickedColor = new Uint8Array(4);
+            let mouseX = 0;
+            let mouseY = 0;
+            let picked = false;
+            let pickedColor = new Uint8Array(4);
 
             window.addEventListener("mouseup", function(event) {
                 mouseX = event.clientX;
@@ -290,7 +290,7 @@
 
                 timer.start();
 
-                for (var i = 0, len = boxes.length; i < len; ++i) {
+                for (let i = 0, len = boxes.length; i < len; ++i) {
                     boxes[i].rotate[0] += 0.01;
                     boxes[i].rotate[1] += 0.02;
 
@@ -307,7 +307,7 @@
                     // DRAW TO PICKING BUFFER
                     app.drawFramebuffer(pickingBuffer).clear();
 
-                    for (var i = 0, len = boxes.length; i < len; ++i) {
+                    for (let i = 0, len = boxes.length; i < len; ++i) {
                         boxes[i].pickingDrawCall.draw();
                     }
 
@@ -336,7 +336,7 @@
                 // MAIN DRAW
                 app.clear();
                 
-                for (var i = 0, len = boxes.length; i < len; ++i) {
+                for (let i = 0, len = boxes.length; i < len; ++i) {
                     boxes[i].mainDrawCall.draw();
                 }
 
