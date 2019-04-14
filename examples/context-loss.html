@@ -315,47 +315,20 @@
         let contextLost = false;
         let lastContextLoss = Date.now();
 
-        let shadowProgram;
-        let lightProgram;
-        let mainProgram;
-        let progamsReady = false;
+        Promise.all([
+            app.createPrograms(
+                [shadowVShader, shadowFsSource],
+                [lightVsSource, lightFsSource],
+                [vsSource, fsSource]
+            ),
+            utils.loadImages(["img/webgl-logo.png", "img/cobblestone.jpg"])
+        ]).then(([
+            [shadowProgram, lightProgram, mainProgram],
+            [webglImage, cobblesImage]
+        ]) => {
+            let webglTexture = app.createTexture2D(webglImage, { flipY: true });
+            let cobblesTexture = app.createTexture2D(cobblesImage, { flipY: true });
 
-        let webglTexture;
-        let webglImage;
-        let cobblesTexture;
-        let cobblesImage;
-        let texturesReady = false;
-
-        // USE PARALLEL SHADER COMPILATION IF AVAILABLE
-        // https://www.khronos.org/registry/webgl/extensions/KHR_parallel_shader_compile/
-        app.createPrograms(
-            [shadowVShader, shadowFsSource],
-            [lightVsSource, lightFsSource],
-            [vsSource, fsSource]
-        ).then((programs) => {
-            [shadowProgram, lightProgram, mainProgram] = programs;
-
-            programsReady = true;
-
-            if (texturesReady) {
-                requestAnimationFrame(start);
-            }
-        });
-
-        utils.loadImages(["img/webgl-logo.png", "img/cobblestone.jpg"], function (images) {
-            webglImage = images[0];
-            cobblesImage = images[1];
-            webglTexture = app.createTexture2D(webglImage, { flipY: true });
-            cobblesTexture = app.createTexture2D(cobblesImage, { flipY: true });
-
-            texturesReady = true;
-
-            if (programsReady) {
-                requestAnimationFrame(start);
-            }
-        });
-
-        function start() {
             // DRAW CALLS
 
             let lightDrawcall = app.createDrawCall(lightProgram, sphereArray)
@@ -516,7 +489,7 @@
             }
 
             requestAnimationFrame(draw);
-        }
+        });
 
     </script>
     <a href="https://github.com/tsherif/picogl.js" id="github-ribbon"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"></a>

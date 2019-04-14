@@ -192,6 +192,103 @@
         }
 
         function startRender() {
+            
+        }
+
+        // USE PARALLEL SHADER COMPILATION IF AVAILABLE
+        // https://www.khronos.org/registry/webgl/extensions/KHR_parallel_shader_compile
+
+        let s3tcPromise, etcPromise, astcPromise, pvrtcPromise;
+
+        if (app.s3tcTexturesEnabled) {
+            s3tcPromise = utils.loadBinary("img/compressed/s3tc-supported-dxt1.pvr").then(data => {
+                let textureData = utils.parsePVR(data);
+                return app.createTexture2D(textureData.data, textureData.width, textureData.height, {
+                    format: PicoGL.COMPRESSED_RGB_S3TC_DXT1_EXT
+                });
+            });
+        } else {
+            s3tcPromise = new Promise((resolve) => {
+                let image = new Image();
+
+                image.onload = function() {
+                    resolve(app.createTexture2D(image));
+                }
+
+                image.src = "img/compressed/s3tc-unsupported.png";
+            });
+        }
+
+        if (app.etcTexturesEnabled) {
+            etcPromise = utils.loadBinary("img/compressed/etc-supported-etc2.pvr").then(data => {
+                let textureData = utils.parsePVR(data);
+                return app.createTexture2D(textureData.data, textureData.width, textureData.height, {
+                    format: PicoGL.COMPRESSED_RGB8_ETC2
+                });
+            });
+        } else {
+            etcPromise = new Promise((resolve) => {
+                let image = new Image();
+
+                image.onload = function() {
+                    resolve(app.createTexture2D(image));
+                }
+
+                image.src = "img/compressed/etc-unsupported.png";
+            });
+        }
+
+        if (app.astcTexturesEnabled) {
+            astcPromise = utils.loadBinary("img/compressed/astc-supported-astc.pvr").then(data => {
+                let textureData = utils.parsePVR(data);
+                return app.createTexture2D(textureData.data, textureData.width, textureData.height, {
+                    format: PicoGL.COMPRESSED_RGBA_ASTC_4x4_KHR
+                });
+            });
+        } else {
+            astcPromise = new Promise((resolve) => {
+                let image = new Image();
+
+                image.onload = function() {
+                    resolve(app.createTexture2D(image));
+                }
+
+                image.src = "img/compressed/astc-unsupported.png";
+            });
+        }
+
+        if (app.pvrtcTexturesEnabled) {
+            pvrtcPromise = utils.loadBinary("img/compressed/pvrtc-supported-pvrtc.pvr").then(data => {
+                let textureData = utils.parsePVR(data);
+                return app.createTexture2D(textureData.data, textureData.width, textureData.height, {
+                    format: PicoGL.COMPRESSED_RGB_PVRTC_4BPPV1_IMG
+                });
+            });
+        } else {
+            pvrtcPromise = new Promise((resolve) => {
+                let image = new Image();
+
+                image.onload = function() {
+                    resolve(app.createTexture2D(image));
+                }
+
+                image.src = "img/compressed/pvrtc-unsupported.png";
+            });
+        }
+
+        Promise.all([
+            app.createPrograms([vsSource, fsSource]),
+            s3tcPromise,
+            etcPromise,
+            astcPromise,
+            pvrtcPromise
+        ]).then(([
+            [program],
+            s3tcTexture,
+            etcTexture,
+            astcTexture,
+            pvrtcTexture
+        ]) => {
             // SET UP DRAW CALL
             boxes[0].drawCall = app.createDrawCall(program, boxArray)
             .uniformBlock("SceneUniforms", sceneUniformBuffer)
@@ -233,117 +330,7 @@
             }
 
             requestAnimationFrame(draw);
-        }
-
-        let program;
-        let programsReady = false;
-
-        let s3tcTexture, etcTexture, astcTexture, pvrtcTexture;
-        let texturesReady = false;
-
-        // USE PARALLEL SHADER COMPILATION IF AVAILABLE
-        // https://www.khronos.org/registry/webgl/extensions/KHR_parallel_shader_compile/
-        app.createPrograms([vsSource, fsSource]).then(([p]) => {
-            program = p;
-
-            programsReady = true;
-
-            if (texturesReady) {
-                requestAnimationFrame(startRender());
-            }
         });
-
-        let texturesRequested = 4;
-
-        function checkDone () {
-            if (--texturesRequested === 0) {
-
-                texturesReady = true;
-                if (programsReady) {
-                    startRender();
-                }
-            }
-        }
-
-        if (app.s3tcTexturesEnabled) {
-            utils.getBinary("img/compressed/s3tc-supported-dxt1.pvr", function(data) {
-                let textureData = utils.parsePVR(data);
-                s3tcTexture = app.createTexture2D(textureData.data, textureData.width, textureData.height, {
-                    format: PicoGL.COMPRESSED_RGB_S3TC_DXT1_EXT
-                });
-                
-                checkDone();
-            });
-        } else {
-            let s3tcImage = new Image();
-
-            s3tcImage.onload = function() {
-                s3tcTexture = app.createTexture2D(s3tcImage);
-                checkDone();
-            }
-
-            s3tcImage.src = "img/compressed/s3tc-unsupported.png";
-        }
-
-        if (app.etcTexturesEnabled) {
-            utils.getBinary("img/compressed/etc-supported-etc2.pvr", function(data) {
-                let textureData = utils.parsePVR(data);
-                etcTexture = app.createTexture2D(textureData.data, textureData.width, textureData.height, {
-                    format: PicoGL.COMPRESSED_RGB8_ETC2
-                });
-                
-                checkDone();
-            });
-        } else {
-            let etcImage = new Image();
-
-            etcImage.onload = function() {
-                etcTexture = app.createTexture2D(etcImage);
-                checkDone();
-            }
-
-            etcImage.src = "img/compressed/etc-unsupported.png";
-        }
-
-        if (app.astcTexturesEnabled) {
-            utils.getBinary("img/compressed/astc-supported-astc.pvr", function(data) {
-                let textureData = utils.parsePVR(data);
-                astcTexture = app.createTexture2D(textureData.data, textureData.width, textureData.height, {
-                    format: PicoGL.COMPRESSED_RGBA_ASTC_4x4_KHR
-                });
-                
-                checkDone();
-            });
-        } else {
-            let astcImage = new Image();
-
-            astcImage.onload = function() {
-                astcTexture = app.createTexture2D(astcImage);
-                checkDone();
-            }
-
-            astcImage.src = "img/compressed/astc-unsupported.png";
-        }
-
-        if (app.pvrtcTexturesEnabled) {
-            utils.getBinary("img/compressed/pvrtc-supported-pvrtc.pvr", function(data) {
-                let textureData = utils.parsePVR(data);
-                pvrtcTexture = app.createTexture2D(textureData.data, textureData.width, textureData.height, {
-                    format: PicoGL.COMPRESSED_RGB_PVRTC_4BPPV1_IMG
-                });
-                
-                checkDone();
-            });
-        } else {
-            let pvrtcImage = new Image();
-
-            pvrtcImage.onload = function() {
-                pvrtcTexture = app.createTexture2D(pvrtcImage);
-                checkDone();
-            }
-
-            pvrtcImage.src = "img/compressed/pvrtc-unsupported.png";
-        }
 
         
     </script>
