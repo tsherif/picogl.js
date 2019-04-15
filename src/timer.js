@@ -21,7 +21,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-import { GL } from "./constants";
+import { GL, WEBGL_INFO } from "./constants";
 import { Query } from "./query";
 
 /**
@@ -30,8 +30,6 @@ import { Query } from "./query";
     @class
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {Object} cpuTimer Timer for CPU. Will be window.performance, if available, or window.Date.
-    @prop {boolean} gpuTimer Whether the gpu timing is available (EXT_disjoint_timer_query_webgl2 or
-            EXT_disjoint_timer_query are supported).
     @prop {WebGLQuery} gpuTimerQuery Timer query object for GPU (if gpu timing is supported).
     @prop {boolean} gpuTimerQueryInProgress Whether a gpu timer query is currently in progress.
     @prop {number} cpuStartTime When the last CPU timing started.
@@ -45,7 +43,6 @@ export class Timer {
         this.gl = gl;
         this.cpuTimer = window.performance || window.Date;
 
-        this.gpuTimer = false;
         this.gpuTimerQuery = null;
 
         this.cpuStartTime = 0;
@@ -61,10 +58,8 @@ export class Timer {
         @method
         @return {Timer} The Timer object.
     */
-    restore() {
-        this.gpuTimer = Boolean(this.gl.getExtension("EXT_disjoint_timer_query_webgl2") || this.gl.getExtension("EXT_disjoint_timer_query"));
-        
-        if (this.gpuTimer) {
+    restore() {        
+        if (WEBGL_INFO.GPU_TIMER) {
             if (this.gpuTimerQuery) {
                 this.gpuTimerQuery.restore();
             } else {
@@ -87,7 +82,7 @@ export class Timer {
         @return {Timer} The Timer object.
     */
     start() {
-        if (this.gpuTimer) {
+        if (WEBGL_INFO.GPU_TIMER) {
             if (!this.gpuTimerQuery.active) {
                 this.gpuTimerQuery.begin();
                 this.cpuStartTime = this.cpuTimer.now();
@@ -107,7 +102,7 @@ export class Timer {
         @return {Timer} The Timer object.
     */
     end() {
-        if (this.gpuTimer) {
+        if (WEBGL_INFO.GPU_TIMER) {
             if (!this.gpuTimerQuery.active) {
                 this.gpuTimerQuery.end();
                 this.cpuTime = this.cpuTimer.now() - this.cpuStartTime;
@@ -129,7 +124,7 @@ export class Timer {
         @return {boolean} If results are available.
     */
     ready() {
-        if (this.gpuTimer) {
+        if (WEBGL_INFO.GPU_TIMER) {
             if (!this.gpuTimerQuery.active) {
                 return false;
             }
@@ -158,7 +153,6 @@ export class Timer {
         if (this.gpuTimerQuery) {
             this.gpuTimerQuery.delete();
             this.gpuTimerQuery = null;
-            this.gpuTimer = false;
         }
 
         return this;

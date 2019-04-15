@@ -196,7 +196,7 @@
 
         let s3tcPromise, etcPromise, astcPromise, pvrtcPromise;
 
-        if (app.s3tcTexturesEnabled) {
+        if (PicoGL.WEBGL_INFO.S3TC_TEXTURES) {
             s3tcPromise = utils.loadBinary("img/compressed/s3tc-supported-dxt1.pvr").then(data => {
                 let textureData = utils.parsePVR(data);
                 return app.createTexture2D(textureData.data, textureData.width, textureData.height, {
@@ -215,7 +215,7 @@
             });
         }
 
-        if (app.etcTexturesEnabled) {
+        if (PicoGL.WEBGL_INFO.ETC_TEXTURES) {
             etcPromise = utils.loadBinary("img/compressed/etc-supported-etc2.pvr").then(data => {
                 let textureData = utils.parsePVR(data);
                 return app.createTexture2D(textureData.data, textureData.width, textureData.height, {
@@ -234,7 +234,7 @@
             });
         }
 
-        if (app.astcTexturesEnabled) {
+        if (PicoGL.WEBGL_INFO.ASTC_TEXTURES) {
             astcPromise = utils.loadBinary("img/compressed/astc-supported-astc.pvr").then(data => {
                 let textureData = utils.parsePVR(data);
                 return app.createTexture2D(textureData.data, textureData.width, textureData.height, {
@@ -253,7 +253,7 @@
             });
         }
 
-        if (app.pvrtcTexturesEnabled) {
+        if (PicoGL.WEBGL_INFO.PVRTC_TEXTURES) {
             pvrtcPromise = utils.loadBinary("img/compressed/pvrtc-supported-pvrtc.pvr").then(data => {
                 let textureData = utils.parsePVR(data);
                 return app.createTexture2D(textureData.data, textureData.width, textureData.height, {

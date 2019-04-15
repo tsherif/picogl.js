@@ -21,7 +21,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-import { GL } from "./constants";
+import { GL, WEBGL_INFO } from "./constants";
 import { Shader } from "./shader";
 import {
     SingleComponentUniform,
@@ -60,7 +60,7 @@ export class Program {
         this.fragmentShader = null;
         this.linked = false;
         this.linkFailed = false;
-        this.parallelCompile = !forceSync && Boolean(this.gl.getExtension("KHR_parallel_shader_compile"));
+        this.parallelCompile = !forceSync && WEBGL_INFO.PARALLEL_SHADER_COMPILE;
         this.pollHandle = null;
 
         if (typeof vsSource === "string") {

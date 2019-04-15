@@ -1557,6 +1557,21 @@ const PicoGL = Object.assign({
                 gl.getParameter(__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].MAX_FRAGMENT_UNIFORM_VECTORS)
             );
             __WEBPACK_IMPORTED_MODULE_0__constants__["g" /* WEBGL_INFO */].SAMPLES = gl.getParameter(__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].SAMPLES);
+
+            // Extensions
+            __WEBPACK_IMPORTED_MODULE_0__constants__["g" /* WEBGL_INFO */].FLOAT_RENDER_TARGETS = Boolean(gl.getExtension("EXT_color_buffer_float"));
+            __WEBPACK_IMPORTED_MODULE_0__constants__["g" /* WEBGL_INFO */].LINEAR_FLOAT_TEXTURES = Boolean(gl.getExtension("OES_texture_float_linear"));
+            __WEBPACK_IMPORTED_MODULE_0__constants__["g" /* WEBGL_INFO */].S3TC_TEXTURES = Boolean(gl.getExtension("WEBGL_compressed_texture_s3tc"));
+            __WEBPACK_IMPORTED_MODULE_0__constants__["g" /* WEBGL_INFO */].S3TC_SRGB_TEXTURES = Boolean(gl.getExtension("WEBGL_compressed_texture_s3tc_srgb"));
+            __WEBPACK_IMPORTED_MODULE_0__constants__["g" /* WEBGL_INFO */].ETC_TEXTURES = Boolean(gl.getExtension("WEBGL_compressed_texture_etc"));
+            __WEBPACK_IMPORTED_MODULE_0__constants__["g" /* WEBGL_INFO */].ASTC_TEXTURES = Boolean(gl.getExtension("WEBGL_compressed_texture_astc"));
+            __WEBPACK_IMPORTED_MODULE_0__constants__["g" /* WEBGL_INFO */].PVRTC_TEXTURES = Boolean(gl.getExtension("WEBGL_compressed_texture_pvrtc"));
+            __WEBPACK_IMPORTED_MODULE_0__constants__["g" /* WEBGL_INFO */].LOSE_CONTEXT = Boolean(gl.getExtension("WEBGL_lose_context"));
+            __WEBPACK_IMPORTED_MODULE_0__constants__["g" /* WEBGL_INFO */].GPU_TIMER = Boolean(gl.getExtension("EXT_disjoint_timer_query_webgl2") || gl.getExtension("EXT_disjoint_timer_query"));
+
+            // Draft extensions
+            __WEBPACK_IMPORTED_MODULE_0__constants__["g" /* WEBGL_INFO */].PARALLEL_SHADER_COMPILE = Boolean(gl.getExtension("KHR_parallel_shader_compile"));
+
             webglInfoInitialized = true;      
         }
         return new __WEBPACK_IMPORTED_MODULE_1__app__["a" /* App */](gl, canvas);
@@ -2741,17 +2756,20 @@ class App {
 
     // Enable extensions
     initExtensions() {
-        this.floatRenderTargetsEnabled = Boolean(this.gl.getExtension("EXT_color_buffer_float"));
-        this.linearFloatTexturesEnabled = Boolean(this.gl.getExtension("OES_texture_float_linear"));
-        this.s3tcTexturesEnabled = Boolean(this.gl.getExtension("WEBGL_compressed_texture_s3tc"));
-        this.s3tcSRGBTexturesEnabled = Boolean(this.gl.getExtension("WEBGL_compressed_texture_s3tc_srgb"));
-        this.etcTexturesEnabled = Boolean(this.gl.getExtension("WEBGL_compressed_texture_etc"));
-        this.astcTexturesEnabled = Boolean(this.gl.getExtension("WEBGL_compressed_texture_astc"));
-        this.pvrtcTexturesEnabled = Boolean(this.gl.getExtension("WEBGL_compressed_texture_pvrtc"));
+        this.gl.getExtension("EXT_color_buffer_float");
+        this.gl.getExtension("OES_texture_float_linear");
+        this.gl.getExtension("WEBGL_compressed_texture_s3tc");
+        this.gl.getExtension("WEBGL_compressed_texture_s3tc_srgb");
+        this.gl.getExtension("WEBGL_compressed_texture_etc");
+        this.gl.getExtension("WEBGL_compressed_texture_astc");
+        this.gl.getExtension("WEBGL_compressed_texture_pvrtc");
+        this.gl.getExtension("EXT_disjoint_timer_query_webgl2");
+        this.gl.getExtension("EXT_disjoint_timer_query");
+        
         this.contextLostExt = this.gl.getExtension("WEBGL_lose_context");
 
-        //Draft extensions
-        this.parallelCompileEnabled = Boolean(this.gl.getExtension("KHR_parallel_shader_compile"));
+        // Draft extensions
+        this.gl.getExtension("KHR_parallel_shader_compile");
     }
 
 }
@@ -3659,7 +3677,7 @@ class Program {
         this.fragmentShader = null;
         this.linked = false;
         this.linkFailed = false;
-        this.parallelCompile = !forceSync && Boolean(this.gl.getExtension("KHR_parallel_shader_compile"));
+        this.parallelCompile = !forceSync && __WEBPACK_IMPORTED_MODULE_0__constants__["g" /* WEBGL_INFO */].PARALLEL_SHADER_COMPILE;
         this.pollHandle = null;
 
         if (typeof vsSource === "string") {
@@ -4179,8 +4197,6 @@ class MatrixUniform {
     @class
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {Object} cpuTimer Timer for CPU. Will be window.performance, if available, or window.Date.
-    @prop {boolean} gpuTimer Whether the gpu timing is available (EXT_disjoint_timer_query_webgl2 or
-            EXT_disjoint_timer_query are supported).
     @prop {WebGLQuery} gpuTimerQuery Timer query object for GPU (if gpu timing is supported).
     @prop {boolean} gpuTimerQueryInProgress Whether a gpu timer query is currently in progress.
     @prop {number} cpuStartTime When the last CPU timing started.
@@ -4194,7 +4210,6 @@ class Timer {
         this.gl = gl;
         this.cpuTimer = window.performance || window.Date;
 
-        this.gpuTimer = false;
         this.gpuTimerQuery = null;
 
         this.cpuStartTime = 0;
@@ -4210,10 +4225,8 @@ class Timer {
         @method
         @return {Timer} The Timer object.
     */
-    restore() {
-        this.gpuTimer = Boolean(this.gl.getExtension("EXT_disjoint_timer_query_webgl2") || this.gl.getExtension("EXT_disjoint_timer_query"));
-        
-        if (this.gpuTimer) {
+    restore() {        
+        if (__WEBPACK_IMPORTED_MODULE_0__constants__["g" /* WEBGL_INFO */].GPU_TIMER) {
             if (this.gpuTimerQuery) {
                 this.gpuTimerQuery.restore();
             } else {
@@ -4236,7 +4249,7 @@ class Timer {
         @return {Timer} The Timer object.
     */
     start() {
-        if (this.gpuTimer) {
+        if (__WEBPACK_IMPORTED_MODULE_0__constants__["g" /* WEBGL_INFO */].GPU_TIMER) {
             if (!this.gpuTimerQuery.active) {
                 this.gpuTimerQuery.begin();
                 this.cpuStartTime = this.cpuTimer.now();
@@ -4256,7 +4269,7 @@ class Timer {
         @return {Timer} The Timer object.
     */
     end() {
-        if (this.gpuTimer) {
+        if (__WEBPACK_IMPORTED_MODULE_0__constants__["g" /* WEBGL_INFO */].GPU_TIMER) {
             if (!this.gpuTimerQuery.active) {
                 this.gpuTimerQuery.end();
                 this.cpuTime = this.cpuTimer.now() - this.cpuStartTime;
@@ -4278,7 +4291,7 @@ class Timer {
         @return {boolean} If results are available.
     */
     ready() {
-        if (this.gpuTimer) {
+        if (__WEBPACK_IMPORTED_MODULE_0__constants__["g" /* WEBGL_INFO */].GPU_TIMER) {
             if (!this.gpuTimerQuery.active) {
                 return false;
             }
@@ -4307,7 +4320,6 @@ class Timer {
         if (this.gpuTimerQuery) {
             this.gpuTimerQuery.delete();
             this.gpuTimerQuery = null;
-            this.gpuTimer = false;
         }
 
         return this;

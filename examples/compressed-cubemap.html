@@ -263,16 +263,16 @@
             let cubemapPromise;
 
             let compressedType = null;
-            if (app.astcTexturesEnabled) {
+            if (PicoGL.WEBGL_INFO.ASTC_TEXTURES) {
                 compressedType = "astc";
                 format = PicoGL.COMPRESSED_RGBA_ASTC_4x4_KHR;
-            } else if (app.s3tcTexturesEnabled) {
+            } else if (PicoGL.WEBGL_INFO.S3TC_TEXTURES) {
                 compressedType = "s3tc";
                 format = PicoGL.COMPRESSED_RGB_S3TC_DXT1_EXT;
-            } else if (app.pvrtcTexturesEnabled) {
+            } else if (PicoGL.WEBGL_INFO.PVRTC_TEXTURES) {
                 compressedType = "pvrtc";
                 format = PicoGL.COMPRESSED_RGB_PVRTC_4BPPV1_IMG;
-            } else if (app.etcTexturesEnabled) {
+            } else if (PicoGL.WEBGL_INFO.ETC_TEXTURES) {
                 compressedType = "etc";
                 format = PicoGL.COMPRESSED_RGB8_ETC2;
             }

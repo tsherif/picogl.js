@@ -1154,17 +1154,20 @@ export class App {
 
     // Enable extensions
     initExtensions() {
-        this.floatRenderTargetsEnabled = Boolean(this.gl.getExtension("EXT_color_buffer_float"));
-        this.linearFloatTexturesEnabled = Boolean(this.gl.getExtension("OES_texture_float_linear"));
-        this.s3tcTexturesEnabled = Boolean(this.gl.getExtension("WEBGL_compressed_texture_s3tc"));
-        this.s3tcSRGBTexturesEnabled = Boolean(this.gl.getExtension("WEBGL_compressed_texture_s3tc_srgb"));
-        this.etcTexturesEnabled = Boolean(this.gl.getExtension("WEBGL_compressed_texture_etc"));
-        this.astcTexturesEnabled = Boolean(this.gl.getExtension("WEBGL_compressed_texture_astc"));
-        this.pvrtcTexturesEnabled = Boolean(this.gl.getExtension("WEBGL_compressed_texture_pvrtc"));
+        this.gl.getExtension("EXT_color_buffer_float");
+        this.gl.getExtension("OES_texture_float_linear");
+        this.gl.getExtension("WEBGL_compressed_texture_s3tc");
+        this.gl.getExtension("WEBGL_compressed_texture_s3tc_srgb");
+        this.gl.getExtension("WEBGL_compressed_texture_etc");
+        this.gl.getExtension("WEBGL_compressed_texture_astc");
+        this.gl.getExtension("WEBGL_compressed_texture_pvrtc");
+        this.gl.getExtension("EXT_disjoint_timer_query_webgl2");
+        this.gl.getExtension("EXT_disjoint_timer_query");
+        
         this.contextLostExt = this.gl.getExtension("WEBGL_lose_context");
 
         // Draft extensions
-        this.parallelCompileEnabled = Boolean(this.gl.getExtension("KHR_parallel_shader_compile"));
+        this.gl.getExtension("KHR_parallel_shader_compile");
     }
 
 }
