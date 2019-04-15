@@ -276,8 +276,7 @@
         let app = PicoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0)
         .depthTest()
-        .depthFunc(PicoGL.LEQUAL)
-        .floatRenderTargets();
+        .depthFunc(PicoGL.LEQUAL);
 
         let timer = app.createTimer();
 

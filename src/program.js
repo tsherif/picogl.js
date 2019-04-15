@@ -60,8 +60,7 @@ export class Program {
         this.fragmentShader = null;
         this.linked = false;
         this.linkFailed = false;
-        this.parallelCompile = false;
-        this.forceSync = Boolean(forceSync);
+        this.parallelCompile = !forceSync && Boolean(this.gl.getExtension("KHR_parallel_shader_compile"));
         this.pollHandle = null;
 
         if (typeof vsSource === "string") {
@@ -96,7 +95,6 @@ export class Program {
             this.pollHandle = null;
         }
 
-        this.parallelCompile = !this.forceSync && Boolean(this.gl.getExtension("KHR_parallel_shader_compile"));
         this.linked = false;
         this.linkFailed = false;
         this.uniformBlockCount = 0;

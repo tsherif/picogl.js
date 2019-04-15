@@ -230,8 +230,7 @@
 
         let app = PicoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0)
-        .depthTest()
-        .floatRenderTargets();
+        .depthTest();
 
         if (!testExtension("EXT_color_buffer_float")) {
             document.body.innerHTML = "This example requires extension EXT_color_buffer_float which is not supported on this system."

@@ -171,8 +171,7 @@
         
         let app = PicoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0)
-        .depthTest()
-        .floatRenderTargets();
+        .depthTest();
 
         let timer = app.createTimer();
 
@@ -353,10 +352,9 @@
                 .texture("uShadowMap", shadowTarget);
             }
 
-            app.onContextRestored(function() {
+            app.onContextRestored(() => {
                 app.clearColor(0.0, 0.0, 0.0, 1.0)
-                .depthTest()
-                .floatRenderTargets();
+                .depthTest();
 
                 timer.restore();
 

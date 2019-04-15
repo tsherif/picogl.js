@@ -764,7 +764,58 @@ const TEXTURE_FORMAT_DEFAULTS = {
 /* harmony export (immutable) */ __webpack_exports__["e"] = TEXTURE_FORMAT_DEFAULTS;
 
 
-const COMPRESSED_TEXTURE_TYPES = {};
+const COMPRESSED_TEXTURE_TYPES = {
+    [GL.COMPRESSED_RGB_S3TC_DXT1_EXT]: true,
+    [GL.COMPRESSED_RGBA_S3TC_DXT1_EXT]: true,
+    [GL.COMPRESSED_RGBA_S3TC_DXT3_EXT]: true,
+    [GL.COMPRESSED_RGBA_S3TC_DXT5_EXT]: true,
+    [GL.COMPRESSED_SRGB_S3TC_DXT1_EXT]: true,
+    [GL.COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT]: true,
+    [GL.COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT]: true,
+    [GL.COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT]: true,
+    [GL.COMPRESSED_R11_EAC]: true,
+    [GL.COMPRESSED_SIGNED_R11_EAC]: true,
+    [GL.COMPRESSED_RG11_EAC]: true,
+    [GL.COMPRESSED_SIGNED_RG11_EAC]: true,
+    [GL.COMPRESSED_RGB8_ETC2]: true,
+    [GL.COMPRESSED_SRGB8_ETC2]: true,
+    [GL.COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2]: true,
+    [GL.COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2]: true,
+    [GL.COMPRESSED_RGBA8_ETC2_EAC]: true,
+    [GL.COMPRESSED_SRGB8_ALPHA8_ETC2_EAC]: true,
+    [GL.COMPRESSED_RGBA_ASTC_4x4_KHR]: true,
+    [GL.COMPRESSED_RGBA_ASTC_5x4_KHR]: true,
+    [GL.COMPRESSED_RGBA_ASTC_5x5_KHR]: true,
+    [GL.COMPRESSED_RGBA_ASTC_6x5_KHR]: true,
+    [GL.COMPRESSED_RGBA_ASTC_6x6_KHR]: true,
+    [GL.COMPRESSED_RGBA_ASTC_8x5_KHR]: true,
+    [GL.COMPRESSED_RGBA_ASTC_8x6_KHR]: true,
+    [GL.COMPRESSED_RGBA_ASTC_8x8_KHR]: true,
+    [GL.COMPRESSED_RGBA_ASTC_10x5_KHR]: true,
+    [GL.COMPRESSED_RGBA_ASTC_10x6_KHR]: true,
+    [GL.COMPRESSED_RGBA_ASTC_10x8_KHR]: true,
+    [GL.COMPRESSED_RGBA_ASTC_10x10_KHR]: true,
+    [GL.COMPRESSED_RGBA_ASTC_12x10_KHR]: true,
+    [GL.COMPRESSED_RGBA_ASTC_12x12_KHR]: true,
+    [GL.COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR]: true,
+    [GL.COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR]: true,
+    [GL.COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR]: true,
+    [GL.COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR]: true,
+    [GL.COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR]: true,
+    [GL.COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR]: true,
+    [GL.COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR]: true,
+    [GL.COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR]: true,
+    [GL.COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR]: true,
+    [GL.COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR]: true,
+    [GL.COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR]: true,
+    [GL.COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR]: true,
+    [GL.COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR]: true,
+    [GL.COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR]: true,
+    [GL.COMPRESSED_RGB_PVRTC_4BPPV1_IMG]: true,
+    [GL.COMPRESSED_RGB_PVRTC_2BPPV1_IMG]: true,
+    [GL.COMPRESSED_RGBA_PVRTC_4BPPV1_IMG]: true,
+    [GL.COMPRESSED_RGBA_PVRTC_2BPPV1_IMG]: true
+};
 /* harmony export (immutable) */ __webpack_exports__["a"] = COMPRESSED_TEXTURE_TYPES;
 
 
@@ -1253,7 +1304,6 @@ class Shader {
         this.shader = null;
         this.type = type;
         this.source = source;
-        this.parallelCompile = false;
 
         this.restore();
     }
@@ -1265,7 +1315,6 @@ class Shader {
         @return {Shader} The Shader object.
     */
     restore() {
-        this.parallelCompile = Boolean(this.gl.getExtension("KHR_parallel_shader_compile"));
         this.shader = this.gl.createShader(this.type);
         this.gl.shaderSource(this.shader, this.source);
         this.gl.compileShader(this.shader);
@@ -1624,6 +1673,8 @@ class App {
         this.cpuTime = 0;
         this.gpuTime = 0;
 
+        this.viewport(0, 0, this.width, this.height);
+        
         // Extensions
         this.floatRenderTargetsEnabled = false;
         this.linearFloatTexturesEnabled = false;
@@ -1632,11 +1683,23 @@ class App {
         this.etcTexturesEnabled = false;
         this.astcTexturesEnabled = false;
         this.pvrtcTexturesEnabled = false;
-
-        this.viewport(0, 0, this.width, this.height);
+        this.contextLostExt = null;
+        
+        this.initExtensions();
 
         this.contextRestoredHandler = null;
-        this.contextLostExt = null;
+
+        this.canvas.addEventListener("webglcontextlost", (e) => {
+            e.preventDefault();
+        });
+
+        this.canvas.addEventListener("webglcontextrestored", () => {
+            this.initExtensions();
+
+            if (this.contextRestoredHandler) {
+                this.contextRestoredHandler();
+            }
+        });
     }
 
     /**
@@ -1646,10 +1709,6 @@ class App {
         @return {App} The App object.
     */
     loseContext() {
-        if (!this.contextLostExt) {
-            this.contextLostExt = this.gl.getExtension("WEBGL_lose_context");
-        }
-
         if (this.contextLostExt) {
             this.contextLostExt.loseContext();
         }
@@ -1678,16 +1737,7 @@ class App {
         @param {function} fn Context restored handler.
         @return {App} The App object.
     */
-    onContextRestored(fn) {
-        if (this.contextRestoredHandler) {
-            this.canvas.removeEventListener("webglcontextrestored", this.contextRestoredHandler);
-        } else {
-            this.canvas.addEventListener("webglcontextlost", (e) => {
-                e.preventDefault();
-            });
-        }
-
-        this.canvas.addEventListener("webglcontextrestored", fn);
+    onContextRestored(fn) {        
         this.contextRestoredHandler = fn;
 
         return this;
@@ -2194,223 +2244,6 @@ class App {
     }
 
     /**
-        Enable the EXT_color_buffer_float extension. Allows for creating float textures as
-        render targets on FrameBuffer objects.
-
-        @method
-        @see Framebuffer
-        @return {App} The App object.
-    */
-    floatRenderTargets() {
-        this.floatRenderTargetsEnabled = Boolean(this.gl.getExtension("EXT_color_buffer_float"));
-
-        return this;
-    }
-
-    /**
-        Enable the OES_texture_float_linear extension. Allows for linear blending on float textures.
-
-        @method
-        @see Framebuffer
-        @return {App} The App object.
-    */
-    linearFloatTextures() {
-        this.linearFloatTexturesEnabled = Boolean(this.gl.getExtension("OES_texture_float_linear"));
-
-        return this;
-    }
-
-
-    /**
-        Enable the WEBGL_compressed_texture_s3tc and WEBGL_compressed_texture_s3tc_srgb extensions, which
-        allow the following enums to be used as texture formats:
-
-        <ul>
-          <li>PicoGL.COMPRESSED_RGB_S3TC_DXT1_EXT
-          <li>PicoGL.COMPRESSED_RGBA_S3TC_DXT1_EXT
-          <li>PicoGL.COMPRESSED_RGBA_S3TC_DXT3_EXT
-          <li>PicoGL.COMPRESSED_RGBA_S3TC_DXT5_EXT
-          <li>PicoGL.COMPRESSED_SRGB_S3TC_DXT1_EXT
-          <li>PicoGL.COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT
-          <li>PicoGL.COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT
-          <li>PicoGL.COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT
-        </ul>
-
-        @method
-        @return {App} The App object.
-    */
-    s3tcTextures() {
-        let ext = this.gl.getExtension("WEBGL_compressed_texture_s3tc");
-        this.s3tcTexturesEnabled = Boolean(ext);
-
-        if (this.s3tcTexturesEnabled) {
-            __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPRESSED_RGB_S3TC_DXT1_EXT]  = true;
-            __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPRESSED_RGBA_S3TC_DXT1_EXT] = true;
-            __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPRESSED_RGBA_S3TC_DXT3_EXT] = true;
-            __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPRESSED_RGBA_S3TC_DXT5_EXT] = true;
-        }
-
-        ext = this.gl.getExtension("WEBGL_compressed_texture_s3tc_srgb");
-        this.s3tcSRGBTexturesEnabled = Boolean(ext);
-
-        if (this.s3tcSRGBTexturesEnabled) {
-            __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPRESSED_SRGB_S3TC_DXT1_EXT]       = true;
-            __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT] = true;
-            __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT] = true;
-            __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT] = true;
-        }
-
-        return this;
-    }
-
-    /**
-        Enable the WEBGL_compressed_texture_etc extension, which allows the following enums to
-        be used as texture formats:
-
-        <ul>
-          <li>PicoGL.COMPRESSED_R11_EAC
-          <li>PicoGL.COMPRESSED_SIGNED_R11_EAC
-          <li>PicoGL.COMPRESSED_RG11_EAC
-          <li>PicoGL.COMPRESSED_SIGNED_RG11_EAC
-          <li>PicoGL.COMPRESSED_RGB8_ETC2
-          <li>PicoGL.COMPRESSED_SRGB8_ETC2
-          <li>PicoGL.COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2
-          <li>PicoGL.COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2
-          <li>PicoGL.COMPRESSED_RGBA8_ETC2_EAC
-          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ETC2_EAC
-        </ul>
-
-        Note that while WEBGL_compressed_texture_etc1 is not enabled by this method,
-        ETC1 textures can be loaded using COMPRESSED_RGB8_ETC2 as the format.
-
-        @method
-        @return {App} The App object.
-    */
-    etcTextures() {
-        let ext = this.gl.getExtension("WEBGL_compressed_texture_etc");
-        this.etcTexturesEnabled = Boolean(ext);
-
-        if (this.etcTexturesEnabled) {
-            __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPRESSED_R11_EAC]                        = true;
-            __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPRESSED_SIGNED_R11_EAC]                 = true;
-            __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPRESSED_RG11_EAC]                       = true;
-            __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPRESSED_SIGNED_RG11_EAC]                = true;
-            __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPRESSED_RGB8_ETC2]                      = true;
-            __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPRESSED_SRGB8_ETC2]                     = true;
-            __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2]  = true;
-            __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2] = true;
-            __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPRESSED_RGBA8_ETC2_EAC]                 = true;
-            __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPRESSED_SRGB8_ALPHA8_ETC2_EAC]          = true;
-        }
-
-        return this;
-    }
-
-    /**
-        Enable the WEBGL_compressed_texture_astc extension, which allows the following enums to
-        be used as texture formats:
-
-        <ul>
-          <li>PicoGL.COMPRESSED_RGBA_ASTC_4x4_KHR
-          <li>PicoGL.COMPRESSED_RGBA_ASTC_5x4_KHR
-          <li>PicoGL.COMPRESSED_RGBA_ASTC_5x5_KHR
-          <li>PicoGL.COMPRESSED_RGBA_ASTC_6x5_KHR
-          <li>PicoGL.COMPRESSED_RGBA_ASTC_6x6_KHR
-          <li>PicoGL.COMPRESSED_RGBA_ASTC_8x5_KHR
-          <li>PicoGL.COMPRESSED_RGBA_ASTC_8x6_KHR
-          <li>PicoGL.COMPRESSED_RGBA_ASTC_8x8_KHR
-          <li>PicoGL.COMPRESSED_RGBA_ASTC_10x5_KHR
-          <li>PicoGL.COMPRESSED_RGBA_ASTC_10x6_KHR
-          <li>PicoGL.COMPRESSED_RGBA_ASTC_10x8_KHR
-          <li>PicoGL.COMPRESSED_RGBA_ASTC_10x10_KHR
-          <li>PicoGL.COMPRESSED_RGBA_ASTC_12x10_KHR
-          <li>PicoGL.COMPRESSED_RGBA_ASTC_12x12_KHR
-          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR
-          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR
-          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR
-          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR
-          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR
-          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR
-          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR
-          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR
-          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR
-          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR
-          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR
-          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR
-          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR
-          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR
-        </ul>
-
-        @method
-        @return {App} The App object.
-    */
-    astcTextures() {
-        let ext = this.gl.getExtension("WEBGL_compressed_texture_astc");
-        this.astcTexturesEnabled = Boolean(ext);
-
-        if (this.astcTexturesEnabled) {
-            __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPRESSED_RGBA_ASTC_4x4_KHR]           = true;
-            __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPRESSED_RGBA_ASTC_5x4_KHR]           = true;
-            __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPRESSED_RGBA_ASTC_5x5_KHR]           = true;
-            __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPRESSED_RGBA_ASTC_6x5_KHR]           = true;
-            __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPRESSED_RGBA_ASTC_6x6_KHR]           = true;
-            __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPRESSED_RGBA_ASTC_8x5_KHR]           = true;
-            __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPRESSED_RGBA_ASTC_8x6_KHR]           = true;
-            __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPRESSED_RGBA_ASTC_8x8_KHR]           = true;
-            __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPRESSED_RGBA_ASTC_10x5_KHR]          = true;
-            __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPRESSED_RGBA_ASTC_10x6_KHR]          = true;
-            __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPRESSED_RGBA_ASTC_10x8_KHR]          = true;
-            __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPRESSED_RGBA_ASTC_10x10_KHR]         = true;
-            __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPRESSED_RGBA_ASTC_12x10_KHR]         = true;
-            __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPRESSED_RGBA_ASTC_12x12_KHR]         = true;
-            __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR]   = true;
-            __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR]   = true;
-            __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR]   = true;
-            __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR]   = true;
-            __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR]   = true;
-            __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR]   = true;
-            __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR]   = true;
-            __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR]   = true;
-            __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR]  = true;
-            __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR]  = true;
-            __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR]  = true;
-            __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR] = true;
-            __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR] = true;
-            __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR] = true;
-        }
-
-        return this;
-    }
-
-    /**
-        Enable the WEBGL_compressed_texture_pvrtc extension, which allows the following enums to
-        be used as texture formats:
-
-        <ul>
-          <li>PicoGL.COMPRESSED_RGB_PVRTC_4BPPV1_IMG
-          <li>PicoGL.COMPRESSED_RGB_PVRTC_2BPPV1_IMG
-          <li>PicoGL.COMPRESSED_RGBA_PVRTC_4BPPV1_IMG
-          <li>PicoGL.COMPRESSED_RGBA_PVRTC_2BPPV1_IMG
-        </ul>
-
-        @method
-        @return {App} The App object.
-    */
-    pvrtcTextures() {
-        let ext = this.gl.getExtension("WEBGL_compressed_texture_pvrtc");
-        this.pvrtcTexturesEnabled = Boolean(ext);
-
-        if (this.pvrtcTexturesEnabled) {
-            __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPRESSED_RGB_PVRTC_4BPPV1_IMG] = true;
-            __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPRESSED_RGB_PVRTC_2BPPV1_IMG] = true;
-            __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPRESSED_RGBA_PVRTC_4BPPV1_IMG] = true;
-            __WEBPACK_IMPORTED_MODULE_0__constants__["a" /* COMPRESSED_TEXTURE_TYPES */][__WEBPACK_IMPORTED_MODULE_0__constants__["d" /* GL */].COMPRESSED_RGBA_PVRTC_2BPPV1_IMG] = true;
-        }
-
-        return this;
-    }
-
-    /**
         Read a pixel's color value from the currently-bound framebuffer.
 
         @method
@@ -2489,7 +2322,7 @@ class App {
     }
 
     /**
-        Create a program synchronously. It is highly recommended to use "createPrograms" instead as
+        Create a program synchronously. It is highly recommended to use <b>createPrograms</b> instead as
             that method will compile shaders in parallel where possible.
         @method
         @param {Shader|string} vertexShader Vertex shader object or source code.
@@ -2904,6 +2737,21 @@ class App {
     */
     createDrawCall(program, vertexArray, primitive) {
         return new __WEBPACK_IMPORTED_MODULE_2__draw_call__["a" /* DrawCall */](this.gl, this.state, program, vertexArray, primitive);
+    }
+
+    // Enable extensions
+    initExtensions() {
+        this.floatRenderTargetsEnabled = Boolean(this.gl.getExtension("EXT_color_buffer_float"));
+        this.linearFloatTexturesEnabled = Boolean(this.gl.getExtension("OES_texture_float_linear"));
+        this.s3tcTexturesEnabled = Boolean(this.gl.getExtension("WEBGL_compressed_texture_s3tc"));
+        this.s3tcSRGBTexturesEnabled = Boolean(this.gl.getExtension("WEBGL_compressed_texture_s3tc_srgb"));
+        this.etcTexturesEnabled = Boolean(this.gl.getExtension("WEBGL_compressed_texture_etc"));
+        this.astcTexturesEnabled = Boolean(this.gl.getExtension("WEBGL_compressed_texture_astc"));
+        this.pvrtcTexturesEnabled = Boolean(this.gl.getExtension("WEBGL_compressed_texture_pvrtc"));
+        this.contextLostExt = this.gl.getExtension("WEBGL_lose_context");
+
+        //Draft extensions
+        this.parallelCompileEnabled = Boolean(this.gl.getExtension("KHR_parallel_shader_compile"));
     }
 
 }
@@ -3811,8 +3659,7 @@ class Program {
         this.fragmentShader = null;
         this.linked = false;
         this.linkFailed = false;
-        this.parallelCompile = false;
-        this.forceSync = Boolean(forceSync);
+        this.parallelCompile = !forceSync && Boolean(this.gl.getExtension("KHR_parallel_shader_compile"));
         this.pollHandle = null;
 
         if (typeof vsSource === "string") {
@@ -3847,7 +3694,6 @@ class Program {
             this.pollHandle = null;
         }
 
-        this.parallelCompile = !this.forceSync && Boolean(this.gl.getExtension("KHR_parallel_shader_compile"));
         this.linked = false;
         this.linkFailed = false;
         this.uniformBlockCount = 0;
@@ -4029,7 +3875,6 @@ class Program {
             this.fragmentShader.delete();
             this.fragmentShader = null;
         }
-
     }
 
     // Set the value of a uniform.

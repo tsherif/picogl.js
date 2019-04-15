@@ -21,7 +21,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-import { GL, COMPRESSED_TEXTURE_TYPES, WEBGL_INFO, DUMMY_OBJECT } from "./constants";
+import { GL, WEBGL_INFO, DUMMY_OBJECT } from "./constants";
 import { Cubemap } from "./cubemap";
 import { DrawCall } from "./draw-call";
 import { Framebuffer } from "./framebuffer";
@@ -86,6 +86,8 @@ export class App {
         this.cpuTime = 0;
         this.gpuTime = 0;
 
+        this.viewport(0, 0, this.width, this.height);
+        
         // Extensions
         this.floatRenderTargetsEnabled = false;
         this.linearFloatTexturesEnabled = false;
@@ -94,11 +96,23 @@ export class App {
         this.etcTexturesEnabled = false;
         this.astcTexturesEnabled = false;
         this.pvrtcTexturesEnabled = false;
-
-        this.viewport(0, 0, this.width, this.height);
+        this.contextLostExt = null;
+        
+        this.initExtensions();
 
         this.contextRestoredHandler = null;
-        this.contextLostExt = null;
+
+        this.canvas.addEventListener("webglcontextlost", (e) => {
+            e.preventDefault();
+        });
+
+        this.canvas.addEventListener("webglcontextrestored", () => {
+            this.initExtensions();
+
+            if (this.contextRestoredHandler) {
+                this.contextRestoredHandler();
+            }
+        });
     }
 
     /**
@@ -108,10 +122,6 @@ export class App {
         @return {App} The App object.
     */
     loseContext() {
-        if (!this.contextLostExt) {
-            this.contextLostExt = this.gl.getExtension("WEBGL_lose_context");
-        }
-
         if (this.contextLostExt) {
             this.contextLostExt.loseContext();
         }
@@ -140,16 +150,7 @@ export class App {
         @param {function} fn Context restored handler.
         @return {App} The App object.
     */
-    onContextRestored(fn) {
-        if (this.contextRestoredHandler) {
-            this.canvas.removeEventListener("webglcontextrestored", this.contextRestoredHandler);
-        } else {
-            this.canvas.addEventListener("webglcontextlost", (e) => {
-                e.preventDefault();
-            });
-        }
-
-        this.canvas.addEventListener("webglcontextrestored", fn);
+    onContextRestored(fn) {        
         this.contextRestoredHandler = fn;
 
         return this;
@@ -656,223 +657,6 @@ export class App {
     }
 
     /**
-        Enable the EXT_color_buffer_float extension. Allows for creating float textures as
-        render targets on FrameBuffer objects.
-
-        @method
-        @see Framebuffer
-        @return {App} The App object.
-    */
-    floatRenderTargets() {
-        this.floatRenderTargetsEnabled = Boolean(this.gl.getExtension("EXT_color_buffer_float"));
-
-        return this;
-    }
-
-    /**
-        Enable the OES_texture_float_linear extension. Allows for linear blending on float textures.
-
-        @method
-        @see Framebuffer
-        @return {App} The App object.
-    */
-    linearFloatTextures() {
-        this.linearFloatTexturesEnabled = Boolean(this.gl.getExtension("OES_texture_float_linear"));
-
-        return this;
-    }
-
-
-    /**
-        Enable the WEBGL_compressed_texture_s3tc and WEBGL_compressed_texture_s3tc_srgb extensions, which
-        allow the following enums to be used as texture formats:
-
-        <ul>
-          <li>PicoGL.COMPRESSED_RGB_S3TC_DXT1_EXT
-          <li>PicoGL.COMPRESSED_RGBA_S3TC_DXT1_EXT
-          <li>PicoGL.COMPRESSED_RGBA_S3TC_DXT3_EXT
-          <li>PicoGL.COMPRESSED_RGBA_S3TC_DXT5_EXT
-          <li>PicoGL.COMPRESSED_SRGB_S3TC_DXT1_EXT
-          <li>PicoGL.COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT
-          <li>PicoGL.COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT
-          <li>PicoGL.COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT
-        </ul>
-
-        @method
-        @return {App} The App object.
-    */
-    s3tcTextures() {
-        let ext = this.gl.getExtension("WEBGL_compressed_texture_s3tc");
-        this.s3tcTexturesEnabled = Boolean(ext);
-
-        if (this.s3tcTexturesEnabled) {
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGB_S3TC_DXT1_EXT]  = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_S3TC_DXT1_EXT] = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_S3TC_DXT3_EXT] = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_S3TC_DXT5_EXT] = true;
-        }
-
-        ext = this.gl.getExtension("WEBGL_compressed_texture_s3tc_srgb");
-        this.s3tcSRGBTexturesEnabled = Boolean(ext);
-
-        if (this.s3tcSRGBTexturesEnabled) {
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB_S3TC_DXT1_EXT]       = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT] = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT] = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT] = true;
-        }
-
-        return this;
-    }
-
-    /**
-        Enable the WEBGL_compressed_texture_etc extension, which allows the following enums to
-        be used as texture formats:
-
-        <ul>
-          <li>PicoGL.COMPRESSED_R11_EAC
-          <li>PicoGL.COMPRESSED_SIGNED_R11_EAC
-          <li>PicoGL.COMPRESSED_RG11_EAC
-          <li>PicoGL.COMPRESSED_SIGNED_RG11_EAC
-          <li>PicoGL.COMPRESSED_RGB8_ETC2
-          <li>PicoGL.COMPRESSED_SRGB8_ETC2
-          <li>PicoGL.COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2
-          <li>PicoGL.COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2
-          <li>PicoGL.COMPRESSED_RGBA8_ETC2_EAC
-          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ETC2_EAC
-        </ul>
-
-        Note that while WEBGL_compressed_texture_etc1 is not enabled by this method,
-        ETC1 textures can be loaded using COMPRESSED_RGB8_ETC2 as the format.
-
-        @method
-        @return {App} The App object.
-    */
-    etcTextures() {
-        let ext = this.gl.getExtension("WEBGL_compressed_texture_etc");
-        this.etcTexturesEnabled = Boolean(ext);
-
-        if (this.etcTexturesEnabled) {
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_R11_EAC]                        = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SIGNED_R11_EAC]                 = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RG11_EAC]                       = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SIGNED_RG11_EAC]                = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGB8_ETC2]                      = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB8_ETC2]                     = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2]  = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2] = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA8_ETC2_EAC]                 = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB8_ALPHA8_ETC2_EAC]          = true;
-        }
-
-        return this;
-    }
-
-    /**
-        Enable the WEBGL_compressed_texture_astc extension, which allows the following enums to
-        be used as texture formats:
-
-        <ul>
-          <li>PicoGL.COMPRESSED_RGBA_ASTC_4x4_KHR
-          <li>PicoGL.COMPRESSED_RGBA_ASTC_5x4_KHR
-          <li>PicoGL.COMPRESSED_RGBA_ASTC_5x5_KHR
-          <li>PicoGL.COMPRESSED_RGBA_ASTC_6x5_KHR
-          <li>PicoGL.COMPRESSED_RGBA_ASTC_6x6_KHR
-          <li>PicoGL.COMPRESSED_RGBA_ASTC_8x5_KHR
-          <li>PicoGL.COMPRESSED_RGBA_ASTC_8x6_KHR
-          <li>PicoGL.COMPRESSED_RGBA_ASTC_8x8_KHR
-          <li>PicoGL.COMPRESSED_RGBA_ASTC_10x5_KHR
-          <li>PicoGL.COMPRESSED_RGBA_ASTC_10x6_KHR
-          <li>PicoGL.COMPRESSED_RGBA_ASTC_10x8_KHR
-          <li>PicoGL.COMPRESSED_RGBA_ASTC_10x10_KHR
-          <li>PicoGL.COMPRESSED_RGBA_ASTC_12x10_KHR
-          <li>PicoGL.COMPRESSED_RGBA_ASTC_12x12_KHR
-          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR
-          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR
-          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR
-          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR
-          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR
-          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR
-          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR
-          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR
-          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR
-          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR
-          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR
-          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR
-          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR
-          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR
-        </ul>
-
-        @method
-        @return {App} The App object.
-    */
-    astcTextures() {
-        let ext = this.gl.getExtension("WEBGL_compressed_texture_astc");
-        this.astcTexturesEnabled = Boolean(ext);
-
-        if (this.astcTexturesEnabled) {
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_ASTC_4x4_KHR]           = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_ASTC_5x4_KHR]           = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_ASTC_5x5_KHR]           = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_ASTC_6x5_KHR]           = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_ASTC_6x6_KHR]           = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_ASTC_8x5_KHR]           = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_ASTC_8x6_KHR]           = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_ASTC_8x8_KHR]           = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_ASTC_10x5_KHR]          = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_ASTC_10x6_KHR]          = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_ASTC_10x8_KHR]          = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_ASTC_10x10_KHR]         = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_ASTC_12x10_KHR]         = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_ASTC_12x12_KHR]         = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR]   = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR]   = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR]   = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR]   = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR]   = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR]   = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR]   = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR]   = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR]  = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR]  = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR]  = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR] = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR] = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR] = true;
-        }
-
-        return this;
-    }
-
-    /**
-        Enable the WEBGL_compressed_texture_pvrtc extension, which allows the following enums to
-        be used as texture formats:
-
-        <ul>
-          <li>PicoGL.COMPRESSED_RGB_PVRTC_4BPPV1_IMG
-          <li>PicoGL.COMPRESSED_RGB_PVRTC_2BPPV1_IMG
-          <li>PicoGL.COMPRESSED_RGBA_PVRTC_4BPPV1_IMG
-          <li>PicoGL.COMPRESSED_RGBA_PVRTC_2BPPV1_IMG
-        </ul>
-
-        @method
-        @return {App} The App object.
-    */
-    pvrtcTextures() {
-        let ext = this.gl.getExtension("WEBGL_compressed_texture_pvrtc");
-        this.pvrtcTexturesEnabled = Boolean(ext);
-
-        if (this.pvrtcTexturesEnabled) {
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGB_PVRTC_4BPPV1_IMG] = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGB_PVRTC_2BPPV1_IMG] = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_PVRTC_4BPPV1_IMG] = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_PVRTC_2BPPV1_IMG] = true;
-        }
-
-        return this;
-    }
-
-    /**
         Read a pixel's color value from the currently-bound framebuffer.
 
         @method
@@ -1366,6 +1150,21 @@ export class App {
     */
     createDrawCall(program, vertexArray, primitive) {
         return new DrawCall(this.gl, this.state, program, vertexArray, primitive);
+    }
+
+    // Enable extensions
+    initExtensions() {
+        this.floatRenderTargetsEnabled = Boolean(this.gl.getExtension("EXT_color_buffer_float"));
+        this.linearFloatTexturesEnabled = Boolean(this.gl.getExtension("OES_texture_float_linear"));
+        this.s3tcTexturesEnabled = Boolean(this.gl.getExtension("WEBGL_compressed_texture_s3tc"));
+        this.s3tcSRGBTexturesEnabled = Boolean(this.gl.getExtension("WEBGL_compressed_texture_s3tc_srgb"));
+        this.etcTexturesEnabled = Boolean(this.gl.getExtension("WEBGL_compressed_texture_etc"));
+        this.astcTexturesEnabled = Boolean(this.gl.getExtension("WEBGL_compressed_texture_astc"));
+        this.pvrtcTexturesEnabled = Boolean(this.gl.getExtension("WEBGL_compressed_texture_pvrtc"));
+        this.contextLostExt = this.gl.getExtension("WEBGL_lose_context");
+
+        // Draft extensions
+        this.parallelCompileEnabled = Boolean(this.gl.getExtension("KHR_parallel_shader_compile"));
     }
 
 }
