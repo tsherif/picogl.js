@@ -21,8 +21,8 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-import { GL } from "./constants";
-import { Query } from "./query";
+import { GL } from "./constants.js";
+import { Query } from "./query.js";
 
 /**
     Rendering timer.

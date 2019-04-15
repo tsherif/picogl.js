@@ -21,14 +21,14 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-import { GL } from "./constants";
-import { Shader } from "./shader";
+import { GL } from "./constants.js";
+import { Shader } from "./shader.js";
 import { 
     SingleComponentUniform,
     MultiNumericUniform,
     MultiBoolUniform,
     MatrixUniform
-} from "./uniforms";
+} from "./uniforms.js";
 
 /**
     WebGL program consisting of compiled and linked vertex and fragment

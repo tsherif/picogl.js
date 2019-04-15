@@ -23,8 +23,8 @@
 
 let webglInfoInitialized = false;
 
-import { GL, WEBGL_INFO } from "./constants";
-import { App } from "./app";
+import { GL, WEBGL_INFO } from "./constants.js";
+import { App } from "./app.js";
 
 /**
     Global PicoGL module. For convenience, all WebGL enums are stored
