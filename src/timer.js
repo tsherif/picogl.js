@@ -21,8 +21,8 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-import { GL, WEBGL_INFO } from "./constants";
-import { Query } from "./query";
+import { GL, WEBGL_INFO } from "./constants.js";
+import { Query } from "./query.js";
 
 /**
     Rendering timer.
@@ -58,7 +58,7 @@ export class Timer {
         @method
         @return {Timer} The Timer object.
     */
-    restore() {        
+    restore() {
         if (WEBGL_INFO.GPU_TIMER) {
             if (this.gpuTimerQuery) {
                 this.gpuTimerQuery.restore();

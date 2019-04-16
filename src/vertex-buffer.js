@@ -21,7 +21,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-import { GL, TYPE_SIZE } from "./constants";
+import { GL, TYPE_SIZE } from "./constants.js";
 
 const INTEGER_TYPES = {
     [GL.BYTE]: true,

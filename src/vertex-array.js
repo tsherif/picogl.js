@@ -18,7 +18,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-import { GL, TYPE_SIZE, DUMMY_OBJECT } from "./constants";
+import { GL, TYPE_SIZE, DUMMY_OBJECT } from "./constants.js";
 
 /**
     Organizes vertex buffer and attribute state.

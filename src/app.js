@@ -21,20 +21,20 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-import { GL, WEBGL_INFO, DUMMY_OBJECT } from "./constants";
-import { Cubemap } from "./cubemap";
-import { DrawCall } from "./draw-call";
-import { Framebuffer } from "./framebuffer";
-import { Renderbuffer } from "./renderbuffer";
-import { Program } from "./program";
-import { Shader } from "./shader";
-import { Texture } from "./texture";
-import { Timer } from "./timer";
-import { TransformFeedback } from "./transform-feedback";
-import { UniformBuffer } from "./uniform-buffer";
-import { VertexArray } from "./vertex-array";
-import { VertexBuffer } from "./vertex-buffer";
-import { Query } from "./query";
+import { GL, WEBGL_INFO, DUMMY_OBJECT } from "./constants.js";
+import { Cubemap } from "./cubemap.js";
+import { DrawCall } from "./draw-call.js";
+import { Framebuffer } from "./framebuffer.js";
+import { Renderbuffer } from "./renderbuffer.js";
+import { Program } from "./program.js";
+import { Shader } from "./shader.js";
+import { Texture } from "./texture.js";
+import { Timer } from "./timer.js";
+import { TransformFeedback } from "./transform-feedback.js";
+import { UniformBuffer } from "./uniform-buffer.js";
+import { VertexArray } from "./vertex-array.js";
+import { VertexBuffer } from "./vertex-buffer.js";
+import { Query } from "./query.js";
 
 /**
     Primary entry point to PicoGL. An app will store all parts of the WebGL
@@ -87,7 +87,7 @@ export class App {
         this.gpuTime = 0;
 
         this.viewport(0, 0, this.width, this.height);
-        
+
         // Extensions
         this.floatRenderTargetsEnabled = false;
         this.linearFloatTexturesEnabled = false;
@@ -97,7 +97,7 @@ export class App {
         this.astcTexturesEnabled = false;
         this.pvrtcTexturesEnabled = false;
         this.contextLostExt = null;
-        
+
         this.initExtensions();
 
         this.contextRestoredHandler = null;
@@ -150,7 +150,7 @@ export class App {
         @param {function} fn Context restored handler.
         @return {App} The App object.
     */
-    onContextRestored(fn) {        
+    onContextRestored(fn) {
         this.contextRestoredHandler = fn;
 
         return this;
@@ -1163,7 +1163,7 @@ export class App {
         this.gl.getExtension("WEBGL_compressed_texture_pvrtc");
         this.gl.getExtension("EXT_disjoint_timer_query_webgl2");
         this.gl.getExtension("EXT_disjoint_timer_query");
-        
+
         this.contextLostExt = this.gl.getExtension("WEBGL_lose_context");
 
         // Draft extensions

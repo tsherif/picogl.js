@@ -27,7 +27,7 @@ import {
     COMPRESSED_TEXTURE_TYPES,
     DUMMY_OBJECT,
     DUMMY_UNIT_ARRAY
-} from "./constants";
+} from "./constants.js";
 
 /**
     General-purpose texture.
