@@ -1,6 +1,6 @@
 {
   "name": "picogl",
-  "version": "0.12.0",
+  "version": "0.13.0-alpha",
   "description": "A minimal WebGL 2 rendering library",
   "main": "build/picogl.js",
   "repository": {
@@ -13,12 +13,10 @@
     "url": "http://tareksherif.net/"
   },
   "scripts": {
-    "clean": "rimraf **/npm-debug.log build/*.map build/temp.js",
+    "clean": "rimraf **/npm-debug.log build/temp.js build/picogl.js",
     "lint": "eslint src/*.js",
-    "dev-build": "webpack --config webpack.config.dev.js && replace %%VERSION%% DEV build/picogl.js",
-    "compile": "webpack && concat -o build/picogl.js BANNER build/temp.js && replace %%VERSION%% $npm_package_version build/picogl.js && npm run clean",
-    "minify": "uglifyjs build/picogl.js --compress --mangle --screw-ie8 > build/temp.js && concat -o build/picogl.min.js BANNER build/temp.js && replace %%VERSION%% $npm_package_version build/picogl.min.js && rimraf build/temp.js",
-    "build": "npm run lint && npm run compile && npm run minify",
+    "compile": "webpack && concat -o build/picogl.js BANNER build/temp.js && replace %%VERSION%% $npm_package_version build/picogl.js && uglifyjs build/picogl.js --compress --mangle --screw-ie8 > build/temp.js && concat -o build/picogl.min.js BANNER build/temp.js && replace %%VERSION%% $npm_package_version build/picogl.min.js && npm run clean",
+    "build": "npm run lint && npm run compile",
     "docs": "jsdoc -d docs src/*.js",
     "test": "npm run lint"
   },

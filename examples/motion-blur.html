@@ -5,7 +5,6 @@
     <meta charset="utf-8">
     <script src="utils/compatibility.js"></script>
     <script src="utils/gl-matrix.js"></script>
-    <script src="../build/picogl.js"></script>
     <script src="utils/utils.js"></script>
     <link rel="stylesheet" href="../site/css/picogl-example.css"> 
     <style>
@@ -216,7 +215,9 @@
             fragColor.rgb /= (NUM_STEPS * 2.0 - 1.0);
         }
     </script>
-    <script type="text/javascript">
+    <script type="module">
+        import { PicoGL } from "../src/picogl.js";
+       
         let blurEnabled = true;
         let slowMoReset = 1;
 

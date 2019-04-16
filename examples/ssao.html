@@ -6,7 +6,6 @@
     <script src="utils/compatibility.js"></script>
     <script src="utils/gl-matrix.js"></script>
     <script src="utils/gl-matrix.js"></script>
-    <script src="../build/picogl.js"></script>
     <script src="utils/utils.js"></script>
     <link rel="stylesheet" href="../site/css/picogl-example.css"> 
     <style>
@@ -229,7 +228,9 @@
             color = vec4(texelFetch(uColorBuffer, ivec2(gl_FragCoord.xy), 0).rgb, 1.0);
         }
     </script>
-    <script type="text/javascript">
+    <script type="module">
+        import { PicoGL } from "../src/picogl.js";
+       
         utils.addTimerElement();
 
         let ssaoEnabled = true;

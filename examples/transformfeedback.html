@@ -4,7 +4,6 @@
     <title>PicoGL.js: Transform Feedback</title>
     <meta charset="utf-8">
     <script src="utils/compatibility.js"></script>
-    <script src="../build/picogl.js"></script>
     <script src="utils/gl-matrix.js"></script>
     <script src="utils/utils.js"></script>
     <link rel="stylesheet" href="../site/css/picogl-example.css"> 
@@ -73,7 +72,9 @@
         }
     </script>
     
-    <script type="text/javascript">
+    <script type="module">
+        import { PicoGL } from "../src/picogl.js";
+       
         utils.addTimerElement();
 
         let canvas = document.getElementById("gl-canvas");

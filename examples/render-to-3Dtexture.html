@@ -5,7 +5,6 @@
     <meta charset="utf-8">
     <script src="utils/compatibility.js"></script>
     <script src="utils/gl-matrix.js"></script>
-    <script src="../build/picogl.js"></script>
     <script src="utils/utils.js"></script>
     <link rel="stylesheet" href="../site/css/picogl-example.css"> 
 </head>
@@ -130,7 +129,9 @@
             fragColor.rgb *= fragColor.a;
         }
     </script>
-    <script type="text/javascript">
+    <script type="module">
+        import { PicoGL } from "../src/picogl.js";
+       
         utils.addTimerElement();
         
         const DIMENSIONS = 128;

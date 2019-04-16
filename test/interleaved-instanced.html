@@ -25,7 +25,6 @@
 <head>
     <title>PicoGL.js: Instanced Drawing</title>
     <meta charset="utf-8">
-    <script src="../build/picogl.js"></script>
     <link rel="stylesheet" href="../site/css/picogl-example.css"> 
 </head>
 <body>
@@ -61,8 +60,9 @@
             fragColor = vColor;
         }
     </script>
-    
-    <script type="text/javascript">
+    <script type="module">
+        import { PicoGL } from "../src/picogl.js";
+
         let canvas = document.getElementById("gl-canvas");
 
         canvas.width = window.innerWidth;

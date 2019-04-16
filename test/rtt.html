@@ -23,7 +23,6 @@
 -->
 <html>
 <head>
-    <script src="../build/picogl.js"></script>
     <style>
         html {
             overflow: hidden;
@@ -61,7 +60,9 @@
             fragColor = texture(tex, vUV);
         }
     </script>
-    <script type="text/javascript">
+    <script type="module">
+        import { PicoGL } from "../src/picogl.js";
+
         let canvas = document.getElementById("gl-canvas");
 
         if (!canvas.getContext("webgl2")) {
