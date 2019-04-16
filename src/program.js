@@ -75,16 +75,47 @@ export class Program {
             this.fragmentShader = fsSource;
         }
 
-        this.restore();
+        this.initialize();
     }
 
     /**
-        Restore program after context loss.
+        Restore program after context loss. Note that this
+        will stall for completion. <b>App.restorePrograms</b>
+        is the preferred method for program restoration as
+        it will parallelize compilation where available.
 
         @method
         @return {Program} The Program object.
     */
     restore() {
+        this.initialize();
+        this.checkCompletion();
+
+        return this;
+    }
+
+    /**
+        Delete this program.
+
+        @method
+        @return {Program} The Program object.
+    */
+    delete() {
+        if (this.program) {
+            this.gl.deleteProgram(this.program);
+            this.program = null;
+
+            if (this.appState.program === this) {
+                this.gl.useProgram(null);
+                this.appState.program = null;
+            }
+        }
+
+        return this;
+    }
+
+    // Initialize program state
+    initialize() {
         if (this.appState.program === this) {
             this.gl.useProgram(null);
             this.appState.program = null;
@@ -118,33 +149,65 @@ export class Program {
 
         this.program = program;
 
+        return this;
+    }
+
+    // Check if compilation is complete
+    checkCompletion() {
         if (this.parallelCompile) {
             this.pollCompletion();
         } else {
             this.checkLinkage();
         }
-
-        return this;
     }
 
-    /**
-        Delete this program.
-
-        @method
-        @return {Program} The Program object.
-    */
-    delete() {
-        if (this.program) {
-            this.gl.deleteProgram(this.program);
-            this.program = null;
-
-            if (this.appState.program === this) {
-                this.gl.useProgram(null);
-                this.appState.program = null;
+    // Poll completion for parallel compiles
+    pollCompletion() {
+        let poll = () => {
+            if (!this.program) {
+                // Program was deleted
+                return;
             }
+
+            if (this.linked || this.linkFailed) {
+                return;
+            }
+
+            if (this.gl.getProgramParameter(this.program, GL.COMPLETION_STATUS_KHR)) {
+                this.checkLinkage();
+            } else {
+                this.pollHandle = requestAnimationFrame(poll);
+            }
+        };
+        poll();
+    }
+
+    // Check if program linked.
+    // Will stall for completion.
+    checkLinkage() {
+        if (this.linked || this.linkFailed) {
+            return;
         }
 
-        return this;
+        if (this.gl.getProgramParameter(this.program, GL.LINK_STATUS)) {
+            this.linked = true;
+            this.initVariables();
+        } else {
+            this.linkFailed = true;
+            console.error(this.gl.getProgramInfoLog(this.program));
+            this.vertexShader.checkCompilation();
+            this.fragmentShader.checkCompilation();
+        }
+
+        if (this.vertexSource) {
+            this.vertexShader.delete();
+            this.vertexShader = null;
+        }
+
+        if (this.fragmentSource) {
+            this.fragmentShader.delete();
+            this.fragmentShader = null;
+        }
     }
 
     // Get variable handles from program
@@ -235,46 +298,6 @@ export class Program {
             let uniformBlockBase = this.uniformBlockCount++;
             this.gl.uniformBlockBinding(this.program, blockIndex, uniformBlockBase);
             this.uniformBlocks[blockName] = uniformBlockBase;
-        }
-    }
-
-    // Poll completion for parallel compiles
-    pollCompletion() {
-        let poll = () => {
-            if (!this.program) {
-                // Program was deleted
-                return;
-            }
-
-            if (this.gl.getProgramParameter(this.program, GL.COMPLETION_STATUS_KHR)) {
-                this.checkLinkage();
-            } else {
-                this.pollHandle = requestAnimationFrame(poll);
-            }
-        };
-        poll();
-    }
-
-    // Check if program linked
-    checkLinkage() {
-        if (this.gl.getProgramParameter(this.program, GL.LINK_STATUS)) {
-            this.linked = true;
-            this.initVariables();
-        } else {
-            this.linkFailed = true;
-            console.error(this.gl.getProgramInfoLog(this.program));
-            this.vertexShader.checkCompilation();
-            this.fragmentShader.checkCompilation();
-        }
-
-        if (this.vertexSource) {
-            this.vertexShader.delete();
-            this.vertexShader = null;
-        }
-
-        if (this.fragmentSource) {
-            this.fragmentShader.delete();
-            this.fragmentShader = null;
         }
     }
 

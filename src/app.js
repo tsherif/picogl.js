@@ -45,13 +45,6 @@ import { Query } from "./query.js";
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {number} width The width of the drawing surface.
     @prop {number} height The height of the drawing surface.
-    @prop {boolean} floatRenderTargetsEnabled Whether the EXT_color_buffer_float extension is enabled.
-    @prop {boolean} linearFloatTexturesEnabled Whether the OES_texture_float_linear extension is enabled.
-    @prop {boolean} s3tcTexturesEnabled Whether the WEBGL_compressed_texture_s3tc extension is enabled.
-    @prop {boolean} s3tcSRGBTexturesEnabled Whether the WEBGL_compressed_texture_s3tc_srgb extension is enabled.
-    @prop {boolean} etcTexturesEnabled Whether the WEBGL_compressed_texture_etc extension is enabled.
-    @prop {boolean} astcTexturesEnabled Whether the WEBGL_compressed_texture_astc extension is enabled.
-    @prop {boolean} pvrtcTexturesEnabled Whether the WEBGL_compressed_texture_pvrtc extension is enabled.
     @prop {Object} state Tracked GL state.
     @prop {GLEnum} clearBits Current clear mask to use with clear().
 */
@@ -88,19 +81,11 @@ export class App {
 
         this.viewport(0, 0, this.width, this.height);
 
-        // Extensions
-        this.floatRenderTargetsEnabled = false;
-        this.linearFloatTexturesEnabled = false;
-        this.s3tcTexturesEnabled = false;
-        this.s3tcSRGBTexturesEnabled = false;
-        this.etcTexturesEnabled = false;
-        this.astcTexturesEnabled = false;
-        this.pvrtcTexturesEnabled = false;
         this.contextLostExt = null;
+        this.contextRestoredHandler = null;
 
         this.initExtensions();
 
-        this.contextRestoredHandler = null;
 
         this.canvas.addEventListener("webglcontextlost", (e) => {
             e.preventDefault();
@@ -744,7 +729,9 @@ export class App {
         @return {Program} New Program object.
     */
     createProgram(vsSource, fsSource, xformFeedbackVars) {
-        return new Program(this.gl, this.state, vsSource, fsSource, xformFeedbackVars, true);
+        let program = new Program(this.gl, this.state, vsSource, fsSource, xformFeedbackVars, true);
+        program.checkCompletion();
+        return program;
     }
 
     /**
@@ -752,7 +739,7 @@ export class App {
         in parallel where possible.
 
         @method
-        @param {...sources} sources Variable number of 2 or 3 element arrays, each containing:
+        @param {...Array} sources Variable number of 2 or 3 element arrays, each containing:
             <ul>
                 <li> (Shader|string) Vertex shader object or source code.
                 <li> (Shader|string) Fragment shader object or source code.
@@ -777,6 +764,10 @@ export class App {
                 pendingPrograms[i] = programs[i];
             }
 
+            for (let i = 0; i < numPrograms; ++i) {
+                programs[i].checkCompletion();
+            }
+
             let poll = () => {
                 let linked = 0;
                 for (let i = 0; i < numPending; ++i) {
@@ -794,6 +785,54 @@ export class App {
 
                 if (numPending === 0) {
                     resolve(programs);
+                } else {
+                    requestAnimationFrame(poll);
+                }
+            };
+
+            poll();
+        });
+    }
+
+    /**
+        Restore several programs after a context loss. Will do so in parallel where available.
+
+        @method
+        @param {...Program} sources Variable number of programs to restore.
+
+        @return {Promise} Promise that will resolve once all programs have been restored.
+    */
+    restorePrograms(...programs) {
+        return new Promise((resolve, reject) => {
+            let numPrograms = programs.length;
+            let pendingPrograms = programs.slice();
+            let numPending = numPrograms;
+
+            for (let i = 0; i < numPrograms; ++i) {
+                programs[i].initialize();
+            }
+
+            for (let i = 0; i < numPrograms; ++i) {
+                programs[i].checkCompletion();
+            }
+
+            let poll = () => {
+                let linked = 0;
+                for (let i = 0; i < numPending; ++i) {
+                    if (pendingPrograms[i].linkFailed) {
+                        reject(new Error("Program linkage failed"));
+                        return;
+                    } else if (pendingPrograms[i].linked) {
+                        ++linked;
+                    } else {
+                        pendingPrograms[i - linked] = pendingPrograms[i];
+                    }
+                }
+
+                numPending -= linked;
+
+                if (numPending === 0) {
+                    resolve();
                 } else {
                     requestAnimationFrame(poll);
                 }

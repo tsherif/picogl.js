@@ -360,7 +360,7 @@
                 timer.restore();
 
                 shadowVShader.restore();
-                shadowProgram.restore();
+                app.restorePrograms(shadowProgram, lightProgram, mainProgram);
 
                 shadowTarget.restore();
                 depthTarget.restore();
@@ -368,9 +368,6 @@
                 shadowBuffer.restore()
                 .colorTarget(0, shadowTarget, PicoGL.TEXTURE_CUBE_MAP_NEGATIVE_X)
                 .depthTarget(depthTarget);
-
-                lightProgram.restore();
-                mainProgram.restore();
 
                 positions.restore(box.positions);
                 normals.restore(box.normals);
