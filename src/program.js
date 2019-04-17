@@ -59,8 +59,6 @@ export class Program {
         this.fragmentSource = null;
         this.fragmentShader = null;
         this.linked = false;
-        this.linkFailed = false;
-        this.parallelCompile = WEBGL_INFO.PARALLEL_SHADER_COMPILE;
 
         if (typeof vsSource === "string") {
             this.vertexSource = vsSource;
@@ -121,7 +119,6 @@ export class Program {
         }
 
         this.linked = false;
-        this.linkFailed = false;
         this.uniformBlockCount = 0;
         this.samplerCount = 0;
 
@@ -148,7 +145,7 @@ export class Program {
 
     // Check if compilation is complete
     checkCompletion() {
-        if (this.parallelCompile) {
+        if (WEBGL_INFO.PARALLEL_SHADER_COMPILE) {
             return this.gl.getProgramParameter(this.program, GL.COMPLETION_STATUS_KHR);
         }
 
@@ -158,7 +155,7 @@ export class Program {
     // Check if program linked.
     // Will stall for completion.
     checkLinkage() {
-        if (this.linked || this.linkFailed) {
+        if (this.linked) {
             return;
         }
 
@@ -166,7 +163,6 @@ export class Program {
             this.linked = true;
             this.initVariables();
         } else {
-            this.linkFailed = true;
             console.error(this.gl.getProgramInfoLog(this.program));
             this.vertexShader.checkCompilation();
             this.fragmentShader.checkCompilation();
