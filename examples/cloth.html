@@ -335,8 +335,8 @@
         const STRUCTURAL_REST = 1 / DATA_TEXTURE_DIM;
         const SHEAR_REST = Math.sqrt(2 * STRUCTURAL_REST * STRUCTURAL_REST);
         const BALL_RADIUS = 0.15;
-        const BALL_SPEED = 0.004;    
         const BALL_RANGE = 0.9;
+        let ballSpeed = 0.004;    
 
         ///////////////////
         // PROGRAMS
@@ -765,10 +765,10 @@
                 }
 
                 if (targetZ === null) {
-                    ballPosition[2] += BALL_SPEED;
+                    ballPosition[2] += ballSpeed;
 
                     if (ballPosition[2] > BALL_RANGE || ballPosition[2] < -BALL_RANGE) {
-                        BALL_SPEED *= -1;
+                        ballSpeed *= -1;
                     }
 
                     ballUniforms.set(0, ballPosition).update();

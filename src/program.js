@@ -43,7 +43,7 @@ import {
 */
 export class Program {
 
-    constructor(gl, appState, vsSource, fsSource, xformFeebackVars, forceSync) {
+    constructor(gl, appState, vsSource, fsSource, xformFeebackVars) {
         this.gl = gl;
         this.appState = appState;
         this.program = null;
@@ -60,7 +60,7 @@ export class Program {
         this.fragmentShader = null;
         this.linked = false;
         this.linkFailed = false;
-        this.parallelCompile = !forceSync && WEBGL_INFO.PARALLEL_SHADER_COMPILE;
+        this.parallelCompile = WEBGL_INFO.PARALLEL_SHADER_COMPILE;
 
         if (typeof vsSource === "string") {
             this.vertexSource = vsSource;

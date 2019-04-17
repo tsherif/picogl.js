@@ -729,7 +729,7 @@ export class App {
         @return {Program} New Program object.
     */
     createProgram(vsSource, fsSource, xformFeedbackVars) {
-        let program = new Program(this.gl, this.state, vsSource, fsSource, xformFeedbackVars, true);
+        let program = new Program(this.gl, this.state, vsSource, fsSource, xformFeedbackVars);
         program.checkLinkage();
         return program;
     }
