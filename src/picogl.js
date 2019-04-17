@@ -21,10 +21,10 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-let webglInfoInitialized = false;
-
 import { GL, WEBGL_INFO } from "./constants.js";
 import { App } from "./app.js";
+
+let webglInfoInitialized = false;
 
 /**
     Global PicoGL module. For convenience, all WebGL enums are stored
@@ -32,7 +32,7 @@ import { App } from "./app.js";
 
     @namespace PicoGL
 */
-export const PicoGL = Object.assign({ 
+export const PicoGL = Object.assign({
     version: "%%VERSION%%",
 
     WEBGL_INFO,
@@ -71,7 +71,7 @@ export const PicoGL = Object.assign({
             // Draft extensions
             WEBGL_INFO.PARALLEL_SHADER_COMPILE = Boolean(gl.getExtension("KHR_parallel_shader_compile"));
 
-            webglInfoInitialized = true;      
+            webglInfoInitialized = true;
         }
         return new App(gl, canvas);
     }
