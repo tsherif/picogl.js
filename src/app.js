@@ -730,7 +730,7 @@ export class App {
     */
     createProgram(vsSource, fsSource, xformFeedbackVars) {
         let program = new Program(this.gl, this.state, vsSource, fsSource, xformFeedbackVars, true);
-        program.checkCompletion();
+        program.checkLinkage();
         return program;
     }
 
@@ -764,18 +764,17 @@ export class App {
                 pendingPrograms[i] = programs[i];
             }
 
-            for (let i = 0; i < numPrograms; ++i) {
-                programs[i].checkCompletion();
-            }
-
             let poll = () => {
                 let linked = 0;
                 for (let i = 0; i < numPending; ++i) {
-                    if (pendingPrograms[i].linkFailed) {
-                        reject(new Error("Program linkage failed"));
-                        return;
-                    } else if (pendingPrograms[i].linked) {
-                        ++linked;
+                    if (pendingPrograms[i].checkCompletion()) {
+                        pendingPrograms[i].checkLinkage();
+                        if (pendingPrograms[i].linked) {
+                            ++linked;
+                        } else {
+                            reject(new Error("Program linkage failed"));
+                            return;
+                        }
                     } else {
                         pendingPrograms[i - linked] = pendingPrograms[i];
                     }
@@ -819,11 +818,14 @@ export class App {
             let poll = () => {
                 let linked = 0;
                 for (let i = 0; i < numPending; ++i) {
-                    if (pendingPrograms[i].linkFailed) {
-                        reject(new Error("Program linkage failed"));
-                        return;
-                    } else if (pendingPrograms[i].linked) {
-                        ++linked;
+                    if (pendingPrograms[i].checkCompletion()) {
+                        pendingPrograms[i].checkLinkage();
+                        if (pendingPrograms[i].linked) {
+                            ++linked;
+                        } else {
+                            reject(new Error("Program linkage failed"));
+                            return;
+                        }
                     } else {
                         pendingPrograms[i - linked] = pendingPrograms[i];
                     }

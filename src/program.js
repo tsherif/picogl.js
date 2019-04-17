@@ -61,7 +61,6 @@ export class Program {
         this.linked = false;
         this.linkFailed = false;
         this.parallelCompile = !forceSync && WEBGL_INFO.PARALLEL_SHADER_COMPILE;
-        this.pollHandle = null;
 
         if (typeof vsSource === "string") {
             this.vertexSource = vsSource;
@@ -89,7 +88,7 @@ export class Program {
     */
     restore() {
         this.initialize();
-        this.checkCompletion();
+        this.checkLinkage();
 
         return this;
     }
@@ -121,11 +120,6 @@ export class Program {
             this.appState.program = null;
         }
 
-        if (this.pollHandle) {
-            cancelAnimationFrame(this.pollHandle);
-            this.pollHandle = null;
-        }
-
         this.linked = false;
         this.linkFailed = false;
         this.uniformBlockCount = 0;
@@ -155,31 +149,10 @@ export class Program {
     // Check if compilation is complete
     checkCompletion() {
         if (this.parallelCompile) {
-            this.pollCompletion();
-        } else {
-            this.checkLinkage();
+            return this.gl.getProgramParameter(this.program, GL.COMPLETION_STATUS_KHR);
         }
-    }
 
-    // Poll completion for parallel compiles
-    pollCompletion() {
-        let poll = () => {
-            if (!this.program) {
-                // Program was deleted
-                return;
-            }
-
-            if (this.linked || this.linkFailed) {
-                return;
-            }
-
-            if (this.gl.getProgramParameter(this.program, GL.COMPLETION_STATUS_KHR)) {
-                this.checkLinkage();
-            } else {
-                this.pollHandle = requestAnimationFrame(poll);
-            }
-        };
-        poll();
+        return true;
     }
 
     // Check if program linked.
