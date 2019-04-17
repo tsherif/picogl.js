@@ -49,14 +49,14 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-import { GL } from "./constants";
-import { Shader } from "./shader";
+import { GL, WEBGL_INFO } from "./constants.js";
+import { Shader } from "./shader.js";
 import {
     SingleComponentUniform,
     MultiNumericUniform,
     MultiBoolUniform,
     MatrixUniform
-} from "./uniforms";
+} from "./uniforms.js";
 
 /**
     WebGL program consisting of compiled and linked vertex and fragment
@@ -88,9 +88,7 @@ export class Program {
         this.fragmentShader = null;
         this.linked = false;
         this.linkFailed = false;
-        this.parallelCompile = false;
-        this.forceSync = Boolean(forceSync);
-        this.pollHandle = null;
+        this.parallelCompile = !forceSync &amp;&amp; WEBGL_INFO.PARALLEL_SHADER_COMPILE;
 
         if (typeof vsSource === "string") {
             this.vertexSource = vsSource;
@@ -104,27 +102,52 @@ export class Program {
             this.fragmentShader = fsSource;
         }
 
-        this.restore();
+        this.initialize();
     }
 
     /**
-        Restore program after context loss.
+        Restore program after context loss. Note that this
+        will stall for completion. &lt;b>App.restorePrograms&lt;/b>
+        is the preferred method for program restoration as
+        it will parallelize compilation where available.
 
         @method
         @return {Program} The Program object.
     */
     restore() {
+        this.initialize();
+        this.checkLinkage();
+
+        return this;
+    }
+
+    /**
+        Delete this program.
+
+        @method
+        @return {Program} The Program object.
+    */
+    delete() {
+        if (this.program) {
+            this.gl.deleteProgram(this.program);
+            this.program = null;
+
+            if (this.appState.program === this) {
+                this.gl.useProgram(null);
+                this.appState.program = null;
+            }
+        }
+
+        return this;
+    }
+
+    // Initialize program state
+    initialize() {
         if (this.appState.program === this) {
             this.gl.useProgram(null);
             this.appState.program = null;
         }
 
-        if (this.pollHandle) {
-            cancelAnimationFrame(this.pollHandle);
-            this.pollHandle = null;
-        }
-
-        this.parallelCompile = !this.forceSync &amp;&amp; Boolean(this.gl.getExtension("KHR_parallel_shader_compile"));
         this.linked = false;
         this.linkFailed = false;
         this.uniformBlockCount = 0;
@@ -148,33 +171,44 @@ export class Program {
 
         this.program = program;
 
-        if (this.parallelCompile) {
-            this.pollCompletion();
-        } else {
-            this.checkLinkage();
-        }
-
         return this;
     }
 
-    /**
-        Delete this program.
-
-        @method
-        @return {Program} The Program object.
-    */
-    delete() {
-        if (this.program) {
-            this.gl.deleteProgram(this.program);
-            this.program = null;
-
-            if (this.appState.program === this) {
-                this.gl.useProgram(null);
-                this.appState.program = null;
-            }
+    // Check if compilation is complete
+    checkCompletion() {
+        if (this.parallelCompile) {
+            return this.gl.getProgramParameter(this.program, GL.COMPLETION_STATUS_KHR);
         }
 
-        return this;
+        return true;
+    }
+
+    // Check if program linked.
+    // Will stall for completion.
+    checkLinkage() {
+        if (this.linked || this.linkFailed) {
+            return;
+        }
+
+        if (this.gl.getProgramParameter(this.program, GL.LINK_STATUS)) {
+            this.linked = true;
+            this.initVariables();
+        } else {
+            this.linkFailed = true;
+            console.error(this.gl.getProgramInfoLog(this.program));
+            this.vertexShader.checkCompilation();
+            this.fragmentShader.checkCompilation();
+        }
+
+        if (this.vertexSource) {
+            this.vertexShader.delete();
+            this.vertexShader = null;
+        }
+
+        if (this.fragmentSource) {
+            this.fragmentShader.delete();
+            this.fragmentShader = null;
+        }
     }
 
     // Get variable handles from program
@@ -268,46 +302,6 @@ export class Program {
         }
     }
 
-    // Poll completion for parallel compiles
-    pollCompletion() {
-        let poll = () => {
-            if (!this.program) {
-                // Program was deleted
-                return;
-            }
-
-            if (this.gl.getProgramParameter(this.program, GL.COMPLETION_STATUS_KHR)) {
-                this.checkLinkage();
-            } else {
-                this.pollHandle = requestAnimationFrame(poll);
-            }
-        };
-        poll();
-    }
-
-    // Check if program linked
-    checkLinkage() {
-        if (this.gl.getProgramParameter(this.program, GL.LINK_STATUS)) {
-            this.linked = true;
-            this.initVariables();
-        } else {
-            this.linkFailed = true;
-            console.error(this.gl.getProgramInfoLog(this.program));
-            this.vertexShader.checkCompilation();
-            this.fragmentShader.checkCompilation();
-        }
-
-        if (this.vertexSource) {
-            this.vertexShader.delete();
-            this.vertexShader = null;
-        }
-
-        if (this.fragmentSource) {
-            this.fragmentShader.delete();
-            this.fragmentShader = null;
-        }
-    }
-
     // Set the value of a uniform.
     uniform(name, value) {
         this.uniforms[name].set(value);
@@ -341,7 +335,7 @@ export class Program {
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sun Apr 14 2019 17:58:20 GMT-0500 (GMT-05:00)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Tue Apr 16 2019 23:08:43 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>
