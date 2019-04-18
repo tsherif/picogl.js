@@ -3,7 +3,7 @@
 <head>
     <title>PicoGL.js: Triangle</title>
     <meta charset="utf-8">
-    <script src="../build/picogl.js"></script>
+    <script src="utils/compatibility.js"></script>
     <script src="utils/utils.js"></script>
     <link rel="stylesheet" href="../site/css/picogl-example.css"> 
 </head>
@@ -60,19 +60,14 @@
             fragColor = vec4(vColor, 1.0);
         }
     </script>
-    <script>
+    <script type="module">
+        import { PicoGL } from "../src/picogl.js";
         
-        if (!utils.testWebGL2()) {
-            console.error("WebGL 2 not available");
-            document.body.innerHTML = "This example requires WebGL 2 which is unavailable on this system."
-        }
-
-        var canvas = document.getElementById("gl-canvas");
-
+        let canvas = document.getElementById("gl-canvas");
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         
-        var app = PicoGL.createApp(canvas)
+        let app = PicoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0);
 
         window.onresize = function() {
@@ -80,13 +75,12 @@
         }
 
         // PROGRAM 
-        var vsSource =  document.getElementById("vs").text.trim();
-        var fsSource =  document.getElementById("fs").text.trim();
-        var program = app.createProgram(vsSource, fsSource);
+        let vsSource =  document.getElementById("vs").text.trim();
+        let fsSource =  document.getElementById("fs").text.trim();
 
         // INTERLEAVE FLOAT POSITION DATA
         // WITH UNSIGNED BYTE COLOR DATA
-        var interleavedData = new Float32Array([
+        let interleavedData = new Float32Array([
             -0.5, -0.5, // Positions data
              0,         // Color data
              0.5, -0.5,
@@ -95,16 +89,16 @@
              0
         ]);
 
-        var interleavedDataUByte = new Uint8Array(interleavedData.buffer);
+        let interleavedDataUByte = new Uint8Array(interleavedData.buffer);
         interleavedDataUByte.set([255, 0, 0, 255], 8);
         interleavedDataUByte.set([0, 255, 0, 255], 20);
         interleavedDataUByte.set([0, 0, 255, 255], 32);
 
         // CREATE INTERLEAVED BUFFER (NO POINTER INFORMATION)
-        var interleavedBuffer = app.createInterleavedBuffer(12, interleavedData);
+        let interleavedBuffer = app.createInterleavedBuffer(12, interleavedData);
 
         // FULLY SPECIFY POINTER INFORMATION IN VERTEX ARRAY
-        var triangleArray = app.createVertexArray()
+        let triangleArray = app.createVertexArray()
         .vertexAttributeBuffer(0, interleavedBuffer, {
             type: PicoGL.FLOAT,
             size: 2,
@@ -118,17 +112,21 @@
             normalized: true
         });
 
-        // CREATE DRAW CALL FROM PROGRAM AND VERTEX ARRAY
-        var drawCall = app.createDrawCall(program, triangleArray);
+        // USE PARALLEL SHADER COMPILATION IF AVAILABLE
+        // https://www.khronos.org/registry/webgl/extensions/KHR_parallel_shader_compile/
+        app.createPrograms([vsSource, fsSource]).then(([program]) => {
+            // CREATE DRAW CALL FROM PROGRAM AND VERTEX ARRAY
+            let drawCall = app.createDrawCall(program, triangleArray);
 
-        // DRAW
-        app.clear();
-        drawCall.draw();
+            // DRAW
+            app.clear();
+            drawCall.draw();
 
-        // CLEANUP
-        program.delete();
-        interleavedBuffer.delete();
-        triangleArray.delete();
+            // CLEANUP
+            program.delete();
+            interleavedBuffer.delete();
+            triangleArray.delete();
+        });
 
     </script>
     <a href="https://github.com/tsherif/picogl.js" id="github-ribbon"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"></a>

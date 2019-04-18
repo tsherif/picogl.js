@@ -21,14 +21,14 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-import { GL } from "./constants";
-import { Shader } from "./shader";
-import { 
+import { GL, WEBGL_INFO } from "./constants.js";
+import { Shader } from "./shader.js";
+import {
     SingleComponentUniform,
     MultiNumericUniform,
     MultiBoolUniform,
     MatrixUniform
-} from "./uniforms";
+} from "./uniforms.js";
 
 /**
     WebGL program consisting of compiled and linked vertex and fragment
@@ -54,74 +54,140 @@ export class Program {
         this.samplers = {};
         this.samplerCount = 0;
 
-        this.restore(vsSource, fsSource);
+        this.vertexSource = null;
+        this.vertexShader = null;
+        this.fragmentSource = null;
+        this.fragmentShader = null;
+        this.linked = false;
+
+        if (typeof vsSource === "string") {
+            this.vertexSource = vsSource;
+        } else {
+            this.vertexShader = vsSource;
+        }
+
+        if (typeof fsSource === "string") {
+            this.fragmentSource = fsSource;
+        } else {
+            this.fragmentShader = fsSource;
+        }
+
+        this.initialize();
     }
 
     /**
-        Restore program after context loss.
+        Restore program after context loss. Note that this
+        will stall for completion. <b>App.restorePrograms</b>
+        is the preferred method for program restoration as
+        it will parallelize compilation where available.
 
         @method
-        @param {Shader|string} vertexShader Vertex shader object or source code.
-        @param {Shader|string} fragmentShader Fragment shader object or source code.
         @return {Program} The Program object.
     */
-    restore(vsSource, fsSource) {
+    restore() {
+        this.initialize();
+        this.checkLinkage();
+
+        return this;
+    }
+
+    /**
+        Delete this program.
+
+        @method
+        @return {Program} The Program object.
+    */
+    delete() {
+        if (this.program) {
+            this.gl.deleteProgram(this.program);
+            this.program = null;
+
+            if (this.appState.program === this) {
+                this.gl.useProgram(null);
+                this.appState.program = null;
+            }
+        }
+
+        return this;
+    }
+
+    // Initialize program state
+    initialize() {
         if (this.appState.program === this) {
             this.gl.useProgram(null);
             this.appState.program = null;
         }
 
+        this.linked = false;
         this.uniformBlockCount = 0;
         this.samplerCount = 0;
 
-        let i;
-
-        let vShader, fShader;
-
-        let ownVertexShader = false;
-        let ownFragmentShader = false;
-        if (typeof vsSource === "string") {
-            vShader = new Shader(this.gl, GL.VERTEX_SHADER, vsSource);
-            ownVertexShader = true;
-        } else {
-            vShader = vsSource;
+        if (this.vertexSource) {
+            this.vertexShader = new Shader(this.gl, GL.VERTEX_SHADER, this.vertexSource);
         }
 
-        if (typeof fsSource === "string") {
-            fShader = new Shader(this.gl, GL.FRAGMENT_SHADER, fsSource);
-            ownFragmentShader = true;
-        } else {
-            fShader = fsSource;
+        if (this.fragmentSource) {
+            this.fragmentShader = new Shader(this.gl, GL.FRAGMENT_SHADER, this.fragmentSource);
         }
 
         let program = this.gl.createProgram();
-        this.gl.attachShader(program, vShader.shader);
-        this.gl.attachShader(program, fShader.shader);
+        this.gl.attachShader(program, this.vertexShader.shader);
+        this.gl.attachShader(program, this.fragmentShader.shader);
         if (this.transformFeedbackVaryings) {
             this.gl.transformFeedbackVaryings(program, this.transformFeedbackVaryings, GL.SEPARATE_ATTRIBS);
         }
         this.gl.linkProgram(program);
 
-        if (!this.gl.getProgramParameter(program, GL.LINK_STATUS)) {
-            console.error(this.gl.getProgramInfoLog(program));
-        }
-
-        if (ownVertexShader) {
-            vShader.delete();
-        }
-
-        if (ownFragmentShader) {
-            fShader.delete();
-        }
-
         this.program = program;
+
+        return this;
+    }
+
+    // Check if compilation is complete
+    checkCompletion() {
+        if (WEBGL_INFO.PARALLEL_SHADER_COMPILE) {
+            return this.gl.getProgramParameter(this.program, GL.COMPLETION_STATUS_KHR);
+        }
+
+        return true;
+    }
+
+    // Check if program linked.
+    // Will stall for completion.
+    checkLinkage() {
+        if (this.linked) {
+            return;
+        }
+
+        if (this.gl.getProgramParameter(this.program, GL.LINK_STATUS)) {
+            this.linked = true;
+            this.initVariables();
+        } else {
+            console.error(this.gl.getProgramInfoLog(this.program));
+            this.vertexShader.checkCompilation();
+            this.fragmentShader.checkCompilation();
+        }
+
+        if (this.vertexSource) {
+            this.vertexShader.delete();
+            this.vertexShader = null;
+        }
+
+        if (this.fragmentSource) {
+            this.fragmentShader.delete();
+            this.fragmentShader = null;
+        }
+    }
+
+    // Get variable handles from program
+    initVariables() {
         this.bind();
 
-        let numUniforms = this.gl.getProgramParameter(program, GL.ACTIVE_UNIFORMS);
+        let numUniforms = this.gl.getProgramParameter(this.program, GL.ACTIVE_UNIFORMS);
         let textureUnit;
 
-        for (i = 0; i < numUniforms; ++i) {
-            let uniformInfo = this.gl.getActiveUniform(program, i);
+        for (let i = 0; i < numUniforms; ++i) {
+            let uniformInfo = this.gl.getActiveUniform(this.program, i);
             let uniformHandle = this.gl.getUniformLocation(this.program, uniformInfo.name);
             let UniformClass = null;
             let type = uniformInfo.type;
@@ -192,61 +258,26 @@ export class Program {
             }
         }
 
-        let numUniformBlocks = this.gl.getProgramParameter(program, GL.ACTIVE_UNIFORM_BLOCKS);
+        let numUniformBlocks = this.gl.getProgramParameter(this.program, GL.ACTIVE_UNIFORM_BLOCKS);
 
-        for (i = 0; i < numUniformBlocks; ++i) {
+        for (let i = 0; i < numUniformBlocks; ++i) {
             let blockName = this.gl.getActiveUniformBlockName(this.program, i);
             let blockIndex = this.gl.getUniformBlockIndex(this.program, blockName);
-            
+
             let uniformBlockBase = this.uniformBlockCount++;
             this.gl.uniformBlockBinding(this.program, blockIndex, uniformBlockBase);
             this.uniformBlocks[blockName] = uniformBlockBase;
         }
-
-        return this;
     }
 
-    /**
-        Delete this program.
-
-        @method
-        @return {Program} The Program object.
-    */
-    delete() {
-        if (this.program) {
-            this.gl.deleteProgram(this.program);
-            this.program = null;
-
-            if (this.appState.program === this) {
-                this.gl.useProgram(null);
-                this.appState.program = null;
-            }
-        }
-
-        return this;
-    }
-    
-    /**
-        Set the value of a uniform.
-
-        @method
-        @ignore
-        @return {Program} The Program object.
-    */
+    // Set the value of a uniform.
     uniform(name, value) {
         this.uniforms[name].set(value);
 
         return this;
     }
 
-    // 
-    /**
-        Use this program.
-
-        @method
-        @ignore
-        @return {Program} The Program object.
-    */
+    // Use this program.
     bind() {
         if (this.appState.program !== this) {
             this.gl.useProgram(this.program);

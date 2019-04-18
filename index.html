@@ -43,40 +43,41 @@
     </div>
     <pre><code class="javascript">
     // Create a PicoGL.js app to manage GL state.
-    var app = PicoGL.createApp(canvas)
+    let app = PicoGL.createApp(canvas)
     .clearColor(0.0, 0.0, 0.0, 1.0);
 
     // Create program from shader source.
-    var program = app.createProgram(vertexShaderSource, fragmentShaderSource);
+    // Shaders are compiled in parallel if supported by the platform.
+    app.createPrograms(vertexShaderSource, fragmentShaderSource).then(([program]) => {
+        // Scene geometry stored vertex buffer object.
+        let positions = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
+            -0.5, -0.5,
+             0.5, -0.5,
+             0.0,  0.5
+        ]));
 
-    // Scene geometry stored vertex buffer object.
-    var positions = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
-        -0.5, -0.5,
-         0.5, -0.5,
-         0.0,  0.5
-    ]));
+        // Vertex buffer and attribute pointer state stored
+        // in vertex array object.
+        let vertexArray = app.createVertexArray()
+        .vertexAttributeBuffer(0, positions);
 
-    // Vertex buffer and attribute pointer state stored
-    // in vertex array object.
-    var vertexArray = app.createVertexArray()
-    .vertexAttributeBuffer(0, positions);
+        // Scene data stored in uniform buffer object. 
+        let uniformBuffer = app.createUniformBuffer([
+            PicoGL.FLOAT_VEC4,
+            PicoGL.FLOAT_VEC4
+        ])
+        .set(0, new Float32Array([1.0, 0.0, 0.0, 0.3]))
+        .set(1, new Float32Array([0.0, 0.0, 1.0, 0.7]))
+        .update();
 
-    // Scene data stored in uniform buffer object. 
-    var uniformBuffer = app.createUniformBuffer([
-        PicoGL.FLOAT_VEC4,
-        PicoGL.FLOAT_VEC4
-    ])
-    .set(0, new Float32Array([1.0, 0.0, 0.0, 0.3]))
-    .set(1, new Float32Array([0.0, 0.0, 1.0, 0.7]))
-    .update();
+        // Create a draw call from program, vertex array, uniform buffer.
+        let drawCall = app.createDrawCall(program, vertexArray)
+        .uniformBlock("ColorUniforms", uniformBuffer);
 
-    // Create a draw call from program, vertex array, uniform buffer.
-    var drawCall = app.createDrawCall(program, vertexArray)
-    .uniformBlock("ColorUniforms", uniformBuffer);
-
-    // Draw!
-    app.clear()
-    drawCall.draw();
+        // Draw!
+        app.clear()
+        drawCall.draw();
+    });
     </code></pre>
     
     <div class="description">

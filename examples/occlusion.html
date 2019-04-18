@@ -3,8 +3,8 @@
 <head>
     <title>PicoGL.js Example: Occlusion Culling</title>
     <meta charset="utf-8">
+    <script src="utils/compatibility.js"></script>
     <script src="utils/gl-matrix.js"></script>
-    <script src="../build/picogl.js"></script>
     <script src="utils/utils.js"></script>
     <link rel="stylesheet" href="../site/css/picogl-example.css">
     <style>
@@ -172,16 +172,13 @@
             fragColor = vec4(0.2, 0.1, 0.1, 0.2);
         }
     </script>
-    <script type="text/javascript">
+    <script type="module">
+        import { PicoGL } from "../src/picogl.js";
+       
         utils.addTimerElement();
 
-        if (!utils.testWebGL2()) {
-            console.error("WebGL 2 not available");
-            document.body.innerHTML = "This example requires WebGL 2 which is unavailable on this system."
-        }
-
-        var occlusionCullingEnabled = true;
-        var showHUD = true;
+        let occlusionCullingEnabled = true;
+        let showHUD = true;
 
         document.getElementById("occlusion-toggle").addEventListener("change", function() {
             occlusionCullingEnabled = this.checked;
@@ -191,16 +188,16 @@
             showHUD = this.checked;
         });
 
-        var sphereCountElement = document.getElementById("num-spheres");
-        var occludedSpheresElement = document.getElementById("num-invisible-spheres");
+        let sphereCountElement = document.getElementById("num-spheres");
+        let occludedSpheresElement = document.getElementById("num-invisible-spheres");
 
-        var canvas = document.getElementById("gl-canvas");
+        let canvas = document.getElementById("gl-canvas");
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
-        var app = PicoGL.createApp(canvas);
+        let app = PicoGL.createApp(canvas);
 
-        var hudViewport = [
+        let hudViewport = [
             0, 
             0,
             app.width / 5, 
@@ -210,41 +207,38 @@
         .blendFunc(PicoGL.ONE_MINUS_SRC_ALPHA, PicoGL.ONE_MINUS_SRC_ALPHA)
         .scissor(hudViewport[0], hudViewport[1], hudViewport[2], hudViewport[3]);
 
-        var timer = app.createTimer();
+        let timer = app.createTimer();
 
         /////////////////////
         // SET UP PROGRAM
         /////////////////////
 
-        var drawVsSource =  document.getElementById("vertex-draw").text.trim();
-        var drawFsSource =  document.getElementById("fragment-draw").text.trim();
-        var drawProgram = app.createProgram(drawVsSource, drawFsSource);
+        let drawVsSource =  document.getElementById("vertex-draw").text.trim();
+        let drawFsSource =  document.getElementById("fragment-draw").text.trim();
 
 
-        var boundingBoxVSource =  document.getElementById("vertex-boundingBox").text.trim();
-        var boundingBoxFSource =  document.getElementById("fragment-boundingBox").text.trim();
-        var boundingBoxProgram = app.createProgram(boundingBoxVSource, boundingBoxFSource);
+        let boundingBoxVSource =  document.getElementById("vertex-boundingBox").text.trim();
+        let boundingBoxFSource =  document.getElementById("fragment-boundingBox").text.trim();
         
 
-        var hudVSSource =  document.getElementById("vertex-hud").text.trim();
-        var hudFSSoure =  document.getElementById("fragment-hud").text.trim();
-        var hudProgram = app.createProgram(hudVSSource, hudFSSoure);
-
+        let hudVSSource =  document.getElementById("vertex-hud").text.trim();
+        let hudFSSource =  document.getElementById("fragment-hud").text.trim();
+        
         /////////////////////
         // SET UP GEOMETRY 
         /////////////////////
 
-        var positionBuffer, uvBuffer, normalBuffer, indices;
+        let positionBuffer, uvBuffer, normalBuffer, indices;
 
         // Sphere geometry
-        var sphereData = utils.createSphere({ radius: 0.6 });
+        let sphereData = utils.createSphere({ radius: 0.6 });
 
-        var spherePositions = app.createVertexBuffer(PicoGL.FLOAT, 3, sphereData.positions);
-        var sphereUVs = app.createVertexBuffer(PicoGL.FLOAT, 2, sphereData.uvs);
-        var sphereNormals = app.createVertexBuffer(PicoGL.FLOAT, 3, sphereData.normals);
-        var sphereIndices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, sphereData.indices);
+        let spherePositions = app.createVertexBuffer(PicoGL.FLOAT, 3, sphereData.positions);
+        let sphereUVs = app.createVertexBuffer(PicoGL.FLOAT, 2, sphereData.uvs);
+        let sphereNormals = app.createVertexBuffer(PicoGL.FLOAT, 3, sphereData.normals);
+        let sphereIndices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, sphereData.indices);
 
-        var sphereArray = app.createVertexArray()
+        let sphereArray = app.createVertexArray()
         .vertexAttributeBuffer(0, spherePositions)
         .vertexAttributeBuffer(1, sphereUVs)
         .vertexAttributeBuffer(2, sphereNormals)
@@ -252,9 +246,9 @@
 
 
         // Bounding box geometry
-        var boundingBoxData = utils.computeBoundingBox(sphereData.positions, { buildGeometry: true });
-        var boundingBoxPositions = app.createVertexBuffer(PicoGL.FLOAT, 3, boundingBoxData.geometry.positions);
-        var boundingBoxArray = app.createVertexArray()
+        let boundingBoxData = utils.computeBoundingBox(sphereData.positions, { buildGeometry: true });
+        let boundingBoxPositions = app.createVertexBuffer(PicoGL.FLOAT, 3, boundingBoxData.geometry.positions);
+        let boundingBoxArray = app.createVertexArray()
         .vertexAttributeBuffer(0, boundingBoxPositions);
 
         //////////////////////////
@@ -262,34 +256,34 @@
         //////////////////////////
 
         // Main camera
-        var projMatrix = mat4.create();
+        let projMatrix = mat4.create();
         mat4.perspective(projMatrix, Math.PI / 2, app.width / app.height, 0.1, 10.0);
 
-        var viewMatrix = mat4.create();
-        var eyePosition = vec3.fromValues(0, 0, 5);
+        let viewMatrix = mat4.create();
+        let eyePosition = vec3.fromValues(0, 0, 5);
         mat4.lookAt(viewMatrix, eyePosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
 
-        var viewProjMatrix = mat4.create();
+        let viewProjMatrix = mat4.create();
         mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
 
         // HUD
-        var hudProjMatrix = mat4.create();
+        let hudProjMatrix = mat4.create();
         mat4.perspective(hudProjMatrix, Math.PI / 2, app.width / app.height, 0.1, 10.0);
 
-        var hudViewMatrix = mat4.create();
-        var hudEyePosition = vec3.fromValues(0, 5, 0);
+        let hudViewMatrix = mat4.create();
+        let hudEyePosition = vec3.fromValues(0, 5, 0);
         mat4.lookAt(hudViewMatrix, hudEyePosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 0, -1));
 
-        var hudViewProjMatrix = mat4.create();
+        let hudViewProjMatrix = mat4.create();
         mat4.multiply(hudViewProjMatrix, hudProjMatrix, hudViewMatrix);
 
-        var lightPosition = vec3.fromValues(1, 1, 40);
+        let lightPosition = vec3.fromValues(1, 1, 40);
 
-        var modelMatrix = mat4.create();
-        var rotateXMatrix = mat4.create();
-        var rotateYMatrix = mat4.create();
+        let modelMatrix = mat4.create();
+        let rotateXMatrix = mat4.create();
+        let rotateYMatrix = mat4.create();
 
-        var sceneUniformBuffer = app.createUniformBuffer([
+        let sceneUniformBuffer = app.createUniformBuffer([
             PicoGL.FLOAT_MAT4,
             PicoGL.FLOAT_VEC4,
             PicoGL.FLOAT_VEC4
@@ -303,9 +297,9 @@
         // DEPTH SORT FUNCTION
         //////////////////////////
 
-        var sortPositionA = vec4.create();
-        var sortPositionB = vec4.create();
-        var sortModelView = mat4.create();
+        let sortPositionA = vec4.create();
+        let sortPositionB = vec4.create();
+        let sortModelView = mat4.create();
 
         function depthSort(a, b) {
             vec4.set(sortPositionA, a.translate[0], a.translate[1], a.translate[2], 1.0);
@@ -323,23 +317,31 @@
         // LOAD TEXTURE
         /////////////////
 
-        var firstFrame = true;
-        var occludedSpheres = 0;
+        let firstFrame = true;
+        let occludedSpheres = 0;
 
-        
-        utils.loadImages(["img/webgl-logo.png"], function(images) {
-            // CREATE TEXTURE
-            var texture = app.createTexture2D(images[0], { flipY: true });
-        
+        Promise.all([
+            app.createPrograms(
+                [drawVsSource, drawFsSource],
+                [boundingBoxVSource, boundingBoxFSource],
+                [hudVSSource, hudFSSource]
+            ),
+            utils.loadImages(["img/webgl-logo.png"])
+        ]).then(([
+            [drawProgram, boundingBoxProgram, hudProgram],
+            [image]
+        ]) => {
+            let texture = app.createTexture2D(image, { flipY: true });
+            
             // Object definitions
-            var GRID_DIM = 6;
-            var GRID_OFFSET = GRID_DIM / 2 - 0.5;
-            var NUM_SPHERES = GRID_DIM * GRID_DIM;
-            var spheres = new Array(NUM_SPHERES);
+            const GRID_DIM = 6;
+            const GRID_OFFSET = GRID_DIM / 2 - 0.5;
+            const NUM_SPHERES = GRID_DIM * GRID_DIM;
+            let spheres = new Array(NUM_SPHERES);
 
-            for (var i = 0; i < NUM_SPHERES; ++i) {
-                var x = Math.floor(i / GRID_DIM) - GRID_OFFSET;
-                var z = i % GRID_DIM - GRID_OFFSET;
+            for (let i = 0; i < NUM_SPHERES; ++i) {
+                let x = Math.floor(i / GRID_DIM) - GRID_OFFSET;
+                let z = i % GRID_DIM - GRID_OFFSET;
 
                 spheres[i] = {
                     rotate: [0, 0, 0], // Will be used for global rotation
@@ -366,11 +368,11 @@
 
             sphereCountElement.innerHTML = spheres.length;
 
-            var rotationMatrix = mat4.create();
-            var sphere, boundingBox;
-            var samplesPassed;
+            let rotationMatrix = mat4.create();
+            let sphere, boundingBox;
+            let samplesPassed;
             
-            var i;
+            let i;
 
             function draw() {
                 occludedSpheres = 0;
@@ -411,7 +413,7 @@
                                 occludedSpheres++;
                             }
                         }
-    
+            
                         // Query is initiated here by drawing the bounding box of the sphere
                         if (!sphere.query.active) {
                             app.colorMask(false, false, false, false)
@@ -469,7 +471,6 @@
             }
 
             requestAnimationFrame(draw);
-            
         });
 
     </script>

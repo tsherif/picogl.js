@@ -21,7 +21,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-import { GL, WEBGL_INFO } from "./constants";
+import { GL, WEBGL_INFO } from "./constants.js";
 
 /**
     A DrawCall represents the program and values of associated

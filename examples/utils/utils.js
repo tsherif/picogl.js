@@ -22,44 +22,49 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 (function() {
-    var dummyGL = document.createElement("canvas").getContext("webgl2");
+
+    let translateMat;
+    let rotateXMat;
+    let rotateYMat;
+    let rotateZMat;
+    let scaleMat;
 
     if (window.mat4) {
-        var translateMat = mat4.create();
-        var rotateXMat = mat4.create();
-        var rotateYMat = mat4.create();
-        var rotateZMat = mat4.create();
-        var scaleMat = mat4.create();
+        translateMat = mat4.create();
+        rotateXMat = mat4.create();
+        rotateYMat = mat4.create();
+        rotateZMat = mat4.create();
+        scaleMat = mat4.create();
     }
 
-    var zeros = [0, 0, 0];
-    var ones = [1, 1, 1];
+    let zeros = [0, 0, 0];
+    let ones = [1, 1, 1];
 
-    var NUM_TIMING_SAMPLES = 10;
+    const NUM_TIMING_SAMPLES = 10;
 
-    var cpuTimeSum = 0;
-    var gpuTimeSum = 0;
-    var timeSampleCount = NUM_TIMING_SAMPLES - 1;
+    let cpuTimeSum = 0;
+    let gpuTimeSum = 0;
+    let timeSampleCount = NUM_TIMING_SAMPLES - 1;
 
     // https://www.khronos.org/registry/webgl/extensions/WEBGL_compressed_texture_pvrtc/
     function pvrtc2bppSize(width, height) {
-        var width = Math.max(width, 16);
-        var height = Math.max(height, 8);
+        width = Math.max(width, 16);
+        height = Math.max(height, 8);
 
         return width * height / 4;
     }
 
     // https://www.khronos.org/registry/webgl/extensions/WEBGL_compressed_texture_pvrtc/
     function pvrtc4bppSize(width, height) {
-        var width = Math.max(width, 8);
-        var height = Math.max(height, 8);
+        width = Math.max(width, 8);
+        height = Math.max(height, 8);
 
         return width * height / 2;
     }
 
     // https://www.khronos.org/registry/webgl/extensions/WEBGL_compressed_texture_s3tc/
     // https://www.khronos.org/registry/webgl/extensions/WEBGL_compressed_texture_etc/
-    // Size for: 
+    // Size for:
     // COMPRESSED_RGB_S3TC_DXT1_EXT
     // COMPRESSED_R11_EAC
     // COMPRESSED_SIGNED_R11_EAC
@@ -74,7 +79,7 @@
     // https://www.khronos.org/registry/webgl/extensions/WEBGL_compressed_texture_s3tc/
     // https://www.khronos.org/registry/webgl/extensions/WEBGL_compressed_texture_etc/
     // https://www.khronos.org/registry/webgl/extensions/WEBGL_compressed_texture_astc/
-    // Size for: 
+    // Size for:
     // COMPRESSED_RGBA_S3TC_DXT3_EXT
     // COMPRESSED_RGBA_S3TC_DXT5_EXT
     // COMPRESSED_RG11_EAC
@@ -151,7 +156,7 @@
         return Math.floor((width + 11) / 12) * Math.floor((height + 11) / 12) * 16;
     }
 
-    var PVR_CONSTANTS = {
+    const PVR_CONSTANTS = {
         MAGIC_NUMBER: 0x03525650,
         HEADER_LENGTH: 13,
         HEADER_SIZE: 52,
@@ -222,13 +227,7 @@
     };
 
     window.utils = {
-        testWebGL2: function() {
-            return Boolean(dummyGL);
-        },
-        testExtension: function(ext) {
-            return Boolean(dummyGL.getExtension(ext));
-        },
-        xformMatrix: function xformMatrix(xform, translate, rotate, scale) {
+        xformMatrix(xform, translate, rotate, scale) {
             translate = translate || zeros;
             rotate = rotate || zeros;
             scale = scale || ones;
@@ -245,72 +244,76 @@
             mat4.multiply(xform, translateMat, xform);
         },
 
-        loadImages: function loadImages(urls, ok) {
-            var numImages = urls.length;
+        loadImages(urls) {
+            return new Promise((resolve) => {
+                let numImages = urls.length;
 
-            var images = new Array(numImages);
+                let images = new Array(numImages);
 
-            function onload() {
-                if (--numImages === 0) {
-                    ok(images);
-                }
-            }
-
-            for (var i = 0; i < numImages; ++i) {
-                images[i] = new Image();
-                images[i].onload = onload;
-                images[i].src = urls[i];
-            }
-        },
-
-        loadImageArray: function loadImages(urls, ok) {
-            this.loadImages(urls, function(images) {
-                var canvas = document.createElement("canvas");
-                var ctx = canvas.getContext("2d");
-                var width = images[0].width;
-                var height = images[0].height;
-                canvas.width = width;
-                canvas.height = height * images.length;
-
-                for (var i = 0, len = images.length; i < len; ++i) {
-                    ctx.drawImage(images[i], 0, i * height);
+                function onload() {
+                    if (--numImages === 0) {
+                        resolve(images);
+                    }
                 }
 
-                var image = new Image();
-                image.onload = function() {
-                    ok({
-                        data: image,
-                        width: width,
-                        height: height,
-                        length: images.length
-                    });
+                for (let i = 0; i < numImages; ++i) {
+                    images[i] = new Image();
+                    images[i].onload = onload;
+                    images[i].src = urls[i];
                 }
-                image.src = canvas.toDataURL();
             });
         },
 
-        createBox: function createBox(options) {
+        loadImageArray(urls) {
+            return this.loadImages(urls).then((images) => {
+                let canvas = document.createElement("canvas");
+                let ctx = canvas.getContext("2d");
+                let width = images[0].width;
+                let height = images[0].height;
+                canvas.width = width;
+                canvas.height = height * images.length;
+
+                for (let i = 0, len = images.length; i < len; ++i) {
+                    ctx.drawImage(images[i], 0, i * height);
+                }
+
+                return new Promise((resolve) => {
+                    let image = new Image();
+                    image.onload = () => {
+                        resolve({
+                            data: image,
+                            width: width,
+                            height: height,
+                            length: images.length
+                        });
+                    }
+                    image.src = canvas.toDataURL();
+                });
+            });
+        },
+
+        createBox(options) {
             options = options || {};
 
-            var dimensions = options.dimensions || [1, 1, 1];
-            var position = options.position || [-dimensions[0] / 2, -dimensions[1] / 2, -dimensions[2] / 2];
-            var x = position[0];
-            var y = position[1];
-            var z = position[2];
-            var width = dimensions[0];
-            var height = dimensions[1];
-            var depth = dimensions[2];
+            let dimensions = options.dimensions || [1, 1, 1];
+            let position = options.position || [-dimensions[0] / 2, -dimensions[1] / 2, -dimensions[2] / 2];
+            let x = position[0];
+            let y = position[1];
+            let z = position[2];
+            let width = dimensions[0];
+            let height = dimensions[1];
+            let depth = dimensions[2];
 
-            var fbl = {x: x,         y: y,          z: z + depth};
-            var fbr = {x: x + width, y: y,          z: z + depth};
-            var ftl = {x: x,         y: y + height, z: z + depth};
-            var ftr = {x: x + width, y: y + height, z: z + depth};
-            var bbl = {x: x,         y: y,          z: z };
-            var bbr = {x: x + width, y: y,          z: z };
-            var btl = {x: x,         y: y + height, z: z };
-            var btr = {x: x + width, y: y + height, z: z };
+            let fbl = {x: x,         y: y,          z: z + depth};
+            let fbr = {x: x + width, y: y,          z: z + depth};
+            let ftl = {x: x,         y: y + height, z: z + depth};
+            let ftr = {x: x + width, y: y + height, z: z + depth};
+            let bbl = {x: x,         y: y,          z: z };
+            let bbr = {x: x + width, y: y,          z: z };
+            let btl = {x: x,         y: y + height, z: z };
+            let btr = {x: x + width, y: y + height, z: z };
 
-            var positions = new Float32Array([
+            let positions = new Float32Array([
                 //front
                 fbl.x, fbl.y, fbl.z,
                 fbr.x, fbr.y, fbr.z,
@@ -360,7 +363,7 @@
                 fbr.x, fbr.y, fbr.z
             ]);
 
-            var uvs = new Float32Array([
+            let uvs = new Float32Array([
                 //front
                 0, 0,
                 1, 0,
@@ -410,53 +413,53 @@
                 1, 1
             ]);
 
-            var normals = new Float32Array([
+            let normals = new Float32Array([
                 // front
-                0, 0, 1, 
-                0, 0, 1, 
-                0, 0, 1, 
-                0, 0, 1, 
-                0, 0, 1, 
+                0, 0, 1,
+                0, 0, 1,
+                0, 0, 1,
+                0, 0, 1,
+                0, 0, 1,
                 0, 0, 1,
 
                 // right
-                1, 0, 0, 
-                1, 0, 0, 
-                1, 0, 0, 
-                1, 0, 0, 
-                1, 0, 0, 
+                1, 0, 0,
+                1, 0, 0,
+                1, 0, 0,
+                1, 0, 0,
+                1, 0, 0,
                 1, 0, 0,
 
-                // back 
-                0, 0, -1, 
-                0, 0, -1, 
-                0, 0, -1, 
-                0, 0, -1, 
-                0, 0, -1, 
-                0, 0, -1, 
+                // back
+                0, 0, -1,
+                0, 0, -1,
+                0, 0, -1,
+                0, 0, -1,
+                0, 0, -1,
+                0, 0, -1,
 
                 // left
-                -1, 0, 0, 
-                -1, 0, 0, 
-                -1, 0, 0, 
-                -1, 0, 0, 
-                -1, 0, 0, 
+                -1, 0, 0,
+                -1, 0, 0,
+                -1, 0, 0,
+                -1, 0, 0,
+                -1, 0, 0,
                 -1, 0, 0,
 
-                // top 
-                0, 1, 0, 
-                0, 1, 0, 
-                0, 1, 0, 
-                0, 1, 0, 
-                0, 1, 0, 
+                // top
+                0, 1, 0,
+                0, 1, 0,
+                0, 1, 0,
+                0, 1, 0,
+                0, 1, 0,
                 0, 1, 0,
 
                 // bottom
-                0, -1, 0, 
-                0, -1, 0, 
-                0, -1, 0, 
-                0, -1, 0, 
-                0, -1, 0, 
+                0, -1, 0,
+                0, -1, 0,
+                0, -1, 0,
+                0, -1, 0,
+                0, -1, 0,
                 0, -1, 0
             ]);
 
@@ -468,29 +471,29 @@
 
         },
 
-        createSphere: function createSphere(options) {
+        createSphere(options) {
             options = options || {};
 
-            var longBands = options.longBands || 32;
-            var latBands = options.latBands || 32;
-            var radius = options.radius || 1;
-            var lat_step = Math.PI / latBands;
-            var long_step = 2 * Math.PI / longBands;
-            var num_positions = longBands * latBands * 4;
-            var num_indices = longBands * latBands * 6;
-            var lat_angle, long_angle;
-            var positions = new Float32Array(num_positions * 3);
-            var normals = new Float32Array(num_positions * 3);
-            var uvs = new Float32Array(num_positions * 2);
-            var indices = new Uint16Array(num_indices);
-            var x1, x2, x3, x4,
+            let longBands = options.longBands || 32;
+            let latBands = options.latBands || 32;
+            let radius = options.radius || 1;
+            let lat_step = Math.PI / latBands;
+            let long_step = 2 * Math.PI / longBands;
+            let num_positions = longBands * latBands * 4;
+            let num_indices = longBands * latBands * 6;
+            let lat_angle, long_angle;
+            let positions = new Float32Array(num_positions * 3);
+            let normals = new Float32Array(num_positions * 3);
+            let uvs = new Float32Array(num_positions * 2);
+            let indices = new Uint16Array(num_indices);
+            let x1, x2, x3, x4,
                 y1, y2,
                 z1, z2, z3, z4,
                 u1, u2,
                 v1, v2;
-            var i, j;
-            var k = 0, l = 0;
-            var vi, ti;
+            let i, j;
+            let k = 0, l = 0;
+            let vi, ti;
 
             for (i = 0; i < latBands; i++) {
                 lat_angle = i * lat_step;
@@ -513,47 +516,47 @@
                     vi = k * 3;
                     ti = k * 2;
 
-                    positions[vi] = x1 * radius; 
-                    positions[vi+1] = y1 * radius; 
+                    positions[vi] = x1 * radius;
+                    positions[vi+1] = y1 * radius;
                     positions[vi+2] = z1 * radius; //v0
 
-                    positions[vi+3] = x2 * radius; 
-                    positions[vi+4] = y1 * radius; 
+                    positions[vi+3] = x2 * radius;
+                    positions[vi+4] = y1 * radius;
                     positions[vi+5] = z2 * radius; //v1
 
-                    positions[vi+6] = x3 * radius; 
-                    positions[vi+7] = y2 * radius; 
+                    positions[vi+6] = x3 * radius;
+                    positions[vi+7] = y2 * radius;
                     positions[vi+8] = z3 * radius; // v2
 
 
-                    positions[vi+9] = x4 * radius; 
-                    positions[vi+10] = y2 * radius; 
+                    positions[vi+9] = x4 * radius;
+                    positions[vi+10] = y2 * radius;
                     positions[vi+11] = z4 * radius; // v3
 
                     normals[vi] = x1;
-                    normals[vi+1] = y1; 
+                    normals[vi+1] = y1;
                     normals[vi+2] = z1;
 
                     normals[vi+3] = x2;
-                    normals[vi+4] = y1; 
+                    normals[vi+4] = y1;
                     normals[vi+5] = z2;
 
                     normals[vi+6] = x3;
-                    normals[vi+7] = y2; 
+                    normals[vi+7] = y2;
                     normals[vi+8] = z3;
 
                     normals[vi+9] = x4;
-                    normals[vi+10] = y2; 
+                    normals[vi+10] = y2;
                     normals[vi+11] = z4;
 
-                    uvs[ti] = u1; 
-                    uvs[ti+1] = v1; 
+                    uvs[ti] = u1;
+                    uvs[ti+1] = v1;
 
-                    uvs[ti+2] = u2; 
+                    uvs[ti+2] = u2;
                     uvs[ti+3] = v1;
 
                     uvs[ti+4] = u1;
-                    uvs[ti+5] = v2; 
+                    uvs[ti+5] = v2;
 
                     uvs[ti+6] = u2;
                     uvs[ti+7] = v2;
@@ -578,17 +581,17 @@
             };
         },
 
-        computeBoundingBox: function (position, options) {
+        computeBoundingBox(position, options) {
             options = options || {};
-            var buildGeometry = options.buildGeometry || false;
+            let buildGeometry = options.buildGeometry || false;
 
-            var boundary = {
+            let boundary = {
                 min: vec3.create(),
                 max: vec3.create()
             };
             vec3.set(boundary.min, Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY);
             vec3.set(boundary.max, Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY);
-            for (var i = 0, len = position.length; i < len; i += 3) {
+            for (let i = 0, len = position.length; i < len; i += 3) {
                 boundary.min[0] = Math.min(position[i], boundary.min[0]);
                 boundary.max[0] = Math.max(position[i], boundary.max[0]);
                 boundary.min[1] = Math.min(position[i + 1], boundary.min[1]);
@@ -598,7 +601,7 @@
             }
 
             if (buildGeometry) {
-                var size = vec3.create();
+                let size = vec3.create();
                 vec3.subtract(size, boundary.max, boundary.min);
                 boundary.geometry = utils.createBox({
                     position: boundary.min,
@@ -609,7 +612,7 @@
             return boundary;
         },
 
-        addTimerElement: function() {
+        addTimerElement() {
             this.timerDiv = document.createElement("div")
             this.timerDiv.id = "timer";
             this.cpuTimeElement = document.createElement("div");
@@ -619,14 +622,14 @@
             document.body.appendChild(this.timerDiv);
         },
 
-        updateTimerElement: function(cpuTime, gpuTime) {
+        updateTimerElement(cpuTime, gpuTime) {
             cpuTimeSum += cpuTime;
             gpuTimeSum += gpuTime;
             ++timeSampleCount;
 
             if (timeSampleCount === NUM_TIMING_SAMPLES) {
-                var cpuTimeAve = cpuTimeSum / NUM_TIMING_SAMPLES;
-                var gpuTimeAve = gpuTimeSum / NUM_TIMING_SAMPLES;
+                let cpuTimeAve = cpuTimeSum / NUM_TIMING_SAMPLES;
+                let gpuTimeAve = gpuTimeSum / NUM_TIMING_SAMPLES;
                 this.cpuTimeElement.innerText = "CPU time: " + cpuTimeAve.toFixed(3) + "ms";
                 if (gpuTimeAve > 0) {
                     this.gpuTimeElement.innerText = "GPU time: " + gpuTimeAve.toFixed(3) + "ms";
@@ -640,62 +643,50 @@
             }
         },
 
-        getBinary: function(url, ok) {
-            var xhr = new XMLHttpRequest();
-            xhr.open("GET", url);
-            xhr.responseType = "arraybuffer";
+        loadBinary(url) {
+            return new Promise((resolve) => {
+                let xhr = new XMLHttpRequest();
+                xhr.open("GET", url);
+                xhr.responseType = "arraybuffer";
 
-            xhr.onload = function() {
-                ok(xhr.response);
-            };
+                xhr.onload = function() {
+                    resolve(xhr.response);
+                };
 
-            xhr.send(null);
+                xhr.send(null);
+            });
         },
 
-        getBinaries(urls, ok) {
-            var numRequests = urls.length;
-            var results = new Array(numRequests);
-
-            function checkDoneFunc(i) {
-                return function(result) {
-                    results[i] = result;
-                    if (--numRequests === 0) {
-                        ok(results);
-                    }
-                };
-            }
-
-            for (var i = 0; i < numRequests; ++i) {
-               this.getBinary(urls[i], checkDoneFunc(i)); 
-            }
+        loadBinaries(urls) {
+            return Promise.all(urls.map(url => this.loadBinary(url)));
         },
 
         // http://cdn.imgtec.com/sdk-documentation/PVR+File+Format.Specification.pdf
-        parsePVR: function(data) {
-            var header = new Uint32Array(data, 0, PVR_CONSTANTS.HEADER_LENGTH);
+        parsePVR(data) {
+            let header = new Uint32Array(data, 0, PVR_CONSTANTS.HEADER_LENGTH);
 
-            var pvrFormat = header[PVR_CONSTANTS.PIXEL_FORMAT_INDEX]
+            let pvrFormat = header[PVR_CONSTANTS.PIXEL_FORMAT_INDEX]
 
-            var formatEnum = PVR_CONSTANTS.FORMATS[pvrFormat];
-            var sizeFunction = PVR_CONSTANTS.SIZE_FUNCTIONS[pvrFormat];
+            let formatEnum = PVR_CONSTANTS.FORMATS[pvrFormat];
+            let sizeFunction = PVR_CONSTANTS.SIZE_FUNCTIONS[pvrFormat];
 
-            var mipMapLevels = header[PVR_CONSTANTS.MIPMAPCOUNT_INDEX];
+            let mipMapLevels = header[PVR_CONSTANTS.MIPMAPCOUNT_INDEX];
 
-            var width = header[PVR_CONSTANTS.WIDTH_INDEX];
-            var height = header[PVR_CONSTANTS.HEIGHT_INDEX];
+            let width = header[PVR_CONSTANTS.WIDTH_INDEX];
+            let height = header[PVR_CONSTANTS.HEIGHT_INDEX];
 
-            var dataOffset = PVR_CONSTANTS.HEADER_SIZE + header[PVR_CONSTANTS.METADATA_SIZE_INDEX];
+            let dataOffset = PVR_CONSTANTS.HEADER_SIZE + header[PVR_CONSTANTS.METADATA_SIZE_INDEX];
 
-            var data = new Uint8Array(data, dataOffset);
+            let image = new Uint8Array(data, dataOffset);
 
-            var levels = new Array(mipMapLevels);
-            var levelWidth = width;
-            var levelHeight = height;
-            var offset = 0;
+            let levels = new Array(mipMapLevels);
+            let levelWidth = width;
+            let levelHeight = height;
+            let offset = 0;
 
-            for (var i = 0; i < mipMapLevels; ++i) {
-                var levelSize = sizeFunction(levelWidth, levelHeight);
-                levels[i] = new Uint8Array(data.buffer, data.byteOffset + offset, levelSize);
+            for (let i = 0; i < mipMapLevels; ++i) {
+                let levelSize = sizeFunction(levelWidth, levelHeight);
+                levels[i] = new Uint8Array(image.buffer, image.byteOffset + offset, levelSize);
 
                 levelWidth = Math.max(1, levelWidth >> 1);
                 levelHeight = Math.max(1, levelHeight >> 1);

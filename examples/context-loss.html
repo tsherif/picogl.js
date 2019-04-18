@@ -3,8 +3,8 @@
 <head>
     <title>PicoGL.js: Context Loss and Recovery</title>
     <meta charset="utf-8">
+    <script src="utils/compatibility.js"></script>
     <script src="utils/gl-matrix.js"></script>
-    <script src="../build/picogl.js"></script>
     <script src="utils/utils.js"></script>
     <link rel="stylesheet" href="../site/css/picogl-example.css"> 
     <style>
@@ -157,97 +157,91 @@
             fragColor = vec4((ambient + diffuse + specular) * baseColor.rgb, baseColor.a);
         }
     </script> 
-    <script type="text/javascript">
+    <script type="module">
+        import { PicoGL } from "../src/picogl.js";
+       
         utils.addTimerElement();
 
-        var canvas = document.getElementById("gl-canvas");
-        if (!utils.testWebGL2()) {
-            console.error("WebGL 2 not available");
-            document.body.innerHTML = "This example requires WebGL 2 which is unavailable on this system."
-        }
-
+        let canvas = document.getElementById("gl-canvas");
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
-        var CUBEMAP_DIM = 1024;
-        var NEAR = 0.1;
-        var FAR = 20.0 
+        const CUBEMAP_DIM = 1024;
+        const NEAR = 0.1;
+        const FAR = 20.0 
         
-        var app = PicoGL.createApp(canvas)
+        let app = PicoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0)
-        .depthTest()
-        .floatRenderTargets();
+        .depthTest();
 
-        var timer = app.createTimer();
+        let timer = app.createTimer();
 
         // SET UP SHADOW PROGRAM
-        var shadowVsSource =  document.getElementById("shadow-vs").text.trim();
-        var shadowFsSource =  document.getElementById("shadow-fs").text.trim();
-        var shadowProgram = app.createProgram(shadowVsSource, shadowFsSource);
+        let shadowVsSource =  document.getElementById("shadow-vs").text.trim();
+        let shadowFsSource =  document.getElementById("shadow-fs").text.trim();
+        let shadowVShader = app.createShader(PicoGL.VERTEX_SHADER, shadowVsSource);
 
-        var shadowTarget = app.createCubemap({
+        let shadowTarget = app.createCubemap({
             format: PicoGL.RED,
             type: PicoGL.FLOAT,
             internalFormat: PicoGL.R16F,
             width: CUBEMAP_DIM, 
             height: CUBEMAP_DIM 
         });
-        var depthTarget = app.createRenderbuffer(CUBEMAP_DIM, CUBEMAP_DIM, PicoGL.DEPTH_COMPONENT16);
-        var shadowBuffer = app.createFramebuffer()
+        let depthTarget = app.createRenderbuffer(CUBEMAP_DIM, CUBEMAP_DIM, PicoGL.DEPTH_COMPONENT16);
+        let shadowBuffer = app.createFramebuffer()
         .colorTarget(0, shadowTarget, PicoGL.TEXTURE_CUBE_MAP_NEGATIVE_X)
         .depthTarget(depthTarget);
 
         // SET UP LIGHT PROGRAM
-        var lightVsSource =  document.getElementById("sphere-vs").text.trim();
-        var lightFsSource =  document.getElementById("sphere-fs").text.trim();
-        var lightProgram = app.createProgram(lightVsSource, lightFsSource);
+        let lightVsSource =  document.getElementById("sphere-vs").text.trim();
+        let lightFsSource =  document.getElementById("sphere-fs").text.trim();
 
         // SET UP MAIN PROGRAM
-        var vsSource =  document.getElementById("main-vs").text.trim();
-        var fsSource =  document.getElementById("main-fs").text.trim();
-        var mainProgram = app.createProgram(vsSource, fsSource);
-
+        let vsSource =  document.getElementById("main-vs").text.trim();
+        let fsSource =  document.getElementById("main-fs").text.trim();
+        
         // GEOMETRY
-        var positions, normals, uv, indices;
+        let positions, normals, uv, indices;
 
-        var box = utils.createBox({dimensions: [1.0, 1.0, 1.0]})
+        let box = utils.createBox({dimensions: [1.0, 1.0, 1.0]})
         positions = app.createVertexBuffer(PicoGL.FLOAT, 3, box.positions);
         normals = app.createVertexBuffer(PicoGL.FLOAT, 3, box.normals);
         uv = app.createVertexBuffer(PicoGL.FLOAT, 2, box.uvs);
 
-        var boxArray = app.createVertexArray()
+        let boxArray = app.createVertexArray()
         .vertexAttributeBuffer(0, positions)
         .vertexAttributeBuffer(1, normals)
         .vertexAttributeBuffer(2, uv);
 
-        var sphere = utils.createSphere({radius: 0.1});
-        var spherePositions = app.createVertexBuffer(PicoGL.FLOAT, 3, sphere.positions);
-        var sphereIndices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, sphere.indices);
+        let sphere = utils.createSphere({radius: 0.1});
+        let spherePositions = app.createVertexBuffer(PicoGL.FLOAT, 3, sphere.positions);
+        let sphereIndices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, sphere.indices);
 
-        var sphereArray = app.createVertexArray()
+        let sphereArray = app.createVertexArray()
         .vertexAttributeBuffer(0, spherePositions)
         .indexBuffer(sphereIndices);
 
         // UNIFORMS
-        var projMatrix = mat4.create();
+        let projMatrix = mat4.create();
         mat4.perspective(projMatrix, Math.PI / 2, canvas.width / canvas.height, NEAR, FAR);
 
-        var viewMatrix = mat4.create();
-        var eyePosition = vec3.fromValues(1, 1, 1);
+        let viewMatrix = mat4.create();
+        let eyePosition = vec3.fromValues(1, 1, 1);
         mat4.lookAt(viewMatrix, eyePosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
 
-        var viewProjMatrix = mat4.create();
+        let viewProjMatrix = mat4.create();
         mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
 
-        var lightPosition = vec3.fromValues(0, 0, 0);
-        var lightProjMatrix = mat4.create(); 
-        var lightViewMatrix = mat4.create();       
-        var lightViewMatrixNegX = mat4.create();
-        var lightViewMatrixPosX = mat4.create();
-        var lightViewMatrixNegY = mat4.create();
-        var lightViewMatrixPosY = mat4.create();
-        var lightViewMatrixNegZ = mat4.create();
-        var lightViewMatrixPosZ = mat4.create();
+        let lightPosition = vec3.fromValues(0, 0, 0);
+        let lightProjMatrix = mat4.create(); 
+        let lightViewMatrix = mat4.create();       
+        let lightViewMatrixNegX = mat4.create();
+        let lightViewMatrixPosX = mat4.create();
+        let lightViewMatrixNegY = mat4.create();
+        let lightViewMatrixPosY = mat4.create();
+        let lightViewMatrixNegZ = mat4.create();
+        let lightViewMatrixPosZ = mat4.create();
 
         mat4.perspective(lightProjMatrix, Math.PI / 2, 1, NEAR, FAR);
         
@@ -263,7 +257,7 @@
         ///////////////////////////////////////
 
         // OBJECT DESCRIPTIONS
-        var boxes = [
+        let boxes = [
             {
                 translate: [0, 0, 0],
                 rotate: [Math.random(), Math.random(), Math.random()],
@@ -317,17 +311,27 @@
             mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
         };
 
-        var contextLossDiv = document.getElementById("context-loss");
-        var contextLost = false;
-        var lastContextLoss = Date.now();
+        let contextLossDiv = document.getElementById("context-loss");
+        let contextLost = false;
+        let lastContextLoss = Date.now();
 
-        utils.loadImages(["img/webgl-logo.png", "img/cobblestone.jpg"], function (images) {
-            var webglTexture = app.createTexture2D(images[0], { flipY: true });
-            var cobblesTexture = app.createTexture2D(images[1], { flipY: true });
+        Promise.all([
+            app.createPrograms(
+                [shadowVShader, shadowFsSource],
+                [lightVsSource, lightFsSource],
+                [vsSource, fsSource]
+            ),
+            utils.loadImages(["img/webgl-logo.png", "img/cobblestone.jpg"])
+        ]).then(([
+            [shadowProgram, lightProgram, mainProgram],
+            [webglImage, cobblesImage]
+        ]) => {
+            let webglTexture = app.createTexture2D(webglImage, { flipY: true });
+            let cobblesTexture = app.createTexture2D(cobblesImage, { flipY: true });
 
             // DRAW CALLS
 
-            var lightDrawcall = app.createDrawCall(lightProgram, sphereArray)
+            let lightDrawcall = app.createDrawCall(lightProgram, sphereArray)
             .uniform("uMVP", viewProjMatrix);
 
             boxes[0].shadowDrawCall = app.createDrawCall(shadowProgram, boxArray)
@@ -338,7 +342,7 @@
             .texture("uTextureMap", cobblesTexture)
             .texture("uShadowMap", shadowTarget);
 
-            for (var i = 1, len = boxes.length; i < len; ++i) {
+            for (let i = 1, len = boxes.length; i < len; ++i) {
                 boxes[i].shadowDrawCall = app.createDrawCall(shadowProgram, boxArray)
                 .uniform("uProjection", lightProjMatrix);
 
@@ -349,14 +353,14 @@
                 .texture("uShadowMap", shadowTarget);
             }
 
-            app.onContextRestored(function() {
+            app.onContextRestored(() => {
                 app.clearColor(0.0, 0.0, 0.0, 1.0)
-                .depthTest()
-                .floatRenderTargets();
+                .depthTest();
 
                 timer.restore();
 
-                shadowProgram.restore(shadowVsSource, shadowFsSource);
+                shadowVShader.restore();
+                app.restorePrograms(shadowProgram, lightProgram, mainProgram);
 
                 shadowTarget.restore();
                 depthTarget.restore();
@@ -364,9 +368,6 @@
                 shadowBuffer.restore()
                 .colorTarget(0, shadowTarget, PicoGL.TEXTURE_CUBE_MAP_NEGATIVE_X)
                 .depthTarget(depthTarget);
-
-                lightProgram.restore(lightVsSource, lightFsSource);
-                mainProgram.restore(vsSource, fsSource);
 
                 positions.restore(box.positions);
                 normals.restore(box.normals);
@@ -384,8 +385,8 @@
                 .vertexAttributeBuffer(0, spherePositions)
                 .indexBuffer(sphereIndices);
 
-                webglTexture.restore(images[0]);
-                cobblesTexture.restore(images[1]);
+                webglTexture.restore(webglImage);
+                cobblesTexture.restore(cobblesImage);
             });
 
 
@@ -393,7 +394,7 @@
             function draw() {
                 requestAnimationFrame(draw);
 
-                var currentTime = Date.now();
+                let currentTime = Date.now();
                 if (contextLost) {
                     contextLossDiv.innerHTML = "Context Restored!";
                     app.restoreContext();
@@ -415,7 +416,7 @@
                 timer.start();
 
                 // UPDATE TRANSFORMS
-                for (var i = 0, len = boxes.length; i < len; ++i) {
+                for (let i = 0, len = boxes.length; i < len; ++i) {
                     boxes[i].rotate[0] += boxes[i].rotateVx;
                     boxes[i].rotate[1] += boxes[i].rotateVy;
 
@@ -433,49 +434,49 @@
 
                 shadowBuffer.colorTarget(0, shadowTarget, PicoGL.TEXTURE_CUBE_MAP_NEGATIVE_X);
                 app.clear();
-                for (var i = 0, len = boxes.length; i < len; ++i) {
+                for (let i = 0, len = boxes.length; i < len; ++i) {
                     boxes[i].shadowDrawCall.uniform("uViewMatrix", lightViewMatrixNegX);
                     boxes[i].shadowDrawCall.draw();
                 }
 
                 shadowBuffer.colorTarget(0, shadowTarget, PicoGL.TEXTURE_CUBE_MAP_POSITIVE_X);
                 app.clear();
-                for (var i = 0, len = boxes.length; i < len; ++i) {
+                for (let i = 0, len = boxes.length; i < len; ++i) {
                     boxes[i].shadowDrawCall.uniform("uViewMatrix", lightViewMatrixPosX);
                     boxes[i].shadowDrawCall.draw();
                 }
 
                 shadowBuffer.colorTarget(0, shadowTarget, PicoGL.TEXTURE_CUBE_MAP_NEGATIVE_Y);
                 app.clear();
-                for (var i = 0, len = boxes.length; i < len; ++i) {
+                for (let i = 0, len = boxes.length; i < len; ++i) {
                     boxes[i].shadowDrawCall.uniform("uViewMatrix", lightViewMatrixNegY);
                     boxes[i].shadowDrawCall.draw();
                 }
 
                 shadowBuffer.colorTarget(0, shadowTarget, PicoGL.TEXTURE_CUBE_MAP_POSITIVE_Y);
                 app.clear();
-                for (var i = 0, len = boxes.length; i < len; ++i) {
+                for (let i = 0, len = boxes.length; i < len; ++i) {
                     boxes[i].shadowDrawCall.uniform("uViewMatrix", lightViewMatrixPosY);
                     boxes[i].shadowDrawCall.draw();
                 }
 
                 shadowBuffer.colorTarget(0, shadowTarget, PicoGL.TEXTURE_CUBE_MAP_NEGATIVE_Z);
                 app.clear();
-                for (var i = 0, len = boxes.length; i < len; ++i) {
+                for (let i = 0, len = boxes.length; i < len; ++i) {
                     boxes[i].shadowDrawCall.uniform("uViewMatrix", lightViewMatrixNegZ);
                     boxes[i].shadowDrawCall.draw();
                 }
 
                 shadowBuffer.colorTarget(0, shadowTarget, PicoGL.TEXTURE_CUBE_MAP_POSITIVE_Z);
                 app.clear();
-                for (var i = 0, len = boxes.length; i < len; ++i) {
+                for (let i = 0, len = boxes.length; i < len; ++i) {
                     boxes[i].shadowDrawCall.uniform("uViewMatrix", lightViewMatrixPosZ);
                     boxes[i].shadowDrawCall.draw();
                 }
 
                 // DRAW TO SCREEN     
                 app.defaultDrawFramebuffer().defaultViewport().clear()
-                for (var i = 0, len = boxes.length; i < len; ++i) {
+                for (let i = 0, len = boxes.length; i < len; ++i) {
                     boxes[i].mainDrawCall.draw();
                 }
                 lightDrawcall.draw();

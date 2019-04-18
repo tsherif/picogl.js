@@ -3,8 +3,8 @@
 <head>
     <title>PicoGL.js: Depth of Field</title>
     <meta charset="utf-8">
+    <script src="utils/compatibility.js"></script>
     <script src="utils/gl-matrix.js"></script>
-    <script src="../build/picogl.js"></script>
     <script src="utils/utils.js"></script>
     <link rel="stylesheet" href="../site/css/picogl-example.css"> 
 </head>
@@ -167,84 +167,78 @@
             fragColor = color;
         }
     </script>
-    <script type="text/javascript">
+    <script type="module">
+        import { PicoGL } from "../src/picogl.js";
+       
         utils.addTimerElement();
 
-        var canvas = document.getElementById("gl-canvas");
-
-        if (!utils.testWebGL2()) {
-            console.error("WebGL 2 not available");
-            document.body.innerHTML = "This example requires WebGL 2 which is unavailable on this system."
-        }
-
+        let canvas = document.getElementById("gl-canvas");
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
-        var NEAR = 0.1;
-        var FAR = 10.0;
-        var FOCAL_LENGTH = 1.0;
-        var FOCUS_DISTANCE = 2.0;
-        var MAGNIFICATION = FOCAL_LENGTH / Math.abs(FOCUS_DISTANCE - FOCAL_LENGTH);
-        var FSTOP = 2.8;
-        var BLUR_COEFFICIENT = FOCAL_LENGTH * MAGNIFICATION / FSTOP;
-        var PPM = Math.sqrt(canvas.width * canvas.width + canvas.height * canvas.height) / 35;   
+        const NEAR = 0.1;
+        const FAR = 10.0;
+        const FOCAL_LENGTH = 1.0;
+        const FOCUS_DISTANCE = 2.0;
+        const MAGNIFICATION = FOCAL_LENGTH / Math.abs(FOCUS_DISTANCE - FOCAL_LENGTH);
+        const FSTOP = 2.8;
+        const BLUR_COEFFICIENT = FOCAL_LENGTH * MAGNIFICATION / FSTOP;
+        const PPM = Math.sqrt(canvas.width * canvas.width + canvas.height * canvas.height) / 35;   
 
-        var NUM_ROWS = 5;
-        var BOXES_PER_ROW = 20;
-        var NUM_BOXES = BOXES_PER_ROW * NUM_ROWS;
+        const NUM_ROWS = 5;
+        const BOXES_PER_ROW = 20;
+        const NUM_BOXES = BOXES_PER_ROW * NUM_ROWS;
 
-        var resized = false;
+        let resized = false;
 
         window.onresize = function() {
             resized = true;
         };
 
-        var app = PicoGL.createApp(canvas)
+        let app = PicoGL.createApp(canvas)
         .depthTest()
         .clearColor(0.0, 0.0, 0.0, 1.0);
 
-        var timer = app.createTimer();
+        let timer = app.createTimer();
 
-        var depthRange = vec2.fromValues(NEAR, FAR);
+        let depthRange = vec2.fromValues(NEAR, FAR);
 
         // SET UP PROGRAMS
-        var boxVsSource =  document.getElementById("vertex-boxes").text.trim();
-        var boxFsSource =  document.getElementById("fragment-boxes").text.trim();
-        var boxProgram = app.createProgram(boxVsSource, boxFsSource);
+        let boxVsSource =  document.getElementById("vertex-boxes").text.trim();
+        let boxFsSource =  document.getElementById("fragment-boxes").text.trim();
 
-        var quadVsSource =  document.getElementById("vertex-quad").text.trim();
-        var blurFsSource = document.getElementById("fragment-blur").text.trim();
-        var blurProgram = app.createProgram(quadVsSource, blurFsSource);
-
+        let quadVsSource =  document.getElementById("vertex-quad").text.trim();
+        let blurFsSource = document.getElementById("fragment-blur").text.trim();
+        
         // FRAMEBUFFERS
-        var colorTargetA = app.createTexture2D(app.width, app.height);
-        var colorTargetB = app.createTexture2D(app.width, app.height);
-        var depthTarget = app.createTexture2D(app.width, app.height, {
+        let colorTargetA = app.createTexture2D(app.width, app.height);
+        let colorTargetB = app.createTexture2D(app.width, app.height);
+        let depthTarget = app.createTexture2D(app.width, app.height, {
             format: PicoGL.DEPTH_COMPONENT
         });
 
-        var boxBuffer = app.createFramebuffer().colorTarget(0, colorTargetA).depthTarget(depthTarget);
-        var hblurBuffer = app.createFramebuffer().colorTarget(0, colorTargetB);
-        var blurBuffer = app.createFramebuffer().colorTarget(0, colorTargetA);
+        let boxBuffer = app.createFramebuffer().colorTarget(0, colorTargetA).depthTarget(depthTarget);
+        let hblurBuffer = app.createFramebuffer().colorTarget(0, colorTargetB);
+        let blurBuffer = app.createFramebuffer().colorTarget(0, colorTargetA);
 
         // INSTANCED BOX GEOMETRY
-        var box = utils.createBox({dimensions: [1.0, 1.0, 1.0]})
-        var positions = app.createVertexBuffer(PicoGL.FLOAT, 3, box.positions);
-        var uv = app.createVertexBuffer(PicoGL.FLOAT, 2, box.uvs);
-        var normals = app.createVertexBuffer(PicoGL.FLOAT, 3, box.normals);
+        let box = utils.createBox({dimensions: [1.0, 1.0, 1.0]})
+        let positions = app.createVertexBuffer(PicoGL.FLOAT, 3, box.positions);
+        let uv = app.createVertexBuffer(PicoGL.FLOAT, 2, box.uvs);
+        let normals = app.createVertexBuffer(PicoGL.FLOAT, 3, box.normals);
 
         // PER-INSTANCE MODEL MATRICES
-        var modelMatrixData = new Float32Array(NUM_BOXES * 16);
-        var modelMatrices = app.createMatrixBuffer(PicoGL.FLOAT_MAT4, modelMatrixData);
+        let modelMatrixData = new Float32Array(NUM_BOXES * 16);
+        let modelMatrices = app.createMatrixBuffer(PicoGL.FLOAT_MAT4, modelMatrixData);
 
-        var boxArray = app.createVertexArray()
+        let boxArray = app.createVertexArray()
         .vertexAttributeBuffer(0, positions)
         .vertexAttributeBuffer(1, uv)
         .vertexAttributeBuffer(2, normals)
         .instanceAttributeBuffer(3, modelMatrices);
 
         // QUAD GEOMETRY
-        var quadPositions = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
+        let quadPositions = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
             -1, 1,
             -1, -1,
             1, -1,
@@ -253,28 +247,28 @@
             1, 1,
         ]));
 
-        var quadArray = app.createVertexArray()
+        let quadArray = app.createVertexArray()
         .vertexAttributeBuffer(0, quadPositions);
 
         // UNIFORM DATA
-        var projMatrix = mat4.create();
+        let projMatrix = mat4.create();
         mat4.perspective(projMatrix, Math.PI / 2, canvas.width / canvas.height, NEAR, FAR);
 
-        var viewMatrix = mat4.create();
-        var eyePosition = vec3.fromValues(1, 1.5, 1);
+        let viewMatrix = mat4.create();
+        let eyePosition = vec3.fromValues(1, 1.5, 1);
         mat4.lookAt(viewMatrix, eyePosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
 
-        var viewProjMatrix = mat4.create();
+        let viewProjMatrix = mat4.create();
         mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
 
-        var lightPosition = vec3.fromValues(1, 1, 0.5);
+        let lightPosition = vec3.fromValues(1, 1, 0.5);
 
-        var modelMatrix = mat4.create();
-        var rotateXMatrix = mat4.create();
-        var rotateYMatrix = mat4.create();
+        let modelMatrix = mat4.create();
+        let rotateXMatrix = mat4.create();
+        let rotateYMatrix = mat4.create();
 
         // UNIFORM BUFFERS
-        var sceneUniforms = app.createUniformBuffer([
+        let sceneUniforms = app.createUniformBuffer([
             PicoGL.FLOAT_MAT4,
             PicoGL.FLOAT_VEC4,
             PicoGL.FLOAT_VEC4
@@ -284,7 +278,7 @@
         .set(2, lightPosition)
         .update();
 
-        var dofUniforms = app.createUniformBuffer([
+        let dofUniforms = app.createUniformBuffer([
             PicoGL.FLOAT_VEC2,
             PicoGL.FLOAT,
             PicoGL.FLOAT,
@@ -296,21 +290,29 @@
         .set(3, PPM)
         .update();
 
-        
-        utils.loadImages(["img/webgl-logo.png"], function(images) {
-            // CREATE TEXTURE
-            var texture = app.createTexture2D(images[0], { flipY: true });
-            
+        // DOF BLUR DRAW CALLS
+        let hTexelOffset = vec2.fromValues(1.0, 0.0);
+        let vTexelOffset = vec2.fromValues(0.0, 1.0);
+
+        Promise.all([
+            app.createPrograms([boxVsSource, boxFsSource], [quadVsSource, blurFsSource]),
+            utils.loadImages(["img/webgl-logo.png"])
+        ]).then(([
+            [boxProgram, blurProgram],
+            [image]
+        ]) => {
+            let texture = app.createTexture2D(image, { flipY: true });
+
             // SINGLE DRAW CALL FOR ALL BOXES
-            var boxes = new Array(NUM_BOXES);
-            var boxesDrawCall = app.createDrawCall(boxProgram, boxArray)
+            let boxes = new Array(NUM_BOXES);
+            let boxesDrawCall = app.createDrawCall(boxProgram, boxArray)
             .uniformBlock("SceneUniforms", sceneUniforms)
             .texture("uTexture", texture);
 
-            var boxI = 0;
-            for (var j = 0; j < NUM_ROWS; ++j) {
-                var rowOffset = (j - Math.floor(NUM_ROWS / 2));
-                for (var i = 0; i < BOXES_PER_ROW; ++i) {
+            let boxI = 0;
+            for (let j = 0; j < NUM_ROWS; ++j) {
+                let rowOffset = (j - Math.floor(NUM_ROWS / 2));
+                for (let i = 0; i < BOXES_PER_ROW; ++i) {
                     boxes[boxI] = {
                         scale: [0.9, 0.9, 0.9],
                         rotate: [-boxI / Math.PI, 0, boxI / Math.PI],
@@ -321,17 +323,13 @@
                 }
             }
 
-            // DOF BLUR DRAW CALLS
-            var hTexelOffset = vec2.fromValues(1.0, 0.0);
-            var vTexelOffset = vec2.fromValues(0.0, 1.0);
-
-            var hBlurDrawCall = app.createDrawCall(blurProgram, quadArray)
+            let hBlurDrawCall = app.createDrawCall(blurProgram, quadArray)
             .uniformBlock("DOFUniforms", dofUniforms)
             .uniform("uTexelOffset", hTexelOffset)
             .texture("uColor", boxBuffer.colorAttachments[0])
             .texture("uDepth", boxBuffer.depthAttachment);
 
-            var finalDrawCall = app.createDrawCall(blurProgram, quadArray)
+            let finalDrawCall = app.createDrawCall(blurProgram, quadArray)
             .uniformBlock("DOFUniforms", dofUniforms)
             .uniform("uTexelOffset", hTexelOffset)
             .texture("uColor", hblurBuffer.colorAttachments[0])
@@ -357,7 +355,7 @@
 
                 timer.start();
 
-                for (var i = 0, len = boxes.length; i < len; ++i) {
+                for (let i = 0, len = boxes.length; i < len; ++i) {
                     boxes[i].rotate[0] += 0.01;
                     boxes[i].rotate[1] += 0.02;
 
@@ -385,7 +383,6 @@
             }
 
             requestAnimationFrame(draw);
-            
         });
 
     </script>

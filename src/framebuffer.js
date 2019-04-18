@@ -21,9 +21,9 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-import { GL } from "./constants";
-import { Texture } from "./texture";
-import { Renderbuffer } from "./renderbuffer";
+import { GL } from "./constants.js";
+import { Texture } from "./texture.js";
+import { Renderbuffer } from "./renderbuffer.js";
 
 /**
     Offscreen drawing surface.
