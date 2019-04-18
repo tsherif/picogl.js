@@ -48,7 +48,7 @@
 
     // Create program from shader source.
     // Shaders are compiled in parallel if supported by the platform.
-    app.createPrograms(vertexShaderSource, fragmentShaderSource).then(([program]) => {
+    app.createPrograms([vertexShaderSource, fragmentShaderSource]).then(([program]) => {
         // Scene geometry stored vertex buffer object.
         let positions = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
             -0.5, -0.5,
