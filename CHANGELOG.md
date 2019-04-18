@@ -3,7 +3,7 @@
 - Support for parallel shader compilation (KHR_parallel_shader_compile)
 - Support importing directly into the browser without bundling
 - Auto-enable extensions
-	- Remove methods `floatRenderTargets`, `linearFloatTextures`, `s3tcTextures`, `etcTextures`, `astcTextures`, `pvrtcTextures`, as they are no longer needed.
+	- Remove methods `App.floatRenderTargets`, `App.linearFloatTextures`, `App.s3tcTextures`, `App.etcTextures`, `App.astcTextures`, `App.pvrtcTextures`, as they are no longer needed.
 
 ## v0.12.0
 
