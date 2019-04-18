@@ -1,3 +1,10 @@
+## v0.13.0
+
+- Support for parallel shader compilation (KHR_parallel_shader_compile)
+- Support importing directly into the browser without bundling
+- Auto-enable extensions
+
+
 ## v0.12.0
 
 - Support for compressed cubemaps
