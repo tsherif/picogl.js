@@ -28,7 +28,6 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <script src="../build/picogl.js"></script>
     <style>
         html {
             overflow: hidden;
@@ -150,50 +149,48 @@
             fragColor = vec4(vColor, 1.0);
         }
     </script>
-    <script type="text/javascript">
-        var canvas = document.getElementById("gl-canvas");
+    <script type="module">
+        import { PicoGL } from "../src/picogl.js";
+
+        let canvas = document.getElementById("gl-canvas");
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         
-        var app = PicoGL.createApp(canvas)
+        let app = PicoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0);
 
-        var timer = app.createTimer();
+        let timer = app.createTimer();
 
         window.onresize = function() {
             app.resize(window.innerWidth, window.innerHeight);
         }
 
         // TRANSFORM FEEDBACK PROGRAM
-        var updateVsSource =  document.getElementById("vs-update").text.trim();
-        var updateFsSource =  document.getElementById("fs-update").text.trim();
+        let updateVsSource =  document.getElementById("vs-update").text.trim();
+        let updateFsSource =  document.getElementById("fs-update").text.trim();
               
         // FINAL ARGUMENT IS TRANSFORM FEEDBACK VARYINGS
-        var updateProgram = app.createProgram(updateVsSource, updateFsSource, ["vOffset", "vRotation"]);
 
         // DRAW PROGRAM
-        var drawVsSource =  document.getElementById("vs-draw").text.trim();
-        var drawFsSource =  document.getElementById("fs-draw").text.trim();
-              
-        var drawProgram = app.createProgram(drawVsSource, drawFsSource);
-
+        let drawVsSource =  document.getElementById("vs-draw").text.trim();
+        let drawFsSource =  document.getElementById("fs-draw").text.trim();
 
         // GEO DATA
-        var NUM_INSTANCES = 50000;
+        const NUM_INSTANCES = 50000;
 
-        var offsetData = new Float32Array(NUM_INSTANCES * 2);
-        var rotationData = new Float32Array(NUM_INSTANCES);
-        var colorData = new Uint8Array(NUM_INSTANCES * 3);
-        var positionData = new Float32Array([
+        let offsetData = new Float32Array(NUM_INSTANCES * 2);
+        let rotationData = new Float32Array(NUM_INSTANCES);
+        let colorData = new Uint8Array(NUM_INSTANCES * 3);
+        let positionData = new Float32Array([
             0.012, 0.0, 
             -0.008, 0.008, 
             -0.008, -0.008,
         ]);
 
-        for (var i = 0; i < NUM_INSTANCES; ++i) {
-            var oi = i * 2;
-            var ri = i;
-            var ci = i * 3;
+        for (let i = 0; i < NUM_INSTANCES; ++i) {
+            let oi = i * 2;
+            let ri = i;
+            let ci = i * 3;
 
             offsetData[oi] = Math.random() * 2.0 - 1.0;
             offsetData[oi + 1] = Math.random() * 2.0 - 1.0;
@@ -206,157 +203,162 @@
         }
 
         // INPUT AND OUTPUT VERTEX BUFFERS
-        var offsetsA = app.createVertexBuffer(PicoGL.FLOAT, 2, offsetData);
-        var offsetsB = app.createVertexBuffer(PicoGL.FLOAT, 2, offsetData.length);
+        let offsetsA = app.createVertexBuffer(PicoGL.FLOAT, 2, offsetData);
+        let offsetsB = app.createVertexBuffer(PicoGL.FLOAT, 2, offsetData.length);
 
-        var rotationsA = app.createVertexBuffer(PicoGL.FLOAT, 1, rotationData);
-        var rotationsB = app.createVertexBuffer(PicoGL.FLOAT, 1, rotationData.length);
+        let rotationsA = app.createVertexBuffer(PicoGL.FLOAT, 1, rotationData);
+        let rotationsB = app.createVertexBuffer(PicoGL.FLOAT, 1, rotationData.length);
 
 
         // ATTRIBUTES FOR DRAWING
-        var positions = app.createVertexBuffer(PicoGL.FLOAT, 2, positionData);
-        var colors = app.createVertexBuffer(PicoGL.UNSIGNED_BYTE, 3, colorData);
+        let positions = app.createVertexBuffer(PicoGL.FLOAT, 2, positionData);
+        let colors = app.createVertexBuffer(PicoGL.UNSIGNED_BYTE, 3, colorData);
 
         
         // COMBINE VERTEX BUFFERS INTO INPUT AND OUTPUT VERTEX ARRAYS
-        var updateArrayA = app.createVertexArray()
+        let updateArrayA = app.createVertexArray()
         .vertexAttributeBuffer(0, offsetsA)
         .vertexAttributeBuffer(1, rotationsA);
 
-        var updateArrayB = app.createVertexArray()
+        let updateArrayB = app.createVertexArray()
         .vertexAttributeBuffer(0, offsetsB)
         .vertexAttributeBuffer(1, rotationsB);
 
         // CREATE TRANSFORM FEEDBACK FROM INPUT AND OUTPUT VERTEX ARRAYS
-        var transformFeedbackA = app.createTransformFeedback()
+        let transformFeedbackA = app.createTransformFeedback()
         .feedbackBuffer(0, offsetsA)
         .feedbackBuffer(1, rotationsA);
 
-        var transformFeedbackB = app.createTransformFeedback()
+        let transformFeedbackB = app.createTransformFeedback()
         .feedbackBuffer(0, offsetsB)
         .feedbackBuffer(1, rotationsB);
 
         // VERTEX ARRAYS FOR DRAWING
-        var drawArrayA = app.createVertexArray()
+        let drawArrayA = app.createVertexArray()
         .vertexAttributeBuffer(0, positions)
         .instanceAttributeBuffer(1, colors, { normalized: true })
         .instanceAttributeBuffer(2, offsetsA)
         .instanceAttributeBuffer(3, rotationsA);
 
-        var drawArrayB = app.createVertexArray()
+        let drawArrayB = app.createVertexArray()
         .vertexAttributeBuffer(0, positions)
         .instanceAttributeBuffer(1, colors, { normalized: true })
         .instanceAttributeBuffer(2, offsetsB)
         .instanceAttributeBuffer(3, rotationsB);
 
-        // CREATE DRAW CALLS FOR SIMULATION
-        // A BUFFERS AS INPUT, UPDATE B BUFFERS
-        var updateDrawCallA = app.createDrawCall(updateProgram, updateArrayA, PicoGL.POINTS)
-        .transformFeedback(transformFeedbackB);
+        app.createPrograms([updateVsSource, updateFsSource, ["vOffset", "vRotation"]], [drawVsSource, drawFsSource])
+        .then(([updateProgram, drawProgram]) => {
+            // CREATE DRAW CALLS FOR SIMULATION
+            // A BUFFERS AS INPUT, UPDATE B BUFFERS
+            let updateDrawCallA = app.createDrawCall(updateProgram, updateArrayA, PicoGL.POINTS)
+            .transformFeedback(transformFeedbackB);
 
-        // B BUFFERS AS INPUT, UPDATE A BUFFERS
-        var updateDrawCallB = app.createDrawCall(updateProgram, updateArrayB, PicoGL.POINTS)
-        .transformFeedback(transformFeedbackA);
+            // B BUFFERS AS INPUT, UPDATE A BUFFERS
+            let updateDrawCallB = app.createDrawCall(updateProgram, updateArrayB, PicoGL.POINTS)
+            .transformFeedback(transformFeedbackA);
 
-        // DRAW USING CONTENTS OF A BUFFERS
-        var drawCallA = app.createDrawCall(drawProgram, drawArrayA);
+            // DRAW USING CONTENTS OF A BUFFERS
+            let drawCallA = app.createDrawCall(drawProgram, drawArrayA);
 
-        // DRAW USING CONTENTS OF B BUFFERS
-        var drawCallB = app.createDrawCall(drawProgram, drawArrayB);
+            // DRAW USING CONTENTS OF B BUFFERS
+            let drawCallB = app.createDrawCall(drawProgram, drawArrayB);
 
-        // START BY DRAWING B BUFFERS THAT ARE
-        // WRITTEN TO ON FIRST TRANSFORM FEEDBACK
-        // PASS 
-        var updateDrawCall = updateDrawCallA;
-        var mainDrawCall = drawCallB;
+            // START BY DRAWING B BUFFERS THAT ARE
+            // WRITTEN TO ON FIRST TRANSFORM FEEDBACK
+            // PASS 
+            let updateDrawCall = updateDrawCallA;
+            let mainDrawCall = drawCallB;
 
-        app.onContextRestored(function() {
-            app.clearColor(0.0, 0.0, 0.0, 1.0);
+            app.onContextRestored(function() {
+                app.clearColor(0.0, 0.0, 0.0, 1.0);
 
-            updateProgram.restore(updateVsSource, updateFsSource);
-            drawProgram.restore(drawVsSource, drawFsSource);
+                updateProgram.restore();
+                drawProgram.restore();
 
-            offsetsA.restore(offsetData);
-            offsetsB.restore();
-            rotationsA.restore(rotationData);
-            rotationsB.restore();
-            positions.restore(positionData);
-            colors.restore(colorData);
+                offsetsA.restore(offsetData);
+                offsetsB.restore();
+                rotationsA.restore(rotationData);
+                rotationsB.restore();
+                positions.restore(positionData);
+                colors.restore(colorData);
 
-            
-            // COMBINE VERTEX BUFFERS INTO INPUT AND OUTPUT VERTEX ARRAYS
-            updateArrayA.restore()
-            .vertexAttributeBuffer(0, offsetsA)
-            .vertexAttributeBuffer(1, rotationsA);
+                
+                // COMBINE VERTEX BUFFERS INTO INPUT AND OUTPUT VERTEX ARRAYS
+                updateArrayA.restore()
+                .vertexAttributeBuffer(0, offsetsA)
+                .vertexAttributeBuffer(1, rotationsA);
 
-            updateArrayB.restore()
-            .vertexAttributeBuffer(0, offsetsB)
-            .vertexAttributeBuffer(1, rotationsB);
+                updateArrayB.restore()
+                .vertexAttributeBuffer(0, offsetsB)
+                .vertexAttributeBuffer(1, rotationsB);
 
-            // CREATE TRANSFORM FEEDBACK FROM INPUT AND OUTPUT VERTEX ARRAYS
-            transformFeedbackA.restore()
-            .feedbackBuffer(0, offsetsA)
-            .feedbackBuffer(1, rotationsA);
+                // CREATE TRANSFORM FEEDBACK FROM INPUT AND OUTPUT VERTEX ARRAYS
+                transformFeedbackA.restore()
+                .feedbackBuffer(0, offsetsA)
+                .feedbackBuffer(1, rotationsA);
 
-            transformFeedbackB.restore()
-            .feedbackBuffer(0, offsetsB)
-            .feedbackBuffer(1, rotationsB);
+                transformFeedbackB.restore()
+                .feedbackBuffer(0, offsetsB)
+                .feedbackBuffer(1, rotationsB);
 
-            // VERTEX ARRAYS FOR DRAWING
-            drawArrayA.restore()
-            .vertexAttributeBuffer(0, positions)
-            .instanceAttributeBuffer(1, colors, { normalized: true })
-            .instanceAttributeBuffer(2, offsetsA)
-            .instanceAttributeBuffer(3, rotationsA);
+                // VERTEX ARRAYS FOR DRAWING
+                drawArrayA.restore()
+                .vertexAttributeBuffer(0, positions)
+                .instanceAttributeBuffer(1, colors, { normalized: true })
+                .instanceAttributeBuffer(2, offsetsA)
+                .instanceAttributeBuffer(3, rotationsA);
 
-            drawArrayB.restore()
-            .vertexAttributeBuffer(0, positions)
-            .instanceAttributeBuffer(1, colors, { normalized: true })
-            .instanceAttributeBuffer(2, offsetsB)
-            .instanceAttributeBuffer(3, rotationsB);
+                drawArrayB.restore()
+                .vertexAttributeBuffer(0, positions)
+                .instanceAttributeBuffer(1, colors, { normalized: true })
+                .instanceAttributeBuffer(2, offsetsB)
+                .instanceAttributeBuffer(3, rotationsB);
 
-            // Make sure to reset loop!
-            updateDrawCall = updateDrawCallA;
-            mainDrawCall = drawCallB;
-        });
+                // Make sure to reset loop!
+                updateDrawCall = updateDrawCallA;
+                mainDrawCall = drawCallB;
+            });
 
-        var contextLossDiv = document.getElementById("context-loss");
-        var contextLost = false;
-        var lastContextLoss = Date.now();
+            let contextLossDiv = document.getElementById("context-loss");
+            let contextLost = false;
+            let lastContextLoss = Date.now();
 
-        function draw() {
-            requestAnimationFrame(draw);
+            function draw() {
+                requestAnimationFrame(draw);
 
-            var currentTime = Date.now();
-            if (contextLost) {
-                contextLossDiv.innerHTML = "Context Restored!";
-                app.restoreContext();
-                lastContextLoss = currentTime;
-                contextLost = false;
-            } else if (currentTime - lastContextLoss > 2000) {
-                contextLossDiv.innerHTML = "Context Lost!";
-                app.loseContext();
-                contextLost = true;
-                return;
-            } else {
-                contextLossDiv.innerHTML = `Countdown to Context Loss: ${((2000 - currentTime + lastContextLoss) / 1000).toFixed(1)}`;
+                let currentTime = Date.now();
+                if (contextLost) {
+                    contextLossDiv.innerHTML = "Context Restored!";
+                    app.restoreContext();
+                    lastContextLoss = currentTime;
+                    contextLost = false;
+                } else if (currentTime - lastContextLoss > 2000) {
+                    contextLossDiv.innerHTML = "Context Lost!";
+                    app.loseContext();
+                    contextLost = true;
+                    return;
+                } else {
+                    contextLossDiv.innerHTML = `Countdown to Context Loss: ${((2000 - currentTime + lastContextLoss) / 1000).toFixed(1)}`;
+                }
+
+                // TRANSFORM FEEDBACK
+                app.noRasterize()
+                updateDrawCall.draw()
+
+                // DRAW
+                app.rasterize().clear()
+                mainDrawCall.draw();
+
+                // SWAP INPUT AND OUTPUT BUFFERS
+                updateDrawCall = updateDrawCall === updateDrawCallA ? updateDrawCallB : updateDrawCallA;
+                mainDrawCall = mainDrawCall === drawCallA ? drawCallB : drawCallA;
+
             }
 
-            // TRANSFORM FEEDBACK
-            app.noRasterize()
-            updateDrawCall.draw()
+            requestAnimationFrame(draw);
+        });
 
-            // DRAW
-            app.rasterize().clear()
-            mainDrawCall.draw();
-
-            // SWAP INPUT AND OUTPUT BUFFERS
-            updateDrawCall = updateDrawCall === updateDrawCallA ? updateDrawCallB : updateDrawCallA;
-            mainDrawCall = mainDrawCall === drawCallA ? drawCallB : drawCallA;
-
-        }
-
-        requestAnimationFrame(draw);
+       
 
     </script>
 </body>

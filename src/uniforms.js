@@ -21,7 +21,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-import { GL } from "./constants";
+import { GL } from "./constants.js";
 
 // Classes to manage uniform value updates, including
 // caching current values.

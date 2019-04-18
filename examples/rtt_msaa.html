@@ -3,8 +3,8 @@
 <head>
     <title>PicoGL.js: Render to MSAA Renderbuffer</title>
     <meta charset="utf-8">
+    <script src="utils/compatibility.js"></script>
     <script src="utils/gl-matrix.js"></script>
-    <script src="../build/picogl.js"></script>
     <script src="utils/utils.js"></script>
     <link rel="stylesheet" href="../site/css/picogl-example.css"> 
 </head>
@@ -98,66 +98,61 @@
             fragColor = vec4(color * (diffuse + highlight + ambient), 1.0);
         }
     </script>
-    <script type="text/javascript">
+    <script type="module">
+        import { PicoGL } from "../src/picogl.js";
+       
         utils.addTimerElement();
 
-        var canvas = document.getElementById("gl-canvas");
-
-        if (!utils.testWebGL2()) {
-            console.error("WebGL 2 not available");
-            document.body.innerHTML = "This example requires WebGL 2 which is unavailable on this system."
-        }
-
+        let canvas = document.getElementById("gl-canvas");
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         
-        var app = PicoGL.createApp(canvas)
+        let app = PicoGL.createApp(canvas)
         .depthTest();
 
-        var timer = app.createTimer();
+        let timer = app.createTimer();
 
         // PROGRAM
-        var vsSource =  document.getElementById("vertex-draw").text.trim();
-        var fsSource =  document.getElementById("fragment-draw").text.trim();
-        var program = app.createProgram(vsSource, fsSource);
+        let vsSource =  document.getElementById("vertex-draw").text.trim();
+        let fsSource =  document.getElementById("fragment-draw").text.trim();
 
         // FRAMEBUFFERS
 
         // Use maxium number of available samples.
-        var colorTarget = app.createRenderbuffer(app.width, app.height, PicoGL.RGBA8, PicoGL.WEBGL_INFO.SAMPLES);
-        var depthTarget = app.createRenderbuffer(app.width, app.height, PicoGL.DEPTH_COMPONENT16, PicoGL.WEBGL_INFO.SAMPLES);
-        var msaaFramebuffer = app.createFramebuffer().colorTarget(0, colorTarget).depthTarget(depthTarget);
+        let colorTarget = app.createRenderbuffer(app.width, app.height, PicoGL.RGBA8, PicoGL.WEBGL_INFO.SAMPLES);
+        let depthTarget = app.createRenderbuffer(app.width, app.height, PicoGL.DEPTH_COMPONENT16, PicoGL.WEBGL_INFO.SAMPLES);
+        let msaaFramebuffer = app.createFramebuffer().colorTarget(0, colorTarget).depthTarget(depthTarget);
 
-        var textureColorTarget = app.createTexture2D(app.width, app.height);
-        var textureFramebuffer = app.createFramebuffer().colorTarget(0, textureColorTarget);
+        let textureColorTarget = app.createTexture2D(app.width, app.height);
+        let textureFramebuffer = app.createFramebuffer().colorTarget(0, textureColorTarget);
 
 
         // GEOMETRY
-        var box = utils.createBox({dimensions: [1.0, 1.0, 1.0]})
-        var positions = app.createVertexBuffer(PicoGL.FLOAT, 3, box.positions);
-        var uv = app.createVertexBuffer(PicoGL.FLOAT, 2, box.uvs);
-        var normals = app.createVertexBuffer(PicoGL.FLOAT, 3, box.normals);
+        let box = utils.createBox({dimensions: [1.0, 1.0, 1.0]})
+        let positions = app.createVertexBuffer(PicoGL.FLOAT, 3, box.positions);
+        let uv = app.createVertexBuffer(PicoGL.FLOAT, 2, box.uvs);
+        let normals = app.createVertexBuffer(PicoGL.FLOAT, 3, box.normals);
 
-        var boxArray = app.createVertexArray()
+        let boxArray = app.createVertexArray()
         .vertexAttributeBuffer(0, positions)
         .vertexAttributeBuffer(1, uv)
         .vertexAttributeBuffer(2, normals);
 
         // UNIFORMS
-        var projMatrix = mat4.create();
+        let projMatrix = mat4.create();
         mat4.perspective(projMatrix, Math.PI / 2, canvas.width / canvas.height, 0.1, 10.0);
 
-        var viewMatrix = mat4.create();
-        var eyePosition = vec3.fromValues(1, 1, 1);
+        let viewMatrix = mat4.create();
+        let eyePosition = vec3.fromValues(1, 1, 1);
         mat4.lookAt(viewMatrix, eyePosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
 
-        var viewProjMatrix = mat4.create();
+        let viewProjMatrix = mat4.create();
         mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
 
-        var lightPosition = vec3.fromValues(1, 1, 0.5);
+        let lightPosition = vec3.fromValues(1, 1, 0.5);
 
         // UNIFORM BUFFER
-        var sceneUniformBuffer = app.createUniformBuffer([
+        let sceneUniformBuffer = app.createUniformBuffer([
             PicoGL.FLOAT_MAT4,
             PicoGL.FLOAT_VEC4,
             PicoGL.FLOAT_VEC4
@@ -167,9 +162,9 @@
         .set(2, lightPosition)
         .update();
 
-        var modelMatrix = mat4.create();
-        var rotateXMatrix = mat4.create();
-        var rotateYMatrix = mat4.create();
+        let modelMatrix = mat4.create();
+        let rotateXMatrix = mat4.create();
+        let rotateYMatrix = mat4.create();
 
         window.onresize = function() {
             app.resize(window.innerWidth, window.innerHeight);
@@ -182,16 +177,19 @@
             sceneUniformBuffer.set(0, viewProjMatrix).update();
         };
 
-        
-        utils.loadImages(["img/webgl-logo.png"], function(images) {
-            // CREATE TEXTURE
-            var texture = app.createTexture2D(images[0], { flipY: true });
-
-            var drawCall = app.createDrawCall(program, boxArray)
+        Promise.all([
+            app.createPrograms([vsSource, fsSource]),
+            utils.loadImages(["img/webgl-logo.png"])
+        ]).then(([
+            [program],
+            [image]
+        ]) => {
+            let texture = app.createTexture2D(image, { flipY: true });
+            let drawCall = app.createDrawCall(program, boxArray)
             .uniformBlock("SceneUniforms", sceneUniformBuffer);
 
-            var angleX = 0;
-            var angleY = 0;
+            let angleX = 0;
+            let angleY = 0;
 
             function draw() {
                 if (timer.ready()) {
@@ -228,7 +226,6 @@
             }
 
             requestAnimationFrame(draw);
-            
         });
 
     </script>

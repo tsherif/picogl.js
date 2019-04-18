@@ -18,7 +18,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-import { GL, TYPE_SIZE, DUMMY_OBJECT } from "./constants";
+import { GL, TYPE_SIZE, DUMMY_OBJECT } from "./constants.js";
 
 /**
     Organizes vertex buffer and attribute state.
@@ -34,16 +34,16 @@ import { GL, TYPE_SIZE, DUMMY_OBJECT } from "./constants";
     @prop {Object} appState Tracked GL state.
 */
 export class VertexArray {
-    
-    constructor(gl, appState, numElements = 0, numInstances = 0) {
+
+    constructor(gl, appState) {
         this.gl = gl;
         this.appState = appState;
         this.vertexArray = null;
-        this.numElements = numElements;
+        this.numElements = 0;
         this.indexType = null;
         this.instancedBuffers = 0;
         this.indexed = false;
-        this.numInstances = numInstances;
+        this.numInstances = 0;
     }
 
     /**

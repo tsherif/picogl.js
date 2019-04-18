@@ -3,8 +3,8 @@
 <head>
     <title>PicoGL.js: Mesh Compression</title>
     <meta charset="utf-8">
+    <script src="utils/compatibility.js"></script>
     <script src="utils/gl-matrix.js"></script>
-    <script src="../build/picogl.js"></script>
     <script src="utils/utils.js"></script>
     <link rel="stylesheet" href="../site/css/picogl-example.css"> 
 </head>
@@ -99,93 +99,92 @@
             fragColor = vec4(normalize(vNormal) * vec3(1.0, 1.0, -1.0), 1.0);
         }
     </script>
+    <script type="module">
+        import { PicoGL } from "../src/picogl.js";
 
-    <script>
-        var canvas = document.getElementById("gl-canvas");
-
-        if (!utils.testWebGL2()) {
-            console.error("WebGL 2 not available");
-            document.body.innerHTML = "This example requires WebGL 2 which is unavailable on this system."
-        }
-
+        let canvas = document.getElementById("gl-canvas");
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         
-        var app = PicoGL.createApp(canvas)
-        .clearColor(0.0, 0.0, 0.0, 1.0)
-        .clear();
+        let app = PicoGL.createApp(canvas)
+        .clearColor(0.0, 0.0, 0.0, 1.0);
 
         window.onresize = function() {
             app.resize(window.innerWidth, window.innerHeight);
         }
 
         // SHARED FRAGMENT SHADER 
-        var fsSource =  document.getElementById("fs").text.trim();
-        var fShader = app.createShader(PicoGL.FRAGMENT_SHADER, fsSource);
+        let fsSource =  document.getElementById("fs").text.trim();
+        let fShader = app.createShader(PicoGL.FRAGMENT_SHADER, fsSource);
 
         // PROGRAM PASSES UNCOMPRESSED GEOMETRY
-        var uncompressedVsSource =  document.getElementById("vs-uncompressed").text.trim();
-        var uncompressedProgram = app.createProgram(uncompressedVsSource, fShader);
+        let uncompressedVsSource =  document.getElementById("vs-uncompressed").text.trim();
 
         // PROGRAM DECODES COMPRESSED GEOMETRY
-        var compressedVsSource =  document.getElementById("vs-compressed").text.trim();
-        var compressedProgram = app.createProgram(compressedVsSource, fShader);
+        let compressedVsSource =  document.getElementById("vs-compressed").text.trim();
 
         // GEOMETRY DATA
-        var sphere = utils.createSphere({ radius: 0.48 });
+        let sphere = utils.createSphere({ radius: 0.48 });
 
         // UNCOMPRESSED GEOMETRY
-        var uncompressedPositions = app.createVertexBuffer(PicoGL.FLOAT, 3, sphere.positions);
-        var uncompressedNormals = app.createVertexBuffer(PicoGL.FLOAT, 3, sphere.normals);
-        var indices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, sphere.indices);
+        let uncompressedPositions = app.createVertexBuffer(PicoGL.FLOAT, 3, sphere.positions);
+        let uncompressedNormals = app.createVertexBuffer(PicoGL.FLOAT, 3, sphere.normals);
+        let indices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, sphere.indices);
 
-        var uncompressedVertexArray = app.createVertexArray()
+        let uncompressedVertexArray = app.createVertexArray()
         .vertexAttributeBuffer(0, uncompressedPositions)
         .vertexAttributeBuffer(1, uncompressedNormals)
         .indexBuffer(indices);
 
         // QUANTIZE POSITIONS AND OCT-ENCODE NORMALS FOR COMPRESSED GEOMETRY
-        var b = bounds(sphere.positions);
-        var q = quantize(sphere.positions, b.min, b.max);
-        var encodedNormals = octEncode(sphere.normals);
+        let b = bounds(sphere.positions);
+        let q = quantize(sphere.positions, b.min, b.max);
+        let encodedNormals = octEncode(sphere.normals);
 
-        var compressedPositions = app.createVertexBuffer(PicoGL.UNSIGNED_SHORT, 3, q.quantized);
-        var compressedNormals = app.createVertexBuffer(PicoGL.BYTE, 2, encodedNormals);
+        let compressedPositions = app.createVertexBuffer(PicoGL.UNSIGNED_SHORT, 3, q.quantized);
+        let compressedNormals = app.createVertexBuffer(PicoGL.BYTE, 2, encodedNormals);
 
-        var compressedVertexArray = app.createVertexArray()
+        let compressedVertexArray = app.createVertexArray()
         .vertexAttributeBuffer(0, compressedPositions)
         .vertexAttributeBuffer(1, compressedNormals, { normalized: true })
         .indexBuffer(indices);
 
         // UNIFORMS
-        var uncompressedTransform = mat4.create();
+        let uncompressedTransform = mat4.create();
         mat4.fromTranslation(uncompressedTransform, vec3.fromValues(-0.5, 0.0, 0.0));
         
-        var compressedTransform = mat4.create();
+        let compressedTransform = mat4.create();
         mat4.fromTranslation(compressedTransform, vec3.fromValues(0.5, 0.0, 0.0))
 
-        // DRAW CALLS
-        var uncompressedDrawCall = app.createDrawCall(uncompressedProgram, uncompressedVertexArray)
-        .uniform("model", uncompressedTransform);
 
-        var compressedDrawCall = app.createDrawCall(compressedProgram, compressedVertexArray)
-        .uniform("decode", q.decode)
-        .uniform("model", compressedTransform);
+        // USE PARALLEL SHADER COMPILATION IF AVAILABLE
+        // https://www.khronos.org/registry/webgl/extensions/KHR_parallel_shader_compile/
+        app.createPrograms([uncompressedVsSource, fShader], [compressedVsSource, fShader])
+        .then(([uncompressedProgram, compressedProgram]) => {
+            // DRAW CALLS
+            let uncompressedDrawCall = app.createDrawCall(uncompressedProgram, uncompressedVertexArray)
+            .uniform("model", uncompressedTransform);
 
-        // DRAW
-        uncompressedDrawCall.draw();
-        compressedDrawCall.draw();
+            let compressedDrawCall = app.createDrawCall(compressedProgram, compressedVertexArray)
+            .uniform("decode", q.decode)
+            .uniform("model", compressedTransform);
 
-        // CLEANUP
-        fShader.delete();
-        uncompressedProgram.delete();
-        compressedProgram.delete();
-        uncompressedPositions.delete();
-        uncompressedNormals.delete();
-        uncompressedVertexArray.delete();
-        compressedPositions.delete();
-        compressedNormals.delete();
-        compressedVertexArray.delete();
+            // DRAW
+            app.clear();
+            uncompressedDrawCall.draw();
+            compressedDrawCall.draw();
+
+            // CLEANUP
+            fShader.delete();
+            uncompressedProgram.delete();
+            compressedProgram.delete();
+            uncompressedPositions.delete();
+            uncompressedNormals.delete();
+            uncompressedVertexArray.delete();
+            compressedPositions.delete();
+            compressedNormals.delete();
+            compressedVertexArray.delete();
+        });
 
         document.getElementById("compression").innerText = ((1 - (q.quantized.byteLength + encodedNormals.byteLength) / (sphere.positions.byteLength + sphere.normals.byteLength)) * 100).toFixed(1);
 
@@ -195,9 +194,9 @@
 
         // CALCULATE THE BOUNDING BOX OF THE MESH
         function bounds(array) {
-            var min = new Float32Array(3);
-            var max = new Float32Array(3);
-            var i;
+            let min = new Float32Array(3);
+            let max = new Float32Array(3);
+            let i;
 
             min[0] = min[1] = min[2] = Number.MAX_VALUE;
             max[0] = max[1] = max[2] = -Number.MAX_VALUE;
@@ -223,13 +222,13 @@
         
         function quantize(array, min, max) {
 
-            var quantized = new Uint16Array(array.length);
-            var multiplier = new Float32Array([
+            let quantized = new Uint16Array(array.length);
+            let multiplier = new Float32Array([
                 max[0] !== min[0] ? 65535 / (max[0] - min[0]) : 0,
                 max[1] !== min[1] ? 65535 / (max[1] - min[1]) : 0,
                 max[2] !== min[2] ? 65535 / (max[2] - min[2]) : 0
             ]);
-            var i;
+            let i;
 
             for (i = 0; i < array.length; i += 3) {
                 quantized[i    ] = Math.floor((array[i    ] - min[0]) * multiplier[0]);
@@ -237,10 +236,10 @@
                 quantized[i + 2] = Math.floor((array[i + 2] - min[2]) * multiplier[2]);
             }
 
-            var decodeMat = new Float32Array(16);
+            let decodeMat = new Float32Array(16);
 
-            var translate = mat4.create();
-            var scale = mat4.create();
+            let translate = mat4.create();
+            let scale = mat4.create();
 
             mat4.identity(translate);
             mat4.identity(scale);
@@ -262,15 +261,15 @@
         // OCT-ENCODE ARRAY OF NORMALS
         // http://jcgt.org/published/0003/02/01/
         function octEncode(array) {
-            var encoded = new Int8Array(array.length * 2 / 3);
+            let encoded = new Int8Array(array.length * 2 / 3);
 
-            var oct, dec, best, currentCos, bestCos;
+            let oct, dec, best, currentCos, bestCos;
 
-            var i, ei;
+            let i, ei;
 
             for (i = 0, ei = 0; i < array.length; i += 3, ei += 2) {
 
-                // Test various combinations of ceil and floor
+                // Test letious combinations of ceil and floor
                 // to minimize rounding errors
                 best = oct = octEncodeVec3(array, i, "floor", "floor");
                 dec = octDecodeVec2(oct);
@@ -312,12 +311,12 @@
 
         // OCT-ENCODE SINGLE NORMAL VECTOR IN 2 BYTES
         function octEncodeVec3(array, i, xfunc, yfunc) {
-            var x = array[i    ] / (Math.abs(array[i]) + Math.abs(array[i + 1]) + Math.abs(array[i + 2]));
-            var y = array[i + 1] / (Math.abs(array[i]) + Math.abs(array[i + 1]) + Math.abs(array[i + 2]));
+            let x = array[i    ] / (Math.abs(array[i]) + Math.abs(array[i + 1]) + Math.abs(array[i + 2]));
+            let y = array[i + 1] / (Math.abs(array[i]) + Math.abs(array[i + 1]) + Math.abs(array[i + 2]));
 
             if (array[i + 2] < 0) {
-                var tempx = x;
-                var tempy = y;
+                let tempx = x;
+                let tempy = y;
                 tempx = (1 - Math.abs(y)) * (x >= 0 ? 1 : -1);
                 tempy = (1 - Math.abs(x)) * (y >= 0 ? 1 : -1);
                 x = tempx;
@@ -333,19 +332,19 @@
 
         // DECODE AN OCT-ENCODED NORMAL
         function octDecodeVec2(oct) {
-            var x = oct[0];
-            var y = oct[1];
+            let x = oct[0];
+            let y = oct[1];
             x /= 127;
             y /= 127;
 
-            var z = 1 - Math.abs(x) - Math.abs(y);
+            let z = 1 - Math.abs(x) - Math.abs(y);
 
             if (z < 0) {
                 x = (1 - Math.abs(y)) * (x >= 0 ? 1 : -1);
                 y = (1 - Math.abs(x)) * (y >= 0 ? 1 : -1);
             }
 
-            var length = Math.sqrt(x * x + y * y + z * z);
+            let length = Math.sqrt(x * x + y * y + z * z);
 
             return [
                 x / length,

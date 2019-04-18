@@ -3,8 +3,8 @@
 <head>
     <title>PicoGL.js: 125,000 Cubes</title>
     <meta charset="utf-8">
+    <script src="utils/compatibility.js"></script>
     <script src="utils/gl-matrix.js"></script>
-    <script src="../build/picogl.js"></script>
     <script src="utils/utils.js"></script>
     <link rel="stylesheet" href="../site/css/picogl-example.css"> 
 </head>
@@ -143,53 +143,48 @@
             fragColor = vec4(color * (diffuse + highlight + ambient), 1.0);
         }
     </script>
-    <script type="text/javascript">
+    <script type="module">
+        import { PicoGL } from "../src/picogl.js";
+
         utils.addTimerElement();
         
-        var BOX_GRID_DIM = 50;
-        var NUM_BOXES = BOX_GRID_DIM * BOX_GRID_DIM * BOX_GRID_DIM;
-        var NEAR = 0.1;
-        var FAR = 100.0;
+        const BOX_GRID_DIM = 50;
+        const NUM_BOXES = BOX_GRID_DIM * BOX_GRID_DIM * BOX_GRID_DIM;
+        const NEAR = 0.1;
+        const FAR = 100.0;
 
-        var canvas = document.getElementById("gl-canvas");
-
-        if (!utils.testWebGL2()) {
-            console.error("WebGL 2 not available");
-            document.body.innerHTML = "This example requires WebGL 2 which is unavailable on this system."
-        }
+        let canvas = document.getElementById("gl-canvas");
 
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         
-        var app = PicoGL.createApp(canvas)
+        let app = PicoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0)
         .depthTest()
         .depthFunc(PicoGL.LEQUAL)
         .cullBackfaces();
 
-        var timer = app.createTimer();
+        let timer = app.createTimer();
 
         // SET UP UPDATE PROGRAM
-        var updateVsSource =  document.getElementById("vertex-update").text.trim();
-        var updateFsSource =  document.getElementById("fragment-update").text.trim();
-        var updateProgram = app.createProgram(updateVsSource, updateFsSource, ["vRotation"]);
+        let updateVsSource =  document.getElementById("vertex-update").text.trim();
+        let updateFsSource =  document.getElementById("fragment-update").text.trim();
 
         // SET UP PROGRAM
-        var vsSource =  document.getElementById("vertex-draw").text.trim();
-        var fsSource =  document.getElementById("fragment-draw").text.trim();
-        var program = app.createProgram(vsSource, fsSource);
+        let vsSource =  document.getElementById("vertex-draw").text.trim();
+        let fsSource =  document.getElementById("fragment-draw").text.trim();
+        
+        let rotationData = new Float32Array(NUM_BOXES);
+        let translationData = new Float32Array(NUM_BOXES * 3);
+        let axisData = new Float32Array(NUM_BOXES * 3);
 
-        var rotationData = new Float32Array(NUM_BOXES);
-        var translationData = new Float32Array(NUM_BOXES * 3);
-        var axisData = new Float32Array(NUM_BOXES * 3);
-
-        var boxI = 0;
-        var offset = -Math.floor(BOX_GRID_DIM / 2);
-        var axis = vec3.create();
-        for (var i = 0; i < BOX_GRID_DIM; ++i) {
-            for (var j = 0; j < BOX_GRID_DIM; ++j) {
-                for (var k = 0; k < BOX_GRID_DIM; ++k) {
-                    var transI = boxI * 3;
+        let boxI = 0;
+        let offset = -Math.floor(BOX_GRID_DIM / 2);
+        let axis = vec3.create();
+        for (let i = 0; i < BOX_GRID_DIM; ++i) {
+            for (let j = 0; j < BOX_GRID_DIM; ++j) {
+                for (let k = 0; k < BOX_GRID_DIM; ++k) {
+                    let transI = boxI * 3;
 
                     rotationData[boxI] = boxI / Math.PI;
                     translationData[transI]     = i + offset;
@@ -210,18 +205,18 @@
         }
 
         // INSTANCED CUBE GEOMETRY
-        var box = utils.createBox({dimensions: [0.5, 0.5, 0.5]})
-        var positions = app.createVertexBuffer(PicoGL.FLOAT, 3, box.positions);
-        var uv = app.createVertexBuffer(PicoGL.FLOAT, 2, box.uvs);
-        var normals = app.createVertexBuffer(PicoGL.FLOAT, 3, box.normals);
+        let box = utils.createBox({dimensions: [0.5, 0.5, 0.5]})
+        let positions = app.createVertexBuffer(PicoGL.FLOAT, 3, box.positions);
+        let uv = app.createVertexBuffer(PicoGL.FLOAT, 2, box.uvs);
+        let normals = app.createVertexBuffer(PicoGL.FLOAT, 3, box.normals);
 
         
-        var rotationsA = app.createVertexBuffer(PicoGL.FLOAT, 1, rotationData);
-        var rotationsB = app.createVertexBuffer(PicoGL.FLOAT, 1, rotationData.length);
-        var translations = app.createVertexBuffer(PicoGL.FLOAT, 3, translationData);
-        var axes = app.createVertexBuffer(PicoGL.FLOAT, 3, axisData);
+        let rotationsA = app.createVertexBuffer(PicoGL.FLOAT, 1, rotationData);
+        let rotationsB = app.createVertexBuffer(PicoGL.FLOAT, 1, rotationData.length);
+        let translations = app.createVertexBuffer(PicoGL.FLOAT, 3, translationData);
+        let axes = app.createVertexBuffer(PicoGL.FLOAT, 3, axisData);
 
-        var boxArrayA = app.createVertexArray()
+        let boxArrayA = app.createVertexArray()
         .vertexAttributeBuffer(0, positions)
         .vertexAttributeBuffer(1, uv)
         .vertexAttributeBuffer(2, normals)
@@ -229,7 +224,7 @@
         .instanceAttributeBuffer(4, axes)
         .instanceAttributeBuffer(5, rotationsA);
 
-        var boxArrayB = app.createVertexArray()
+        let boxArrayB = app.createVertexArray()
         .vertexAttributeBuffer(0, positions)
         .vertexAttributeBuffer(1, uv)
         .vertexAttributeBuffer(2, normals)
@@ -237,28 +232,28 @@
         .instanceAttributeBuffer(4, axes)
         .instanceAttributeBuffer(5, rotationsB);
 
-        var updateVertexArrayA = app.createVertexArray()
+        let updateVertexArrayA = app.createVertexArray()
         .vertexAttributeBuffer(0, rotationsA);
 
-        var transformFeedbackA = app.createTransformFeedback()
+        let transformFeedbackA = app.createTransformFeedback()
         .feedbackBuffer(0, rotationsA);
 
-        var updateVertexArrayB = app.createVertexArray()
+        let updateVertexArrayB = app.createVertexArray()
         .vertexAttributeBuffer(0, rotationsB);
 
-        var transformFeedbackB = app.createTransformFeedback()
+        let transformFeedbackB = app.createTransformFeedback()
         .feedbackBuffer(0, rotationsB);
 
         // SET UP UNIFORM BUFFER
-        var projMatrix = mat4.create();
+        let projMatrix = mat4.create();
         mat4.perspective(projMatrix, Math.PI / 2, canvas.width / canvas.height, NEAR, FAR);
 
-        var viewMatrix = mat4.create();
-        var eyePosition = vec3.fromValues(0, 28, 0);
-        var viewProjMatrix = mat4.create();
-        var lightPosition = vec3.create();
+        let viewMatrix = mat4.create();
+        let eyePosition = vec3.fromValues(0, 28, 0);
+        let viewProjMatrix = mat4.create();
+        let lightPosition = vec3.create();
 
-        var sceneUniformBuffer = app.createUniformBuffer([
+        let sceneUniformBuffer = app.createUniformBuffer([
             PicoGL.FLOAT_MAT4,
             PicoGL.FLOAT_VEC4,
             PicoGL.FLOAT_VEC4
@@ -270,29 +265,31 @@
             mat4.perspective(projMatrix, Math.PI / 2, app.width / app.height, NEAR, FAR);
         }
 
-        utils.loadImages(["img/webgl-logo.png"], function(images) {
-            // CREATE TEXTURE
-            var texture = app.createTexture2D(images[0], { flipY: true });
+        Promise.all([
+            app.createPrograms([vsSource, fsSource], [updateVsSource, updateFsSource, ["vRotation"]]),
+            utils.loadImages(["img/webgl-logo.png"])
+        ]).then(([[program, updateProgram], [image]]) => {
+            let texture = app.createTexture2D(image, { flipY: true });
 
-            var updateDrawCallA = app.createDrawCall(updateProgram, updateVertexArrayA, PicoGL.POINTS)
+            let updateDrawCallA = app.createDrawCall(updateProgram, updateVertexArrayA, PicoGL.POINTS)
             .transformFeedback(transformFeedbackB);
 
-            var updateDrawCallB = app.createDrawCall(updateProgram, updateVertexArrayB, PicoGL.POINTS)
+            let updateDrawCallB = app.createDrawCall(updateProgram, updateVertexArrayB, PicoGL.POINTS)
             .transformFeedback(transformFeedbackA);
 
             // SINGLE DRAW CALL FOR ALL BOXES
-            var boxesDrawCallA = app.createDrawCall(program, boxArrayA)
+            let boxesDrawCallA = app.createDrawCall(program, boxArrayA)
             .uniformBlock("SceneUniforms", sceneUniformBuffer)
             .texture("uTexture", texture);
 
-            var boxesDrawCallB = app.createDrawCall(program, boxArrayB)
+            let boxesDrawCallB = app.createDrawCall(program, boxArrayB)
             .uniformBlock("SceneUniforms", sceneUniformBuffer)
             .texture("uTexture", texture)
 
-            var updateDrawCall = updateDrawCallA;
-            var boxesDrawCall = boxesDrawCallB
-            var eyeRadius = 40;
-            var eyeRotation = 0;
+            let updateDrawCall = updateDrawCallA;
+            let boxesDrawCall = boxesDrawCallB
+            let eyeRadius = 40;
+            let eyeRotation = 0;
             function draw() {
                 if (timer.ready()) {
                     utils.updateTimerElement(timer.cpuTime, timer.gpuTime);
@@ -331,7 +328,6 @@
             }
 
             requestAnimationFrame(draw);
-            
         });
 
     </script>

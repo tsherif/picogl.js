@@ -3,7 +3,7 @@
 <head>
     <title>PicoGL.js: Wandering Triangles</title>
     <meta charset="utf-8">
-    <script src="../build/picogl.js"></script>
+    <script src="utils/compatibility.js"></script>
     <script src="utils/gl-matrix.js"></script>
     <script src="utils/utils.js"></script>
     <link rel="stylesheet" href="../site/css/picogl-example.css"> 
@@ -141,58 +141,48 @@
             fragColor = vec4(vColor, 1.0);
         }
     </script>
-    <script type="text/javascript">
+    <script type="module">
+        import { PicoGL } from "../src/picogl.js";
+       
         utils.addTimerElement();
 
-        var canvas = document.getElementById("gl-canvas");
-
-        if (!utils.testWebGL2()) {
-            console.error("WebGL 2 not available");
-            document.body.innerHTML = "This example requires WebGL 2 which is unavailable on this system."
-        }
-
+        let canvas = document.getElementById("gl-canvas");
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         
-        var app = PicoGL.createApp(canvas)
+        let app = PicoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0);
 
-        var timer = app.createTimer();
+        let timer = app.createTimer();
 
         window.onresize = function() {
             app.resize(window.innerWidth, window.innerHeight);
         }
 
         // TRANSFORM FEEDBACK PROGRAM
-        var updateVsSource =  document.getElementById("vs-update").text.trim();
-        var updateFsSource =  document.getElementById("fs-update").text.trim();
+        let updateVsSource =  document.getElementById("vs-update").text.trim();
+        let updateFsSource =  document.getElementById("fs-update").text.trim();
               
-        // FINAL ARGUMENT IS TRANSFORM FEEDBACK VARYINGS
-        var updateProgram = app.createProgram(updateVsSource, updateFsSource, ["vOffset", "vRotation"]);
-
         // DRAW PROGRAM
-        var drawVsSource =  document.getElementById("vs-draw").text.trim();
-        var drawFsSource =  document.getElementById("fs-draw").text.trim();
-              
-        var drawProgram = app.createProgram(drawVsSource, drawFsSource);
-
+        let drawVsSource =  document.getElementById("vs-draw").text.trim();
+        let drawFsSource =  document.getElementById("fs-draw").text.trim();
 
         // GEO DATA
-        var NUM_INSTANCES = 50000;
+        const NUM_INSTANCES = 50000;
 
-        var offsetData = new Float32Array(NUM_INSTANCES * 2);
-        var rotationData = new Float32Array(NUM_INSTANCES);
-        var colorData = new Uint8Array(NUM_INSTANCES * 3);
-        var positionData = new Float32Array([
+        let offsetData = new Float32Array(NUM_INSTANCES * 2);
+        let rotationData = new Float32Array(NUM_INSTANCES);
+        let colorData = new Uint8Array(NUM_INSTANCES * 3);
+        let positionData = new Float32Array([
             0.012, 0.0, 
             -0.008, 0.008, 
             -0.008, -0.008,
         ]);
 
-        for (var i = 0; i < NUM_INSTANCES; ++i) {
-            var oi = i * 2;
-            var ri = i;
-            var ci = i * 3;
+        for (let i = 0; i < NUM_INSTANCES; ++i) {
+            let oi = i * 2;
+            let ri = i;
+            let ci = i * 3;
 
             offsetData[oi] = Math.random() * 2.0 - 1.0;
             offsetData[oi + 1] = Math.random() * 2.0 - 1.0;
@@ -205,94 +195,99 @@
         }
 
         // INPUT AND OUTPUT VERTEX BUFFERS
-        var offsetsA = app.createVertexBuffer(PicoGL.FLOAT, 2, offsetData);
-        var offsetsB = app.createVertexBuffer(PicoGL.FLOAT, 2, offsetData.length);
+        let offsetsA = app.createVertexBuffer(PicoGL.FLOAT, 2, offsetData);
+        let offsetsB = app.createVertexBuffer(PicoGL.FLOAT, 2, offsetData.length);
 
-        var rotationsA = app.createVertexBuffer(PicoGL.FLOAT, 1, rotationData);
-        var rotationsB = app.createVertexBuffer(PicoGL.FLOAT, 1, rotationData.length);
+        let rotationsA = app.createVertexBuffer(PicoGL.FLOAT, 1, rotationData);
+        let rotationsB = app.createVertexBuffer(PicoGL.FLOAT, 1, rotationData.length);
 
 
         // ATTRIBUTES FOR DRAWING
-        var positions = app.createVertexBuffer(PicoGL.FLOAT, 2, positionData);
-        var colors = app.createVertexBuffer(PicoGL.UNSIGNED_BYTE, 3, colorData);
+        let positions = app.createVertexBuffer(PicoGL.FLOAT, 2, positionData);
+        let colors = app.createVertexBuffer(PicoGL.UNSIGNED_BYTE, 3, colorData);
 
         
         // COMBINE VERTEX BUFFERS INTO INPUT AND OUTPUT VERTEX ARRAYS
-        var updateArrayA = app.createVertexArray()
+        let updateArrayA = app.createVertexArray()
         .vertexAttributeBuffer(0, offsetsA)
         .vertexAttributeBuffer(1, rotationsA);
 
-        var updateArrayB = app.createVertexArray()
+        let updateArrayB = app.createVertexArray()
         .vertexAttributeBuffer(0, offsetsB)
         .vertexAttributeBuffer(1, rotationsB);
 
         // CREATE TRANSFORM FEEDBACK FROM INPUT AND OUTPUT VERTEX ARRAYS
-        var transformFeedbackA = app.createTransformFeedback()
+        let transformFeedbackA = app.createTransformFeedback()
         .feedbackBuffer(0, offsetsA)
         .feedbackBuffer(1, rotationsA);
 
-        var transformFeedbackB = app.createTransformFeedback()
+        let transformFeedbackB = app.createTransformFeedback()
         .feedbackBuffer(0, offsetsB)
         .feedbackBuffer(1, rotationsB);
 
         // VERTEX ARRAYS FOR DRAWING
-        var drawArrayA = app.createVertexArray()
+        let drawArrayA = app.createVertexArray()
         .vertexAttributeBuffer(0, positions)
         .instanceAttributeBuffer(1, colors, { normalized: true })
         .instanceAttributeBuffer(2, offsetsA)
         .instanceAttributeBuffer(3, rotationsA);
 
-        var drawArrayB = app.createVertexArray()
+        let drawArrayB = app.createVertexArray()
         .vertexAttributeBuffer(0, positions)
         .instanceAttributeBuffer(1, colors, { normalized: true })
         .instanceAttributeBuffer(2, offsetsB)
         .instanceAttributeBuffer(3, rotationsB);
 
-        // CREATE DRAW CALLS FOR SIMULATION
-        // A BUFFERS AS INPUT, UPDATE B BUFFERS
-        var updateDrawCallA = app.createDrawCall(updateProgram, updateArrayA, PicoGL.POINTS)
-        .transformFeedback(transformFeedbackB);
+        app.createPrograms(
+            [drawVsSource, drawFsSource],
+            [updateVsSource, updateFsSource, ["vOffset", "vRotation"]]
+        ).then(([drawProgram, updateProgram]) => {
+            // CREATE DRAW CALLS FOR SIMULATION
+            // A BUFFERS AS INPUT, UPDATE B BUFFERS
+            let updateDrawCallA = app.createDrawCall(updateProgram, updateArrayA, PicoGL.POINTS)
+            .transformFeedback(transformFeedbackB);
 
-        // B BUFFERS AS INPUT, UPDATE A BUFFERS
-        var updateDrawCallB = app.createDrawCall(updateProgram, updateArrayB, PicoGL.POINTS)
-        .transformFeedback(transformFeedbackA);
+            // B BUFFERS AS INPUT, UPDATE A BUFFERS
+            let updateDrawCallB = app.createDrawCall(updateProgram, updateArrayB, PicoGL.POINTS)
+            .transformFeedback(transformFeedbackA);
 
-        // DRAW USING CONTENTS OF A BUFFERS
-        var drawCallA = app.createDrawCall(drawProgram, drawArrayA);
+            // DRAW USING CONTENTS OF A BUFFERS
+            let drawCallA = app.createDrawCall(drawProgram, drawArrayA);
 
-        // DRAW USING CONTENTS OF B BUFFERS
-        var drawCallB = app.createDrawCall(drawProgram, drawArrayB);
+            // DRAW USING CONTENTS OF B BUFFERS
+            let drawCallB = app.createDrawCall(drawProgram, drawArrayB);
 
-        // START BY DRAWING B BUFFERS THAT ARE
-        // WRITTEN TO ON FIRST TRANSFORM FEEDBACK
-        // PASS 
-        var updateDrawCall = updateDrawCallA;
-        var mainDrawCall = drawCallB;
-        function draw() {
-            if (timer.ready()) {
-                utils.updateTimerElement(timer.cpuTime, timer.gpuTime);
+            // START BY DRAWING B BUFFERS THAT ARE
+            // WRITTEN TO ON FIRST TRANSFORM FEEDBACK
+            // PASS 
+            let updateDrawCall = updateDrawCallA;
+            let mainDrawCall = drawCallB;
+            function draw() {
+                if (timer.ready()) {
+                    utils.updateTimerElement(timer.cpuTime, timer.gpuTime);
+                }
+
+                timer.start();
+
+                // TRANSFORM FEEDBACK
+                app.noRasterize()
+                updateDrawCall.draw()
+
+                // DRAW
+                app.rasterize().clear()
+                mainDrawCall.draw();
+
+                // SWAP INPUT AND OUTPUT BUFFERS
+                updateDrawCall = updateDrawCall === updateDrawCallA ? updateDrawCallB : updateDrawCallA;
+                mainDrawCall = mainDrawCall === drawCallA ? drawCallB : drawCallA;
+
+                timer.end();
+
+                requestAnimationFrame(draw);
             }
 
-            timer.start();
-
-            // TRANSFORM FEEDBACK
-            app.noRasterize()
-            updateDrawCall.draw()
-
-            // DRAW
-            app.rasterize().clear()
-            mainDrawCall.draw();
-
-            // SWAP INPUT AND OUTPUT BUFFERS
-            updateDrawCall = updateDrawCall === updateDrawCallA ? updateDrawCallB : updateDrawCallA;
-            mainDrawCall = mainDrawCall === drawCallA ? drawCallB : drawCallA;
-
-            timer.end();
-
             requestAnimationFrame(draw);
-        }
-
-        requestAnimationFrame(draw);
+        });
 
     </script>
     <a href="https://github.com/tsherif/picogl.js" id="github-ribbon"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"></a>

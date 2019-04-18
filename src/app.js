@@ -21,20 +21,20 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-import { GL, COMPRESSED_TEXTURE_TYPES, WEBGL_INFO, DUMMY_OBJECT } from "./constants";
-import { Cubemap } from "./cubemap";
-import { DrawCall } from "./draw-call";
-import { Framebuffer } from "./framebuffer";
-import { Renderbuffer } from "./renderbuffer";
-import { Program } from "./program";
-import { Shader } from "./shader";
-import { Texture } from "./texture";
-import { Timer } from "./timer";
-import { TransformFeedback } from "./transform-feedback";
-import { UniformBuffer } from "./uniform-buffer";
-import { VertexArray } from "./vertex-array";
-import { VertexBuffer } from "./vertex-buffer";
-import { Query } from "./query";
+import { GL, WEBGL_INFO, DUMMY_OBJECT } from "./constants.js";
+import { Cubemap } from "./cubemap.js";
+import { DrawCall } from "./draw-call.js";
+import { Framebuffer } from "./framebuffer.js";
+import { Renderbuffer } from "./renderbuffer.js";
+import { Program } from "./program.js";
+import { Shader } from "./shader.js";
+import { Texture } from "./texture.js";
+import { Timer } from "./timer.js";
+import { TransformFeedback } from "./transform-feedback.js";
+import { UniformBuffer } from "./uniform-buffer.js";
+import { VertexArray } from "./vertex-array.js";
+import { VertexBuffer } from "./vertex-buffer.js";
+import { Query } from "./query.js";
 
 /**
     Primary entry point to PicoGL. An app will store all parts of the WebGL
@@ -45,18 +45,11 @@ import { Query } from "./query";
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {number} width The width of the drawing surface.
     @prop {number} height The height of the drawing surface.
-    @prop {boolean} floatRenderTargetsEnabled Whether the EXT_color_buffer_float extension is enabled.
-    @prop {boolean} linearFloatTexturesEnabled Whether the OES_texture_float_linear extension is enabled.
-    @prop {boolean} s3tcTexturesEnabled Whether the WEBGL_compressed_texture_s3tc extension is enabled.
-    @prop {boolean} s3tcSRGBTexturesEnabled Whether the WEBGL_compressed_texture_s3tc_srgb extension is enabled.
-    @prop {boolean} etcTexturesEnabled Whether the WEBGL_compressed_texture_etc extension is enabled.
-    @prop {boolean} astcTexturesEnabled Whether the WEBGL_compressed_texture_astc extension is enabled.
-    @prop {boolean} pvrtcTexturesEnabled Whether the WEBGL_compressed_texture_pvrtc extension is enabled.
     @prop {Object} state Tracked GL state.
-    @prop {GLEnum} clearBits Current clear mask to use with clear().    
+    @prop {GLEnum} clearBits Current clear mask to use with clear().
 */
 export class App {
-    
+
     constructor(gl, canvas) {
         this.canvas = canvas;
         this.gl = gl;
@@ -86,19 +79,25 @@ export class App {
         this.cpuTime = 0;
         this.gpuTime = 0;
 
-        // Extensions
-        this.floatRenderTargetsEnabled = false;
-        this.linearFloatTexturesEnabled = false;
-        this.s3tcTexturesEnabled = false;
-        this.s3tcSRGBTexturesEnabled = false;
-        this.etcTexturesEnabled = false;
-        this.astcTexturesEnabled = false;
-        this.pvrtcTexturesEnabled = false;
-
         this.viewport(0, 0, this.width, this.height);
 
-        this.contextRestoredHandler = null;
         this.contextLostExt = null;
+        this.contextRestoredHandler = null;
+
+        this.initExtensions();
+
+
+        this.canvas.addEventListener("webglcontextlost", (e) => {
+            e.preventDefault();
+        });
+
+        this.canvas.addEventListener("webglcontextrestored", () => {
+            this.initExtensions();
+
+            if (this.contextRestoredHandler) {
+                this.contextRestoredHandler();
+            }
+        });
     }
 
     /**
@@ -108,10 +107,6 @@ export class App {
         @return {App} The App object.
     */
     loseContext() {
-        if (!this.contextLostExt) {
-            this.contextLostExt = this.gl.getExtension("WEBGL_lose_context");
-        }
-
         if (this.contextLostExt) {
             this.contextLostExt.loseContext();
         }
@@ -141,15 +136,6 @@ export class App {
         @return {App} The App object.
     */
     onContextRestored(fn) {
-        if (this.contextRestoredHandler) {
-            this.canvas.removeEventListener("webglcontextrestored", this.contextRestoredHandler);
-        } else {
-            this.canvas.addEventListener("webglcontextlost", (e) => {
-                e.preventDefault();
-            });
-        }
-        
-        this.canvas.addEventListener("webglcontextrestored", fn);
         this.contextRestoredHandler = fn;
 
         return this;
@@ -277,19 +263,19 @@ export class App {
         Copy data from framebuffer attached to READ_FRAMEBUFFER to framebuffer attached to DRAW_FRAMEBUFFER.
 
         @method
-        @param {GLEnum} mask Write mask (e.g. PicoGL.COLOR_BUFFER_BIT). 
+        @param {GLEnum} mask Write mask (e.g. PicoGL.COLOR_BUFFER_BIT).
         @param {Object} [options] Blit options.
-        @param {number} [options.srcStartX=0] Source start x coordinate. 
-        @param {number} [options.srcStartY=0] Source start y coordinate. 
-        @param {number} [options.srcEndX=Width of the read framebuffer] Source end x coordinate. 
-        @param {number} [options.srcEndY=Height of the read framebuffer] Source end y coordinate. 
-        @param {number} [options.dstStartX=0] Destination start x coordinate. 
-        @param {number} [options.dstStartY=0] Destination start y coordinate. 
-        @param {number} [options.dstEndX=Width of the draw framebuffer] Destination end x coordinate. 
-        @param {number} [options.dstEndY=Height of the draw framebuffer] Destination end y coordinate. 
-        @param {number} [options.filter=NEAREST] Sampling filter. 
+        @param {number} [options.srcStartX=0] Source start x coordinate.
+        @param {number} [options.srcStartY=0] Source start y coordinate.
+        @param {number} [options.srcEndX=Width of the read framebuffer] Source end x coordinate.
+        @param {number} [options.srcEndY=Height of the read framebuffer] Source end y coordinate.
+        @param {number} [options.dstStartX=0] Destination start x coordinate.
+        @param {number} [options.dstStartY=0] Destination start y coordinate.
+        @param {number} [options.dstEndX=Width of the draw framebuffer] Destination end x coordinate.
+        @param {number} [options.dstEndY=Height of the draw framebuffer] Destination end y coordinate.
+        @param {number} [options.filter=NEAREST] Sampling filter.
         @return {App} The App object.
-    */  
+    */
     blitFramebuffer(mask, options = DUMMY_OBJECT) {
         let readFramebuffer = this.state.readFramebuffer;
         let drawFramebuffer = this.state.drawFramebuffer;
@@ -656,223 +642,6 @@ export class App {
     }
 
     /**
-        Enable the EXT_color_buffer_float extension. Allows for creating float textures as
-        render targets on FrameBuffer objects.
-
-        @method
-        @see Framebuffer
-        @return {App} The App object.
-    */
-    floatRenderTargets() {
-        this.floatRenderTargetsEnabled = Boolean(this.gl.getExtension("EXT_color_buffer_float"));
-
-        return this;
-    }
-
-    /**
-        Enable the OES_texture_float_linear extension. Allows for linear blending on float textures.
-
-        @method
-        @see Framebuffer
-        @return {App} The App object.
-    */
-    linearFloatTextures() {
-        this.linearFloatTexturesEnabled = Boolean(this.gl.getExtension("OES_texture_float_linear"));
-
-        return this;
-    }
-
-
-    /**
-        Enable the WEBGL_compressed_texture_s3tc and WEBGL_compressed_texture_s3tc_srgb extensions, which 
-        allow the following enums to be used as texture formats:
-
-        <ul>
-          <li>PicoGL.COMPRESSED_RGB_S3TC_DXT1_EXT
-          <li>PicoGL.COMPRESSED_RGBA_S3TC_DXT1_EXT
-          <li>PicoGL.COMPRESSED_RGBA_S3TC_DXT3_EXT
-          <li>PicoGL.COMPRESSED_RGBA_S3TC_DXT5_EXT
-          <li>PicoGL.COMPRESSED_SRGB_S3TC_DXT1_EXT
-          <li>PicoGL.COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT
-          <li>PicoGL.COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT
-          <li>PicoGL.COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT
-        </ul>
-
-        @method
-        @return {App} The App object.
-    */
-    s3tcTextures() {
-        let ext = this.gl.getExtension("WEBGL_compressed_texture_s3tc");
-        this.s3tcTexturesEnabled = Boolean(ext);
-        
-        if (this.s3tcTexturesEnabled) {
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGB_S3TC_DXT1_EXT]  = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_S3TC_DXT1_EXT] = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_S3TC_DXT3_EXT] = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_S3TC_DXT5_EXT] = true;
-        }
-
-        ext = this.gl.getExtension("WEBGL_compressed_texture_s3tc_srgb");
-        this.s3tcSRGBTexturesEnabled = Boolean(ext);
-        
-        if (this.s3tcSRGBTexturesEnabled) {
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB_S3TC_DXT1_EXT]       = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT] = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT] = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT] = true;
-        }
-
-        return this;
-    }
-
-    /**
-        Enable the WEBGL_compressed_texture_etc extension, which allows the following enums to
-        be used as texture formats:
-        
-        <ul>
-          <li>PicoGL.COMPRESSED_R11_EAC
-          <li>PicoGL.COMPRESSED_SIGNED_R11_EAC
-          <li>PicoGL.COMPRESSED_RG11_EAC
-          <li>PicoGL.COMPRESSED_SIGNED_RG11_EAC
-          <li>PicoGL.COMPRESSED_RGB8_ETC2
-          <li>PicoGL.COMPRESSED_SRGB8_ETC2
-          <li>PicoGL.COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2
-          <li>PicoGL.COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2
-          <li>PicoGL.COMPRESSED_RGBA8_ETC2_EAC
-          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ETC2_EAC
-        </ul>
-
-        Note that while WEBGL_compressed_texture_etc1 is not enabled by this method,
-        ETC1 textures can be loaded using COMPRESSED_RGB8_ETC2 as the format.
-
-        @method
-        @return {App} The App object.
-    */
-    etcTextures() {
-        let ext = this.gl.getExtension("WEBGL_compressed_texture_etc");
-        this.etcTexturesEnabled = Boolean(ext);
-
-        if (this.etcTexturesEnabled) {
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_R11_EAC]                        = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SIGNED_R11_EAC]                 = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RG11_EAC]                       = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SIGNED_RG11_EAC]                = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGB8_ETC2]                      = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB8_ETC2]                     = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2]  = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2] = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA8_ETC2_EAC]                 = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB8_ALPHA8_ETC2_EAC]          = true;
-        }
-
-        return this;
-    }
-
-    /**
-        Enable the WEBGL_compressed_texture_astc extension, which allows the following enums to
-        be used as texture formats:
-        
-        <ul>
-          <li>PicoGL.COMPRESSED_RGBA_ASTC_4x4_KHR
-          <li>PicoGL.COMPRESSED_RGBA_ASTC_5x4_KHR
-          <li>PicoGL.COMPRESSED_RGBA_ASTC_5x5_KHR
-          <li>PicoGL.COMPRESSED_RGBA_ASTC_6x5_KHR
-          <li>PicoGL.COMPRESSED_RGBA_ASTC_6x6_KHR
-          <li>PicoGL.COMPRESSED_RGBA_ASTC_8x5_KHR
-          <li>PicoGL.COMPRESSED_RGBA_ASTC_8x6_KHR
-          <li>PicoGL.COMPRESSED_RGBA_ASTC_8x8_KHR
-          <li>PicoGL.COMPRESSED_RGBA_ASTC_10x5_KHR
-          <li>PicoGL.COMPRESSED_RGBA_ASTC_10x6_KHR
-          <li>PicoGL.COMPRESSED_RGBA_ASTC_10x8_KHR
-          <li>PicoGL.COMPRESSED_RGBA_ASTC_10x10_KHR
-          <li>PicoGL.COMPRESSED_RGBA_ASTC_12x10_KHR
-          <li>PicoGL.COMPRESSED_RGBA_ASTC_12x12_KHR
-          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR
-          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR
-          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR
-          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR
-          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR
-          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR
-          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR
-          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR
-          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR
-          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR
-          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR
-          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR
-          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR
-          <li>PicoGL.COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR
-        </ul>
-
-        @method
-        @return {App} The App object.
-    */
-    astcTextures() {
-        let ext = this.gl.getExtension("WEBGL_compressed_texture_astc");
-        this.astcTexturesEnabled = Boolean(ext);
-
-        if (this.astcTexturesEnabled) {
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_ASTC_4x4_KHR]           = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_ASTC_5x4_KHR]           = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_ASTC_5x5_KHR]           = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_ASTC_6x5_KHR]           = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_ASTC_6x6_KHR]           = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_ASTC_8x5_KHR]           = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_ASTC_8x6_KHR]           = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_ASTC_8x8_KHR]           = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_ASTC_10x5_KHR]          = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_ASTC_10x6_KHR]          = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_ASTC_10x8_KHR]          = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_ASTC_10x10_KHR]         = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_ASTC_12x10_KHR]         = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_ASTC_12x12_KHR]         = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR]   = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR]   = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR]   = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR]   = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR]   = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR]   = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR]   = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR]   = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR]  = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR]  = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR]  = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR] = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR] = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR] = true;
-        }
-        
-        return this;
-    }
-
-    /**
-        Enable the WEBGL_compressed_texture_pvrtc extension, which allows the following enums to
-        be used as texture formats:
-
-        <ul>
-          <li>PicoGL.COMPRESSED_RGB_PVRTC_4BPPV1_IMG
-          <li>PicoGL.COMPRESSED_RGB_PVRTC_2BPPV1_IMG
-          <li>PicoGL.COMPRESSED_RGBA_PVRTC_4BPPV1_IMG
-          <li>PicoGL.COMPRESSED_RGBA_PVRTC_2BPPV1_IMG
-        </ul>
-
-        @method
-        @return {App} The App object.
-    */
-    pvrtcTextures() {
-        let ext = this.gl.getExtension("WEBGL_compressed_texture_pvrtc");
-        this.pvrtcTexturesEnabled = Boolean(ext);
-        
-        if (this.pvrtcTexturesEnabled) {
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGB_PVRTC_4BPPV1_IMG] = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGB_PVRTC_2BPPV1_IMG] = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_PVRTC_4BPPV1_IMG] = true;
-            COMPRESSED_TEXTURE_TYPES[GL.COMPRESSED_RGBA_PVRTC_2BPPV1_IMG] = true;
-        }
-
-        return this;
-    }
-
-    /**
         Read a pixel's color value from the currently-bound framebuffer.
 
         @method
@@ -887,9 +656,9 @@ export class App {
     readPixel(x, y, outColor, options = DUMMY_OBJECT) {
         let {
             format = GL.RGBA,
-            type = GL.UNSIGNED_BYTE    
+            type = GL.UNSIGNED_BYTE
         } = options;
-        
+
         this.gl.readPixels(x, y, 1, 1, format, type, outColor);
 
         return this;
@@ -949,9 +718,10 @@ export class App {
 
         return this;
     }
-    /**
-        Create a program.
 
+    /**
+        Create a program synchronously. It is highly recommended to use <b>createPrograms</b> instead as
+            that method will compile shaders in parallel where possible.
         @method
         @param {Shader|string} vertexShader Vertex shader object or source code.
         @param {Shader|string} fragmentShader Fragment shader object or source code.
@@ -959,7 +729,119 @@ export class App {
         @return {Program} New Program object.
     */
     createProgram(vsSource, fsSource, xformFeedbackVars) {
-        return new Program(this.gl, this.state, vsSource, fsSource, xformFeedbackVars);
+        let program = new Program(this.gl, this.state, vsSource, fsSource, xformFeedbackVars);
+        program.checkLinkage();
+        return program;
+    }
+
+    /**
+        Create several programs. Preferred method for program creation as it will compile shaders
+        in parallel where possible.
+
+        @method
+        @param {...Array} sources Variable number of 2 or 3 element arrays, each containing:
+            <ul>
+                <li> (Shader|string) Vertex shader object or source code.
+                <li> (Shader|string) Fragment shader object or source code.
+                <li> (Array - optional) Array of names of transform feedback varyings.
+            </ul>
+        @return {Promise} Promise that will resolve to an array of Programs when compilation and
+            linking are complete for all programs.
+    */
+    createPrograms(...sources) {
+        return new Promise((resolve, reject) => {
+            let numPrograms = sources.length;
+            let programs = new Array(numPrograms);
+            let pendingPrograms = new Array(numPrograms);
+            let numPending = numPrograms;
+
+            for (let i = 0; i < numPrograms; ++i) {
+                let source = sources[i];
+                let vsSource = source[0];
+                let fsSource = source[1];
+                let xformFeedbackVars = source[2];
+                programs[i] = new Program(this.gl, this.state, vsSource, fsSource, xformFeedbackVars);
+                pendingPrograms[i] = programs[i];
+            }
+
+            let poll = () => {
+                let linked = 0;
+                for (let i = 0; i < numPending; ++i) {
+                    if (pendingPrograms[i].checkCompletion()) {
+                        pendingPrograms[i].checkLinkage();
+                        if (pendingPrograms[i].linked) {
+                            ++linked;
+                        } else {
+                            reject(new Error("Program linkage failed"));
+                            return;
+                        }
+                    } else {
+                        pendingPrograms[i - linked] = pendingPrograms[i];
+                    }
+                }
+
+                numPending -= linked;
+
+                if (numPending === 0) {
+                    resolve(programs);
+                } else {
+                    requestAnimationFrame(poll);
+                }
+            };
+
+            poll();
+        });
+    }
+
+    /**
+        Restore several programs after a context loss. Will do so in parallel where available.
+
+        @method
+        @param {...Program} sources Variable number of programs to restore.
+
+        @return {Promise} Promise that will resolve once all programs have been restored.
+    */
+    restorePrograms(...programs) {
+        return new Promise((resolve, reject) => {
+            let numPrograms = programs.length;
+            let pendingPrograms = programs.slice();
+            let numPending = numPrograms;
+
+            for (let i = 0; i < numPrograms; ++i) {
+                programs[i].initialize();
+            }
+
+            for (let i = 0; i < numPrograms; ++i) {
+                programs[i].checkCompletion();
+            }
+
+            let poll = () => {
+                let linked = 0;
+                for (let i = 0; i < numPending; ++i) {
+                    if (pendingPrograms[i].checkCompletion()) {
+                        pendingPrograms[i].checkLinkage();
+                        if (pendingPrograms[i].linked) {
+                            ++linked;
+                        } else {
+                            reject(new Error("Program linkage failed"));
+                            return;
+                        }
+                    } else {
+                        pendingPrograms[i - linked] = pendingPrograms[i];
+                    }
+                }
+
+                numPending -= linked;
+
+                if (numPending === 0) {
+                    resolve();
+                } else {
+                    requestAnimationFrame(poll);
+                }
+            };
+
+            poll();
+        });
     }
 
     /**
@@ -981,8 +863,8 @@ export class App {
         @method
         @return {VertexArray} New VertexArray object.
     */
-    createVertexArray(numElements = 0, numInstances = 0) {
-        return new VertexArray(this.gl, this.state, numElements, numInstances);
+    createVertexArray() {
+        return new VertexArray(this.gl, this.state);
     }
 
     /**
@@ -1001,7 +883,7 @@ export class App {
         @method
         @param {GLEnum} type The data type stored in the vertex buffer.
         @param {number} itemSize Number of elements per vertex.
-        @param {ArrayBufferView|number} data Buffer data itself or the total 
+        @param {ArrayBufferView|number} data Buffer data itself or the total
             number of elements to be allocated.
         @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
         @return {VertexBuffer} New VertexBuffer object.
@@ -1032,7 +914,7 @@ export class App {
 
         @method
         @param {number} bytesPerVertex Number of bytes per vertex.
-        @param {ArrayBufferView|number} data Buffer data itself or the total 
+        @param {ArrayBufferView|number} data Buffer data itself or the total
             number of bytes to be allocated.
         @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
         @return {VertexBuffer} New VertexBuffer object.
@@ -1079,19 +961,19 @@ export class App {
         </ul>
 
         @method
-        @param {DOMElement|ArrayBufferView|Array} [image] Image data. An array can be passed to manually set all levels 
+        @param {DOMElement|ArrayBufferView|Array} [image] Image data. An array can be passed to manually set all levels
             of the mipmap chain. If a single level is passed and mipmap filtering is being used,
             generateMipmap() will be called to produce the remaining levels.
         @param {number} [width] Texture width. Required for array or empty data.
         @param {number} [height] Texture height. Required for array or empty data.
         @param {Object} [options] Texture options.
-        @param {GLEnum} [options.type] Type of data stored in the texture. Defaults to UNSIGNED_SHORT 
+        @param {GLEnum} [options.type] Type of data stored in the texture. Defaults to UNSIGNED_SHORT
             if format is DEPTH_COMPONENT, UNSIGNED_BYTE otherwise.
         @param {GLEnum} [options.format=RGBA] Texture data format.
         @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
-        @param {boolean} [options.flipY=false] Whether the y-axis should be flipped when unpacking the texture. 
-        @param {boolean} [options.premultiplyAlpha=false] Whether the alpha channel should be pre-multiplied when unpacking the texture. 
-        @param {GLEnum} [options.minFilter] Minification filter. Defaults to 
+        @param {boolean} [options.flipY=false] Whether the y-axis should be flipped when unpacking the texture.
+        @param {boolean} [options.premultiplyAlpha=false] Whether the alpha channel should be pre-multiplied when unpacking the texture.
+        @param {GLEnum} [options.minFilter] Minification filter. Defaults to
             LINEAR_MIPMAP_NEAREST if image data is provided, NEAREST otherwise.
         @param {GLEnum} [options.magFilter] Magnification filter. Defaults to LINEAR
             if image data is provided, NEAREST otherwise.
@@ -1111,7 +993,7 @@ export class App {
             options = height;
             height = width;
             width = image;
-            image = null;    
+            image = null;
         } else if (height === undefined) {
             // Passing in a DOM element. Height/width not required.
             options = width;
@@ -1126,19 +1008,19 @@ export class App {
         Create a 2D texture array.
 
         @method
-        @param {ArrayBufferView|Array} image Pixel data. An array can be passed to manually set all levels 
+        @param {ArrayBufferView|Array} image Pixel data. An array can be passed to manually set all levels
             of the mipmap chain. If a single level is passed and mipmap filtering is being used,
             generateMipmap() will be called to produce the remaining levels.
         @param {number} width Texture width.
         @param {number} height Texture height.
         @param {number} size Number of images in the array.
         @param {Object} [options] Texture options.
-         @param {GLEnum} [options.type] Type of data stored in the texture. Defaults to UNSIGNED_SHORT 
+         @param {GLEnum} [options.type] Type of data stored in the texture. Defaults to UNSIGNED_SHORT
             if format is DEPTH_COMPONENT, UNSIGNED_BYTE otherwise.
         @param {GLEnum} [options.format=RGBA] Texture data format.
         @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
-        @param {boolean} [options.flipY=false] Whether the y-axis should be flipped when unpacking the texture. 
-        @param {GLEnum} [options.minFilter] Minification filter. Defaults to 
+        @param {boolean} [options.flipY=false] Whether the y-axis should be flipped when unpacking the texture.
+        @param {GLEnum} [options.minFilter] Minification filter. Defaults to
             LINEAR_MIPMAP_NEAREST if image data is provided, NEAREST otherwise.
         @param {GLEnum} [options.magFilter] Magnification filter. Defaults to LINEAR
             if image data is provided, NEAREST otherwise.
@@ -1160,7 +1042,7 @@ export class App {
             depth = height;
             height = width;
             width = image;
-            image = null;    
+            image = null;
         }
         return new Texture(this.gl, this.state, this.gl.TEXTURE_2D_ARRAY, image, width, height, depth, true, options);
     }
@@ -1169,19 +1051,19 @@ export class App {
         Create a 3D texture.
 
         @method
-        @param {ArrayBufferView|Array} image Pixel data. An array can be passed to manually set all levels 
+        @param {ArrayBufferView|Array} image Pixel data. An array can be passed to manually set all levels
             of the mipmap chain. If a single level is passed and mipmap filtering is being used,
             generateMipmap() will be called to produce the remaining levels.
         @param {number} width Texture width.
         @param {number} height Texture height.
         @param {number} depth Texture depth.
         @param {Object} [options] Texture options.
-        @param {GLEnum} [options.type] Type of data stored in the texture. Defaults to UNSIGNED_SHORT 
+        @param {GLEnum} [options.type] Type of data stored in the texture. Defaults to UNSIGNED_SHORT
             if format is DEPTH_COMPONENT, UNSIGNED_BYTE otherwise.
         @param {GLEnum} [options.format=RGBA] Texture data format.
         @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
-        @param {boolean} [options.flipY=false] Whether the y-axis should be flipped when unpacking the texture. 
-        @param {GLEnum} [options.minFilter] Minification filter. Defaults to 
+        @param {boolean} [options.flipY=false] Whether the y-axis should be flipped when unpacking the texture.
+        @param {GLEnum} [options.minFilter] Minification filter. Defaults to
             LINEAR_MIPMAP_NEAREST if image data is provided, NEAREST otherwise.
         @param {GLEnum} [options.magFilter] Magnification filter. Defaults to LINEAR
             if image data is provided, NEAREST otherwise.
@@ -1203,7 +1085,7 @@ export class App {
             depth = height;
             height = width;
             width = image;
-            image = null;    
+            image = null;
         }
         return new Texture(this.gl, this.state, this.gl.TEXTURE_3D, image, width, height, depth, true, options);
     }
@@ -1227,13 +1109,13 @@ export class App {
                 Can be any format that would be accepted by texImage2D.
         @param {number} [options.width] Cubemap side width. Defaults to the width of negX if negX is an image.
         @param {number} [options.height] Cubemap side height. Defaults to the height of negX if negX is an image.
-        @param {GLEnum} [options.type] Type of data stored in the texture. Defaults to UNSIGNED_SHORT 
+        @param {GLEnum} [options.type] Type of data stored in the texture. Defaults to UNSIGNED_SHORT
             if format is DEPTH_COMPONENT, UNSIGNED_BYTE otherwise.
         @param {GLEnum} [options.format=RGBA] Texture data format.
         @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
-        @param {boolean} [options.flipY=false] Whether the y-axis should be flipped when unpacking the image. 
-        @param {boolean} [options.premultiplyAlpha=false] Whether the alpha channel should be pre-multiplied when unpacking the image. 
-        @param {GLEnum} [options.minFilter] Minification filter. Defaults to 
+        @param {boolean} [options.flipY=false] Whether the y-axis should be flipped when unpacking the image.
+        @param {boolean} [options.premultiplyAlpha=false] Whether the alpha channel should be pre-multiplied when unpacking the image.
+        @param {GLEnum} [options.minFilter] Minification filter. Defaults to
             LINEAR_MIPMAP_NEAREST if image data is provided, NEAREST otherwise.
         @param {GLEnum} [options.magFilter] Magnification filter. Defaults to LINEAR
             if image data is provided, NEAREST otherwise.
@@ -1309,6 +1191,24 @@ export class App {
     */
     createDrawCall(program, vertexArray, primitive) {
         return new DrawCall(this.gl, this.state, program, vertexArray, primitive);
+    }
+
+    // Enable extensions
+    initExtensions() {
+        this.gl.getExtension("EXT_color_buffer_float");
+        this.gl.getExtension("OES_texture_float_linear");
+        this.gl.getExtension("WEBGL_compressed_texture_s3tc");
+        this.gl.getExtension("WEBGL_compressed_texture_s3tc_srgb");
+        this.gl.getExtension("WEBGL_compressed_texture_etc");
+        this.gl.getExtension("WEBGL_compressed_texture_astc");
+        this.gl.getExtension("WEBGL_compressed_texture_pvrtc");
+        this.gl.getExtension("EXT_disjoint_timer_query_webgl2");
+        this.gl.getExtension("EXT_disjoint_timer_query");
+
+        this.contextLostExt = this.gl.getExtension("WEBGL_lose_context");
+
+        // Draft extensions
+        this.gl.getExtension("KHR_parallel_shader_compile");
     }
 
 }

@@ -3,7 +3,7 @@
 <head>
     <title>PicoGL.js: Triangle</title>
     <meta charset="utf-8">
-    <script src="../build/picogl.js"></script>
+    <script src="utils/compatibility.js"></script>
     <script src="utils/utils.js"></script>
     <link rel="stylesheet" href="../site/css/picogl-example.css"> 
 </head>
@@ -60,18 +60,14 @@
             fragColor = vec4(vColor, 1.0);
         }
     </script>
-    <script>
-        var canvas = document.getElementById("gl-canvas");
+    <script type="module">
+        import { PicoGL } from "../src/picogl.js";
 
-        if (!utils.testWebGL2()) {
-            console.error("WebGL 2 not available");
-            document.body.innerHTML = "This example requires WebGL 2 which is unavailable on this system."
-        }
-
+        let canvas = document.getElementById("gl-canvas");
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         
-        var app = PicoGL.createApp(canvas)
+        let app = PicoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0);
 
         window.onresize = function() {
@@ -79,40 +75,41 @@
         }
 
         // PROGRAM 
-        var vsSource =  document.getElementById("vs").text.trim();
-        var fsSource =  document.getElementById("fs").text.trim();
-        var program = app.createProgram(vsSource, fsSource);
+        let vsSource =  document.getElementById("vs").text.trim();
+        let fsSource =  document.getElementById("fs").text.trim();
 
         // GEOMETRY IN VERTEX BUFFERS
-        var positions = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
+        let positions = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
             -0.5, -0.5,
              0.5, -0.5,
              0.0, 0.5, 
         ]));
 
-        var colors = app.createVertexBuffer(PicoGL.UNSIGNED_BYTE, 3, new Uint8Array([
+        let colors = app.createVertexBuffer(PicoGL.UNSIGNED_BYTE, 3, new Uint8Array([
             255, 0, 0,
             0, 255, 0,
             0, 0, 255
         ]));
 
         // COMBINE VERTEX BUFFERS INTO VERTEX ARRAY
-        var triangleArray = app.createVertexArray()
+        let triangleArray = app.createVertexArray()
         .vertexAttributeBuffer(0, positions)
         .vertexAttributeBuffer(1, colors, { normalized: true });
 
-        // CREATE DRAW CALL FROM PROGRAM AND VERTEX ARRAY
-        var drawCall = app.createDrawCall(program, triangleArray);
+        app.createPrograms([vsSource, fsSource]).then(function([program]) {
+            // CREATE DRAW CALL FROM PROGRAM AND VERTEX ARRAY
+            let drawCall = app.createDrawCall(program, triangleArray);
 
-        // DRAW
-        app.clear();
-        drawCall.draw();
+            // DRAW
+            app.clear();
+            drawCall.draw();
 
-        // CLEANUP
-        program.delete();
-        positions.delete();
-        colors.delete();
-        triangleArray.delete();
+            // CLEANUP
+            program.delete();
+            positions.delete();
+            colors.delete();
+            triangleArray.delete();
+        });
 
     </script>
     <a href="https://github.com/tsherif/picogl.js" id="github-ribbon"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"></a>
