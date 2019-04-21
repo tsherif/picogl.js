@@ -70,6 +70,8 @@ export const PicoGL = Object.assign({
 
             // Draft extensions
             WEBGL_INFO.PARALLEL_SHADER_COMPILE = Boolean(gl.getExtension("KHR_parallel_shader_compile"));
+            WEBGL_INFO.MULTI_DRAW = Boolean(gl.getExtension("WEBGL_multi_draw"));
+            WEBGL_INFO.MULTI_DRAW_INSTANCED = Boolean(gl.getExtension("WEBGL_multi_draw_instanced"));
 
             webglInfoInitialized = true;
         }

@@ -39,11 +39,13 @@ export class VertexArray {
         this.gl = gl;
         this.appState = appState;
         this.vertexArray = null;
-        this.numElements = 0;
+        this.numElements = new Int32Array(1);
         this.indexType = null;
         this.instancedBuffers = 0;
         this.indexed = false;
-        this.numInstances = 0;
+        this.numInstances = new Int32Array(1);
+        this.offsets = new Int32Array(1);
+        this.numDraws = 1;
     }
 
     /**
@@ -126,11 +128,22 @@ export class VertexArray {
         this.bind();
         this.gl.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, vertexBuffer.buffer);
 
-        this.numElements = vertexBuffer.numItems * 3;
+        this.numElements[0] = vertexBuffer.numItems * 3;
         this.indexType = vertexBuffer.type;
         this.indexed = true;
 
         return this;
+    }
+
+    multiDraw(numElements, numInstances = null) {
+        this.numDraws = numElements.length;
+        this.numElements = numElements;
+        this.offsets = new Int32Array(this.numElements);
+        this.offsets.set(this.numElements.subarray(1), 1);
+
+        if (numInstances) {
+            this.numInstances = numInstances;
+        }
     }
 
     /**
@@ -217,9 +230,9 @@ export class VertexArray {
         this.instanced = this.instanced || instanced;
 
         if (instanced) {
-            this.numInstances = vertexBuffer.numItems;
+            this.numInstances[0] = vertexBuffer.numItems;
         } else {
-            this.numElements = this.numElements || vertexBuffer.numItems;
+            this.numElements[0] = this.numElements[0] || vertexBuffer.numItems;
         }
 
         this.gl.bindBuffer(GL.ARRAY_BUFFER, null);
