@@ -136,12 +136,14 @@ export class VertexArray {
     multiDraw(numElements, numInstances = null) {
         this.numDraws = numElements.length;
         this.numElements = numElements;
-        this.offsets = new Int32Array(this.numElements);
-        this.offsets.set(this.numElements.subarray(1), 1);
+        this.offsets = new Int32Array(this.numDraws);
+        this.offsets.set(this.numElements.subarray(0, this.numDraws - 1), 1);
 
         if (numInstances) {
             this.numInstances = numInstances;
         }
+
+        return this;
     }
 
     /**
