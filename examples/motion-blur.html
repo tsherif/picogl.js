@@ -423,9 +423,9 @@
                 }
                 
                 if (blurEnabled) {
-                    app.defaultDrawFramebuffer()
+                    // Multi draw seems to require a clear?
+                    app.defaultDrawFramebuffer().clear();
                     blurDrawCall.draw();
-                    
                 }
                 
                 timer.end();

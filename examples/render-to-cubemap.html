@@ -383,7 +383,8 @@
                 cubemapDrawCall.draw();
                 
                 // RENDER TO SCREEN
-                app.defaultDrawFramebuffer().defaultViewport();
+                // Multi draw seems to require a clear here?
+                app.defaultDrawFramebuffer().defaultViewport().clear();
                 skyboxDrawcall.draw();
                 cubeDrawCall.draw();
 
