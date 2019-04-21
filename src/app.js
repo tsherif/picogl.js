@@ -1209,7 +1209,6 @@ export class App {
 
         // Draft extensions
         this.gl.getExtension("KHR_parallel_shader_compile");
-        this.state.extensions.multiDraw = this.gl.getExtension("WEBGL_multi_draw");
         this.state.extensions.multiDrawInstanced = this.gl.getExtension("WEBGL_multi_draw_instanced");
     }
 

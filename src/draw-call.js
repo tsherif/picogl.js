@@ -208,39 +208,22 @@ export class DrawCall {
             this.appState.transformFeedback = null;
         }
 
-        if (this.currentVertexArray.instanced) {
-            if (WEBGL_INFO.MULTI_DRAW_INSTANCED) {
-                let ext = this.appState.extensions.multiDrawInstanced;
-                if (this.currentVertexArray.indexed) {
-                    ext.multiDrawElementsInstancedWEBGL(this.primitive, this.numElements, 0, this.currentVertexArray.indexType, this.offsets, 0, this.numInstances, 0, this.numDraws);
-                } else {
-                    ext.multiDrawArraysInstancedWEBGL(this.primitive, this.offsets, 0, this.numElements, 0, this.numInstances, 0, this.numDraws);
-                }
-            } else if (this.currentVertexArray.indexed) {
-                for (let i = 0; i < this.numDraws; ++i) {
-                    this.gl.drawElementsInstanced(this.primitive, this.numElements[i], this.currentVertexArray.indexType, this.offsets[i], this.numInstances[i]);
-                }
-            } else {
-                for (let i = 0; i < this.numDraws; ++i) {
-                    this.gl.drawArraysInstanced(this.primitive, this.offsets[i], this.numElements[i], this.numInstances[i]);
-                }
-            }
-        } else if (WEBGL_INFO.MULTI_DRAW) {
-            let ext = this.appState.extensions.multiDraw;
+        if (WEBGL_INFO.MULTI_DRAW_INSTANCED) {
+            let ext = this.appState.extensions.multiDrawInstanced;
             if (this.currentVertexArray.indexed) {
-                ext.multiDrawElementsWEBGL(this.primitive, this.numElements, 0, this.currentVertexArray.indexType, this.offsets, 0, this.numDraws);
+                ext.multiDrawElementsInstancedWEBGL(this.primitive, this.numElements, 0, this.currentVertexArray.indexType, this.offsets, 0, this.numInstances, 0, this.numDraws);
             } else {
-                ext.multiDrawArraysWEBGL(this.primitive, this.offsets, 0, this.numElements, 0, this.numDraws);
+                ext.multiDrawArraysInstancedWEBGL(this.primitive, this.offsets, 0, this.numElements, 0, this.numInstances, 0, this.numDraws);
             }
         } else if (this.currentVertexArray.indexed) {
             for (let i = 0; i < this.numDraws; ++i) {
-                this.gl.drawElements(this.primitive, this.numElements[i], this.currentVertexArray.indexType, this.offsets[i]);
+                this.gl.drawElementsInstanced(this.primitive, this.numElements[i], this.currentVertexArray.indexType, this.offsets[i], this.numInstances[i]);
             }
         } else {
             for (let i = 0; i < this.numDraws; ++i) {
-                this.gl.drawArrays(this.primitive, this.offsets[i], this.numElements[i]);
+                this.gl.drawArraysInstanced(this.primitive, this.offsets[i], this.numElements[i], this.numInstances[i]);
             }
-        }   
+        }
 
         if (this.currentTransformFeedback) {
             this.gl.endTransformFeedback();
