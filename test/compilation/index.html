@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        #timings {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: black;
+            color: white;
+        }
+    </style>
+</head>
+<!--
+  The MIT License (MIT)
+
+  Copyright (c) 2017 Tarek Sherif
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy of
+  this software and associated documentation files (the "Software"), to deal in
+  the Software without restriction, including without limitation the rights to
+  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+  the Software, and to permit persons to whom the Software is furnished to do so,
+  subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+  FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+  COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+  IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+<body>
+    <div id="timings"></div>
+    <canvas id="gl-canvas"></canvas>
+    <script type="x-shader/vs" id="vertex-draw">
+        #version 300 es
+
+        layout(std140, column_major) uniform;
+
+        layout(location=0) in vec4 position;
+        layout(location=1) in vec2 uv;
+        layout(location=2) in vec4 normal;
+        
+        uniform SceneUniforms {
+            mat4 viewProj;
+            vec4 eyePosition;
+            vec4 lightPosition;
+        };
+
+        uniform mat4 uModel;
+        
+        out vec3 vPosition;
+        out vec2 vUV;
+        out vec3 vNormal;
+
+        void main() {
+            vec4 worldPosition = uModel * position;
+            vPosition = worldPosition.xyz;
+            vUV = uv;
+            vNormal = (uModel * normal).xyz;
+            gl_Position = viewProj * worldPosition * RAND_CONSTANT;
+        }
+    </script>
+    <script type="x-shader/vf" id="fragment-draw">
+        #version 300 es
+        precision highp float;
+
+        layout(std140, column_major) uniform;
+
+        uniform SceneUniforms {
+            mat4 viewProj;
+            vec4 eyePosition;
+            vec4 lightPosition;
+        };
+
+        uniform sampler2D tex;
+        
+        in vec3 vPosition;
+        in vec2 vUV;
+        in vec3 vNormal;
+
+        out vec4 fragColor;
+        void main() {
+            vec3 color = texture(tex, vUV).rgb;
+
+            vec3 normal = normalize(vNormal);
+            vec3 eyeVec = normalize(eyePosition.xyz - vPosition);
+            vec3 incidentVec = normalize(vPosition - lightPosition.xyz);
+            vec3 lightVec = -incidentVec;
+            float diffuse = max(dot(lightVec, normal), 0.0);
+            float highlight = pow(max(dot(eyeVec, reflect(incidentVec, normal)), 0.0), 100.0);
+            float ambient = 0.1;
+            fragColor = vec4(color * (diffuse + highlight + ambient), 1.0) * RAND_CONSTANT;
+        }
+    </script>
+    <script id="update-force-fs" type="x-fragment-shader">
+        #version 300 es   
+
+        precision highp float;
+
+        #define GRAVITY vec3(0.0, -0.0003, 0.0)
+        #define WIND vec3(0.0, 0.0, 0.00008)
+        #define DAMPING 0.99
+
+        in vec2 vScreenUV;
+
+        uniform sampler2D uPositionBuffer;
+        uniform sampler2D uNormalBuffer;
+        uniform sampler2D uOldPositionBuffer;
+
+        layout(location=0) out vec3 outPosition;
+        layout(location=1) out vec3 outOldPosition;
+
+        void main() {
+            ivec2 dimensions = textureSize(uPositionBuffer, 0);
+            ivec2 maxTexelCoord = dimensions - 1;
+            ivec2 texelCoord = ivec2(vScreenUV * vec2(dimensions));
+            vec3 position = texelFetch(uPositionBuffer, texelCoord, 0).xyz;
+            vec3 normal = texelFetch(uNormalBuffer, texelCoord, 0).xyz;
+            vec3 oldPosition = texelFetch(uOldPositionBuffer, texelCoord, 0).xyz;
+            vec3 temp = position;
+
+            if (texelCoord != ivec2(0, 0) && texelCoord != ivec2(maxTexelCoord.x, 0)) {
+                position += (position - oldPosition) * DAMPING + GRAVITY;
+                float wDotN = dot(WIND, normal);
+                position += abs(wDotN) * sign(wDotN) * normal;
+            }
+
+            if (texelCoord != ivec2(0, 0) && texelCoord != ivec2(maxTexelCoord.x, 0)) {
+                position += (position - oldPosition) * DAMPING + GRAVITY;
+                float wDotN = dot(WIND, normal);
+                position += abs(wDotN) * sign(wDotN) * normal;
+            }
+
+            if (texelCoord != ivec2(0, 0) && texelCoord != ivec2(maxTexelCoord.x, 0)) {
+                position += (position - oldPosition) * DAMPING + GRAVITY;
+                float wDotN = dot(WIND, normal);
+                position += abs(wDotN) * sign(wDotN) * normal;
+            }
+
+            if (texelCoord != ivec2(0, 0) && texelCoord != ivec2(maxTexelCoord.x, 0)) {
+                position += (position - oldPosition) * DAMPING + GRAVITY;
+                float wDotN = dot(WIND, normal);
+                position += abs(wDotN) * sign(wDotN) * normal;
+            }
+
+            if (texelCoord != ivec2(0, 0) && texelCoord != ivec2(maxTexelCoord.x, 0)) {
+                position += (position - oldPosition) * DAMPING + GRAVITY;
+                float wDotN = dot(WIND, normal);
+                position += abs(wDotN) * sign(wDotN) * normal;
+            }
+
+            if (texelCoord != ivec2(0, 0) && texelCoord != ivec2(maxTexelCoord.x, 0)) {
+                position += (position - oldPosition) * DAMPING + GRAVITY;
+                float wDotN = dot(WIND, normal);
+                position += abs(wDotN) * sign(wDotN) * normal;
+            }
+
+            outPosition = position * RAND_CONSTANT;
+            outOldPosition = temp;
+        }
+    </script>
+    <script id="update-constraint-fs" type="x-fragment-shader">
+        #version 300 es
+        
+        precision highp float;
+
+        in vec2 vScreenUV;
+
+        // uModVal and dir used to select the direction
+        // to look for the neighbour we're going to check
+        layout(std140) uniform ConstraintUniforms {
+            ivec2 uDir;
+            int uModVal;
+            float uRestDistance;   
+        };
+
+        uniform sampler2D uPositionBuffer;
+
+        out vec3 outPosition;
+
+        void main() {
+            ivec2 dimensions = textureSize(uPositionBuffer, 0);
+            ivec2 texelCoord = ivec2(vScreenUV * vec2(dimensions));
+            vec3 position = texelFetch(uPositionBuffer, texelCoord, 0).xyz;
+
+            int iDot = abs(texelCoord.x * uDir.x) + abs(texelCoord.y * uDir.y);
+            int neg = iDot % 2 == uModVal ? 1 : -1;
+
+            bool otherPin = false;
+
+            if (texelCoord != ivec2(0, 0) && texelCoord != ivec2(dimensions.x - 1, 0)) {
+                ivec2 otherCoord = texelCoord + uDir * neg;
+
+                if (otherCoord == ivec2(0, 0) || otherCoord == ivec2(dimensions.x - 1, 0)) {
+                    otherPin = true;
+                }
+
+                if (all(greaterThanEqual(otherCoord, ivec2(0, 0))) && all(lessThan(otherCoord, dimensions))) {
+                    vec3 otherPosition = texelFetch(uPositionBuffer, otherCoord, 0).xyz;
+                    
+                    vec3 diffVec = otherPosition - position;
+                    float dist = length(diffVec);
+                    if (dist > uRestDistance) {
+                        position += diffVec * (1.0 - uRestDistance / dist) * (otherPin ? 1.0 : 0.5);
+                    }
+                }
+            }
+
+            if (texelCoord != ivec2(0, 0) && texelCoord != ivec2(dimensions.x - 1, 0)) {
+                ivec2 otherCoord = texelCoord + uDir * neg;
+
+                if (otherCoord == ivec2(0, 0) || otherCoord == ivec2(dimensions.x - 1, 0)) {
+                    otherPin = true;
+                }
+
+                if (all(greaterThanEqual(otherCoord, ivec2(0, 0))) && all(lessThan(otherCoord, dimensions))) {
+                    vec3 otherPosition = texelFetch(uPositionBuffer, otherCoord, 0).xyz;
+                    
+                    vec3 diffVec = otherPosition - position;
+                    float dist = length(diffVec);
+                    if (dist > uRestDistance) {
+                        position += diffVec * (1.0 - uRestDistance / dist) * (otherPin ? 1.0 : 0.5);
+                    }
+                }
+            }
+
+            if (texelCoord != ivec2(0, 0) && texelCoord != ivec2(dimensions.x - 1, 0)) {
+                ivec2 otherCoord = texelCoord + uDir * neg;
+
+                if (otherCoord == ivec2(0, 0) || otherCoord == ivec2(dimensions.x - 1, 0)) {
+                    otherPin = true;
+                }
+
+                if (all(greaterThanEqual(otherCoord, ivec2(0, 0))) && all(lessThan(otherCoord, dimensions))) {
+                    vec3 otherPosition = texelFetch(uPositionBuffer, otherCoord, 0).xyz;
+                    
+                    vec3 diffVec = otherPosition - position;
+                    float dist = length(diffVec);
+                    if (dist > uRestDistance) {
+                        position += diffVec * (1.0 - uRestDistance / dist) * (otherPin ? 1.0 : 0.5);
+                    }
+                }
+            }
+
+            if (texelCoord != ivec2(0, 0) && texelCoord != ivec2(dimensions.x - 1, 0)) {
+                ivec2 otherCoord = texelCoord + uDir * neg;
+
+                if (otherCoord == ivec2(0, 0) || otherCoord == ivec2(dimensions.x - 1, 0)) {
+                    otherPin = true;
+                }
+
+                if (all(greaterThanEqual(otherCoord, ivec2(0, 0))) && all(lessThan(otherCoord, dimensions))) {
+                    vec3 otherPosition = texelFetch(uPositionBuffer, otherCoord, 0).xyz;
+                    
+                    vec3 diffVec = otherPosition - position;
+                    float dist = length(diffVec);
+                    if (dist > uRestDistance) {
+                        position += diffVec * (1.0 - uRestDistance / dist) * (otherPin ? 1.0 : 0.5);
+                    }
+                }
+            }
+
+            if (texelCoord != ivec2(0, 0) && texelCoord != ivec2(dimensions.x - 1, 0)) {
+                ivec2 otherCoord = texelCoord + uDir * neg;
+
+                if (otherCoord == ivec2(0, 0) || otherCoord == ivec2(dimensions.x - 1, 0)) {
+                    otherPin = true;
+                }
+
+                if (all(greaterThanEqual(otherCoord, ivec2(0, 0))) && all(lessThan(otherCoord, dimensions))) {
+                    vec3 otherPosition = texelFetch(uPositionBuffer, otherCoord, 0).xyz;
+                    
+                    vec3 diffVec = otherPosition - position;
+                    float dist = length(diffVec);
+                    if (dist > uRestDistance) {
+                        position += diffVec * (1.0 - uRestDistance / dist) * (otherPin ? 1.0 : 0.5);
+                    }
+                }
+            }
+
+            outPosition = position * RAND_CONSTANT;
+        }
+    </script>
+    <script id="update-collision-fs" type="x-fragment-shader">
+        #version 300 es
+        
+        precision highp float;
+
+        in vec2 vScreenUV;
+
+        layout(std140) uniform BallUniforms {
+            vec4 position;
+            float radius;
+        } ball;
+
+        uniform sampler2D uPositionBuffer;
+
+        out vec3 outPosition;
+
+        void main() {
+            vec2 dimensions = vec2(textureSize(uPositionBuffer, 0));
+            ivec2 texelCoord = ivec2(vScreenUV * dimensions);
+            vec3 position = texelFetch(uPositionBuffer, texelCoord, 0).xyz;
+
+            vec3 diff = position - ball.position.xyz;
+            float dist = length(diff);
+            if (dist < ball.radius + 0.01) {
+                position += (ball.radius + 0.01 - dist) * normalize(diff);
+            }
+
+            if (dist < ball.radius + 0.01) {
+                position += (ball.radius + 0.01 - dist) * normalize(diff);
+            }
+
+            if (dist < ball.radius + 0.01) {
+                position += (ball.radius + 0.01 - dist) * normalize(diff);
+            }
+
+            if (dist < ball.radius + 0.01) {
+                position += (ball.radius + 0.01 - dist) * normalize(diff);
+            }
+
+            if (dist < ball.radius + 0.01) {
+                position += (ball.radius + 0.01 - dist) * normalize(diff);
+            }
+
+            outPosition = position * RAND_CONSTANT;
+        }
+    </script>
+
+    <script id="update-normal-fs" type="x-fragment-shader">
+        #version 300 es
+        
+        precision highp float;
+
+        in vec2 vScreenUV;
+
+        uniform sampler2D uPositionBuffer;
+
+        out vec3 outNormal;
+
+        void main() {
+            ivec2 dimensions = textureSize(uPositionBuffer, 0);
+            ivec2 texelCoord = ivec2(vScreenUV * vec2(dimensions));
+            vec3 position = texelFetch(uPositionBuffer, texelCoord, 0).xyz;
+
+            vec3 normal = vec3(0.0);
+
+            if (texelCoord.x > 0) {
+                vec3 left = texelFetch(uPositionBuffer, texelCoord - ivec2(1, 0), 0).xyz;
+
+                if (texelCoord.y > 0) {
+                    vec3 down = texelFetch(uPositionBuffer, texelCoord - ivec2(0, 1), 0).xyz;
+                    normal += normalize(cross(left - position, down - position));
+                }
+
+                if (texelCoord.y < dimensions.y - 1) {
+                    vec3 up = texelFetch(uPositionBuffer, texelCoord + ivec2(0, 1), 0).xyz;
+                    normal += normalize(cross(up - position, left - position));
+                }
+            }
+
+            if (texelCoord.x < dimensions.x - 1) {
+                vec3 right = texelFetch(uPositionBuffer, texelCoord + ivec2(1, 0), 0).xyz;
+
+                if (texelCoord.y > 0) {
+                    vec3 down = texelFetch(uPositionBuffer, texelCoord - ivec2(0, 1), 0).xyz;
+                    normal += normalize(cross(down - position, right - position));
+                }
+
+                if (texelCoord.y < dimensions.y - 1) {
+                    vec3 up = texelFetch(uPositionBuffer, texelCoord + ivec2(0, 1), 0).xyz;
+                    normal += normalize(cross(right - position, up - position));
+                }
+            }
+
+            if (texelCoord.x > 0) {
+                vec3 left = texelFetch(uPositionBuffer, texelCoord - ivec2(1, 0), 0).xyz;
+
+                if (texelCoord.y > 0) {
+                    vec3 down = texelFetch(uPositionBuffer, texelCoord - ivec2(0, 1), 0).xyz;
+                    normal += normalize(cross(left - position, down - position));
+                }
+
+                if (texelCoord.y < dimensions.y - 1) {
+                    vec3 up = texelFetch(uPositionBuffer, texelCoord + ivec2(0, 1), 0).xyz;
+                    normal += normalize(cross(up - position, left - position));
+                }
+            }
+
+            if (texelCoord.x < dimensions.x - 1) {
+                vec3 right = texelFetch(uPositionBuffer, texelCoord + ivec2(1, 0), 0).xyz;
+
+                if (texelCoord.y > 0) {
+                    vec3 down = texelFetch(uPositionBuffer, texelCoord - ivec2(0, 1), 0).xyz;
+                    normal += normalize(cross(down - position, right - position));
+                }
+
+                if (texelCoord.y < dimensions.y - 1) {
+                    vec3 up = texelFetch(uPositionBuffer, texelCoord + ivec2(0, 1), 0).xyz;
+                    normal += normalize(cross(right - position, up - position));
+                }
+            }
+
+            if (texelCoord.x > 0) {
+                vec3 left = texelFetch(uPositionBuffer, texelCoord - ivec2(1, 0), 0).xyz;
+
+                if (texelCoord.y > 0) {
+                    vec3 down = texelFetch(uPositionBuffer, texelCoord - ivec2(0, 1), 0).xyz;
+                    normal += normalize(cross(left - position, down - position));
+                }
+
+                if (texelCoord.y < dimensions.y - 1) {
+                    vec3 up = texelFetch(uPositionBuffer, texelCoord + ivec2(0, 1), 0).xyz;
+                    normal += normalize(cross(up - position, left - position));
+                }
+            }
+
+            if (texelCoord.x < dimensions.x - 1) {
+                vec3 right = texelFetch(uPositionBuffer, texelCoord + ivec2(1, 0), 0).xyz;
+
+                if (texelCoord.y > 0) {
+                    vec3 down = texelFetch(uPositionBuffer, texelCoord - ivec2(0, 1), 0).xyz;
+                    normal += normalize(cross(down - position, right - position));
+                }
+
+                if (texelCoord.y < dimensions.y - 1) {
+                    vec3 up = texelFetch(uPositionBuffer, texelCoord + ivec2(0, 1), 0).xyz;
+                    normal += normalize(cross(right - position, up - position));
+                }
+            }
+
+            outNormal = normalize(normal) * RAND_CONSTANT;
+        }
+    </script>
+    <script id="quad-vs" type="x-shader/vs">
+        #version 300 es   
+
+        layout(location=0) in vec4 aPosition;
+        
+        out vec2 vScreenUV;
+        void main() {
+            vScreenUV = aPosition.xy * 0.5 + 0.5;
+            gl_Position = aPosition * RAND_CONSTANT;
+        }
+    </script>
+    <script type="module">
+        import { PicoGL } from "../../src/picogl.js";
+       
+        let canvas = document.getElementById("gl-canvas");
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        let app = PicoGL.createApp(canvas)
+        .clearColor(0.0, 0.0, 0.0, 1.0)
+        .depthTest();
+
+        let timer = app.createTimer();
+
+        // SET UP PROGRAM
+        let vsSource =  document.getElementById("vertex-draw").text.trim();
+        let fsSource =  document.getElementById("fragment-draw").text.trim();
+        let quadVsSource = document.getElementById("quad-vs").text.trim();
+        let updateForceFsSource = document.getElementById("update-force-fs").text.trim();
+        let updateConstraintFsSource = document.getElementById("update-constraint-fs").text.trim();
+        let updateCollisionFsSource = document.getElementById("update-collision-fs").text.trim();
+        let updateNormalFsSource = document.getElementById("update-normal-fs").text.trim();
+
+        let numIterations = 20;
+        let sources = [];
+
+        requestAnimationFrame(() => {
+            // Cache busting
+            for (let i = 0; i < numIterations; ++i) {
+                sources.push(
+                    [
+                        vsSource.replace("RAND_CONSTANT", Math.random().toFixed(6)),
+                        fsSource.replace("RAND_CONSTANT", Math.random().toFixed(6))
+                    ],
+                    [   
+                        quadVsSource.replace("RAND_CONSTANT", Math.random().toFixed(6)), 
+                        updateForceFsSource.replace("RAND_CONSTANT", Math.random().toFixed(6))
+                    ],
+                    [   
+                        quadVsSource.replace("RAND_CONSTANT", Math.random().toFixed(6)),
+                        updateConstraintFsSource.replace("RAND_CONSTANT", Math.random().toFixed(6))
+                    ],
+                    [
+                        quadVsSource.replace("RAND_CONSTANT", Math.random().toFixed(6)), 
+                        updateCollisionFsSource.replace("RAND_CONSTANT", Math.random().toFixed(6))
+                    ],
+                    [
+                        quadVsSource.replace("RAND_CONSTANT", Math.random().toFixed(6)), 
+                        updateNormalFsSource.replace("RAND_CONSTANT", Math.random().toFixed(6))
+                    ]
+                );
+            }
+
+            let parallelTimeStart = performance.now();
+            let parallelTime;
+
+            app.createPrograms(...sources).then(() => {
+                parallelTime = performance.now() - parallelTimeStart
+
+                sources.length = 0;
+                for (let i = 0; i < numIterations; ++i) {
+                    sources.push(
+                        [
+                            vsSource.replace("RAND_CONSTANT", Math.random().toFixed(6)),
+                            fsSource.replace("RAND_CONSTANT", Math.random().toFixed(6))
+                        ],
+                        [   
+                            quadVsSource.replace("RAND_CONSTANT", Math.random().toFixed(6)), 
+                            updateForceFsSource.replace("RAND_CONSTANT", Math.random().toFixed(6))
+                        ],
+                        [   
+                            quadVsSource.replace("RAND_CONSTANT", Math.random().toFixed(6)),
+                            updateConstraintFsSource.replace("RAND_CONSTANT", Math.random().toFixed(6))
+                        ],
+                        [
+                            quadVsSource.replace("RAND_CONSTANT", Math.random().toFixed(6)), 
+                            updateCollisionFsSource.replace("RAND_CONSTANT", Math.random().toFixed(6))
+                        ],
+                        [
+                            quadVsSource.replace("RAND_CONSTANT", Math.random().toFixed(6)), 
+                            updateNormalFsSource.replace("RAND_CONSTANT", Math.random().toFixed(6))
+                        ]
+                    );
+                }
+
+                let serialTimeStart = performance.now();
+                let serialTime;
+
+                for (let i = 0, len = sources.length; i < len; ++i) {
+                    app.createProgram(...sources[i]);
+                }
+
+                serialTime = performance.now() - serialTimeStart;
+                
+                document.getElementById("timings").innerHTML = ` Parallel: ${parallelTime.toFixed(1)}ms<BR>Serial: ${serialTime.toFixed(1)}ms`;
+            });
+        });
+
+    </script>
+</body>
+</html>
