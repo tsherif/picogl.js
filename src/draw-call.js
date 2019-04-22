@@ -65,11 +65,6 @@ export class DrawCall {
         this.textures = new Array(WEBGL_INFO.MAX_TEXTURE_UNITS);
         this.textureCount = 0;
         this.primitive = primitive;
-
-        this.offsets = this.currentVertexArray.offsets;
-        this.numElements = this.currentVertexArray.numElements;
-        this.numInstances = this.currentVertexArray.numInstances;
-        this.numDraws = this.currentVertexArray.numDraws;
     }
 
     /**
@@ -138,40 +133,6 @@ export class DrawCall {
     }
 
     /**
-        Set numElements property to allow number of elements to be drawn
-
-        @method
-        @param {GLsizei} [count=0] Number of element to draw, 0 set to all.
-        @return {DrawCall} The DrawCall object.
-    */
-    elementCount(count = 0) {
-        if (count > 0) {
-            this.numElements[0] = Math.min(count, this.currentVertexArray.numElements);
-        } else {
-            this.numElements[0] = this.currentVertexArray.numElements;
-        }
-
-        return this;
-    }
-
-    /**
-        Set numInstances property to allow number of instances be drawn
-
-        @method
-        @param {GLsizei} [count=0] Number of instance to draw, 0 set to all.
-        @return {DrawCall} The DrawCall object.
-    */
-    instanceCount(count = 0) {
-        if (count > 0) {
-            this.numInstances[0] = Math.min(count, this.currentVertexArray.numInstances);
-        } else {
-            this.numInstances[0] = this.currentVertexArray.numInstances;
-        }
-
-        return this;
-    }
-
-    /**
         Draw based on current state.
 
         @method
@@ -184,6 +145,10 @@ export class DrawCall {
         let uniformBlockCount = this.currentProgram.uniformBlockCount;
         let textures = this.textures;
         let textureCount = this.currentProgram.samplerCount;
+        let offsets = this.currentVertexArray.offsets;
+        let numElements = this.currentVertexArray.numElements;
+        let numInstances = this.currentVertexArray.numInstances;
+        let numDraws = this.currentVertexArray.numDraws;
 
         this.currentProgram.bind();
         this.currentVertexArray.bind();
@@ -211,17 +176,17 @@ export class DrawCall {
         if (WEBGL_INFO.MULTI_DRAW_INSTANCED) {
             let ext = this.appState.extensions.multiDrawInstanced;
             if (this.currentVertexArray.indexed) {
-                ext.multiDrawElementsInstancedWEBGL(this.primitive, this.numElements, 0, this.currentVertexArray.indexType, this.offsets, 0, this.numInstances, 0, this.numDraws);
+                ext.multiDrawElementsInstancedWEBGL(this.primitive, numElements, 0, this.currentVertexArray.indexType, offsets, 0, numInstances, 0, numDraws);
             } else {
-                ext.multiDrawArraysInstancedWEBGL(this.primitive, this.offsets, 0, this.numElements, 0, this.numInstances, 0, this.numDraws);
+                ext.multiDrawArraysInstancedWEBGL(this.primitive, offsets, 0, numElements, 0, numInstances, 0, numDraws);
             }
         } else if (this.currentVertexArray.indexed) {
-            for (let i = 0; i < this.numDraws; ++i) {
-                this.gl.drawElementsInstanced(this.primitive, this.numElements[i], this.currentVertexArray.indexType, this.offsets[i], this.numInstances[i]);
+            for (let i = 0; i < numDraws; ++i) {
+                this.gl.drawElementsInstanced(this.primitive, numElements[i], this.currentVertexArray.indexType, offsets[i], numInstances[i]);
             }
         } else {
-            for (let i = 0; i < this.numDraws; ++i) {
-                this.gl.drawArraysInstanced(this.primitive, this.offsets[i], this.numElements[i], this.numInstances[i]);
+            for (let i = 0; i < numDraws; ++i) {
+                this.gl.drawArraysInstanced(this.primitive, offsets[i], numElements[i], numInstances[i]);
             }
         }
 

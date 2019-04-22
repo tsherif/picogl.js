@@ -133,14 +133,38 @@ export class VertexArray {
         return this;
     }
 
-    multiDraw(numElements, numInstances = null) {
-        this.numDraws = numElements.length;
-        this.numElements = numElements;
-        this.offsets = new Int32Array(this.numDraws);
+    elementCounts(...counts) {
+        this.numDraws = counts.length;
+
+        if (this.numElements.length < this.numDraws) {
+            this.numElements = new Int32Array(counts);
+        } else {
+            this.numElements.set(counts);
+        }
+
+        if (this.offsets.length < this.numDraws) {
+            this.offsets = new Int32Array(this.numDraws);
+        }
+
         this.offsets.set(this.numElements.subarray(0, this.numDraws - 1), 1);
 
-        if (numInstances) {
-            this.numInstances = numInstances;
+        if (this.numInstances.length < this.numDraws) {
+            this.numInstances = new Int32Array(this.numDraws);
+            for (let i = 0; i < this.numDraws; ++i) {
+                this.numInstances[i] = 1;
+            }
+        }
+
+        return this;
+    }
+
+    instanceCounts(...counts) {
+        this.numDraws = counts.length;
+
+        if (this.numInstances.length < this.numDraws) {
+            this.numInstances = new Int32Array(counts);
+        } else {
+            this.numInstances.set(counts);
         }
 
         return this;

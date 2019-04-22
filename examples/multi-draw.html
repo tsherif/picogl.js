@@ -44,14 +44,12 @@
         layout(location=0) in vec4 position;
         layout(location=1) in float verticalOffset;
         layout(location=2) in vec4 color;
-        
-        uniform float horizontalOffet[2];
-        
+                
         out vec4 vColor;
         void main() {
             vColor = color;
             gl_Position = position;
-            gl_Position.xy += vec2(horizontalOffet[gl_DrawID], verticalOffset);
+            gl_Position.xy += vec2(0.4 - 0.8 * float(gl_DrawID), verticalOffset);
         }
     </script>
     <script type="shader/fs" id="fs">
@@ -116,16 +114,13 @@
         .vertexAttributeBuffer(0, positions)
         .instanceAttributeBuffer(1, verticalOffets)
         .instanceAttributeBuffer(2, colors, { normalized: true })
-        .multiDraw(new Int32Array([3, 6]), new Int32Array([3, 3]));
+        .elementCounts(3, 6)
+        .instanceCounts(3, 3);
 
         // USE PARALLEL SHADER COMPILATION IF AVAILABLE
         // https://www.khronos.org/registry/webgl/extensions/KHR_parallel_shader_compile/
         app.createPrograms([vsSource, fsSource]).then(([program]) => {
-          let drawCall = app.createDrawCall(program, triangleArray)
-          .uniform("horizontalOffet[0]", new Float32Array([
-            -0.4,
-            0.4
-          ]));
+          let drawCall = app.createDrawCall(program, triangleArray);
 
           app.clear();
           drawCall.draw();
