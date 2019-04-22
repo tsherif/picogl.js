@@ -117,18 +117,19 @@
         let triangleArray = app.createVertexArray()
         .vertexAttributeBuffer(0, positions)
         .instanceAttributeBuffer(1, verticalOffets)
-        .instanceAttributeBuffer(2, colors, { normalized: true })
-        .drawRanges(
-          [0, 3, 3],
-          [3, 6, 3],
-          [0, 3, 3],
-          [3, 6, 3]
-        );
+        .instanceAttributeBuffer(2, colors, { normalized: true });
+        
 
         // USE PARALLEL SHADER COMPILATION IF AVAILABLE
         // https://www.khronos.org/registry/webgl/extensions/KHR_parallel_shader_compile/
         app.createPrograms([vsSource, fsSource]).then(([program]) => {
-          let drawCall = app.createDrawCall(program, triangleArray);
+          let drawCall = app.createDrawCall(program, triangleArray)
+          .drawRanges(
+            [0, 3, 3],
+            [3, 6, 3],
+            [0, 3, 3],
+            [3, 6, 3]
+          );;
 
           app.clear();
           drawCall.draw();

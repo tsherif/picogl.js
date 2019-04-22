@@ -65,6 +65,11 @@ export class DrawCall {
         this.textures = new Array(WEBGL_INFO.MAX_TEXTURE_UNITS);
         this.textureCount = 0;
         this.primitive = primitive;
+
+        this.offsets = new Int32Array(1);
+        this.numElements = new Int32Array([ this.currentVertexArray.numElements ]);
+        this.numInstances = new Int32Array([ this.currentVertexArray.numInstances ]);
+        this.numDraws = 1;
     }
 
     /**
@@ -133,6 +138,45 @@ export class DrawCall {
     }
 
     /**
+        Ranges in the vertex array to draw. Multiple arguments can be provided to set up
+        a multi-draw.
+
+        @method
+        @param {...Array} counts Variable number of 2 or 3 element arrays, each containing:
+            <ul>
+                <li> (Number) Number of elements to skip at the start of the array.
+                <li> (Number) Number of elements to draw.
+                <li> (Number - optional) Number of instances to draw of the given range.
+            </ul>
+        @return {DrawCall} The DrawCall object.
+    */
+    drawRanges(...counts) {
+        this.numDraws = counts.length;
+
+        if (this.offsets.length < this.numDraws) {
+            this.offsets = new Int32Array(this.numDraws);
+        }
+
+        if (this.numElements.length < this.numDraws) {
+            this.numElements = new Int32Array(this.numDraws);
+        }
+
+        if (this.numInstances.length < this.numDraws) {
+            this.numInstances = new Int32Array(this.numDraws);
+        }
+
+        for (let i = 0; i < this.numDraws; ++i) {
+            let count = counts[i];
+
+            this.offsets[i] = count[0];
+            this.numElements[i] = count[1];
+            this.numInstances[i] = count[2] || 1;
+        }
+
+        return this;
+    }
+
+    /**
         Draw based on current state.
 
         @method
@@ -145,10 +189,6 @@ export class DrawCall {
         let uniformBlockCount = this.currentProgram.uniformBlockCount;
         let textures = this.textures;
         let textureCount = this.currentProgram.samplerCount;
-        let offsets = this.currentVertexArray.offsets;
-        let numElements = this.currentVertexArray.numElements;
-        let numInstances = this.currentVertexArray.numInstances;
-        let numDraws = this.currentVertexArray.numDraws;
 
         this.currentProgram.bind();
         this.currentVertexArray.bind();
@@ -176,17 +216,17 @@ export class DrawCall {
         if (WEBGL_INFO.MULTI_DRAW_INSTANCED) {
             let ext = this.appState.extensions.multiDrawInstanced;
             if (this.currentVertexArray.indexed) {
-                ext.multiDrawElementsInstancedWEBGL(this.primitive, numElements, 0, this.currentVertexArray.indexType, offsets, 0, numInstances, 0, numDraws);
+                ext.multiDrawElementsInstancedWEBGL(this.primitive, this.numElements, 0, this.currentVertexArray.indexType, this.offsets, 0, this.numInstances, 0, this.numDraws);
             } else {
-                ext.multiDrawArraysInstancedWEBGL(this.primitive, offsets, 0, numElements, 0, numInstances, 0, numDraws);
+                ext.multiDrawArraysInstancedWEBGL(this.primitive, this.offsets, 0, this.numElements, 0, this.numInstances, 0, this.numDraws);
             }
         } else if (this.currentVertexArray.indexed) {
-            for (let i = 0; i < numDraws; ++i) {
-                this.gl.drawElementsInstanced(this.primitive, numElements[i], this.currentVertexArray.indexType, offsets[i], numInstances[i]);
+            for (let i = 0; i < this.numDraws; ++i) {
+                this.gl.drawElementsInstanced(this.primitive, this.numElements[i], this.currentVertexArray.indexType, this.offsets[i], this.numInstances[i]);
             }
         } else {
-            for (let i = 0; i < numDraws; ++i) {
-                this.gl.drawArraysInstanced(this.primitive, offsets[i], numElements[i], numInstances[i]);
+            for (let i = 0; i < this.numDraws; ++i) {
+                this.gl.drawArraysInstanced(this.primitive, this.offsets[i], this.numElements[i], this.numInstances[i]);
             }
         }
 
