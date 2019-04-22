@@ -49,7 +49,7 @@
         void main() {
             vColor = color;
             gl_Position = position;
-            gl_Position.xy += vec2(0.4 - 0.8 * float(gl_DrawID), verticalOffset);
+            gl_Position.xy += vec2(0.6 - 0.4 * float(gl_DrawID), verticalOffset);
         }
     </script>
     <script type="shader/fs" id="fs">
@@ -89,16 +89,16 @@
         // PER-VERTEX POSITIONS
         let positions = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
              // Triangle positions
-            -0.2, -0.2,
-             0.2, -0.2,
-             0.0, 0.2,
+            -0.15, -0.15,
+             0.15, -0.15,
+             0.0, 0.15,
              // Square positions 
-             -0.2, 0.2,
-             -0.2, -0.2,
-             0.2, -0.2,
-             -0.2, 0.2,
-             0.2, -0.2,
-             0.2, 0.2
+             -0.15, 0.15,
+             -0.15, -0.15,
+             0.15, -0.15,
+             -0.15, 0.15,
+             0.15, -0.15,
+             0.15, 0.15
         ]));
 
         // PER-INSTANCE OFFSETS AND COLORS
@@ -118,8 +118,12 @@
         .vertexAttributeBuffer(0, positions)
         .instanceAttributeBuffer(1, verticalOffets)
         .instanceAttributeBuffer(2, colors, { normalized: true })
-        .elementCounts(3, 6)
-        .instanceCounts(3, 3);
+        .drawRanges(
+          [0, 3, 3],
+          [3, 6, 3],
+          [0, 3, 3],
+          [3, 6, 3]
+        );
 
         // USE PARALLEL SHADER COMPILATION IF AVAILABLE
         // https://www.khronos.org/registry/webgl/extensions/KHR_parallel_shader_compile/

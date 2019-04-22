@@ -133,54 +133,27 @@ export class VertexArray {
         return this;
     }
 
-    /**
-        Set the number of elements to draw.
-
-        @method
-        @param {...Number} Number of elements to draw. Multiple arguments can 
-            be provided to set up a multi-draw.
-        @return {VertexArray} The VertexArray object.
-    */
-    elementCounts(...counts) {
+    drawRanges(...counts) {
         this.numDraws = counts.length;
-
-        if (this.numElements.length < this.numDraws) {
-            this.numElements = new Int32Array(counts);
-        } else {
-            this.numElements.set(counts);
-        }
 
         if (this.offsets.length < this.numDraws) {
             this.offsets = new Int32Array(this.numDraws);
         }
 
-        this.offsets.set(this.numElements.subarray(0, this.numDraws - 1), 1);
+        if (this.numElements.length < this.numDraws) {
+            this.numElements = new Int32Array(this.numDraws);
+        }
 
         if (this.numInstances.length < this.numDraws) {
             this.numInstances = new Int32Array(this.numDraws);
-            for (let i = 0; i < this.numDraws; ++i) {
-                this.numInstances[i] = 1;
-            }
         }
 
-        return this;
-    }
+        for (let i = 0; i < this.numDraws; ++i) {
+            let count = counts[i];
 
-    /**
-        Set the number of instances to draw.
-
-        @method
-        @param {...Number} Number of instances to draw. Multiple arguments can 
-            be provided to set up a multi-draw.
-        @return {VertexArray} The VertexArray object.
-    */
-    instanceCounts(...counts) {
-        this.numDraws = counts.length;
-
-        if (this.numInstances.length < this.numDraws) {
-            this.numInstances = new Int32Array(counts);
-        } else {
-            this.numInstances.set(counts);
+            this.offsets[i] = count[0];
+            this.numElements[i] = count[1];
+            this.numInstances[i] = count[2] || 1;
         }
 
         return this;

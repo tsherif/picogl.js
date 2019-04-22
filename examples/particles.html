@@ -162,13 +162,13 @@
         .vertexAttributeBuffer(0, positions1)
         .vertexAttributeBuffer(1, velocities1)
         .vertexAttributeBuffer(2, colors, { normalized: true })
-        .elementCounts(50000);
+        .drawRanges([0, 50000]);
 
         let vertexArray2 = app.createVertexArray()
         .vertexAttributeBuffer(0, positions2)
         .vertexAttributeBuffer(1, velocities2)
         .vertexAttributeBuffer(2, colors, { normalized: true })
-        .elementCounts(50000);
+        .drawRanges([0, 50000]);
 
         // TRANSFORM FEEDBACK OBJECTS
         let transformFeedback1 = app.createTransformFeedback()
@@ -213,8 +213,8 @@
         };
 
         window.setDrawRange = (count) => {
-            vertexArray1.elementCounts(count);
-            vertexArray2.elementCounts(count);
+            vertexArray1.drawRanges([0, count]);
+            vertexArray2.drawRanges([0, count]);
         };
 
         // USE PARALLEL SHADER COMPILATION IF AVAILABLE
