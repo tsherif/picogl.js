@@ -133,6 +133,14 @@ export class VertexArray {
         return this;
     }
 
+    /**
+        Set the number of elements to draw.
+
+        @method
+        @param {...Number} Number of elements to draw. Multiple arguments can 
+            be provided to set up a multi-draw.
+        @return {VertexArray} The VertexArray object.
+    */
     elementCounts(...counts) {
         this.numDraws = counts.length;
 
@@ -158,6 +166,14 @@ export class VertexArray {
         return this;
     }
 
+    /**
+        Set the number of instances to draw.
+
+        @method
+        @param {...Number} Number of instances to draw. Multiple arguments can 
+            be provided to set up a multi-draw.
+        @return {VertexArray} The VertexArray object.
+    */
     instanceCounts(...counts) {
         this.numDraws = counts.length;
 
@@ -251,10 +267,12 @@ export class VertexArray {
             this.gl.enableVertexAttribArray(attributeIndex + i);
         }
 
-        if (instanced) {
-            this.numInstances[0] = vertexBuffer.numItems;
-        } else {
-            this.numElements[0] = this.numElements[0] || vertexBuffer.numItems;
+        if (this.numDraws === 1) {
+            if (instanced) {
+                this.numInstances[0] = vertexBuffer.numItems;
+            } else {
+                this.numElements[0] = this.numElements[0] || vertexBuffer.numItems;
+            }
         }
 
         this.gl.bindBuffer(GL.ARRAY_BUFFER, null);

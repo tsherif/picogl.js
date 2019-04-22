@@ -66,6 +66,10 @@
     
     <script type="module">
         import { PicoGL } from "../src/picogl.js";
+
+        if (!testExtension("WEBGL_multi_draw_instanced")) {
+            document.body.innerHTML = 'This example requires extension <b>WEBGL_multi_draw_instanced</b> which is not supported on this system. You may need to enable <b>WebGL Draft Extensions</b> in your browser, via <b><code>chrome://flags</code></b> in Google Chrome, or <b><code>about:config</code></b> in Firefox.';
+        }
        
         let canvas = document.getElementById("gl-canvas");
         canvas.width = window.innerWidth;
