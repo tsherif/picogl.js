@@ -310,8 +310,14 @@
             [shadowProgram, lightProgram, mainProgram],
             [webglImage, cobblesImage]
         ]) => {
-            let webglTexture = app.createTexture2D(webglImage, { flipY: true });
-            let cobblesTexture = app.createTexture2D(cobblesImage, { flipY: true });
+            let webglTexture = app.createTexture2D(webglImage, { 
+                flipY: true,
+                maxAnisotropy: PicoGL.WEBGL_INFO.MAX_TEXTURE_ANISOTROPY 
+            });
+            let cobblesTexture = app.createTexture2D(cobblesImage, { 
+                flipY: true,
+                maxAnisotropy: PicoGL.WEBGL_INFO.MAX_TEXTURE_ANISOTROPY 
+            });
 
             // DRAW CALLS
 

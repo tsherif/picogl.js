@@ -392,7 +392,10 @@
         ]).then(([[cubeProgram, sunProgram, blurProgram, blendProgram], [image]]) => {
             quadVertexShader.delete();
             
-            let texture = app.createTexture2D(image, { flipY: true });
+            let texture = app.createTexture2D(image, { 
+                flipY: true,
+                maxAnisotropy: PicoGL.WEBGL_INFO.MAX_TEXTURE_ANISOTROPY 
+            });
 
             // PREPARE DRAW CALLS
             let drawCall = app.createDrawCall(cubeProgram, cubeArray)

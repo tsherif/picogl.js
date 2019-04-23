@@ -663,7 +663,10 @@
             [updateForceProgram, updateConstraintProgram, updateCollisionProgram, updateNormalProgram, ballProgram, clothProgram],
             [image]
         ]) => {
-            let texture = app.createTexture2D(image);
+            let texture = app.createTexture2D(image, { 
+                flipY: true,
+                maxAnisotropy: PicoGL.WEBGL_INFO.MAX_TEXTURE_ANISOTROPY 
+            });
             
             ///////////////
             // DRAW CALLS

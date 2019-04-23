@@ -130,7 +130,7 @@
             }
         }
 
-        let texture = app.createTexture3D(textureData, TEXTURE_DIMENSIONS, TEXTURE_DIMENSIONS, TEXTURE_DIMENSIONS, { format: PicoGL.RED });
+        let texture = app.createTexture3D(textureData, TEXTURE_DIMENSIONS, TEXTURE_DIMENSIONS, TEXTURE_DIMENSIONS, { format: PicoGL.RED, maxAnisotropy: PicoGL.WEBGL_INFO.MAX_TEXTURE_ANISOTROPY });
 
         // UNIFORM DATA
         let projMatrix = mat4.create();
