@@ -967,10 +967,9 @@ export class App {
         @param {number} [width] Texture width. Required for array or empty data.
         @param {number} [height] Texture height. Required for array or empty data.
         @param {Object} [options] Texture options.
-        @param {GLEnum} [options.type] Type of data stored in the texture. Defaults to UNSIGNED_SHORT
-            if format is DEPTH_COMPONENT, UNSIGNED_BYTE otherwise.
-        @param {GLEnum} [options.format=RGBA] Texture data format.
-        @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
+        @param {GLEnum} [options.internalFormat=RGBA8] Texture data internal format. Must be a sized type.
+        @param {GLEnum} [options.type] Type of data stored in the texture. Default based on 
+            <b>internalFormat</b>.
         @param {boolean} [options.flipY=false] Whether the y-axis should be flipped when unpacking the texture.
         @param {boolean} [options.premultiplyAlpha=false] Whether the alpha channel should be pre-multiplied when unpacking the texture.
         @param {GLEnum} [options.minFilter] Minification filter. Defaults to
@@ -1016,10 +1015,9 @@ export class App {
         @param {number} height Texture height.
         @param {number} size Number of images in the array.
         @param {Object} [options] Texture options.
-         @param {GLEnum} [options.type] Type of data stored in the texture. Defaults to UNSIGNED_SHORT
-            if format is DEPTH_COMPONENT, UNSIGNED_BYTE otherwise.
-        @param {GLEnum} [options.format=RGBA] Texture data format.
-        @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
+        @param {GLEnum} [options.internalFormat=RGBA8] Texture data internal format. Must be a sized type.
+        @param {GLEnum} [options.type] Type of data stored in the texture. Default based on 
+            <b>internalFormat</b>.
         @param {boolean} [options.flipY=false] Whether the y-axis should be flipped when unpacking the texture.
         @param {GLEnum} [options.minFilter] Minification filter. Defaults to
             LINEAR_MIPMAP_NEAREST if image data is provided, NEAREST otherwise.
@@ -1060,10 +1058,9 @@ export class App {
         @param {number} height Texture height.
         @param {number} depth Texture depth.
         @param {Object} [options] Texture options.
-        @param {GLEnum} [options.type] Type of data stored in the texture. Defaults to UNSIGNED_SHORT
-            if format is DEPTH_COMPONENT, UNSIGNED_BYTE otherwise.
-        @param {GLEnum} [options.format=RGBA] Texture data format.
-        @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
+        @param {GLEnum} [options.internalFormat=RGBA8] Texture data internal format. Must be a sized type.
+        @param {GLEnum} [options.type] Type of data stored in the texture. Default based on 
+            <b>internalFormat</b>.
         @param {boolean} [options.flipY=false] Whether the y-axis should be flipped when unpacking the texture.
         @param {GLEnum} [options.minFilter] Minification filter. Defaults to
             LINEAR_MIPMAP_NEAREST if image data is provided, NEAREST otherwise.
@@ -1112,10 +1109,9 @@ export class App {
                 Can be any format that would be accepted by texImage2D.
         @param {number} [options.width] Cubemap side width. Defaults to the width of negX if negX is an image.
         @param {number} [options.height] Cubemap side height. Defaults to the height of negX if negX is an image.
-        @param {GLEnum} [options.type] Type of data stored in the texture. Defaults to UNSIGNED_SHORT
-            if format is DEPTH_COMPONENT, UNSIGNED_BYTE otherwise.
-        @param {GLEnum} [options.format=RGBA] Texture data format.
-        @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
+        @param {GLEnum} [options.internalFormat=RGBA8] Texture data internal format. Must be a sized type.
+        @param {GLEnum} [options.type] Type of data stored in the texture. Default based on 
+            <b>internalFormat</b>.
         @param {boolean} [options.flipY=false] Whether the y-axis should be flipped when unpacking the image.
         @param {boolean} [options.premultiplyAlpha=false] Whether the alpha channel should be pre-multiplied when unpacking the image.
         @param {GLEnum} [options.minFilter] Minification filter. Defaults to
