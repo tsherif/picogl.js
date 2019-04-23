@@ -232,7 +232,7 @@
         utils.addTimerElement();
 
         if (!testExtension("EXT_color_buffer_float")) {
-            document.body.innerHTML = "This example requires extension EXT_color_buffer_float which is not supported on this system."
+            document.body.innerHTML = "This example requires extension <b>EXT_color_buffer_float</b> which is not supported on this system."
         }
 
         const EASING = 0.8;
@@ -423,9 +423,9 @@
                 }
                 
                 if (blurEnabled) {
-                    app.defaultDrawFramebuffer()
+                    // Multi draw seems to require a clear?
+                    app.defaultDrawFramebuffer().clear();
                     blurDrawCall.draw();
-                    
                 }
                 
                 timer.end();

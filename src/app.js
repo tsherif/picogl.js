@@ -71,7 +71,8 @@ export class App {
             uniformBuffers: new Array(WEBGL_INFO.MAX_UNIFORM_BUFFERS),
             freeUniformBufferBases: [],
             drawFramebuffer: null,
-            readFramebuffer: null
+            readFramebuffer: null,
+            extensions: {}
         };
 
         this.clearBits = this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT| this.gl.STENCIL_BUFFER_BIT;
@@ -85,7 +86,6 @@ export class App {
         this.contextRestoredHandler = null;
 
         this.initExtensions();
-
 
         this.canvas.addEventListener("webglcontextlost", (e) => {
             e.preventDefault();
@@ -1209,6 +1209,7 @@ export class App {
 
         // Draft extensions
         this.gl.getExtension("KHR_parallel_shader_compile");
+        this.state.extensions.multiDrawInstanced = this.gl.getExtension("WEBGL_multi_draw_instanced");
     }
 
 }
