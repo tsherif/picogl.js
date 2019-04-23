@@ -1034,6 +1034,7 @@ export class App {
         @param {GLEnum} [options.maxLevel] Maximum mipmap level.
         @param {GLEnum} [options.minLOD] Mimimum level of detail.
         @param {GLEnum} [options.maxLOD] Maximum level of detail.
+        @param {GLEnum} [options.maxAnisotropy] Maximum anisotropy in filtering.
         @return {Texture} New Texture object.
     */
     createTextureArray(image, width, height, depth, options) {
@@ -1077,6 +1078,7 @@ export class App {
         @param {GLEnum} [options.maxLevel] Maximum mipmap level.
         @param {GLEnum} [options.minLOD] Mimimum level of detail.
         @param {GLEnum} [options.maxLOD] Maximum level of detail.
+        @param {GLEnum} [options.maxAnisotropy] Maximum anisotropy in filtering.
         @return {Texture} New Texture object.
     */
     createTexture3D(image, width, height, depth, options) {
@@ -1128,6 +1130,7 @@ export class App {
         @param {GLEnum} [options.maxLevel] Maximum mipmap level.
         @param {GLEnum} [options.minLOD] Mimimum level of detail.
         @param {GLEnum} [options.maxLOD] Maximum level of detail.
+        @param {GLEnum} [options.maxAnisotropy] Maximum anisotropy in filtering.
         @return {Cubemap} New Cubemap object.
     */
     createCubemap(options) {
