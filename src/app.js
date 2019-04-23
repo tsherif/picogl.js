@@ -985,6 +985,7 @@ export class App {
         @param {GLEnum} [options.maxLevel] Maximum mipmap level.
         @param {GLEnum} [options.minLOD] Mimimum level of detail.
         @param {GLEnum} [options.maxLOD] Maximum level of detail.
+        @param {GLEnum} [options.maxAnisotropy] Maximum anisotropy in filtering.
         @return {Texture} New Texture object.
     */
     createTexture2D(image, width, height, options) {
@@ -1204,6 +1205,7 @@ export class App {
         this.gl.getExtension("WEBGL_compressed_texture_pvrtc");
         this.gl.getExtension("EXT_disjoint_timer_query_webgl2");
         this.gl.getExtension("EXT_disjoint_timer_query");
+        this.gl.getExtension("EXT_texture_filter_anisotropic");
 
         this.contextLostExt = this.gl.getExtension("WEBGL_lose_context");
 

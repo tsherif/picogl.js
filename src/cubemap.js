@@ -23,6 +23,7 @@
 
 import { 
     GL,
+    WEBGL_INFO,
     TEXTURE_FORMAT_DEFAULTS,
     COMPRESSED_TEXTURE_TYPES,
     DUMMY_OBJECT,
@@ -87,7 +88,8 @@ export class Cubemap {
             minLOD = null,
             maxLOD = null,
             baseLevel = null,
-            maxLevel = null
+            maxLevel = null,
+            maxAnisotropy = 1
         } = options;
         
         this.width = width;
@@ -104,6 +106,7 @@ export class Cubemap {
         this.maxLOD = maxLOD;
         this.baseLevel = baseLevel;
         this.maxLevel = maxLevel;
+        this.maxAnisotropy = Math.min(maxAnisotropy, WEBGL_INFO.MAX_TEXTURE_ANISOTROPY);
         this.mipmaps = (minFilter === GL.LINEAR_MIPMAP_NEAREST || minFilter === GL.LINEAR_MIPMAP_LINEAR);
         this.miplevelsProvided = arrayData && options.negX.length > 1;
         this.levels = this.mipmaps ? Math.floor(Math.log2(Math.min(this.width, this.height))) + 1 : 1;
@@ -146,17 +149,25 @@ export class Cubemap {
         this.gl.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_WRAP_T, this.wrapT);
         this.gl.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_COMPARE_FUNC, this.compareFunc);
         this.gl.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_COMPARE_MODE, this.compareMode);
+        
         if (this.baseLevel !== null) {
             this.gl.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_BASE_LEVEL, this.baseLevel);
         }
+        
         if (this.maxLevel !== null) {
             this.gl.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_MAX_LEVEL, this.maxLevel);
         }
+        
         if (this.minLOD !== null) {
             this.gl.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_MIN_LOD, this.minLOD);
         }
+        
         if (this.maxLOD !== null) {
             this.gl.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_MAX_LOD, this.maxLOD);
+        }
+
+        if (this.maxAnisotropy > 1) {
+            this.gl.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_MAX_ANISOTROPY_EXT, this.maxAnisotropy);
         }
 
         this.gl.texStorage2D(GL.TEXTURE_CUBE_MAP, this.levels, this.internalFormat, this.width, this.height);

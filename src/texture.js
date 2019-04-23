@@ -23,6 +23,7 @@
 
 import { 
     GL,
+    WEBGL_INFO,
     TEXTURE_FORMAT_DEFAULTS,
     COMPRESSED_TEXTURE_TYPES,
     DUMMY_OBJECT,
@@ -94,6 +95,7 @@ export class Texture {
             maxLOD = null,
             baseLevel = null,
             maxLevel = null,
+            maxAnisotropy = 1,
             flipY = false,
             premultiplyAlpha = false
         } = options;
@@ -109,6 +111,7 @@ export class Texture {
         this.maxLOD = maxLOD;
         this.baseLevel = baseLevel;
         this.maxLevel = maxLevel;
+        this.maxAnisotropy = Math.min(maxAnisotropy, WEBGL_INFO.MAX_TEXTURE_ANISOTROPY);
         this.flipY = flipY;
         this.premultiplyAlpha = premultiplyAlpha;
         this.mipmaps = (minFilter === GL.LINEAR_MIPMAP_NEAREST || minFilter === GL.LINEAR_MIPMAP_LINEAR);
@@ -173,18 +176,25 @@ export class Texture {
         this.gl.texParameteri(this.binding, GL.TEXTURE_COMPARE_MODE, this.compareMode);
         this.gl.pixelStorei(GL.UNPACK_FLIP_Y_WEBGL, this.flipY);
         this.gl.pixelStorei(GL.UNPACK_PREMULTIPLY_ALPHA_WEBGL, this.premultiplyAlpha);
+        
         if (this.minLOD !== null) {
             this.gl.texParameterf(this.binding, GL.TEXTURE_MIN_LOD, this.minLOD);
         }
+        
         if (this.maxLOD !== null) {
             this.gl.texParameterf(this.binding, GL.TEXTURE_MAX_LOD, this.maxLOD);
         }
+        
         if (this.baseLevel !== null) {
             this.gl.texParameteri(this.binding, GL.TEXTURE_BASE_LEVEL, this.baseLevel);
         }
-
+        
         if (this.maxLevel !== null) {
             this.gl.texParameteri(this.binding, GL.TEXTURE_MAX_LEVEL, this.maxLevel);
+        }
+        
+        if (this.maxAnisotropy > 1) {
+            this.gl.texParameteri(this.binding, GL.TEXTURE_MAX_ANISOTROPY_EXT, this.maxAnisotropy);
         }
 
         let levels;
