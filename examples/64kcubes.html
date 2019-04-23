@@ -168,7 +168,10 @@
             app.createPrograms([vsSource, fsSource]),
             utils.loadImages(["img/webgl-logo.png"])
         ]).then(([[program], [image]]) => {
-            let texture = app.createTexture2D(image, { flipY: true });
+            let texture = app.createTexture2D(image, { 
+                flipY: true,
+                maxAnisotropy: PicoGL.WEBGL_INFO.MAX_TEXTURE_ANISOTROPY 
+            });
 
             // SINGLE DRAW CALL FOR ALL BOXES
             let boxes = new Array(NUM_BOXES);

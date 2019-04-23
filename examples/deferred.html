@@ -233,7 +233,10 @@
             [geoProgram, mainProgram],
             [image]
         ]) => {
-            let texture = app.createTexture2D(image, { flipY: true });
+            let texture = app.createTexture2D(image, { 
+                flipY: true,
+                maxAnisotropy: PicoGL.WEBGL_INFO.MAX_TEXTURE_ANISOTROPY 
+            });
 
             // BOX DESCRIPTIONS FOR GEO PASS
             let boxes = [

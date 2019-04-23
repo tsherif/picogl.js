@@ -331,7 +331,10 @@
             [drawProgram, boundingBoxProgram, hudProgram],
             [image]
         ]) => {
-            let texture = app.createTexture2D(image, { flipY: true });
+            let texture = app.createTexture2D(image, { 
+                flipY: true,
+                maxAnisotropy: PicoGL.WEBGL_INFO.MAX_TEXTURE_ANISOTROPY 
+            });
             
             // Object definitions
             const GRID_DIM = 6;

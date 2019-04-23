@@ -175,7 +175,10 @@
             [program],
             [image]
         ]) => {
-            let texture = app.createTexture2D(image, { flipY: true });
+            let texture = app.createTexture2D(image, { 
+                flipY: true,
+                maxAnisotropy: PicoGL.WEBGL_INFO.MAX_TEXTURE_ANISOTROPY 
+            });
 
             // SET UP DRAW CALL
             let drawCall = app.createDrawCall(program, boxArray)

@@ -338,7 +338,10 @@
             [program, noVelocityProgram, blurProgram],
             [image]
         ]) => {
-            let texture = app.createTexture2D(image, { flipY: true });
+            let texture = app.createTexture2D(image, { 
+                flipY: true,
+                maxAnisotropy: PicoGL.WEBGL_INFO.MAX_TEXTURE_ANISOTROPY 
+            });
 
             const NUM_SPHERES = 10;
             let spheres = new Array(NUM_SPHERES);

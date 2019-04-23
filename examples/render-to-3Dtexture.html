@@ -155,7 +155,9 @@
         let vsSource =  document.getElementById("vertex-draw").text.trim();
         let fsSource =  document.getElementById("fragment-draw").text.trim();
         
-        let colorTarget = app.createTexture3D(DIMENSIONS, DIMENSIONS, DIMENSIONS);
+        let colorTarget = app.createTexture3D(DIMENSIONS, DIMENSIONS, DIMENSIONS, {
+            maxAnisotropy: PicoGL.WEBGL_INFO.MAX_TEXTURE_ANISOTROPY 
+        });
 
         let framebuffer = app.createFramebuffer()
         .colorTarget(0, colorTarget);
@@ -253,7 +255,10 @@
             [tex3DProgram, program],
             [image]
         ]) => {
-            let texture = app.createTexture2D(image, { flipY: true })
+            let texture = app.createTexture2D(image, { 
+                flipY: true,
+                maxAnisotropy: PicoGL.WEBGL_INFO.MAX_TEXTURE_ANISOTROPY 
+            });
 
             // SET UP DRAW CALL
             let tex3DDrawCall = app.createDrawCall(tex3DProgram, boxArray)

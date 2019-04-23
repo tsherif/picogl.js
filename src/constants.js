@@ -591,6 +591,10 @@ export const GL = {
     TIMESTAMP_EXT: 0x8E28,
     GPU_DISJOINT_EXT: 0x8FBB,
 
+    // https://www.khronos.org/registry/webgl/extensions/EXT_texture_filter_anisotropic/
+    TEXTURE_MAX_ANISOTROPY_EXT: 0x84FE,
+    MAX_TEXTURE_MAX_ANISOTROPY_EXT: 0x84FF,
+
     // https://www.khronos.org/registry/webgl/extensions/KHR_parallel_shader_compile/
     COMPLETION_STATUS_KHR: 0x91B1,
 

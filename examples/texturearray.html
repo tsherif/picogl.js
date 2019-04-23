@@ -247,7 +247,7 @@
             [program],
             imageArray
         ]) => {
-            let texture = app.createTextureArray(imageArray.data, imageArray.width, imageArray.height, imageArray.length);
+            let texture = app.createTextureArray(imageArray.data, imageArray.width, imageArray.height, imageArray.length, { maxAnisotropy: PicoGL.WEBGL_INFO.MAX_TEXTURE_ANISOTROPY });
 
             // SET UP DRAW CALL
             let drawCall = app.createDrawCall(program, boxArray)
