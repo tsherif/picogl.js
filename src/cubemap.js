@@ -24,7 +24,7 @@
 import { 
     GL,
     WEBGL_INFO,
-    TEXTURE_FORMAT_DEFAULTS,
+    TEXTURE_FORMATS,
     COMPRESSED_TEXTURE_TYPES,
     DUMMY_OBJECT,
     DUMMY_UNIT_ARRAY
@@ -47,25 +47,25 @@ import {
 export class Cubemap {
 
     constructor(gl, appState, options) {
-        let defaultType = options.format === GL.DEPTH_COMPONENT ? GL.UNSIGNED_SHORT : GL.UNSIGNED_BYTE;
 
         this.gl = gl;
         this.texture = null;
-        this.type = options.type !== undefined ? options.type : defaultType;
         this.appState = appState;
 
-        this.format = null;
-        this.internalFormat = null;
         this.compressed = Boolean(COMPRESSED_TEXTURE_TYPES[options.format] || COMPRESSED_TEXTURE_TYPES[options.internalFormat]);
         
         if (this.compressed) {
             // For compressed textures, just need to provide one of format, internalFormat.
             // The other will be the same.
-            this.format = options.format !== undefined ? options.format : options.internalFormat;
-            this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : options.format;
+            this.internalFormat = options.internalFormat;
+            this.format = options.internalFormat;
+            this.type = GL.UNSIGNED_BYTE;
         } else {
-            this.format = options.format !== undefined ? options.format : gl.RGBA;
-            this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : TEXTURE_FORMAT_DEFAULTS[this.type][this.format];
+            this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : GL.RGBA8;
+
+            let formatInfo = TEXTURE_FORMATS[this.internalFormat];
+            this.format = formatInfo[0];
+            this.type = options.type !== undefined ? options.type : formatInfo[1];
         }
         
         // -1 indicates unbound
