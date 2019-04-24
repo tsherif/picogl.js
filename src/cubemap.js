@@ -27,7 +27,9 @@ import {
     TEXTURE_FORMATS,
     COMPRESSED_TEXTURE_TYPES,
     DUMMY_OBJECT,
-    DUMMY_UNIT_ARRAY
+    DUMMY_UNIT_ARRAY,
+    // DEPRECATED
+    TEXTURE_FORMAT_DEFAULTS
 } from "./constants.js";
 
 /**
@@ -52,8 +54,23 @@ export class Cubemap {
         this.texture = null;
         this.appState = appState;
 
-        this.compressed = Boolean(COMPRESSED_TEXTURE_TYPES[options.format] || COMPRESSED_TEXTURE_TYPES[options.internalFormat]);
+        this.compressed = COMPRESSED_TEXTURE_TYPES[options.internalFormat];
         
+        if (options.format !== undefined) {
+            console.warn("Cubemap option 'format' is deprecated. Use 'internalFormat' with a sized format instead.");
+            this.compressed = Boolean(COMPRESSED_TEXTURE_TYPES[options.format]);
+            if (options.type === undefined) {
+                options.type = options.format === GL.DEPTH_COMPONENT ? GL.UNSIGNED_SHORT : GL.UNSIGNED_BYTE;
+            }
+            if (options.internalFormat === undefined) {
+                if (this.compressed) {
+                    options.internalFormat = options.format;
+                } else {
+                    options.internalFormat = TEXTURE_FORMAT_DEFAULTS[options.type][options.format];
+                }
+            }
+        }
+
         if (this.compressed) {
             // For compressed textures, just need to provide one of format, internalFormat.
             // The other will be the same.
