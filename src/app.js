@@ -854,7 +854,7 @@ export class App {
         @return {Shader} New Shader object.
     */
     createShader(type, source) {
-        return new Shader(this.gl, type, source);
+        return new Shader(this.gl, this.state, type, source);
     }
 
     /**
@@ -1205,6 +1205,7 @@ export class App {
         this.gl.getExtension("EXT_disjoint_timer_query");
         this.gl.getExtension("EXT_texture_filter_anisotropic");
 
+        this.state.extensions.debugShaders = this.gl.getExtension("WEBGL_debug_shaders");
         this.contextLostExt = this.gl.getExtension("WEBGL_lose_context");
 
         // Draft extensions

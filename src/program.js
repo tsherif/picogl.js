@@ -92,6 +92,40 @@ export class Program {
     }
 
     /**
+        Get the vertex shader source translated for the platform's API.
+
+        @method
+        @return {String} The translated vertex shader source.
+    */
+    translatedVertexSource() {
+        if (this.vertexShader) {
+            return this.vertexShader.translatedSource();
+        } else {
+            let vertexShader = new Shader(this.gl, this.appState, GL.VERTEX_SHADER, this.vertexSource);
+            let translatedSource = vertexShader.translatedSource();
+            vertexShader.delete();
+            return translatedSource;
+        }
+    }
+
+    /**
+        Get the fragment shader source translated for the platform's API.
+
+        @method
+        @return {String} The translated fragment shader source.
+    */
+    translatedFragmentSource() {
+        if (this.fragmentShader) {
+            return this.fragmentShader.translatedSource();
+        } else {
+            let fragmentShader = new Shader(this.gl, this.appState, GL.FRAGMENT_SHADER, this.fragmentSource);
+            let translatedSource = fragmentShader.translatedSource();
+            fragmentShader.delete();
+            return translatedSource;
+        }
+    }
+
+    /**
         Delete this program.
 
         @method
@@ -123,11 +157,11 @@ export class Program {
         this.samplerCount = 0;
 
         if (this.vertexSource) {
-            this.vertexShader = new Shader(this.gl, GL.VERTEX_SHADER, this.vertexSource);
+            this.vertexShader = new Shader(this.gl, this.appState, GL.VERTEX_SHADER, this.vertexSource);
         }
 
         if (this.fragmentSource) {
-            this.fragmentShader = new Shader(this.gl, GL.FRAGMENT_SHADER, this.fragmentSource);
+            this.fragmentShader = new Shader(this.gl, this.appState, GL.FRAGMENT_SHADER, this.fragmentSource);
         }
 
         let program = this.gl.createProgram();
