@@ -78,14 +78,13 @@ export class DrawCall {
         this.numDraws = 1;
 
         if (primitive !== undefined) {
-            console.warn("Primitive argument to 'App.createDrawCall' is deprecated and will be removed.");
-            console.warn("Use 'DrawCall.primitive' instead.");
+            console.warn("Primitive argument to 'App.createDrawCall' is deprecated and will be removed. Use 'DrawCall.primitive' instead.");
             this.primitive(primitive);
         }
     }
 
     /**
-        Set the current draw primitive this draw call
+        Set the current draw primitive for this draw call.
 
         @method
         @param {GLEnum} primitive Primitive to draw.
@@ -98,7 +97,7 @@ export class DrawCall {
     }
 
     /**
-        Set the current TransformFeedback object for draw
+        Set the current TransformFeedback object for draw.
 
         @method
         @param {TransformFeedback} transformFeedback Transform Feedback to set.
