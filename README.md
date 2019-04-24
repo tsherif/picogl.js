@@ -91,7 +91,7 @@ PicoGL.js simplifies usage of some more complex WebGL 2 features, such as multip
     let colorTarget0 = app.createTexture2D(app.width, app.height);
     let colorTarget1 = app.createTexture2D(app.width, app.height);
     let depthTarget = app.createTexture2D(app.width, app.height, {
-        format: PicoGL.DEPTH_COMPONENT
+        internalFormat: PicoGL.DEPTH_COMPONENT16
     });
 
 

@@ -2540,6 +2540,45 @@
 
         <tr>
             
+                <td class="name"><code>internalFormat</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">GLEnum</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    RGBA8
+                
+                </td>
+            
+
+            <td class="description last">Texture data internal format. Must be a sized format.</td>
+        </tr>
+
+    
+
+        <tr>
+            
                 <td class="name"><code>type</code></td>
             
 
@@ -2570,86 +2609,8 @@
                 </td>
             
 
-            <td class="description last">Type of data stored in the texture. Defaults to UNSIGNED_SHORT
-            if format is DEPTH_COMPONENT, UNSIGNED_BYTE otherwise.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>format</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">GLEnum</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    RGBA
-                
-                </td>
-            
-
-            <td class="description last">Texture data format.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>internalFormat</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">GLEnum</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    RGBA
-                
-                </td>
-            
-
-            <td class="description last">Texture data internal format.</td>
+            <td class="description last">Type of data stored in the texture. Default based on 
+            <b>internalFormat</b>.</td>
         </tr>
 
     
@@ -3111,6 +3072,43 @@
         </tr>
 
     
+
+        <tr>
+            
+                <td class="name"><code>maxAnisotropy</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">GLEnum</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">Maximum anisotropy in filtering.</td>
+        </tr>
+
+    
     </tbody>
 </table>
 
@@ -3211,7 +3209,7 @@
     
 
     
-    <h4 class="name" id="createDrawCall"><span class="type-signature"></span>createDrawCall<span class="signature">(program, vertexArray, primitive<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="DrawCall.html">DrawCall</a>}</span></h4>
+    <h4 class="name" id="createDrawCall"><span class="type-signature"></span>createDrawCall<span class="signature">(program, vertexArray<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="DrawCall.html">DrawCall</a>}</span></h4>
     
 
     
@@ -3311,41 +3309,6 @@
             
                 <td class="attributes">
                 
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last">Vertex data to use for drawing.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>primitive</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">GLEnum</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
                     &lt;optional><br>
                 
 
@@ -3358,12 +3321,12 @@
             
                 <td class="default">
                 
-                    TRIANGLES
+                    null
                 
                 </td>
             
 
-            <td class="description last">Type of primitive to draw.</td>
+            <td class="description last">Vertex data to use for drawing.</td>
         </tr>
 
     
@@ -3404,7 +3367,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1192">line 1192</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1191">line 1191</a>
     </li></ul></dd>
     
 
@@ -5600,6 +5563,45 @@
 
         <tr>
             
+                <td class="name"><code>internalFormat</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">GLEnum</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    RGBA8
+                
+                </td>
+            
+
+            <td class="description last">Texture data internal format. Must be a sized format.</td>
+        </tr>
+
+    
+
+        <tr>
+            
                 <td class="name"><code>type</code></td>
             
 
@@ -5630,86 +5632,8 @@
                 </td>
             
 
-            <td class="description last">Type of data stored in the texture. Defaults to UNSIGNED_SHORT
-            if format is DEPTH_COMPONENT, UNSIGNED_BYTE otherwise.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>format</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">GLEnum</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    RGBA
-                
-                </td>
-            
-
-            <td class="description last">Texture data format.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>internalFormat</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">GLEnum</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    RGBA
-                
-                </td>
-            
-
-            <td class="description last">Texture data internal format.</td>
+            <td class="description last">Type of data stored in the texture. Default based on 
+            <b>internalFormat</b>.</td>
         </tr>
 
     
@@ -6171,6 +6095,43 @@
         </tr>
 
     
+
+        <tr>
+            
+                <td class="name"><code>maxAnisotropy</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">GLEnum</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">Maximum anisotropy in filtering.</td>
+        </tr>
+
+    
     </tbody>
 </table>
 
@@ -6502,6 +6463,45 @@
 
         <tr>
             
+                <td class="name"><code>internalFormat</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">GLEnum</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    RGBA8
+                
+                </td>
+            
+
+            <td class="description last">Texture data internal format. Must be a sized format.</td>
+        </tr>
+
+    
+
+        <tr>
+            
                 <td class="name"><code>type</code></td>
             
 
@@ -6532,86 +6532,8 @@
                 </td>
             
 
-            <td class="description last">Type of data stored in the texture. Defaults to UNSIGNED_SHORT
-            if format is DEPTH_COMPONENT, UNSIGNED_BYTE otherwise.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>format</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">GLEnum</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    RGBA
-                
-                </td>
-            
-
-            <td class="description last">Texture data format.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>internalFormat</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">GLEnum</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    RGBA
-                
-                </td>
-            
-
-            <td class="description last">Texture data internal format.</td>
+            <td class="description last">Type of data stored in the texture. Default based on 
+            <b>internalFormat</b>.</td>
         </tr>
 
     
@@ -7070,6 +6992,43 @@
             
 
             <td class="description last">Maximum level of detail.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>maxAnisotropy</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">GLEnum</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">Maximum anisotropy in filtering.</td>
         </tr>
 
     
@@ -7404,6 +7363,45 @@
 
         <tr>
             
+                <td class="name"><code>internalFormat</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">GLEnum</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    RGBA8
+                
+                </td>
+            
+
+            <td class="description last">Texture data internal format. Must be a sized format.</td>
+        </tr>
+
+    
+
+        <tr>
+            
                 <td class="name"><code>type</code></td>
             
 
@@ -7434,86 +7432,8 @@
                 </td>
             
 
-            <td class="description last">Type of data stored in the texture. Defaults to UNSIGNED_SHORT
-            if format is DEPTH_COMPONENT, UNSIGNED_BYTE otherwise.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>format</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">GLEnum</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    RGBA
-                
-                </td>
-            
-
-            <td class="description last">Texture data format.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>internalFormat</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">GLEnum</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    RGBA
-                
-                </td>
-            
-
-            <td class="description last">Texture data internal format.</td>
+            <td class="description last">Type of data stored in the texture. Default based on 
+            <b>internalFormat</b>.</td>
         </tr>
 
     
@@ -7972,6 +7892,43 @@
             
 
             <td class="description last">Maximum level of detail.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>maxAnisotropy</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">GLEnum</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">Maximum anisotropy in filtering.</td>
         </tr>
 
     
@@ -13894,7 +13851,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Tue Apr 16 2019 23:08:43 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Apr 24 2019 08:40:11 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>
