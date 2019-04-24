@@ -786,3 +786,25 @@ export const WEBGL_INFO = {};
 export const DUMMY_UNIT_ARRAY = new Array(1);
 
 export const DUMMY_OBJECT = {};
+
+// DEPRECATED
+export const TEXTURE_FORMAT_DEFAULTS = {
+    [GL.UNSIGNED_BYTE]: {
+        [GL.RED]: GL.R8,
+        [GL.RG]: GL.RG8,
+        [GL.RGB]: GL.RGB8,
+        [GL.RGBA]: GL.RGBA8
+    },
+
+    [GL.UNSIGNED_SHORT]: {
+        [GL.DEPTH_COMPONENT]: GL.DEPTH_COMPONENT16
+    },
+
+    [GL.FLOAT]: {
+        [GL.RED]: GL.R16F,
+        [GL.RG]: GL.RG16F,
+        [GL.RGB]: GL.RGB16F,
+        [GL.RGBA]: GL.RGBA16F,
+        [GL.DEPTH_COMPONENT]: GL.DEPTH_COMPONENT32F
+    }
+};
