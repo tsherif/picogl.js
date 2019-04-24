@@ -68,7 +68,7 @@ export class Texture {
         this.compressed = Boolean(COMPRESSED_TEXTURE_TYPES[options.internalFormat]);
         
         if (options.format !== undefined) {
-            console.warn("Texture option 'format' is deprecated. Use 'internalFormat' with a sized format instead.");
+            console.warn("Texture option 'format' is deprecated and will be removed. Use 'internalFormat' with a sized format instead.");
             this.compressed = Boolean(COMPRESSED_TEXTURE_TYPES[options.format]);
             if (options.type === undefined) {
                 options.type = options.format === GL.DEPTH_COMPONENT ? GL.UNSIGNED_SHORT : GL.UNSIGNED_BYTE;

@@ -967,7 +967,7 @@ export class App {
         @param {number} [width] Texture width. Required for array or empty data.
         @param {number} [height] Texture height. Required for array or empty data.
         @param {Object} [options] Texture options.
-        @param {GLEnum} [options.internalFormat=RGBA8] Texture data internal format. Must be a sized type.
+        @param {GLEnum} [options.internalFormat=RGBA8] Texture data internal format. Must be a sized format.
         @param {GLEnum} [options.type] Type of data stored in the texture. Default based on 
             <b>internalFormat</b>.
         @param {boolean} [options.flipY=false] Whether the y-axis should be flipped when unpacking the texture.
@@ -1015,7 +1015,7 @@ export class App {
         @param {number} height Texture height.
         @param {number} size Number of images in the array.
         @param {Object} [options] Texture options.
-        @param {GLEnum} [options.internalFormat=RGBA8] Texture data internal format. Must be a sized type.
+        @param {GLEnum} [options.internalFormat=RGBA8] Texture data internal format. Must be a sized format.
         @param {GLEnum} [options.type] Type of data stored in the texture. Default based on 
             <b>internalFormat</b>.
         @param {boolean} [options.flipY=false] Whether the y-axis should be flipped when unpacking the texture.
@@ -1058,7 +1058,7 @@ export class App {
         @param {number} height Texture height.
         @param {number} depth Texture depth.
         @param {Object} [options] Texture options.
-        @param {GLEnum} [options.internalFormat=RGBA8] Texture data internal format. Must be a sized type.
+        @param {GLEnum} [options.internalFormat=RGBA8] Texture data internal format. Must be a sized format.
         @param {GLEnum} [options.type] Type of data stored in the texture. Default based on 
             <b>internalFormat</b>.
         @param {boolean} [options.flipY=false] Whether the y-axis should be flipped when unpacking the texture.
@@ -1109,7 +1109,7 @@ export class App {
                 Can be any format that would be accepted by texImage2D.
         @param {number} [options.width] Cubemap side width. Defaults to the width of negX if negX is an image.
         @param {number} [options.height] Cubemap side height. Defaults to the height of negX if negX is an image.
-        @param {GLEnum} [options.internalFormat=RGBA8] Texture data internal format. Must be a sized type.
+        @param {GLEnum} [options.internalFormat=RGBA8] Texture data internal format. Must be a sized format.
         @param {GLEnum} [options.type] Type of data stored in the texture. Default based on 
             <b>internalFormat</b>.
         @param {boolean} [options.flipY=false] Whether the y-axis should be flipped when unpacking the image.
