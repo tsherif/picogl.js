@@ -261,8 +261,7 @@
         
         let colorTarget = app.createTexture2D(app.width, app.height);
         let velocityTarget = app.createTexture2D(app.width, app.height, { 
-            type: PicoGL.FLOAT,
-            format: PicoGL.RG
+            interalFormat: PicoGL.RG16
         });
         let depthTarget = app.createRenderbuffer(app.width, app.height, PicoGL.DEPTH_COMPONENT16);
         let framebuffer = app.createFramebuffer()

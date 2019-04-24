@@ -182,8 +182,6 @@
         let shadowVShader = app.createShader(PicoGL.VERTEX_SHADER, shadowVsSource);
 
         let shadowTarget = app.createCubemap({
-            format: PicoGL.RED,
-            type: PicoGL.FLOAT,
             internalFormat: PicoGL.R16F,
             width: CUBEMAP_DIM, 
             height: CUBEMAP_DIM 

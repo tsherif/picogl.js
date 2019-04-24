@@ -214,7 +214,7 @@
         let colorTargetA = app.createTexture2D(app.width, app.height);
         let colorTargetB = app.createTexture2D(app.width, app.height);
         let depthTarget = app.createTexture2D(app.width, app.height, {
-            format: PicoGL.DEPTH_COMPONENT
+            internalFormat: PicoGL.DEPTH_COMPONENT16
         });
 
         let boxBuffer = app.createFramebuffer().colorTarget(0, colorTargetA).depthTarget(depthTarget);
