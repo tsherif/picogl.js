@@ -595,6 +595,10 @@ export const GL = {
     TEXTURE_MAX_ANISOTROPY_EXT: 0x84FE,
     MAX_TEXTURE_MAX_ANISOTROPY_EXT: 0x84FF,
 
+    // https://www.khronos.org/registry/webgl/extensions/WEBGL_debug_renderer_info/
+    UNMASKED_VENDOR_WEBGL: 0x9245,
+    UNMASKED_RENDERER_WEBGL: 0x9246,
+
     // https://www.khronos.org/registry/webgl/extensions/KHR_parallel_shader_compile/
     COMPLETION_STATUS_KHR: 0x91B1,
 
