@@ -267,7 +267,8 @@
 
             let startTime = performance.now();
 
-            let drawCall = app.createDrawCall(program, pointArray, PicoGL.POINTS)
+            let drawCall = app.createDrawCall(program, pointArray)
+            .primitive(PicoGL.POINTS)
             .texture("tex", colorTarget)
             .uniform("uMVP", mvpMatrix);;
 

@@ -274,10 +274,12 @@
                 maxAnisotropy: PicoGL.WEBGL_INFO.MAX_TEXTURE_ANISOTROPY 
             });
 
-            let updateDrawCallA = app.createDrawCall(updateProgram, updateVertexArrayA, PicoGL.POINTS)
+            let updateDrawCallA = app.createDrawCall(updateProgram, updateVertexArrayA)
+            .primitive(PicoGL.POINTS)
             .transformFeedback(transformFeedbackB);
 
-            let updateDrawCallB = app.createDrawCall(updateProgram, updateVertexArrayB, PicoGL.POINTS)
+            let updateDrawCallB = app.createDrawCall(updateProgram, updateVertexArrayB)
+            .primitive(PicoGL.POINTS)
             .transformFeedback(transformFeedbackA);
 
             // SINGLE DRAW CALL FOR ALL BOXES

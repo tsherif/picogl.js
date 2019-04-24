@@ -158,7 +158,8 @@
         // https://www.khronos.org/registry/webgl/extensions/KHR_parallel_shader_compile/
         app.createPrograms([vsSource, fsSource]).then(([program]) => {
             // SET UP DRAW CALL
-            let drawCall = app.createDrawCall(program, pointArray, PicoGL.POINTS)
+            let drawCall = app.createDrawCall(program, pointArray)
+            .primitive(PicoGL.POINTS)
             .texture("tex", texture)
             .uniform("uMVP", mvpMatrix);
 

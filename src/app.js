@@ -1185,8 +1185,7 @@ export class App {
 
         @method
         @param {Program} program The program to use for this DrawCall.
-        @param {VertexArray} vertexArray Vertex data to use for drawing.
-        @param {GLEnum} [primitive=TRIANGLES] Type of primitive to draw.
+        @param {VertexArray} [vertexArray=null] Vertex data to use for drawing.
         @return {DrawCall} New DrawCall object.
     */
     createDrawCall(program, vertexArray, primitive) {

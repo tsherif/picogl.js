@@ -244,11 +244,13 @@
         ).then(([drawProgram, updateProgram]) => {
             // CREATE DRAW CALLS FOR SIMULATION
             // A BUFFERS AS INPUT, UPDATE B BUFFERS
-            let updateDrawCallA = app.createDrawCall(updateProgram, updateArrayA, PicoGL.POINTS)
+            let updateDrawCallA = app.createDrawCall(updateProgram, updateArrayA)
+            .primitive(PicoGL.POINTS)
             .transformFeedback(transformFeedbackB);
 
             // B BUFFERS AS INPUT, UPDATE A BUFFERS
-            let updateDrawCallB = app.createDrawCall(updateProgram, updateArrayB, PicoGL.POINTS)
+            let updateDrawCallB = app.createDrawCall(updateProgram, updateArrayB)
+            .primitive(PicoGL.POINTS)
             .transformFeedback(transformFeedbackA);
 
             // DRAW USING CONTENTS OF A BUFFERS
