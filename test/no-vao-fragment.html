@@ -44,11 +44,11 @@
         out vec4 fragColor;
         void main() {
             fragColor = vec4(0.2, 0.2, 0.2, 1.0);
-            if (gl_FragCoord.x < 10.0) {
-                fragColor = vec4(1.0, 0.0, 0.0, 1.0);
+            if (gl_FragCoord.x < 50.0) {
+                fragColor += vec4(1.0, 0.0, 0.0, 1.0);
             }
-            if (gl_FragCoord.y < 10.0) { // to understand direction of y
-                fragColor = vec4(0.0, 0.0, 1.0, 1.0);
+            if (gl_FragCoord.y < 50.0) { // to understand direction of y
+                fragColor += vec4(0.0, 0.0, 1.0, 1.0);
             }
         }
     </script>
