@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>PicoGL.js: Triangle</title>
+    <title>PicoGL.js: Fragment shader w/o VAO</title>
     <meta charset="utf-8">
     <link rel="stylesheet" href="../site/css/picogl-example.css"> 
 </head>
@@ -31,27 +31,25 @@
     <canvas id="gl-canvas"></canvas>
     <script type="shader/vs" id="vs">
         #version 300 es
-                
-        out vec3 vColor; 
         void main() {
-            int col = gl_VertexID % 2;
-            int row = gl_VertexID / 2;
-            float x = (float(row) - 0.5) * 0.8;
-            float y = (float(col) - 0.5) * 0.8;
-            vColor = vec3(row, col, 1.0);
+            float x = gl_VertexID < 2 ? -1.0 : 1.0;
+            float y = gl_VertexID % 2 == 0 ? -1.0 : 1.0;
             gl_Position = vec4(x, y, 0.0, 1.0);
-            gl_PointSize = 40.0;
         }
     </script>
     <script type="shader/fs" id="fs">
         #version 300 es
         precision highp float;
         
-        in vec3 vColor;
-        
         out vec4 fragColor;
         void main() {
-            fragColor = vec4(vColor, 1.0);
+            fragColor = vec4(0.2, 0.2, 0.2, 1.0);
+            if (gl_FragCoord.x < 50.0) {
+                fragColor += vec4(1.0, 0.0, 0.0, 1.0);
+            }
+            if (gl_FragCoord.y < 50.0) { // to understand direction of y
+                fragColor += vec4(0.0, 0.0, 1.0, 1.0);
+            }
         }
     </script>
     <script type="module">
@@ -75,7 +73,7 @@
         app.createPrograms([vsSource, fsSource]).then(function([program]) {
             // CREATE DRAW CALL FROM PROGRAM AND VERTEX ARRAY
             let drawCall = app.createDrawCall(program)
-            .primitive(PicoGL.POINTS)
+            .primitive(PicoGL.TRIANGLE_STRIP)
             .drawRanges([0, 4]);
 
             // DRAW
