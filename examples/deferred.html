@@ -158,13 +158,13 @@
         let geoFsSource =  document.getElementById("geo-fs").text.trim();
 
         let positionTarget = app.createTexture2D(app.width, app.height, { 
-            internalFormat: PicoGL.RGBA32F 
+            internalFormat: PicoGL.RGBA16F 
         });
         let normalTarget = app.createTexture2D(app.width, app.height, { 
-            internalFormat: PicoGL.RGBA32F 
+            internalFormat: PicoGL.RGBA16F 
         });
         let uvTarget = app.createTexture2D(app.width, app.height, { 
-            internalFormat: PicoGL.RG32F
+            internalFormat: PicoGL.RG16F
         });
         let depthTarget = app.createRenderbuffer(app.width, app.height, PicoGL.DEPTH_COMPONENT16);
         let gBuffer = app.createFramebuffer()

@@ -202,10 +202,10 @@
         let accumFsSource = document.getElementById("fragment-accum").text.trim();
 
         let accumulateTarget = app.createTexture2D(app.width, app.height, { 
-            internalFormat: PicoGL.RGBA32F 
+            internalFormat: PicoGL.RGBA16F 
         });
         let accumulateAlphaTarget = app.createTexture2D(app.width, app.height, { 
-            internalFormat: PicoGL.RGBA32F 
+            internalFormat: PicoGL.RGBA16F 
         });
         let accumBuffer = app.createFramebuffer()
         .colorTarget(0, accumulateTarget)

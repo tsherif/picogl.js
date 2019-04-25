@@ -258,8 +258,8 @@
  
         // SET UP FRAMEBUFFERS AND TEXTURES
 
-        let colorTarget1 = app.createTexture2D(null, app.width, app.height, { internalFormat: PicoGL.RGBA32F });
-        let colorTarget2 = app.createTexture2D(null, app.width, app.height, { internalFormat: PicoGL.RGBA32F });
+        let colorTarget1 = app.createTexture2D(null, app.width, app.height, { internalFormat: PicoGL.RGBA16F });
+        let colorTarget2 = app.createTexture2D(null, app.width, app.height, { internalFormat: PicoGL.RGBA16F });
         let depthTarget = app.createRenderbuffer(app.width, app.height, PicoGL.DEPTH_COMPONENT16 );
 
         let colorBuffer = app.createFramebuffer()
