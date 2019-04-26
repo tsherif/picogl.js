@@ -86,6 +86,7 @@ export class Program {
     */
     restore() {
         this.initialize();
+        this.link();
         this.checkLinkage();
 
         return this;
@@ -164,15 +165,21 @@ export class Program {
             this.fragmentShader = new Shader(this.gl, this.appState, GL.FRAGMENT_SHADER, this.fragmentSource);
         }
 
-        let program = this.gl.createProgram();
-        this.gl.attachShader(program, this.vertexShader.shader);
-        this.gl.attachShader(program, this.fragmentShader.shader);
-        if (this.transformFeedbackVaryings) {
-            this.gl.transformFeedbackVaryings(program, this.transformFeedbackVaryings, GL.SEPARATE_ATTRIBS);
-        }
-        this.gl.linkProgram(program);
+        this.program = this.gl.createProgram();
 
-        this.program = program;
+        return this;
+    }
+
+    // Attach shaders and link program.
+    // Done as a separate step to avoid stalls on compileShader
+    // when doing async compile.
+    link() {
+        this.gl.attachShader(this.program, this.vertexShader.shader);
+        this.gl.attachShader(this.program, this.fragmentShader.shader);
+        if (this.transformFeedbackVaryings) {
+            this.gl.transformFeedbackVaryings(this.program, this.transformFeedbackVaryings, GL.SEPARATE_ATTRIBS);
+        }
+        this.gl.linkProgram(this.program);
 
         return this;
     }
@@ -190,7 +197,7 @@ export class Program {
     // Will stall for completion.
     checkLinkage() {
         if (this.linked) {
-            return;
+            return this;
         }
 
         if (this.gl.getProgramParameter(this.program, GL.LINK_STATUS)) {
@@ -211,6 +218,8 @@ export class Program {
             this.fragmentShader.delete();
             this.fragmentShader = null;
         }
+
+        return this;
     }
 
     // Get variable handles from program

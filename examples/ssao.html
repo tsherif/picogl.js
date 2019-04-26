@@ -287,10 +287,10 @@
         
         let colorTarget = app.createTexture2D(app.width, app.height);
         let positionTarget = app.createTexture2D(app.width, app.height, { 
-            internalFormat: PicoGL.RGBA32F 
+            internalFormat: PicoGL.RGBA16F 
         });
         let normalTarget = app.createTexture2D(app.width, app.height, { 
-            internalFormat: PicoGL.RGBA32F
+            internalFormat: PicoGL.RGBA16F
         });
         let depthTarget = app.createRenderbuffer(app.width, app.height, PicoGL.DEPTH_COMPONENT16);
         let colorGeoBuffer = app.createFramebuffer()
@@ -306,7 +306,7 @@
         // SET UP SSAO PROGRAM
         let ssaoFsSource =  document.getElementById("fragment-ssao").text.trim();
         let ssaoTarget = app.createTexture2D(app.width, app.height, { 
-            internalFormat: PicoGL.RGBA32F
+            internalFormat: PicoGL.RGBA16F
         });
         let ssaoBuffer = app.createFramebuffer().colorTarget(0, ssaoTarget);
 

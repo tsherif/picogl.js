@@ -620,7 +620,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="draw-call.js.html">draw-call.js</a>, <a href="draw-call.js.html#line178">line 178</a>
+        <a href="draw-call.js.html">draw-call.js</a>, <a href="draw-call.js.html#line209">line 209</a>
     </li></ul></dd>
     
 
@@ -676,7 +676,7 @@
     
 
     
-    <h4 class="name" id="elementCount"><span class="type-signature"></span>elementCount<span class="signature">(count<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="DrawCall.html">DrawCall</a>}</span></h4>
+    <h4 class="name" id="drawRanges"><span class="type-signature"></span>drawRanges<span class="signature">(&hellip;counts)</span><span class="type-signature"> &rarr; {<a href="DrawCall.html">DrawCall</a>}</span></h4>
     
 
     
@@ -684,7 +684,8 @@
 
 
 <div class="description">
-    Set numElements property to allow number of elements to be drawn
+    Ranges in the vertex array to draw. Multiple arguments can be provided to set up
+        a multi-draw.
 </div>
 
 
@@ -712,8 +713,6 @@
         
 
         
-        <th>Default</th>
-        
 
         <th class="last">Description</th>
     </tr>
@@ -724,13 +723,13 @@
 
         <tr>
             
-                <td class="name"><code>count</code></td>
+                <td class="name"><code>counts</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">GLsizei</span>
+<span class="param-type">Array</span>
 
 
             
@@ -739,24 +738,23 @@
             
                 <td class="attributes">
                 
-                    &lt;optional><br>
-                
 
                 
 
+                
+                    &lt;repeatable><br>
                 
                 </td>
             
 
             
-                <td class="default">
-                
-                    0
-                
-                </td>
-            
 
-            <td class="description last">Number of element to draw, 0 set to all.</td>
+            <td class="description last">Variable number of 2 or 3 element arrays, each containing:
+            <ul>
+                <li> (Number) Number of elements to skip at the start of the array.
+                <li> (Number) Number of elements to draw.
+                <li> (Number - optional) Number of instances to draw of the given range.
+            </ul></td>
         </tr>
 
     
@@ -797,7 +795,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="draw-call.js.html">draw-call.js</a>, <a href="draw-call.js.html#line145">line 145</a>
+        <a href="draw-call.js.html">draw-call.js</a>, <a href="draw-call.js.html#line177">line 177</a>
     </li></ul></dd>
     
 
@@ -853,7 +851,7 @@
     
 
     
-    <h4 class="name" id="instanceCount"><span class="type-signature"></span>instanceCount<span class="signature">(count<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="DrawCall.html">DrawCall</a>}</span></h4>
+    <h4 class="name" id="primitive"><span class="type-signature"></span>primitive<span class="signature">(primitive)</span><span class="type-signature"> &rarr; {<a href="DrawCall.html">DrawCall</a>}</span></h4>
     
 
     
@@ -861,7 +859,7 @@
 
 
 <div class="description">
-    Set numInstances property to allow number of instances be drawn
+    Set the current draw primitive for this draw call.
 </div>
 
 
@@ -885,11 +883,7 @@
         <th>Type</th>
 
         
-        <th>Attributes</th>
-        
 
-        
-        <th>Default</th>
         
 
         <th class="last">Description</th>
@@ -901,39 +895,23 @@
 
         <tr>
             
-                <td class="name"><code>count</code></td>
+                <td class="name"><code>primitive</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">GLsizei</span>
+<span class="param-type">GLEnum</span>
 
 
             
             </td>
 
             
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
 
             
-                <td class="default">
-                
-                    0
-                
-                </td>
-            
 
-            <td class="description last">Number of instance to draw, 0 set to all.</td>
+            <td class="description last">Primitive to draw.</td>
         </tr>
 
     
@@ -974,7 +952,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="draw-call.js.html">draw-call.js</a>, <a href="draw-call.js.html#line162">line 162</a>
+        <a href="draw-call.js.html">draw-call.js</a>, <a href="draw-call.js.html#line93">line 93</a>
     </li></ul></dd>
     
 
@@ -1157,7 +1135,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="draw-call.js.html">draw-call.js</a>, <a href="draw-call.js.html#line116">line 116</a>
+        <a href="draw-call.js.html">draw-call.js</a>, <a href="draw-call.js.html#line142">line 142</a>
     </li></ul></dd>
     
 
@@ -1221,7 +1199,7 @@
 
 
 <div class="description">
-    Set the current TransformFeedback object for draw
+    Set the current TransformFeedback object for draw.
 </div>
 
 
@@ -1314,7 +1292,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="draw-call.js.html">draw-call.js</a>, <a href="draw-call.js.html#line80">line 80</a>
+        <a href="draw-call.js.html">draw-call.js</a>, <a href="draw-call.js.html#line106">line 106</a>
     </li></ul></dd>
     
 
@@ -1496,7 +1474,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="draw-call.js.html">draw-call.js</a>, <a href="draw-call.js.html#line96">line 96</a>
+        <a href="draw-call.js.html">draw-call.js</a>, <a href="draw-call.js.html#line122">line 122</a>
     </li></ul></dd>
     
 
@@ -1676,7 +1654,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="draw-call.js.html">draw-call.js</a>, <a href="draw-call.js.html#line131">line 131</a>
+        <a href="draw-call.js.html">draw-call.js</a>, <a href="draw-call.js.html#line157">line 157</a>
     </li></ul></dd>
     
 
@@ -1748,7 +1726,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Tue Apr 16 2019 23:08:43 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Apr 24 2019 08:40:11 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

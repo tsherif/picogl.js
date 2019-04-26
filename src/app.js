@@ -729,9 +729,9 @@ export class App {
         @return {Program} New Program object.
     */
     createProgram(vsSource, fsSource, xformFeedbackVars) {
-        let program = new Program(this.gl, this.state, vsSource, fsSource, xformFeedbackVars);
-        program.checkLinkage();
-        return program;
+        return new Program(this.gl, this.state, vsSource, fsSource, xformFeedbackVars)
+            .link()
+            .checkLinkage();
     }
 
     /**
@@ -762,6 +762,10 @@ export class App {
                 let xformFeedbackVars = source[2];
                 programs[i] = new Program(this.gl, this.state, vsSource, fsSource, xformFeedbackVars);
                 pendingPrograms[i] = programs[i];
+            }
+
+            for (let i = 0; i < numPrograms; ++i) {
+                programs[i].link();
             }
 
             let poll = () => {
@@ -809,6 +813,10 @@ export class App {
 
             for (let i = 0; i < numPrograms; ++i) {
                 programs[i].initialize();
+            }
+
+            for (let i = 0; i < numPrograms; ++i) {
+                programs[i].link();
             }
 
             for (let i = 0; i < numPrograms; ++i) {
@@ -968,7 +976,7 @@ export class App {
         @param {number} [height] Texture height. Required for array or empty data.
         @param {Object} [options] Texture options.
         @param {GLEnum} [options.internalFormat=RGBA8] Texture data internal format. Must be a sized format.
-        @param {GLEnum} [options.type] Type of data stored in the texture. Default based on 
+        @param {GLEnum} [options.type] Type of data stored in the texture. Default based on
             <b>internalFormat</b>.
         @param {boolean} [options.flipY=false] Whether the y-axis should be flipped when unpacking the texture.
         @param {boolean} [options.premultiplyAlpha=false] Whether the alpha channel should be pre-multiplied when unpacking the texture.
@@ -1016,7 +1024,7 @@ export class App {
         @param {number} size Number of images in the array.
         @param {Object} [options] Texture options.
         @param {GLEnum} [options.internalFormat=RGBA8] Texture data internal format. Must be a sized format.
-        @param {GLEnum} [options.type] Type of data stored in the texture. Default based on 
+        @param {GLEnum} [options.type] Type of data stored in the texture. Default based on
             <b>internalFormat</b>.
         @param {boolean} [options.flipY=false] Whether the y-axis should be flipped when unpacking the texture.
         @param {GLEnum} [options.minFilter] Minification filter. Defaults to
@@ -1059,7 +1067,7 @@ export class App {
         @param {number} depth Texture depth.
         @param {Object} [options] Texture options.
         @param {GLEnum} [options.internalFormat=RGBA8] Texture data internal format. Must be a sized format.
-        @param {GLEnum} [options.type] Type of data stored in the texture. Default based on 
+        @param {GLEnum} [options.type] Type of data stored in the texture. Default based on
             <b>internalFormat</b>.
         @param {boolean} [options.flipY=false] Whether the y-axis should be flipped when unpacking the texture.
         @param {GLEnum} [options.minFilter] Minification filter. Defaults to
@@ -1110,7 +1118,7 @@ export class App {
         @param {number} [options.width] Cubemap side width. Defaults to the width of negX if negX is an image.
         @param {number} [options.height] Cubemap side height. Defaults to the height of negX if negX is an image.
         @param {GLEnum} [options.internalFormat=RGBA8] Texture data internal format. Must be a sized format.
-        @param {GLEnum} [options.type] Type of data stored in the texture. Default based on 
+        @param {GLEnum} [options.type] Type of data stored in the texture. Default based on
             <b>internalFormat</b>.
         @param {boolean} [options.flipY=false] Whether the y-axis should be flipped when unpacking the image.
         @param {boolean} [options.premultiplyAlpha=false] Whether the alpha channel should be pre-multiplied when unpacking the image.
