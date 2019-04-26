@@ -48,9 +48,10 @@ import { GL, WEBGL_INFO } from "./constants.js";
 */
 export class DrawCall {
 
-    constructor(gl, appState, program, vertexArray, primitive = GL.TRIANGLES) {
+    constructor(gl, appState, program, vertexArray = null, primitive) {
         this.gl = gl;
         this.currentProgram = program;
+        this.drawPrimitive = GL.TRIANGLES;
         this.currentVertexArray = vertexArray;
         this.currentTransformFeedback = null;
         this.appState = appState;
@@ -64,14 +65,39 @@ export class DrawCall {
         this.uniformBlockCount = 0;
         this.textures = new Array(WEBGL_INFO.MAX_TEXTURE_UNITS);
         this.textureCount = 0;
-        this.primitive = primitive;
 
-        this.numElements = this.currentVertexArray.numElements;
-        this.numInstances = this.currentVertexArray.numInstances;
+        this.offsets = new Int32Array(1);
+        this.numElements = new Int32Array(1);
+        this.numInstances = new Int32Array(1);
+
+        if (this.currentVertexArray) {
+            this.numElements[0] = this.currentVertexArray.numElements;
+            this.numInstances[0] = this.currentVertexArray.numInstances;
+        }
+
+        this.numDraws = 1;
+
+        if (primitive !== undefined) {
+            console.warn("Primitive argument to 'App.createDrawCall' is deprecated and will be removed. Use 'DrawCall.primitive' instead.");
+            this.primitive(primitive);
+        }
     }
 
     /**
-        Set the current TransformFeedback object for draw
+        Set the current draw primitive for this draw call.
+
+        @method
+        @param {GLEnum} primitive Primitive to draw.
+        @return {DrawCall} The DrawCall object.
+    */
+    primitive(primitive) {
+        this.drawPrimitive = primitive;
+
+        return this;
+    }
+
+    /**
+        Set the current TransformFeedback object for draw.
 
         @method
         @param {TransformFeedback} transformFeedback Transform Feedback to set.
@@ -136,34 +162,39 @@ export class DrawCall {
     }
 
     /**
-        Set numElements property to allow number of elements to be drawn
+        Ranges in the vertex array to draw. Multiple arguments can be provided to set up
+        a multi-draw.
 
         @method
-        @param {GLsizei} [count=0] Number of element to draw, 0 set to all.
+        @param {...Array} counts Variable number of 2 or 3 element arrays, each containing:
+            <ul>
+                <li> (Number) Number of elements to skip at the start of the array.
+                <li> (Number) Number of elements to draw.
+                <li> (Number - optional) Number of instances to draw of the given range.
+            </ul>
         @return {DrawCall} The DrawCall object.
     */
-    elementCount(count = 0) {
-        if (count > 0) {
-            this.numElements = Math.min(count, this.currentVertexArray.numElements);
-        } else {
-            this.numElements = this.currentVertexArray.numElements;
+    drawRanges(...counts) {
+        this.numDraws = counts.length;
+
+        if (this.offsets.length < this.numDraws) {
+            this.offsets = new Int32Array(this.numDraws);
         }
 
-        return this;
-    }
+        if (this.numElements.length < this.numDraws) {
+            this.numElements = new Int32Array(this.numDraws);
+        }
 
-    /**
-        Set numInstances property to allow number of instances be drawn
+        if (this.numInstances.length < this.numDraws) {
+            this.numInstances = new Int32Array(this.numDraws);
+        }
 
-        @method
-        @param {GLsizei} [count=0] Number of instance to draw, 0 set to all.
-        @return {DrawCall} The DrawCall object.
-    */
-    instanceCount(count = 0) {
-        if (count > 0) {
-            this.numInstances = Math.min(count, this.currentVertexArray.numInstances);
-        } else {
-            this.numInstances = this.currentVertexArray.numInstances;
+        for (let i = 0; i < this.numDraws; ++i) {
+            let count = counts[i];
+
+            this.offsets[i] = count[0];
+            this.numElements[i] = count[1];
+            this.numInstances[i] = count[2] || 1;
         }
 
         return this;
@@ -182,9 +213,14 @@ export class DrawCall {
         let uniformBlockCount = this.currentProgram.uniformBlockCount;
         let textures = this.textures;
         let textureCount = this.currentProgram.samplerCount;
+        let indexed = false;
 
         this.currentProgram.bind();
-        this.currentVertexArray.bind();
+
+        if (this.currentVertexArray) {
+            this.currentVertexArray.bind();
+            indexed = this.currentVertexArray.indexed;
+        }
 
         for (let uIndex = 0; uIndex < this.uniformCount; ++uIndex) {
             this.currentProgram.uniform(uniformNames[uIndex], uniformValues[uIndex]);
@@ -200,22 +236,27 @@ export class DrawCall {
 
         if (this.currentTransformFeedback) {
             this.currentTransformFeedback.bind();
-            this.gl.beginTransformFeedback(this.primitive);
+            this.gl.beginTransformFeedback(this.drawPrimitive);
         } else if (this.appState.transformFeedback) {
             this.gl.bindTransformFeedback(GL.TRANSFORM_FEEDBACK, null);
             this.appState.transformFeedback = null;
         }
 
-        if (this.currentVertexArray.instanced) {
-            if (this.currentVertexArray.indexed) {
-                this.gl.drawElementsInstanced(this.primitive, this.numElements, this.currentVertexArray.indexType, 0, this.numInstances);
+        if (WEBGL_INFO.MULTI_DRAW_INSTANCED) {
+            let ext = this.appState.extensions.multiDrawInstanced;
+            if (indexed) {
+                ext.multiDrawElementsInstancedWEBGL(this.drawPrimitive, this.numElements, 0, this.currentVertexArray.indexType, this.offsets, 0, this.numInstances, 0, this.numDraws);
             } else {
-                this.gl.drawArraysInstanced(this.primitive, 0, this.numElements, this.numInstances);
+                ext.multiDrawArraysInstancedWEBGL(this.drawPrimitive, this.offsets, 0, this.numElements, 0, this.numInstances, 0, this.numDraws);
             }
-        } else if (this.currentVertexArray.indexed) {
-            this.gl.drawElements(this.primitive, this.numElements, this.currentVertexArray.indexType, 0);
+        } else if (indexed) {
+            for (let i = 0; i < this.numDraws; ++i) {
+                this.gl.drawElementsInstanced(this.drawPrimitive, this.numElements[i], this.currentVertexArray.indexType, this.offsets[i], this.numInstances[i]);
+            }
         } else {
-            this.gl.drawArrays(this.primitive, 0, this.numElements);
+            for (let i = 0; i < this.numDraws; ++i) {
+                this.gl.drawArraysInstanced(this.drawPrimitive, this.offsets[i], this.numElements[i], this.numInstances[i]);
+            }
         }
 
         if (this.currentTransformFeedback) {

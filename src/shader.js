@@ -21,7 +21,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-import { GL } from "./constants.js";
+import { GL, WEBGL_INFO } from "./constants.js";
 
 /**
     WebGL shader.
@@ -32,8 +32,9 @@ import { GL } from "./constants.js";
 */
 export class Shader {
 
-    constructor(gl, type, source) {
+    constructor(gl, appState, type, source) {
         this.gl = gl;
+        this.appState = appState;
         this.shader = null;
         this.type = type;
         this.source = source;
@@ -53,6 +54,20 @@ export class Shader {
         this.gl.compileShader(this.shader);
 
         return this;
+    }
+
+    /**
+        Get the shader source translated for the platform's API.
+
+        @method
+        @return {String} The translated shader source.
+    */
+    translatedSource() {
+        if (WEBGL_INFO.DEBUG_SHADERS) {
+            return this.appState.extensions.debugShaders.getTranslatedShaderSource(this.shader);
+        } else {
+            return "(Unavailable)";
+        }
     }
 
     /**

@@ -29,7 +29,6 @@ import { GL, TYPE_SIZE, DUMMY_OBJECT } from "./constants.js";
     @prop {number} numElements Number of elements in the vertex array.
     @prop {boolean} indexed Whether this vertex array is set up for indexed drawing.
     @prop {GLenum} indexType Data type of the indices.
-    @prop {boolean} instanced Whether this vertex array is set up for instanced drawing.
     @prop {number} numInstances Number of instances to draw with this vertex array.
     @prop {Object} appState Tracked GL state.
 */
@@ -39,11 +38,12 @@ export class VertexArray {
         this.gl = gl;
         this.appState = appState;
         this.vertexArray = null;
-        this.numElements = 0;
         this.indexType = null;
-        this.instancedBuffers = 0;
         this.indexed = false;
-        this.numInstances = 0;
+        this.numElements = 0;
+        this.numInstances = 1;
+        this.offsets = 0;
+        this.numDraws = 1;
     }
 
     /**
@@ -214,12 +214,12 @@ export class VertexArray {
             this.gl.enableVertexAttribArray(attributeIndex + i);
         }
 
-        this.instanced = this.instanced || instanced;
-
-        if (instanced) {
-            this.numInstances = vertexBuffer.numItems;
-        } else {
-            this.numElements = this.numElements || vertexBuffer.numItems;
+        if (this.numDraws === 1) {
+            if (instanced) {
+                this.numInstances = vertexBuffer.numItems;
+            } else {
+                this.numElements = this.numElements || vertexBuffer.numItems;
+            }
         }
 
         this.gl.bindBuffer(GL.ARRAY_BUFFER, null);

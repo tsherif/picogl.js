@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PicoGL.js: Triangle</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="../site/css/picogl-example.css"> 
+    <style>
+        #translated-source {
+            position: absolute;
+            left: 0;
+            top: 0;
+            color: white;
+            font-size: 8px;
+        }
+    </style>
+</head>
+<!--
+  The MIT License (MIT)
+
+  Copyright (c) 2017 Tarek Sherif
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy of
+  this software and associated documentation files (the "Software"), to deal in
+  the Software without restriction, including without limitation the rights to
+  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+  the Software, and to permit persons to whom the Software is furnished to do so,
+  subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+  FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+  COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+  IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+<body>
+    <div id="translated-source"></div>
+    <canvas id="gl-canvas"></canvas>
+    <script type="shader/vs" id="vs">
+        #version 300 es
+        
+        layout(location=0) in vec4 position;
+        layout(location=1) in vec3 color;
+        
+        out vec3 vColor; 
+        void main() {
+            vColor = color;
+            gl_Position = position;
+        }
+    </script>
+    <script type="shader/fs" id="fs">
+        #version 300 es
+        precision highp float;
+        
+        in vec3 vColor;
+        
+        out vec4 fragColor;
+        void main() {
+            fragColor = vec4(vColor, 1.0);
+        }
+    </script>
+    <script type="module">
+        import { PicoGL } from "../src/picogl.js";
+
+        let canvas = document.getElementById("gl-canvas");
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        let app = PicoGL.createApp(canvas)
+        .clearColor(0.0, 0.0, 0.0, 1.0);
+
+        window.onresize = function() {
+            app.resize(window.innerWidth, window.innerHeight);
+        }
+
+        // PROGRAM 
+        let vsSource =  document.getElementById("vs").text.trim();
+        let fsSource =  document.getElementById("fs").text.trim();
+
+        // GEOMETRY IN VERTEX BUFFERS
+        let positions = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
+            -0.5, -0.5,
+             0.5, -0.5,
+             0.0, 0.5, 
+        ]));
+
+        let colors = app.createVertexBuffer(PicoGL.UNSIGNED_BYTE, 3, new Uint8Array([
+            255, 0, 0,
+            0, 255, 0,
+            0, 0, 255
+        ]));
+
+        // COMBINE VERTEX BUFFERS INTO VERTEX ARRAY
+        let triangleArray = app.createVertexArray()
+        .vertexAttributeBuffer(0, positions)
+        .vertexAttributeBuffer(1, colors, { normalized: true });
+
+        app.createPrograms([vsSource, fsSource]).then(function([program]) {
+            document.getElementById("translated-source").innerHTML = `${program.translatedVertexSource()}<BR><BR>${program.translatedFragmentSource()}`.replace(/\n/g, "<BR>");
+            // CREATE DRAW CALL FROM PROGRAM AND VERTEX ARRAY
+            let drawCall = app.createDrawCall(program, triangleArray);
+
+            // DRAW
+            app.clear();
+            drawCall.draw();
+
+            // CLEANUP
+            program.delete();
+            positions.delete();
+            colors.delete();
+            triangleArray.delete();
+        });
+
+    </script>
+</body>
+</html>

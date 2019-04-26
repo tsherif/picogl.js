@@ -170,8 +170,6 @@
         let shadowFsSource =  document.getElementById("shadow-fs").text.trim();
 
         let shadowTarget = app.createCubemap({
-            format: PicoGL.RED,
-            type: PicoGL.FLOAT,
             internalFormat: PicoGL.R16F,
             width: CUBEMAP_DIM, 
             height: CUBEMAP_DIM 
@@ -310,8 +308,14 @@
             [shadowProgram, lightProgram, mainProgram],
             [webglImage, cobblesImage]
         ]) => {
-            let webglTexture = app.createTexture2D(webglImage, { flipY: true });
-            let cobblesTexture = app.createTexture2D(cobblesImage, { flipY: true });
+            let webglTexture = app.createTexture2D(webglImage, { 
+                flipY: true,
+                maxAnisotropy: PicoGL.WEBGL_INFO.MAX_TEXTURE_ANISOTROPY 
+            });
+            let cobblesTexture = app.createTexture2D(cobblesImage, { 
+                flipY: true,
+                maxAnisotropy: PicoGL.WEBGL_INFO.MAX_TEXTURE_ANISOTROPY 
+            });
 
             // DRAW CALLS
 

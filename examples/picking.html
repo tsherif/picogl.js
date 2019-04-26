@@ -238,7 +238,10 @@
             [pickingProgram, mainProgram],
             [image]
         ]) => {
-            let texture = app.createTexture2D(image, { flipY: true });
+            let texture = app.createTexture2D(image, { 
+                flipY: true,
+                maxAnisotropy: PicoGL.WEBGL_INFO.MAX_TEXTURE_ANISOTROPY 
+            });
 
             for (let i = 0, len = boxes.length; i < len; ++i) {
                 boxes[i].pickingDrawCall = app.createDrawCall(pickingProgram, boxArray)

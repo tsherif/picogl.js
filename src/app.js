@@ -71,7 +71,8 @@ export class App {
             uniformBuffers: new Array(WEBGL_INFO.MAX_UNIFORM_BUFFERS),
             freeUniformBufferBases: [],
             drawFramebuffer: null,
-            readFramebuffer: null
+            readFramebuffer: null,
+            extensions: {}
         };
 
         this.clearBits = this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT| this.gl.STENCIL_BUFFER_BIT;
@@ -85,7 +86,6 @@ export class App {
         this.contextRestoredHandler = null;
 
         this.initExtensions();
-
 
         this.canvas.addEventListener("webglcontextlost", (e) => {
             e.preventDefault();
@@ -729,9 +729,9 @@ export class App {
         @return {Program} New Program object.
     */
     createProgram(vsSource, fsSource, xformFeedbackVars) {
-        let program = new Program(this.gl, this.state, vsSource, fsSource, xformFeedbackVars);
-        program.checkLinkage();
-        return program;
+        return new Program(this.gl, this.state, vsSource, fsSource, xformFeedbackVars)
+            .link()
+            .checkLinkage();
     }
 
     /**
@@ -762,6 +762,10 @@ export class App {
                 let xformFeedbackVars = source[2];
                 programs[i] = new Program(this.gl, this.state, vsSource, fsSource, xformFeedbackVars);
                 pendingPrograms[i] = programs[i];
+            }
+
+            for (let i = 0; i < numPrograms; ++i) {
+                programs[i].link();
             }
 
             let poll = () => {
@@ -812,6 +816,10 @@ export class App {
             }
 
             for (let i = 0; i < numPrograms; ++i) {
+                programs[i].link();
+            }
+
+            for (let i = 0; i < numPrograms; ++i) {
                 programs[i].checkCompletion();
             }
 
@@ -854,7 +862,7 @@ export class App {
         @return {Shader} New Shader object.
     */
     createShader(type, source) {
-        return new Shader(this.gl, type, source);
+        return new Shader(this.gl, this.state, type, source);
     }
 
     /**
@@ -967,10 +975,9 @@ export class App {
         @param {number} [width] Texture width. Required for array or empty data.
         @param {number} [height] Texture height. Required for array or empty data.
         @param {Object} [options] Texture options.
-        @param {GLEnum} [options.type] Type of data stored in the texture. Defaults to UNSIGNED_SHORT
-            if format is DEPTH_COMPONENT, UNSIGNED_BYTE otherwise.
-        @param {GLEnum} [options.format=RGBA] Texture data format.
-        @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
+        @param {GLEnum} [options.internalFormat=RGBA8] Texture data internal format. Must be a sized format.
+        @param {GLEnum} [options.type] Type of data stored in the texture. Default based on
+            <b>internalFormat</b>.
         @param {boolean} [options.flipY=false] Whether the y-axis should be flipped when unpacking the texture.
         @param {boolean} [options.premultiplyAlpha=false] Whether the alpha channel should be pre-multiplied when unpacking the texture.
         @param {GLEnum} [options.minFilter] Minification filter. Defaults to
@@ -985,6 +992,7 @@ export class App {
         @param {GLEnum} [options.maxLevel] Maximum mipmap level.
         @param {GLEnum} [options.minLOD] Mimimum level of detail.
         @param {GLEnum} [options.maxLOD] Maximum level of detail.
+        @param {GLEnum} [options.maxAnisotropy] Maximum anisotropy in filtering.
         @return {Texture} New Texture object.
     */
     createTexture2D(image, width, height, options) {
@@ -1015,10 +1023,9 @@ export class App {
         @param {number} height Texture height.
         @param {number} size Number of images in the array.
         @param {Object} [options] Texture options.
-         @param {GLEnum} [options.type] Type of data stored in the texture. Defaults to UNSIGNED_SHORT
-            if format is DEPTH_COMPONENT, UNSIGNED_BYTE otherwise.
-        @param {GLEnum} [options.format=RGBA] Texture data format.
-        @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
+        @param {GLEnum} [options.internalFormat=RGBA8] Texture data internal format. Must be a sized format.
+        @param {GLEnum} [options.type] Type of data stored in the texture. Default based on
+            <b>internalFormat</b>.
         @param {boolean} [options.flipY=false] Whether the y-axis should be flipped when unpacking the texture.
         @param {GLEnum} [options.minFilter] Minification filter. Defaults to
             LINEAR_MIPMAP_NEAREST if image data is provided, NEAREST otherwise.
@@ -1033,6 +1040,7 @@ export class App {
         @param {GLEnum} [options.maxLevel] Maximum mipmap level.
         @param {GLEnum} [options.minLOD] Mimimum level of detail.
         @param {GLEnum} [options.maxLOD] Maximum level of detail.
+        @param {GLEnum} [options.maxAnisotropy] Maximum anisotropy in filtering.
         @return {Texture} New Texture object.
     */
     createTextureArray(image, width, height, depth, options) {
@@ -1058,10 +1066,9 @@ export class App {
         @param {number} height Texture height.
         @param {number} depth Texture depth.
         @param {Object} [options] Texture options.
-        @param {GLEnum} [options.type] Type of data stored in the texture. Defaults to UNSIGNED_SHORT
-            if format is DEPTH_COMPONENT, UNSIGNED_BYTE otherwise.
-        @param {GLEnum} [options.format=RGBA] Texture data format.
-        @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
+        @param {GLEnum} [options.internalFormat=RGBA8] Texture data internal format. Must be a sized format.
+        @param {GLEnum} [options.type] Type of data stored in the texture. Default based on
+            <b>internalFormat</b>.
         @param {boolean} [options.flipY=false] Whether the y-axis should be flipped when unpacking the texture.
         @param {GLEnum} [options.minFilter] Minification filter. Defaults to
             LINEAR_MIPMAP_NEAREST if image data is provided, NEAREST otherwise.
@@ -1076,6 +1083,7 @@ export class App {
         @param {GLEnum} [options.maxLevel] Maximum mipmap level.
         @param {GLEnum} [options.minLOD] Mimimum level of detail.
         @param {GLEnum} [options.maxLOD] Maximum level of detail.
+        @param {GLEnum} [options.maxAnisotropy] Maximum anisotropy in filtering.
         @return {Texture} New Texture object.
     */
     createTexture3D(image, width, height, depth, options) {
@@ -1109,10 +1117,9 @@ export class App {
                 Can be any format that would be accepted by texImage2D.
         @param {number} [options.width] Cubemap side width. Defaults to the width of negX if negX is an image.
         @param {number} [options.height] Cubemap side height. Defaults to the height of negX if negX is an image.
-        @param {GLEnum} [options.type] Type of data stored in the texture. Defaults to UNSIGNED_SHORT
-            if format is DEPTH_COMPONENT, UNSIGNED_BYTE otherwise.
-        @param {GLEnum} [options.format=RGBA] Texture data format.
-        @param {GLEnum} [options.internalFormat=RGBA] Texture data internal format.
+        @param {GLEnum} [options.internalFormat=RGBA8] Texture data internal format. Must be a sized format.
+        @param {GLEnum} [options.type] Type of data stored in the texture. Default based on
+            <b>internalFormat</b>.
         @param {boolean} [options.flipY=false] Whether the y-axis should be flipped when unpacking the image.
         @param {boolean} [options.premultiplyAlpha=false] Whether the alpha channel should be pre-multiplied when unpacking the image.
         @param {GLEnum} [options.minFilter] Minification filter. Defaults to
@@ -1127,6 +1134,7 @@ export class App {
         @param {GLEnum} [options.maxLevel] Maximum mipmap level.
         @param {GLEnum} [options.minLOD] Mimimum level of detail.
         @param {GLEnum} [options.maxLOD] Maximum level of detail.
+        @param {GLEnum} [options.maxAnisotropy] Maximum anisotropy in filtering.
         @return {Cubemap} New Cubemap object.
     */
     createCubemap(options) {
@@ -1185,8 +1193,7 @@ export class App {
 
         @method
         @param {Program} program The program to use for this DrawCall.
-        @param {VertexArray} vertexArray Vertex data to use for drawing.
-        @param {GLEnum} [primitive=TRIANGLES] Type of primitive to draw.
+        @param {VertexArray} [vertexArray=null] Vertex data to use for drawing.
         @return {DrawCall} New DrawCall object.
     */
     createDrawCall(program, vertexArray, primitive) {
@@ -1204,11 +1211,14 @@ export class App {
         this.gl.getExtension("WEBGL_compressed_texture_pvrtc");
         this.gl.getExtension("EXT_disjoint_timer_query_webgl2");
         this.gl.getExtension("EXT_disjoint_timer_query");
+        this.gl.getExtension("EXT_texture_filter_anisotropic");
 
+        this.state.extensions.debugShaders = this.gl.getExtension("WEBGL_debug_shaders");
         this.contextLostExt = this.gl.getExtension("WEBGL_lose_context");
 
         // Draft extensions
         this.gl.getExtension("KHR_parallel_shader_compile");
+        this.state.extensions.multiDrawInstanced = this.gl.getExtension("WEBGL_multi_draw_instanced");
     }
 
 }

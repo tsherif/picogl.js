@@ -201,7 +201,8 @@
             s3tcPromise = utils.loadBinary("img/compressed/s3tc-supported-dxt1.pvr").then(data => {
                 let textureData = utils.parsePVR(data);
                 return app.createTexture2D(textureData.data, textureData.width, textureData.height, {
-                    format: PicoGL.COMPRESSED_RGB_S3TC_DXT1_EXT
+                    internalFormat: PicoGL.COMPRESSED_RGB_S3TC_DXT1_EXT,
+                    maxAnisotropy: PicoGL.WEBGL_INFO.MAX_TEXTURE_ANISOTROPY 
                 });
             });
         } else {
@@ -220,7 +221,8 @@
             etcPromise = utils.loadBinary("img/compressed/etc-supported-etc2.pvr").then(data => {
                 let textureData = utils.parsePVR(data);
                 return app.createTexture2D(textureData.data, textureData.width, textureData.height, {
-                    format: PicoGL.COMPRESSED_RGB8_ETC2
+                    internalFormat: PicoGL.COMPRESSED_RGB8_ETC2,
+                    maxAnisotropy: PicoGL.WEBGL_INFO.MAX_TEXTURE_ANISOTROPY 
                 });
             });
         } else {
@@ -239,7 +241,8 @@
             astcPromise = utils.loadBinary("img/compressed/astc-supported-astc.pvr").then(data => {
                 let textureData = utils.parsePVR(data);
                 return app.createTexture2D(textureData.data, textureData.width, textureData.height, {
-                    format: PicoGL.COMPRESSED_RGBA_ASTC_4x4_KHR
+                    internalFormat: PicoGL.COMPRESSED_RGBA_ASTC_4x4_KHR,
+                    maxAnisotropy: PicoGL.WEBGL_INFO.MAX_TEXTURE_ANISOTROPY 
                 });
             });
         } else {
@@ -258,7 +261,8 @@
             pvrtcPromise = utils.loadBinary("img/compressed/pvrtc-supported-pvrtc.pvr").then(data => {
                 let textureData = utils.parsePVR(data);
                 return app.createTexture2D(textureData.data, textureData.width, textureData.height, {
-                    format: PicoGL.COMPRESSED_RGB_PVRTC_4BPPV1_IMG
+                    internalFormat: PicoGL.COMPRESSED_RGB_PVRTC_4BPPV1_IMG,
+                    maxAnisotropy: PicoGL.WEBGL_INFO.MAX_TEXTURE_ANISOTROPY 
                 });
             });
         } else {
@@ -266,7 +270,7 @@
                 let image = new Image();
 
                 image.onload = function() {
-                    resolve(app.createTexture2D(image));
+                    resolve(app.createTexture2D(image, { maxAnisotropy: PicoGL.WEBGL_INFO.MAX_TEXTURE_ANISOTROPY }));
                 }
 
                 image.src = "img/compressed/pvrtc-unsupported.png";

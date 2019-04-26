@@ -139,7 +139,7 @@
         let shadowFsSource =  document.getElementById("shadow-fs").text.trim();
 
         let shadowDepthTarget = app.createTexture2D(app.width, app.height, {
-            format: PicoGL.DEPTH_COMPONENT,
+            internalFormat: PicoGL.DEPTH_COMPONENT16,
             compareMode: PicoGL.COMPARE_REF_TO_TEXTURE
         });
         let shadowBuffer = app.createFramebuffer().depthTarget(shadowDepthTarget);
@@ -215,7 +215,10 @@
             [mainProgram, shadowProgram],
             [image]
         ]) => {
-            let texture = app.createTexture2D(image, { flipY: true });
+            let texture = app.createTexture2D(image, { 
+                flipY: true,
+                maxAnisotropy: PicoGL.WEBGL_INFO.MAX_TEXTURE_ANISOTROPY 
+            });
 
             // DRAW CALLS
 

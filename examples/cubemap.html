@@ -227,7 +227,10 @@
             [program, skyboxProgram],
             [webglImage, ...cubemapImages]
         ]) => {
-            let texture = app.createTexture2D(webglImage, { flipY: true });
+            let texture = app.createTexture2D(webglImage, { 
+                maxAnisotropy: PicoGL.WEBGL_INFO.MAX_TEXTURE_ANISOTROPY,
+                flipY: true 
+            });
             let cubemap = app.createCubemap({
                 negX: cubemapImages[0],
                 posX: cubemapImages[1],
@@ -235,6 +238,7 @@
                 posY: cubemapImages[3],
                 negZ: cubemapImages[4],
                 posZ: cubemapImages[5],
+                maxAnisotropy: PicoGL.WEBGL_INFO.MAX_TEXTURE_ANISOTROPY,
                 flipY: false
             });
 

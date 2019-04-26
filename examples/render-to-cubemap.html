@@ -330,7 +330,10 @@
             [program, cubemapProgram, skyboxProgram],
             [webglImage, ...cubemapImages]
         ]) => {
-            let texture = app.createTexture2D(webglImage, { flipY: true });
+            let texture = app.createTexture2D(webglImage, { 
+                flipY: true,
+                maxAnisotropy: PicoGL.WEBGL_INFO.MAX_TEXTURE_ANISOTROPY 
+            });
 
             let skyCubemap = app.createCubemap({
                 negX: cubemapImages[0],
@@ -339,6 +342,7 @@
                 posY: cubemapImages[3],
                 negZ: cubemapImages[4],
                 posZ: cubemapImages[5],
+                maxAnisotropy: PicoGL.WEBGL_INFO.MAX_TEXTURE_ANISOTROPY
             });
 
             let cubemapDrawCall = app.createDrawCall(cubemapProgram, boxArray)
@@ -383,7 +387,8 @@
                 cubemapDrawCall.draw();
                 
                 // RENDER TO SCREEN
-                app.defaultDrawFramebuffer().defaultViewport();
+                // Multi draw seems to require a clear here?
+                app.defaultDrawFramebuffer().defaultViewport().clear();
                 skyboxDrawcall.draw();
                 cubeDrawCall.draw();
 

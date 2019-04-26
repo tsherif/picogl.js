@@ -23,10 +23,13 @@
 
 import { 
     GL,
-    TEXTURE_FORMAT_DEFAULTS,
+    WEBGL_INFO,
+    TEXTURE_FORMATS,
     COMPRESSED_TEXTURE_TYPES,
     DUMMY_OBJECT,
-    DUMMY_UNIT_ARRAY
+    DUMMY_UNIT_ARRAY,
+    // DEPRECATED
+    TEXTURE_FORMAT_DEFAULTS
 } from "./constants.js";
 
 /**
@@ -46,25 +49,40 @@ import {
 export class Cubemap {
 
     constructor(gl, appState, options) {
-        let defaultType = options.format === GL.DEPTH_COMPONENT ? GL.UNSIGNED_SHORT : GL.UNSIGNED_BYTE;
 
         this.gl = gl;
         this.texture = null;
-        this.type = options.type !== undefined ? options.type : defaultType;
         this.appState = appState;
 
-        this.format = null;
-        this.internalFormat = null;
-        this.compressed = Boolean(COMPRESSED_TEXTURE_TYPES[options.format] || COMPRESSED_TEXTURE_TYPES[options.internalFormat]);
+        this.compressed = COMPRESSED_TEXTURE_TYPES[options.internalFormat];
         
+        if (options.format !== undefined) {
+            console.warn("Cubemap option 'format' is deprecated and will be removed. Use 'internalFormat' with a sized format instead.");
+            this.compressed = Boolean(COMPRESSED_TEXTURE_TYPES[options.format]);
+            if (options.type === undefined) {
+                options.type = options.format === GL.DEPTH_COMPONENT ? GL.UNSIGNED_SHORT : GL.UNSIGNED_BYTE;
+            }
+            if (options.internalFormat === undefined) {
+                if (this.compressed) {
+                    options.internalFormat = options.format;
+                } else {
+                    options.internalFormat = TEXTURE_FORMAT_DEFAULTS[options.type][options.format];
+                }
+            }
+        }
+
         if (this.compressed) {
             // For compressed textures, just need to provide one of format, internalFormat.
             // The other will be the same.
-            this.format = options.format !== undefined ? options.format : options.internalFormat;
-            this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : options.format;
+            this.internalFormat = options.internalFormat;
+            this.format = options.internalFormat;
+            this.type = GL.UNSIGNED_BYTE;
         } else {
-            this.format = options.format !== undefined ? options.format : gl.RGBA;
-            this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : TEXTURE_FORMAT_DEFAULTS[this.type][this.format];
+            this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : GL.RGBA8;
+
+            let formatInfo = TEXTURE_FORMATS[this.internalFormat];
+            this.format = formatInfo[0];
+            this.type = options.type !== undefined ? options.type : formatInfo[1];
         }
         
         // -1 indicates unbound
@@ -87,7 +105,8 @@ export class Cubemap {
             minLOD = null,
             maxLOD = null,
             baseLevel = null,
-            maxLevel = null
+            maxLevel = null,
+            maxAnisotropy = 1
         } = options;
         
         this.width = width;
@@ -104,6 +123,7 @@ export class Cubemap {
         this.maxLOD = maxLOD;
         this.baseLevel = baseLevel;
         this.maxLevel = maxLevel;
+        this.maxAnisotropy = Math.min(maxAnisotropy, WEBGL_INFO.MAX_TEXTURE_ANISOTROPY);
         this.mipmaps = (minFilter === GL.LINEAR_MIPMAP_NEAREST || minFilter === GL.LINEAR_MIPMAP_LINEAR);
         this.miplevelsProvided = arrayData && options.negX.length > 1;
         this.levels = this.mipmaps ? Math.floor(Math.log2(Math.min(this.width, this.height))) + 1 : 1;
@@ -146,17 +166,25 @@ export class Cubemap {
         this.gl.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_WRAP_T, this.wrapT);
         this.gl.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_COMPARE_FUNC, this.compareFunc);
         this.gl.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_COMPARE_MODE, this.compareMode);
+        
         if (this.baseLevel !== null) {
             this.gl.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_BASE_LEVEL, this.baseLevel);
         }
+        
         if (this.maxLevel !== null) {
             this.gl.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_MAX_LEVEL, this.maxLevel);
         }
+        
         if (this.minLOD !== null) {
             this.gl.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_MIN_LOD, this.minLOD);
         }
+        
         if (this.maxLOD !== null) {
             this.gl.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_MAX_LOD, this.maxLOD);
+        }
+
+        if (this.maxAnisotropy > 1) {
+            this.gl.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_MAX_ANISOTROPY_EXT, this.maxAnisotropy);
         }
 
         this.gl.texStorage2D(GL.TEXTURE_CUBE_MAP, this.levels, this.internalFormat, this.width, this.height);

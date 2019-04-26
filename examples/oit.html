@@ -153,7 +153,7 @@
         utils.addTimerElement();
 
         if (!testExtension("EXT_color_buffer_float")) {
-            document.body.innerHTML = "This example requires extension EXT_color_buffer_float which is not supported on this system."
+            document.body.innerHTML = "This example requires extension <b>EXT_color_buffer_float</b> which is not supported on this system."
         }
 
         const NEAR = 0.1;
@@ -202,10 +202,10 @@
         let accumFsSource = document.getElementById("fragment-accum").text.trim();
 
         let accumulateTarget = app.createTexture2D(app.width, app.height, { 
-            type: PicoGL.FLOAT 
+            internalFormat: PicoGL.RGBA16F 
         });
         let accumulateAlphaTarget = app.createTexture2D(app.width, app.height, { 
-            type: PicoGL.FLOAT 
+            internalFormat: PicoGL.RGBA16F 
         });
         let accumBuffer = app.createFramebuffer()
         .colorTarget(0, accumulateTarget)
@@ -288,7 +288,10 @@
             [accumProgram, blendProgram],
             [image]
         ]) => {
-            let texture = app.createTexture2D(image, { flipY: true });
+            let texture = app.createTexture2D(image, { 
+                flipY: true,
+                maxAnisotropy: PicoGL.WEBGL_INFO.MAX_TEXTURE_ANISOTROPY 
+            });
             
             let accumDrawCall = app.createDrawCall(accumProgram, sphereArray)
             .uniformBlock("SceneUniforms", sceneUniforms)

@@ -130,7 +130,10 @@
             }
         }
 
-        let texture = app.createTexture3D(textureData, TEXTURE_DIMENSIONS, TEXTURE_DIMENSIONS, TEXTURE_DIMENSIONS, { format: PicoGL.RED });
+        let texture = app.createTexture3D(textureData, TEXTURE_DIMENSIONS, TEXTURE_DIMENSIONS, TEXTURE_DIMENSIONS, { 
+            internalFormat: PicoGL.R8, 
+            maxAnisotropy: PicoGL.WEBGL_INFO.MAX_TEXTURE_ANISOTROPY 
+        });
 
         // UNIFORM DATA
         let projMatrix = mat4.create();
@@ -155,7 +158,8 @@
         // https://www.khronos.org/registry/webgl/extensions/KHR_parallel_shader_compile/
         app.createPrograms([vsSource, fsSource]).then(([program]) => {
             // SET UP DRAW CALL
-            let drawCall = app.createDrawCall(program, pointArray, PicoGL.POINTS)
+            let drawCall = app.createDrawCall(program, pointArray)
+            .primitive(PicoGL.POINTS)
             .texture("tex", texture)
             .uniform("uMVP", mvpMatrix);
 

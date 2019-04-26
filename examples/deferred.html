@@ -138,7 +138,7 @@
         utils.addTimerElement();
 
         if (!testExtension("EXT_color_buffer_float")) {
-            document.body.innerHTML = "This example requires extension EXT_color_buffer_float which is not supported on this system."
+            document.body.innerHTML = "This example requires extension <b>EXT_color_buffer_float</b> which is not supported on this system."
         }
         
         let canvas = document.getElementById("gl-canvas");
@@ -158,14 +158,13 @@
         let geoFsSource =  document.getElementById("geo-fs").text.trim();
 
         let positionTarget = app.createTexture2D(app.width, app.height, { 
-            type: PicoGL.FLOAT 
+            internalFormat: PicoGL.RGBA16F 
         });
         let normalTarget = app.createTexture2D(app.width, app.height, { 
-            type: PicoGL.FLOAT 
+            internalFormat: PicoGL.RGBA16F 
         });
         let uvTarget = app.createTexture2D(app.width, app.height, { 
-            type: PicoGL.FLOAT,
-            format: PicoGL.RG
+            internalFormat: PicoGL.RG16F
         });
         let depthTarget = app.createRenderbuffer(app.width, app.height, PicoGL.DEPTH_COMPONENT16);
         let gBuffer = app.createFramebuffer()
@@ -233,7 +232,10 @@
             [geoProgram, mainProgram],
             [image]
         ]) => {
-            let texture = app.createTexture2D(image, { flipY: true });
+            let texture = app.createTexture2D(image, { 
+                flipY: true,
+                maxAnisotropy: PicoGL.WEBGL_INFO.MAX_TEXTURE_ANISOTROPY 
+            });
 
             // BOX DESCRIPTIONS FOR GEO PASS
             let boxes = [

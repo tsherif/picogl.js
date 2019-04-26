@@ -215,7 +215,10 @@
             app.createPrograms([vsSource, fsSource], [skyboxVsSource, skyboxFsSource]),
             loadImages()  
         ]).then(([[program, skyboxProgram], [image, cubemapData]]) => {
-            let texture = app.createTexture2D(image, { flipY: true });
+            let texture = app.createTexture2D(image, { 
+                flipY: true,
+                maxAnisotropy: PicoGL.WEBGL_INFO.MAX_TEXTURE_ANISOTROPY 
+            });
             let cubemap = app.createCubemap(cubemapData);
 
             // CREATE DRAWCALLS FOR SKYBOX AND REFLECTIVE CUBE
@@ -300,7 +303,7 @@
                         posY: data[3].data,
                         negZ: data[4].data,
                         posZ: data[5].data,
-                        format: format
+                        internalFormat: format
                     };
                 });
             } else {
