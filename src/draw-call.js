@@ -161,6 +161,32 @@ export class DrawCall {
         return this;
     }
 
+    multiDraw(numDraws) {
+        this.numDraws = numDraws;
+
+        if (this.offsets.length < this.numDraws) {
+            this.offsets = new Int32Array(this.numDraws);
+        }
+
+        if (this.numElements.length < this.numDraws) {
+            this.numElements = new Int32Array(this.numDraws);
+        }
+
+        if (this.numInstances.length < this.numDraws) {
+            this.numInstances = new Int32Array(this.numDraws);
+        }
+
+        let numElements = this.currentVertexArray ? this.currentVertexArray.numElements : 0;
+        let numInstances = this.currentVertexArray ? this.currentVertexArray.numInstances : 0;
+        for (let i = 0; i < this.numDraws; ++i) {
+            this.offsets[i] = 0;
+            this.numElements[i] = numElements;
+            this.numInstances[i] = numInstances;
+        }
+
+        return this;
+    }
+
     /**
         Ranges in the vertex array to draw. Multiple arguments can be provided to set up
         a multi-draw.

@@ -293,30 +293,12 @@
             let boxesDrawCallA = app.createDrawCall(program, boxArrayA)
             .uniformBlock("SceneUniforms", sceneUniformBuffer)
             .texture("uTexture", texture)
-            .drawRanges(
-                [0, boxArrayA.numElements, boxArrayA.numInstances],
-                [0, boxArrayA.numElements, boxArrayA.numInstances],
-                [0, boxArrayA.numElements, boxArrayA.numInstances],
-                [0, boxArrayA.numElements, boxArrayA.numInstances],
-                [0, boxArrayA.numElements, boxArrayA.numInstances],
-                // [0, boxArrayA.numElements, boxArrayA.numInstances],
-                // [0, boxArrayA.numElements, boxArrayA.numInstances],
-                // [0, boxArrayA.numElements, boxArrayA.numInstances]
-            );
+            .multiDraw(5);
 
             let boxesDrawCallB = app.createDrawCall(program, boxArrayB)
             .uniformBlock("SceneUniforms", sceneUniformBuffer)
             .texture("uTexture", texture)
-            .drawRanges(
-                [0, boxArrayB.numElements, boxArrayB.numInstances],
-                [0, boxArrayB.numElements, boxArrayB.numInstances],
-                [0, boxArrayB.numElements, boxArrayB.numInstances],
-                [0, boxArrayB.numElements, boxArrayB.numInstances],
-                [0, boxArrayB.numElements, boxArrayB.numInstances],
-                // [0, boxArrayB.numElements, boxArrayB.numInstances],
-                // [0, boxArrayB.numElements, boxArrayB.numInstances],
-                // [0, boxArrayB.numElements, boxArrayB.numInstances]
-            );
+            .multiDraw(5);
 
             let updateDrawCall = updateDrawCallA;
             let boxesDrawCall = boxesDrawCallB
