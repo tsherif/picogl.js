@@ -38,26 +38,6 @@
         </div>
     </div>
     <canvas id="gl-canvas"></canvas>
-    <script type="x-shader/vs" id="vertex-update">
-        #version 300 es
-
-        #define ROTATION_SPEED 0.04
-
-        layout(location=0) in float rotation;
-
-        out float vRotation;
-
-        void main() {
-            vRotation = rotation + ROTATION_SPEED;
-        }
-    </script>
-    <script type="x-shader/fs" id="fragment-update">
-        #version 300 es
-
-        void main() {
-
-        }
-    </script>
     <script type="x-shader/vs" id="vertex-draw">
         #version 300 es
         #extension GL_ANGLE_multi_draw : require
@@ -67,14 +47,12 @@
         layout(location=0) in vec3 position;
         layout(location=1) in vec2 uv;
         layout(location=2) in vec3 normal;
-        layout(location=3) in vec3 translation;
-        layout(location=4) in vec3 axis;
-        layout(location=5) in float rotation;
         
         uniform SceneUniforms {
             mat4 viewProj;
             vec4 eyePosition;
             vec4 lightPosition;
+            vec4 offsetRotation;
         };
 
         
@@ -83,8 +61,13 @@
         out vec3 vNormal;
 
         void main() {
-            float s = sin(rotation);
-            float c = cos(rotation);
+            float floatId = float(gl_DrawID);
+            vec3 offset = offsetRotation.xyz;
+            float rotation = offsetRotation.w;
+
+            vec3 axis = normalize(vec3(sin(floatId), cos(floatId), -cos(floatId)));
+            float s = sin(rotation + floatId);
+            float c = cos(rotation + floatId);
             float t = 1.0 - c;
             float xt = axis.x * t;
             float yt = axis.y * t;
@@ -105,9 +88,9 @@
                 axis.z * zt + c
             );
 
-
-            vPosition = rotationMat * position + translation + vec3(gl_DrawID, 0.0, 0.0);
-            vUV = vec3(uv, (gl_DrawID + int(translation.y) + int(translation.z)) % 5);
+            vec3 translation = vec3(gl_DrawID % 50, (gl_DrawID / 50) % 50, gl_DrawID / 2500);
+            vPosition = rotationMat * position + offset + translation;
+            vUV = vec3(uv, (gl_DrawID + int(translation.y) + int(translation.z)) % 8);
             vNormal = rotationMat * normal;
             gl_Position = viewProj * vec4(vPosition, 1.0);
         }
@@ -122,6 +105,7 @@
             mat4 viewProj;
             vec4 eyePosition;
             vec4 lightPosition;
+            vec4 offsetRotation;
         };
 
         uniform lowp sampler2DArray uTexture;
@@ -150,7 +134,7 @@
         utils.addTimerElement();
         
         const BOX_GRID_DIM = 50;
-        const NUM_BOXES = BOX_GRID_DIM * BOX_GRID_DIM * BOX_GRID_DIM / 5;
+        const NUM_BOXES = BOX_GRID_DIM * BOX_GRID_DIM * BOX_GRID_DIM;
         const NEAR = 0.1;
         const FAR = 100.0;
 
@@ -167,83 +151,20 @@
 
         let timer = app.createTimer();
 
-        // SET UP UPDATE PROGRAM
-        let updateVsSource =  document.getElementById("vertex-update").text.trim();
-        let updateFsSource =  document.getElementById("fragment-update").text.trim();
-
         // SET UP PROGRAM
         let vsSource =  document.getElementById("vertex-draw").text.trim();
         let fsSource =  document.getElementById("fragment-draw").text.trim();
-        
-        let rotationData = new Float32Array(NUM_BOXES);
-        let translationData = new Float32Array(NUM_BOXES * 3);
-        let axisData = new Float32Array(NUM_BOXES * 3);
-
-        let boxI = 0;
-        let offset = -Math.floor(BOX_GRID_DIM / 2);
-        let axis = vec3.create();
-        for (let i = 0; i < BOX_GRID_DIM; i += 5) {
-            for (let j = 0; j < BOX_GRID_DIM; ++j) {
-                for (let k = 0; k < BOX_GRID_DIM; ++k) {
-                    let transI = boxI * 3;
-
-                    rotationData[boxI] = boxI / Math.PI;
-                    translationData[transI]     = i + offset;
-                    translationData[transI + 1] = j + offset;
-                    translationData[transI + 2] = k + offset;
-
-                    axis[0] = Math.random() * 2 - 1;
-                    axis[1] = Math.random() * 2 - 1;
-                    axis[2] = Math.random() * 2 - 1;
-
-                    vec3.normalize(axis, axis);
-
-                    axisData.set(axis, transI);
-
-                    ++boxI;
-                }
-            }
-        }
-
+    
         // INSTANCED CUBE GEOMETRY
         let box = utils.createBox({dimensions: [0.5, 0.5, 0.5]})
         let positions = app.createVertexBuffer(PicoGL.FLOAT, 3, box.positions);
         let uv = app.createVertexBuffer(PicoGL.FLOAT, 2, box.uvs);
         let normals = app.createVertexBuffer(PicoGL.FLOAT, 3, box.normals);
 
-        
-        let rotationsA = app.createVertexBuffer(PicoGL.FLOAT, 1, rotationData);
-        let rotationsB = app.createVertexBuffer(PicoGL.FLOAT, 1, rotationData.length);
-        let translations = app.createVertexBuffer(PicoGL.FLOAT, 3, translationData);
-        let axes = app.createVertexBuffer(PicoGL.FLOAT, 3, axisData);
-
-        let boxArrayA = app.createVertexArray()
+        let boxArray = app.createVertexArray()
         .vertexAttributeBuffer(0, positions)
         .vertexAttributeBuffer(1, uv)
-        .vertexAttributeBuffer(2, normals)
-        .instanceAttributeBuffer(3, translations)
-        .instanceAttributeBuffer(4, axes)
-        .instanceAttributeBuffer(5, rotationsA);
-
-        let boxArrayB = app.createVertexArray()
-        .vertexAttributeBuffer(0, positions)
-        .vertexAttributeBuffer(1, uv)
-        .vertexAttributeBuffer(2, normals)
-        .instanceAttributeBuffer(3, translations)
-        .instanceAttributeBuffer(4, axes)
-        .instanceAttributeBuffer(5, rotationsB);
-
-        let updateVertexArrayA = app.createVertexArray()
-        .vertexAttributeBuffer(0, rotationsA);
-
-        let transformFeedbackA = app.createTransformFeedback()
-        .feedbackBuffer(0, rotationsA);
-
-        let updateVertexArrayB = app.createVertexArray()
-        .vertexAttributeBuffer(0, rotationsB);
-
-        let transformFeedbackB = app.createTransformFeedback()
-        .feedbackBuffer(0, rotationsB);
+        .vertexAttributeBuffer(2, normals);
 
         // SET UP UNIFORM BUFFER
         let projMatrix = mat4.create();
@@ -253,9 +174,12 @@
         let eyePosition = vec3.fromValues(0, 28, 0);
         let viewProjMatrix = mat4.create();
         let lightPosition = vec3.create();
+        let offset = -BOX_GRID_DIM / 2;
+        let offsetRotation = vec4.fromValues(offset, offset, offset, 0);
 
         let sceneUniformBuffer = app.createUniformBuffer([
             PicoGL.FLOAT_MAT4,
+            PicoGL.FLOAT_VEC4,
             PicoGL.FLOAT_VEC4,
             PicoGL.FLOAT_VEC4
         ]);
@@ -267,7 +191,7 @@
         }
 
         Promise.all([
-            app.createPrograms([vsSource, fsSource], [updateVsSource, updateFsSource, ["vRotation"]]),
+            app.createPrograms([vsSource, fsSource]),
             utils.loadImageArray([
                 "img/webgl-logo.png",
                 "img/carpet.jpg",
@@ -278,30 +202,15 @@
                 "img/marble.png",
                 "img/tile.png",
             ])
-        ]).then(([[program, updateProgram], imageArray]) => {
+        ]).then(([[program], imageArray]) => {
             let texture = app.createTextureArray(imageArray.data, imageArray.width, imageArray.height, imageArray.length, { maxAnisotropy: PicoGL.WEBGL_INFO.MAX_TEXTURE_ANISOTROPY });
 
-            let updateDrawCallA = app.createDrawCall(updateProgram, updateVertexArrayA)
-            .primitive(PicoGL.POINTS)
-            .transformFeedback(transformFeedbackB);
-
-            let updateDrawCallB = app.createDrawCall(updateProgram, updateVertexArrayB)
-            .primitive(PicoGL.POINTS)
-            .transformFeedback(transformFeedbackA);
-
             // SINGLE DRAW CALL FOR ALL BOXES
-            let boxesDrawCallA = app.createDrawCall(program, boxArrayA)
+            let boxesDrawCall = app.createDrawCall(program, boxArray)
             .uniformBlock("SceneUniforms", sceneUniformBuffer)
             .texture("uTexture", texture)
-            .multiDraw(5);
+            .multiDraw(NUM_BOXES);
 
-            let boxesDrawCallB = app.createDrawCall(program, boxArrayB)
-            .uniformBlock("SceneUniforms", sceneUniformBuffer)
-            .texture("uTexture", texture)
-            .multiDraw(5);
-
-            let updateDrawCall = updateDrawCallA;
-            let boxesDrawCall = boxesDrawCallB
             let eyeRadius = 40;
             let eyeRotation = 0;
             function draw() {
@@ -312,6 +221,7 @@
                 timer.start();
 
                 eyeRotation += 0.002;
+                offsetRotation[3] += 0.04;
 
                 eyePosition[0] = Math.sin(eyeRotation) * eyeRadius;
                 eyePosition[2] = Math.cos(eyeRotation) * eyeRadius;
@@ -325,17 +235,12 @@
                 .set(0, viewProjMatrix)
                 .set(1, eyePosition)
                 .set(2, lightPosition)
+                .set(3, offsetRotation)
                 .update();
 
-                app.noRasterize();
-                updateDrawCall.draw();
-
-                app.rasterize().clear();
+                app.clear();
                 boxesDrawCall.draw()
                 
-                updateDrawCall = updateDrawCall === updateDrawCallA ? updateDrawCallB : updateDrawCallA;
-                boxesDrawCall = boxesDrawCall === boxesDrawCallA ? boxesDrawCallB : boxesDrawCallA;
-
                 timer.end();
 
                 requestAnimationFrame(draw);
