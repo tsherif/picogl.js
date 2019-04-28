@@ -69,6 +69,7 @@
         layout(location=3) in vec3 translation;
         layout(location=4) in vec3 axis;
         layout(location=5) in float rotation;
+        layout(location=6) in uint textureIndex;       
         
         uniform SceneUniforms {
             mat4 viewProj;
@@ -78,7 +79,7 @@
 
         
         out vec3 vPosition;
-        out vec2 vUV;
+        out vec3 vUV;
         out vec3 vNormal;
 
         void main() {
@@ -106,7 +107,7 @@
 
 
             vPosition = rotationMat * position + translation;
-            vUV = uv;
+            vUV = vec3(uv, textureIndex);
             vNormal = rotationMat * normal;
             gl_Position = viewProj * vec4(vPosition, 1.0);
         }
@@ -123,10 +124,10 @@
             vec4 lightPosition;
         };
 
-        uniform sampler2D uTexture;
+        uniform lowp sampler2DArray uTexture;
         
         in vec3 vPosition;
-        in vec2 vUV;
+        in vec3 vUV;
         in vec3 vNormal;
 
         out vec4 fragColor;
@@ -177,6 +178,7 @@
         let rotationData = new Float32Array(NUM_BOXES);
         let translationData = new Float32Array(NUM_BOXES * 3);
         let axisData = new Float32Array(NUM_BOXES * 3);
+        let textureIndexData = new Uint8Array(NUM_BOXES);
 
         let boxI = 0;
         let offset = -Math.floor(BOX_GRID_DIM / 2);
@@ -194,10 +196,10 @@
                     axis[0] = Math.random() * 2 - 1;
                     axis[1] = Math.random() * 2 - 1;
                     axis[2] = Math.random() * 2 - 1;
-
                     vec3.normalize(axis, axis);
-
                     axisData.set(axis, transI);
+
+                    textureIndexData[boxI] = Math.floor(Math.random() * 8);
 
                     ++boxI;
                 }
@@ -209,12 +211,12 @@
         let positions = app.createVertexBuffer(PicoGL.FLOAT, 3, box.positions);
         let uv = app.createVertexBuffer(PicoGL.FLOAT, 2, box.uvs);
         let normals = app.createVertexBuffer(PicoGL.FLOAT, 3, box.normals);
-
         
         let rotationsA = app.createVertexBuffer(PicoGL.FLOAT, 1, rotationData);
         let rotationsB = app.createVertexBuffer(PicoGL.FLOAT, 1, rotationData.length);
         let translations = app.createVertexBuffer(PicoGL.FLOAT, 3, translationData);
         let axes = app.createVertexBuffer(PicoGL.FLOAT, 3, axisData);
+        let textureIndices = app.createVertexBuffer(PicoGL.UNSIGNED_BYTE, 1, textureIndexData);
 
         let boxArrayA = app.createVertexArray()
         .vertexAttributeBuffer(0, positions)
@@ -222,7 +224,8 @@
         .vertexAttributeBuffer(2, normals)
         .instanceAttributeBuffer(3, translations)
         .instanceAttributeBuffer(4, axes)
-        .instanceAttributeBuffer(5, rotationsA);
+        .instanceAttributeBuffer(5, rotationsA)
+        .instanceAttributeBuffer(6, textureIndices);
 
         let boxArrayB = app.createVertexArray()
         .vertexAttributeBuffer(0, positions)
@@ -230,7 +233,8 @@
         .vertexAttributeBuffer(2, normals)
         .instanceAttributeBuffer(3, translations)
         .instanceAttributeBuffer(4, axes)
-        .instanceAttributeBuffer(5, rotationsB);
+        .instanceAttributeBuffer(5, rotationsB)
+        .instanceAttributeBuffer(6, textureIndices);
 
         let updateVertexArrayA = app.createVertexArray()
         .vertexAttributeBuffer(0, rotationsA);
@@ -267,12 +271,18 @@
 
         Promise.all([
             app.createPrograms([vsSource, fsSource], [updateVsSource, updateFsSource, ["vRotation"]]),
-            utils.loadImages(["img/webgl-logo.png"])
-        ]).then(([[program, updateProgram], [image]]) => {
-            let texture = app.createTexture2D(image, { 
-                flipY: true,
-                maxAnisotropy: PicoGL.WEBGL_INFO.MAX_TEXTURE_ANISOTROPY 
-            });
+            utils.loadImageArray([
+                "img/webgl-logo.png",
+                "img/carpet.jpg",
+                "img/grass.png",
+                "img/pavement.jpg",
+                "img/brick.png",
+                "img/concrete.jpg",
+                "img/marble.png",
+                "img/tile.png",
+            ])
+        ]).then(([[program, updateProgram], imageArray]) => {
+            let texture = app.createTextureArray(imageArray.data, imageArray.width, imageArray.height, imageArray.length, { maxAnisotropy: PicoGL.WEBGL_INFO.MAX_TEXTURE_ANISOTROPY });
 
             let updateDrawCallA = app.createDrawCall(updateProgram, updateVertexArrayA)
             .primitive(PicoGL.POINTS)

@@ -201,7 +201,13 @@ export class DrawCall {
         @return {DrawCall} The DrawCall object.
     */
     drawRanges(...counts) {
-        this.numDraws = counts.length;
+        let singleRange = null;
+        if (typeof counts[0] === "number") {
+            this.numDraws = counts[0];
+            singleRange = counts[1] || [ 0, this.currentVertexArray.numElements, this.currentVertexArray.numInstances ];
+        } else {
+            this.numDraws = counts.length;
+        }
 
         if (this.offsets.length < this.numDraws) {
             this.offsets = new Int32Array(this.numDraws);
@@ -216,7 +222,7 @@ export class DrawCall {
         }
 
         for (let i = 0; i < this.numDraws; ++i) {
-            let count = counts[i];
+            let count = singleRange ? singleRange : counts[i];
 
             this.offsets[i] = count[0];
             this.numElements[i] = count[1];

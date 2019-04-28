@@ -209,7 +209,7 @@
             let boxesDrawCall = app.createDrawCall(program, boxArray)
             .uniformBlock("SceneUniforms", sceneUniformBuffer)
             .texture("uTexture", texture)
-            .multiDraw(NUM_BOXES);
+            .drawRanges(NUM_BOXES);
 
             let eyeRadius = 40;
             let eyeRotation = 0;

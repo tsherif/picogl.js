@@ -46,7 +46,8 @@
         layout(location=0) in vec4 position;
         layout(location=1) in vec2 uv;
         layout(location=2) in vec4 normal;
-        layout(location=3) in mat4 model;
+        layout(location=3) in uint textureIndex;
+        layout(location=4) in mat4 model;
         
         uniform SceneUniforms {
             mat4 viewProj;
@@ -56,13 +57,13 @@
 
         
         out vec3 vPosition;
-        out vec2 vUV;
+        out vec3 vUV;
         out vec3 vNormal;
 
         void main() {
             vec4 worldPosition = model * position;
             vPosition = worldPosition.xyz;
-            vUV = uv;
+            vUV = vec3(uv, textureIndex);
             vNormal = (model * vec4(normal.xyz, 0.0)).xyz;
             gl_Position = viewProj * worldPosition;
         }
@@ -79,10 +80,10 @@
             vec4 lightPosition;
         };
 
-        uniform sampler2D uTexture;
+        uniform lowp sampler2DArray uTexture;
         
         in vec3 vPosition;
-        in vec2 vUV;
+        in vec3 vUV;
         in vec3 vNormal;
 
         out vec4 fragColor;
@@ -131,14 +132,21 @@
         let uv = app.createVertexBuffer(PicoGL.FLOAT, 2, box.uvs);
         let normals = app.createVertexBuffer(PicoGL.FLOAT, 3, box.normals);
 
+        let textureIndexData = new Uint8Array(NUM_BOXES);
+        for (let i = 0; i < NUM_BOXES; ++i) {
+            textureIndexData[i] = Math.floor(Math.random() * 8);
+        }
+        let textureIndices = app.createVertexBuffer(PicoGL.UNSIGNED_BYTE, 1, textureIndexData);
+        
         let modelMatrixData = new Float32Array(NUM_BOXES * 16);
-        let modelMatrices = app.createMatrixBuffer(PicoGL.FLOAT_MAT4, modelMatrixData);
+        let modelMatrices = app.createMatrixBuffer(PicoGL.FLOAT_MAT4, modelMatrixData.length);
 
         let boxArray = app.createVertexArray()
         .vertexAttributeBuffer(0, positions)
         .vertexAttributeBuffer(1, uv)
         .vertexAttributeBuffer(2, normals)
-        .instanceAttributeBuffer(3, modelMatrices)
+        .instanceAttributeBuffer(3, textureIndices)
+        .instanceAttributeBuffer(4, modelMatrices)
 
         // SET UP UNIFORM BUFFER
         let projMatrix = mat4.create();
@@ -166,12 +174,18 @@
 
         Promise.all([
             app.createPrograms([vsSource, fsSource]),
-            utils.loadImages(["img/webgl-logo.png"])
-        ]).then(([[program], [image]]) => {
-            let texture = app.createTexture2D(image, { 
-                flipY: true,
-                maxAnisotropy: PicoGL.WEBGL_INFO.MAX_TEXTURE_ANISOTROPY 
-            });
+            utils.loadImageArray([
+                "img/webgl-logo.png",
+                "img/carpet.jpg",
+                "img/grass.png",
+                "img/pavement.jpg",
+                "img/brick.png",
+                "img/concrete.jpg",
+                "img/marble.png",
+                "img/tile.png",
+            ])
+        ]).then(([[program], imageArray]) => {
+            let texture = app.createTextureArray(imageArray.data, imageArray.width, imageArray.height, imageArray.length, { maxAnisotropy: PicoGL.WEBGL_INFO.MAX_TEXTURE_ANISOTROPY });
 
             // SINGLE DRAW CALL FOR ALL BOXES
             let boxes = new Array(NUM_BOXES);
