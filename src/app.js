@@ -200,6 +200,22 @@ export class App {
         return this;
     }
 
+    clearBuffer(buffer, attachement, values) {
+        switch (values.constructor) {
+            case Int32Array: 
+                this.gl.clearBufferiv(buffer, attachement, values);
+                break;
+            case Uint32Array: 
+                this.gl.clearBufferuiv(buffer, attachement, values);
+                break;
+            default:
+                this.gl.clearBufferfv(buffer, attachement, values);
+                break;
+        }
+
+        return this;
+    }
+
     /**
         Bind a draw framebuffer to the WebGL context.
 
@@ -416,6 +432,12 @@ export class App {
     */
     blendFuncSeparate(csrc, cdest, asrc, adest) {
         this.gl.blendFuncSeparate(csrc, cdest, asrc, adest);
+
+        return this;
+    }
+
+    blendEquation(eq) {
+        this.gl.blendEquation(eq);
 
         return this;
     }

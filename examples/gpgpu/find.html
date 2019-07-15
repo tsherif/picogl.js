@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PicoGL.js: Triangle</title>
+    <meta charset="utf-8">
+    <script src="../utils/compatibility.js"></script>
+    <script src="../utils/utils.js"></script>
+    <link rel="stylesheet" href="../../site/css/picogl-example.css"> 
+</head>
+<!--
+  The MIT License (MIT)
+
+  Copyright (c) 2017 Tarek Sherif
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy of
+  this software and associated documentation files (the "Software"), to deal in
+  the Software without restriction, including without limitation the rights to
+  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+  the Software, and to permit persons to whom the Software is furnished to do so,
+  subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+  FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+  COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+  IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+<body>
+    <div id="example-title">
+        PicoGL.js Example: Triangle
+        <div>
+            <a href="https://github.com/tsherif/picogl.js/blob/master/examples/triangle.html">Source code</a>
+        </div>
+    </div>
+    <canvas id="gl-canvas"></canvas>
+    <script type="shader/vs" id="vs">
+        #version 300 es
+        
+        layout(location=0) in float element;
+        uniform float target;
+
+        flat out int vIndex; 
+        flat out int vTest;
+        
+        void main() {
+            vIndex = gl_VertexID;
+            vTest = int(element == target);
+            gl_Position = vec4(0.0, 0.0, 0.0, 1.0);
+        }
+    </script>
+    <script type="shader/fs" id="fs">
+        #version 300 es
+        precision highp float;
+        
+        flat in int vIndex;
+        flat in int vTest;
+
+        out float index;
+        void main() {
+            if (vTest > 0) {
+                index = float(vIndex);
+            } else {
+                discard;
+            }
+        }
+    </script>
+    <script type="module">
+        import { PicoGL } from "../../src/picogl.js";
+
+        let canvas = document.getElementById("gl-canvas");
+        canvas.width = 1;
+        canvas.height = 1;
+        
+        const TARGET = 3;
+
+        let app = PicoGL.createApp(canvas)
+        .blend()
+        .blendEquation(PicoGL.MIN)
+        .blendFunc(PicoGL.ONE, PicoGL.ONE);
+
+        window.onresize = function() {
+            app.resize(window.innerWidth, window.innerHeight);
+        }
+
+        // PROGRAM 
+        let vsSource =  document.getElementById("vs").text.trim();
+        let fsSource =  document.getElementById("fs").text.trim();
+
+        // GEOMETRY IN VERTEX BUFFERS
+        let inputData =  new Float32Array(10000000);
+        inputData[inputData.length - 1] = TARGET;
+
+
+        let input = app.createVertexBuffer(PicoGL.FLOAT, 1, inputData);
+
+        // COMBINE VERTEX BUFFERS INTO VERTEX ARRAY
+        let triangleArray = app.createVertexArray()
+        .vertexAttributeBuffer(0, input);
+
+        let resultTexture = app.createTexture2D(1, 1, {internalFormat: PicoGL.R32F});
+        let resultFB = app.createFramebuffer().colorTarget(0, resultTexture);
+
+        app.createPrograms([vsSource, fsSource]).then(function([program]) {
+            // CREATE DRAW CALL FROM PROGRAM AND VERTEX ARRAY
+            let drawCall = app.createDrawCall(program, triangleArray)
+            .primitive(PicoGL.POINTS)
+            .uniform("target", 3);
+
+            console.time("GPU");
+            app.drawFramebuffer(resultFB).clearBuffer(PicoGL.COLOR, 0, new Float32Array([inputData.length, 0, 0, 0]));
+            drawCall.draw();
+
+            app.readFramebuffer(resultFB);
+
+            let result = new Float32Array(4);
+            app.readPixel(0, 0, result, {
+                type: PicoGL.FLOAT
+            });
+            console.timeEnd("GPU");
+            console.log("GPU Result", result[0]);
+
+            console.time("CPU");
+            let cpuResult = inputData.length;
+            for (let i = 0, len = inputData.length; i < len; ++i) {
+                if (inputData[i] === TARGET) {
+                    cpuResult = i;
+                    break;
+                }
+            }
+
+            console.timeEnd("CPU");
+            console.log("CPU Result", cpuResult);
+
+
+            // CLEANUP
+            program.delete();
+            input.delete();
+            triangleArray.delete();
+            resultTexture.delete();
+            resultFB.delete();
+        });
+
+    </script>
+    <a href="https://github.com/tsherif/picogl.js" id="github-ribbon"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"></a>
+    <script src="../../site/js/iframe.js"></script>
+</body>
+</html>
