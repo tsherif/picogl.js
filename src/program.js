@@ -315,7 +315,10 @@ export class Program {
 
     // Set the value of a uniform.
     uniform(name, value) {
-        this.uniforms[name].set(value);
+        // some uniforms are optimized out
+        if (this.uniforms[name]) {
+            this.uniforms[name].set(value);
+        }
 
         return this;
     }
