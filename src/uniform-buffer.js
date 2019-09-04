@@ -65,7 +65,7 @@ export class UniformBuffer {
 
                     if (type === GL.INT) {
                         this.types[i] = GL.INT;
-                    } else if (this.type === GL.UNSIGNED_INT) {
+                    } else if (type === GL.UNSIGNED_INT) {
                         this.types[i] = GL.UNSIGNED_INT;
                     } else {
                         this.types[i] = GL.FLOAT;
@@ -83,7 +83,7 @@ export class UniformBuffer {
 
                     if (type === GL.INT_VEC2) {
                         this.types[i] = GL.INT;
-                    } else if (this.type === GL.UNSIGNED_INT_VEC2) {
+                    } else if (type === GL.UNSIGNED_INT_VEC2) {
                         this.types[i] = GL.UNSIGNED_INT;
                     } else {
                         this.types[i] = GL.FLOAT;
@@ -105,7 +105,7 @@ export class UniformBuffer {
 
                     if (type === GL.INT_VEC4 || type === GL.INT_VEC3) {
                         this.types[i] = GL.INT;
-                    } else if (this.type === GL.UNSIGNED_INT_VEC4 || this.type === GL.UNSIGNED_INT_VEC3) {
+                    } else if (type === GL.UNSIGNED_INT_VEC4 || type === GL.UNSIGNED_INT_VEC3) {
                         this.types[i] = GL.UNSIGNED_INT;
                     } else {
                         this.types[i] = GL.FLOAT;
