@@ -1,6 +1,6 @@
 {
   "name": "picogl",
-  "version": "0.14.0",
+  "version": "0.14.1",
   "description": "A minimal WebGL 2 rendering library",
   "main": "build/picogl.min.js",
   "repository": {
@@ -13,9 +13,11 @@
     "url": "http://tareksherif.net/"
   },
   "scripts": {
-    "clean": "rimraf **/npm-debug.log build/temp.js build/picogl.js",
+    "clean": "rimraf **/npm-debug.log build/picogl.min.js.LICENSE",
     "lint": "eslint src/*.js",
-    "compile": "webpack && concat -o build/picogl.js BANNER build/temp.js && replace %%VERSION%% $npm_package_version build/picogl.js && uglifyjs build/picogl.js --compress --mangle --screw-ie8 > build/temp.js && concat -o build/picogl.min.js BANNER build/temp.js && replace %%VERSION%% $npm_package_version build/picogl.min.js && npm run clean",
+    "compile-module": "rimraf build/module && cpy src build/module && replace %%VERSION%% $npm_package_version build/module/picogl.js",
+    "compile-bundle": "webpack && npm run clean",
+    "compile": "npm run compile-module && npm run compile-bundle",
     "build": "npm run lint && npm run compile",
     "docs": "jsdoc -d docs src/*.js",
     "test": "npm run lint"
@@ -48,12 +50,14 @@
     }
   },
   "devDependencies": {
-    "concat": "^1.0.3",
-    "eslint": "^4.3.0",
-    "jsdoc": "^3.5.3",
-    "replace": "^1.0.0",
-    "rimraf": "^2.6.1",
-    "uglify-es": "^3.1.7",
-    "webpack": "^3.8.1"
+    "babel-minify-webpack-plugin": "^0.3.1",
+    "cpy-cli": "^2.0.0",
+    "eslint": "^6.3.0",
+    "jsdoc": "^3.6.3",
+    "replace": "^1.1.1",
+    "rimraf": "^3.0.0",
+    "terser-webpack-plugin": "^2.0.1",
+    "webpack": "^4.39.3",
+    "webpack-cli": "^3.3.8"
   }
 }
