@@ -1,3 +1,11 @@
+## v0.15.0
+
+- Built, versioned unbundled modules.
+- `App.blendEquation`
+- Fix uniform buffer handling of UNSIGNED_INT
+- Ignore setting of non-existent uniforms
+
+
 ## v0.14.0
 
 - `DrawCall`
@@ -11,12 +19,14 @@
 - Renderer information now stored in `PicoGL.WEBGL_INFO.VENDOR` and `PicoGL.WEBGL_INFO.RENDERER`. 
 - Use recommended polling pattern for shader compilation and program linking.
 
+
 ## v0.13.0
 
 - Support for parallel shader compilation (KHR_parallel_shader_compile)
 - Support importing directly into the browser without bundling
 - Auto-enable extensions
 	- Remove methods `App.floatRenderTargets`, `App.linearFloatTextures`, `App.s3tcTextures`, `App.etcTextures`, `App.astcTextures`, `App.pvrtcTextures`, as they are no longer needed.
+
 
 ## v0.12.0
 
