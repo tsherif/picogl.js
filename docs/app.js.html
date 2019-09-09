@@ -757,9 +757,9 @@ export class App {
         @return {Program} New Program object.
     */
     createProgram(vsSource, fsSource, xformFeedbackVars) {
-        let program = new Program(this.gl, this.state, vsSource, fsSource, xformFeedbackVars);
-        program.checkLinkage();
-        return program;
+        return new Program(this.gl, this.state, vsSource, fsSource, xformFeedbackVars)
+            .link()
+            .checkLinkage();
     }
 
     /**
@@ -790,6 +790,10 @@ export class App {
                 let xformFeedbackVars = source[2];
                 programs[i] = new Program(this.gl, this.state, vsSource, fsSource, xformFeedbackVars);
                 pendingPrograms[i] = programs[i];
+            }
+
+            for (let i = 0; i &lt; numPrograms; ++i) {
+                programs[i].link();
             }
 
             let poll = () => {
@@ -837,6 +841,10 @@ export class App {
 
             for (let i = 0; i &lt; numPrograms; ++i) {
                 programs[i].initialize();
+            }
+
+            for (let i = 0; i &lt; numPrograms; ++i) {
+                programs[i].link();
             }
 
             for (let i = 0; i &lt; numPrograms; ++i) {
@@ -996,7 +1004,7 @@ export class App {
         @param {number} [height] Texture height. Required for array or empty data.
         @param {Object} [options] Texture options.
         @param {GLEnum} [options.internalFormat=RGBA8] Texture data internal format. Must be a sized format.
-        @param {GLEnum} [options.type] Type of data stored in the texture. Default based on 
+        @param {GLEnum} [options.type] Type of data stored in the texture. Default based on
             &lt;b>internalFormat&lt;/b>.
         @param {boolean} [options.flipY=false] Whether the y-axis should be flipped when unpacking the texture.
         @param {boolean} [options.premultiplyAlpha=false] Whether the alpha channel should be pre-multiplied when unpacking the texture.
@@ -1044,7 +1052,7 @@ export class App {
         @param {number} size Number of images in the array.
         @param {Object} [options] Texture options.
         @param {GLEnum} [options.internalFormat=RGBA8] Texture data internal format. Must be a sized format.
-        @param {GLEnum} [options.type] Type of data stored in the texture. Default based on 
+        @param {GLEnum} [options.type] Type of data stored in the texture. Default based on
             &lt;b>internalFormat&lt;/b>.
         @param {boolean} [options.flipY=false] Whether the y-axis should be flipped when unpacking the texture.
         @param {GLEnum} [options.minFilter] Minification filter. Defaults to
@@ -1087,7 +1095,7 @@ export class App {
         @param {number} depth Texture depth.
         @param {Object} [options] Texture options.
         @param {GLEnum} [options.internalFormat=RGBA8] Texture data internal format. Must be a sized format.
-        @param {GLEnum} [options.type] Type of data stored in the texture. Default based on 
+        @param {GLEnum} [options.type] Type of data stored in the texture. Default based on
             &lt;b>internalFormat&lt;/b>.
         @param {boolean} [options.flipY=false] Whether the y-axis should be flipped when unpacking the texture.
         @param {GLEnum} [options.minFilter] Minification filter. Defaults to
@@ -1138,7 +1146,7 @@ export class App {
         @param {number} [options.width] Cubemap side width. Defaults to the width of negX if negX is an image.
         @param {number} [options.height] Cubemap side height. Defaults to the height of negX if negX is an image.
         @param {GLEnum} [options.internalFormat=RGBA8] Texture data internal format. Must be a sized format.
-        @param {GLEnum} [options.type] Type of data stored in the texture. Default based on 
+        @param {GLEnum} [options.type] Type of data stored in the texture. Default based on
             &lt;b>internalFormat&lt;/b>.
         @param {boolean} [options.flipY=false] Whether the y-axis should be flipped when unpacking the image.
         @param {boolean} [options.premultiplyAlpha=false] Whether the alpha channel should be pre-multiplied when unpacking the image.
@@ -1252,13 +1260,13 @@ export class App {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="App.html">App</a></li><li><a href="Cubemap.html">Cubemap</a></li><li><a href="DrawCall.html">DrawCall</a></li><li><a href="Framebuffer.html">Framebuffer</a></li><li><a href="Program.html">Program</a></li><li><a href="Query.html">Query</a></li><li><a href="Renderbuffer.html">Renderbuffer</a></li><li><a href="Shader.html">Shader</a></li><li><a href="Texture.html">Texture</a></li><li><a href="Timer.html">Timer</a></li><li><a href="TransformFeedback.html">TransformFeedback</a></li><li><a href="UniformBuffer.html">UniformBuffer</a></li><li><a href="VertexArray.html">VertexArray</a></li><li><a href="VertexBuffer.html">VertexBuffer</a></li></ul><h3>Namespaces</h3><ul><li><a href="PicoGL.html">PicoGL</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="PicoGL.html">PicoGL</a></li></ul><h3>Classes</h3><ul><li><a href="App.html">App</a></li><li><a href="Cubemap.html">Cubemap</a></li><li><a href="DrawCall.html">DrawCall</a></li><li><a href="Framebuffer.html">Framebuffer</a></li><li><a href="Program.html">Program</a></li><li><a href="Query.html">Query</a></li><li><a href="Renderbuffer.html">Renderbuffer</a></li><li><a href="Shader.html">Shader</a></li><li><a href="Texture.html">Texture</a></li><li><a href="Timer.html">Timer</a></li><li><a href="TransformFeedback.html">TransformFeedback</a></li><li><a href="UniformBuffer.html">UniformBuffer</a></li><li><a href="VertexArray.html">VertexArray</a></li><li><a href="VertexBuffer.html">VertexBuffer</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Apr 24 2019 08:40:11 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Mon Sep 09 2019 10:53:13 GMT-0500 (GMT-05:00)
 </footer>
 
 <script> prettyPrint(); </script>
