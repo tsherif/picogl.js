@@ -1,7 +1,9 @@
-## v0.14.1
+## v0.15.0
 
-- fix uniform buffer typo bug
-- dont throw when setting non-existent uniform
+- Built, versioned unbundled modules.
+- `App.blendEquation`
+- Fix uniform buffer handling of UNSIGNED_INT
+- Ignore setting of non-existent uniforms
 
 
 ## v0.14.0
