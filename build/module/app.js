@@ -421,6 +421,19 @@ export class App {
     }
 
     /**
+        Set the blend equation. E.g. app.blendEquation(PicoGL.MIN).
+
+        @method
+        @param {GLEnum} mode The operation to use in combining source and destination channels.
+        @return {App} The App object.
+    */
+    blendEquation(mode) {
+        this.gl.blendEquation(mode);
+
+        return this;
+    }
+
+    /**
         Enable stencil testing.
         NOTE: Only works if { stencil: true } passed as a
         context attribute when creating the App!
