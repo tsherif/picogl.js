@@ -3,7 +3,7 @@ const path = require('path');
 const webpack = require("webpack");
 const TerserPlugin = require("terser-webpack-plugin");
 
-const license = fs.readFileSync('LICENSE');
+const license = fs.readFileSync('LICENSE', { encoding: "utf8" });
 
 module.exports = {
     entry: "./build/module/picogl.js",
@@ -16,20 +16,21 @@ module.exports = {
         libraryExport: "PicoGL"
     },
     plugins: [
-        // Placeholder for actual license
         new webpack.BannerPlugin({
-          banner: 'DUMMY_BANNER'
+          banner: license
         })
     ],
     optimization: {
         minimize: true,
         minimizer: [new TerserPlugin({
             sourceMap: true,
-            extractComments: {
-                condition: true,
-                banner: `\n${license}\n`,
+            extractComments: false,
+            terserOptions: {
+              output: {
+                comments: /^\**!/,
+              },
             }
-        })],
+        })]
     },
     devtool: "source-map"
 };
