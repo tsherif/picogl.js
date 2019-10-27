@@ -13,10 +13,9 @@
     "url": "http://tareksherif.net/"
   },
   "scripts": {
-    "clean": "rimraf **/npm-debug.log",
     "lint": "eslint src/*.js",
     "compile-module": "rimraf build/module && cpy src build/module && replace %%VERSION%% $npm_package_version build/module/picogl.js",
-    "compile-bundle": "webpack && npm run clean",
+    "compile-bundle": "webpack",
     "compile": "npm run compile-module && npm run compile-bundle",
     "build": "npm run lint && npm run compile",
     "docs": "jsdoc -d docs src/*.js",
@@ -58,6 +57,7 @@
     "rimraf": "^3.0.0",
     "terser-webpack-plugin": "^2.0.1",
     "webpack": "^4.39.3",
-    "webpack-cli": "^3.3.8"
+    "webpack-cli": "^3.3.8",
+    "webpack-merge": "^4.2.2"
   }
 }
