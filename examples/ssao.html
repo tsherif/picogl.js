@@ -227,7 +227,9 @@
             color = vec4(texelFetch(uColorBuffer, ivec2(gl_FragCoord.xy), 0).rgb, 1.0);
         }
     </script>
-    <script type="module">       
+    <script type="module">
+        import { PicoGL } from "../src/picogl.js";
+        
         utils.addTimerElement();
 
         let ssaoEnabled = true;

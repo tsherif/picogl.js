@@ -55,7 +55,6 @@
     "jsdoc": "^3.6.3",
     "replace": "^1.1.1",
     "rimraf": "^3.0.0",
-    "terser-webpack-plugin": "^2.0.1",
     "webpack": "^4.39.3",
     "webpack-cli": "^3.3.8",
     "webpack-merge": "^4.2.2"
