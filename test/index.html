@@ -2,32 +2,27 @@
 <html>
 <head>
     <title>PicoGL Tests</title>
+    <script src="./lib/qunit-2.9.2.js"></script>
+    <link rel="stylesheet" href="./css/qunit-2.9.2.css">
 </head>
 <body>
-    <script>
-        let tests = [
-            "./interleaved-instanced.html",
-            "./uniforms.html",
-            "./rtt.html",
-            "./context-loss-xform-feedback.html",
-            "./build.html",
-            "./module.html",
-            "./no-vao.html",
-            "./no-vao-fragment.html",
-            "./translated-shaders.html"
-        ];
+    <div id="qunit"></div>
+    <div id="qunit-fixture"></div>
+    <script type="module">
+        import {PicoGL} from "../src/picogl.js";
 
-        for (let i = 0, len = tests.length; i < len; ++i) {
-            let src = tests[i];
-            let iframe = document.createElement("iframe");
-            iframe.src = src;
-            iframe.style.pointerEvents = "none";
-            let link = document.createElement("a");
-            link.href = src;
-            link.appendChild(iframe);
-            link.style.display = "inline-block";
-            document.body.appendChild(link);
+        if (window.puppeteer_runEnd) {
+            QUnit.on("runEnd", puppeteer_runEnd);
         }
+
+        QUnit.test("PicoGL", (assert) => {
+            assert.ok(PicoGL, "PicoGL was loaded");
+            // assert.ok(PicoGL.luma, "PicoGL has a luma property");
+            // assert.ok(PicoGL.duma, "PicoGL has a duma property");
+            // assert.ok(PicoGL.guma, "PicoGL has a guma property");
+            assert.ok(PicoGL.FLOAT, "PicoGL.FLOAT is a THANG");
+            
+        });
     </script>
 </body>
 </html>

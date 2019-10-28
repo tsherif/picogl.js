@@ -19,6 +19,7 @@
     "compile": "npm run compile-module && npm run compile-bundle",
     "build": "npm run lint && npm run compile",
     "docs": "jsdoc -d docs src/*.js",
+    "test-unit": "node test/puppeteer.js", 
     "test": "npm run lint"
   },
   "keywords": [
@@ -53,6 +54,7 @@
     "cpy-cli": "^2.0.0",
     "eslint": "^6.3.0",
     "jsdoc": "^3.6.3",
+    "puppeteer": "^2.0.0",
     "replace": "^1.1.1",
     "rimraf": "^3.0.0",
     "webpack": "^4.39.3",

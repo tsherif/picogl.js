@@ -3,7 +3,16 @@
 <head>
     <title>PicoGL.js: Triangle</title>
     <meta charset="utf-8">
-    <link rel="stylesheet" href="../site/css/picogl-example.css"> 
+    <link rel="stylesheet" href="../../site/css/picogl-example.css"> 
+    <style>
+        #translated-source {
+            position: absolute;
+            left: 0;
+            top: 0;
+            color: white;
+            font-size: 8px;
+        }
+    </style>
 </head>
 <!--
   The MIT License (MIT)
@@ -28,19 +37,18 @@
   CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -->
 <body>
+    <div id="translated-source"></div>
     <canvas id="gl-canvas"></canvas>
     <script type="shader/vs" id="vs">
         #version 300 es
-                
+        
+        layout(location=0) in vec4 position;
+        layout(location=1) in vec3 color;
+        
         out vec3 vColor; 
         void main() {
-            int col = gl_VertexID % 2;
-            int row = gl_VertexID / 2;
-            float x = (float(row) - 0.5) * 0.8;
-            float y = (float(col) - 0.5) * 0.8;
-            vColor = vec3(row, col, 1.0);
-            gl_Position = vec4(x, y, 0.0, 1.0);
-            gl_PointSize = 40.0;
+            vColor = color;
+            gl_Position = position;
         }
     </script>
     <script type="shader/fs" id="fs">
@@ -55,7 +63,7 @@
         }
     </script>
     <script type="module">
-        import { PicoGL } from "../src/picogl.js";
+        import { PicoGL } from "../../src/picogl.js";
 
         let canvas = document.getElementById("gl-canvas");
         canvas.width = window.innerWidth;
@@ -72,11 +80,28 @@
         let vsSource =  document.getElementById("vs").text.trim();
         let fsSource =  document.getElementById("fs").text.trim();
 
+        // GEOMETRY IN VERTEX BUFFERS
+        let positions = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
+            -0.5, -0.5,
+             0.5, -0.5,
+             0.0, 0.5, 
+        ]));
+
+        let colors = app.createVertexBuffer(PicoGL.UNSIGNED_BYTE, 3, new Uint8Array([
+            255, 0, 0,
+            0, 255, 0,
+            0, 0, 255
+        ]));
+
+        // COMBINE VERTEX BUFFERS INTO VERTEX ARRAY
+        let triangleArray = app.createVertexArray()
+        .vertexAttributeBuffer(0, positions)
+        .vertexAttributeBuffer(1, colors, { normalized: true });
+
         app.createPrograms([vsSource, fsSource]).then(function([program]) {
+            document.getElementById("translated-source").innerHTML = `${program.translatedVertexSource()}<BR><BR>${program.translatedFragmentSource()}`.replace(/\n/g, "<BR>");
             // CREATE DRAW CALL FROM PROGRAM AND VERTEX ARRAY
-            let drawCall = app.createDrawCall(program)
-            .primitive(PicoGL.POINTS)
-            .drawRanges([0, 4]);
+            let drawCall = app.createDrawCall(program, triangleArray);
 
             // DRAW
             app.clear();
@@ -84,6 +109,9 @@
 
             // CLEANUP
             program.delete();
+            positions.delete();
+            colors.delete();
+            triangleArray.delete();
         });
 
     </script>
