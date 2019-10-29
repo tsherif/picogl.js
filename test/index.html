@@ -2,27 +2,20 @@
 <html>
 <head>
     <title>PicoGL Tests</title>
-    <script src="./lib/qunit-2.9.2.js"></script>
     <link rel="stylesheet" href="./css/qunit-2.9.2.css">
+    <script src="./utils/qunit-2.9.2.js"></script>
+    <script src="./utils/test-utils.js"></script>
+    <script>
+        if (window.puppeteer_runEnd) {
+            QUnit.on("runEnd", puppeteer_runEnd);
+        }
+    </script>
 </head>
 <body>
     <div id="qunit"></div>
     <div id="qunit-fixture"></div>
     <script type="module">
-        import {PicoGL} from "../src/picogl.js";
-
-        if (window.puppeteer_runEnd) {
-            QUnit.on("runEnd", puppeteer_runEnd);
-        }
-
-        QUnit.test("PicoGL", (assert) => {
-            assert.ok(PicoGL, "PicoGL was loaded");
-            // assert.ok(PicoGL.luma, "PicoGL has a luma property");
-            // assert.ok(PicoGL.duma, "PicoGL has a duma property");
-            // assert.ok(PicoGL.guma, "PicoGL has a guma property");
-            assert.ok(PicoGL.FLOAT, "PicoGL.FLOAT is a THANG");
-            
-        });
+        import "./index.js";
     </script>
 </body>
 </html>
