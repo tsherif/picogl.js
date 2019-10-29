@@ -22,7 +22,7 @@ const puppeteer = require('puppeteer');
                 for (let j = 0; j < count; ++j) {
                     const assertion = assertions[j];
                     if (!assertion.passed) {
-                        console.log(`\n\u001b[31mFail:\u001b[0m ${test.name}: ${assertion.message}`);
+                        console.log(`\n\u001b[31mFail:\u001b[0m ${test.name}: ${assertion.message}\n`);
                         console.log(assertion.stack);
                         console.log("\n");
                     }
