@@ -1,36 +1,36 @@
-const puppeteer = require('puppeteer');
+"use strict";
+
+const puppeteer = require("puppeteer");
 const http = require("http");
 const fs = require("fs");
 const path = require("path");
 
-const PATH = 'test/';
-const FILE_PATH = path.resolve('.', PATH);
+const PATH = "test/tests/";
 const PORT = 7171;
 const MIME_TYPES = {
-    ".css":  "text/css",
+    ".css": "text/css",
     ".html": "text/html",
     ".js": "text/javascript",
     ".json": "application/json"
 };
 
-const server = http.createServer(function (req, res) {
-    const method = req.method;
+const server = http.createServer((req, res) => {
     const url = req.url; 
     const requestPath = decodeURI(url.replace(/^\/+/, "").replace(/\?.*$/, ""));
-    const filePath = path.resolve('.', requestPath);
+    const filePath = path.resolve(".", requestPath);
     const mimeType = MIME_TYPES[path.extname(filePath)] || "application/octet-stream";
 
-    fs.stat(filePath, function(err, stat) {
+    fs.stat(filePath, (err, stat) => {
         if (stat && stat.isDirectory()) {
-          fs.readFile(filePath + "/index.html", function(err, content) {
-            res.setHeader("Content-Type", "text/html");
-            res.end(content);
-          });
+            fs.readFile(filePath + "/index.html", (err, content) => {
+                res.setHeader("Content-Type", "text/html");
+                res.end(content);
+            });
         } else {
-          fs.readFile(filePath, function(err, content) {
-            res.setHeader("Content-Type", mimeType);
-            res.end(content);
-          });
+            fs.readFile(filePath, (err, content) => {
+                res.setHeader("Content-Type", mimeType);
+                res.end(content);
+            });
         }
     });
 }).listen(PORT);
@@ -65,7 +65,9 @@ const server = http.createServer(function (req, res) {
             }
         }
         console.log(`\nRan ${results.testCounts.total} tests (${numAssertions} assertions)...\n`);
-        if (results.status === "passed") {
+
+        const passed = results.status === "passed";
+        if (passed) {
             console.log("\u001b[32mAll tests passed!\u001b[0m\n");
         } else {
             console.log(`\t\u001b[31m${results.testCounts.failed} tests failed.\u001b[0m\n\n`);

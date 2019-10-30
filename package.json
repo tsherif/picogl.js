@@ -13,14 +13,14 @@
     "url": "http://tareksherif.net/"
   },
   "scripts": {
-    "lint": "eslint src/*.js",
+    "lint": "eslint src/*.js test/*.js test/tests/*.js",
     "compile-module": "rimraf build/module && cpy src build/module && replace %%VERSION%% $npm_package_version build/module/picogl.js",
     "compile-bundle": "webpack",
     "compile": "npm run compile-module && npm run compile-bundle",
     "build": "npm run lint && npm run compile",
     "docs": "jsdoc -d docs src/*.js",
     "test-unit": "node test/puppeteer.js", 
-    "test": "npm run lint"
+    "test": "npm run lint && npm run test-unit"
   },
   "keywords": [
     "webgl",

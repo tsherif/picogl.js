@@ -9,6 +9,6 @@ test("PicoGL", (t) => {
 test("PicoGL.createApp", (t, canvas) => {
     let app = PicoGL.createApp(canvas);
 
-    t.ok(app, "App was created")
-    t.ok(typeof PicoGL.WEBGL_INFO.MAX_TEXTURE_UNITS === "number", "WEBGL_INFO initialized")
+    t.ok(app, "App was created");
+    t.ok(typeof PicoGL.WEBGL_INFO.MAX_TEXTURE_UNITS === "number", "WEBGL_INFO initialized");
 });

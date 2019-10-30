@@ -1,9 +1,9 @@
 import {PicoGL} from "../../src/picogl.js";
 
-const TEST_COLOR_MASK = [true, false, false, true];
-const TEST_COLOR = [0, 0.25, 0.5, 0.75];
-const TEST_DEPTH_RANGE = [0.25, 0.5];
-const TEST_SCISSOR_BOX = [10, 10, 10, 10];
+const TEST_COLOR_MASK = [ true, false, false, true ];
+const TEST_COLOR = [ 0, 0.25, 0.5, 0.75 ];
+const TEST_DEPTH_RANGE = [ 0.25, 0.5 ];
+const TEST_SCISSOR_BOX = [ 10, 10, 10, 10 ];
 
 test("App", (t, canvas) => {
     let app = PicoGL.createApp(canvas);
