@@ -2,7 +2,7 @@
 
 const puppeteer = require("puppeteer");
 const http = require("http");
-const fs = require("fs");
+const fs = require("fs").promises;
 const path = require("path");
 
 const PATH = "test/tests/";
@@ -14,25 +14,23 @@ const MIME_TYPES = {
     ".json": "application/json"
 };
 
-const server = http.createServer((req, res) => {
+const server = http.createServer(async (req, res) => {
     const url = req.url; 
     const requestPath = decodeURI(url.replace(/^\/+/, "").replace(/\?.*$/, ""));
     const filePath = path.resolve(".", requestPath);
     const mimeType = MIME_TYPES[path.extname(filePath)] || "application/octet-stream";
 
-    fs.stat(filePath, (err, stat) => {
-        if (stat && stat.isDirectory()) {
-            fs.readFile(filePath + "/index.html", (err, content) => {
-                res.setHeader("Content-Type", "text/html");
-                res.end(content);
-            });
-        } else {
-            fs.readFile(filePath, (err, content) => {
-                res.setHeader("Content-Type", mimeType);
-                res.end(content);
-            });
-        }
-    });
+    const stat = await fs.stat(filePath);
+
+    if (stat && stat.isDirectory()) {
+        const content = await fs.readFile(filePath + "/index.html");
+        res.setHeader("Content-Type", "text/html");
+        res.end(content);
+    } else {
+        const content = await fs.readFile(filePath);
+        res.setHeader("Content-Type", mimeType);
+        res.end(content);
+    }
 }).listen(PORT);
 
 (async () => {
