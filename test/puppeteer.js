@@ -1,4 +1,39 @@
 const puppeteer = require('puppeteer');
+const http = require("http");
+const fs = require("fs");
+const path = require("path");
+
+const PATH = 'test/';
+const FILE_PATH = path.resolve('.', PATH);
+const PORT = 7171;
+const MIME_TYPES = {
+    ".css":  "text/css",
+    ".html": "text/html",
+    ".js": "text/javascript",
+    ".json": "application/json"
+};
+
+const server = http.createServer(function (req, res) {
+    const method = req.method;
+    const url = req.url; 
+    const requestPath = decodeURI(url.replace(/^\/+/, "").replace(/\?.*$/, ""));
+    const filePath = path.resolve('.', requestPath);
+    const mimeType = MIME_TYPES[path.extname(filePath)] || "application/octet-stream";
+
+    fs.stat(filePath, function(err, stat) {
+        if (stat && stat.isDirectory()) {
+          fs.readFile(filePath + "/index.html", function(err, content) {
+            res.setHeader("Content-Type", "text/html");
+            res.end(content);
+          });
+        } else {
+          fs.readFile(filePath, function(err, content) {
+            res.setHeader("Content-Type", mimeType);
+            res.end(content);
+          });
+        }
+    });
+}).listen(PORT);
 
 (async () => {
     const browser = await puppeteer.launch();
@@ -36,11 +71,12 @@ const puppeteer = require('puppeteer');
             console.log(`\t\u001b[31m${results.testCounts.failed} tests failed.\u001b[0m\n\n`);
         }
 
+        await server.close();
         await browser.close();
 
         process.exit(passed ? 0 : 1);
     });
 
-    await page.goto('http://localhost:5000/test/');
+    await page.goto(`http://localhost:${PORT}/${PATH}`);
 
 })();
