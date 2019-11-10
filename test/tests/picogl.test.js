@@ -1,3 +1,4 @@
+import {test} from "../utils/test-utils.js";
 import {PicoGL} from "../../src/picogl.js";
 
 test("PicoGL", (t) => {

@@ -1,3 +1,4 @@
+import {test, createQuadDrawCall, readCenterPixel} from "../utils/test-utils.js";
 import {PicoGL} from "../../src/picogl.js";
 
 test("Cubemap lifecycle", (t, canvas) => {
