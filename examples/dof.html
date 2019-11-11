@@ -204,11 +204,11 @@
         let depthRange = vec2.fromValues(NEAR, FAR);
 
         // SET UP PROGRAMS
-        let boxVsSource =  document.getElementById("vertex-boxes").text.trim();
-        let boxFsSource =  document.getElementById("fragment-boxes").text.trim();
+        let boxVsSource =  document.getElementById("vertex-boxes").text;
+        let boxFsSource =  document.getElementById("fragment-boxes").text;
 
-        let quadVsSource =  document.getElementById("vertex-quad").text.trim();
-        let blurFsSource = document.getElementById("fragment-blur").text.trim();
+        let quadVsSource =  document.getElementById("vertex-quad").text;
+        let blurFsSource = document.getElementById("fragment-blur").text;
         
         // FRAMEBUFFERS
         let colorTargetA = app.createTexture2D(app.width, app.height);

@@ -301,15 +301,15 @@
         };
 
         // PROGRAM
-        let vsSource =  document.getElementById("vertex-cube").text.trim();
+        let vsSource =  document.getElementById("vertex-cube").text;
         let vShader = app.createShader(PicoGL.VERTEX_SHADER, vsSource);
 
-        let cubemapFsSource =  document.getElementById("fragment-cubemap").text.trim();
+        let cubemapFsSource =  document.getElementById("fragment-cubemap").text;
         
-        let fsSource =  document.getElementById("fragment-cube").text.trim();
+        let fsSource =  document.getElementById("fragment-cube").text;
 
-        let skyboxVsSource =  document.getElementById("vertex-skybox").text.trim();
-        let skyboxFsSource =  document.getElementById("fragment-skybox").text.trim();
+        let skyboxVsSource =  document.getElementById("vertex-skybox").text;
+        let skyboxFsSource =  document.getElementById("fragment-skybox").text;
 
         Promise.all([
             app.createPrograms(

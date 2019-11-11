@@ -61,7 +61,7 @@
         }
     </script>
     <script type="module">
-        import { PicoGL } from "../src/picogl.js";
+        import { PicoGL } from "../../src/picogl.js";
 
         let canvas = document.getElementById("gl-canvas");
 
@@ -76,8 +76,8 @@
         let app = PicoGL.createApp(canvas);
 
         // PROGRAM
-        let vsSource =  document.getElementById("vertex-draw").text.trim();
-        let fsSource =  document.getElementById("fragment-draw").text.trim();
+        let vsSource =  document.getElementById("vertex-draw").text;
+        let fsSource =  document.getElementById("fragment-draw").text;
         let program = app.createProgram(vsSource, fsSource);
 
         // FRAMEBUFFER
@@ -124,10 +124,9 @@
             // RENDER TO SCREEN
             app.defaultDrawFramebuffer().clearColor(0.0, 0.0, 0.0, 1.0).clear();
             drawCall.texture("tex", rttBuffer.colorAttachments[0]).draw();
-            
         }
 
-        image.src = "../examples/img/webgl-logo.png";
+        image.src = "../../examples/img/webgl-logo.png";
     </script>
 </body>
 </html>

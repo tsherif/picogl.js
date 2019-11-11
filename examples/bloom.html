@@ -243,18 +243,18 @@
 
         // SET UP PROGRAMS
 
-        let cubeVsSource =  document.getElementById("vertex-cube").text.trim();
-        let cubeFsSource =  document.getElementById("fragment-cube").text.trim();
+        let cubeVsSource =  document.getElementById("vertex-cube").text;
+        let cubeFsSource =  document.getElementById("fragment-cube").text;
 
-        let sunVsSource =  document.getElementById("vertex-sun").text.trim();
-        let sunFsSource =  document.getElementById("fragment-sun").text.trim();
+        let sunVsSource =  document.getElementById("vertex-sun").text;
+        let sunFsSource =  document.getElementById("fragment-sun").text;
 
-        let quadVsSource =  document.getElementById("vertex-quad").text.trim();
+        let quadVsSource =  document.getElementById("vertex-quad").text;
         let quadVertexShader = app.createShader(PicoGL.VERTEX_SHADER, quadVsSource);
 
-        let blurFsSource =  document.getElementById("fragment-blur").text.trim();
+        let blurFsSource =  document.getElementById("fragment-blur").text;
 
-        let blendFsSource =  document.getElementById("fragment-blend").text.trim();
+        let blendFsSource =  document.getElementById("fragment-blend").text;
  
         // SET UP FRAMEBUFFERS AND TEXTURES
 

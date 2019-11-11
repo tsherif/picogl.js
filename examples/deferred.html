@@ -154,8 +154,8 @@
         let timer = app.createTimer();
 
         // SET UP GBUFFER PROGRAM
-        let geoVsSource =  document.getElementById("geo-vs").text.trim();
-        let geoFsSource =  document.getElementById("geo-fs").text.trim();
+        let geoVsSource =  document.getElementById("geo-vs").text;
+        let geoFsSource =  document.getElementById("geo-fs").text;
 
         let positionTarget = app.createTexture2D(app.width, app.height, { 
             internalFormat: PicoGL.RGBA16F 
@@ -175,8 +175,8 @@
         console.assert(gBuffer.getStatus() === PicoGL.FRAMEBUFFER_COMPLETE, "G-buffer framebuffer is not complete!");
 
         // SET UP MAIN PROGRAM
-        let vsSource =  document.getElementById("main-vs").text.trim();
-        let fsSource =  document.getElementById("main-fs").text.trim();
+        let vsSource =  document.getElementById("main-vs").text;
+        let fsSource =  document.getElementById("main-fs").text;
         
         // GEOMETRY
         let box = utils.createBox();

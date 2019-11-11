@@ -135,8 +135,8 @@
         let timer = app.createTimer();
 
         // SET UP SHADOW PROGRAM
-        let shadowVsSource =  document.getElementById("shadow-vs").text.trim();
-        let shadowFsSource =  document.getElementById("shadow-fs").text.trim();
+        let shadowVsSource =  document.getElementById("shadow-vs").text;
+        let shadowFsSource =  document.getElementById("shadow-fs").text;
 
         let shadowDepthTarget = app.createTexture2D(app.width, app.height, {
             internalFormat: PicoGL.DEPTH_COMPONENT16,
@@ -145,8 +145,8 @@
         let shadowBuffer = app.createFramebuffer().depthTarget(shadowDepthTarget);
 
         // SET UP MAIN PROGRAM
-        let vsSource =  document.getElementById("main-vs").text.trim();
-        let fsSource =  document.getElementById("main-fs").text.trim();
+        let vsSource =  document.getElementById("main-vs").text;
+        let fsSource =  document.getElementById("main-fs").text;
        
         // GEOMETRY
         let box = utils.createBox({dimensions: [1.0, 1.0, 1.0]})
