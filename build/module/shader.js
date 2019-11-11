@@ -37,7 +37,7 @@ export class Shader {
         this.appState = appState;
         this.shader = null;
         this.type = type;
-        this.source = source;
+        this.source = source.trim();
 
         this.restore();
     }

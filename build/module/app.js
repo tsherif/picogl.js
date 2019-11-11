@@ -459,43 +459,6 @@ export class App {
         return this;
     }
 
-
-    /**
-        Enable scissor testing.
-
-        @method
-        @return {App} The App object.
-    */
-    scissorTest() {
-        this.gl.enable(this.gl.SCISSOR_TEST);
-
-        return this;
-    }
-
-    /**
-        Disable scissor testing.
-
-        @method
-        @return {App} The App object.
-    */
-    noScissorTest() {
-        this.gl.disable(this.gl.SCISSOR_TEST);
-
-        return this;
-    }
-
-    /**
-        Define the scissor box.
-
-        @method
-        @return {App} The App object.
-    */
-    scissor(x, y, width, height) {
-        this.gl.scissor(x, y, width, height);
-
-        return this;
-    }
-
     /**
         Set the bitmask to use for tested stencil values.
         E.g. app.stencilMask(0xFF).
@@ -602,6 +565,43 @@ export class App {
     */
     stencilOpSeparate(face, stencilFail, depthFail, pass) {
         this.gl.stencilOpSeparate(face, stencilFail, depthFail, pass);
+
+        return this;
+    }
+
+
+    /**
+        Enable scissor testing.
+
+        @method
+        @return {App} The App object.
+    */
+    scissorTest() {
+        this.gl.enable(this.gl.SCISSOR_TEST);
+
+        return this;
+    }
+
+    /**
+        Disable scissor testing.
+
+        @method
+        @return {App} The App object.
+    */
+    noScissorTest() {
+        this.gl.disable(this.gl.SCISSOR_TEST);
+
+        return this;
+    }
+
+    /**
+        Define the scissor box.
+
+        @method
+        @return {App} The App object.
+    */
+    scissor(x, y, width, height) {
+        this.gl.scissor(x, y, width, height);
 
         return this;
     }
