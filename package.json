@@ -20,7 +20,7 @@
     "build": "npm run lint && npm run compile",
     "docs": "jsdoc -d docs src/*.js",
     "test-unit": "rimraf .nyc_output/ && node test/puppeteer.js",
-    "coverage": "npm run test-unit && nyc report",
+    "coverage": "npm run test-unit && nyc report --reporter=lcov",
     "test": "npm run lint && npm run test-unit"
   },
   "keywords": [
@@ -37,6 +37,7 @@
   },
   "devDependencies": {
     "babel-minify-webpack-plugin": "^0.3.1",
+    "coveralls": "^3.0.7",
     "cpy-cli": "^2.0.0",
     "eslint": "^6.3.0",
     "jsdoc": "^3.6.3",

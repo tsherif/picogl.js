@@ -8,6 +8,8 @@ const path = require("path");
 
 const PATH = "test/tests/";
 const PORT = 7171;
+const BASE_URL = `http://localhost:${PORT}/`;
+const FILTER_REGEX = new RegExp(`${BASE_URL}src/`);
 const MIME_TYPES = {
     ".css": "text/css",
     ".html": "text/html",
@@ -72,8 +74,8 @@ const server = http.createServer(async (req, res) => {
             console.log(`\t\u001b[31m${results.testCounts.failed} tests failed.\u001b[0m\n\n`);
         }
 
-        const jsCoverage = await page.coverage.stopJSCoverage(); 
-        pti.write(jsCoverage.filter(s => s.url.match(/\/src\/.+\.js/)));
+        const jsCoverage = await page.coverage.stopJSCoverage();
+        pti.write(jsCoverage.filter(s => s.url.match(FILTER_REGEX)));
 
         await server.close();
         await browser.close();
@@ -82,5 +84,5 @@ const server = http.createServer(async (req, res) => {
     });
 
     await page.coverage.startJSCoverage();
-    await page.goto(`http://localhost:${PORT}/${PATH}`);
+    await page.goto(`${BASE_URL}${PATH}`);
 })();
