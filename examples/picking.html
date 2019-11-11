@@ -142,8 +142,8 @@
         let timer = app.createTimer();
 
         // SET UP PICKING PROGRAM
-        let pickingVsSource = document.getElementById("picking-vs").text.trim();
-        let pickingFsSource = document.getElementById("picking-fs").text.trim();
+        let pickingVsSource = document.getElementById("picking-vs").text;
+        let pickingFsSource = document.getElementById("picking-fs").text;
 
         let pickColorTarget = app.createTexture2D(app.width, app.height);
         let pickDepthTarget = app.createRenderbuffer(app.width, app.height, PicoGL.DEPTH_COMPONENT16);
@@ -151,8 +151,8 @@
         let pickingBuffer = app.createFramebuffer().colorTarget(0, pickColorTarget).depthTarget(pickDepthTarget);
 
         // SET UP MAIN PROGRAM
-        let vsSource = document.getElementById("main-vs").text.trim();
-        let fsSource = document.getElementById("main-fs").text.trim();
+        let vsSource = document.getElementById("main-vs").text;
+        let fsSource = document.getElementById("main-fs").text;
         
         // GEOMETRY
         let box = utils.createBox({dimensions: [1.0, 1.0, 1.0]})

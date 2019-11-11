@@ -76,8 +76,8 @@
         }
 
         // PROGRAM
-        let vsSource =  document.getElementById("vs").text.trim();
-        let fsSource =  document.getElementById("fs").text.trim();
+        let vsSource =  document.getElementById("vs").text;
+        let fsSource =  document.getElementById("fs").text;
                         
         // PER-VERTEX POSITIONS
         let positions = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([

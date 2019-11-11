@@ -343,30 +343,30 @@
         ///////////////////
 
         // Generic quad vertex shader
-        let quadVsSource = document.getElementById("quad-vs").text.trim();
+        let quadVsSource = document.getElementById("quad-vs").text;
         let quadShader = app.createShader(PicoGL.VERTEX_SHADER, quadVsSource);
 
         // Update wind and gravity forces
-        let updateForceFsSource = document.getElementById("update-force-fs").text.trim();
+        let updateForceFsSource = document.getElementById("update-force-fs").text;
 
         // Apply structural and shear constraints
-        let updateConstraintFsSource = document.getElementById("update-constraint-fs").text.trim();
+        let updateConstraintFsSource = document.getElementById("update-constraint-fs").text;
 
         // Check for collision with ball
-        let updateCollisionFsSource = document.getElementById("update-collision-fs").text.trim();
+        let updateCollisionFsSource = document.getElementById("update-collision-fs").text;
         // Calculate normals
-        let updateNormalFsSource = document.getElementById("update-normal-fs").text.trim();
+        let updateNormalFsSource = document.getElementById("update-normal-fs").text;
         
 
         // Generic phong shader used for drawing
-        let phongSource = document.getElementById("phong-fs").text.trim();
+        let phongSource = document.getElementById("phong-fs").text;
         let phongShader = app.createShader(PicoGL.FRAGMENT_SHADER, phongSource);
 
         // Draw ball
-        let ballVsSource = document.getElementById("ball-vs").text.trim();
+        let ballVsSource = document.getElementById("ball-vs").text;
 
         // Draw cloth
-        let clothVsSource = document.getElementById("cloth-vs").text.trim();
+        let clothVsSource = document.getElementById("cloth-vs").text;
 
         ////////////////////
         // FRAME BUFFERS

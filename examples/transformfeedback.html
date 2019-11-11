@@ -91,8 +91,8 @@
         }
 
         // TRANSFORM FEEDBACK PROGRAM
-        let vsSource =  document.getElementById("vs").text.trim();
-        let fsSource =  document.getElementById("fs").text.trim();
+        let vsSource =  document.getElementById("vs").text;
+        let fsSource =  document.getElementById("fs").text;
               
         // INPUT AND OUTPUT VERTEX BUFFERS
         let positions1 = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([

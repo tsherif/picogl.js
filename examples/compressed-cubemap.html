@@ -142,11 +142,11 @@
         let timer = app.createTimer();
 
         // SET UP PROGRAMS
-        let vsSource =  document.getElementById("vertex-draw").text.trim();
-        let fsSource =  document.getElementById("fragment-draw").text.trim();
+        let vsSource =  document.getElementById("vertex-draw").text;
+        let fsSource =  document.getElementById("fragment-draw").text;
 
-        let skyboxVsSource =  document.getElementById("vertex-skybox").text.trim();
-        let skyboxFsSource =  document.getElementById("fragment-skybox").text.trim();
+        let skyboxVsSource =  document.getElementById("vertex-skybox").text;
+        let skyboxFsSource =  document.getElementById("fragment-skybox").text;
         
         // SET UP GEOMETRY
         let box = utils.createBox({dimensions: [1.0, 1.0, 1.0]})

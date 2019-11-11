@@ -67,8 +67,8 @@
         }
 
         // PROGRAM 
-        let vsSource =  document.getElementById("vs").text.trim();
-        let fsSource =  document.getElementById("fs").text.trim();
+        let vsSource =  document.getElementById("vs").text;
+        let fsSource =  document.getElementById("fs").text;
 
         app.createPrograms([vsSource, fsSource]).then(function([program]) {
             // CREATE DRAW CALL FROM PROGRAM AND VERTEX ARRAY

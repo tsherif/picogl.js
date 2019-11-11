@@ -76,8 +76,8 @@
         let app = PicoGL.createApp(canvas);
 
         // PROGRAM
-        let vsSource =  document.getElementById("vertex-draw").text.trim();
-        let fsSource =  document.getElementById("fragment-draw").text.trim();
+        let vsSource =  document.getElementById("vertex-draw").text;
+        let fsSource =  document.getElementById("fragment-draw").text;
         let program = app.createProgram(vsSource, fsSource);
 
         // FRAMEBUFFER

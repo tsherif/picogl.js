@@ -464,13 +464,13 @@
         let timer = app.createTimer();
 
         // SET UP PROGRAM
-        let vsSource =  document.getElementById("vertex-draw").text.trim();
-        let fsSource =  document.getElementById("fragment-draw").text.trim();
-        let quadVsSource = document.getElementById("quad-vs").text.trim();
-        let updateForceFsSource = document.getElementById("update-force-fs").text.trim();
-        let updateConstraintFsSource = document.getElementById("update-constraint-fs").text.trim();
-        let updateCollisionFsSource = document.getElementById("update-collision-fs").text.trim();
-        let updateNormalFsSource = document.getElementById("update-normal-fs").text.trim();
+        let vsSource =  document.getElementById("vertex-draw").text;
+        let fsSource =  document.getElementById("fragment-draw").text;
+        let quadVsSource = document.getElementById("quad-vs").text;
+        let updateForceFsSource = document.getElementById("update-force-fs").text;
+        let updateConstraintFsSource = document.getElementById("update-constraint-fs").text;
+        let updateCollisionFsSource = document.getElementById("update-collision-fs").text;
+        let updateNormalFsSource = document.getElementById("update-normal-fs").text;
 
         let numIterations = 20;
         let sources = [];

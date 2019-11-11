@@ -198,8 +198,8 @@
         }
 
         // ACCUMULATION PROGRAM
-        let accumVsSource = document.getElementById("vertex-accum").text.trim();
-        let accumFsSource = document.getElementById("fragment-accum").text.trim();
+        let accumVsSource = document.getElementById("vertex-accum").text;
+        let accumFsSource = document.getElementById("fragment-accum").text;
 
         let accumulateTarget = app.createTexture2D(app.width, app.height, { 
             internalFormat: PicoGL.RGBA16F 
@@ -212,8 +212,8 @@
         .colorTarget(1, accumulateAlphaTarget);
 
         // BLEND PROGRAM
-        let blendVsSource = document.getElementById("vertex-quad").text.trim();
-        let blendFsSource = document.getElementById("fragment-blend").text.trim();
+        let blendVsSource = document.getElementById("vertex-quad").text;
+        let blendFsSource = document.getElementById("fragment-blend").text;
 
         // INSTANCED SPHERE GEOMETRY
         let sphere = utils.createSphere({radius: 0.5});

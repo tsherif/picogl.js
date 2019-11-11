@@ -149,11 +149,11 @@
         let timer = app.createTimer();
 
         // SET UP PROGRAM
-        let tex3DVsSource =  document.getElementById("vertex-3dtexture").text.trim();
-        let tex3DFsSource =  document.getElementById("fragment-3dtexture").text.trim();
+        let tex3DVsSource =  document.getElementById("vertex-3dtexture").text;
+        let tex3DFsSource =  document.getElementById("fragment-3dtexture").text;
 
-        let vsSource =  document.getElementById("vertex-draw").text.trim();
-        let fsSource =  document.getElementById("fragment-draw").text.trim();
+        let vsSource =  document.getElementById("vertex-draw").text;
+        let fsSource =  document.getElementById("fragment-draw").text;
         
         let colorTarget = app.createTexture3D(DIMENSIONS, DIMENSIONS, DIMENSIONS, {
             maxAnisotropy: PicoGL.WEBGL_INFO.MAX_TEXTURE_ANISOTROPY 

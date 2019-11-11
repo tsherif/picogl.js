@@ -148,16 +148,16 @@
         }
 
         // PROGRAM
-        let vsSource =  document.getElementById("vs-mats").text.trim();
-        let fsSource =  document.getElementById("fs-mats").text.trim();                        
+        let vsSource =  document.getElementById("vs-mats").text;
+        let fsSource =  document.getElementById("fs-mats").text;                        
         let matProgram = app.createProgram(vsSource, fsSource);
 
-        vsSource =  document.getElementById("vs-arrays").text.trim();
-        fsSource =  document.getElementById("fs-arrays").text.trim();                        
+        vsSource =  document.getElementById("vs-arrays").text;
+        fsSource =  document.getElementById("fs-arrays").text;                        
         let arrayProgram = app.createProgram(vsSource, fsSource);
 
-        vsSource =  document.getElementById("vs-tex-bool").text.trim();
-        fsSource =  document.getElementById("fs-tex-bool").text.trim();                        
+        vsSource =  document.getElementById("vs-tex-bool").text;
+        fsSource =  document.getElementById("fs-tex-bool").text;                        
         let texBoolProgram = app.createProgram(vsSource, fsSource);
 
         // GEOMETRY
