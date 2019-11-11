@@ -1,6 +1,7 @@
 "use strict";
 
 const puppeteer = require("puppeteer");
+const pti = require("puppeteer-to-istanbul");
 const http = require("http");
 const fs = require("fs").promises;
 const path = require("path");
@@ -71,11 +72,15 @@ const server = http.createServer(async (req, res) => {
             console.log(`\t\u001b[31m${results.testCounts.failed} tests failed.\u001b[0m\n\n`);
         }
 
+        const jsCoverage = await page.coverage.stopJSCoverage(); 
+        pti.write(jsCoverage.filter(s => s.url.match(/\/src\/.+\.js/)));
+
         await server.close();
         await browser.close();
 
         process.exit(passed ? 0 : 1);
     });
 
+    await page.coverage.startJSCoverage();
     await page.goto(`http://localhost:${PORT}/${PATH}`);
 })();
