@@ -1,4 +1,4 @@
-import {test} from "../utils/test-utils.js";
+import {test, asyncResult} from "../utils/test-utils.js";
 import {PicoGL} from "../../src/picogl.js";
 
 const TEST_COLOR_MASK = [ true, false, false, true ];
@@ -125,4 +125,17 @@ test("App state functions", (t, canvas) => {
     
     app.scissor(...TEST_SCISSOR_BOX);
     t.glParameterEqual(gl, PicoGL.SCISSOR_BOX, TEST_SCISSOR_BOX, "Scissor box set");
+});
+
+test("App context loss", (t, canvas) => {
+    let app = PicoGL.createApp(canvas);
+
+    app.onContextLost(() => {
+        requestAnimationFrame(() => app.restoreContext());
+    });
+
+    return asyncResult(t, "Context loss handler runs", (pass) => {
+        app.onContextRestored(pass);
+        app.loseContext();
+    });
 });

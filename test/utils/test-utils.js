@@ -33,10 +33,24 @@ export function test(name, fn) {
         document.body.appendChild(canvas);
 
         let result = fn(tester(assert), canvas);
-        
-        document.body.removeChild(canvas);
+
+        if (result instanceof Promise) {
+            result.then(() => document.body.removeChild(canvas));
+        } else {
+            document.body.removeChild(canvas);
+        }
     
         return result;
+    });
+}
+
+export function asyncResult(t, message, fn) {
+    return new Promise((resolve, reject) => {
+        fn(() => {
+            t.ok(true);
+            resolve(message);
+        });
+        setTimeout(() => reject(message), 500);
     });
 }
 
