@@ -167,12 +167,12 @@
         let timer = app.createTimer();
 
         // SET UP UPDATE PROGRAM
-        let updateVsSource =  document.getElementById("vertex-update").text.trim();
-        let updateFsSource =  document.getElementById("fragment-update").text.trim();
+        let updateVsSource =  document.getElementById("vertex-update").text;
+        let updateFsSource =  document.getElementById("fragment-update").text;
 
         // SET UP PROGRAM
-        let vsSource =  document.getElementById("vertex-draw").text.trim();
-        let fsSource =  document.getElementById("fragment-draw").text.trim();
+        let vsSource =  document.getElementById("vertex-draw").text;
+        let fsSource =  document.getElementById("fragment-draw").text;
         
         let rotationData = new Float32Array(NUM_BOXES);
         let translationData = new Float32Array(NUM_BOXES * 3);

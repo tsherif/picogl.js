@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html>
 <head>
     <title>PicoGL.js: Screen Space Ambient Occlusion</title>
@@ -230,7 +229,7 @@
     </script>
     <script type="module">
         import { PicoGL } from "../src/picogl.js";
-       
+        
         utils.addTimerElement();
 
         let ssaoEnabled = true;
@@ -282,8 +281,8 @@
         let timer = app.createTimer();
 
         // SET UP COLOR/GEO PROGRAM
-        let colorGeoVsSource =  document.getElementById("vertex-colorgeo").text.trim();
-        let colorGeoFsSource =  document.getElementById("fragment-colorgeo").text.trim();
+        let colorGeoVsSource =  document.getElementById("vertex-colorgeo").text;
+        let colorGeoFsSource =  document.getElementById("fragment-colorgeo").text;
         
         let colorTarget = app.createTexture2D(app.width, app.height);
         let positionTarget = app.createTexture2D(app.width, app.height, { 
@@ -300,21 +299,21 @@
         .depthTarget(depthTarget);
 
         // QUAD VERTEX SHADER
-        let quadVsSource =  document.getElementById("vertex-quad").text.trim();
+        let quadVsSource =  document.getElementById("vertex-quad").text;
         let quadShader = app.createShader(PicoGL.VERTEX_SHADER, quadVsSource);
 
         // SET UP SSAO PROGRAM
-        let ssaoFsSource =  document.getElementById("fragment-ssao").text.trim();
+        let ssaoFsSource =  document.getElementById("fragment-ssao").text;
         let ssaoTarget = app.createTexture2D(app.width, app.height, { 
             internalFormat: PicoGL.RGBA16F
         });
         let ssaoBuffer = app.createFramebuffer().colorTarget(0, ssaoTarget);
 
         // SET UP AO BLEND PROGRAM
-        let aoBlendFsSource =  document.getElementById("fragment-aoblend").text.trim();
+        let aoBlendFsSource =  document.getElementById("fragment-aoblend").text;
 
         // DRAW WITHOUT SSAO
-        let noSSAOFsSource =  document.getElementById("fragment-color").text.trim();
+        let noSSAOFsSource =  document.getElementById("fragment-color").text;
 
         // INSTANCED SPHERE GEOMETRY
         let sphere = utils.createSphere({radius: 0.5});

@@ -114,14 +114,14 @@
         }
 
         // SHARED FRAGMENT SHADER 
-        let fsSource =  document.getElementById("fs").text.trim();
+        let fsSource =  document.getElementById("fs").text;
         let fShader = app.createShader(PicoGL.FRAGMENT_SHADER, fsSource);
 
         // PROGRAM PASSES UNCOMPRESSED GEOMETRY
-        let uncompressedVsSource =  document.getElementById("vs-uncompressed").text.trim();
+        let uncompressedVsSource =  document.getElementById("vs-uncompressed").text;
 
         // PROGRAM DECODES COMPRESSED GEOMETRY
-        let compressedVsSource =  document.getElementById("vs-compressed").text.trim();
+        let compressedVsSource =  document.getElementById("vs-compressed").text;
 
         // GEOMETRY DATA
         let sphere = utils.createSphere({ radius: 0.48 });

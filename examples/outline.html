@@ -177,13 +177,13 @@
         let timer = app.createTimer();
 
         // SET UP MAIN DRAW PROGRAM
-        let mainVsSource =  document.getElementById("vertex-main").text.trim();
-        let mainFsSource =  document.getElementById("fragment-main").text.trim();
+        let mainVsSource =  document.getElementById("vertex-main").text;
+        let mainFsSource =  document.getElementById("fragment-main").text;
 
         // SET UP OUTLINE PROGRAM, WHICH SCALES UP GEOMETRY AND DRAWS
         // IN SOLID YELLOW 
-        let outlineVsSource =  document.getElementById("vertex-outline").text.trim();
-        let outlineFsSource =  document.getElementById("fragment-outline").text.trim();
+        let outlineVsSource =  document.getElementById("vertex-outline").text;
+        let outlineFsSource =  document.getElementById("fragment-outline").text;
         
 
         // INSTANCED SPHERE GEOMETRY

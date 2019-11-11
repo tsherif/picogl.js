@@ -249,15 +249,15 @@
         let timer = app.createTimer();
 
         // SET UP PROGRAM
-        let drawFsSource =  document.getElementById("fragment-draw").text.trim();
+        let drawFsSource =  document.getElementById("fragment-draw").text;
         let drawFShader = app.createShader(PicoGL.FRAGMENT_SHADER, drawFsSource)
 
-        let velocityVsSource =  document.getElementById("vertex-velocity").text.trim();
+        let velocityVsSource =  document.getElementById("vertex-velocity").text;
 
-        let noVelocityVsSource =  document.getElementById("vertex-no-velocity").text.trim();
+        let noVelocityVsSource =  document.getElementById("vertex-no-velocity").text;
 
-        let quadVSSource =  document.getElementById("vertex-quad").text.trim();
-        let blurFSSource =  document.getElementById("fragment-blur").text.trim();
+        let quadVSSource =  document.getElementById("vertex-quad").text;
+        let blurFSSource =  document.getElementById("fragment-blur").text;
         
         let colorTarget = app.createTexture2D(app.width, app.height);
         let velocityTarget = app.createTexture2D(app.width, app.height, { 

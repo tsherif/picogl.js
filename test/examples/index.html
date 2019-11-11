@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PicoGL Tests</title>
+</head>
+<body>
+    <script>
+        let tests = [
+            "./interleaved-instanced.html",
+            "./uniforms.html",
+            "./rtt.html",
+            "./context-loss-xform-feedback.html",
+            "./build.html",
+            "./module.html",
+            "./no-vao.html",
+            "./no-vao-fragment.html",
+            "./translated-shaders.html"
+        ];
+
+        for (let i = 0, len = tests.length; i < len; ++i) {
+            let src = tests[i];
+            let iframe = document.createElement("iframe");
+            iframe.src = src;
+            iframe.style.pointerEvents = "none";
+            let link = document.createElement("a");
+            link.href = src;
+            link.appendChild(iframe);
+            link.style.display = "inline-block";
+            document.body.appendChild(link);
+        }
+    </script>
+</body>
+</html>

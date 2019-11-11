@@ -1,18 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>PicoGL.js: Triangle</title>
+    <title>PicoGL.js: Fragment shader w/o VAO</title>
     <meta charset="utf-8">
-    <link rel="stylesheet" href="../site/css/picogl-example.css"> 
-    <style>
-        #translated-source {
-            position: absolute;
-            left: 0;
-            top: 0;
-            color: white;
-            font-size: 8px;
-        }
-    </style>
+    <link rel="stylesheet" href="../../site/css/picogl-example.css"> 
 </head>
 <!--
   The MIT License (MIT)
@@ -37,33 +28,32 @@
   CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -->
 <body>
-    <div id="translated-source"></div>
     <canvas id="gl-canvas"></canvas>
     <script type="shader/vs" id="vs">
         #version 300 es
-        
-        layout(location=0) in vec4 position;
-        layout(location=1) in vec3 color;
-        
-        out vec3 vColor; 
         void main() {
-            vColor = color;
-            gl_Position = position;
+            float x = gl_VertexID < 2 ? -1.0 : 1.0;
+            float y = gl_VertexID % 2 == 0 ? -1.0 : 1.0;
+            gl_Position = vec4(x, y, 0.0, 1.0);
         }
     </script>
     <script type="shader/fs" id="fs">
         #version 300 es
         precision highp float;
         
-        in vec3 vColor;
-        
         out vec4 fragColor;
         void main() {
-            fragColor = vec4(vColor, 1.0);
+            fragColor = vec4(0.2, 0.2, 0.2, 1.0);
+            if (gl_FragCoord.x < 50.0) {
+                fragColor += vec4(1.0, 0.0, 0.0, 1.0);
+            }
+            if (gl_FragCoord.y < 50.0) { // to understand direction of y
+                fragColor += vec4(0.0, 0.0, 1.0, 1.0);
+            }
         }
     </script>
     <script type="module">
-        import { PicoGL } from "../src/picogl.js";
+        import { PicoGL } from "../../src/picogl.js";
 
         let canvas = document.getElementById("gl-canvas");
         canvas.width = window.innerWidth;
@@ -77,31 +67,14 @@
         }
 
         // PROGRAM 
-        let vsSource =  document.getElementById("vs").text.trim();
-        let fsSource =  document.getElementById("fs").text.trim();
-
-        // GEOMETRY IN VERTEX BUFFERS
-        let positions = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
-            -0.5, -0.5,
-             0.5, -0.5,
-             0.0, 0.5, 
-        ]));
-
-        let colors = app.createVertexBuffer(PicoGL.UNSIGNED_BYTE, 3, new Uint8Array([
-            255, 0, 0,
-            0, 255, 0,
-            0, 0, 255
-        ]));
-
-        // COMBINE VERTEX BUFFERS INTO VERTEX ARRAY
-        let triangleArray = app.createVertexArray()
-        .vertexAttributeBuffer(0, positions)
-        .vertexAttributeBuffer(1, colors, { normalized: true });
+        let vsSource =  document.getElementById("vs").text;
+        let fsSource =  document.getElementById("fs").text;
 
         app.createPrograms([vsSource, fsSource]).then(function([program]) {
-            document.getElementById("translated-source").innerHTML = `${program.translatedVertexSource()}<BR><BR>${program.translatedFragmentSource()}`.replace(/\n/g, "<BR>");
             // CREATE DRAW CALL FROM PROGRAM AND VERTEX ARRAY
-            let drawCall = app.createDrawCall(program, triangleArray);
+            let drawCall = app.createDrawCall(program)
+            .primitive(PicoGL.TRIANGLE_STRIP)
+            .drawRanges([0, 4]);
 
             // DRAW
             app.clear();
@@ -109,9 +82,6 @@
 
             // CLEANUP
             program.delete();
-            positions.delete();
-            colors.delete();
-            triangleArray.delete();
         });
 
     </script>

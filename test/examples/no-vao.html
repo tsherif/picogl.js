@@ -3,7 +3,7 @@
 <head>
     <title>PicoGL.js: Triangle</title>
     <meta charset="utf-8">
-    <link rel="stylesheet" href="../site/css/picogl-example.css"> 
+    <link rel="stylesheet" href="../../site/css/picogl-example.css"> 
 </head>
 <!--
   The MIT License (MIT)
@@ -55,7 +55,7 @@
         }
     </script>
     <script type="module">
-        import { PicoGL } from "../src/picogl.js";
+        import { PicoGL } from "../../src/picogl.js";
 
         let canvas = document.getElementById("gl-canvas");
         canvas.width = window.innerWidth;
@@ -69,8 +69,8 @@
         }
 
         // PROGRAM 
-        let vsSource =  document.getElementById("vs").text.trim();
-        let fsSource =  document.getElementById("fs").text.trim();
+        let vsSource =  document.getElementById("vs").text;
+        let fsSource =  document.getElementById("fs").text;
 
         app.createPrograms([vsSource, fsSource]).then(function([program]) {
             // CREATE DRAW CALL FROM PROGRAM AND VERTEX ARRAY

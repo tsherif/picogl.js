@@ -166,8 +166,8 @@
         let timer = app.createTimer();
 
         // SET UP SHADOW PROGRAM
-        let shadowVsSource =  document.getElementById("shadow-vs").text.trim();
-        let shadowFsSource =  document.getElementById("shadow-fs").text.trim();
+        let shadowVsSource =  document.getElementById("shadow-vs").text;
+        let shadowFsSource =  document.getElementById("shadow-fs").text;
 
         let shadowTarget = app.createCubemap({
             internalFormat: PicoGL.R16F,
@@ -180,12 +180,12 @@
         .depthTarget(depthTarget);
 
         // SET UP LIGHT PROGRAM
-        let lightVsSource =  document.getElementById("sphere-vs").text.trim();
-        let lightFsSource =  document.getElementById("sphere-fs").text.trim();
+        let lightVsSource =  document.getElementById("sphere-vs").text;
+        let lightFsSource =  document.getElementById("sphere-fs").text;
 
         // SET UP MAIN PROGRAM
-        let vsSource =  document.getElementById("main-vs").text.trim();
-        let fsSource =  document.getElementById("main-fs").text.trim();
+        let vsSource =  document.getElementById("main-vs").text;
+        let fsSource =  document.getElementById("main-fs").text;
         
         // GEOMETRY
         let positions, normals, uv, indices;

@@ -122,8 +122,8 @@
         let timer = app.createTimer();
 
         // SET UP PROGRAM
-        let vsSource =  document.getElementById("vertex-draw").text.trim();
-        let fsSource =  document.getElementById("fragment-draw").text.trim();
+        let vsSource =  document.getElementById("vertex-draw").text;
+        let fsSource =  document.getElementById("fragment-draw").text;
 
         // INSTANCED CUBE GEOMETRY
         let box = utils.createBox({dimensions: [0.5, 0.5, 0.5]})

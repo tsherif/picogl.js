@@ -1,4 +1,8 @@
 sudo: false
 language: node_js
 node_js:
-  - "6"
+  - "10"
+script:
+  - npm run coverage
+after_success:
+  - cat coverage/lcov.info | coveralls
