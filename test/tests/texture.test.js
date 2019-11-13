@@ -44,5 +44,11 @@ test("Texure flip y", async (t, canvas) => {
     t.arrayEqual(readPixel(app, [ 0.5, 0.75 ]), [ 0, 0, 255, 255 ], "Top drew correctly without y flip");
     t.arrayEqual(readPixel(app, [ 0.5, 0.25 ]), [ 255, 0, 0, 255 ], "Bottom drew correctly without y flip");
 
+    textureBW.data(rb);
+    drawCall.texture("tex", textureBW)
+        .draw();
+    t.arrayEqual(readPixel(app, [ 0.5, 0.75 ]), [ 255, 0, 0, 255 ], "Top drew correctly with y flip after update");
+    t.arrayEqual(readPixel(app, [ 0.5, 0.25 ]), [ 0, 0, 255, 255 ], "Bottom drew correctly with y flip after update");
+
     t.done();
 });
