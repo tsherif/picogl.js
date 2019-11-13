@@ -158,8 +158,6 @@ export class Cubemap {
         }
 
         this.bind(0);
-        this.gl.pixelStorei(GL.UNPACK_FLIP_Y_WEBGL, this.flipY);
-        this.gl.pixelStorei(GL.UNPACK_PREMULTIPLY_ALPHA_WEBGL, this.premultiplyAlpha);
         this.gl.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_MAG_FILTER, this.magFilter);
         this.gl.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_MIN_FILTER, this.minFilter);
         this.gl.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_WRAP_S, this.wrapS);
@@ -236,6 +234,9 @@ export class Cubemap {
         let height = this.height;
         let i;
 
+        this.gl.pixelStorei(GL.UNPACK_FLIP_Y_WEBGL, this.flipY);
+        this.gl.pixelStorei(GL.UNPACK_PREMULTIPLY_ALPHA_WEBGL, this.premultiplyAlpha);
+
         if (this.compressed) {
             for (i = 0; i < numLevels; ++i) {
                 this.gl.compressedTexSubImage2D(face, i, 0, 0, width, height, this.format, data[i]);
@@ -256,6 +257,11 @@ export class Cubemap {
     // Bind this cubemap to a texture unit.
     bind(unit) {
         let currentTexture = this.appState.textures[unit];
+
+        if (this.appState.activeTexture !== unit) {
+            this.gl.activeTexture(GL.TEXTURE0 + unit);
+            this.appState.activeTexture = unit;
+        }
         
         if (currentTexture !== this) {
             if (currentTexture) {
@@ -266,7 +272,6 @@ export class Cubemap {
                 this.appState.textures[this.currentUnit] = null;
             }
 
-            this.gl.activeTexture(GL.TEXTURE0 + unit);
             this.gl.bindTexture(GL.TEXTURE_CUBE_MAP, this.texture);
 
             this.appState.textures[unit] = this;

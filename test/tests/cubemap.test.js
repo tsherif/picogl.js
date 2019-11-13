@@ -1,4 +1,4 @@
-import {test, createQuadDrawCall, readCenterPixel} from "../utils/test-utils.js";
+import {test, createQuadDrawCall, readPixel} from "../utils/test-utils.js";
 import {PicoGL} from "../../src/picogl.js";
 
 test("Cubemap lifecycle", (t, canvas) => {
@@ -29,6 +29,7 @@ test("Cubemap lifecycle", (t, canvas) => {
     t.equal(cubemap.texture, null, "Texture object deleted");
     t.equal(cubemap.currentUnit, -1, "Texture unit reset");
     t.equal(app.state.textures[1], null, "State tracking reset");
+    t.done();
 });
 
 test("Cubemap draw", (t, canvas) => {
@@ -62,9 +63,10 @@ test("Cubemap draw", (t, canvas) => {
         .texture("cubemap", cubemap);
 
     drawCall.draw();
-    t.arrayEqual(readCenterPixel(app), [ 255, 255, 255, 255 ], "Drew correctly");
+    t.arrayEqual(readPixel(app), [ 255, 255, 255, 255 ], "Drew correctly");
 
     cubemap.faceData(PicoGL.TEXTURE_CUBE_MAP_NEGATIVE_Z, new Uint8Array([ 255, 0, 0, 255 ]));
     drawCall.draw();
-    t.arrayEqual(readCenterPixel(app), [ 255, 0, 0, 255 ], "Updated face");
+    t.arrayEqual(readPixel(app), [ 255, 0, 0, 255 ], "Updated face");
+    t.done();
 });

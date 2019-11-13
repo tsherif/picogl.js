@@ -191,8 +191,6 @@ export class Texture {
         this.gl.texParameteri(this.binding, GL.TEXTURE_WRAP_R, this.wrapR);
         this.gl.texParameteri(this.binding, GL.TEXTURE_COMPARE_FUNC, this.compareFunc);
         this.gl.texParameteri(this.binding, GL.TEXTURE_COMPARE_MODE, this.compareMode);
-        this.gl.pixelStorei(GL.UNPACK_FLIP_Y_WEBGL, this.flipY);
-        this.gl.pixelStorei(GL.UNPACK_PREMULTIPLY_ALPHA_WEBGL, this.premultiplyAlpha);
         
         if (this.minLOD !== null) {
             this.gl.texParameterf(this.binding, GL.TEXTURE_MIN_LOD, this.minLOD);
@@ -259,6 +257,8 @@ export class Texture {
         let i;
 
         this.bind(Math.max(this.currentUnit, 0));
+        this.gl.pixelStorei(GL.UNPACK_FLIP_Y_WEBGL, this.flipY);
+        this.gl.pixelStorei(GL.UNPACK_PREMULTIPLY_ALPHA_WEBGL, this.premultiplyAlpha);
 
         if (this.compressed) {
             if (this.is3D) {
@@ -326,6 +326,11 @@ export class Texture {
     */
     bind(unit) {
         let currentTexture = this.appState.textures[unit];
+
+        if (this.appState.activeTexture !== unit) {
+            this.gl.activeTexture(GL.TEXTURE0 + unit);
+            this.appState.activeTexture = unit;
+        }
         
         if (currentTexture !== this) {
             if (currentTexture) {
@@ -336,7 +341,6 @@ export class Texture {
                 this.appState.textures[this.currentUnit] = null;
             }
 
-            this.gl.activeTexture(GL.TEXTURE0 + unit);
             this.gl.bindTexture(this.binding, this.texture);
 
             this.appState.textures[unit] = this;

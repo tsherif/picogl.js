@@ -89,6 +89,10 @@ export class App {
 
         this.canvas.addEventListener("webglcontextlost", (e) => {
             e.preventDefault();
+
+            if (this.contextLostHandler) {
+                this.contextLostHandler();
+            }
         });
 
         this.canvas.addEventListener("webglcontextrestored", () => {
@@ -124,6 +128,19 @@ export class App {
         if (this.contextLostExt) {
             this.contextLostExt.restoreContext();
         }
+
+        return this;
+    }
+
+    /**
+        Set function to handle context loss.
+
+        @method
+        @param {function} fn Context loss handler.
+        @return {App} The App object.
+    */
+    onContextLost(fn) {
+        this.contextLostHandler = fn;
 
         return this;
     }
