@@ -12,6 +12,8 @@ test("App", (t, canvas) => {
     t.ok(app.gl, "App contains a gl context");
     t.ok(app.gl instanceof WebGL2RenderingContext, "Created WebGL 2 context");
     t.ok(app.state, "App state tracking initialized");
+
+    t.done();
 });
 
 test("App state functions", (t, canvas) => {
@@ -125,4 +127,20 @@ test("App state functions", (t, canvas) => {
     
     app.scissor(...TEST_SCISSOR_BOX);
     t.glParameterEqual(gl, PicoGL.SCISSOR_BOX, TEST_SCISSOR_BOX, "Scissor box set");
+
+    t.done();
+});
+
+test("App context loss", (t, canvas) => {
+    let app = PicoGL.createApp(canvas);
+
+    app.onContextLost(() => {
+        requestAnimationFrame(() => app.restoreContext());
+    });
+
+    app.onContextRestored(() => {
+        t.ok(true);
+        t.done();
+    });
+    app.loseContext();
 });
