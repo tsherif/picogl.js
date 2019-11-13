@@ -259,6 +259,8 @@ export class Texture {
         let i;
 
         this.bind(Math.max(this.currentUnit, 0));
+        this.gl.pixelStorei(GL.UNPACK_FLIP_Y_WEBGL, this.flipY);
+        this.gl.pixelStorei(GL.UNPACK_PREMULTIPLY_ALPHA_WEBGL, this.premultiplyAlpha);
 
         if (this.compressed) {
             if (this.is3D) {

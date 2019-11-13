@@ -1,4 +1,4 @@
-import {test, asyncResult} from "../utils/test-utils.js";
+import {test} from "../utils/test-utils.js";
 import {PicoGL} from "../../src/picogl.js";
 
 const TEST_COLOR_MASK = [ true, false, false, true ];
@@ -12,6 +12,8 @@ test("App", (t, canvas) => {
     t.ok(app.gl, "App contains a gl context");
     t.ok(app.gl instanceof WebGL2RenderingContext, "Created WebGL 2 context");
     t.ok(app.state, "App state tracking initialized");
+
+    t.done();
 });
 
 test("App state functions", (t, canvas) => {
@@ -125,6 +127,8 @@ test("App state functions", (t, canvas) => {
     
     app.scissor(...TEST_SCISSOR_BOX);
     t.glParameterEqual(gl, PicoGL.SCISSOR_BOX, TEST_SCISSOR_BOX, "Scissor box set");
+
+    t.done();
 });
 
 test("App context loss", (t, canvas) => {
@@ -134,8 +138,9 @@ test("App context loss", (t, canvas) => {
         requestAnimationFrame(() => app.restoreContext());
     });
 
-    return asyncResult(t, "Context loss handler runs", (pass) => {
-        app.onContextRestored(pass);
-        app.loseContext();
+    app.onContextRestored(() => {
+        t.ok(true);
+        t.done();
     });
+    app.loseContext();
 });
