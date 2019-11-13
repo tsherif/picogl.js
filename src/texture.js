@@ -326,6 +326,11 @@ export class Texture {
     */
     bind(unit) {
         let currentTexture = this.appState.textures[unit];
+
+        if (this.appState.activeTexture !== unit) {
+            this.gl.activeTexture(GL.TEXTURE0 + unit);
+            this.appState.activeTexture = unit;
+        }
         
         if (currentTexture !== this) {
             if (currentTexture) {
@@ -336,7 +341,6 @@ export class Texture {
                 this.appState.textures[this.currentUnit] = null;
             }
 
-            this.gl.activeTexture(GL.TEXTURE0 + unit);
             this.gl.bindTexture(this.binding, this.texture);
 
             this.appState.textures[unit] = this;

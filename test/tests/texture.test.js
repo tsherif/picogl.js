@@ -52,3 +52,65 @@ test("Texure flip y", async (t, canvas) => {
 
     t.done();
 });
+
+test("Texure draw after update", (t, canvas) => {
+
+    let app = PicoGL.createApp(canvas);
+
+    let red = new Uint8Array([ 255, 0, 0, 255 ]);
+    let blue = new Uint8Array([ 0, 0, 255, 255 ]);
+
+    let texture1 = app.createTexture2D(red, 1, 1, {
+        minFilter: PicoGL.NEAREST,
+        magFilter: PicoGL.NEAREST
+    });
+
+    let texture2 = app.createTexture2D(blue, 1, 1, {
+        minFilter: PicoGL.NEAREST,
+        magFilter: PicoGL.NEAREST
+    });
+
+    let fs = `
+        #version 300 es
+        precision highp float;
+
+        in vec2 vUV;
+
+        uniform sampler2D tex1;
+        uniform sampler2D tex2;
+
+        uniform float whichTex;
+
+        out vec4 fragColor;
+
+        void main() {
+            if (whichTex == 1.0) {
+                fragColor = texture(tex1, vUV);
+            } else {
+                fragColor = texture(tex2, vUV);
+            }
+        }
+    `;
+
+    let drawCall = createQuadDrawCall(app, fs)
+        .texture("tex1", texture1)
+        .texture("tex2", texture2);
+
+    drawCall.uniform("whichTex", 1).draw();
+    t.arrayEqual(readPixel(app), [ 255, 0, 0, 255 ], "Drew correctly before update");
+
+    drawCall.uniform("whichTex", 2).draw();
+    t.arrayEqual(readPixel(app), [ 0, 0, 255, 255 ], "Drew correctly before update");
+
+    texture1.data(blue);
+    texture2.data(red);
+
+    drawCall.uniform("whichTex", 1).draw();
+    t.arrayEqual(readPixel(app), [ 0, 0, 255, 255 ], "Drew correctly after update");
+
+
+    drawCall.uniform("whichTex", 2).draw();
+    t.arrayEqual(readPixel(app), [ 255, 0, 0, 255 ], "Drew correctly after update");
+
+    t.done();
+});
