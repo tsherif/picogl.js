@@ -1,5 +1,5 @@
-import {test, createQuadDrawCall, readPixel} from "../utils/test-utils.js";
-import {PicoGL} from "../../src/picogl.js";
+import {test, createQuadDrawCall, readPixel} from "/test-results/pico-test.js";
+import {PicoGL} from "/src/picogl.js";
 
 test("Cubemap lifecycle", (t, canvas) => {
     let app = PicoGL.createApp(canvas);

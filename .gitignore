@@ -5,3 +5,4 @@ npm-debug.log
 build/*.map
 .nyc_output/
 coverage/
+test-results/

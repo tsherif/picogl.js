@@ -1,5 +1,5 @@
-import {test} from "../utils/test-utils.js";
-import {PicoGL} from "../../src/picogl.js";
+import {test} from "/test-results/pico-test.js";
+import {PicoGL} from "/src/picogl.js";
 
 const TEST_COLOR_MASK = [ true, false, false, true ];
 const TEST_COLOR = [ 0, 0.25, 0.5, 0.75 ];

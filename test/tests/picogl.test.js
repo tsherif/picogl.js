@@ -1,5 +1,5 @@
-import {test} from "../utils/test-utils.js";
-import {PicoGL} from "../../src/picogl.js";
+import {test} from "/test-results/pico-test.js";
+import {PicoGL} from "/src/picogl.js";
 
 test("PicoGL", (t) => {
     t.ok(PicoGL, "PicoGL was loaded");

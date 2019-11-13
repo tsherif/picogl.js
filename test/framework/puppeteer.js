@@ -6,7 +6,7 @@ const http = require("http");
 const fs = require("fs").promises;
 const path = require("path");
 
-const PATH = "test/tests/";
+const PATH = "test-results/";
 const PORT = 7171;
 const BASE_URL = `http://localhost:${PORT}/`;
 const FILTER_REGEX = new RegExp(`${BASE_URL}src/`);
@@ -16,6 +16,13 @@ const MIME_TYPES = {
     ".js": "text/javascript",
     ".json": "application/json"
 };
+
+const TESTS = [
+    "test/tests/picogl.test.js",
+    "test/tests/app.test.js",
+    "test/tests/cubemap.test.js",
+    "test/tests/texture.test.js"
+];
 
 const server = http.createServer(async (req, res) => {
     const url = req.url; 
@@ -37,6 +44,13 @@ const server = http.createServer(async (req, res) => {
 }).listen(PORT);
 
 (async () => {
+    const template = await fs.readFile("test/framework/index-template.html", "utf8");
+    const index = template.replace("FRAMEWORK_IMPORTS", TESTS.map(t => `import "../${t}";`).join("\n"));
+
+    await fs.mkdir("test-results");
+    await fs.writeFile("test-results/index.html", index);
+    await fs.copyFile("test/framework/js/pico-test.js", "test-results/pico-test.js");
+
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
   

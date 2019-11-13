@@ -1,11 +1,11 @@
-import {test, createQuadDrawCall, loadImages, readPixel} from "../utils/test-utils.js";
-import {PicoGL} from "../../src/picogl.js";
+import {test, createQuadDrawCall, loadImages, readPixel} from "/test-results/pico-test.js";
+import {PicoGL} from "/src/picogl.js";
 
 test("Texure flip y", async (t, canvas) => {
 
     let app = PicoGL.createApp(canvas);
 
-    let [ bw, rb ] = await loadImages([ "../img/top-white-bottom-black.png", "../img/top-red-bottom-blue.png" ]);
+    let [ bw, rb ] = await loadImages([ "/test/img/top-white-bottom-black.png", "/test/img/top-red-bottom-blue.png" ]);
 
     let textureBW = app.createTexture2D(bw, {
         minFilter: PicoGL.NEAREST,
