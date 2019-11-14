@@ -19,7 +19,7 @@
     "compile": "npm run compile-module && npm run compile-bundle",
     "build": "npm run lint && npm run compile",
     "docs": "jsdoc -d docs src/*.js",
-    "test-unit": "rimraf .nyc_output/ test-results/ && node test/framework/pico-test.js",
+    "test-unit": "node test/framework/pico-test.js",
     "coverage": "rimraf coverage/ && npm test && nyc report --reporter=lcov",
     "test": "npm run lint && npm run test-unit"
   },
@@ -37,6 +37,7 @@
   },
   "devDependencies": {
     "babel-minify-webpack-plugin": "^0.3.1",
+    "copy-dir": "^1.2.0",
     "coveralls": "^3.0.7",
     "cpy-cli": "^2.0.0",
     "eslint": "^6.3.0",

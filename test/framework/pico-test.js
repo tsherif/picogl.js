@@ -5,12 +5,15 @@ const pti = require("puppeteer-to-istanbul");
 const http = require("http");
 const fs = require("fs").promises;
 const path = require("path");
-const glob = require("glob");
+const glob = require("glob").sync;
+const copydir = require("copy-dir").sync;
+const rimraf = require("rimraf").sync;
 
 let config = {
     outputDir: "test-results/",
     serverPort: 7171,
-    tests: []
+    tests: [],
+    assetDir: null
 };
 
 try {
@@ -20,9 +23,11 @@ try {
     }
 } catch (e) {}
 
+const OUTPUT_DIR = path.resolve(".", config.outputDir);
+const ASSET_DIR = path.resolve(OUTPUT_DIR, "assets");
+const COVERAGE_DIR = path.resolve(".", ".nyc_output");
 const CWD = process.cwd();
 const BASE_URL = `http://localhost:${config.serverPort}/`;
-const FILTER_REGEX = new RegExp(`${BASE_URL}src/`);
 const MIME_TYPES = {
     ".css": "text/css",
     ".html": "text/html",
@@ -53,15 +58,22 @@ const server = http.createServer(async (req, res) => {
     const template = await fs.readFile("test/framework/index-template.html", "utf8");
     const testPaths = [];
     config.tests.forEach(t => {
-        glob.sync(t).map(f => {
+        glob(t).map(f => {
             const modulePath = path.resolve(".", f).replace(CWD, "");
             testPaths.push(`import "${modulePath}";`);
         });
     });
     const index = template.replace("FRAMEWORK_IMPORTS", testPaths.join("\n"));
 
-    await fs.mkdir("test-results");
-    await fs.writeFile("test-results/index.html", index);
+    rimraf(OUTPUT_DIR);
+    rimraf(COVERAGE_DIR);
+    await fs.mkdir(OUTPUT_DIR);
+    await fs.writeFile(path.resolve(OUTPUT_DIR, "index.html"), index);
+
+    if (config.assetDir) {
+        await fs.mkdir(ASSET_DIR);
+        copydir(path.resolve(".", config.assetDir), ASSET_DIR);
+    }
 
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
@@ -101,7 +113,7 @@ const server = http.createServer(async (req, res) => {
         }
 
         const jsCoverage = await page.coverage.stopJSCoverage();
-        pti.write(jsCoverage.filter(s => s.url.match(FILTER_REGEX)));
+        pti.write(jsCoverage);
 
         await server.close();
         await browser.close();

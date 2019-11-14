@@ -1,4 +1,5 @@
 {
+    "assetDir": "test/assets",
     "tests": [
         "test/tests/*.test.js"
     ]

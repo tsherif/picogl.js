@@ -5,7 +5,7 @@ picoTest("Texure flip y", async (t, canvas) => {
 
     let app = PicoGL.createApp(canvas);
 
-    let [ bw, rb ] = await loadImages([ "/test/img/top-white-bottom-black.png", "/test/img/top-red-bottom-blue.png" ]);
+    let [ bw, rb ] = await loadImages([ "assets/img/top-white-bottom-black.png", "assets/img/top-red-bottom-blue.png" ]);
 
     let textureBW = app.createTexture2D(bw, {
         minFilter: PicoGL.NEAREST,
