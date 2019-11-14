@@ -1,7 +1,7 @@
-import {test, createQuadDrawCall, readPixel} from "/test-results/pico-test.js";
-import {PicoGL} from "/src/picogl.js";
+import {createQuadDrawCall, readPixel} from "./utils.js";
+import {PicoGL} from "../../src/picogl.js";
 
-test("Cubemap lifecycle", (t, canvas) => {
+picoTest("Cubemap lifecycle", (t, canvas) => {
     let app = PicoGL.createApp(canvas);
     let cubemap = app.createCubemap({
         negX: new Uint8Array([ 255, 255, 255, 255 ]),
@@ -32,7 +32,7 @@ test("Cubemap lifecycle", (t, canvas) => {
     t.done();
 });
 
-test("Cubemap draw", (t, canvas) => {
+picoTest("Cubemap draw", (t, canvas) => {
     let app = PicoGL.createApp(canvas);
     
     let cubemap = app.createCubemap({

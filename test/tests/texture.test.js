@@ -1,7 +1,7 @@
-import {test, createQuadDrawCall, loadImages, readPixel} from "/test-results/pico-test.js";
-import {PicoGL} from "/src/picogl.js";
+import {createQuadDrawCall, loadImages, readPixel} from "./utils.js";
+import {PicoGL} from "../../src/picogl.js";
 
-test("Texure flip y", async (t, canvas) => {
+picoTest("Texure flip y", async (t, canvas) => {
 
     let app = PicoGL.createApp(canvas);
 
@@ -53,7 +53,7 @@ test("Texure flip y", async (t, canvas) => {
     t.done();
 });
 
-test("Texure draw after update", (t, canvas) => {
+picoTest("Texure draw after update", (t, canvas) => {
 
     let app = PicoGL.createApp(canvas);
 

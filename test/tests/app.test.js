@@ -1,12 +1,11 @@
-import {test} from "/test-results/pico-test.js";
-import {PicoGL} from "/src/picogl.js";
+import {PicoGL} from "../../src/picogl.js";
 
 const TEST_COLOR_MASK = [ true, false, false, true ];
 const TEST_COLOR = [ 0, 0.25, 0.5, 0.75 ];
 const TEST_DEPTH_RANGE = [ 0.25, 0.5 ];
 const TEST_SCISSOR_BOX = [ 10, 10, 10, 10 ];
 
-test("App", (t, canvas) => {
+picoTest("App", (t, canvas) => {
     let app = PicoGL.createApp(canvas);
 
     t.ok(app.gl, "App contains a gl context");
@@ -16,7 +15,7 @@ test("App", (t, canvas) => {
     t.done();
 });
 
-test("App state functions", (t, canvas) => {
+picoTest("App state functions", (t, canvas) => {
     let app = PicoGL.createApp(canvas);
     let gl = app.gl;
 
@@ -131,7 +130,7 @@ test("App state functions", (t, canvas) => {
     t.done();
 });
 
-test("App context loss", (t, canvas) => {
+picoTest("App context loss", (t, canvas) => {
     let app = PicoGL.createApp(canvas);
 
     app.onContextLost(() => {

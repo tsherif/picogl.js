@@ -19,7 +19,7 @@
     "compile": "npm run compile-module && npm run compile-bundle",
     "build": "npm run lint && npm run compile",
     "docs": "jsdoc -d docs src/*.js",
-    "test-unit": "rimraf .nyc_output/ test-results/ && node test/framework/puppeteer.js",
+    "test-unit": "rimraf .nyc_output/ test-results/ && node test/framework/pico-test.js",
     "coverage": "rimraf coverage/ && npm test && nyc report --reporter=lcov",
     "test": "npm run lint && npm run test-unit"
   },
@@ -41,6 +41,7 @@
     "cpy-cli": "^2.0.0",
     "eslint": "^6.3.0",
     "jsdoc": "^3.6.3",
+    "node-glob": "^1.2.0",
     "nyc": "^14.1.1",
     "puppeteer": "^2.0.0",
     "puppeteer-to-istanbul": "^1.2.2",

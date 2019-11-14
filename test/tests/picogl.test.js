@@ -1,14 +1,13 @@
-import {test} from "/test-results/pico-test.js";
-import {PicoGL} from "/src/picogl.js";
+import {PicoGL} from "../../src/picogl.js";
 
-test("PicoGL", (t) => {
+picoTest("PicoGL", (t) => {
     t.ok(PicoGL, "PicoGL was loaded");
     t.ok(typeof PicoGL.FLOAT === "number", "PicoGL.FLOAT is a number");
     t.ok(typeof PicoGL.COMPRESSED_SRGB_S3TC_DXT1_EXT === "number", "PicoGL.COMPRESSED_SRGB_S3TC_DXT1_EXT is a number");
     t.done();
 });
 
-test("PicoGL.createApp", (t, canvas) => {
+picoTest("PicoGL.createApp", (t, canvas) => {
     let app = PicoGL.createApp(canvas);
 
     t.ok(app, "App was created");
