@@ -4,6 +4,6 @@
         "test/tests/*.test.js"
     ],
     "coverageExcludeFiles": [
-        "test/tests/utils.js"
+        "test/**/*"
     ]
 }
