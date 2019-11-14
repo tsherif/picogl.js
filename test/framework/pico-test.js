@@ -13,13 +13,19 @@ let config = {
     outputDir: "test-results/",
     serverPort: 7171,
     tests: [],
-    assetDir: null
+    assetDir: null,
+    excludeFiles: []
 };
 
 try {
     Object.assign(config, require(path.resolve(".", ".pico-testrc.json")));
+    config.tests = config.tests || [];
+    config.excludeFiles = config.excludeFiles || [];
     if (!Array.isArray(config.tests)) {
         config.tests = [ config.tests ];
+    }
+    if (!Array.isArray(config.excludeFiles)) {
+        config.excludeFiles = [ config.excludeFiles ];
     }
 } catch (e) {}
 
@@ -34,6 +40,13 @@ const MIME_TYPES = {
     ".js": "text/javascript",
     ".json": "application/json"
 };
+const EXCLUDE_REGEX = [];
+config.coverageExcludeFiles.forEach(ex => {
+    glob(ex).map(f => {
+        const excludePath = path.resolve(".", f).replace(CWD, "");
+        EXCLUDE_REGEX.push(new RegExp(`${excludePath}$`));
+    }); 
+});
 
 const server = http.createServer(async (req, res) => {
     const url = req.url; 
@@ -41,17 +54,9 @@ const server = http.createServer(async (req, res) => {
     const filePath = path.resolve(".", requestPath);
     const mimeType = MIME_TYPES[path.extname(filePath)] || "application/octet-stream";
 
-    const stat = await fs.stat(filePath);
-
-    if (stat && stat.isDirectory()) {
-        const content = await fs.readFile(filePath + "/index.html");
-        res.setHeader("Content-Type", "text/html");
-        res.end(content);
-    } else {
-        const content = await fs.readFile(filePath);
-        res.setHeader("Content-Type", mimeType);
-        res.end(content);
-    }
+    const content = await fs.readFile(filePath);
+    res.setHeader("Content-Type", mimeType);
+    res.end(content);
 }).listen(config.serverPort);
 
 (async () => {
@@ -113,7 +118,21 @@ const server = http.createServer(async (req, res) => {
         }
 
         const jsCoverage = await page.coverage.stopJSCoverage();
-        pti.write(jsCoverage);
+        pti.write(jsCoverage.filter(item => {
+            const url = item.url;
+            if (url.match(/index\.html$/)) {
+                return false;
+            }
+
+            let include = true;
+            EXCLUDE_REGEX.forEach(ex => {
+                if (url.match(ex)) {
+                    include = false;
+                }
+            });
+
+            return include; 
+        }));
 
         await server.close();
         await browser.close();
@@ -122,5 +141,5 @@ const server = http.createServer(async (req, res) => {
     });
 
     await page.coverage.startJSCoverage();
-    await page.goto(`${BASE_URL}${config.outputDir}`);
+    await page.goto(`${BASE_URL}${config.outputDir}/index.html`);
 })();
