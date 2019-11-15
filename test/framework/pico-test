@@ -117,11 +117,16 @@ const server = http.createServer(async (req, res) => {
 
     await page.exposeFunction("puppeteer_runEnd", async (results) => {
         const tests = results.tests;
+        let numTests = 0;
         let numAssertions = 0;
         for (let i = 0; i < tests.length; ++i) {
             const test = tests[i];
             const assertions = test.assertions;
             const count = assertions.length;
+            if (count === 0) {
+                continue;
+            }
+            numTests++;
             numAssertions += count;
             if (test.status === "passed") {
                 console.log(`\u001b[32mPass:\u001b[0m ${test.name}`);
@@ -136,7 +141,7 @@ const server = http.createServer(async (req, res) => {
                 }
             }
         }
-        console.log(`\nRan ${results.testCounts.total} tests (${numAssertions} assertions)...\n`);
+        console.log(`\nRan ${numTests} tests (${numAssertions} assertions)...\n`);
 
         const passed = results.status === "passed";
         if (passed) {

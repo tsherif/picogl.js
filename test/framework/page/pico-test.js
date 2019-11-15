@@ -23,6 +23,24 @@
 
 (function() {
 
+    function picoTest(name, fn) {
+        QUnit.test(name, (assert) => runTest(assert, fn));
+    }
+
+    picoTest.only = function picoTest(name, fn) {
+        QUnit.only(name, (assert) => runTest(assert, fn));
+    };
+
+    function runTest(assert, fn) {
+        let canvas = document.createElement("canvas");
+        document.body.appendChild(canvas);
+        
+        return new Promise((resolve, reject) => {
+            fn(tester(assert, resolve), canvas);  
+            setTimeout(() => reject("Timeout"), 1000);
+        }).finally(() => document.body.removeChild(canvas));
+    }
+
     function tester(assert, resolve) {
         return {
             ok(...args) {
@@ -88,19 +106,7 @@
                 resolve();
             }
         };
-    }
-
-    window.picoTest = function picoTest(name, fn) {
-        QUnit.test(name, (assert) => {
-            let canvas = document.createElement("canvas");
-            document.body.appendChild(canvas);
-        
-            return new Promise((resolve, reject) => {
-                fn(tester(assert, resolve), canvas);  
-                setTimeout(() => reject("Timeout"), 1000);
-            }).finally(() => document.body.removeChild(canvas));
-        });
-    }   
+    } 
 
     function readPixel(gl, uv) {
         let x = Math.floor(gl.drawingBufferWidth * uv[0]);
@@ -111,4 +117,6 @@
 
         return actual;
     }
+
+    window.picoTest = picoTest;
 })();
