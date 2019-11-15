@@ -66,9 +66,19 @@
                 }
             },
             pixelEqual(gl, uv, expected, message) {
+                if (!expected || typeof expected === "string") {
+                    message = expected;
+                    expected = uv;
+                    uv = [0.5, 0.5];
+                }
                 return this.arrayEqual(readPixel(gl, uv), expected, message);
             },
             notPixelEqual(gl, uv, expected, message) {
+                if (!expected || typeof expected === "string") {
+                    message = expected;
+                    expected = uv;
+                    uv = [0.5, 0.5];
+                }
                 return this.notArrayEqual(readPixel(gl, uv), expected, message);
             },
             throws(...args) {

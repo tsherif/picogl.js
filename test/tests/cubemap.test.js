@@ -86,10 +86,10 @@ picoTest("Cubemap draw", (t, canvas) => {
         .texture("cubemap", cubemap);
 
     drawCall.draw();
-    t.pixelEqual(app.gl, [ 0.5, 0.5 ], [ 255, 255, 255, 255 ], "Drew correctly");
+    t.pixelEqual(app.gl, [ 255, 255, 255, 255 ], "Drew correctly");
 
     cubemap.faceData(PicoGL.TEXTURE_CUBE_MAP_NEGATIVE_Z, new Uint8Array([ 255, 0, 0, 255 ]));
     drawCall.draw();
-    t.pixelEqual(app.gl, [ 0.5, 0.5 ], [ 255, 0, 0, 255 ], "Updated face");
+    t.pixelEqual(app.gl, [ 255, 0, 0, 255 ], "Updated face");
     t.done();
 });
