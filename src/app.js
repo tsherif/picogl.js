@@ -128,15 +128,11 @@ export class App {
     */
     onContextLost(fn) {
         if (!this.contextLostListener && fn) {
-            this.contextLostListener = (e) => {
-                e.preventDefault();
-                this.contextLostHandler();
-            };
-            this.canvas.addEventListener("webglcontextlost", this.contextLostListener);
+            this.addContextListeners();
         }
 
         if (this.contextLostListener && !fn) {
-            this.canvas.removeEventListener("webglcontextlost", this.contextLostListener);
+            this.removeContextListeners();
         }
 
         this.contextLostHandler = fn;
@@ -152,16 +148,12 @@ export class App {
         @return {App} The App object.
     */
     onContextRestored(fn) {
-        if (!this.contextRestoredListener && fn) {
-            this.contextRestoredListener = () => {
-                this.initExtensions();
-                this.contextRestoredHandler();
-            };  
-            this.canvas.addEventListener("webglcontextrestored", this.contextRestoredListener);
+        if (!this.contextLostListener && fn) {
+            this.addContextListeners();
         }
 
-        if (this.contextRestoredListener && !fn) {
-            this.canvas.removeEventListener("webglcontextrestored", this.contextRestoredListener);
+        if (this.contextLostListener && !fn) {
+            this.removeContextListeners();
         }
 
         this.contextRestoredHandler = fn;
@@ -1262,4 +1254,27 @@ export class App {
         this.state.extensions.multiDrawInstanced = this.gl.getExtension("WEBGL_multi_draw_instanced");
     }
 
+    addContextListeners() {
+        this.contextLostListener = (e) => {
+            e.preventDefault();
+            if (this.contextLostHandler) {
+                this.contextLostHandler();
+            }
+        };
+        this.contextRestoredListener = () => {
+            this.initExtensions();
+            if (this.contextRestoredHandler) {
+                this.contextRestoredHandler();
+            }
+        };  
+        this.canvas.addEventListener("webglcontextlost", this.contextLostListener);
+        this.canvas.addEventListener("webglcontextrestored", this.contextRestoredListener);
+    }
+
+    removeContextListeners() {
+        this.canvas.removeEventListener("webglcontextlost", this.contextLostListener);
+        this.canvas.removeEventListener("webglcontextrestored", this.contextRestoredListener);
+        this.contextLostListener = null;
+        this.contextRestoredListener = null;  
+    }
 }
