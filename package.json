@@ -13,13 +13,13 @@
     "url": "http://tareksherif.net/"
   },
   "scripts": {
-    "lint": "eslint src/*.js test/*.js test/tests/*.js",
+    "lint": "eslint src/*.js test/framework/pico-test test/tests/*.js",
     "compile-module": "rimraf build/module && cpy src build/module && replace %%VERSION%% $npm_package_version build/module/picogl.js",
     "compile-bundle": "webpack",
     "compile": "npm run compile-module && npm run compile-bundle",
     "build": "npm run lint && npm run compile",
     "docs": "jsdoc -d docs src/*.js",
-    "test-unit": "rimraf .nyc_output/ && node test/puppeteer.js",
+    "test-unit": "node test/framework/pico-test",
     "coverage": "rimraf coverage/ && npm test && nyc report --reporter=lcov",
     "test": "npm run lint && npm run test-unit"
   },
@@ -37,10 +37,12 @@
   },
   "devDependencies": {
     "babel-minify-webpack-plugin": "^0.3.1",
+    "copy-dir": "^1.2.0",
     "coveralls": "^3.0.7",
     "cpy-cli": "^2.0.0",
     "eslint": "^6.3.0",
     "jsdoc": "^3.6.3",
+    "node-glob": "^1.2.0",
     "nyc": "^14.1.1",
     "puppeteer": "^2.0.0",
     "puppeteer-to-istanbul": "^1.2.2",

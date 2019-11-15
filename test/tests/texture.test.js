@@ -1,11 +1,88 @@
-import {test, createQuadDrawCall, loadImages, readPixel} from "../utils/test-utils.js";
+///////////////////////////////////////////////////////////////////////////////////
+// The MIT License (MIT)
+//
+// Copyright (c) 2019 Tarek Sherif
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy of
+// this software and associated documentation files (the "Software"), to deal in
+// the Software without restriction, including without limitation the rights to
+// use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+// the Software, and to permit persons to whom the Software is furnished to do so,
+// subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+// FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+// COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+// IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+// CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+///////////////////////////////////////////////////////////////////////////////////
+
+import {createQuadDrawCall, loadImages, readPixel} from "./utils.js";
 import {PicoGL} from "../../src/picogl.js";
 
-test("Texure flip y", async (t, canvas) => {
+picoTest("Texture lifecycle", (t, canvas) => {
+    let app = PicoGL.createApp(canvas);
+    let texture = app.createTexture2D(new Uint8Array([ 255, 255, 255, 255 ]), 1, 1);
+
+    t.ok(texture.gl, "Texture contains a gl context");
+    t.ok(texture.appState, "App state tracking initialized");
+    t.ok(texture.texture, "Texture created a texture");
+    t.ok(texture.texture instanceof WebGLTexture, "Texture created texture instance");
+    t.equal(texture.width, 1, "Texture width set");
+    t.equal(texture.height, 1, "Texture height set");
+
+    texture.bind(1);
+    t.equal(texture.currentUnit, 1, "Texture tracking its texture unit");
+    t.equal(app.state.textures[1], texture, "State tracking tracks texture unit");
+
+    texture.delete();
+    t.equal(texture.texture, null, "Texture object deleted");
+    t.equal(texture.currentUnit, -1, "Texture unit reset");
+    t.equal(app.state.textures[1], null, "State tracking reset");
+    t.done();
+});
+
+picoTest("Texture3D lifecycle", (t, canvas) => {
+    let app = PicoGL.createApp(canvas);
+    let texture = app.createTexture3D(new Uint8Array([
+        255, 255, 255, 255, 
+        255, 255, 255, 255, 
+        255, 255, 255, 255, 
+        255, 255, 255, 255, 
+        255, 255, 255, 255, 
+        255, 255, 255, 255, 
+        255, 255, 255, 255, 
+        255, 255, 255, 255
+    ]), 2, 2, 2);
+
+    t.ok(texture.gl, "Texture contains a gl context");
+    t.ok(texture.appState, "App state tracking initialized");
+    t.ok(texture.texture, "Texture created a texture");
+    t.ok(texture.texture instanceof WebGLTexture, "Texture created texture instance");
+    t.equal(texture.width, 2, "Texture width set");
+    t.equal(texture.height, 2, "Texture height set");
+    t.equal(texture.height, 2, "Texture depth set");
+
+    texture.bind(1);
+    t.equal(texture.currentUnit, 1, "Texture tracking its texture unit");
+    t.equal(app.state.textures[1], texture, "State tracking tracks texture unit");
+
+    texture.delete();
+    t.equal(texture.texture, null, "Texture object deleted");
+    t.equal(texture.currentUnit, -1, "Texture unit reset");
+    t.equal(app.state.textures[1], null, "State tracking reset");
+    t.done();
+});
+
+picoTest("Texure flip y", async (t, canvas) => {
 
     let app = PicoGL.createApp(canvas);
 
-    let [ bw, rb ] = await loadImages([ "../img/top-white-bottom-black.png", "../img/top-red-bottom-blue.png" ]);
+    let [ bw, rb ] = await loadImages([ "assets/img/top-white-bottom-black.png", "assets/img/top-red-bottom-blue.png" ]);
 
     let textureBW = app.createTexture2D(bw, {
         minFilter: PicoGL.NEAREST,
@@ -53,7 +130,7 @@ test("Texure flip y", async (t, canvas) => {
     t.done();
 });
 
-test("Texure draw after update", (t, canvas) => {
+picoTest("Texure draw after update", (t, canvas) => {
 
     let app = PicoGL.createApp(canvas);
 
