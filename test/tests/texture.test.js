@@ -21,7 +21,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-import {createQuadDrawCall, loadImages, readPixel} from "./utils.js";
+import {createQuadDrawCall, loadImages} from "./utils.js";
 import {PicoGL} from "../../src/picogl.js";
 
 picoTest("Texture lifecycle", (t, canvas) => {
@@ -113,19 +113,19 @@ picoTest("Texure flip y", async (t, canvas) => {
         .texture("tex", textureBW);
 
     drawCall.draw();
-    t.arrayEqual(readPixel(app, [ 0.5, 0.75 ]), [ 255, 255, 255, 255 ], "Top drew correctly with y flip");
-    t.arrayEqual(readPixel(app, [ 0.5, 0.25 ]), [ 0, 0, 0, 255 ], "Bottom drew correctly with y flip");
+    t.pixelEqual(app.gl, [ 0.5, 0.75 ], [ 255, 255, 255, 255 ], "Top drew correctly with y flip");
+    t.pixelEqual(app.gl, [ 0.5, 0.25 ], [ 0, 0, 0, 255 ], "Bottom drew correctly with y flip");
 
     drawCall.texture("tex", textureRB)
         .draw();
-    t.arrayEqual(readPixel(app, [ 0.5, 0.75 ]), [ 0, 0, 255, 255 ], "Top drew correctly without y flip");
-    t.arrayEqual(readPixel(app, [ 0.5, 0.25 ]), [ 255, 0, 0, 255 ], "Bottom drew correctly without y flip");
+    t.pixelEqual(app.gl, [ 0.5, 0.75 ], [ 0, 0, 255, 255 ], "Top drew correctly without y flip");
+    t.pixelEqual(app.gl, [ 0.5, 0.25 ], [ 255, 0, 0, 255 ], "Bottom drew correctly without y flip");
 
     textureBW.data(rb);
     drawCall.texture("tex", textureBW)
         .draw();
-    t.arrayEqual(readPixel(app, [ 0.5, 0.75 ]), [ 255, 0, 0, 255 ], "Top drew correctly with y flip after update");
-    t.arrayEqual(readPixel(app, [ 0.5, 0.25 ]), [ 0, 0, 255, 255 ], "Bottom drew correctly with y flip after update");
+    t.pixelEqual(app.gl, [ 0.5, 0.75 ], [ 255, 0, 0, 255 ], "Top drew correctly with y flip after update");
+    t.pixelEqual(app.gl, [ 0.5, 0.25 ], [ 0, 0, 255, 255 ], "Bottom drew correctly with y flip after update");
 
     t.done();
 });
@@ -174,20 +174,20 @@ picoTest("Texure draw after update", (t, canvas) => {
         .texture("tex2", texture2);
 
     drawCall.uniform("whichTex", 1).draw();
-    t.arrayEqual(readPixel(app), [ 255, 0, 0, 255 ], "Drew correctly before update");
+    t.pixelEqual(app.gl, [ 0.5, 0.5 ], [ 255, 0, 0, 255 ], "Drew correctly before update");
 
     drawCall.uniform("whichTex", 2).draw();
-    t.arrayEqual(readPixel(app), [ 0, 0, 255, 255 ], "Drew correctly before update");
+    t.pixelEqual(app.gl, [ 0.5, 0.5 ], [ 0, 0, 255, 255 ], "Drew correctly before update");
 
     texture1.data(blue);
     texture2.data(red);
 
     drawCall.uniform("whichTex", 1).draw();
-    t.arrayEqual(readPixel(app), [ 0, 0, 255, 255 ], "Drew correctly after update");
+    t.pixelEqual(app.gl, [ 0.5, 0.5 ], [ 0, 0, 255, 255 ], "Drew correctly after update");
 
 
     drawCall.uniform("whichTex", 2).draw();
-    t.arrayEqual(readPixel(app), [ 255, 0, 0, 255 ], "Drew correctly after update");
+    t.pixelEqual(app.gl, [ 0.5, 0.5 ], [ 255, 0, 0, 255 ], "Drew correctly after update");
 
     t.done();
 });

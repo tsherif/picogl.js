@@ -21,7 +21,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-import {createQuadDrawCall, readPixel} from "./utils.js";
+import {createQuadDrawCall} from "./utils.js";
 import {PicoGL} from "../../src/picogl.js";
 
 picoTest("Cubemap lifecycle", (t, canvas) => {
@@ -86,10 +86,10 @@ picoTest("Cubemap draw", (t, canvas) => {
         .texture("cubemap", cubemap);
 
     drawCall.draw();
-    t.arrayEqual(readPixel(app), [ 255, 255, 255, 255 ], "Drew correctly");
+    t.pixelEqual(app.gl, [ 0.5, 0.5 ], [ 255, 255, 255, 255 ], "Drew correctly");
 
     cubemap.faceData(PicoGL.TEXTURE_CUBE_MAP_NEGATIVE_Z, new Uint8Array([ 255, 0, 0, 255 ]));
     drawCall.draw();
-    t.arrayEqual(readPixel(app), [ 255, 0, 0, 255 ], "Updated face");
+    t.pixelEqual(app.gl, [ 0.5, 0.5 ], [ 255, 0, 0, 255 ], "Updated face");
     t.done();
 });

@@ -85,7 +85,7 @@ const server = http.createServer(async (req, res) => {
 }).listen(config.serverPort);
 
 (async () => {
-    const template = await fs.readFile("test/framework/index-template.html", "utf8");
+    const template = await fs.readFile("test/framework/page/index-template.html", "utf8");
     const testPaths = [];
     config.tests.forEach(t => {
         glob(t).map(f => {
@@ -98,7 +98,10 @@ const server = http.createServer(async (req, res) => {
     rimraf(OUTPUT_DIR);
     rimraf(COVERAGE_DIR);
     await fs.mkdir(OUTPUT_DIR);
-    await fs.writeFile(path.resolve(OUTPUT_DIR, "index.html"), index);
+    await Promise.all([
+        fs.writeFile(path.resolve(OUTPUT_DIR, "index.html"), index),
+        fs.copyFile("test/framework/page/pico-test.js", path.resolve(OUTPUT_DIR, "pico-test.js"))
+    ]);
 
     if (config.assetDir) {
         await fs.mkdir(ASSET_DIR);
@@ -161,14 +164,17 @@ const server = http.createServer(async (req, res) => {
             }));
         }
 
-        await server.close();
-        await browser.close();
-
+        await Promise.all([
+            await server.close(),
+            await browser.close()
+        ]);
+        
         process.exit(passed ? 0 : 1);
     });
 
     if (config.coverage) {
         await page.coverage.startJSCoverage();
     }
-    await page.goto(`${BASE_URL}${config.outputDir}/index.html`);
+    
+    page.goto(`${BASE_URL}${config.outputDir}/index.html`);
 })();

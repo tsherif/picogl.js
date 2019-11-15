@@ -49,17 +49,6 @@ export function createQuadDrawCall(app, fs) {
     return app.createDrawCall(program, vertexArray).primitive(app.gl.TRIANGLE_STRIP);
 }
 
-export function readPixel(app, uv = [ 0.5, 0.5 ]) {
-    let x = Math.floor(app.width * uv[0]);
-    let y = Math.floor(app.height * uv[1]);
-
-    let result = new Uint8Array(4);
-
-    app.readPixel(x, y, result);
-
-    return result;
-}
-
 export function loadImages(urls) {
     return new Promise((resolve) => {
         let numImages = urls.length;
