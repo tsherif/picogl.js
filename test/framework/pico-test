@@ -110,10 +110,6 @@ const server = http.createServer(async (req, res) => {
 
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
-  
-    page.on("console", msg => {
-        console.log(msg.text());
-    });
 
     await page.exposeFunction("puppeteer_runEnd", async (results) => {
         const tests = results.tests;

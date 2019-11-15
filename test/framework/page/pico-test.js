@@ -36,7 +36,7 @@
         document.body.appendChild(canvas);
         
         return new Promise((resolve, reject) => {
-            fn(tester(assert, resolve), canvas);  
+            requestAnimationFrame(() => fn(tester(assert, resolve), canvas));  
             setTimeout(() => reject("Timeout"), 1000);
         }).finally(() => document.body.removeChild(canvas));
     }

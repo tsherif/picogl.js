@@ -83,25 +83,12 @@ export class App {
         this.viewport(0, 0, this.width, this.height);
 
         this.contextLostExt = null;
+        this.contextLostListener = null;
+        this.contextLostHandler = null;
+        this.contextRestoredListener = null;
         this.contextRestoredHandler = null;
 
         this.initExtensions();
-
-        this.canvas.addEventListener("webglcontextlost", (e) => {
-            e.preventDefault();
-
-            if (this.contextLostHandler) {
-                this.contextLostHandler();
-            }
-        });
-
-        this.canvas.addEventListener("webglcontextrestored", () => {
-            this.initExtensions();
-
-            if (this.contextRestoredHandler) {
-                this.contextRestoredHandler();
-            }
-        });
     }
 
     /**
@@ -140,6 +127,18 @@ export class App {
         @return {App} The App object.
     */
     onContextLost(fn) {
+        if (!this.contextLostListener && fn) {
+            this.contextLostListener = (e) => {
+                e.preventDefault();
+                this.contextLostHandler();
+            };
+            this.canvas.addEventListener("webglcontextlost", this.contextLostListener);
+        }
+
+        if (this.contextLostListener && !fn) {
+            this.canvas.removeEventListener("webglcontextlost", this.contextLostListener);
+        }
+
         this.contextLostHandler = fn;
 
         return this;
@@ -153,6 +152,18 @@ export class App {
         @return {App} The App object.
     */
     onContextRestored(fn) {
+        if (!this.contextRestoredListener && fn) {
+            this.contextRestoredListener = () => {
+                this.initExtensions();
+                this.contextRestoredHandler();
+            };  
+            this.canvas.addEventListener("webglcontextrestored", this.contextRestoredListener);
+        }
+
+        if (this.contextRestoredListener && !fn) {
+            this.canvas.removeEventListener("webglcontextrestored", this.contextRestoredListener);
+        }
+
         this.contextRestoredHandler = fn;
 
         return this;

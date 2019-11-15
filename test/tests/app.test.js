@@ -162,6 +162,10 @@ picoTest("App context loss", (t, canvas) => {
 
     app.onContextRestored(() => {
         t.ok(true);
+
+        app.onContextLost(null);
+        app.onContextRestored(null);
+
         t.done();
     });
     app.loseContext();
