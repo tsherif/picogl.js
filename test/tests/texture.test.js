@@ -24,6 +24,60 @@
 import {createQuadDrawCall, loadImages, readPixel} from "./utils.js";
 import {PicoGL} from "../../src/picogl.js";
 
+picoTest("Texture lifecycle", (t, canvas) => {
+    let app = PicoGL.createApp(canvas);
+    let texture = app.createTexture2D(new Uint8Array([ 255, 255, 255, 255 ]), 1, 1);
+
+    t.ok(texture.gl, "Texture contains a gl context");
+    t.ok(texture.appState, "App state tracking initialized");
+    t.ok(texture.texture, "Texture created a texture");
+    t.ok(texture.texture instanceof WebGLTexture, "Texture created texture instance");
+    t.equal(texture.width, 1, "Texture width set");
+    t.equal(texture.height, 1, "Texture height set");
+
+    texture.bind(1);
+    t.equal(texture.currentUnit, 1, "Texture tracking its texture unit");
+    t.equal(app.state.textures[1], texture, "State tracking tracks texture unit");
+
+    texture.delete();
+    t.equal(texture.texture, null, "Texture object deleted");
+    t.equal(texture.currentUnit, -1, "Texture unit reset");
+    t.equal(app.state.textures[1], null, "State tracking reset");
+    t.done();
+});
+
+picoTest("Texture3D lifecycle", (t, canvas) => {
+    let app = PicoGL.createApp(canvas);
+    let texture = app.createTexture3D(new Uint8Array([
+        255, 255, 255, 255, 
+        255, 255, 255, 255, 
+        255, 255, 255, 255, 
+        255, 255, 255, 255, 
+        255, 255, 255, 255, 
+        255, 255, 255, 255, 
+        255, 255, 255, 255, 
+        255, 255, 255, 255
+    ]), 2, 2, 2);
+
+    t.ok(texture.gl, "Texture contains a gl context");
+    t.ok(texture.appState, "App state tracking initialized");
+    t.ok(texture.texture, "Texture created a texture");
+    t.ok(texture.texture instanceof WebGLTexture, "Texture created texture instance");
+    t.equal(texture.width, 2, "Texture width set");
+    t.equal(texture.height, 2, "Texture height set");
+    t.equal(texture.height, 2, "Texture depth set");
+
+    texture.bind(1);
+    t.equal(texture.currentUnit, 1, "Texture tracking its texture unit");
+    t.equal(app.state.textures[1], texture, "State tracking tracks texture unit");
+
+    texture.delete();
+    t.equal(texture.texture, null, "Texture object deleted");
+    t.equal(texture.currentUnit, -1, "Texture unit reset");
+    t.equal(app.state.textures[1], null, "State tracking reset");
+    t.done();
+});
+
 picoTest("Texure flip y", async (t, canvas) => {
 
     let app = PicoGL.createApp(canvas);
