@@ -21,50 +21,40 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-export function createQuadDrawCall(app, fs) {
-    let vertexArray = app.createVertexArray()
-        .vertexAttributeBuffer(0, 
-            app.createVertexBuffer(app.gl.FLOAT, 2, new Float32Array([
-                -1, -1,
-                1, -1,
-                -1, 1,
-                1, 1
-            ]))
-        );
-    let program = app.createProgram(`
-        #version 300 es
-        
-        layout(location=0) in vec4 position;
-        
-        out vec2 vUV;
-        void main() {
-            vUV = position.xy * 0.5 + 0.5;
-            gl_Position = position;
-        }
-    `,
-    fs);
+import {PicoGL} from "../../src/picogl.js";
 
-    app.cullBackfaces();
+picoTest("Query lifecycle", (t, canvas) => {
+    let app = PicoGL.createApp(canvas);
+    let query = app.createQuery(PicoGL.ANY_SAMPLES_PASSED_CONSERVATIVE);
 
-    return app.createDrawCall(program, vertexArray).primitive(app.gl.TRIANGLE_STRIP);
-}
+    t.ok(query.gl, "Query contains a gl context");
+    t.ok(query.query, "Query created a query");
+    t.ok(query.query instanceof WebGLQuery, "Query created query instance");
+    t.equal(query.active, false, "Query starts in inactive state");
+    t.equal(query.result, null, "Query starts with null result");
+    t.equal(query.target, PicoGL.ANY_SAMPLES_PASSED_CONSERVATIVE, "Query sets target");
 
-export function loadImages(urls) {
-    return new Promise((resolve) => {
-        let numImages = urls.length;
+    query.delete();
+    t.equal(query.query, null, "Query was deleted");
 
-        let images = new Array(numImages);
+    t.done();
+});
 
-        function onload() {
-            if (--numImages === 0) {
-                resolve(images);
-            }
-        }
+picoTest("Query querying", (t, canvas) => {
+    let app = PicoGL.createApp(canvas);
+    let query = app.createQuery(PicoGL.ANY_SAMPLES_PASSED_CONSERVATIVE);
+    
+    query.begin();
+    query.end();
 
-        for (let i = 0; i < numImages; ++i) {
-            images[i] = new Image();
-            images[i].onload = onload;
-            images[i].src = urls[i];
+    t.equal(query.active, true, "Query active after end");
+
+    requestAnimationFrame(function check() {
+        if (query.ready()) {
+            t.equal(typeof query.result, "number", "Query result is a number when ready");
+            t.done();
+        } else {
+            requestAnimationFrame(check);
         }
     });
-}
+});
