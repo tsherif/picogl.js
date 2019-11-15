@@ -3,6 +3,7 @@
     "tests": [
         "test/tests/*.test.js"
     ],
+    "coverage": true,
     "coverageExcludeFiles": [
         "test/**/*"
     ]

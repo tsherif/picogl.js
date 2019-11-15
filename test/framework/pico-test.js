@@ -10,22 +10,23 @@ const copydir = require("copy-dir").sync;
 const rimraf = require("rimraf").sync;
 
 let config = {
-    outputDir: "test-results/",
+    outputDir: "pico-test-results/",
     serverPort: 7171,
     tests: [],
     assetDir: null,
-    excludeFiles: []
+    coverage: false,
+    coverageExcludeFiles: []
 };
 
 try {
     Object.assign(config, require(path.resolve(".", ".pico-testrc.json")));
     config.tests = config.tests || [];
-    config.excludeFiles = config.excludeFiles || [];
+    config.coverageExcludeFiles = config.coverageExcludeFiles || [];
     if (!Array.isArray(config.tests)) {
         config.tests = [ config.tests ];
     }
-    if (!Array.isArray(config.excludeFiles)) {
-        config.excludeFiles = [ config.excludeFiles ];
+    if (!Array.isArray(config.coverageExcludeFiles)) {
+        config.coverageExcludeFiles = [ config.coverageExcludeFiles ];
     }
 } catch (e) {}
 
@@ -117,22 +118,24 @@ const server = http.createServer(async (req, res) => {
             console.log(`\t\u001b[31m${results.testCounts.failed} tests failed.\u001b[0m\n\n`);
         }
 
-        const jsCoverage = await page.coverage.stopJSCoverage();
-        pti.write(jsCoverage.filter(item => {
-            const url = item.url;
-            if (url.match(/index\.html$/)) {
-                return false;
-            }
-
-            let include = true;
-            EXCLUDE_REGEX.forEach(ex => {
-                if (url.match(ex)) {
-                    include = false;
+        if (config.coverage) {
+            const jsCoverage = await page.coverage.stopJSCoverage();
+            pti.write(jsCoverage.filter(item => {
+                const url = item.url;
+                if (url.match(/index\.html$/)) {
+                    return false;
                 }
-            });
 
-            return include; 
-        }));
+                let include = true;
+                EXCLUDE_REGEX.forEach(ex => {
+                    if (url.match(ex)) {
+                        include = false;
+                    }
+                });
+
+                return include; 
+            }));
+        }
 
         await server.close();
         await browser.close();
@@ -140,6 +143,8 @@ const server = http.createServer(async (req, res) => {
         process.exit(passed ? 0 : 1);
     });
 
-    await page.coverage.startJSCoverage();
+    if (config.coverage) {
+        await page.coverage.startJSCoverage();
+    }
     await page.goto(`${BASE_URL}${config.outputDir}/index.html`);
 })();
