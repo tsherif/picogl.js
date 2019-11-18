@@ -49,8 +49,20 @@ picoTest("Framebuffer lifecycle", (t, canvas) => {
     framebuffer.bindForDraw();
     t.equal(app.state.drawFramebuffer, framebuffer, "State tracking tracks draw framebuffer");
 
+    app.defaultReadFramebuffer();
+    t.equal(app.state.readFramebuffer, null, "Set default read framebuffer");
+
+    app.defaultDrawFramebuffer();
+    t.equal(app.state.drawFramebuffer, null, "Set default draw framebuffer");
+
+    framebuffer.bindForRead();
+    t.equal(app.state.readFramebuffer, framebuffer, "State tracking tracks read framebuffer");
+
+    framebuffer.bindForDraw();
+    t.equal(app.state.drawFramebuffer, framebuffer, "State tracking tracks draw framebuffer");
+
     framebuffer.delete();
-    t.equal(framebuffer.framebuffer, null, "Texture object deleted");
+    t.equal(framebuffer.framebuffer, null, "Framebuffer object deleted");
     t.equal(app.state.readFramebuffer, null, "State tracking resets read framebuffer");
     t.equal(app.state.drawFramebuffer, null, "State tracking resets draw framebuffer");
     t.done();

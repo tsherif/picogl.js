@@ -36,7 +36,13 @@
         document.body.appendChild(canvas);
         
         return new Promise((resolve, reject) => {
-            requestAnimationFrame(() => fn(tester(assert, resolve), canvas));  
+            requestAnimationFrame(() => {
+                try {
+                    fn(tester(assert, resolve), canvas)
+                } catch (e) {
+                    reject(e.message);
+                }
+            });  
             setTimeout(() => reject("Timeout"), 1000);
         }).finally(() => document.body.removeChild(canvas));
     }
@@ -46,8 +52,8 @@
             ok(...args) {
                 return assert.ok(...args);
             },
-            noOk(...args) {
-                return assert.noOk(...args);
+            notOk(...args) {
+                return assert.notOk(...args);
             },
             equal(...args) {
                 return assert.equal(...args);
@@ -99,23 +105,11 @@
                 }
                 return this.notArrayEqual(readPixel(gl, uv), expected, message);
             },
-            bufferEqual(gl, buffer, binding, expected, message) {
-                if (!expected || typeof expected === "string") {
-                    message = expected;
-                    expected = binding;
-                    binding = gl.ARRAY_BUFFER;
-                }
-
-                return this.arrayEqual(readBuffer(gl, buffer, binding), expected, message);
+            bufferEqual(gl, binding, expected, message) {
+                return this.arrayEqual(readBuffer(gl, binding, expected), expected, message);
             },
-            notBufferEqual(gl, buffer, binding, expected, message) {
-                if (!expected || typeof expected === "string") {
-                    message = expected;
-                    expected = binding;
-                    binding = gl.ARRAY_BUFFER;
-                }
-                
-                return this.notArrayEqual(readBuffer(gl, buffer, ArrayType), expected, message);
+            notBufferEqual(gl, binding, expected, message) {
+                return this.notArrayEqual(readBuffer(gl, binding, expected), expected, message);
             },
             throws(...args) {
                 return assert.throws(...args);
@@ -147,10 +141,13 @@
         return actual;
     }
 
-    function readBuffer(gl, buffer, binding) {
-        gl.bindBuffer(binding, buffer);
+    function readBuffer(gl, binding, expected) {
+        let ArrayType = Float32Array;
+        if (ArrayBuffer.isView(expected)) {
+            ArrayType = expected.constructor;
+        }
         let size = gl.getBufferParameter(binding, gl.BUFFER_SIZE);
-        let actual = new Float32Array(size / Float32Array.BYTES_PER_ELEMENT);
+        let actual = new ArrayType(size / ArrayType.BYTES_PER_ELEMENT);
         gl.getBufferSubData(binding, 0, actual);
 
         return actual;

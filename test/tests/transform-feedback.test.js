@@ -81,7 +81,8 @@ picoTest("TransformFeedback draw", (t, canvas) => {
         .transformFeedback(transformFeedback)
         .draw();
 
-    t.bufferEqual(app.gl, feedbackBuffer.buffer, PicoGL.TRANSFORM_FEEDBACK_BUFFER, [ 2, 4, 6, 8 ], "Buffer was updated");
+    app.gl.bindBuffer(PicoGL.TRANSFORM_FEEDBACK_BUFFER, feedbackBuffer.buffer);
+    t.bufferEqual(app.gl, PicoGL.TRANSFORM_FEEDBACK_BUFFER, [ 2, 4, 6, 8 ], "Buffer was updated");
 
     t.done();
 });

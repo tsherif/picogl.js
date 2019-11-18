@@ -35,6 +35,10 @@ picoTest("App", (t, canvas) => {
     t.ok(app.gl instanceof WebGL2RenderingContext, "Created WebGL 2 context");
     t.ok(app.state, "App state tracking initialized");
 
+    app.resize(20, 30);
+    t.equal(app.width, 20, "App width was resized");
+    t.equal(app.height, 30, "App height was resized");
+
     t.done();
 });
 
