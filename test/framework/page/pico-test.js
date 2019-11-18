@@ -102,6 +102,17 @@
             throws(...args) {
                 return assert.throws(...args);
             },
+            loopUntil(cond, fn) {
+                return new Promise((resolve) => {
+                    requestAnimationFrame(function loop() {
+                        if (cond()) {
+                            resolve();
+                        } else {
+                            requestAnimationFrame(loop);
+                        }
+                    });
+                });
+            },
             done() {
                 resolve();
             }
