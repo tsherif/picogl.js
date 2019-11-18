@@ -10,6 +10,36 @@
     </script>
     <script src="./pico-test.js"></script>
     <script>
+        if (window.puppeteer_testEnd) {
+            function sanitizeAssertions(test) {
+                test.assertions.forEach((assertion) => {
+                    try {
+                        JSON.stringify(assertion.expected);
+                    } catch(e) {
+                        if (assertion.expected.constructor) {
+                            assertion.expected = `{${assertion.expected.constructor.name} object}`;
+                        } else {
+                            assertion.expected = assertion.expected.toString();
+                        }
+                    }
+
+                    try {
+                        JSON.stringify(assertion.actual);
+                    } catch(e) {
+                        if (assertion.actual.constructor) {
+                            assertion.actual = `{${assertion.actual.constructor.name} object}`;
+                        } else {
+                            assertion.actual = assertion.actual.toString();
+                        }
+                    }
+                });
+            }
+
+            QUnit.on("testEnd", (test) => {
+                sanitizeAssertions(test);
+                puppeteer_testEnd(test);
+            });
+        }
         if (window.puppeteer_runEnd) {
             QUnit.on("runEnd", puppeteer_runEnd);
         }
