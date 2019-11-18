@@ -84,7 +84,6 @@ export class App {
 
         this.contextLostExt = null;
         this.contextLostListener = null;
-        this.contextLostHandler = null;
         this.contextRestoredListener = null;
         this.contextRestoredHandler = null;
 
@@ -120,27 +119,6 @@ export class App {
     }
 
     /**
-        Set function to handle context loss.
-
-        @method
-        @param {function} fn Context loss handler.
-        @return {App} The App object.
-    */
-    onContextLost(fn) {
-        if (!this.contextLostListener && fn) {
-            this.addContextListeners();
-        }
-
-        if (this.contextLostListener && !fn) {
-            this.removeContextListeners();
-        }
-
-        this.contextLostHandler = fn;
-
-        return this;
-    }
-
-    /**
         Set function to handle context restoration after loss.
 
         @method
@@ -148,15 +126,9 @@ export class App {
         @return {App} The App object.
     */
     onContextRestored(fn) {
-        if (!this.contextLostListener && fn) {
-            this.addContextListeners();
-        }
-
-        if (this.contextLostListener && !fn) {
-            this.removeContextListeners();
-        }
-
         this.contextRestoredHandler = fn;
+
+        this.initContextListeners();
 
         return this;
     }
@@ -1254,27 +1226,22 @@ export class App {
         this.state.extensions.multiDrawInstanced = this.gl.getExtension("WEBGL_multi_draw_instanced");
     }
 
-    addContextListeners() {
-        this.contextLostListener = (e) => {
-            e.preventDefault();
-            if (this.contextLostHandler) {
-                this.contextLostHandler();
-            }
-        };
-        this.contextRestoredListener = () => {
-            this.initExtensions();
-            if (this.contextRestoredHandler) {
+    initContextListeners() {
+        if (this.contextRestoredHandler) {
+            this.contextLostListener = (e) => {
+                e.preventDefault();
+            };
+            this.contextRestoredListener = () => {
+                this.initExtensions();
                 this.contextRestoredHandler();
-            }
-        };  
-        this.canvas.addEventListener("webglcontextlost", this.contextLostListener);
-        this.canvas.addEventListener("webglcontextrestored", this.contextRestoredListener);
-    }
-
-    removeContextListeners() {
-        this.canvas.removeEventListener("webglcontextlost", this.contextLostListener);
-        this.canvas.removeEventListener("webglcontextrestored", this.contextRestoredListener);
-        this.contextLostListener = null;
-        this.contextRestoredListener = null;  
+            };  
+            this.canvas.addEventListener("webglcontextlost", this.contextLostListener);
+            this.canvas.addEventListener("webglcontextrestored", this.contextRestoredListener);
+        } else {
+            this.canvas.removeEventListener("webglcontextlost", this.contextLostListener);
+            this.canvas.removeEventListener("webglcontextrestored", this.contextRestoredListener);
+            this.contextLostListener = null;
+            this.contextRestoredListener = null;  
+        }
     }
 }

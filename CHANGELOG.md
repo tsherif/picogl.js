@@ -1,3 +1,7 @@
+## v0.15.4
+
+- Remove App.onContextLost (was only used for testing)
+
 ## v0.15.3
 
 - Improved context recovery handling

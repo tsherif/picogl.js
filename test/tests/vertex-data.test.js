@@ -35,6 +35,10 @@ picoTest("VertexBuffer and VertexArray lifecycle", (t, canvas) => {
     t.equal(buffer.itemSize, 2, "VertexBuffer item size set");
     t.equal(buffer.numItems, 2, "VertexBuffer number of items set");
     t.equal(buffer.binding, PicoGL.ARRAY_BUFFER, "VertexBuffer binding set");
+    t.bufferEqual(app.gl, buffer.buffer, [ 0, 0, 1, 1 ], "VertexBuffer data was set");
+
+    buffer.data(new Float32Array([ 2, 2, 3, 3 ]));
+    t.bufferEqual(app.gl, buffer.buffer, [ 2, 2, 3, 3 ], "VertexBuffer data was set");
 
     let vertexArray = app.createVertexArray();
     
@@ -49,6 +53,12 @@ picoTest("VertexBuffer and VertexArray lifecycle", (t, canvas) => {
     t.ok(vertexArray.vertexArray instanceof WebGLVertexArrayObject, "VertexArray created vertexArray instance");
     t.equal(vertexArray.numElements, 2, "VertexArray updates to buffer's number of elements");
     t.equal(vertexArray.numInstances, 1, "VertexArray updates to buffer's number of instances");
+
+    vertexArray.bind();
+    t.equal(app.state.vertexArray, vertexArray, "State tracks vertexArray");
+
+    vertexArray.restore();
+    t.equal(app.state.vertexArray, null, "Restore resets vertexArray");
 
     vertexArray.bind();
     t.equal(app.state.vertexArray, vertexArray, "State tracks vertexArray");

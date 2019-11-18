@@ -99,6 +99,24 @@
                 }
                 return this.notArrayEqual(readPixel(gl, uv), expected, message);
             },
+            bufferEqual(gl, buffer, binding, expected, message) {
+                if (!expected || typeof expected === "string") {
+                    message = expected;
+                    expected = binding;
+                    binding = gl.ARRAY_BUFFER;
+                }
+
+                return this.arrayEqual(readBuffer(gl, buffer, binding), expected, message);
+            },
+            notBufferEqual(gl, buffer, binding, expected, message) {
+                if (!expected || typeof expected === "string") {
+                    message = expected;
+                    expected = binding;
+                    binding = gl.ARRAY_BUFFER;
+                }
+                
+                return this.notArrayEqual(readBuffer(gl, buffer, ArrayType), expected, message);
+            },
             throws(...args) {
                 return assert.throws(...args);
             },
@@ -128,6 +146,15 @@
 
         return actual;
     }
+
+    function readBuffer(gl, buffer, binding) {
+        gl.bindBuffer(binding, buffer);
+        let size = gl.getBufferParameter(binding, gl.BUFFER_SIZE);
+        let actual = new Float32Array(size / Float32Array.BYTES_PER_ELEMENT);
+        gl.getBufferSubData(binding, 0, actual);
+
+        return actual;
+    };
 
     window.picoTest = picoTest;
 })();
