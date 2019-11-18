@@ -39,7 +39,8 @@ let config = {
     tests: [],
     assetDir: null,
     coverage: false,
-    coverageExcludeFiles: []
+    coverageExcludeFiles: [],
+    headless: true
 };
 
 try {
@@ -108,7 +109,7 @@ const server = http.createServer(async (req, res) => {
         copydir(path.resolve(".", config.assetDir), ASSET_DIR);
     }
 
-    const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch({headless: config.headless});
     const page = await browser.newPage();
 
     const errorMessages = [];
