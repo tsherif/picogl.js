@@ -23,34 +23,45 @@
 
 import {PicoGL} from "../../src/picogl.js";
 
-picoTest("Query lifecycle", (t, canvas) => {
+picoTest("Timer CPU timing", async (t, canvas) => {
     let app = PicoGL.createApp(canvas);
-    let query = app.createQuery(PicoGL.ANY_SAMPLES_PASSED_CONSERVATIVE);
+    let timer = app.createTimer();
 
-    t.ok(query.gl, "Query contains a gl context");
-    t.ok(query.query, "Query created a query");
-    t.ok(query.query instanceof WebGLQuery, "Query created query instance");
-    t.equal(query.active, false, "Query starts in inactive state");
-    t.equal(query.result, null, "Query starts with null result");
-    t.equal(query.target, PicoGL.ANY_SAMPLES_PASSED_CONSERVATIVE, "Query sets target");
+    t.ok(timer.gl, "Timer contains a gl context");
+    t.ok(timer.cpuTimer, "Timer created a cpu timer");
 
-    query.delete();
-    t.equal(query.query, null, "Query was deleted");
+    timer.start();
+    timer.end();
 
+    await t.loopUntil(() => timer.ready());
+
+    t.equal(typeof timer.cpuTime, "number", "CPU time is number");
     t.done();
+
 });
 
-picoTest("Query querying", async (t, canvas) => {
+picoTest("Timer GPU timing", async (t, canvas) => {
+    if (!PicoGL.WEBGL_INFO.GPU_TIMER) {
+        t.ok(true, "GPU Timing not supported");
+        t.done();
+        return;
+    }
+
     let app = PicoGL.createApp(canvas);
-    let query = app.createQuery(PicoGL.ANY_SAMPLES_PASSED_CONSERVATIVE);
-    
-    query.begin();
-    query.end();
+    let timer = app.createTimer();
 
-    t.equal(query.active, true, "Query active after end");
+    t.ok(timer.gl, "Timer contains a gl context");
+    t.ok(timer.gpuTimerQuery, "Timer created a gpu timer");
 
-    await t.loopUntil(() => query.ready());
+    timer.start();
+    timer.end();
 
-    t.equal(typeof query.result, "number", "Query result is a number when ready");
+    await t.loopUntil(() => timer.ready()); 
+        
+    t.equal(typeof timer.gpuTime, "number", "GPU time is number");
+
+    timer.delete();
+    t.equal(timer.gpuTimerQuery, null, "Timer was deleted");
+
     t.done();
 });
