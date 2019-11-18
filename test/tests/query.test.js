@@ -40,7 +40,7 @@ picoTest("Query lifecycle", (t, canvas) => {
     t.done();
 });
 
-picoTest("Query querying", (t, canvas) => {
+picoTest("Query querying", async (t, canvas) => {
     let app = PicoGL.createApp(canvas);
     let query = app.createQuery(PicoGL.ANY_SAMPLES_PASSED_CONSERVATIVE);
     
@@ -49,12 +49,8 @@ picoTest("Query querying", (t, canvas) => {
 
     t.equal(query.active, true, "Query active after end");
 
-    requestAnimationFrame(function check() {
-        if (query.ready()) {
-            t.equal(typeof query.result, "number", "Query result is a number when ready");
-            t.done();
-        } else {
-            requestAnimationFrame(check);
-        }
-    });
+    await t.loopUntil(() => query.ready());
+
+    t.equal(typeof query.result, "number", "Query result is a number when ready");
+    t.done();
 });

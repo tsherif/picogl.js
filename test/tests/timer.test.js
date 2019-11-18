@@ -51,7 +51,7 @@ picoTest("Timer GPU timing", async (t, canvas) => {
     let timer = app.createTimer();
 
     t.ok(timer.gl, "Timer contains a gl context");
-    t.ok(timer.gpuTimer, "Timer created a gpu timer");
+    t.ok(timer.gpuTimerQuery, "Timer created a gpu timer");
 
     timer.start();
     timer.end();
@@ -61,7 +61,7 @@ picoTest("Timer GPU timing", async (t, canvas) => {
     t.equal(typeof timer.gpuTime, "number", "GPU time is number");
 
     timer.delete();
-    t.equal(timer.gpuTimer, null, "Timer was deleted");
+    t.equal(timer.gpuTimerQuery, null, "Timer was deleted");
 
     t.done();
 });
