@@ -35,6 +35,7 @@ picoTest("VertexBuffer and VertexArray lifecycle", (t, canvas) => {
     t.equal(buffer.itemSize, 2, "VertexBuffer item size set");
     t.equal(buffer.numItems, 2, "VertexBuffer number of items set");
     t.equal(buffer.binding, PicoGL.ARRAY_BUFFER, "VertexBuffer binding set");
+    t.bufferEqual(app.gl, buffer.buffer, [0, 0, 1, 1], "VertexBuffer data was set");
 
     let vertexArray = app.createVertexArray();
     

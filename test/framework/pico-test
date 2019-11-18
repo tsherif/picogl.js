@@ -111,9 +111,10 @@ const server = http.createServer(async (req, res) => {
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
 
+    const errorMessages = [];
     page.on("console", msg => {
         if (msg.type() === "error") {
-            console.error(msg.text());
+            errorMessages.push(msg.text());
         }
     });
 
@@ -151,6 +152,8 @@ const server = http.createServer(async (req, res) => {
         } else {
             console.log(`\t\u001b[31m${results.testCounts.failed} tests failed.\u001b[0m\n\n`);
         }
+
+        console.log(`\u001b[31m${errorMessages.join("\n")}\u001b[0m`);
 
         if (config.coverage) {
             const jsCoverage = await page.coverage.stopJSCoverage();

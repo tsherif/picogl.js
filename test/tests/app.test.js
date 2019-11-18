@@ -153,20 +153,21 @@ picoTest("App state functions", (t, canvas) => {
     t.done();
 });
 
-picoTest("App context loss", (t, canvas) => {
+picoTest("App context loss", async (t, canvas) => {
     let app = PicoGL.createApp(canvas);
 
-    app.onContextLost(() => {
-        requestAnimationFrame(() => app.restoreContext());
-    });
-
     app.onContextRestored(() => {
-        t.ok(true);
+        t.ok(true, "Context restored handler was called");
 
-        app.onContextLost(null);
         app.onContextRestored(null);
+        t.equal(app.contextRestoredHandler, null, "Context restored handler was removed");
 
         t.done();
     });
+
     app.loseContext();
+
+    await t.loopUntil(() => app.gl.isContextLost());
+
+    app.restoreContext();
 });
