@@ -39,11 +39,20 @@ picoTest("Framebuffer lifecycle", (t, canvas) => {
     framebuffer.bindForDraw();
     t.equal(app.state.drawFramebuffer, framebuffer, "State tracking tracks draw framebuffer");
 
+    framebuffer.restore();
+    t.equal(app.state.readFramebuffer, null, "Restore resets read framebuffer");
+    t.equal(app.state.drawFramebuffer, null, "Restore resets draw framebuffer");
+    
+    framebuffer.bindForRead();
+    t.equal(app.state.readFramebuffer, framebuffer, "State tracking tracks read framebuffer");
+
+    framebuffer.bindForDraw();
+    t.equal(app.state.drawFramebuffer, framebuffer, "State tracking tracks draw framebuffer");
 
     framebuffer.delete();
     t.equal(framebuffer.framebuffer, null, "Texture object deleted");
-    t.equal(app.state.readFramebuffer, null, "State tracking tracks resels read framebuffer");
-    t.equal(app.state.drawFramebuffer, null, "State tracking tracks resels draw framebuffer");
+    t.equal(app.state.readFramebuffer, null, "State tracking resets read framebuffer");
+    t.equal(app.state.drawFramebuffer, null, "State tracking resets draw framebuffer");
     t.done();
 });
 
@@ -65,6 +74,16 @@ picoTest("Framebuffer attachments", (t, canvas) => {
     t.equal(framebuffer.colorAttachmentEnums[1], PicoGL.COLOR_ATTACHMENT1, "Framebuffer tracks color attachment enums");
     t.equal(framebuffer.colorAttachments[1], renderbufferColorTarget, "Framebuffer tracks color target");
     t.equal(framebuffer.depthAttachment, depthTarget, "Framebuffer tracks depth target");
+
+    framebuffer.resize(100, 200);
+    t.equal(framebuffer.width, 100, "Framebuffer width updated");
+    t.equal(framebuffer.height, 200, "Framebuffer height updated");
+    t.equal(textureColorTarget.width, 100, "Texture color taget width updated");
+    t.equal(textureColorTarget.height, 200, "Texture color taget height updated");
+    t.equal(renderbufferColorTarget.width, 100, "Renderbuffer color taget width updated");
+    t.equal(renderbufferColorTarget.height, 200, "Renderbuffer color taget height updated");
+    t.equal(depthTarget.width, 100, "Depth taget width updated");
+    t.equal(depthTarget.height, 200, "Depth taget height updated");
 
     framebuffer.bindForDraw();
     t.glParameterEqual(app.gl, PicoGL.DRAW_BUFFER0, PicoGL.COLOR_ATTACHMENT0, "Draw buffer 0 set when bound");

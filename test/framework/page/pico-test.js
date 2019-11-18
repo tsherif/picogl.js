@@ -99,21 +99,20 @@
                 }
                 return this.notArrayEqual(readPixel(gl, uv), expected, message);
             },
-            bufferEqual(gl, buffer, ArrayType, expected, message) {
+            bufferEqual(gl, buffer, binding, expected, message) {
                 if (!expected || typeof expected === "string") {
                     message = expected;
-                    expected = ArrayType;
-                    ArrayType = Float32Array;
+                    expected = binding;
+                    binding = gl.ARRAY_BUFFER;
                 }
-                
 
-                return this.arrayEqual(readBuffer(gl, buffer, ArrayType), expected, message);
+                return this.arrayEqual(readBuffer(gl, buffer, binding), expected, message);
             },
-            notBufferEqual(gl, buffer, ArrayType, expected, message) {
+            notBufferEqual(gl, buffer, binding, expected, message) {
                 if (!expected || typeof expected === "string") {
                     message = expected;
-                    expected = ArrayType;
-                    ArrayType = Float32Array;
+                    expected = binding;
+                    binding = gl.ARRAY_BUFFER;
                 }
                 
                 return this.notArrayEqual(readBuffer(gl, buffer, ArrayType), expected, message);
@@ -148,11 +147,11 @@
         return actual;
     }
 
-    function readBuffer(gl, buffer, ArrayType) {
-        gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-        let size = gl.getBufferParameter(gl.ARRAY_BUFFER, gl.BUFFER_SIZE);
-        let actual = new ArrayType(size / ArrayType.BYTES_PER_ELEMENT);
-        gl.getBufferSubData(gl.ARRAY_BUFFER, 0, actual);
+    function readBuffer(gl, buffer, binding) {
+        gl.bindBuffer(binding, buffer);
+        let size = gl.getBufferParameter(binding, gl.BUFFER_SIZE);
+        let actual = new Float32Array(size / Float32Array.BYTES_PER_ELEMENT);
+        gl.getBufferSubData(binding, 0, actual);
 
         return actual;
     };
