@@ -154,7 +154,7 @@ PicoGL.js simplifies usage of some more complex WebGL 2 features, such as multip
     .clearColor(0.0, 0.0, 0.0, 1.0);
 
     // Last argument is transform feedback varyings
-    app.createProgramx([vertexShaderSource, fragmentShaderSource, ["vPosition"]]).then(([program]) => {
+    app.createPrograms([vertexShaderSource, fragmentShaderSource, ["vPosition"]]).then(([program]) => {
         let positions1 = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
             -0.5, -0.5,
              0.5, -0.5,
