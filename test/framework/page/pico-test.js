@@ -81,7 +81,7 @@
                     return this.equal(actual, expected, message);
                 }
             },
-            notGLParameterEqual(gl, parameter, expected, message) {
+            glParameterNotEqual(gl, parameter, expected, message) {
                 let actual = gl.getParameter(parameter);
                 if (Array.isArray(actual) || ArrayBuffer.isView(actual)) {
                     return this.notArrayEqual(actual, expected, message);
@@ -97,7 +97,7 @@
                 }
                 return this.arrayEqual(readPixel(gl, uv), expected, message);
             },
-            notPixelEqual(gl, uv, expected, message) {
+            pixelNotEqual(gl, uv, expected, message) {
                 if (!expected || typeof expected === "string") {
                     message = expected;
                     expected = uv;
@@ -108,7 +108,7 @@
             bufferEqual(gl, binding, expected, message) {
                 return this.arrayEqual(readBuffer(gl, binding, expected), expected, message);
             },
-            notBufferEqual(gl, binding, expected, message) {
+            bufferNotEqual(gl, binding, expected, message) {
                 return this.notArrayEqual(readBuffer(gl, binding, expected), expected, message);
             },
             throws(...args) {
@@ -154,4 +154,38 @@
     };
 
     window.picoTest = picoTest;
+
+    if (window.puppeteer_testEnd) {
+        function sanitizeAssertions(test) {
+            test.assertions.forEach((assertion) => {
+                try {
+                    JSON.stringify(assertion.expected);
+                } catch(e) {
+                    if (assertion.expected.constructor) {
+                        assertion.expected = `{${assertion.expected.constructor.name} object}`;
+                    } else {
+                        assertion.expected = assertion.expected.toString();
+                    }
+                }
+
+                try {
+                    JSON.stringify(assertion.actual);
+                } catch(e) {
+                    if (assertion.actual.constructor) {
+                        assertion.actual = `{${assertion.actual.constructor.name} object}`;
+                    } else {
+                        assertion.actual = assertion.actual.toString();
+                    }
+                }
+            });
+        }
+
+        QUnit.on("testEnd", (test) => {
+            sanitizeAssertions(test);
+            puppeteer_testEnd(test);
+        });
+    }
+    if (window.puppeteer_runEnd) {
+        QUnit.on("runEnd", puppeteer_runEnd);
+    }
 })();

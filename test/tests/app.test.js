@@ -27,6 +27,7 @@ const TEST_COLOR_MASK = [ true, false, false, true ];
 const TEST_COLOR = [ 0, 0.25, 0.5, 0.75 ];
 const TEST_DEPTH_RANGE = [ 0.25, 0.5 ];
 const TEST_SCISSOR_BOX = [ 10, 10, 10, 10 ];
+const TEST_VIEWPORT = [ 20, 20, 30, 30 ];
 
 picoTest("App", (t, canvas) => {
     let app = PicoGL.createApp(canvas);
@@ -100,7 +101,6 @@ picoTest("App state functions", (t, canvas) => {
     app.drawBackfaces();
     t.glParameterEqual(gl, PicoGL.CULL_FACE, false, "Culling set");
 
-
     app.stencilTest();
     t.glParameterEqual(gl, PicoGL.STENCIL_TEST, true, "Stencil test set");
 
@@ -154,6 +154,12 @@ picoTest("App state functions", (t, canvas) => {
     app.scissor(...TEST_SCISSOR_BOX);
     t.glParameterEqual(gl, PicoGL.SCISSOR_BOX, TEST_SCISSOR_BOX, "Scissor box set");
 
+    app.viewport(...TEST_VIEWPORT);
+    t.glParameterEqual(gl, PicoGL.VIEWPORT, TEST_VIEWPORT, "Viewport set");    
+
+    app.defaultViewport();
+    t.glParameterEqual(gl, PicoGL.VIEWPORT, [ 0, 0, app.width, app.height ], "Viewport reset");    
+
     t.done();
 });
 
@@ -174,4 +180,40 @@ picoTest("App context loss", async (t, canvas) => {
     await t.loopUntil(() => app.gl.isContextLost());
 
     app.restoreContext();
+});
+
+picoTest("App clear", (t, canvas) => {
+    let app = PicoGL.createApp(canvas);
+
+    app.clearColor(1, 0, 0, 1);
+    app.clearMask(PicoGL.COLOR_BUFFER_BIT);
+    app.clear();
+    t.pixelEqual(app.gl, [ 255, 0, 0, 255 ], "Framebuffer cleared");
+
+    app.clearColor(0, 0, 1, 1);
+    app.clearMask(PicoGL.DEPTH_BUFFER_BIT);
+    app.clear();
+    t.pixelNotEqual(app.gl, [ 0, 0, 255, 255 ], "Framebuffer not cleared");
+
+    app.clearMask(PicoGL.COLOR_BUFFER_BIT);
+    app.clear();
+    t.pixelEqual(app.gl, [ 0, 0, 255, 255 ], "Framebuffer not cleared");
+
+    t.done();
+});
+
+picoTest("App readPixel", (t, canvas) => {
+    let app = PicoGL.createApp(canvas);
+
+    app.clearColor(1, 0, 0, 1);
+    app.clearMask(PicoGL.COLOR_BUFFER_BIT);
+    app.clear();
+
+    let result = new Uint8Array(4);
+
+    app.readPixel(app.width / 2, app.height / 2, result);
+
+    t.pixelEqual(app.gl, result, "Pixel read");
+
+    t.done();
 });
