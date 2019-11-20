@@ -24,7 +24,7 @@
 import {createQuadDrawCall} from "./utils.js";
 import {PicoGL} from "../../src/picogl.js";
 
-picoTest("UniformBuffer lifecycle", (t, canvas) => {
+glTest("UniformBuffer lifecycle", (t, canvas) => {
     let app = PicoGL.createApp(canvas);
     let ubo = app.createUniformBuffer([ PicoGL.FLOAT_VEC4 ]);
 
@@ -48,7 +48,7 @@ picoTest("UniformBuffer lifecycle", (t, canvas) => {
     t.done();
 });
 
-picoTest("UniformBuffer setting", (t, canvas) => {
+glTest("UniformBuffer setting", (t, canvas) => {
     let app = PicoGL.createApp(canvas);
     let ubo = app.createUniformBuffer([
         PicoGL.FLOAT_VEC4,
@@ -115,7 +115,7 @@ picoTest("UniformBuffer setting", (t, canvas) => {
     t.done();
 });
 
-picoTest("UniformBuffer drawing", (t, canvas) => {
+glTest("UniformBuffer drawing", (t, canvas) => {
     let app = PicoGL.createApp(canvas);
     let leftUBO = app.createUniformBuffer([
         PicoGL.FLOAT_VEC4,

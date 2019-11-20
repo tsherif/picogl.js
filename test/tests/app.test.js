@@ -29,7 +29,7 @@ const TEST_DEPTH_RANGE = [ 0.25, 0.5 ];
 const TEST_SCISSOR_BOX = [ 10, 10, 10, 10 ];
 const TEST_VIEWPORT = [ 20, 20, 30, 30 ];
 
-picoTest("App", (t, canvas) => {
+glTest("App", (t, canvas) => {
     let app = PicoGL.createApp(canvas);
 
     t.ok(app.gl, "App contains a gl context");
@@ -43,7 +43,7 @@ picoTest("App", (t, canvas) => {
     t.done();
 });
 
-picoTest("App state functions", (t, canvas) => {
+glTest("App state functions", (t, canvas) => {
     let app = PicoGL.createApp(canvas);
     let gl = app.gl;
 
@@ -163,7 +163,7 @@ picoTest("App state functions", (t, canvas) => {
     t.done();
 });
 
-picoTest("App context loss", async (t, canvas) => {
+glTest("App context loss", async (t, canvas) => {
     let app = PicoGL.createApp(canvas);
 
     app.onContextRestored(() => {
@@ -182,7 +182,7 @@ picoTest("App context loss", async (t, canvas) => {
     app.restoreContext();
 });
 
-picoTest("App clear", (t, canvas) => {
+glTest("App clear", (t, canvas) => {
     let app = PicoGL.createApp(canvas);
 
     app.clearColor(1, 0, 0, 1);
@@ -202,7 +202,7 @@ picoTest("App clear", (t, canvas) => {
     t.done();
 });
 
-picoTest("App readPixel", (t, canvas) => {
+glTest("App readPixel", (t, canvas) => {
     let app = PicoGL.createApp(canvas);
 
     app.clearColor(1, 0, 0, 1);

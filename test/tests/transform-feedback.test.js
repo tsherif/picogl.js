@@ -23,7 +23,7 @@
 
 import {PicoGL} from "../../src/picogl.js";
 
-picoTest("TransformFeedback lifecycle", (t, canvas) => {
+glTest("TransformFeedback lifecycle", (t, canvas) => {
     let app = PicoGL.createApp(canvas);
     let transformFeedback = app.createTransformFeedback();
     
@@ -41,7 +41,7 @@ picoTest("TransformFeedback lifecycle", (t, canvas) => {
     t.done();
 });
 
-picoTest("TransformFeedback draw", (t, canvas) => {
+glTest("TransformFeedback draw", (t, canvas) => {
     let app = PicoGL.createApp(canvas);
     let inputBuffer = app.createVertexBuffer(PicoGL.FLOAT, 4, new Float32Array([ 1, 2, 3, 4 ]));
     let feedbackBuffer = app.createVertexBuffer(PicoGL.FLOAT, 4, 4);

@@ -23,7 +23,7 @@
 
 import {PicoGL} from "../../src/picogl.js";
 
-picoTest("Program lifecycle", async (t, canvas) => {
+glTest("Program lifecycle", async (t, canvas) => {
     let app = PicoGL.createApp(canvas);
     let vsSource = `
         #version 300 es
