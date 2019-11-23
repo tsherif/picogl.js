@@ -40,7 +40,7 @@
     "eslint": "^6.7.0",
     "jsdoc": "^3.6.3",
     "nyc": "^14.1.1",
-    "pico-gltest": "0.0.13",
+    "pico-gltest": "0.0.14",
     "replace": "^1.1.1",
     "rimraf": "^3.0.0",
     "webpack": "^4.39.3",

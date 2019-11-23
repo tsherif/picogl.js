@@ -53,16 +53,24 @@ glTest("UniformBuffer setting", (t, canvas) => {
     let ubo = app.createUniformBuffer([
         PicoGL.FLOAT_VEC4,
         PicoGL.FLOAT_VEC2,
-        PicoGL.FLOAT_MAT4
+        PicoGL.FLOAT,
+        PicoGL.FLOAT_MAT4,
+        PicoGL.FLOAT_MAT3,
+        PicoGL.FLOAT_MAT2
     ]);
 
-    t.equal(ubo.size, 24, "Size is correct");
+    t.equal(ubo.size, 44, "Size is correct");
     t.deepEqual(ubo.data, [
+        0, 0, 0, 0, // 0
+        0, 0, 0, 0, // 1, 2
+        0, 0, 0, 0, // 3
         0, 0, 0, 0,
         0, 0, 0, 0,
         0, 0, 0, 0,
+        0, 0, 0, 0, // 4
+        0, 0, 0, 0, 
         0, 0, 0, 0,
-        0, 0, 0, 0,
+        0, 0, 0, 0, // 5
         0, 0, 0, 0
     ], "UBO starts empty");
 
@@ -70,11 +78,16 @@ glTest("UniformBuffer setting", (t, canvas) => {
     t.equal(ubo.dirtyStart, 4, "UBO dirty start reset after udpate");
     t.equal(ubo.dirtyEnd, 6, "UBO dirty end set");
     t.deepEqual(ubo.data, [
+        0, 0, 0, 0, // 0
+        1, 2, 0, 0, // 1, 2
+        0, 0, 0, 0, // 3
         0, 0, 0, 0,
-        1, 2, 0, 0,
         0, 0, 0, 0,
         0, 0, 0, 0,
+        0, 0, 0, 0, // 4
+        0, 0, 0, 0, 
         0, 0, 0, 0,
+        0, 0, 0, 0, // 5
         0, 0, 0, 0
     ], "UBO data updated");
 
@@ -82,15 +95,20 @@ glTest("UniformBuffer setting", (t, canvas) => {
     t.equal(ubo.dirtyStart, 0, "UBO dirty start set");
     t.equal(ubo.dirtyEnd, 6, "UBO dirty end set");
     t.deepEqual(ubo.data, [
-        1, 2, 3, 4,
-        1, 2, 0, 0,
+        1, 2, 3, 4, // 0
+        1, 2, 0, 0, // 1, 2
+        0, 0, 0, 0, // 3
         0, 0, 0, 0,
         0, 0, 0, 0,
         0, 0, 0, 0,
+        0, 0, 0, 0, // 4
+        0, 0, 0, 0, 
+        0, 0, 0, 0,
+        0, 0, 0, 0, // 5
         0, 0, 0, 0
     ], "UBO data updated");
 
-    ubo.set(2, [
+    ubo.set(3, [
         1, 2, 3, 4,
         5, 6, 7, 8,
         9, 10, 11, 12,
@@ -99,17 +117,110 @@ glTest("UniformBuffer setting", (t, canvas) => {
     t.equal(ubo.dirtyStart, 0, "UBO dirty start set");
     t.equal(ubo.dirtyEnd, 24, "UBO dirty end set");
     t.deepEqual(ubo.data, [
-        1, 2, 3, 4,
-        1, 2, 0, 0,
-        1, 2, 3, 4,
+        1, 2, 3, 4, // 0
+        1, 2, 0, 0, // 1, 2
+        1, 2, 3, 4, // 3
         5, 6, 7, 8,
         9, 10, 11, 12,
-        13, 14, 15, 16
+        13, 14, 15, 16,
+        0, 0, 0, 0, // 4
+        0, 0, 0, 0, 
+        0, 0, 0, 0,
+        0, 0, 0, 0, // 5
+        0, 0, 0, 0
     ], "UBO data updated");
+
+    ubo.set(2, 3);
+    t.equal(ubo.dirtyStart, 0, "UBO dirty start set");
+    t.equal(ubo.dirtyEnd, 24, "UBO dirty end set");
+    t.deepEqual(ubo.data, [
+        1, 2, 3, 4, // 0
+        1, 2, 3, 0, // 1, 2
+        1, 2, 3, 4, // 3
+        5, 6, 7, 8,
+        9, 10, 11, 12,
+        13, 14, 15, 16,
+        0, 0, 0, 0, // 4
+        0, 0, 0, 0, 
+        0, 0, 0, 0,
+        0, 0, 0, 0, // 5
+        0, 0, 0, 0
+    ], "UBO data updated");
+
+    ubo.set(4, [
+        1, 2, 3, 0,
+        4, 5, 6, 0,
+        7, 8, 9, 0
+    ]);
+    t.equal(ubo.dirtyStart, 0, "UBO dirty start set");
+    t.equal(ubo.dirtyEnd, 36, "UBO dirty end set");
+    t.deepEqual(ubo.data, [
+        1, 2, 3, 4, // 0
+        1, 2, 3, 0, // 1, 2
+        1, 2, 3, 4, // 3
+        5, 6, 7, 8,
+        9, 10, 11, 12,
+        13, 14, 15, 16,
+        1, 2, 3, 0, // 4
+        4, 5, 6, 0, 
+        7, 8, 9, 0,
+        0, 0, 0, 0, // 5
+        0, 0, 0, 0
+    ], "UBO data updated");
+
+    ubo.set(5, [
+        1, 2, 0, 0,
+        3, 4, 0, 0
+    ]);
+    t.equal(ubo.dirtyStart, 0, "UBO dirty start set");
+    t.equal(ubo.dirtyEnd, 44, "UBO dirty end set");
+    t.deepEqual(ubo.data, [
+        1, 2, 3, 4, // 0
+        1, 2, 3, 0, // 1, 2
+        1, 2, 3, 4, // 3
+        5, 6, 7, 8,
+        9, 10, 11, 12,
+        13, 14, 15, 16,
+        1, 2, 3, 0, // 4
+        4, 5, 6, 0, 
+        7, 8, 9, 0,
+        1, 2, 0, 0, // 5
+        3, 4, 0, 0
+    ], "UBO data updated");
+
+    app.gl.bindBuffer(PicoGL.UNIFORM_BUFFER, ubo.buffer);
+    t.bufferNotEqual(app.gl, PicoGL.UNIFORM_BUFFER, [
+        1, 2, 3, 4, // 0
+        1, 2, 3, 0, // 1, 2
+        1, 2, 3, 4, // 3
+        5, 6, 7, 8,
+        9, 10, 11, 12,
+        13, 14, 15, 16,
+        1, 2, 3, 0, // 4
+        4, 5, 6, 0, 
+        7, 8, 9, 0,
+        1, 2, 0, 0, // 5
+        3, 4, 0, 0
+    ], "Buffer data not updated before update() call");
 
     ubo.update();
     t.equal(ubo.dirtyStart, ubo.size, "UBO dirty start reset after udpate");
     t.equal(ubo.dirtyEnd, 0, "UBO dirty end reset after udpate");
+
+    app.gl.bindBuffer(PicoGL.UNIFORM_BUFFER, ubo.buffer);
+    t.bufferEqual(app.gl, PicoGL.UNIFORM_BUFFER, [
+        1, 2, 3, 4, // 0
+        1, 2, 3, 0, // 1, 2
+        1, 2, 3, 4, // 3
+        5, 6, 7, 8,
+        9, 10, 11, 12,
+        13, 14, 15, 16,
+        1, 2, 3, 0, // 4
+        4, 5, 6, 0, 
+        7, 8, 9, 0,
+        1, 2, 0, 0, // 5
+        3, 4, 0, 0
+    ], "Buffer data updated after update call");
     
 
     t.done();
