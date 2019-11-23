@@ -23,7 +23,7 @@
 
 import {PicoGL} from "../../src/picogl.js";
 
-glTest("VertexBuffer and VertexArray lifecycle", (t, canvas) => {
+glCheck("VertexBuffer and VertexArray lifecycle", (t, canvas) => {
     let app = PicoGL.createApp(canvas);
     let buffer = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([ 0, 0, 1, 1 ]));
     
@@ -76,7 +76,7 @@ glTest("VertexBuffer and VertexArray lifecycle", (t, canvas) => {
     t.done();
 });
 
-glTest("VertexBuffer and VertexArray draw", (t, canvas) => {
+glCheck("VertexBuffer and VertexArray draw", (t, canvas) => {
     let app = PicoGL.createApp(canvas);
     let vertexPositions = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
         -0.5, 0.5,

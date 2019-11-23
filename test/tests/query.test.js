@@ -23,7 +23,7 @@
 
 import {PicoGL} from "../../src/picogl.js";
 
-glTest("Query lifecycle", (t, canvas) => {
+glCheck("Query lifecycle", (t, canvas) => {
     let app = PicoGL.createApp(canvas);
     let query = app.createQuery(PicoGL.ANY_SAMPLES_PASSED_CONSERVATIVE);
 
@@ -40,7 +40,7 @@ glTest("Query lifecycle", (t, canvas) => {
     t.done();
 });
 
-glTest("Query querying", async (t, canvas) => {
+glCheck("Query querying", async (t, canvas) => {
     let app = PicoGL.createApp(canvas);
     let query = app.createQuery(PicoGL.ANY_SAMPLES_PASSED_CONSERVATIVE);
     

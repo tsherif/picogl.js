@@ -23,7 +23,7 @@
 
 import {PicoGL} from "../../src/picogl.js";
 
-glTest("Framebuffer lifecycle", (t, canvas) => {
+glCheck("Framebuffer lifecycle", (t, canvas) => {
     let app = PicoGL.createApp(canvas);
     let framebuffer = app.createFramebuffer();
 
@@ -68,7 +68,7 @@ glTest("Framebuffer lifecycle", (t, canvas) => {
     t.done();
 });
 
-glTest("Framebuffer attachments", (t, canvas) => {
+glCheck("Framebuffer attachments", (t, canvas) => {
     let app = PicoGL.createApp(canvas);
 
     let textureColorTarget = app.createTexture2D(app.width, app.height);
@@ -98,13 +98,13 @@ glTest("Framebuffer attachments", (t, canvas) => {
     t.equal(depthTarget.height, 200, "Depth taget height updated");
 
     framebuffer.bindForDraw();
-    t.glParameterEqual(app.gl, PicoGL.DRAW_BUFFER0, PicoGL.COLOR_ATTACHMENT0, "Draw buffer 0 set when bound");
-    t.glParameterEqual(app.gl, PicoGL.DRAW_BUFFER1, PicoGL.COLOR_ATTACHMENT1, "Draw buffer 1 set when bound");
+    t.parameterEqual(app.gl, PicoGL.DRAW_BUFFER0, PicoGL.COLOR_ATTACHMENT0, "Draw buffer 0 set when bound");
+    t.parameterEqual(app.gl, PicoGL.DRAW_BUFFER1, PicoGL.COLOR_ATTACHMENT1, "Draw buffer 1 set when bound");
 
     t.done();
 });
 
-glTest("Framebuffer blit", (t, canvas) => {
+glCheck("Framebuffer blit", (t, canvas) => {
     let app = PicoGL.createApp(canvas);
 
     let readTarget = app.createRenderbuffer(app.width, app.height, PicoGL.RGBA8);

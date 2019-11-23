@@ -8,6 +8,6 @@
         "es6": true
     },
     "globals": {
-        "glTest": true
+        "glCheck": true
     }
 }
