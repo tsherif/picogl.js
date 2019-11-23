@@ -1,7 +1,7 @@
 PicoGL.js
 =========
 
-[![Build Status](https://travis-ci.org/tsherif/picogl.js.svg?branch=master)](https://travis-ci.org/tsherif/picogl.js) [![Coverage Status](https://coveralls.io/repos/github/tsherif/picogl.js/badge.svg?branch=master)](https://coveralls.io/github/tsherif/picogl.js?branch=master) [![GZIP size](https://badge-size.herokuapp.com/tsherif/picogl.js/master/build/picogl.min.js.svg?compression=gzip)](https://github.com/tsherif/picogl.js/blob/master/build/picogl.min.js) [![Gitter](https://img.shields.io/gitter/room/picogl.js/general.svg)](https://gitter.im/picogl-js/general) [![License](https://img.shields.io/github/license/tsherif/picogl.js.svg)](https://github.com/tsherif/picogl.js/blob/master/LICENSE) [![NPM](https://img.shields.io/npm/v/picogl.svg)](https://www.npmjs.com/package/picogl)
+[![Build Status](https://img.shields.io/travis/tsherif/picogl.js)](https://travis-ci.org/tsherif/picogl.js) [![Coverage Status](https://img.shields.io/coveralls/github/tsherif/picogl.js)](https://coveralls.io/github/tsherif/picogl.js?branch=master) [![GZIP size](https://badge-size.herokuapp.com/tsherif/picogl.js/master/build/picogl.min.js.svg?compression=gzip)](https://github.com/tsherif/picogl.js/blob/master/build/picogl.min.js) [![Gitter](https://img.shields.io/gitter/room/picogl.js/general.svg)](https://gitter.im/picogl-js/general) [![License](https://img.shields.io/github/license/tsherif/picogl.js.svg)](https://github.com/tsherif/picogl.js/blob/master/LICENSE) [![NPM](https://img.shields.io/npm/v/picogl.svg)](https://www.npmjs.com/package/picogl)
 
 **[API Docs](https://tsherif.github.io/picogl.js/docs/)** | **[Tutorial](https://tsherif.wordpress.com/2017/07/26/webgl-2-development-with-picogl-js/)** | **[Chat](https://gitter.im/picogl-js/general)**
 
@@ -154,7 +154,7 @@ PicoGL.js simplifies usage of some more complex WebGL 2 features, such as multip
     .clearColor(0.0, 0.0, 0.0, 1.0);
 
     // Last argument is transform feedback varyings
-    app.createProgramx([vertexShaderSource, fragmentShaderSource, ["vPosition"]]).then(([program]) => {
+    app.createPrograms([vertexShaderSource, fragmentShaderSource, ["vPosition"]]).then(([program]) => {
         let positions1 = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
             -0.5, -0.5,
              0.5, -0.5,

@@ -249,6 +249,8 @@ export class UniformBuffer {
             if (this.currentBase !== -1 && this.appState.uniformBuffers[this.currentBase] === this) {
                 this.appState.uniformBuffers[this.currentBase] = null;
             }
+
+            this.currentBase = -1;
         }
 
         return this;

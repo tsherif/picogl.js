@@ -1,3 +1,19 @@
+## v0.15.4
+
+- Remove App.onContextLost (was only used for testing)
+
+## v0.15.3
+
+- Improved context recovery handling
+
+## v0.15.2
+
+- Shaders trim source
+
+## v0.15.1
+
+- App.onContextLost callback
+
 ## v0.15.0
 
 - Built, versioned unbundled modules.

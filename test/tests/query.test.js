@@ -23,17 +23,34 @@
 
 import {PicoGL} from "../../src/picogl.js";
 
-glCheck("PicoGL", (t) => {
-    t.ok(PicoGL, "PicoGL was loaded");
-    t.ok(typeof PicoGL.FLOAT === "number", "PicoGL.FLOAT is a number");
-    t.ok(typeof PicoGL.COMPRESSED_SRGB_S3TC_DXT1_EXT === "number", "PicoGL.COMPRESSED_SRGB_S3TC_DXT1_EXT is a number");
+glCheck("Query lifecycle", (t, canvas) => {
+    let app = PicoGL.createApp(canvas);
+    let query = app.createQuery(PicoGL.ANY_SAMPLES_PASSED_CONSERVATIVE);
+
+    t.ok(query.gl, "Query contains a gl context");
+    t.ok(query.query, "Query created a query");
+    t.ok(query.query instanceof WebGLQuery, "Query created query instance");
+    t.equal(query.active, false, "Query starts in inactive state");
+    t.equal(query.result, null, "Query starts with null result");
+    t.equal(query.target, PicoGL.ANY_SAMPLES_PASSED_CONSERVATIVE, "Query sets target");
+
+    query.delete();
+    t.equal(query.query, null, "Query was deleted");
+
     t.done();
 });
 
-glCheck("PicoGL.createApp", (t, canvas) => {
+glCheck("Query querying", async (t, canvas) => {
     let app = PicoGL.createApp(canvas);
+    let query = app.createQuery(PicoGL.ANY_SAMPLES_PASSED_CONSERVATIVE);
+    
+    query.begin();
+    query.end();
 
-    t.ok(app, "App was created");
-    t.ok(typeof PicoGL.WEBGL_INFO.MAX_TEXTURE_UNITS === "number", "WEBGL_INFO initialized");
+    t.equal(query.active, true, "Query active after end");
+
+    await t.loopUntil(() => query.ready());
+
+    t.equal(typeof query.result, "number", "Query result is a number when ready");
     t.done();
 });

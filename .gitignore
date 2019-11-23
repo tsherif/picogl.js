@@ -1,7 +1,7 @@
 .DS_Store
 node_modules
-package-lock.json
 npm-debug.log
 build/*.map
 .nyc_output/
 coverage/
+glcheck-results/

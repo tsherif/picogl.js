@@ -1,6 +1,6 @@
 {
   "name": "picogl",
-  "version": "0.15.2",
+  "version": "0.15.5",
   "description": "A minimal WebGL 2 rendering library",
   "main": "build/picogl.min.js",
   "repository": {
@@ -9,19 +9,18 @@
   },
   "author": {
     "name": "Tarek Sherif",
-    "email": "tsherif@gmail.com",
+    "email": "tareksherif@pm.me",
     "url": "http://tareksherif.net/"
   },
   "scripts": {
-    "lint": "eslint src/*.js test/*.js test/tests/*.js",
+    "lint": "eslint src/*.js test/tests/*.js",
     "compile-module": "rimraf build/module && cpy src build/module && replace %%VERSION%% $npm_package_version build/module/picogl.js",
     "compile-bundle": "webpack",
     "compile": "npm run compile-module && npm run compile-bundle",
     "build": "npm run lint && npm run compile",
     "docs": "jsdoc -d docs src/*.js",
-    "test-unit": "rimraf .nyc_output/ && node test/puppeteer.js",
-    "coverage": "rimraf coverage/ && npm test && nyc report --reporter=lcov",
-    "test": "npm run lint && npm run test-unit"
+    "coverage": "rimraf coverage/ && npm run lint && glcheck --coverage=true && nyc report --reporter=lcov",
+    "test": "npm run lint && glcheck"
   },
   "keywords": [
     "webgl",
@@ -36,18 +35,16 @@
     "url": "https://github.com/tsherif/picogl.js/issues"
   },
   "devDependencies": {
-    "babel-minify-webpack-plugin": "^0.3.1",
-    "coveralls": "^3.0.7",
+    "coveralls": "^3.0.8",
     "cpy-cli": "^2.0.0",
-    "eslint": "^6.3.0",
+    "eslint": "^6.7.0",
     "jsdoc": "^3.6.3",
     "nyc": "^14.1.1",
-    "puppeteer": "^2.0.0",
-    "puppeteer-to-istanbul": "^1.2.2",
+    "glcheck": "0.0.17",
     "replace": "^1.1.1",
     "rimraf": "^3.0.0",
     "webpack": "^4.39.3",
-    "webpack-cli": "^3.3.8",
-    "webpack-merge": "^4.2.2"
-  }
+    "webpack-cli": "^3.3.8"
+  },
+  "dependencies": {}
 }
