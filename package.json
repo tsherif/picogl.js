@@ -19,9 +19,8 @@
     "compile": "npm run compile-module && npm run compile-bundle",
     "build": "npm run lint && npm run compile",
     "docs": "jsdoc -d docs src/*.js",
-    "test-unit": "gltest",
-    "coverage": "rimraf coverage/ && npm test && nyc report --reporter=lcov",
-    "test": "npm run lint && npm run test-unit"
+    "coverage": "rimraf coverage/ && npm run lint && gltest --coverage=true && nyc report --reporter=lcov",
+    "test": "npm run lint && gltest"
   },
   "keywords": [
     "webgl",
@@ -41,7 +40,7 @@
     "eslint": "^6.3.0",
     "jsdoc": "^3.6.3",
     "nyc": "^14.1.1",
-    "pico-gltest": "0.0.2",
+    "pico-gltest": "0.0.12",
     "replace": "^1.1.1",
     "rimraf": "^3.0.0",
     "webpack": "^4.39.3",

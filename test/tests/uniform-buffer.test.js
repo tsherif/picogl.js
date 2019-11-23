@@ -57,7 +57,7 @@ glTest("UniformBuffer setting", (t, canvas) => {
     ]);
 
     t.equal(ubo.size, 24, "Size is correct");
-    t.arrayEqual(ubo.data, [
+    t.deepEqual(ubo.data, [
         0, 0, 0, 0,
         0, 0, 0, 0,
         0, 0, 0, 0,
@@ -69,7 +69,7 @@ glTest("UniformBuffer setting", (t, canvas) => {
     ubo.set(1, [ 1, 2 ]);
     t.equal(ubo.dirtyStart, 4, "UBO dirty start reset after udpate");
     t.equal(ubo.dirtyEnd, 6, "UBO dirty end set");
-    t.arrayEqual(ubo.data, [
+    t.deepEqual(ubo.data, [
         0, 0, 0, 0,
         1, 2, 0, 0,
         0, 0, 0, 0,
@@ -81,7 +81,7 @@ glTest("UniformBuffer setting", (t, canvas) => {
     ubo.set(0, [ 1, 2, 3, 4 ]);
     t.equal(ubo.dirtyStart, 0, "UBO dirty start set");
     t.equal(ubo.dirtyEnd, 6, "UBO dirty end set");
-    t.arrayEqual(ubo.data, [
+    t.deepEqual(ubo.data, [
         1, 2, 3, 4,
         1, 2, 0, 0,
         0, 0, 0, 0,
@@ -98,7 +98,7 @@ glTest("UniformBuffer setting", (t, canvas) => {
     ]);
     t.equal(ubo.dirtyStart, 0, "UBO dirty start set");
     t.equal(ubo.dirtyEnd, 24, "UBO dirty end set");
-    t.arrayEqual(ubo.data, [
+    t.deepEqual(ubo.data, [
         1, 2, 3, 4,
         1, 2, 0, 0,
         1, 2, 3, 4,
