@@ -35,12 +35,12 @@
     "url": "https://github.com/tsherif/picogl.js/issues"
   },
   "devDependencies": {
-    "coveralls": "^3.0.7",
+    "coveralls": "^3.0.8",
     "cpy-cli": "^2.0.0",
-    "eslint": "^6.3.0",
+    "eslint": "^6.7.0",
     "jsdoc": "^3.6.3",
     "nyc": "^14.1.1",
-    "pico-gltest": "0.0.12",
+    "pico-gltest": "0.0.13",
     "replace": "^1.1.1",
     "rimraf": "^3.0.0",
     "webpack": "^4.39.3",
