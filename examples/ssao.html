@@ -386,8 +386,8 @@
 
         for (let i = 0; i < numNoisePixels; ++i) {
             let index = i * 2;
-            noiseTextureData[index]     = Math.random() * 2.0 - 1.0;
-            noiseTextureData[index + 1] = Math.random() * 2.0 - 1.0;
+            noiseTextureData[index]     = utils.random() * 2.0 - 1.0;
+            noiseTextureData[index + 1] = utils.random() * 2.0 - 1.0;
         }
 
         let noiseTexture = app.createTexture2D(
@@ -414,8 +414,8 @@
 
             for (let i = 0; i < numNoisePixels; ++i) {
                 let index = i * 2;
-                noiseTextureData[index]     = Math.random() * 2.0 - 1.0;
-                noiseTextureData[index + 1] = Math.random() * 2.0 - 1.0;
+                noiseTextureData[index]     = utils.random() * 2.0 - 1.0;
+                noiseTextureData[index + 1] = utils.random() * 2.0 - 1.0;
             }
 
             noiseTexture.resize(app.gl.drawingBufferWidth, app.gl.drawingBufferHeight)
@@ -499,7 +499,9 @@
                     noSSAODrawCall.draw();
                 }
                 
-                timer.end();
+                timer.end(); 
+                                
+                window.glcheck_renderDone = true;
 
                 requestAnimationFrame(draw);
             }

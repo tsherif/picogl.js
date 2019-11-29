@@ -46,6 +46,21 @@
     let gpuTimeSum = 0;
     let timeSampleCount = NUM_TIMING_SAMPLES - 1;
 
+    const SEARCH = {};
+
+    location.search.slice(1).split('&').forEach(t => {
+        let [key, value] = t.split('=');
+        let numValue = Number(value);
+
+        SEARCH[key] = Number.isFinite(numValue) ? numVal : value;
+    });
+
+    const NUM_FRAMES = SEARCH["num-frames"] || Number.POSITIVE_INFINITY;
+
+    let randS = 1;
+    let randC = 1;
+    let frame = 0;
+
     // https://www.khronos.org/registry/webgl/extensions/WEBGL_compressed_texture_pvrtc/
     function pvrtc2bppSize(width, height) {
         width = Math.max(width, 16);
@@ -227,6 +242,17 @@
     };
 
     window.utils = {
+        random() {
+            randS = Math.sin(randC * 18.42);
+            randC = Math.cos(randS * 984.21);
+            let n = Math.abs(randS * randC) * 4532.3454;
+            return n - Math.floor(n);
+        },
+        requestAnimationFrame(fn) {
+            if (frame++ < NUM_FRAMES) {
+                window.requestAnimationFrame(fn);
+            }
+        },
         xformMatrix(xform, translate, rotate, scale) {
             translate = translate || zeros;
             rotate = rotate || zeros;

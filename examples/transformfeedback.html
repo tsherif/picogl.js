@@ -152,8 +152,9 @@
                 // SWAP INPUT AND OUTPUT
                 currentDrawCall = currentDrawCall === drawCallA ? drawCallB : drawCallA;
 
-                timer.end();
-
+                timer.end(); 
+                                
+                window.glcheck_renderDone = true;
 
                 requestAnimationFrame(draw);
             }

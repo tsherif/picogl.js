@@ -124,6 +124,8 @@
             // RENDER TO SCREEN
             app.defaultDrawFramebuffer().clearColor(0.0, 0.0, 0.0, 1.0).clear();
             drawCall.texture("tex", rttBuffer.colorAttachments[0]).draw();
+
+            window.glcheck_renderDone = true;
         }
 
         image.src = "../../examples/img/webgl-logo.png";

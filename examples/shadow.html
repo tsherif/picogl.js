@@ -267,7 +267,9 @@
                     boxes[i].mainDrawCall.draw();
                 }
 
-                timer.end();
+                timer.end(); 
+                                
+                window.glcheck_renderDone = true;
 
                 requestAnimationFrame(draw);
             }

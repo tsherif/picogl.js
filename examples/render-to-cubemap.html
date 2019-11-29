@@ -392,7 +392,9 @@
                 skyboxDrawcall.draw();
                 cubeDrawCall.draw();
 
-                timer.end(); 
+                timer.end();
+
+                window.glcheck_renderDone = true;
 
                 requestAnimationFrame(draw);
             }

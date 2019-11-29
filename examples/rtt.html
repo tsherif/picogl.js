@@ -212,7 +212,9 @@
                 app.defaultDrawFramebuffer().clearColor(0.0, 0.0, 0.0, 1.0).clear()
                 drawCall.texture("tex", rttBuffer.colorAttachments[0]).draw();
 
-                timer.end(); 
+                timer.end();
+
+                window.glcheck_renderDone = true;
 
                 requestAnimationFrame(draw);
             }

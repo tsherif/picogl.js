@@ -154,25 +154,25 @@
 
         let boxes = [
             {
-                rotation: vec3.fromValues(0, Math.random(), 0),
+                rotation: vec3.fromValues(0, utils.random(), 0),
                 translation: vec3.fromValues(-1, 1, 0),
                 modelMatrix: mat4.create(),
                 drawCall: null
             },
             {
-                rotation: vec3.fromValues(0, Math.random(), 0),
+                rotation: vec3.fromValues(0, utils.random(), 0),
                 translation: vec3.fromValues(1, 1, 0),
                 modelMatrix: mat4.create(),
                 drawCall: null
             },
             {
-                rotation: vec3.fromValues(0, Math.random(), 0),
+                rotation: vec3.fromValues(0, utils.random(), 0),
                 translation: vec3.fromValues(-1, -1, 0),
                 modelMatrix: mat4.create(),
                 drawCall: null
             },
             {
-                rotation: vec3.fromValues(0, Math.random(), 0),
+                rotation: vec3.fromValues(0, utils.random(), 0),
                 translation: vec3.fromValues(1, -1, 0),
                 modelMatrix: mat4.create(),
                 drawCall: null
@@ -326,6 +326,8 @@
                 }
                 
                 timer.end();
+
+                window.glcheck_renderDone = true;
 
                 requestAnimationFrame(draw);
             }

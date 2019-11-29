@@ -190,9 +190,9 @@
             };
 
             sphereColorData.set(vec4.fromValues(
-                Math.floor(Math.sqrt(Math.random()) * 256),
-                Math.floor(Math.sqrt(Math.random()) * 256),
-                Math.floor(Math.sqrt(Math.random()) * 256),
+                Math.floor(Math.sqrt(utils.random()) * 256),
+                Math.floor(Math.sqrt(utils.random()) * 256),
+                Math.floor(Math.sqrt(utils.random()) * 256),
                 128
             ), i * 4);
         }
@@ -335,6 +335,8 @@
                 
                 timer.end(); 
                                 
+                window.glcheck_renderDone = true;
+
                 requestAnimationFrame(draw);
             }
 

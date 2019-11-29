@@ -470,6 +470,8 @@
 
                 occludedSpheresElement.innerHTML = occludedSpheres;
 
+                window.glcheck_renderDone = true;
+
                 requestAnimationFrame(draw);
             }
 
