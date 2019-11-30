@@ -159,6 +159,8 @@
         let app = PicoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0);
 
+        utils.instrumentAnimationFrame(10);
+        
         let timer = app.createTimer();
 
         window.onresize = function() {
@@ -275,7 +277,6 @@
             let contextRestoring = false;
             let contextRestored = false;
             let frameCount = 0;
-            let framesDrawn = 0;
 
             app.onContextRestored(function() {
                 app.clearColor(0.0, 0.0, 0.0, 1.0);
@@ -335,7 +336,7 @@
 
                 frameCount++;
 
-                if (frameCount === 5) {
+                if (frameCount === 2) {
                     app.loseContext();
                     contextLost = true;
                     return;
@@ -359,13 +360,6 @@
                 // SWAP INPUT AND OUTPUT BUFFERS
                 updateDrawCall = updateDrawCall === updateDrawCallA ? updateDrawCallB : updateDrawCallA;
                 mainDrawCall = mainDrawCall === drawCallA ? drawCallB : drawCallA;
-
-                framesDrawn++;
-
-                if (contextRestored && !window.glcheck_renderDone) {
-                    window.glcheck_renderDone = true;
-                }
-
             }
 
             requestAnimationFrame(draw);

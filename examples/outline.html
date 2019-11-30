@@ -136,6 +136,7 @@
         import { PicoGL } from "../src/picogl.js";
        
         utils.addTimerElement();
+        utils.instrumentAnimationFrame();
 
         const NUM_SPHERES = 32;
         const NUM_PER_ROW = 8;
@@ -294,8 +295,6 @@
                 
                 timer.end();
 
-                window.glcheck_renderDone = true;
-                
                 requestAnimationFrame(draw);
             }
 

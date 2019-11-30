@@ -3,6 +3,7 @@
 <head>
     <title>PicoGL.js: Transform Feedback</title>
     <meta charset="utf-8">
+    <script src="../../examples/utils/utils.js"></script>
     <link rel="stylesheet" href="../../site/css/picogl-example.css"> 
 </head>
 <!--
@@ -73,6 +74,8 @@
         let app = PicoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0);
 
+        utils.instrumentAnimationFrame();
+        
         let timer = app.createTimer();
 
         window.onresize = function() {

@@ -231,6 +231,7 @@
         import { PicoGL } from "../src/picogl.js";
         
         utils.addTimerElement();
+        utils.instrumentAnimationFrame();
 
         let ssaoEnabled = true;
 
@@ -501,8 +502,6 @@
                 
                 timer.end(); 
                                 
-                window.glcheck_renderDone = true;
-
                 requestAnimationFrame(draw);
             }
 

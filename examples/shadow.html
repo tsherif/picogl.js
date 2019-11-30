@@ -122,6 +122,7 @@
         import { PicoGL } from "../src/picogl.js";
        
         utils.addTimerElement();
+        utils.instrumentAnimationFrame();
 
         let canvas = document.getElementById("gl-canvas");
         canvas.width = window.innerWidth;
@@ -269,8 +270,6 @@
 
                 timer.end(); 
                                 
-                window.glcheck_renderDone = true;
-
                 requestAnimationFrame(draw);
             }
 

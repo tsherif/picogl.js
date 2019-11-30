@@ -176,6 +176,7 @@
         import { PicoGL } from "../src/picogl.js";
        
         utils.addTimerElement();
+        utils.instrumentAnimationFrame();
 
         let occlusionCullingEnabled = true;
         let showHUD = true;
@@ -469,8 +470,6 @@
                 }
 
                 occludedSpheresElement.innerHTML = occludedSpheres;
-
-                window.glcheck_renderDone = true;
 
                 requestAnimationFrame(draw);
             }

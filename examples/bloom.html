@@ -215,6 +215,7 @@
         import { PicoGL } from "../src/picogl.js";
 
         utils.addTimerElement();   
+        utils.instrumentAnimationFrame();
         
         let bloomEnabled = true;
 
@@ -499,8 +500,6 @@
                 blendDrawCall.draw();
                 
                 timer.end();
-
-                window.glcheck_renderDone = true;
 
                 requestAnimationFrame(draw);
             }

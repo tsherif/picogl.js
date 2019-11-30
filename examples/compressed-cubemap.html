@@ -128,6 +128,7 @@
     <script type="module">
         import { PicoGL } from "../src/picogl.js";
        
+        utils.instrumentAnimationFrame();
         utils.addTimerElement();
         utils.timerDiv.style.color = "black";
 
@@ -252,8 +253,6 @@
                 drawCall.draw();
                 
                 timer.end();
-
-                window.glcheck_renderDone = true;
 
                 requestAnimationFrame(draw);
             }
