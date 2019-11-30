@@ -33,5 +33,10 @@
         "examples/triangle.html",
         "examples/ubo.html"
     ],
-    "referenceImageDir": "test/reference-images"
+    "referenceImageDir": "test/reference-images",
+    "coverageExcludeFiles": [
+        "examples/**/*",
+        "build/**/*",
+        "site/**/*"
+    ]
 }
