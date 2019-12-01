@@ -23,7 +23,7 @@
 
 import {PicoGL} from "../../src/picogl.js";
 
-glCheck("Timer CPU timing", async (t, canvas) => {
+glcheck("Timer CPU timing", async (t, canvas) => {
     let app = PicoGL.createApp(canvas);
     let timer = app.createTimer();
 
@@ -40,7 +40,7 @@ glCheck("Timer CPU timing", async (t, canvas) => {
 
 });
 
-glCheck("Timer GPU timing", async (t, canvas) => {
+glcheck("Timer GPU timing", async (t, canvas) => {
     if (!PicoGL.WEBGL_INFO.GPU_TIMER) {
         t.ok(true, "GPU Timing not supported");
         t.done();

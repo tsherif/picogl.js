@@ -238,8 +238,8 @@
             return n - Math.floor(n);
         },
         instrumentAnimationFrame(numFrames = 1) {
-            if (window.glcheck_instrumentAnimationFrame) {
-                window.glcheck_instrumentAnimationFrame(numFrames);
+            if (window.glcheck_setRAFCount) {
+                window.glcheck_setRAFCount(numFrames);
             }
         },
         xformMatrix(xform, translate, rotate, scale) {
