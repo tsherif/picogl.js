@@ -34,9 +34,5 @@
         "examples/ubo.html"
     ],
     "referenceImageDir": "test/reference-images",
-    "coverageExcludeFiles": [
-        "examples/**/*",
-        "build/**/*",
-        "site/**/*"
-    ]
+    "coverageFiles": "src/*.js"
 }
