@@ -24,7 +24,7 @@
 import {createQuadDrawCall} from "./utils.js";
 import {PicoGL} from "../../src/picogl.js";
 
-glCheck("UniformBuffer lifecycle", (t, canvas) => {
+glcheck("UniformBuffer lifecycle", (t, canvas) => {
     let app = PicoGL.createApp(canvas);
     let ubo = app.createUniformBuffer([ PicoGL.FLOAT_VEC4 ]);
 
@@ -48,7 +48,7 @@ glCheck("UniformBuffer lifecycle", (t, canvas) => {
     t.done();
 });
 
-glCheck("UniformBuffer setting", (t, canvas) => {
+glcheck("UniformBuffer setting", (t, canvas) => {
     let app = PicoGL.createApp(canvas);
     let ubo = app.createUniformBuffer([
         PicoGL.FLOAT_VEC4,
@@ -226,7 +226,7 @@ glCheck("UniformBuffer setting", (t, canvas) => {
     t.done();
 });
 
-glCheck("UniformBuffer drawing", (t, canvas) => {
+glcheck("UniformBuffer drawing", (t, canvas) => {
     let app = PicoGL.createApp(canvas);
     let leftUBO = app.createUniformBuffer([
         PicoGL.FLOAT_VEC4,

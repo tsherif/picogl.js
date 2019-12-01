@@ -76,6 +76,7 @@
         import { PicoGL } from "../src/picogl.js";
        
         utils.addTimerElement();
+        utils.instrumentAnimationFrame();
 
         let canvas = document.getElementById("gl-canvas");
         canvas.width = window.innerWidth;
@@ -152,9 +153,8 @@
                 // SWAP INPUT AND OUTPUT
                 currentDrawCall = currentDrawCall === drawCallA ? drawCallB : drawCallA;
 
-                timer.end();
-
-
+                timer.end(); 
+                                
                 requestAnimationFrame(draw);
             }
 

@@ -116,6 +116,8 @@
           app.clear();
           drawCall.draw();
 
+          window.glcheck_renderDone = true;
+
           // CLEANUP
           program.delete();
           positions.delete();

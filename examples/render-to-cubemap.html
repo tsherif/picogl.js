@@ -188,6 +188,7 @@
     <script type="module">
         import { PicoGL } from "../src/picogl.js";
        
+        utils.instrumentAnimationFrame();
         utils.addTimerElement();
         utils.timerDiv.style.color = "black";
         
@@ -392,7 +393,7 @@
                 skyboxDrawcall.draw();
                 cubeDrawCall.draw();
 
-                timer.end(); 
+                timer.end();
 
                 requestAnimationFrame(draw);
             }

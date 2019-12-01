@@ -151,6 +151,7 @@
         import { PicoGL } from "../src/picogl.js";
        
         utils.addTimerElement();
+        utils.instrumentAnimationFrame();
 
         if (!testExtension("EXT_color_buffer_float")) {
             document.body.innerHTML = "This example requires extension <b>EXT_color_buffer_float</b> which is not supported on this system."
@@ -190,9 +191,9 @@
             };
 
             sphereColorData.set(vec4.fromValues(
-                Math.floor(Math.sqrt(Math.random()) * 256),
-                Math.floor(Math.sqrt(Math.random()) * 256),
-                Math.floor(Math.sqrt(Math.random()) * 256),
+                Math.floor(Math.sqrt(utils.random()) * 256),
+                Math.floor(Math.sqrt(utils.random()) * 256),
+                Math.floor(Math.sqrt(utils.random()) * 256),
                 128
             ), i * 4);
         }

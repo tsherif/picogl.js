@@ -246,10 +246,10 @@
         let boxes = [
             {
                 translate: [0, 0, 0],
-                rotate: [Math.random(), Math.random(), Math.random()],
+                rotate: [utils.random(), utils.random(), utils.random()],
                 scale: [6, 6, 6],
-                rotateVx: Math.random() * 0.01 - 0.005,
-                rotateVy: Math.random() * 0.01 - 0.005,
+                rotateVx: utils.random() * 0.01 - 0.005,
+                rotateVy: utils.random() * 0.01 - 0.005,
                 mvpMatrix: mat4.create(),
                 modelMatrix: mat4.create(),
                 mainDrawCall: null,
@@ -257,10 +257,10 @@
             },
             {
                 translate: [-1, -1, 0.5],
-                rotate: [Math.random(), Math.random(), Math.random()],
+                rotate: [utils.random(), utils.random(), utils.random()],
                 scale: [0.5, 0.5, 0.5],
-                rotateVx: Math.random() * 0.06 - 0.03,
-                rotateVy: Math.random() * 0.06 - 0.03,
+                rotateVx: utils.random() * 0.06 - 0.03,
+                rotateVy: utils.random() * 0.06 - 0.03,
                 mvpMatrix: mat4.create(),
                 modelMatrix: mat4.create(),
                 mainDrawCall: null,
@@ -268,10 +268,10 @@
             },
             {
                 translate: [-1, 0.5, -1],
-                rotate: [Math.random(), Math.random(), Math.random()],
+                rotate: [utils.random(), utils.random(), utils.random()],
                 scale: [0.3, 0.3, 0.3],
-                rotateVx: Math.random() * 0.06 - 0.03,
-                rotateVy: Math.random() * 0.06 - 0.03,
+                rotateVx: utils.random() * 0.06 - 0.03,
+                rotateVy: utils.random() * 0.06 - 0.03,
                 mvpMatrix: mat4.create(),
                 modelMatrix: mat4.create(),
                 mainDrawCall: null,
@@ -279,10 +279,10 @@
             },
             {
                 translate: [0, 0, -2],
-                rotate: [Math.random(), Math.random(), Math.random()],
+                rotate: [utils.random(), utils.random(), utils.random()],
                 scale: [0.4, 0.4, 0.4],
-                rotateVx: Math.random() * 0.06 - 0.03,
-                rotateVy: Math.random() * 0.06 - 0.03,
+                rotateVx: utils.random() * 0.06 - 0.03,
+                rotateVy: utils.random() * 0.06 - 0.03,
                 mvpMatrix: mat4.create(),
                 modelMatrix: mat4.create(),
                 mainDrawCall: null,
@@ -416,6 +416,8 @@
                 lightDrawcall.draw();
 
                 timer.end();
+
+                window.glcheck_renderDone = true;
 
                 requestAnimationFrame(draw);
             }

@@ -28,6 +28,7 @@
 <html>
 <head>
     <meta charset="utf-8">
+    <script src="../../examples/utils/utils.js"></script>
     <style>
         html {
             overflow: hidden;
@@ -48,7 +49,6 @@
     </style>
 </head>
 <body>
-    <div id="context-loss"></div>
     <canvas id="gl-canvas"></canvas>
     <script id="vs-update" type="shader/vs">
         #version 300 es
@@ -66,9 +66,9 @@
         // Thus we fake a smooth wandering behavior
 
         #define MAP_HALF_LENGTH 1.01
-        #define WANDER_CIRCLE_R 0.01
+        #define WANDER_CIRCLE_R 0.005
         #define WANDER_CIRCLE_OFFSET 0.04
-        #define MOVE_DELTA 0.001
+        #define MOVE_DELTA 0.01
 
         layout(location=0) in vec2 aOffset;
         layout(location=1) in float aRotation;
@@ -134,7 +134,7 @@
                 cosR, sinR,
                 -sinR, cosR
             );
-            gl_Position = vec4(rot * aPosition + aOffset, 0.0, 1.0);
+            gl_Position = vec4(rot * aPosition * 10.0 + aOffset, 0.0, 1.0);
         }
     </script>
     <script id="fs-draw" type="shader/fs">
@@ -159,6 +159,8 @@
         let app = PicoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0);
 
+        utils.instrumentAnimationFrame(10);
+        
         let timer = app.createTimer();
 
         window.onresize = function() {
@@ -176,7 +178,7 @@
         let drawFsSource =  document.getElementById("fs-draw").text;
 
         // GEO DATA
-        const NUM_INSTANCES = 50000;
+        const NUM_INSTANCES = 100;
 
         let offsetData = new Float32Array(NUM_INSTANCES * 2);
         let rotationData = new Float32Array(NUM_INSTANCES);
@@ -192,14 +194,14 @@
             let ri = i;
             let ci = i * 3;
 
-            offsetData[oi] = Math.random() * 2.0 - 1.0;
-            offsetData[oi + 1] = Math.random() * 2.0 - 1.0;
+            offsetData[oi] = utils.random() * 2.0 - 1.0;
+            offsetData[oi + 1] = utils.random() * 2.0 - 1.0;
 
-            rotationData[i] = Math.random() * 2 * Math.PI;
+            rotationData[i] = utils.random() * 2 * Math.PI;
 
-            colorData[ci]     = Math.floor(Math.random() * 256);
-            colorData[ci + 1] = Math.floor(Math.random() * 256);
-            colorData[ci + 2] = Math.floor(Math.random() * 256);
+            colorData[ci]     = Math.floor(utils.random() * 256);
+            colorData[ci + 1] = Math.floor(utils.random() * 256);
+            colorData[ci + 2] = Math.floor(utils.random() * 256);
         }
 
         // INPUT AND OUTPUT VERTEX BUFFERS
@@ -271,6 +273,11 @@
             let updateDrawCall = updateDrawCallA;
             let mainDrawCall = drawCallB;
 
+            let contextLost = false;
+            let contextRestoring = false;
+            let contextRestored = false;
+            let frameCount = 0;
+
             app.onContextRestored(function() {
                 app.clearColor(0.0, 0.0, 0.0, 1.0);
 
@@ -319,28 +326,27 @@
                 // Make sure to reset loop!
                 updateDrawCall = updateDrawCallA;
                 mainDrawCall = drawCallB;
-            });
 
-            let contextLossDiv = document.getElementById("context-loss");
-            let contextLost = false;
-            let lastContextLoss = Date.now();
+                contextRestoring = false;
+                contextRestored = true;
+            });
 
             function draw() {
                 requestAnimationFrame(draw);
 
-                let currentTime = Date.now();
-                if (contextLost) {
-                    contextLossDiv.innerHTML = "Context Restored!";
-                    app.restoreContext();
-                    lastContextLoss = currentTime;
-                    contextLost = false;
-                } else if (currentTime - lastContextLoss > 2000) {
-                    contextLossDiv.innerHTML = "Context Lost!";
+                frameCount++;
+
+                if (frameCount === 2) {
                     app.loseContext();
                     contextLost = true;
                     return;
-                } else {
-                    contextLossDiv.innerHTML = `Countdown to Context Loss: ${((2000 - currentTime + lastContextLoss) / 1000).toFixed(1)}`;
+                } else if (contextLost) {
+                    app.restoreContext();
+                    contextLost = false;
+                    contextRestoring = true;
+                    return;
+                } else if (contextRestoring) {
+                    return;
                 }
 
                 // TRANSFORM FEEDBACK
@@ -354,7 +360,6 @@
                 // SWAP INPUT AND OUTPUT BUFFERS
                 updateDrawCall = updateDrawCall === updateDrawCallA ? updateDrawCallB : updateDrawCallA;
                 mainDrawCall = mainDrawCall === drawCallA ? drawCallB : drawCallA;
-
             }
 
             requestAnimationFrame(draw);

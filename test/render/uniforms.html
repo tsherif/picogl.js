@@ -314,6 +314,8 @@
             matProgram.delete();
             positions.delete();
             triangleArray.delete();
+
+            window.glcheck_renderDone = true;
         };
 
         image.src = "../../examples/img/webgl-logo.png";

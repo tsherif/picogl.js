@@ -136,6 +136,7 @@
         import { PicoGL } from "../src/picogl.js";
        
         utils.addTimerElement();
+        utils.instrumentAnimationFrame();
 
         if (!testExtension("EXT_color_buffer_float")) {
             document.body.innerHTML = "This example requires extension <b>EXT_color_buffer_float</b> which is not supported on this system."
@@ -365,7 +366,7 @@
                 }
                 
                 timer.end();                
-                
+                                
                 requestAnimationFrame(draw);
             }
 

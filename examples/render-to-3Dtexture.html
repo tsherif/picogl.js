@@ -185,9 +185,9 @@
             for (let j = 0; j < DIMENSIONS; ++j) {
                 let z = -0.5;
                 for (let k = 0; k < DIMENSIONS; ++k) {
-                    positionData[positionIndex++] = x + (Math.random() - 0.5) / (DIMENSIONS);
-                    positionData[positionIndex++] = y + (Math.random() - 0.5) / (DIMENSIONS);
-                    positionData[positionIndex++] = z + (Math.random() - 0.5) / (DIMENSIONS);
+                    positionData[positionIndex++] = x + (utils.random() - 0.5) / (DIMENSIONS);
+                    positionData[positionIndex++] = y + (utils.random() - 0.5) / (DIMENSIONS);
+                    positionData[positionIndex++] = z + (utils.random() - 0.5) / (DIMENSIONS);
                     z += INCREMENT;
                 }
                 y += INCREMENT;
@@ -318,6 +318,8 @@
                 drawCall.draw();
                 
                 timer.end();
+
+                window.glcheck_renderDone = true;
 
                 requestAnimationFrame(drawMain);
             }

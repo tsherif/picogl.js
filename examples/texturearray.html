@@ -115,6 +115,7 @@
         import { PicoGL } from "../src/picogl.js";
        
         utils.addTimerElement();
+        utils.instrumentAnimationFrame();
         
         let canvas = document.getElementById("gl-canvas");
         canvas.width = window.innerWidth;
@@ -173,50 +174,50 @@
 
         let boxes = [
             {
-                rotation: vec3.fromValues(Math.random(), Math.random(), Math.random()),
-                rv: vec3.fromValues(Math.random() * 0.02, Math.random() * 0.02, Math.random() * 0.02),
+                rotation: vec3.fromValues(utils.random(), utils.random(), utils.random()),
+                rv: vec3.fromValues(utils.random() * 0.02, utils.random() * 0.02, utils.random() * 0.02),
                 translation: vec3.fromValues(-3, 1, 0),
                 modelMatrix: new Float32Array(modelMatrixData.buffer, 0, 16),
             },
             {
-                rotation: vec3.fromValues(Math.random(), Math.random(), Math.random()),
-                rv: vec3.fromValues(Math.random() * 0.02, Math.random() * 0.02, Math.random() * 0.02),
+                rotation: vec3.fromValues(utils.random(), utils.random(), utils.random()),
+                rv: vec3.fromValues(utils.random() * 0.02, utils.random() * 0.02, utils.random() * 0.02),
                 translation: vec3.fromValues(-1, 1, 0),
                 modelMatrix: new Float32Array(modelMatrixData.buffer, 16 * 4, 16),
             },
             {
-                rotation: vec3.fromValues(Math.random(), Math.random(), Math.random()),
-                rv: vec3.fromValues(Math.random() * 0.02, Math.random() * 0.02, Math.random() * 0.02),
+                rotation: vec3.fromValues(utils.random(), utils.random(), utils.random()),
+                rv: vec3.fromValues(utils.random() * 0.02, utils.random() * 0.02, utils.random() * 0.02),
                 translation: vec3.fromValues(1, 1, 0),
                 modelMatrix: new Float32Array(modelMatrixData.buffer, 32 * 4, 16),
             },
             {
-                rotation: vec3.fromValues(Math.random(), Math.random(), Math.random()),
-                rv: vec3.fromValues(Math.random() * 0.02, Math.random() * 0.02, Math.random() * 0.02),
+                rotation: vec3.fromValues(utils.random(), utils.random(), utils.random()),
+                rv: vec3.fromValues(utils.random() * 0.02, utils.random() * 0.02, utils.random() * 0.02),
                 translation: vec3.fromValues(3, 1, 0),
                 modelMatrix: new Float32Array(modelMatrixData.buffer, 48 * 4, 16),
             },
             {
-                rotation: vec3.fromValues(Math.random(), Math.random(), Math.random()),
-                rv: vec3.fromValues(Math.random() * 0.02, Math.random() * 0.02, Math.random() * 0.02),
+                rotation: vec3.fromValues(utils.random(), utils.random(), utils.random()),
+                rv: vec3.fromValues(utils.random() * 0.02, utils.random() * 0.02, utils.random() * 0.02),
                 translation: vec3.fromValues(-3, -1, 0),
                 modelMatrix: new Float32Array(modelMatrixData.buffer, 64 * 4, 16),
             },
             {
-                rotation: vec3.fromValues(Math.random(), Math.random(), Math.random()),
-                rv: vec3.fromValues(Math.random() * 0.02, Math.random() * 0.02, Math.random() * 0.02),
+                rotation: vec3.fromValues(utils.random(), utils.random(), utils.random()),
+                rv: vec3.fromValues(utils.random() * 0.02, utils.random() * 0.02, utils.random() * 0.02),
                 translation: vec3.fromValues(-1, -1, 0),
                 modelMatrix: new Float32Array(modelMatrixData.buffer, 80 * 4, 16),
             },
             {
-                rotation: vec3.fromValues(Math.random(), Math.random(), Math.random()),
-                rv: vec3.fromValues(Math.random() * 0.02, Math.random() * 0.02, Math.random() * 0.02),
+                rotation: vec3.fromValues(utils.random(), utils.random(), utils.random()),
+                rv: vec3.fromValues(utils.random() * 0.02, utils.random() * 0.02, utils.random() * 0.02),
                 translation: vec3.fromValues(1, -1, 0),
                 modelMatrix: new Float32Array(modelMatrixData.buffer, 96 * 4, 16),
             },
             {
-                rotation: vec3.fromValues(Math.random(), Math.random(), Math.random()),
-                rv: vec3.fromValues(Math.random() * 0.02, Math.random() * 0.02, Math.random() * 0.02),
+                rotation: vec3.fromValues(utils.random(), utils.random(), utils.random()),
+                rv: vec3.fromValues(utils.random() * 0.02, utils.random() * 0.02, utils.random() * 0.02),
                 translation: vec3.fromValues(3, -1, 0),
                 modelMatrix: new Float32Array(modelMatrixData.buffer, 112 * 4, 16),
             }
@@ -274,8 +275,8 @@
 
                 drawCall.draw()
                 
-                timer.end();
-
+                timer.end(); 
+                                
                 requestAnimationFrame(draw);
             }
 

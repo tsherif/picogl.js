@@ -1,10 +1,18 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>PicoGL.js: Transform Feedback</title>
+    <title>PicoGL.js: Triangle</title>
     <meta charset="utf-8">
-    <script src="../../build/picogl.min.js"></script>
     <link rel="stylesheet" href="../../site/css/picogl-example.css"> 
+    <style>
+        #translated-source {
+            position: absolute;
+            left: 0;
+            top: 0;
+            color: white;
+            font-size: 8px;
+        }
+    </style>
 </head>
 <!--
   The MIT License (MIT)
@@ -29,27 +37,18 @@
   CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -->
 <body>
+    <div id="translated-source"></div>
     <canvas id="gl-canvas"></canvas>
     <script type="shader/vs" id="vs">
         #version 300 es
-
-        #define SIN2 0.03489949
-        #define COS2 0.99939082
         
-        layout(location=0) in vec2 position;
+        layout(location=0) in vec4 position;
         layout(location=1) in vec3 color;
         
-        out vec2 vPosition;
         out vec3 vColor; 
         void main() {
-            mat2 rotation = mat2(
-                COS2, SIN2,
-                -SIN2, COS2
-            );
-
-            vPosition = rotation * position;
             vColor = color;
-            gl_Position = vec4(vPosition, 0.0, 1.0);
+            gl_Position = position;
         }
     </script>
     <script type="shader/fs" id="fs">
@@ -63,8 +62,9 @@
             fragColor = vec4(vColor, 1.0);
         }
     </script>
-    
-    <script>
+    <script type="module">
+        import { PicoGL } from "../../src/picogl.js";
+
         let canvas = document.getElementById("gl-canvas");
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
@@ -72,72 +72,48 @@
         let app = PicoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0);
 
-        let timer = app.createTimer();
-
         window.onresize = function() {
             app.resize(window.innerWidth, window.innerHeight);
         }
 
-        // TRANSFORM FEEDBACK PROGRAM
+        // PROGRAM 
         let vsSource =  document.getElementById("vs").text;
         let fsSource =  document.getElementById("fs").text;
-              
-        // INPUT AND OUTPUT VERTEX BUFFERS
-        let positions1 = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
-            -0.3, -0.3,
-             0.3, -0.3,
-             0.0, 0.3 
+
+        // GEOMETRY IN VERTEX BUFFERS
+        let positions = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
+            -0.5, -0.5,
+             0.5, -0.5,
+             0.0, 0.5, 
         ]));
 
-        let positions2 = app.createVertexBuffer(PicoGL.FLOAT, 2, 6);
-
-        // COLOR BUFFER BECAUSE IT WON'T BE PART OF TRANSFORM FEEDBACK
         let colors = app.createVertexBuffer(PicoGL.UNSIGNED_BYTE, 3, new Uint8Array([
             255, 0, 0,
             0, 255, 0,
             0, 0, 255
         ]));
 
-        // COMBINE VERTEX BUFFERS INTO INPUT AND OUTPUT VERTEX ARRAYS
-        let triangleArrayA = app.createVertexArray()
-        .vertexAttributeBuffer(0, positions1)
+        // COMBINE VERTEX BUFFERS INTO VERTEX ARRAY
+        let triangleArray = app.createVertexArray()
+        .vertexAttributeBuffer(0, positions)
         .vertexAttributeBuffer(1, colors, { normalized: true });
 
-        let triangleArrayB = app.createVertexArray()
-        .vertexAttributeBuffer(0, positions2)
-        .vertexAttributeBuffer(1, colors, { normalized: true });
+        app.createPrograms([vsSource, fsSource]).then(function([program]) {
+            document.getElementById("translated-source").innerHTML = `${program.translatedVertexSource()}<BR><BR>${program.translatedFragmentSource()}`.replace(/\n/g, "<BR>");
+            // CREATE DRAW CALL FROM PROGRAM AND VERTEX ARRAY
+            let drawCall = app.createDrawCall(program, triangleArray);
 
-        // CREATE TRANSFORM FEEDBACK OBJECTS AND
-        // INDICATE BUFFERS TO CAPTURE
-        let transformFeedbackA = app.createTransformFeedback()
-        .feedbackBuffer(0, positions1);
+            // DRAW
+            app.clear();
+            drawCall.draw();
 
-        let transformFeedbackB = app.createTransformFeedback()
-        .feedbackBuffer(0, positions2);
+            // CLEANUP
+            program.delete();
+            positions.delete();
+            colors.delete();
+            triangleArray.delete();
 
-        // FINAL ARGUMENT IS TRANSFORM FEEDBACK VARYINGS
-        app.createPrograms([vsSource, fsSource, ["vPosition"]]).then(([program]) => {
-            // CREATE DRAW CALLS FROM PROGRAM AND TRANSFORMFEEDBACK.
-            // EACH DRAW CALL REPRESENTS ONE DIRECTION OF DRAW/CAPTURE
-            let drawCallA = app.createDrawCall(program, triangleArrayA)
-            .transformFeedback(transformFeedbackB);
-            
-            let drawCallB = app.createDrawCall(program, triangleArrayB)
-            .transformFeedback(transformFeedbackA);
-
-            let currentDrawCall = drawCallA;
-            function draw() {
-                // DRAW
-                app.clear();
-                currentDrawCall.draw();
-                
-                // SWAP INPUT AND OUTPUT
-                currentDrawCall = currentDrawCall === drawCallA ? drawCallB : drawCallA;
-
-                requestAnimationFrame(draw);
-            }
-
-            requestAnimationFrame(draw);
+            window.glcheck_renderDone = true;
         });
 
     </script>

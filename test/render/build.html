@@ -3,6 +3,8 @@
 <head>
     <title>PicoGL.js: Transform Feedback</title>
     <meta charset="utf-8">
+    <script src="../../build/picogl.min.js"></script>
+    <script src="../../examples/utils/utils.js"></script>
     <link rel="stylesheet" href="../../site/css/picogl-example.css"> 
 </head>
 <!--
@@ -63,8 +65,8 @@
         }
     </script>
     
-    <script type="module">
-        import { PicoGL } from "../../build/module/picogl.js";
+    <script>
+        utils.instrumentAnimationFrame();
 
         let canvas = document.getElementById("gl-canvas");
         canvas.width = window.innerWidth;

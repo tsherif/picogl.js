@@ -184,14 +184,14 @@
             let ri = i;
             let ci = i * 3;
 
-            offsetData[oi] = Math.random() * 2.0 - 1.0;
-            offsetData[oi + 1] = Math.random() * 2.0 - 1.0;
+            offsetData[oi] = utils.random() * 2.0 - 1.0;
+            offsetData[oi + 1] = utils.random() * 2.0 - 1.0;
 
-            rotationData[i] = Math.random() * 2 * Math.PI;
+            rotationData[i] = utils.random() * 2 * Math.PI;
 
-            colorData[ci]     = Math.floor(Math.random() * 256);
-            colorData[ci + 1] = Math.floor(Math.random() * 256);
-            colorData[ci + 2] = Math.floor(Math.random() * 256);
+            colorData[ci]     = Math.floor(utils.random() * 256);
+            colorData[ci + 1] = Math.floor(utils.random() * 256);
+            colorData[ci + 2] = Math.floor(utils.random() * 256);
         }
 
         // INPUT AND OUTPUT VERTEX BUFFERS

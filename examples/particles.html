@@ -139,13 +139,13 @@
         for (let i = 0; i < NUM_PARTICLES; ++i) {
             let vec3i = i * 3;
 
-            positionData[vec3i] = Math.random() * 2 - 1;
-            positionData[vec3i + 1] = Math.random() * 2 - 1;
-            positionData[vec3i + 2] = Math.random() * 2 - 1;
+            positionData[vec3i] = utils.random() * 2 - 1;
+            positionData[vec3i + 1] = utils.random() * 2 - 1;
+            positionData[vec3i + 2] = utils.random() * 2 - 1;
 
-            colorData[vec3i] =     Math.floor(Math.random() * 256);
-            colorData[vec3i + 1] = Math.floor(Math.random() * 256);
-            colorData[vec3i + 2] = Math.floor(Math.random() * 256);
+            colorData[vec3i] =     Math.floor(utils.random() * 256);
+            colorData[vec3i + 1] = Math.floor(utils.random() * 256);
+            colorData[vec3i + 2] = Math.floor(utils.random() * 256);
         }
 
         // INPUT AND OUTPUT POSITION AND VELOCITY BUFFERS
@@ -186,21 +186,21 @@
             PicoGL.FLOAT,
             PicoGL.FLOAT
         ]).set(0, vec3.fromValues(
-            Math.random() * 2.0 - 1.0,
-            Math.random() * 2.0 - 1.0,
-            Math.random() * 2.0 - 1.0
+            utils.random() * 2.0 - 1.0,
+            utils.random() * 2.0 - 1.0,
+            utils.random() * 2.0 - 1.0
         )).set(1, vec3.fromValues(
-            Math.random() * 2.0 - 1.0,
-            Math.random() * 2.0 - 1.0,
-            Math.random() * 2.0 - 1.0
+            utils.random() * 2.0 - 1.0,
+            utils.random() * 2.0 - 1.0,
+            utils.random() * 2.0 - 1.0
         )).set(2, vec3.fromValues(
-            Math.random() * 2.0 - 1.0,
-            Math.random() * 2.0 - 1.0,
-            Math.random() * 2.0 - 1.0
+            utils.random() * 2.0 - 1.0,
+            utils.random() * 2.0 - 1.0,
+            utils.random() * 2.0 - 1.0
         ))
-        .set(3, Math.random() / 30000)
-        .set(4, Math.random() / 30000)
-        .set(5, Math.random() / 30000)
+        .set(3, utils.random() / 30000)
+        .set(4, utils.random() / 30000)
+        .set(5, utils.random() / 30000)
         .update();
 
         window.onresize = function() {

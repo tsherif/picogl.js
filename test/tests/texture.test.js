@@ -24,7 +24,7 @@
 import {createQuadDrawCall, loadImages} from "./utils.js";
 import {PicoGL} from "../../src/picogl.js";
 
-glCheck("Texture lifecycle", (t, canvas) => {
+glcheck("Texture lifecycle", (t, canvas) => {
     let app = PicoGL.createApp(canvas);
     let texture = app.createTexture2D(new Uint8Array([ 255, 255, 255, 255 ]), 1, 1);
 
@@ -47,7 +47,7 @@ glCheck("Texture lifecycle", (t, canvas) => {
     t.done();
 });
 
-glCheck("Texture empty", (t, canvas) => {
+glcheck("Texture empty", (t, canvas) => {
     let app = PicoGL.createApp(canvas);
     let texture = app.createTexture2D(2, 2);
 
@@ -58,7 +58,7 @@ glCheck("Texture empty", (t, canvas) => {
     t.done();
 });
 
-glCheck("Texture3D lifecycle", (t, canvas) => {
+glcheck("Texture3D lifecycle", (t, canvas) => {
     let app = PicoGL.createApp(canvas);
     let texture = app.createTexture3D(new Uint8Array([
         255, 255, 255, 255, 
@@ -91,7 +91,7 @@ glCheck("Texture3D lifecycle", (t, canvas) => {
     t.done();
 });
 
-glCheck("Texture3D empty", (t, canvas) => {
+glcheck("Texture3D empty", (t, canvas) => {
     let app = PicoGL.createApp(canvas);
     let texture = app.createTexture3D(2, 2, 2);
 
@@ -103,7 +103,7 @@ glCheck("Texture3D empty", (t, canvas) => {
     t.done();
 });
 
-glCheck("TextureArray lifecycle", (t, canvas) => {
+glcheck("TextureArray lifecycle", (t, canvas) => {
     let app = PicoGL.createApp(canvas);
     let texture = app.createTextureArray(new Uint8Array([
         255, 255, 255, 255, 
@@ -136,7 +136,7 @@ glCheck("TextureArray lifecycle", (t, canvas) => {
     t.done();
 });
 
-glCheck("TextureArray empty", (t, canvas) => {
+glcheck("TextureArray empty", (t, canvas) => {
     let app = PicoGL.createApp(canvas);
     let texture = app.createTextureArray(2, 2, 2);
 
@@ -148,7 +148,7 @@ glCheck("TextureArray empty", (t, canvas) => {
     t.done();
 });
 
-glCheck("Texure flip y", async (t, canvas) => {
+glcheck("Texure flip y", async (t, canvas) => {
 
     let app = PicoGL.createApp(canvas);
 
@@ -200,7 +200,7 @@ glCheck("Texure flip y", async (t, canvas) => {
     t.done();
 });
 
-glCheck("Texure draw after update", (t, canvas) => {
+glcheck("Texure draw after update", (t, canvas) => {
 
     let app = PicoGL.createApp(canvas);
 

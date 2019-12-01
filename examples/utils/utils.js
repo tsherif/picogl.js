@@ -46,6 +46,10 @@
     let gpuTimeSum = 0;
     let timeSampleCount = NUM_TIMING_SAMPLES - 1;
 
+    let randS = 1;
+    let randC = 1;
+    let frame = 0;
+
     // https://www.khronos.org/registry/webgl/extensions/WEBGL_compressed_texture_pvrtc/
     function pvrtc2bppSize(width, height) {
         width = Math.max(width, 16);
@@ -227,6 +231,17 @@
     };
 
     window.utils = {
+        random() {
+            randS = Math.sin(randC * 18.42);
+            randC = Math.cos(randS * 984.21);
+            let n = Math.abs(randS * randC) * 4532.3454;
+            return n - Math.floor(n);
+        },
+        instrumentAnimationFrame(numFrames = 1) {
+            if (window.glcheck_setRAFCount) {
+                window.glcheck_setRAFCount(numFrames);
+            }
+        },
         xformMatrix(xform, translate, rotate, scale) {
             translate = translate || zeros;
             rotate = rotate || zeros;
