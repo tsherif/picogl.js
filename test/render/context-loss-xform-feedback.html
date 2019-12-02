@@ -282,7 +282,7 @@
                 app.clearColor(0.0, 0.0, 0.0, 1.0);
 
                 updateProgram.restore();
-                drawProgram.restore();
+                app.restorePrograms(drawProgram);
 
                 offsetsA.restore(offsetData);
                 offsetsB.restore();
