@@ -266,7 +266,7 @@
             .uniformBlock("SceneUniforms", sceneUniformBuffer)
             .texture("tex", texture);
 
-            let startTime = performance.now();
+            let time = 0;
 
             let drawCall = app.createDrawCall(program, pointArray)
             .primitive(PicoGL.POINTS)
@@ -313,7 +313,9 @@
 
                 timer.start();
 
-                drawCall.uniform("uTime", (performance.now() - startTime) / 1000);
+                time += 0.016;
+
+                drawCall.uniform("uTime", time);
 
                 app.clear();
                 drawCall.draw();
