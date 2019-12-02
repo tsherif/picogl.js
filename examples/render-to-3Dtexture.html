@@ -133,6 +133,7 @@
         import { PicoGL } from "../src/picogl.js";
        
         utils.addTimerElement();
+        utils.instrumentAnimationFrame(2);
         
         const DIMENSIONS = 128;
         
@@ -318,8 +319,6 @@
                 drawCall.draw();
                 
                 timer.end();
-
-                window.glcheck_renderDone = true;
 
                 requestAnimationFrame(drawMain);
             }
