@@ -81,7 +81,7 @@
         
         let app = PicoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0)
-        .blend()
+        .enable(PicoGL.BLEND)
         .blendFunc(PicoGL.ONE, PicoGL.ONE_MINUS_SRC_ALPHA);
 
         let timer = app.createTimer();

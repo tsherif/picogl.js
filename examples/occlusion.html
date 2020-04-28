@@ -204,7 +204,7 @@
             app.width / 5, 
             app.height / 5
         ];
-        app.depthTest()
+        app.enable(PicoGL.DEPTH_TEST)
         .blendFunc(PicoGL.ONE_MINUS_SRC_ALPHA, PicoGL.ONE_MINUS_SRC_ALPHA)
         .scissor(hudViewport[0], hudViewport[1], hudViewport[2], hudViewport[3]);
 
@@ -388,7 +388,7 @@
 
                 app.viewport(0, 0, app.width, app.height)
                 .clearColor(0, 0, 0, 1)
-                .depthTest()
+                .enable(PicoGL.DEPTH_TEST)
                 .colorMask(true, true, true, true)
                 .depthMask(true)
                 .clear();
@@ -450,9 +450,9 @@
                 // Draw HUD (visualize occlusion results)
                 if (showHUD) {
                     app.viewport(hudViewport[0], hudViewport[1], hudViewport[2], hudViewport[3])
-                    .blend()
-                    .noDepthTest()
-                    .scissorTest()
+                    .enable(PicoGL.BLEND)
+                    .disable(PicoGL.DEPTH_TEST)
+                    .enable(PicoGL.SCISSOR_TEST)
                     .colorMask(true, true, true, true)
                     .depthMask(true)
                     .clearColor(0.3, 0.3, 0.3, 1)
@@ -465,8 +465,8 @@
                         }
                     }
 
-                    app.noBlend()
-                    .noScissorTest();
+                    app.disable(PicoGL.BLEND)
+                    .disable(PicoGL.SCISSOR_TEST);
                 }
 
                 occludedSpheresElement.innerHTML = occludedSpheres;

@@ -169,7 +169,7 @@
 
         let app = PicoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0)
-        .blend()
+        .enable(PicoGL.BLEND)
         .depthMask(false);
 
         let timer = app.createTimer();

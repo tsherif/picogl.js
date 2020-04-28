@@ -170,7 +170,7 @@
         .clearMask(PicoGL.COLOR_BUFFER_BIT | PicoGL.DEPTH_BUFFER_BIT | PicoGL.STENCIL_BUFFER_BIT)
         .depthFunc(PicoGL.LEQUAL)
         // ENABLE STENCIL TESTING
-        .stencilTest()
+        .enable(PicoGL.STENCIL_TEST)
         // SET STENCIL TEST TO UPDATE STENCIL VALUE WHEN 
         // DEPTH AND STENCIL TESTS PASS
         .stencilOp(PicoGL.KEEP, PicoGL.KEEP, PicoGL.REPLACE);
@@ -279,14 +279,14 @@
                 modelMatrices.data(modelMatrixData);
 
                 app.clear()
-                .depthTest()
+                .enable(PicoGL.DEPTH_TEST)
                 // SET STENCIL VALUE TO 1 FOR EVERY PIXEL
                 // THAT GETS DRAWN
                 .stencilFunc(PicoGL.ALWAYS, 1, 0xFF)
                 .stencilMask(0xFFFF);
                 mainDrawcall.draw();
                 
-                app.noDepthTest()
+                app.disable(PicoGL.DEPTH_TEST)
                 // ONLY DRAW WHERE STENCIL VALUE IS NOT 1
                 // (I.E. WHERE WE DIDN'T DRAW BEFORE)
                 .stencilFunc(PicoGL.NOTEQUAL, 1, 0xFF)
