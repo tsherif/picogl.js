@@ -108,7 +108,7 @@
         canvas.height = window.innerHeight;
         
         let app = PicoGL.createApp(canvas)
-        .depthTest();
+        .enable(PicoGL.DEPTH_TEST);
 
         let timer = app.createTimer();
 

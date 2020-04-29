@@ -197,7 +197,7 @@
         };
 
         let app = PicoGL.createApp(canvas)
-        .depthTest()
+        .enable(PicoGL.DEPTH_TEST)
         .clearColor(0.0, 0.0, 0.0, 1.0);
 
         let timer = app.createTimer();

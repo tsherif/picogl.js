@@ -272,11 +272,11 @@
                 timer.start();
 
                 // TRANSFORM FEEDBACK
-                app.noRasterize()
+                app.enable(PicoGL.RASTERIZER_DISCARD)
                 updateDrawCall.draw()
 
                 // DRAW
-                app.rasterize().clear()
+                app.disable(PicoGL.RASTERIZER_DISCARD).clear()
                 mainDrawCall.draw();
 
                 // SWAP INPUT AND OUTPUT BUFFERS

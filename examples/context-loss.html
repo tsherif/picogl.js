@@ -172,7 +172,7 @@
         
         let app = PicoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0)
-        .depthTest();
+        .enable(PicoGL.DEPTH_TEST);
 
         let timer = app.createTimer();
 
@@ -359,7 +359,7 @@
 
             app.onContextRestored(() => {
                 app.clearColor(0.0, 0.0, 0.0, 1.0)
-                .depthTest();
+                .enable(PicoGL.DEPTH_TEST);
 
                 timer.restore();
 

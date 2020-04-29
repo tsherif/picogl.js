@@ -144,7 +144,7 @@
         let app = PicoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0)
         .blendFunc(PicoGL.ONE, PicoGL.ONE_MINUS_SRC_ALPHA)
-        .cullBackfaces()
+        .enable(PicoGL.CULL_FACE)
         .clear();
 
         let timer = app.createTimer();
@@ -275,7 +275,7 @@
 
             app.drawFramebuffer(framebuffer)
             .viewport(0, 0, DIMENSIONS, DIMENSIONS)
-            .depthTest()
+            .enable(PicoGL.DEPTH_TEST)
             .clearColor(0.0, 0.0, 0.0, 0.0)
             
 
@@ -300,8 +300,8 @@
             
                 app.defaultDrawFramebuffer()
                 .defaultViewport()
-                .noDepthTest()
-                .blend()
+                .disable(PicoGL.DEPTH_TEST)
+                .enable(PicoGL.BLEND)
                 .clearColor(0.0, 0.0, 0.0, 1.0)
                 requestAnimationFrame(drawMain);
             }
