@@ -127,6 +127,20 @@ export class Program {
     }
 
     /**
+        Bind attribute to a specific index.
+
+        @method
+        @param {number} attributeIndex The attribute location to bind to.
+        @param {string} attributeName Name of the attribute in the vertex shader.
+        @return {Program} The Program object.
+    */
+    bindAttribute(attributeIndex, attributeName) {
+        this.gl.bindAttribLocation(this.program, attributeIndex, attributeName);
+
+        return this;
+    }
+
+    /**
         Delete this program.
 
         @method
