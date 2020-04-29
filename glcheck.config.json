@@ -11,6 +11,7 @@
         "test/render/rtt.html",
         "test/render/translated-shaders.html",
         "test/render/uniforms.html",
+        "test/render/webglx.html",
         "examples/3Dtexture.html",
         "examples/bloom.html",
         "examples/cloth.html",
