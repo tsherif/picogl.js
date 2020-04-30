@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        html {
+            overflow: hidden;
+        }
+
+        body {
+            margin: 0;
+        }
+    </style>
+    <meta charset="utf-8">
+    <script src="utils/webglx.min.js"></script>
+</head>
+<!--
+  The MIT License (MIT)
+
+  Copyright (c) 2017 Tarek Sherif
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy of
+  this software and associated documentation files (the "Software"), to deal in
+  the Software without restriction, including without limitation the rights to
+  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+  the Software, and to permit persons to whom the Software is furnished to do so,
+  subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+  FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+  COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+  IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+<body>
+    <canvas id="gl-canvas"></canvas>
+    <script type="x-shader/vs" id="vertex-draw">
+        attribute vec4 position;
+        attribute vec2 uv;
+        
+        varying vec2 vUV;
+        void main() {
+            vUV = uv;
+            gl_Position = position;
+        }
+    </script>
+    <script type="x-shader/vf" id="fragment-draw">
+        precision highp float;
+
+        varying vec2 vUV;
+
+        uniform sampler2D tex;
+
+        void main() {
+            gl_FragColor = texture2D(tex, vUV);
+        }
+    </script>
+    <script type="module">
+        import { PicoGL } from "../../src/picogl.js";
+
+        let canvas = document.getElementById("gl-canvas");
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        let gl = WebGLX.getContext(canvas, {
+            requireExtensions: [
+                "OES_vertex_array_object"
+            ],
+            forceWebGL1: true
+        });
+
+        let app = PicoGL.createApp(gl)
+
+        // PROGRAM
+        let vsSource =  document.getElementById("vertex-draw").text;
+        let fsSource =  document.getElementById("fragment-draw").text;
+        let program = app.createProgram(vsSource, fsSource);
+
+        // FRAMEBUFFER
+        let colorTarget = app.createTexture2D(app.width, app.height, {
+            wrapS: PicoGL.CLAMP_TO_EDGE,
+            wrapT: PicoGL.CLAMP_TO_EDGE
+        });
+        let depthTarget = app.createTexture2D(app.width, app.height, {
+            internalFormat: PicoGL.DEPTH_COMPONENT16,
+            wrapS: PicoGL.CLAMP_TO_EDGE,
+            wrapT: PicoGL.CLAMP_TO_EDGE
+        });
+
+        let rttBuffer = app.createFramebuffer().colorTarget(0, colorTarget).depthTarget(depthTarget);
+
+        // GEOMETRY
+        let positions = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
+            -0.5, 0.5,
+            -0.5, -0.5,
+            0.5, -0.5,
+            -0.5, 0.5,
+            0.5, -0.5,
+            0.5, 0.5
+        ]));
+        let uv = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
+            0, 1,
+            0, 0,
+            1, 0,
+            0, 1,
+            1, 0,
+            1, 1
+        ]));
+
+        let quadArray = app.createVertexArray()
+        .vertexAttributeBuffer(0, positions)
+        .vertexAttributeBuffer(1, uv);
+
+        let image = new Image();
+
+        image.onload = function() {
+            let texture = app.createTexture2D(image, { flipY: true });
+
+            let drawCall = app.createDrawCall(program, quadArray);
+
+            // RENDER TO OFFSCREEN TEXTURE
+            app.drawFramebuffer(rttBuffer).clearColor(0.4, 0.4, 0.4, 1.0).clear();
+            drawCall.texture("tex", texture).draw();
+            
+            // RENDER TO SCREEN
+            app.defaultDrawFramebuffer().clearColor(0.0, 0.0, 0.0, 1.0).clear();
+            drawCall.texture("tex", rttBuffer.colorAttachments[0]).draw();
+
+            window.glcheck_renderDone = true;
+        }
+
+        image.src = "../../examples/img/webgl-logo.png";
+    </script>
+</body>
+</html>
