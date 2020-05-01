@@ -1,3 +1,8 @@
+## v0.17.0
+
+- App.createProgram(s) now optionally set explicit `attributeLocations`, `transformFeedbackVaryings` must be passed in an options object
+- Remove Program.bindAttribute method
+
 ## v0.16.0
 
 - Support providing an external context

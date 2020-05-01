@@ -77,7 +77,12 @@
         // PROGRAM
         let vsSource =  document.getElementById("vertex-draw").text;
         let fsSource =  document.getElementById("fragment-draw").text;
-        let program = app.createProgram(vsSource, fsSource);
+        let program = app.createProgram(vsSource, fsSource, {
+            attributeLocations: {
+                position: 0,
+                uv: 2
+            }
+        });
 
         // FRAMEBUFFER
         let colorTarget = app.createTexture2D(app.width, app.height, {
@@ -112,7 +117,7 @@
 
         let quadArray = app.createVertexArray()
         .vertexAttributeBuffer(0, positions)
-        .vertexAttributeBuffer(1, uv);
+        .vertexAttributeBuffer(2, uv);
 
         let image = new Image();
 

@@ -109,16 +109,22 @@
 
         let triangleArray = app.createVertexArray()
         .vertexAttributeBuffer(0, positions)
-        .instanceAttributeBuffer(1, offsets)
-        .instanceAttributeBuffer(2, colors, { normalized: true });
+        .instanceAttributeBuffer(2, offsets)
+        .instanceAttributeBuffer(3, colors, { normalized: true });
 
         // USE PARALLEL SHADER COMPILATION IF AVAILABLE
         // https://www.khronos.org/registry/webgl/extensions/KHR_parallel_shader_compile/
-        app.createPrograms([vsSource, fsSource]).then(([program]) => {
-            program.bindAttribute(0, "position")
-            .bindAttribute(1, "offset")
-            .bindAttribute(2, "color");
-
+        app.createPrograms([
+            vsSource,
+            fsSource, 
+            {
+                attributeLocations: {
+                    position: 0,
+                    offset: 2,
+                    color: 3
+                }
+            }
+        ]).then(([program]) => {
             let drawCall = app.createDrawCall(program, triangleArray);
 
             app.clear();

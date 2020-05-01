@@ -248,8 +248,10 @@
         .instanceAttributeBuffer(2, offsetsB)
         .instanceAttributeBuffer(3, rotationsB);
 
-        app.createPrograms([updateVsSource, updateFsSource, ["vOffset", "vRotation"]], [drawVsSource, drawFsSource])
-        .then(([updateProgram, drawProgram]) => {
+        app.createPrograms(
+            [updateVsSource, updateFsSource, { transformFeedbackVaryings: ["vOffset", "vRotation"] }], 
+            [drawVsSource, drawFsSource]
+        ).then(([updateProgram, drawProgram]) => {
             // CREATE DRAW CALLS FOR SIMULATION
             // A BUFFERS AS INPUT, UPDATE B BUFFERS
             let updateDrawCallA = app.createDrawCall(updateProgram, updateArrayA)

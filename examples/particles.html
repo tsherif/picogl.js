@@ -213,7 +213,7 @@
 
         // USE PARALLEL SHADER COMPILATION IF AVAILABLE
         // https://www.khronos.org/registry/webgl/extensions/KHR_parallel_shader_compile/
-        app.createPrograms([vsSource, fsSource, ["vPosition", "vVelocity"]]).then(([program]) => {
+        app.createPrograms([vsSource, fsSource, { transformFeedbackVaryings: ["vPosition", "vVelocity"] }]).then(([program]) => {
             let drawCall1 = app.createDrawCall(program, vertexArray1)
             .primitive(PicoGL.POINTS)
             .transformFeedback(transformFeedback2)

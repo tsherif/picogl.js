@@ -240,7 +240,7 @@
 
         app.createPrograms(
             [drawVsSource, drawFsSource],
-            [updateVsSource, updateFsSource, ["vOffset", "vRotation"]]
+            [updateVsSource, updateFsSource, { transformFeedbackVaryings: ["vOffset", "vRotation"] }]
         ).then(([drawProgram, updateProgram]) => {
             // CREATE DRAW CALLS FOR SIMULATION
             // A BUFFERS AS INPUT, UPDATE B BUFFERS

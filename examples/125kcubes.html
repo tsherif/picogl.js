@@ -266,7 +266,7 @@
         }
 
         Promise.all([
-            app.createPrograms([vsSource, fsSource], [updateVsSource, updateFsSource, ["vRotation"]]),
+            app.createPrograms([vsSource, fsSource], [updateVsSource, updateFsSource, { transformFeedbackVaryings: ["vRotation"] }]),
             utils.loadImages(["img/webgl-logo.png"])
         ]).then(([[program, updateProgram], [image]]) => {
             let texture = app.createTexture2D(image, { 

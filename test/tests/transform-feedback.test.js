@@ -74,7 +74,9 @@ glcheck("TransformFeedback draw", (t, canvas) => {
         }
     `;
 
-    let program = app.createProgram(vs, fs, [ "outputData" ]);
+    let program = app.createProgram(vs, fs, {
+        transformFeedbackVaryings: [ "outputData" ]
+    });
 
     app.createDrawCall(program, vertexArray)
         .primitive(PicoGL.POINTS)
