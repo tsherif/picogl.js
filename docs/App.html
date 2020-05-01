@@ -3227,7 +3227,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1022">line 1022</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1032">line 1032</a>
     </li></ul></dd>
     
 
@@ -3443,7 +3443,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1081">line 1081</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1091">line 1091</a>
     </li></ul></dd>
     
 
@@ -3553,7 +3553,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1046">line 1046</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1056">line 1056</a>
     </li></ul></dd>
     
 
@@ -3837,7 +3837,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line826">line 826</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line836">line 836</a>
     </li></ul></dd>
     
 
@@ -4091,7 +4091,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line812">line 812</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line822">line 822</a>
     </li></ul></dd>
     
 
@@ -4343,7 +4343,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line797">line 797</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line807">line 807</a>
     </li></ul></dd>
     
 
@@ -4401,7 +4401,7 @@
     
 
     
-    <h4 class="name" id="createProgram"><span class="type-signature"></span>createProgram<span class="signature">(vertexShader, fragmentShader, xformFeedbackVars<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="Program.html">Program</a>}</span></h4>
+    <h4 class="name" id="createProgram"><span class="type-signature"></span>createProgram<span class="signature">(vertexShader, fragmentShader, options<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="Program.html">Program</a>}</span></h4>
     
 
     
@@ -4516,7 +4516,94 @@
 
         <tr>
             
-                <td class="name"><code>xformFeedbackVars</code></td>
+                <td class="name"><code>options</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Texture options.
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>attributeLocations</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Map of attribute names to locations (useful when using GLSL 1).</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>transformFeedbackVaryings</code></td>
             
 
             <td class="type">
@@ -4542,7 +4629,14 @@
 
             
 
-            <td class="description last">Transform feedback varyings.</td>
+            <td class="description last">Array of varying names used for transform feedback output.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
         </tr>
 
     
@@ -4583,7 +4677,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line613">line 613</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line615">line 615</a>
     </li></ul></dd>
     
 
@@ -4718,7 +4812,12 @@
             <ul>
                 <li> (Shader|string) Vertex shader object or source code.
                 <li> (Shader|string) Fragment shader object or source code.
-                <li> (Array - optional) Array of names of transform feedback varyings.
+                <li> (Object - optional) Optional program parameters.
+                <ul>
+                    <li> (Object - optional) <strong><code>attributeLocations</code></strong> Map of attribute names to locations (useful when using GLSL 1).
+                    <li>(Array - optional) <strong><code>transformFeedbackVaryings</code></strong> Array of varying names used for transform feedback output.
+                </ul>
+                </ul>
             </ul></td>
         </tr>
 
@@ -4760,7 +4859,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line633">line 633</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line642">line 642</a>
     </li></ul></dd>
     
 
@@ -4920,7 +5019,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1057">line 1057</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1067">line 1067</a>
     </li></ul></dd>
     
 
@@ -5204,7 +5303,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1036">line 1036</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1046">line 1046</a>
     </li></ul></dd>
     
 
@@ -5387,7 +5486,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line746">line 746</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line756">line 756</a>
     </li></ul></dd>
     
 
@@ -6272,7 +6371,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line880">line 880</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line890">line 890</a>
     </li></ul></dd>
     
 
@@ -7174,7 +7273,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line971">line 971</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line981">line 981</a>
     </li></ul></dd>
     
 
@@ -8076,7 +8175,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line928">line 928</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line938">line 938</a>
     </li></ul></dd>
     
 
@@ -8186,7 +8285,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1067">line 1067</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1077">line 1077</a>
     </li></ul></dd>
     
 
@@ -8296,7 +8395,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line766">line 766</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line776">line 776</a>
     </li></ul></dd>
     
 
@@ -8513,7 +8612,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line841">line 841</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line851">line 851</a>
     </li></ul></dd>
     
 
@@ -8623,7 +8722,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line756">line 756</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line766">line 766</a>
     </li></ul></dd>
     
 
@@ -8911,7 +9010,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line781">line 781</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line791">line 791</a>
     </li></ul></dd>
     
 
@@ -11452,7 +11551,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line690">line 690</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line700">line 700</a>
     </li></ul></dd>
     
 
@@ -13091,7 +13190,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Wed Apr 29 2020 10:04:48 GMT-0400 (Eastern Daylight Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Fri May 01 2020 16:36:16 GMT-0400 (Eastern Daylight Time)
 </footer>
 
 <script> prettyPrint(); </script>

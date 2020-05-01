@@ -607,11 +607,15 @@ export class App {
         @method
         @param {Shader|string} vertexShader Vertex shader object or source code.
         @param {Shader|string} fragmentShader Fragment shader object or source code.
-        @param {Array} [xformFeedbackVars] Transform feedback varyings.
+        @param {Object} [options] Texture options.
+        @param {Object} [options.attributeLocations] Map of attribute names to locations (useful when using GLSL 1).
+        @param {Array} [options.transformFeedbackVaryings] Array of varying names used for transform feedback output.
         @return {Program} New Program object.
     */
-    createProgram(vsSource, fsSource, xformFeedbackVars) {
-        return new Program(this.gl, this.state, vsSource, fsSource, xformFeedbackVars)
+    createProgram(vsSource, fsSource, opts = {}) {
+        let {transformFeedbackVaryings, attributeLocations} = opts;
+
+        return new Program(this.gl, this.state, vsSource, fsSource, transformFeedbackVaryings, attributeLocations)
             .link()
             .checkLinkage();
     }
@@ -625,7 +629,12 @@ export class App {
             <ul>
                 <li> (Shader|string) Vertex shader object or source code.
                 <li> (Shader|string) Fragment shader object or source code.
-                <li> (Array - optional) Array of names of transform feedback varyings.
+                <li> (Object - optional) Optional program parameters.
+                <ul>
+                    <li> (Object - optional) <strong><code>attributeLocations</code></strong> Map of attribute names to locations (useful when using GLSL 1).
+                    <li>(Array - optional) <strong><code>transformFeedbackVaryings</code></strong> Array of varying names used for transform feedback output.
+                </ul>
+                </ul>
             </ul>
         @return {Promise} Promise that will resolve to an array of Programs when compilation and
             linking are complete for all programs.
@@ -641,8 +650,9 @@ export class App {
                 let source = sources[i];
                 let vsSource = source[0];
                 let fsSource = source[1];
-                let xformFeedbackVars = source[2];
-                programs[i] = new Program(this.gl, this.state, vsSource, fsSource, xformFeedbackVars);
+                let opts = source[2] || {};
+                let {transformFeedbackVaryings, attributeLocations} = opts;
+                programs[i] = new Program(this.gl, this.state, vsSource, fsSource, transformFeedbackVaryings, attributeLocations);
                 pendingPrograms[i] = programs[i];
             }
 
