@@ -230,6 +230,7 @@
         });
 
         utils.addTimerElement();
+        utils.instrumentAnimationFrame();
 
         if (!testExtension("EXT_color_buffer_float")) {
             document.body.innerHTML = "This example requires extension <b>EXT_color_buffer_float</b> which is not supported on this system."
@@ -244,7 +245,7 @@
         
         let app = PicoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0)
-        .depthTest();
+        .enable(PicoGL.DEPTH_TEST);
 
         let timer = app.createTimer();
 
@@ -349,8 +350,8 @@
             for (let i = 0, len = spheres.length; i < len; ++i) {
                 spheres[i] = {
                     rotation: 1.8,
-                    translation: [Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1],
-                    translationTarget: [Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1],
+                    translation: [utils.random() * 2 - 1, utils.random() * 2 - 1, utils.random() * 2 - 1],
+                    translationTarget: [utils.random() * 2 - 1, utils.random() * 2 - 1, utils.random() * 2 - 1],
                     modelMatrix: mat4.create(),
                     previousModelMatrix: mat4.create(),
                     drawCall: app.createDrawCall(program, sphereArray)
@@ -401,9 +402,9 @@
                     let distance = vec3.length(diff);
 
                     if (distance < STOP_THRESHOLD) {
-                        sphere.translationTarget[0] = Math.random() * 2 - 1;
-                        sphere.translationTarget[1] = Math.random() * 2 - 1;
-                        sphere.translationTarget[2] = Math.random() * 2 - 1;
+                        sphere.translationTarget[0] = utils.random() * 2 - 1;
+                        sphere.translationTarget[1] = utils.random() * 2 - 1;
+                        sphere.translationTarget[2] = utils.random() * 2 - 1;
                     } else {
                         vec3.normalize(diff, diff);
                         vec3.scale(diff, diff, distance * EASING);
@@ -430,8 +431,9 @@
                     blurDrawCall.draw();
                 }
                 
-                timer.end();
 
+                timer.end();
+                
                 requestAnimationFrame(draw);
             }
 

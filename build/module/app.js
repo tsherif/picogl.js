@@ -50,9 +50,9 @@ import { Query } from "./query.js";
 */
 export class App {
 
-    constructor(gl, canvas) {
-        this.canvas = canvas;
+    constructor(gl) {
         this.gl = gl;
+        this.canvas = gl.canvas;
         this.width = this.gl.drawingBufferWidth;
         this.height = this.gl.drawingBufferHeight;
         this.viewportX = 0;
@@ -129,6 +129,30 @@ export class App {
         this.contextRestoredHandler = fn;
 
         this.initContextListeners();
+
+        return this;
+    }
+
+    /**
+        Enable WebGL capability (e.g. depth testing, blending, etc.).
+
+        @method
+        @param {GLEnum} cap Capability to enable.
+    */
+    enable(cap) {
+        this.gl.enable(cap);
+
+        return this;
+    }
+
+    /**
+        Disable WebGL capability (e.g. depth testing, blending, etc.).
+
+        @method
+        @param {GLEnum} cap Capability to disable.
+    */
+    disable(cap) {
+        this.gl.disable(cap);
 
         return this;
     }
@@ -308,30 +332,6 @@ export class App {
     }
 
     /**
-        Enable depth testing.
-
-        @method
-        @return {App} The App object.
-    */
-    depthTest() {
-        this.gl.enable(this.gl.DEPTH_TEST);
-
-        return this;
-    }
-
-    /**
-        Disable depth testing.
-
-        @method
-        @return {App} The App object.
-    */
-    noDepthTest() {
-        this.gl.disable(this.gl.DEPTH_TEST);
-
-        return this;
-    }
-
-    /**
         Enable or disable writing to the depth buffer.
 
         @method
@@ -353,30 +353,6 @@ export class App {
     */
     depthFunc(func) {
         this.gl.depthFunc(func);
-
-        return this;
-    }
-
-    /**
-        Enable blending.
-
-        @method
-        @return {App} The App object.
-    */
-    blend() {
-        this.gl.enable(this.gl.BLEND);
-
-        return this;
-    }
-
-    /**
-        Disable blending
-
-        @method
-        @return {App} The App object.
-    */
-    noBlend() {
-        this.gl.disable(this.gl.BLEND);
 
         return this;
     }
@@ -421,32 +397,6 @@ export class App {
     */
     blendEquation(mode) {
         this.gl.blendEquation(mode);
-
-        return this;
-    }
-
-    /**
-        Enable stencil testing.
-        NOTE: Only works if { stencil: true } passed as a
-        context attribute when creating the App!
-
-        @method
-        @return {App} The App object.
-    */
-    stencilTest() {
-        this.gl.enable(this.gl.STENCIL_TEST);
-
-        return this;
-    }
-
-    /**
-        Disable stencil testing.
-
-        @method
-        @return {App} The App object.
-    */
-    noStencilTest() {
-        this.gl.disable(this.gl.STENCIL_TEST);
 
         return this;
     }
@@ -561,31 +511,6 @@ export class App {
         return this;
     }
 
-
-    /**
-        Enable scissor testing.
-
-        @method
-        @return {App} The App object.
-    */
-    scissorTest() {
-        this.gl.enable(this.gl.SCISSOR_TEST);
-
-        return this;
-    }
-
-    /**
-        Disable scissor testing.
-
-        @method
-        @return {App} The App object.
-    */
-    noScissorTest() {
-        this.gl.disable(this.gl.SCISSOR_TEST);
-
-        return this;
-    }
-
     /**
         Define the scissor box.
 
@@ -594,54 +519,6 @@ export class App {
     */
     scissor(x, y, width, height) {
         this.gl.scissor(x, y, width, height);
-
-        return this;
-    }
-
-    /**
-        Enable rasterization step.
-
-        @method
-        @return {App} The App object.
-    */
-    rasterize() {
-        this.gl.disable(this.gl.RASTERIZER_DISCARD);
-
-        return this;
-    }
-
-    /**
-        Disable rasterization step.
-
-        @method
-        @return {App} The App object.
-    */
-    noRasterize() {
-        this.gl.enable(this.gl.RASTERIZER_DISCARD);
-
-        return this;
-    }
-
-    /**
-        Enable backface culling.
-
-        @method
-        @return {App} The App object.
-    */
-    cullBackfaces() {
-        this.gl.enable(this.gl.CULL_FACE);
-
-        return this;
-    }
-
-    /**
-        Disable backface culling.
-
-        @method
-        @return {App} The App object.
-    */
-    drawBackfaces() {
-        this.gl.disable(this.gl.CULL_FACE);
 
         return this;
     }
@@ -730,11 +607,15 @@ export class App {
         @method
         @param {Shader|string} vertexShader Vertex shader object or source code.
         @param {Shader|string} fragmentShader Fragment shader object or source code.
-        @param {Array} [xformFeedbackVars] Transform feedback varyings.
+        @param {Object} [options] Texture options.
+        @param {Object} [options.attributeLocations] Map of attribute names to locations (useful when using GLSL 1).
+        @param {Array} [options.transformFeedbackVaryings] Array of varying names used for transform feedback output.
         @return {Program} New Program object.
     */
-    createProgram(vsSource, fsSource, xformFeedbackVars) {
-        return new Program(this.gl, this.state, vsSource, fsSource, xformFeedbackVars)
+    createProgram(vsSource, fsSource, opts = {}) {
+        let {transformFeedbackVaryings, attributeLocations} = opts;
+
+        return new Program(this.gl, this.state, vsSource, fsSource, transformFeedbackVaryings, attributeLocations)
             .link()
             .checkLinkage();
     }
@@ -748,7 +629,12 @@ export class App {
             <ul>
                 <li> (Shader|string) Vertex shader object or source code.
                 <li> (Shader|string) Fragment shader object or source code.
-                <li> (Array - optional) Array of names of transform feedback varyings.
+                <li> (Object - optional) Optional program parameters.
+                <ul>
+                    <li> (Object - optional) <strong><code>attributeLocations</code></strong> Map of attribute names to locations (useful when using GLSL 1).
+                    <li>(Array - optional) <strong><code>transformFeedbackVaryings</code></strong> Array of varying names used for transform feedback output.
+                </ul>
+                </ul>
             </ul>
         @return {Promise} Promise that will resolve to an array of Programs when compilation and
             linking are complete for all programs.
@@ -764,8 +650,9 @@ export class App {
                 let source = sources[i];
                 let vsSource = source[0];
                 let fsSource = source[1];
-                let xformFeedbackVars = source[2];
-                programs[i] = new Program(this.gl, this.state, vsSource, fsSource, xformFeedbackVars);
+                let opts = source[2] || {};
+                let {transformFeedbackVaryings, attributeLocations} = opts;
+                programs[i] = new Program(this.gl, this.state, vsSource, fsSource, transformFeedbackVaryings, attributeLocations);
                 pendingPrograms[i] = programs[i];
             }
 
@@ -1244,4 +1131,91 @@ export class App {
             this.contextRestoredListener = null;  
         }
     }
+
+    // DEPRECATED
+
+    depthTest() {
+        console.warn("App.depthTest is deprecated. Use App.enable(PicoGL.DEPTH_TEST) instead.");
+        this.enable(GL.DEPTH_TEST);
+
+        return this;
+    }
+
+    noDepthTest() {
+        console.warn("App.noDepthTest is deprecated. Use App.disable(PicoGL.DEPTH_TEST) instead.");
+        this.disable(GL.DEPTH_TEST);
+
+        return this;
+    }
+
+    blend() {
+        console.warn("App.blend is deprecated. Use App.enable(PicoGL.BLEND) instead.");
+        this.enable(GL.BLEND);
+
+        return this;
+    }
+
+    noBlend() {
+        console.warn("App.noBlend is deprecated. Use App.disable(PicoGL.BLEND) instead.");
+        this.disable(GL.BLEND);
+
+        return this;
+    }
+
+    stencilTest() {
+        console.warn("App.stencilTest is deprecated. Use App.enable(PicoGL.STENCIL_TEST) instead.");
+        this.enable(GL.STENCIL_TEST);
+
+        return this;
+    }
+
+    noStencilTest() {
+        console.warn("App.noStencilTest is deprecated. Use App.disable(PicoGL.STENCIL_TEST) instead.");
+        this.disable(GL.STENCIL_TEST);
+
+        return this;
+    }
+
+    scissorTest() {
+        console.warn("App.scissorTest is deprecated. Use App.enable(PicoGL.SCISSOR_TEST) instead.");
+        this.enable(GL.SCISSOR_TEST);
+
+        return this;
+    }
+
+    noScissorTest() {
+        console.warn("App.noScissorTest is deprecated. Use App.disable(PicoGL.SCISSOR_TEST) instead.");
+        this.disable(GL.SCISSOR_TEST);
+
+        return this;
+    }
+
+    rasterize() {
+        console.warn("App.noRasterize is deprecated. Use App.disable(PicoGL.RASTERIZER_DISCARD) instead.");
+        this.disable(GL.RASTERIZER_DISCARD);
+
+        return this;
+    }
+
+    noRasterize() {
+        console.warn("App.rasterize is deprecated. Use App.enable(PicoGL.RASTERIZER_DISCARD) instead.");
+        this.enable(GL.RASTERIZER_DISCARD);
+
+        return this;
+    }
+
+    cullBackfaces() {
+        console.warn("App.cullBackfaces is deprecated. Use App.enable(PicoGL.CULL_FACE) instead.");
+        this.enable(GL.CULL_FACE);
+
+        return this;
+    }
+
+    drawBackfaces() {
+        console.warn("App.drawBackfaces is deprecated. Use App.disable(PicoGL.CULL_FACE) instead.");
+        this.disable(GL.CULL_FACE);
+
+        return this;
+    }
+
 }

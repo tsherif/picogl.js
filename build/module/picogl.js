@@ -33,7 +33,7 @@ let webglInfoInitialized = false;
     @namespace PicoGL
 */
 export const PicoGL = Object.assign({
-    version: "0.15.4",
+    version: "0.17.0",
 
     WEBGL_INFO,
 
@@ -46,8 +46,13 @@ export const PicoGL = Object.assign({
         @param {Object} [contextAttributes] Context attributes to pass when calling getContext().
         @return {App} New App object.
     */
-    createApp(canvas, contextAttributes) {
-        let gl = canvas.getContext("webgl2", contextAttributes);
+    createApp(gl, contextAttributes) {
+
+        // Support providing a canvas and getting a WebGL 2 context
+        if (gl.tagName === "CANVAS") {
+            gl = gl.getContext("webgl2", contextAttributes);
+        }
+
         if (!webglInfoInitialized) {
             WEBGL_INFO.MAX_TEXTURE_UNITS = gl.getParameter(GL.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
             WEBGL_INFO.MAX_UNIFORM_BUFFERS = gl.getParameter(GL.MAX_UNIFORM_BUFFER_BINDINGS);
@@ -86,6 +91,6 @@ export const PicoGL = Object.assign({
 
             webglInfoInitialized = true;
         }
-        return new App(gl, canvas);
+        return new App(gl);
     }
 }, GL);

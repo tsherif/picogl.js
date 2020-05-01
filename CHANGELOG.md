@@ -1,3 +1,15 @@
+## v0.17.0
+
+- App.createProgram(s) now optionally set explicit `attributeLocations`, `transformFeedbackVaryings` must be passed in an options object
+- Remove Program.bindAttribute method
+
+## v0.16.0
+
+- Support providing an external context
+- App.enable and App.disable methods
+- Deprecate App.depthTest, App.noDepthTest, App.blend, App.noBlend, App.stencilTest, App.noStencilTest, App.scissorTest, App.noScissorTest, App.rasterize, App.noRasterize, App.cullBackfaces, App.drawBackfaces
+- Program.bindAttribute method
+
 ## v0.15.4
 
 - Remove App.onContextLost (was only used for testing)

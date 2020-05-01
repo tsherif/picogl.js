@@ -37,17 +37,19 @@ import {
     @class
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLProgram} program The WebGL program.
-    @prop {boolean} transformFeedback Whether this program is set up for transform feedback.
+    @prop {array} transformFeedbackVaryings Names of transform feedback varyings, if any.
+    @prop {objects} attributeLocations Map of user-provided attribute names to indices, if any.
     @prop {Object} uniforms Map of uniform names to handles.
     @prop {Object} appState Tracked GL state.
 */
 export class Program {
 
-    constructor(gl, appState, vsSource, fsSource, xformFeebackVars) {
+    constructor(gl, appState, vsSource, fsSource, xformFeebackVars, attributeLocations) {
         this.gl = gl;
         this.appState = appState;
         this.program = null;
         this.transformFeedbackVaryings = xformFeebackVars || null;
+        this.attributeLocations = attributeLocations || null;
         this.uniforms = {};
         this.uniformBlocks = {};
         this.uniformBlockCount = 0;
@@ -178,6 +180,11 @@ export class Program {
         this.gl.attachShader(this.program, this.fragmentShader.shader);
         if (this.transformFeedbackVaryings) {
             this.gl.transformFeedbackVaryings(this.program, this.transformFeedbackVaryings, GL.SEPARATE_ATTRIBS);
+        }
+        if (this.attributeLocations) {
+            for (let name in this.attributeLocations) {
+                this.gl.bindAttribLocation(this.program, this.attributeLocations[name], name);
+            }
         }
         this.gl.linkProgram(this.program);
 

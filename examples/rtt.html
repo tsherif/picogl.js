@@ -102,13 +102,14 @@
         import { PicoGL } from "../src/picogl.js";
        
         utils.addTimerElement();
+        utils.instrumentAnimationFrame();
 
         let canvas = document.getElementById("gl-canvas");
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         
         let app = PicoGL.createApp(canvas)
-        .depthTest();
+        .enable(PicoGL.DEPTH_TEST);
 
         let timer = app.createTimer();
 
@@ -212,7 +213,7 @@
                 app.defaultDrawFramebuffer().clearColor(0.0, 0.0, 0.0, 1.0).clear()
                 drawCall.texture("tex", rttBuffer.colorAttachments[0]).draw();
 
-                timer.end(); 
+                timer.end();
 
                 requestAnimationFrame(draw);
             }

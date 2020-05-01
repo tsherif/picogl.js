@@ -128,7 +128,8 @@
     </script>
     <script type="module">
         import { PicoGL } from "../src/picogl.js";
-       
+        
+        utils.instrumentAnimationFrame();
         utils.addTimerElement();
         utils.timerDiv.style.color = "black";
 
@@ -138,7 +139,7 @@
         
         let app = PicoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0)
-        .depthTest();
+        .enable(PicoGL.DEPTH_TEST);
 
         let timer = app.createTimer();
 

@@ -108,7 +108,7 @@
         canvas.height = window.innerHeight;
         
         let app = PicoGL.createApp(canvas)
-        .depthTest();
+        .enable(PicoGL.DEPTH_TEST);
 
         let timer = app.createTimer();
 
@@ -224,6 +224,8 @@
                 drawCall.texture("tex", textureFramebuffer.colorAttachments[0]).draw();
 
                 timer.end(); 
+
+                window.glcheck_renderDone = true;
 
                 requestAnimationFrame(draw);
             }

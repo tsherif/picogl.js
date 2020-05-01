@@ -1,4 +1,16 @@
 <!DOCTYPE html>
+<html>
+<head>
+    <style>
+        html {
+            overflow: hidden;
+        }
+
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
 <!--
   The MIT License (MIT)
 
@@ -21,18 +33,6 @@
   IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
   CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -->
-<html>
-<head>
-    <style>
-        html {
-            overflow: hidden;
-        }
-
-        body {
-            margin: 0;
-        }
-    </style>
-</head>
 <body>
     <canvas id="gl-canvas"></canvas>
     <script type="x-shader/vs" id="vertex-draw">
@@ -124,6 +124,8 @@
             // RENDER TO SCREEN
             app.defaultDrawFramebuffer().clearColor(0.0, 0.0, 0.0, 1.0).clear();
             drawCall.texture("tex", rttBuffer.colorAttachments[0]).draw();
+
+            window.glcheck_renderDone = true;
         }
 
         image.src = "../../examples/img/webgl-logo.png";

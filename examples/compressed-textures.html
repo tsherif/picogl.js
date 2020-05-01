@@ -103,6 +103,7 @@
         import { PicoGL } from "../src/picogl.js";
        
         utils.addTimerElement();
+        utils.instrumentAnimationFrame();
         
         let canvas = document.getElementById("gl-canvas");
         canvas.width = window.innerWidth;
@@ -110,7 +111,7 @@
         
         let app = PicoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0)
-        .depthTest();
+        .enable(PicoGL.DEPTH_TEST);
 
         let timer = app.createTimer();
 
@@ -154,25 +155,25 @@
 
         let boxes = [
             {
-                rotation: vec3.fromValues(0, Math.random(), 0),
+                rotation: vec3.fromValues(0, utils.random(), 0),
                 translation: vec3.fromValues(-1, 1, 0),
                 modelMatrix: mat4.create(),
                 drawCall: null
             },
             {
-                rotation: vec3.fromValues(0, Math.random(), 0),
+                rotation: vec3.fromValues(0, utils.random(), 0),
                 translation: vec3.fromValues(1, 1, 0),
                 modelMatrix: mat4.create(),
                 drawCall: null
             },
             {
-                rotation: vec3.fromValues(0, Math.random(), 0),
+                rotation: vec3.fromValues(0, utils.random(), 0),
                 translation: vec3.fromValues(-1, -1, 0),
                 modelMatrix: mat4.create(),
                 drawCall: null
             },
             {
-                rotation: vec3.fromValues(0, Math.random(), 0),
+                rotation: vec3.fromValues(0, utils.random(), 0),
                 translation: vec3.fromValues(1, -1, 0),
                 modelMatrix: mat4.create(),
                 drawCall: null

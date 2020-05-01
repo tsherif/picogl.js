@@ -23,7 +23,7 @@
 
 import {PicoGL} from "../../src/picogl.js";
 
-glCheck("Framebuffer lifecycle", (t, canvas) => {
+glcheck("Framebuffer lifecycle", (t, canvas) => {
     let app = PicoGL.createApp(canvas);
     let framebuffer = app.createFramebuffer();
 
@@ -68,7 +68,7 @@ glCheck("Framebuffer lifecycle", (t, canvas) => {
     t.done();
 });
 
-glCheck("Framebuffer attachments", (t, canvas) => {
+glcheck("Framebuffer attachments", (t, canvas) => {
     let app = PicoGL.createApp(canvas);
 
     let textureColorTarget = app.createTexture2D(app.width, app.height);
@@ -104,7 +104,7 @@ glCheck("Framebuffer attachments", (t, canvas) => {
     t.done();
 });
 
-glCheck("Framebuffer blit", (t, canvas) => {
+glcheck("Framebuffer blit", (t, canvas) => {
     let app = PicoGL.createApp(canvas);
 
     let readTarget = app.createRenderbuffer(app.width, app.height, PicoGL.RGBA8);

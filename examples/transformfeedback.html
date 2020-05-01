@@ -76,6 +76,7 @@
         import { PicoGL } from "../src/picogl.js";
        
         utils.addTimerElement();
+        utils.instrumentAnimationFrame();
 
         let canvas = document.getElementById("gl-canvas");
         canvas.width = window.innerWidth;
@@ -128,7 +129,7 @@
         .feedbackBuffer(0, positions2);
 
         // FINAL ARGUMENT IS TRANSFORM FEEDBACK VARYINGS
-        app.createPrograms([vsSource, fsSource, ["vPosition"]]).then(([program]) => {
+        app.createPrograms([vsSource, fsSource, { transformFeedbackVaryings: ["vPosition"] }]).then(([program]) => {
             // CREATE DRAW CALLS FROM PROGRAM AND TRANSFORMFEEDBACK.
             // EACH DRAW CALL REPRESENTS ONE DIRECTION OF DRAW/CAPTURE
             let drawCallA = app.createDrawCall(program, triangleArrayA)
@@ -152,9 +153,8 @@
                 // SWAP INPUT AND OUTPUT
                 currentDrawCall = currentDrawCall === drawCallA ? drawCallB : drawCallA;
 
-                timer.end();
-
-
+                timer.end(); 
+                                
                 requestAnimationFrame(draw);
             }
 

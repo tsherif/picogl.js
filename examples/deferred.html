@@ -136,6 +136,7 @@
         import { PicoGL } from "../src/picogl.js";
        
         utils.addTimerElement();
+        utils.instrumentAnimationFrame();
 
         if (!testExtension("EXT_color_buffer_float")) {
             document.body.innerHTML = "This example requires extension <b>EXT_color_buffer_float</b> which is not supported on this system."
@@ -147,7 +148,7 @@
 
         let app = PicoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0)
-        .depthTest()
+        .enable(PicoGL.DEPTH_TEST)
         .depthFunc(PicoGL.LEQUAL)
         .blendFunc(PicoGL.ONE, PicoGL.ONE);
 
@@ -347,7 +348,7 @@
                 // DRAW TO GBUFFER
                 app.drawFramebuffer(gBuffer)
                 .depthMask(true)
-                .noBlend()
+                .disable(PicoGL.BLEND)
                 .clear();
 
                 for (let i = 0, len = boxes.length; i < len; ++i) {
@@ -356,7 +357,7 @@
 
                 // DRAW LIGHTS
                 app.defaultDrawFramebuffer()
-                .blend()
+                .enable(PicoGL.BLEND)
                 .depthMask(false)
                 .clear();
 
@@ -365,7 +366,7 @@
                 }
                 
                 timer.end();                
-                
+                                
                 requestAnimationFrame(draw);
             }
 

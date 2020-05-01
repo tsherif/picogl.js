@@ -215,6 +215,7 @@
         import { PicoGL } from "../src/picogl.js";
 
         utils.addTimerElement();   
+        utils.instrumentAnimationFrame();
         
         let bloomEnabled = true;
 
@@ -231,7 +232,7 @@
 
         let app = PicoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0)
-        .depthTest();
+        .enable(PicoGL.DEPTH_TEST);
 
         if (!testExtension("EXT_color_buffer_float")) {
             document.body.innerHTML = "This example requires extension <b>EXT_color_buffer_float</b> which is not supported on this system."

@@ -1,18 +1,17 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>PicoGL.js: Triangle</title>
-    <meta charset="utf-8">
-    <link rel="stylesheet" href="../../site/css/picogl-example.css"> 
     <style>
-        #translated-source {
-            position: absolute;
-            left: 0;
-            top: 0;
-            color: white;
-            font-size: 8px;
+        html {
+            overflow: hidden;
+        }
+
+        body {
+            margin: 0;
         }
     </style>
+    <meta charset="utf-8">
+    <script src="utils/webglx.min.js"></script>
 </head>
 <!--
   The MIT License (MIT)
@@ -37,82 +36,110 @@
   CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -->
 <body>
-    <div id="translated-source"></div>
     <canvas id="gl-canvas"></canvas>
     <script type="shader/vs" id="vs">
-        #version 300 es
+        attribute vec4 position;
+        attribute vec2 offset;
+        attribute vec4 color;
         
-        layout(location=0) in vec4 position;
-        layout(location=1) in vec3 color;
-        
-        out vec3 vColor; 
+        varying vec4 vColor;
         void main() {
             vColor = color;
             gl_Position = position;
+            gl_Position.xy += offset;
         }
     </script>
     <script type="shader/fs" id="fs">
-        #version 300 es
         precision highp float;
-        
-        in vec3 vColor;
-        
-        out vec4 fragColor;
+
+        varying vec4 vColor;
+
         void main() {
-            fragColor = vec4(vColor, 1.0);
+            gl_FragColor = vColor;
         }
     </script>
+    
     <script type="module">
-        import { PicoGL } from "../../src/picogl.js";
-
+        import { PicoGL } from "../../src/picogl.js";;
+       
         let canvas = document.getElementById("gl-canvas");
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         
-        let app = PicoGL.createApp(canvas)
+        let gl = WebGLX.getContext(canvas, {
+            requireExtensions: [
+                "ANGLE_instanced_arrays",
+                "OES_vertex_array_object"
+            ],
+            forceWebGL1: true
+        });
+
+        let app = PicoGL.createApp(gl)
         .clearColor(0.0, 0.0, 0.0, 1.0);
 
         window.onresize = function() {
             app.resize(window.innerWidth, window.innerHeight);
         }
 
-        // PROGRAM 
+        // PROGRAM
         let vsSource =  document.getElementById("vs").text;
         let fsSource =  document.getElementById("fs").text;
-
-        // GEOMETRY IN VERTEX BUFFERS
+                        
+        // PER-VERTEX POSITIONS
         let positions = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
-            -0.5, -0.5,
-             0.5, -0.5,
-             0.0, 0.5, 
+            -0.3, -0.3,
+             0.3, -0.3,
+             0.0, 0.3
+        ]));
+
+        // PER-INSTANCE OFFSETS AND COLORS
+        let offsets = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
+            -0.4, -0.4,
+             0.4, -0.4,
+             -0.4, 0.4,
+             0.4, 0.4
         ]));
 
         let colors = app.createVertexBuffer(PicoGL.UNSIGNED_BYTE, 3, new Uint8Array([
             255, 0, 0,
             0, 255, 0,
-            0, 0, 255
+            0, 0, 255,
+            0, 255, 255
         ]));
 
-        // COMBINE VERTEX BUFFERS INTO VERTEX ARRAY
         let triangleArray = app.createVertexArray()
         .vertexAttributeBuffer(0, positions)
-        .vertexAttributeBuffer(1, colors, { normalized: true });
+        .instanceAttributeBuffer(2, offsets)
+        .instanceAttributeBuffer(3, colors, { normalized: true });
 
-        app.createPrograms([vsSource, fsSource]).then(function([program]) {
-            document.getElementById("translated-source").innerHTML = `${program.translatedVertexSource()}<BR><BR>${program.translatedFragmentSource()}`.replace(/\n/g, "<BR>");
-            // CREATE DRAW CALL FROM PROGRAM AND VERTEX ARRAY
+        // USE PARALLEL SHADER COMPILATION IF AVAILABLE
+        // https://www.khronos.org/registry/webgl/extensions/KHR_parallel_shader_compile/
+        app.createPrograms([
+            vsSource,
+            fsSource, 
+            {
+                attributeLocations: {
+                    position: 0,
+                    offset: 2,
+                    color: 3
+                }
+            }
+        ]).then(([program]) => {
             let drawCall = app.createDrawCall(program, triangleArray);
 
-            // DRAW
             app.clear();
             drawCall.draw();
+
+            window.glcheck_renderDone = true;
 
             // CLEANUP
             program.delete();
             positions.delete();
+            offsets.delete();
             colors.delete();
             triangleArray.delete();
         });
+
 
     </script>
 </body>

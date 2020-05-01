@@ -171,6 +171,7 @@
         import { PicoGL } from "../src/picogl.js";
        
         utils.addTimerElement();
+        utils.instrumentAnimationFrame();
 
         let canvas = document.getElementById("gl-canvas");
         canvas.width = window.innerWidth;
@@ -196,7 +197,7 @@
         };
 
         let app = PicoGL.createApp(canvas)
-        .depthTest()
+        .enable(PicoGL.DEPTH_TEST)
         .clearColor(0.0, 0.0, 0.0, 1.0);
 
         let timer = app.createTimer();

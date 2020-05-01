@@ -133,6 +133,7 @@
         import { PicoGL } from "../src/picogl.js";
        
         utils.addTimerElement();
+        utils.instrumentAnimationFrame(2);
         
         const DIMENSIONS = 128;
         
@@ -143,7 +144,7 @@
         let app = PicoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0)
         .blendFunc(PicoGL.ONE, PicoGL.ONE_MINUS_SRC_ALPHA)
-        .cullBackfaces()
+        .enable(PicoGL.CULL_FACE)
         .clear();
 
         let timer = app.createTimer();
@@ -185,9 +186,9 @@
             for (let j = 0; j < DIMENSIONS; ++j) {
                 let z = -0.5;
                 for (let k = 0; k < DIMENSIONS; ++k) {
-                    positionData[positionIndex++] = x + (Math.random() - 0.5) / (DIMENSIONS);
-                    positionData[positionIndex++] = y + (Math.random() - 0.5) / (DIMENSIONS);
-                    positionData[positionIndex++] = z + (Math.random() - 0.5) / (DIMENSIONS);
+                    positionData[positionIndex++] = x + (utils.random() - 0.5) / (DIMENSIONS);
+                    positionData[positionIndex++] = y + (utils.random() - 0.5) / (DIMENSIONS);
+                    positionData[positionIndex++] = z + (utils.random() - 0.5) / (DIMENSIONS);
                     z += INCREMENT;
                 }
                 y += INCREMENT;
@@ -265,7 +266,7 @@
             .uniformBlock("SceneUniforms", sceneUniformBuffer)
             .texture("tex", texture);
 
-            let startTime = performance.now();
+            let time = 0;
 
             let drawCall = app.createDrawCall(program, pointArray)
             .primitive(PicoGL.POINTS)
@@ -274,7 +275,7 @@
 
             app.drawFramebuffer(framebuffer)
             .viewport(0, 0, DIMENSIONS, DIMENSIONS)
-            .depthTest()
+            .enable(PicoGL.DEPTH_TEST)
             .clearColor(0.0, 0.0, 0.0, 0.0)
             
 
@@ -299,8 +300,8 @@
             
                 app.defaultDrawFramebuffer()
                 .defaultViewport()
-                .noDepthTest()
-                .blend()
+                .disable(PicoGL.DEPTH_TEST)
+                .enable(PicoGL.BLEND)
                 .clearColor(0.0, 0.0, 0.0, 1.0)
                 requestAnimationFrame(drawMain);
             }
@@ -312,7 +313,9 @@
 
                 timer.start();
 
-                drawCall.uniform("uTime", (performance.now() - startTime) / 1000);
+                time += 0.016;
+
+                drawCall.uniform("uTime", time);
 
                 app.clear();
                 drawCall.draw();

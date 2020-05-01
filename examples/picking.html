@@ -136,8 +136,8 @@
         
         let app = PicoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0)
-        .depthTest()
-        .cullBackfaces();
+        .enable(PicoGL.DEPTH_TEST)
+        .enable(PicoGL.CULL_FACE);
 
         let timer = app.createTimer();
 
