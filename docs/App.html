@@ -199,7 +199,92 @@
 
             
 
-            <td class="description last">Tracked GL state.</td>
+            <td class="description last">Tracked GL state.
+                <h6>Properties</h6>
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>drawFramebufferBinding</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                    GL.DRAW_FRAMEBUFFER
+                
+                </td>
+            
+
+            <td class="description last">Binding point to bind framebuffers to for draw. Should be set before any binding occurs. Should only have values GL.DRAW_FRAMEBUFFER or GL.FRAMEBUFFER (the latter with state.readFramebufferBinding set to the same).</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>readFramebufferBinding</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                    GL.READ_FRAMEBUFFER
+                
+                </td>
+            
+
+            <td class="description last">Binding point to bind framebuffers to for read. Should be set before any binding occurs. Should only have values GL.READ_FRAMEBUFFER or GL.FRAMEBUFFER (the latter with state.drawFramebufferBinding set to the same).</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
         </tr>
 
     
@@ -261,7 +346,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line53">line 53</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line55">line 55</a>
     </li></ul></dd>
     
 
@@ -425,7 +510,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line398">line 398</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line405">line 405</a>
     </li></ul></dd>
     
 
@@ -607,7 +692,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line368">line 368</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line375">line 375</a>
     </li></ul></dd>
     
 
@@ -836,7 +921,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line385">line 385</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line392">line 392</a>
     </li></ul></dd>
     
 
@@ -1419,7 +1504,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line295">line 295</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line300">line 300</a>
     </li></ul></dd>
     
 
@@ -1529,7 +1614,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line213">line 213</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line216">line 216</a>
     </li></ul></dd>
     
 
@@ -1757,7 +1842,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line187">line 187</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line190">line 190</a>
     </li></ul></dd>
     
 
@@ -1917,7 +2002,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line201">line 201</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line204">line 204</a>
     </li></ul></dd>
     
 
@@ -2146,7 +2231,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line171">line 171</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line174">line 174</a>
     </li></ul></dd>
     
 
@@ -3227,7 +3312,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1032">line 1032</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1039">line 1039</a>
     </li></ul></dd>
     
 
@@ -3443,7 +3528,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1091">line 1091</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1098">line 1098</a>
     </li></ul></dd>
     
 
@@ -3553,7 +3638,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1056">line 1056</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1063">line 1063</a>
     </li></ul></dd>
     
 
@@ -3837,7 +3922,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line836">line 836</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line843">line 843</a>
     </li></ul></dd>
     
 
@@ -4091,7 +4176,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line822">line 822</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line829">line 829</a>
     </li></ul></dd>
     
 
@@ -4343,7 +4428,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line807">line 807</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line814">line 814</a>
     </li></ul></dd>
     
 
@@ -4677,7 +4762,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line615">line 615</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line622">line 622</a>
     </li></ul></dd>
     
 
@@ -4859,7 +4944,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line642">line 642</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line649">line 649</a>
     </li></ul></dd>
     
 
@@ -5019,7 +5104,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1067">line 1067</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1074">line 1074</a>
     </li></ul></dd>
     
 
@@ -5303,7 +5388,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1046">line 1046</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1053">line 1053</a>
     </li></ul></dd>
     
 
@@ -5486,7 +5571,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line756">line 756</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line763">line 763</a>
     </li></ul></dd>
     
 
@@ -6371,7 +6456,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line890">line 890</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line897">line 897</a>
     </li></ul></dd>
     
 
@@ -7273,7 +7358,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line981">line 981</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line988">line 988</a>
     </li></ul></dd>
     
 
@@ -8175,7 +8260,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line938">line 938</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line945">line 945</a>
     </li></ul></dd>
     
 
@@ -8285,7 +8370,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1077">line 1077</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line1084">line 1084</a>
     </li></ul></dd>
     
 
@@ -8395,7 +8480,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line776">line 776</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line783">line 783</a>
     </li></ul></dd>
     
 
@@ -8612,7 +8697,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line851">line 851</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line858">line 858</a>
     </li></ul></dd>
     
 
@@ -8722,7 +8807,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line766">line 766</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line773">line 773</a>
     </li></ul></dd>
     
 
@@ -9010,7 +9095,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line791">line 791</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line798">line 798</a>
     </li></ul></dd>
     
 
@@ -9121,7 +9206,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line254">line 254</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line257">line 257</a>
     </li></ul></dd>
     
 
@@ -9231,7 +9316,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line269">line 269</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line273">line 273</a>
     </li></ul></dd>
     
 
@@ -9341,7 +9426,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line579">line 579</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line586">line 586</a>
     </li></ul></dd>
     
 
@@ -9500,7 +9585,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line354">line 354</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line361">line 361</a>
     </li></ul></dd>
     
 
@@ -9659,7 +9744,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line341">line 341</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line348">line 348</a>
     </li></ul></dd>
     
 
@@ -9841,7 +9926,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line328">line 328</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line335">line 335</a>
     </li></ul></dd>
     
 
@@ -10000,7 +10085,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line154">line 154</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line157">line 157</a>
     </li></ul></dd>
     
 
@@ -10137,7 +10222,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line227">line 227</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line230">line 230</a>
     </li></ul></dd>
     
 
@@ -10303,7 +10388,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line142">line 142</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line145">line 145</a>
     </li></ul></dd>
     
 
@@ -10391,7 +10476,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line99">line 99</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line102">line 102</a>
     </li></ul></dd>
     
 
@@ -10550,7 +10635,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line128">line 128</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line131">line 131</a>
     </li></ul></dd>
     
 
@@ -10709,7 +10794,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line241">line 241</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line244">line 244</a>
     </li></ul></dd>
     
 
@@ -11088,7 +11173,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line538">line 538</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line545">line 545</a>
     </li></ul></dd>
     
 
@@ -11270,7 +11355,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line593">line 593</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line600">line 600</a>
     </li></ul></dd>
     
 
@@ -11380,7 +11465,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line113">line 113</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line116">line 116</a>
     </li></ul></dd>
     
 
@@ -11551,7 +11636,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line700">line 700</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line707">line 707</a>
     </li></ul></dd>
     
 
@@ -11661,7 +11746,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line520">line 520</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line527">line 527</a>
     </li></ul></dd>
     
 
@@ -11870,7 +11955,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line451">line 451</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line458">line 458</a>
     </li></ul></dd>
     
 
@@ -12102,7 +12187,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line471">line 471</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line478">line 478</a>
     </li></ul></dd>
     
 
@@ -12264,7 +12349,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line415">line 415</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line422">line 422</a>
     </li></ul></dd>
     
 
@@ -12449,7 +12534,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line432">line 432</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line439">line 439</a>
     </li></ul></dd>
     
 
@@ -12657,7 +12742,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line489">line 489</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line496">line 496</a>
     </li></ul></dd>
     
 
@@ -12888,7 +12973,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line508">line 508</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line515">line 515</a>
     </li></ul></dd>
     
 
@@ -13116,7 +13201,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="app.js.html">app.js</a>, <a href="app.js.html#line559">line 559</a>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line566">line 566</a>
     </li></ul></dd>
     
 
@@ -13190,7 +13275,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Fri May 01 2020 16:36:16 GMT-0400 (Eastern Daylight Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Sun May 03 2020 07:24:57 GMT-0400 (Eastern Daylight Time)
 </footer>
 
 <script> prettyPrint(); </script>
