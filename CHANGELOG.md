@@ -1,3 +1,7 @@
+## v0.17.1
+
+- Support for changing framebuffer binding points.
+
 ## v0.17.0
 
 - App.createProgram(s) now optionally set explicit `attributeLocations`, `transformFeedbackVaryings` must be passed in an options object

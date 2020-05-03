@@ -34,37 +34,84 @@ glcheck("Framebuffer lifecycle", (t, canvas) => {
     t.notEqual(framebuffer.getStatus(), PicoGL.COMPLETE, "Framebuffer does not start with COMPLETE status");
 
     framebuffer.bindForRead();
-    t.equal(app.state.readFramebuffer, framebuffer, "State tracking tracks read framebuffer");
+    t.equal(app.state.framebuffers[PicoGL.READ_FRAMEBUFFER], framebuffer, "State tracking tracks read framebuffer");
 
     framebuffer.bindForDraw();
-    t.equal(app.state.drawFramebuffer, framebuffer, "State tracking tracks draw framebuffer");
+    t.equal(app.state.framebuffers[PicoGL.DRAW_FRAMEBUFFER], framebuffer, "State tracking tracks draw framebuffer");
 
     framebuffer.restore();
-    t.equal(app.state.readFramebuffer, null, "Restore resets read framebuffer");
-    t.equal(app.state.drawFramebuffer, null, "Restore resets draw framebuffer");
+    t.equal(app.state.framebuffers[PicoGL.READ_FRAMEBUFFER], null, "Restore resets read framebuffer");
+    t.equal(app.state.framebuffers[PicoGL.DRAW_FRAMEBUFFER], null, "Restore resets draw framebuffer");
     
     framebuffer.bindForRead();
-    t.equal(app.state.readFramebuffer, framebuffer, "State tracking tracks read framebuffer");
+    t.equal(app.state.framebuffers[PicoGL.READ_FRAMEBUFFER], framebuffer, "State tracking tracks read framebuffer");
 
     framebuffer.bindForDraw();
-    t.equal(app.state.drawFramebuffer, framebuffer, "State tracking tracks draw framebuffer");
+    t.equal(app.state.framebuffers[PicoGL.DRAW_FRAMEBUFFER], framebuffer, "State tracking tracks draw framebuffer");
 
     app.defaultReadFramebuffer();
-    t.equal(app.state.readFramebuffer, null, "Set default read framebuffer");
+    t.equal(app.state.framebuffers[PicoGL.READ_FRAMEBUFFER], null, "Set default read framebuffer");
 
     app.defaultDrawFramebuffer();
-    t.equal(app.state.drawFramebuffer, null, "Set default draw framebuffer");
+    t.equal(app.state.framebuffers[PicoGL.DRAW_FRAMEBUFFER], null, "Set default draw framebuffer");
 
     framebuffer.bindForRead();
-    t.equal(app.state.readFramebuffer, framebuffer, "State tracking tracks read framebuffer");
+    t.equal(app.state.framebuffers[PicoGL.READ_FRAMEBUFFER], framebuffer, "State tracking tracks read framebuffer");
 
     framebuffer.bindForDraw();
-    t.equal(app.state.drawFramebuffer, framebuffer, "State tracking tracks draw framebuffer");
+    t.equal(app.state.framebuffers[PicoGL.DRAW_FRAMEBUFFER], framebuffer, "State tracking tracks draw framebuffer");
 
     framebuffer.delete();
     t.equal(framebuffer.framebuffer, null, "Framebuffer object deleted");
-    t.equal(app.state.readFramebuffer, null, "State tracking resets read framebuffer");
-    t.equal(app.state.drawFramebuffer, null, "State tracking resets draw framebuffer");
+    t.equal(app.state.framebuffers[PicoGL.READ_FRAMEBUFFER], null, "State tracking resets read framebuffer");
+    t.equal(app.state.framebuffers[PicoGL.DRAW_FRAMEBUFFER], null, "State tracking resets draw framebuffer");
+    t.done();
+});
+
+glcheck("Framebuffer lifecycle - modified bindings", (t, canvas) => {
+    let app = PicoGL.createApp(canvas);
+    let framebuffer = app.createFramebuffer();
+    app.state.drawFramebufferBinding = PicoGL.FRAMEBUFFER;
+    app.state.readFramebufferBinding = PicoGL.FRAMEBUFFER;
+
+    t.ok(framebuffer.gl, "Framebuffer contains a gl context");
+    t.ok(framebuffer.appState, "App state tracking initialized");
+    t.ok(framebuffer.framebuffer, "Framebuffer created a framebuffer");
+    t.ok(framebuffer.framebuffer instanceof WebGLFramebuffer, "Framebuffer created framebuffer instance");
+    t.notEqual(framebuffer.getStatus(), PicoGL.COMPLETE, "Framebuffer does not start with COMPLETE status");
+
+    framebuffer.bindForRead();
+    t.equal(app.state.framebuffers[PicoGL.FRAMEBUFFER], framebuffer, "State tracking tracks read framebuffer");
+
+    framebuffer.bindForDraw();
+    t.equal(app.state.framebuffers[PicoGL.FRAMEBUFFER], framebuffer, "State tracking tracks draw framebuffer");
+
+    framebuffer.restore();
+    t.equal(app.state.framebuffers[PicoGL.FRAMEBUFFER], null, "Restore resets read framebuffer");
+    t.equal(app.state.framebuffers[PicoGL.FRAMEBUFFER], null, "Restore resets draw framebuffer");
+    
+    framebuffer.bindForRead();
+    t.equal(app.state.framebuffers[PicoGL.FRAMEBUFFER], framebuffer, "State tracking tracks read framebuffer");
+
+    framebuffer.bindForDraw();
+    t.equal(app.state.framebuffers[PicoGL.FRAMEBUFFER], framebuffer, "State tracking tracks draw framebuffer");
+
+    app.defaultReadFramebuffer();
+    t.equal(app.state.framebuffers[PicoGL.FRAMEBUFFER], null, "Set default read framebuffer");
+
+    app.defaultDrawFramebuffer();
+    t.equal(app.state.framebuffers[PicoGL.FRAMEBUFFER], null, "Set default draw framebuffer");
+
+    framebuffer.bindForRead();
+    t.equal(app.state.framebuffers[PicoGL.FRAMEBUFFER], framebuffer, "State tracking tracks read framebuffer");
+
+    framebuffer.bindForDraw();
+    t.equal(app.state.framebuffers[PicoGL.FRAMEBUFFER], framebuffer, "State tracking tracks draw framebuffer");
+
+    framebuffer.delete();
+    t.equal(framebuffer.framebuffer, null, "Framebuffer object deleted");
+    t.equal(app.state.framebuffers[PicoGL.FRAMEBUFFER], null, "State tracking resets read framebuffer");
+    t.equal(app.state.framebuffers[PicoGL.FRAMEBUFFER], null, "State tracking resets draw framebuffer");
     t.done();
 });
 

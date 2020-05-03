@@ -119,7 +119,7 @@
         .feedbackBuffer(0, positions2);
 
         // FINAL ARGUMENT IS TRANSFORM FEEDBACK VARYINGS
-        app.createPrograms([vsSource, fsSource, ["vPosition"]]).then(([program]) => {
+        app.createPrograms([vsSource, fsSource, { transformFeedbackVaryings: ["vPosition"] }]).then(([program]) => {
             // CREATE DRAW CALLS FROM PROGRAM AND TRANSFORMFEEDBACK.
             // EACH DRAW CALL REPRESENTS ONE DIRECTION OF DRAW/CAPTURE
             let drawCallA = app.createDrawCall(program, triangleArrayA)
