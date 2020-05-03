@@ -72,7 +72,9 @@
             forceWebGL1: true
         });
 
-        let app = PicoGL.createApp(gl)
+        let app = PicoGL.createApp(gl);
+        app.state.readFramebufferBinding = PicoGL.FRAMEBUFFER;
+        app.state.drawFramebufferBinding = PicoGL.FRAMEBUFFER;
 
         // PROGRAM
         let vsSource =  document.getElementById("vertex-draw").text;
