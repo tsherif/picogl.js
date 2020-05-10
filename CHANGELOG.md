@@ -1,5 +1,9 @@
 ## v0.17.1
 
+- VertexBuffer.data can take an offset.
+
+## v0.17.1
+
 - Support for changing framebuffer binding points.
 
 ## v0.17.0

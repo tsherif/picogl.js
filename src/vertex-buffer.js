@@ -152,10 +152,11 @@ export class VertexBuffer {
         the originally-allocated buffer!
 
         @method
-        @param {VertexBufferView} data Data to store in the buffer.
+        @param {ArrayBufferView} data Data to store in the buffer.
+        @param {number} [offset=0] Byte offset into the buffer at which to start writing.
         @return {VertexBuffer} The VertexBuffer object.
     */
-    data(data) {
+    data(data, offset = 0) {
         // Don't want to update vertex array bindings
         if (this.appState.vertexArray) {
             this.gl.bindVertexArray(null);
@@ -163,7 +164,7 @@ export class VertexBuffer {
         }
 
         this.gl.bindBuffer(this.binding, this.buffer);
-        this.gl.bufferSubData(this.binding, 0, data);
+        this.gl.bufferSubData(this.binding, offset, data);
         this.gl.bindBuffer(this.binding, null);
 
         return this;
