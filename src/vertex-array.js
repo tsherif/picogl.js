@@ -189,6 +189,8 @@ export class VertexArray {
             stride = numColumns * size * TYPE_SIZE[type];
         }
 
+        let numItems = Math.ceil((vertexBuffer.byteLength - offset) / stride);
+
         for (let i = 0; i < numColumns; ++i) {
             if (integer) {
                 this.gl.vertexAttribIPointer(
@@ -216,9 +218,9 @@ export class VertexArray {
 
         if (this.numDraws === 1) {
             if (instanced) {
-                this.numInstances = vertexBuffer.numItems;
-            } else {
-                this.numElements = this.numElements || vertexBuffer.numItems;
+                this.numInstances = numItems;
+            } else if (!this.indexed) {
+                this.numElements = numItems;
             }
         }
 

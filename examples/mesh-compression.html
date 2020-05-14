@@ -129,7 +129,7 @@
         // UNCOMPRESSED GEOMETRY
         let uncompressedPositions = app.createVertexBuffer(PicoGL.FLOAT, 3, sphere.positions);
         let uncompressedNormals = app.createVertexBuffer(PicoGL.FLOAT, 3, sphere.normals);
-        let indices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, sphere.indices);
+        let indices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, sphere.indices);
 
         let uncompressedVertexArray = app.createVertexArray()
         .vertexAttributeBuffer(0, uncompressedPositions)

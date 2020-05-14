@@ -294,7 +294,7 @@
 
         let sun = utils.createSphere({radius: 0.1});
         let sunPositions = app.createVertexBuffer(PicoGL.FLOAT, 3, sun.positions);
-        let sunIndices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, sun.indices);
+        let sunIndices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, sun.indices);
 
         let sunArray = app.createVertexArray()
         .vertexAttributeBuffer(0, sunPositions)
