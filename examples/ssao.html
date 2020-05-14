@@ -321,7 +321,7 @@
         let positions = app.createVertexBuffer(PicoGL.FLOAT, 3, sphere.positions);
         let uv = app.createVertexBuffer(PicoGL.FLOAT, 2, sphere.uvs);
         let normals = app.createVertexBuffer(PicoGL.FLOAT, 3, sphere.normals);
-        let indices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, sphere.indices);
+        let indices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, sphere.indices);
 
         // PER-INSTANCE MODEL MATRICES
         let modelMatrices = app.createMatrixBuffer(PicoGL.FLOAT_MAT4, modelMatrixData);

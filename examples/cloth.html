@@ -487,7 +487,7 @@
         // Cloth geometry for drawing
         let dataIndex = app.createVertexBuffer(PicoGL.SHORT, 2, dataTextureIndex);
         let uv = app.createVertexBuffer(PicoGL.FLOAT, 2, uvData);
-        let indices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, indexData);
+        let indices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, indexData);
 
         let clothArray = app.createVertexArray()
         .vertexAttributeBuffer(0, dataIndex)
@@ -498,7 +498,7 @@
         let ballGeo = utils.createSphere({radius: BALL_RADIUS});
         let ballPositions = app.createVertexBuffer(PicoGL.FLOAT, 3, ballGeo.positions);
         let ballNormals = app.createVertexBuffer(PicoGL.FLOAT, 3, ballGeo.normals);
-        let ballIndices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, ballGeo.indices);
+        let ballIndices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, ballGeo.indices);
 
         let ballArray = app.createVertexArray()
         .vertexAttributeBuffer(0, ballPositions)

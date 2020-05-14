@@ -1,4 +1,9 @@
-## v0.17.1
+## v0.17.3
+
+- VertexArray.vertexAttributeBuffer, VertexArray.instanceAttributeBuffer `size`, `offset` and `stride` options will affect item count.
+- App.createIndexBuffer no longer needs an item count (defaults to 3).
+
+## v0.17.2
 
 - VertexBuffer.data can take an offset.
 

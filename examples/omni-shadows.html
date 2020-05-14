@@ -203,7 +203,7 @@
 
         let sphere = utils.createSphere({radius: 0.1});
         positions = app.createVertexBuffer(PicoGL.FLOAT, 3, sphere.positions);
-        indices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, sphere.indices);
+        indices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, sphere.indices);
 
         let sphereArray = app.createVertexArray()
         .vertexAttributeBuffer(0, positions)

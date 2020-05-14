@@ -835,12 +835,17 @@ export class App {
 
         @method
         @param {GLEnum} type The data type stored in the index buffer.
-        @param {number} itemSize Number of elements per primitive.
+        @param {number} [itemSize=3] Number of elements per primitive.
         @param {ArrayBufferView} data Index buffer data.
         @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
         @return {VertexBuffer} New VertexBuffer object.
     */
     createIndexBuffer(type, itemSize, data, usage) {
+        if (ArrayBuffer.isView(itemSize)) {
+            usage = data;
+            data = itemSize;
+            itemSize = 3;
+        }
         return new VertexBuffer(this.gl, this.state, type, itemSize, data, usage, true);
     }
 
