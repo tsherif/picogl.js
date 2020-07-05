@@ -27,6 +27,7 @@ const TEST_COLOR_MASK = [ true, false, false, true ];
 const TEST_COLOR = [ 0, 0.25, 0.5, 0.75 ];
 const TEST_DEPTH_RANGE = [ 0.25, 0.5 ];
 const TEST_SCISSOR_BOX = [ 10, 10, 10, 10 ];
+const TEST_POLYGON_OFFSET = [ 1, 2 ];
 const TEST_VIEWPORT = [ 20, 20, 30, 30 ];
 
 glcheck("App", (t, canvas) => {
@@ -153,6 +154,10 @@ glcheck("App state functions", (t, canvas) => {
     
     app.scissor(...TEST_SCISSOR_BOX);
     t.parameterEqual(gl, PicoGL.SCISSOR_BOX, TEST_SCISSOR_BOX, "Scissor box set");
+
+    app.polygonOffset(...TEST_POLYGON_OFFSET);
+    t.parameterEqual(gl, PicoGL.POLYGON_OFFSET_FACTOR, TEST_POLYGON_OFFSET[0], "Polygon offset factor set");
+    t.parameterEqual(gl, PicoGL.POLYGON_OFFSET_UNITS, TEST_POLYGON_OFFSET[1], "Polygon offset units set");
 
     app.viewport(...TEST_VIEWPORT);
     t.parameterEqual(gl, PicoGL.VIEWPORT, TEST_VIEWPORT, "Viewport set");    

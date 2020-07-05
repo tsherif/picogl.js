@@ -275,7 +275,7 @@
         let positions = app.createVertexBuffer(PicoGL.FLOAT, 3, sphere.positions);
         let uv = app.createVertexBuffer(PicoGL.FLOAT, 2, sphere.uvs);
         let normals = app.createVertexBuffer(PicoGL.FLOAT, 3, sphere.normals);
-        let indices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, sphere.indices);
+        let indices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, sphere.indices);
 
         let sphereArray = app.createVertexArray()
         .vertexAttributeBuffer(0, positions)

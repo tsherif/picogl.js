@@ -33,7 +33,7 @@ let webglInfoInitialized = false;
     @namespace PicoGL
 */
 export const PicoGL = Object.assign({
-    version: "0.17.0",
+    version: "0.17.4",
 
     WEBGL_INFO,
 

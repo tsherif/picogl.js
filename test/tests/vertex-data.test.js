@@ -148,4 +148,34 @@ glcheck("VertexBuffer and VertexArray draw", (t, canvas) => {
     t.done();
 });
 
+glcheck("VertexArray attribute pointer updates", (t, canvas) => {
+    let app = PicoGL.createApp(canvas);
+    let buffer = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
+        -1, 1,
+        1, 1,
+        1, -1,
+        -1, -1,
+        -1, 1,
+        1, 1,
+        1, -1,
+        -1, -1
+    ]));
 
+    let vertexArray1 = app.createVertexArray()
+        .vertexAttributeBuffer(0, buffer);
+
+    t.equal(vertexArray1.numElements, 8, "Item count from buffer");
+
+    let vertexArray2 = app.createVertexArray()
+        .vertexAttributeBuffer(0, buffer, {size: 4});
+
+    t.equal(vertexArray2.numElements, 4, "Item count adjusted for size");
+
+    let vertexArray3 = app.createVertexArray()
+        .vertexAttributeBuffer(0, buffer, {stride: 16});
+
+    t.equal(vertexArray3.numElements, 4, "Item count adjusted for stride");
+
+
+    t.done();
+});

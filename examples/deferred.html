@@ -192,7 +192,7 @@
 
         let sphere = utils.createSphere();
         let lightPositions = app.createVertexBuffer(PicoGL.FLOAT, 3, sphere.positions);
-        let lightIndices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, sphere.indices);
+        let lightIndices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, sphere.indices);
 
         let sphereArray = app.createVertexArray()
         .vertexAttributeBuffer(0, lightPositions)

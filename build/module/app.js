@@ -46,6 +46,8 @@ import { Query } from "./query.js";
     @prop {number} width The width of the drawing surface.
     @prop {number} height The height of the drawing surface.
     @prop {Object} state Tracked GL state.
+    @prop {Object} state.drawFramebufferBinding=GL.DRAW_FRAMEBUFFER Binding point to bind framebuffers to for draw. Should be set before any binding occurs. Should only have values GL.DRAW_FRAMEBUFFER or GL.FRAMEBUFFER (the latter with state.readFramebufferBinding set to the same).
+    @prop {Object} state.readFramebufferBinding=GL.READ_FRAMEBUFFER  Binding point to bind framebuffers to for read. Should be set before any binding occurs. Should only have values GL.READ_FRAMEBUFFER or GL.FRAMEBUFFER (the latter with state.drawFramebufferBinding set to the same).
     @prop {GLEnum} clearBits Current clear mask to use with clear().
 */
 export class App {
@@ -70,8 +72,9 @@ export class App {
             textures: new Array(WEBGL_INFO.MAX_TEXTURE_UNITS),
             uniformBuffers: new Array(WEBGL_INFO.MAX_UNIFORM_BUFFERS),
             freeUniformBufferBases: [],
-            drawFramebuffer: null,
-            readFramebuffer: null,
+            framebuffers: {},
+            drawFramebufferBinding: GL.DRAW_FRAMEBUFFER,
+            readFramebufferBinding: GL.READ_FRAMEBUFFER,
             extensions: {}
         };
 
@@ -252,9 +255,10 @@ export class App {
         @return {App} The App object.
     */
     defaultDrawFramebuffer() {
-        if (this.state.drawFramebuffer !== null) {
-            this.gl.bindFramebuffer(this.gl.DRAW_FRAMEBUFFER, null);
-            this.state.drawFramebuffer = null;
+        let binding = this.state.drawFramebufferBinding;
+        if (this.state.framebuffers[binding] !== null) {
+            this.gl.bindFramebuffer(binding, null);
+            this.state.framebuffers[binding] = null;
         }
 
         return this;
@@ -267,9 +271,10 @@ export class App {
         @return {App} The App object.
     */
     defaultReadFramebuffer() {
-        if (this.state.readFramebuffer !== null) {
-            this.gl.bindFramebuffer(this.gl.READ_FRAMEBUFFER, null);
-            this.state.readFramebuffer = null;
+        let binding = this.state.readFramebufferBinding;
+        if (this.state.framebuffers[binding] !== null) {
+            this.gl.bindFramebuffer(binding, null);
+            this.state.framebuffers[binding] = null;
         }
 
         return this;
@@ -293,8 +298,10 @@ export class App {
         @return {App} The App object.
     */
     blitFramebuffer(mask, options = DUMMY_OBJECT) {
-        let readFramebuffer = this.state.readFramebuffer;
-        let drawFramebuffer = this.state.drawFramebuffer;
+        let readBinding = this.state.readFramebufferBinding;
+        let drawBinding = this.state.drawFramebufferBinding;
+        let readFramebuffer = this.state.framebuffers[readBinding];
+        let drawFramebuffer = this.state.framebuffers[drawBinding];
         let defaultReadWidth = readFramebuffer ? readFramebuffer.width : this.width;
         let defaultReadHeight = readFramebuffer ? readFramebuffer.height : this.height;
         let defaultDrawWidth = drawFramebuffer ? drawFramebuffer.width : this.width;
@@ -515,10 +522,28 @@ export class App {
         Define the scissor box.
 
         @method
+        @param {Number} x Horizontal position of the scissor box.
+        @param {Number} y Vertical position of the scissor box.
+        @param {Number} width Width of the scissor box.
+        @param {Number} height Height of the scissor box.
         @return {App} The App object.
     */
     scissor(x, y, width, height) {
         this.gl.scissor(x, y, width, height);
+
+        return this;
+    }
+
+    /**
+        Set the scale and units used.
+
+        @method
+        @param {Number} factor Scale factor used to create a variable depth offset for each polygon.
+        @param {Number} units Constant depth offset.
+        @return {App} The App object.
+    */
+    polygonOffset(factor, units) {
+        this.gl.polygonOffset(factor, units);
 
         return this;
     }
@@ -828,12 +853,17 @@ export class App {
 
         @method
         @param {GLEnum} type The data type stored in the index buffer.
-        @param {number} itemSize Number of elements per primitive.
+        @param {number} [itemSize=3] Number of elements per primitive.
         @param {ArrayBufferView} data Index buffer data.
         @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
         @return {VertexBuffer} New VertexBuffer object.
     */
     createIndexBuffer(type, itemSize, data, usage) {
+        if (ArrayBuffer.isView(itemSize)) {
+            usage = data;
+            data = itemSize;
+            itemSize = 3;
+        }
         return new VertexBuffer(this.gl, this.state, type, itemSize, data, usage, true);
     }
 
