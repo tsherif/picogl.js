@@ -522,10 +522,28 @@ export class App {
         Define the scissor box.
 
         @method
+        @param {Number} x Horizontal position of the scissor box.
+        @param {Number} y Vertical position of the scissor box.
+        @param {Number} width Width of the scissor box.
+        @param {Number} height Height of the scissor box.
         @return {App} The App object.
     */
     scissor(x, y, width, height) {
         this.gl.scissor(x, y, width, height);
+
+        return this;
+    }
+
+    /**
+        Set the scale and units used.
+
+        @method
+        @param {Number} factor Scale factor used to create a variable depth offset for each polygon.
+        @param {Number} units Constant depth offset.
+        @return {App} The App object.
+    */
+    polygonOffset(factor, units) {
+        this.gl.polygonOffset(factor, units);
 
         return this;
     }

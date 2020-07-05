@@ -1,3 +1,6 @@
+## v0.17.4
+- App.polygonOffset method
+
 ## v0.17.3
 
 - VertexArray.vertexAttributeBuffer, VertexArray.instanceAttributeBuffer `size`, `offset` and `stride` options will affect item count.
