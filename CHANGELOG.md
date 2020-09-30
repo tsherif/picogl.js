@@ -1,3 +1,6 @@
+## v0.17.5
+- Update DrawCall counts from current VertexArray.
+
 ## v0.17.4
 - App.polygonOffset method
 
