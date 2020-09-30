@@ -70,12 +70,8 @@ export class DrawCall {
         this.numElements = new Int32Array(1);
         this.numInstances = new Int32Array(1);
 
-        if (this.currentVertexArray) {
-            this.numElements[0] = this.currentVertexArray.numElements;
-            this.numInstances[0] = this.currentVertexArray.numInstances;
-        }
-
         this.numDraws = 1;
+        this.drawCountsFromVertexArray = true;
 
         if (primitive !== undefined) {
             console.warn("Primitive argument to 'App.createDrawCall' is deprecated and will be removed. Use 'DrawCall.primitive' instead.");
@@ -163,7 +159,8 @@ export class DrawCall {
 
     /**
         Ranges in the vertex array to draw. Multiple arguments can be provided to set up
-        a multi-draw.
+        a multi-draw. Note that after this method is called, draw counts will no longer
+        automatically be pulled from the VertexArray.
 
         @method
         @param {...Array} counts Variable number of 2 or 3 element arrays, each containing:
@@ -197,6 +194,8 @@ export class DrawCall {
             this.numInstances[i] = count[2] || 1;
         }
 
+        this.drawCountsFromVertexArray = false;
+
         return this;
     }
 
@@ -220,6 +219,11 @@ export class DrawCall {
         if (this.currentVertexArray) {
             this.currentVertexArray.bind();
             indexed = this.currentVertexArray.indexed;
+
+            if (this.drawCountsFromVertexArray) {
+                this.numElements[0] = this.currentVertexArray.numElements;
+                this.numInstances[0] = this.currentVertexArray.numInstances;
+            }
         }
 
         for (let uIndex = 0; uIndex < this.uniformCount; ++uIndex) {

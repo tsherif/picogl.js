@@ -13,6 +13,7 @@
         "test/render/uniforms.html",
         "test/render/instanced-webglx.html",
         "test/render/rtt-webglx.html",
+        "test/render/vao-update-after-drawcall.html",
         "examples/3Dtexture.html",
         "examples/bloom.html",
         "examples/cloth.html",
