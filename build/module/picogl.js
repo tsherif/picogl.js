@@ -108,3 +108,5 @@ export const PicoGL = Object.assign({
         return new App(gl);
     }
 }, GL);
+
+export default PicoGL;
