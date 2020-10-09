@@ -1611,6 +1611,11 @@ export namespace PicoGL {
 }
 
 /**
+ * This is a hack to be able to document the default export :(
+ */
+export default PicoGL;
+
+/**
  * WebGL program consisting of compiled and linked vertex and fragment
  *     shaders.
  * @property gl - The WebGL context.
