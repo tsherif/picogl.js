@@ -38,7 +38,7 @@ import {
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLProgram} program The WebGL program.
     @prop {array} transformFeedbackVaryings Names of transform feedback varyings, if any.
-    @prop {objects} attributeLocations Map of user-provided attribute names to indices, if any.
+    @prop {Object.<string, number>} attributeLocations Map of user-provided attribute names to indices, if any.
     @prop {Object} uniforms Map of uniform names to handles.
     @prop {Object} appState Tracked GL state.
 */
