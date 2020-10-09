@@ -41,7 +41,6 @@ import { GL, WEBGL_INFO } from "./constants.js";
     @prop {number} uniformCount The number of active uniforms for this draw call.
     @prop {Array} textures Array of active textures.
     @prop {number} textureCount The number of active textures for this draw call.
-    @prop {GLenum} primitive The primitive type being drawn.
     @prop {Object} appState Tracked GL state.
     @prop {GLsizei} numElements The number of element to draw.
     @prop {GLsizei} numInstances The number of instances to draw.
