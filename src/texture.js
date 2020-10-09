@@ -239,7 +239,7 @@ export class Texture {
         NOTE: the data must fit the currently-allocated storage!
 
         @method
-        @param {ImageElement|ArrayBufferView|Array} data Image data. If an array is passed, it will be
+        @param {HTMLImageElement|ArrayBufferView|Array} data Image data. If an array is passed, it will be
             used to set mip map levels.
         @return {Texture} The Texture object.
     */
