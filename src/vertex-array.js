@@ -23,7 +23,7 @@ import { GL, TYPE_SIZE, DUMMY_OBJECT } from "./constants.js";
 /**
     Organizes vertex buffer and attribute state.
 
-    @class
+    @class VertexArray
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLVertexArrayObject} vertexArray Vertex array object.
     @prop {number} numElements Number of elements in the vertex array.

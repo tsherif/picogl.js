@@ -35,7 +35,7 @@ const INTEGER_TYPES = {
 /**
     Storage for vertex data.
 
-    @class
+    @class VertexBuffer
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLBuffer} buffer Allocated buffer storage.
     @prop {GLEnum} type The type of data stored in the buffer.
@@ -124,7 +124,7 @@ export class VertexBuffer {
         Restore vertex buffer after context loss.
 
         @method
-        @param {ArrayBufferView|number} data Buffer data itself or the total 
+        @param {ArrayBufferView|number} data Buffer data itself or the total
             number of elements to be allocated.
         @return {VertexBuffer} The VertexBuffer object.
     */

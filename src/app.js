@@ -40,7 +40,8 @@ import { Query } from "./query.js";
     Primary entry point to PicoGL. An app will store all parts of the WebGL
     state.
 
-    @class
+    @class App
+    @param {WebGLRenderingContext} gl
     @prop {DOMElement} canvas The canvas on which this app drawing.
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {number} width The width of the drawing surface.
@@ -1151,14 +1152,14 @@ export class App {
             this.contextRestoredListener = () => {
                 this.initExtensions();
                 this.contextRestoredHandler();
-            };  
+            };
             this.canvas.addEventListener("webglcontextlost", this.contextLostListener);
             this.canvas.addEventListener("webglcontextrestored", this.contextRestoredListener);
         } else {
             this.canvas.removeEventListener("webglcontextlost", this.contextLostListener);
             this.canvas.removeEventListener("webglcontextrestored", this.contextRestoredListener);
             this.contextLostListener = null;
-            this.contextRestoredListener = null;  
+            this.contextRestoredListener = null;
         }
     }
 

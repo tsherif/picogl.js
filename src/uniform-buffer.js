@@ -26,7 +26,7 @@ import { GL } from "./constants.js";
 /**
     Storage for uniform data. Data is stored in std140 layout.
 
-    @class
+    @class UniformBuffer
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLBuffer} buffer Allocated buffer storage.
     @prop {Float32Array} data Buffer data.
@@ -277,7 +277,7 @@ export class UniformBuffer {
             }
 
             this.gl.bindBufferBase(this.gl.UNIFORM_BUFFER, base, this.buffer);
-            
+
             this.appState.uniformBuffers[base] = this;
             this.currentBase = base;
         }

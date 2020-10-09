@@ -28,7 +28,7 @@ import { Renderbuffer } from "./renderbuffer.js";
 /**
     Offscreen drawing surface.
 
-    @class
+    @class Framebuffer
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLFramebuffer} framebuffer Handle to the framebuffer.
     @prop {number} width Framebuffer width.
@@ -102,7 +102,7 @@ export class Framebuffer {
             }
 
             this.numColorTargets = numColorTargets;
-        }        
+        }
 
         this.colorAttachmentEnums[index] = GL.COLOR_ATTACHMENT0 + index;
         this.colorAttachments[index] = attachment;

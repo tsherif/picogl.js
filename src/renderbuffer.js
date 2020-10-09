@@ -26,7 +26,7 @@ import { GL } from "./constants.js";
 /**
     Offscreen drawing attachment.
 
-    @class
+    @class Renderbuffer
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLRenderbuffer} renderbuffer Handle to the renderbuffer.
     @prop {number} width Renderbuffer width.
@@ -72,7 +72,7 @@ export class Renderbuffer {
         this.gl.bindRenderbuffer(GL.RENDERBUFFER, this.renderbuffer);
         this.gl.renderbufferStorageMultisample(GL.RENDERBUFFER, this.samples, this.internalFormat, this.width, this.height);
         this.gl.bindRenderbuffer(GL.RENDERBUFFER, null);
-        
+
         return this;
     }
 
@@ -87,5 +87,5 @@ export class Renderbuffer {
         this.renderbuffer = null;
 
         return this;
-    }   
+    }
 }
