@@ -18,7 +18,7 @@
     "lint": "eslint src/*.js test/tests/*.js",
     "compile-module": "rimraf build/module && cpy src build/module && replace %%VERSION%% $npm_package_version build/module/picogl.js",
     "compile-bundle": "webpack",
-    "compile-types": "jsdoc -c types.config.json && replace-in-file /declare/g export build/types.d.ts --isRegex",
+    "compile-types": "jsdoc -c types.config.js && replace-in-file --configFile=types.config.js",
     "compile": "npm run compile-module && npm run compile-bundle && npm run compile-types",
     "build": "npm run test && npm run compile",
     "docs": "jsdoc -d docs src/*.js",
