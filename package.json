@@ -3,6 +3,7 @@
   "version": "0.17.5",
   "description": "A minimal WebGL 2 rendering library",
   "main": "build/picogl.min.js",
+  "types": "build/types.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/tsherif/picogl.js"
