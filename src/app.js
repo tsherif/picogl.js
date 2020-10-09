@@ -37,6 +37,12 @@ import { VertexBuffer } from "./vertex-buffer.js";
 import { Query } from "./query.js";
 
 /**
+ * The correct type for a DOMElement is HTMLElement:
+ * https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement
+ * @typedef {HTMLElement} DOMElement
+ */
+
+/**
     Primary entry point to PicoGL. An app will store all parts of the WebGL
     state.
 
