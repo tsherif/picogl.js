@@ -109,4 +109,10 @@ export const PicoGL = Object.assign({
     }
 }, GL);
 
+/**
+ * This is a hack to be able to document the default export :(
+ * @type {PicoGL}
+ * @name exportDefaultPicoGL
+ * @private
+ */
 export default PicoGL;
