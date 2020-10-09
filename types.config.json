@@ -1,0 +1,12 @@
+{
+  "source": {
+    "include": [ "./src/" ]
+  },
+  "opts": {
+    "template": "./node_modules/tsd-jsdoc/dist",
+    "destination": "./build/",
+    "recurse": true,
+    "access": "private",
+    "private": true
+  }
+}
