@@ -856,11 +856,21 @@ export class App {
     }
 
     /**
+        Create an index buffer. If the `itemSize` is not specified, it defaults to 3
+
+        @method
+        @variation 1
+        @param {GLenum} type The data type stored in the index buffer.
+        @param {ArrayBufferView} data Index buffer data.
+        @param {GLenum} [usage=STATIC_DRAW] Buffer usage.
+        @return {VertexBuffer} New VertexBuffer object.
+    *//**
         Create an index buffer.
 
         @method
+        @variation 2
         @param {GLenum} type The data type stored in the index buffer.
-        @param {number} [itemSize=3] Number of elements per primitive.
+        @param {number} itemSize Number of elements per primitive.
         @param {ArrayBufferView} data Index buffer data.
         @param {GLenum} [usage=STATIC_DRAW] Buffer usage.
         @return {VertexBuffer} New VertexBuffer object.
