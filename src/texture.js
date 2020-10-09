@@ -41,10 +41,10 @@ import {
     @prop {number} width Texture width.
     @prop {number} height Texture height.
     @prop {number} depth Texture depth.
-    @prop {GLEnum} binding Binding point for the texture.
-    @prop {GLEnum} type Type of data stored in the texture.
-    @prop {GLEnum} format Layout of texture data.
-    @prop {GLEnum} internalFormat Internal arrangement of the texture data.
+    @prop {GLenum} binding Binding point for the texture.
+    @prop {GLenum} type Type of data stored in the texture.
+    @prop {GLenum} format Layout of texture data.
+    @prop {GLenum} internalFormat Internal arrangement of the texture data.
     @prop {number} currentUnit The current texture unit this texture is bound to.
     @prop {boolean} is3D Whether this texture contains 3D data.
     @prop {boolean} flipY Whether the y-axis is flipped for this texture.

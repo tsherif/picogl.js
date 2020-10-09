@@ -35,7 +35,7 @@ import { GL } from "./constants.js";
     @prop {Array} sizes Size of the item at the given offset.
     @prop {Array} types The base type of the item at the given offset (FLOAT, INT or UNSIGNED_INT).
     @prop {number} size The size of the buffer (in 4-byte items).
-    @prop {GLEnum} usage Usage pattern of the buffer.
+    @prop {GLenum} usage Usage pattern of the buffer.
 */
 export class UniformBuffer {
 

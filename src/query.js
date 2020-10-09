@@ -29,7 +29,7 @@ import { GL } from "./constants.js";
     @class Query
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLQuery} query Query object.
-    @prop {GLEnum} target The type of information being queried.
+    @prop {GLenum} target The type of information being queried.
     @prop {boolean} active Whether or not a query is currently in progress.
     @prop {Any} result The result of the query (only available after a call to ready() returns true).
 */

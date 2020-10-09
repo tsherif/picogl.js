@@ -38,9 +38,9 @@ import {
     @class Cubemap
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLTexture} texture Handle to the texture.
-    @prop {GLEnum} type Type of data stored in the texture.
-    @prop {GLEnum} format Layout of texture data.
-    @prop {GLEnum} internalFormat Internal arrangement of the texture data.
+    @prop {GLenum} type Type of data stored in the texture.
+    @prop {GLenum} format Layout of texture data.
+    @prop {GLenum} internalFormat Internal arrangement of the texture data.
     @prop {Number} currentUnit The current texture unit this cubemap is bound to.
     @prop {boolean} flipY Whether the y-axis is flipped for this cubemap.
     @prop {boolean} premultiplyAlpha Whether alpha should be pre-multiplied when loading this cubemap.

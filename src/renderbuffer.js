@@ -31,7 +31,7 @@ import { GL } from "./constants.js";
     @prop {WebGLRenderbuffer} renderbuffer Handle to the renderbuffer.
     @prop {number} width Renderbuffer width.
     @prop {number} height Renderbuffer height.
-    @prop {GLEnum} internalFormat Internal arrangement of the renderbuffer data.
+    @prop {GLenum} internalFormat Internal arrangement of the renderbuffer data.
     @prop {number} samples Number of MSAA samples.
 */
 export class Renderbuffer {
