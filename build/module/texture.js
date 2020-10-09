@@ -21,7 +21,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-import { 
+import {
     GL,
     WEBGL_INFO,
     TEXTURE_FORMATS,
@@ -35,21 +35,21 @@ import {
 /**
     General-purpose texture.
 
-    @class
+    @class Texture
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLTexture} texture Handle to the texture.
     @prop {number} width Texture width.
     @prop {number} height Texture height.
     @prop {number} depth Texture depth.
-    @prop {GLEnum} binding Binding point for the texture.
-    @prop {GLEnum} type Type of data stored in the texture.
-    @prop {GLEnum} format Layout of texture data.
-    @prop {GLEnum} internalFormat Internal arrangement of the texture data.
+    @prop {GLenum} binding Binding point for the texture.
+    @prop {GLenum} type Type of data stored in the texture.
+    @prop {GLenum} format Layout of texture data.
+    @prop {GLenum} internalFormat Internal arrangement of the texture data.
     @prop {number} currentUnit The current texture unit this texture is bound to.
     @prop {boolean} is3D Whether this texture contains 3D data.
     @prop {boolean} flipY Whether the y-axis is flipped for this texture.
     @prop {boolean} premultiplyAlpha Whether alpha should be pre-multiplied when loading this texture.
-    @prop {boolean} mipmaps Whether this texture is using mipmap filtering 
+    @prop {boolean} mipmaps Whether this texture is using mipmap filtering
         (and thus should have a complete mipmap chain).
     @prop {Object} appState Tracked GL state.
 */
@@ -66,7 +66,7 @@ export class Texture {
         this.appState = appState;
 
         this.compressed = Boolean(COMPRESSED_TEXTURE_TYPES[options.internalFormat]);
-        
+
         if (options.format !== undefined) {
             console.warn("Texture option 'format' is deprecated and will be removed. Use 'internalFormat' with a sized format instead.");
             this.compressed = Boolean(COMPRESSED_TEXTURE_TYPES[options.format]);
@@ -140,7 +140,7 @@ export class Texture {
         Restore texture after context loss.
 
         @method
-        @param {DOMElement|ArrayBufferView|Array} [image] Image data. An array can be passed to manually set all levels 
+        @param {DOMElement|ArrayBufferView|Array} [image] Image data. An array can be passed to manually set all levels
             of the mipmap chain. If a single level is passed and mipmap filtering is being used,
             generateMipmap() will be called to produce the remaining levels.
         @return {Texture} The Texture object.
@@ -169,7 +169,7 @@ export class Texture {
         depth = depth || 0;
 
         if (this.texture && width === this.width && height === this.height && depth === this.depth) {
-            return this; 
+            return this;
         }
 
         this.gl.deleteTexture(this.texture);
@@ -191,23 +191,23 @@ export class Texture {
         this.gl.texParameteri(this.binding, GL.TEXTURE_WRAP_R, this.wrapR);
         this.gl.texParameteri(this.binding, GL.TEXTURE_COMPARE_FUNC, this.compareFunc);
         this.gl.texParameteri(this.binding, GL.TEXTURE_COMPARE_MODE, this.compareMode);
-        
+
         if (this.minLOD !== null) {
             this.gl.texParameterf(this.binding, GL.TEXTURE_MIN_LOD, this.minLOD);
         }
-        
+
         if (this.maxLOD !== null) {
             this.gl.texParameterf(this.binding, GL.TEXTURE_MAX_LOD, this.maxLOD);
         }
-        
+
         if (this.baseLevel !== null) {
             this.gl.texParameteri(this.binding, GL.TEXTURE_BASE_LEVEL, this.baseLevel);
         }
-        
+
         if (this.maxLevel !== null) {
             this.gl.texParameteri(this.binding, GL.TEXTURE_MAX_LEVEL, this.maxLevel);
         }
-        
+
         if (this.maxAnisotropy > 1) {
             this.gl.texParameteri(this.binding, GL.TEXTURE_MAX_ANISOTROPY_EXT, this.maxAnisotropy);
         }
@@ -233,13 +233,13 @@ export class Texture {
     }
 
     /**
-        Set the image data for the texture. An array can be passed to manually set all levels 
+        Set the image data for the texture. An array can be passed to manually set all levels
         of the mipmap chain. If a single level is passed and mipmap filtering is being used,
         generateMipmap() will be called to produce the remaining levels.
         NOTE: the data must fit the currently-allocated storage!
 
         @method
-        @param {ImageElement|ArrayBufferView|Array} data Image data. If an array is passed, it will be 
+        @param {HTMLImageElement|ArrayBufferView|Array} data Image data. If an array is passed, it will be
             used to set mip map levels.
         @return {Texture} The Texture object.
     */
@@ -331,7 +331,7 @@ export class Texture {
             this.gl.activeTexture(GL.TEXTURE0 + unit);
             this.appState.activeTexture = unit;
         }
-        
+
         if (currentTexture !== this) {
             if (currentTexture) {
                 currentTexture.currentUnit = -1;

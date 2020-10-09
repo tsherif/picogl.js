@@ -37,10 +37,17 @@ import { VertexBuffer } from "./vertex-buffer.js";
 import { Query } from "./query.js";
 
 /**
+ * The correct type for a DOMElement is HTMLElement:
+ * https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement
+ * @typedef {HTMLElement} DOMElement
+ */
+
+/**
     Primary entry point to PicoGL. An app will store all parts of the WebGL
     state.
 
-    @class
+    @class App
+    @param {WebGLRenderingContext} gl
     @prop {DOMElement} canvas The canvas on which this app drawing.
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {number} width The width of the drawing surface.
@@ -48,7 +55,7 @@ import { Query } from "./query.js";
     @prop {Object} state Tracked GL state.
     @prop {Object} state.drawFramebufferBinding=GL.DRAW_FRAMEBUFFER Binding point to bind framebuffers to for draw. Should be set before any binding occurs. Should only have values GL.DRAW_FRAMEBUFFER or GL.FRAMEBUFFER (the latter with state.readFramebufferBinding set to the same).
     @prop {Object} state.readFramebufferBinding=GL.READ_FRAMEBUFFER  Binding point to bind framebuffers to for read. Should be set before any binding occurs. Should only have values GL.READ_FRAMEBUFFER or GL.FRAMEBUFFER (the latter with state.drawFramebufferBinding set to the same).
-    @prop {GLEnum} clearBits Current clear mask to use with clear().
+    @prop {GLenum} clearBits Current clear mask to use with clear().
 */
 export class App {
 
@@ -140,7 +147,7 @@ export class App {
         Enable WebGL capability (e.g. depth testing, blending, etc.).
 
         @method
-        @param {GLEnum} cap Capability to enable.
+        @param {GLenum} cap Capability to enable.
     */
     enable(cap) {
         this.gl.enable(cap);
@@ -152,7 +159,7 @@ export class App {
         Disable WebGL capability (e.g. depth testing, blending, etc.).
 
         @method
-        @param {GLEnum} cap Capability to disable.
+        @param {GLenum} cap Capability to disable.
     */
     disable(cap) {
         this.gl.disable(cap);
@@ -198,7 +205,7 @@ export class App {
         E.g. app.clearMask(PicoGL.COLOR_BUFFER_BIT).
 
         @method
-        @param {GLEnum} mask Bit mask of buffers to clear.
+        @param {GLenum} mask Bit mask of buffers to clear.
         @return {App} The App object.
     */
     clearMask(mask) {
@@ -284,7 +291,7 @@ export class App {
         Copy data from framebuffer attached to READ_FRAMEBUFFER to framebuffer attached to DRAW_FRAMEBUFFER.
 
         @method
-        @param {GLEnum} mask Write mask (e.g. PicoGL.COLOR_BUFFER_BIT).
+        @param {GLenum} mask Write mask (e.g. PicoGL.COLOR_BUFFER_BIT).
         @param {Object} [options] Blit options.
         @param {number} [options.srcStartX=0] Source start x coordinate.
         @param {number} [options.srcStartY=0] Source start y coordinate.
@@ -355,7 +362,7 @@ export class App {
         Set the depth test function. E.g. app.depthFunc(PicoGL.LEQUAL).
 
         @method
-        @param {GLEnum} func The depth testing function to use.
+        @param {GLenum} func The depth testing function to use.
         @return {App} The App object.
     */
     depthFunc(func) {
@@ -368,8 +375,8 @@ export class App {
         Set the blend function. E.g. app.blendFunc(PicoGL.ONE, PicoGL.ONE_MINUS_SRC_ALPHA).
 
         @method
-        @param {GLEnum} src The source blending weight.
-        @param {GLEnum} dest The destination blending weight.
+        @param {GLenum} src The source blending weight.
+        @param {GLenum} dest The destination blending weight.
         @return {App} The App object.
     */
     blendFunc(src, dest) {
@@ -383,10 +390,10 @@ export class App {
         E.g. app.blendFuncSeparate(PicoGL.ONE, PicoGL.ONE_MINUS_SRC_ALPHA, PicoGL.ONE, PicoGL.ONE).
 
         @method
-        @param {GLEnum} csrc The source blending weight for the RGB channels.
-        @param {GLEnum} cdest The destination blending weight for the RGB channels.
-        @param {GLEnum} asrc The source blending weight for the alpha channel.
-        @param {GLEnum} adest The destination blending weight for the alpha channel.
+        @param {GLenum} csrc The source blending weight for the RGB channels.
+        @param {GLenum} cdest The destination blending weight for the RGB channels.
+        @param {GLenum} asrc The source blending weight for the alpha channel.
+        @param {GLenum} adest The destination blending weight for the alpha channel.
         @return {App} The App object.
     */
     blendFuncSeparate(csrc, cdest, asrc, adest) {
@@ -399,7 +406,7 @@ export class App {
         Set the blend equation. E.g. app.blendEquation(PicoGL.MIN).
 
         @method
-        @param {GLEnum} mode The operation to use in combining source and destination channels.
+        @param {GLenum} mode The operation to use in combining source and destination channels.
         @return {App} The App object.
     */
     blendEquation(mode) {
@@ -432,7 +439,7 @@ export class App {
         context attribute when creating the App!
 
         @method
-        @param {GLEnum} face The face orientation to apply the mask to.
+        @param {GLenum} face The face orientation to apply the mask to.
         @param {number} mask The mask value.
         @return {App} The App object.
     */
@@ -449,9 +456,9 @@ export class App {
         context attribute when creating the App!
 
         @method
-        @param {GLEnum} func The testing function.
+        @param {GLenum} func The testing function.
         @param {number} ref The reference value.
-        @param {GLEnum} mask The bitmask to use against tested values before applying
+        @param {GLenum} mask The bitmask to use against tested values before applying
             the stencil function.
         @return {App} The App object.
     */
@@ -468,10 +475,10 @@ export class App {
         context attribute when creating the App!
 
         @method
-        @param {GLEnum} face The face orientation to apply the function to.
-        @param {GLEnum} func The testing function.
+        @param {GLenum} face The face orientation to apply the function to.
+        @param {GLenum} func The testing function.
         @param {number} ref The reference value.
-        @param {GLEnum} mask The bitmask to use against tested values before applying
+        @param {GLenum} mask The bitmask to use against tested values before applying
             the stencil function.
         @return {App} The App object.
     */
@@ -488,9 +495,9 @@ export class App {
         context attribute when creating the App!
 
         @method
-        @param {GLEnum} stencilFail Operation to apply if the stencil test fails.
-        @param {GLEnum} depthFail Operation to apply if the depth test fails.
-        @param {GLEnum} pass Operation to apply if the both the depth and stencil tests pass.
+        @param {GLenum} stencilFail Operation to apply if the stencil test fails.
+        @param {GLenum} depthFail Operation to apply if the depth test fails.
+        @param {GLenum} pass Operation to apply if the both the depth and stencil tests pass.
         @return {App} The App object.
     */
     stencilOp(stencilFail, depthFail, pass) {
@@ -506,10 +513,10 @@ export class App {
         context attribute when creating the App!
 
         @method
-        @param {GLEnum} face The face orientation to apply the operations to.
-        @param {GLEnum} stencilFail Operation to apply if the stencil test fails.
-        @param {GLEnum} depthFail Operation to apply if the depth test fails.
-        @param {GLEnum} pass Operation to apply if the both the depth and stencil tests pass.
+        @param {GLenum} face The face orientation to apply the operations to.
+        @param {GLenum} stencilFail Operation to apply if the stencil test fails.
+        @param {GLenum} depthFail Operation to apply if the depth test fails.
+        @param {GLenum} pass Operation to apply if the both the depth and stencil tests pass.
         @return {App} The App object.
     */
     stencilOpSeparate(face, stencilFail, depthFail, pass) {
@@ -556,8 +563,8 @@ export class App {
         @param {number} y The y coordinate of the pixel.
         @param {ArrayBufferView} outColor Typed array to store the pixel's color.
         @param {object} [options] Options.
-        @param {GLEnum} [options.type=UNSIGNED_BYTE] Type of data stored in the read framebuffer.
-        @param {GLEnum} [options.format=RGBA] Read framebuffer data format.
+        @param {GLenum} [options.type=UNSIGNED_BYTE] Type of data stored in the read framebuffer.
+        @param {GLenum} [options.format=RGBA] Read framebuffer data format.
         @return {App} The App object.
     */
     readPixel(x, y, outColor, options = DUMMY_OBJECT) {
@@ -661,7 +668,7 @@ export class App {
                 </ul>
                 </ul>
             </ul>
-        @return {Promise} Promise that will resolve to an array of Programs when compilation and
+        @return {Promise<Program[]>} Promise that will resolve to an array of Programs when compilation and
             linking are complete for all programs.
     */
     createPrograms(...sources) {
@@ -720,7 +727,7 @@ export class App {
         @method
         @param {...Program} sources Variable number of programs to restore.
 
-        @return {Promise} Promise that will resolve once all programs have been restored.
+        @return {Promise<void>} Promise that will resolve once all programs have been restored.
     */
     restorePrograms(...programs) {
         return new Promise((resolve, reject) => {
@@ -774,7 +781,7 @@ export class App {
         shader reuse.
 
         @method
-        @param {GLEnum} type Shader type.
+        @param {GLenum} type Shader type.
         @param {string} source Shader source.
         @return {Shader} New Shader object.
     */
@@ -806,11 +813,11 @@ export class App {
         Create a vertex buffer.
 
         @method
-        @param {GLEnum} type The data type stored in the vertex buffer.
+        @param {GLenum} type The data type stored in the vertex buffer.
         @param {number} itemSize Number of elements per vertex.
         @param {ArrayBufferView|number} data Buffer data itself or the total
             number of elements to be allocated.
-        @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
+        @param {GLenum} [usage=STATIC_DRAW] Buffer usage.
         @return {VertexBuffer} New VertexBuffer object.
     */
     createVertexBuffer(type, itemSize, data, usage) {
@@ -822,11 +829,11 @@ export class App {
         are correctly split across attribute locations.
 
         @method
-        @param {GLEnum} type The data type stored in the matrix buffer. Valid types
+        @param {GLenum} type The data type stored in the matrix buffer. Valid types
         are FLOAT_MAT4, FLOAT_MAT4x2, FLOAT_MAT4x3, FLOAT_MAT3, FLOAT_MAT3x2,
         FLOAT_MAT3x4, FLOAT_MAT2, FLOAT_MAT2x3, FLOAT_MAT2x4.
         @param {ArrayBufferView} data Matrix buffer data.
-        @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
+        @param {GLenum} [usage=STATIC_DRAW] Buffer usage.
         @return {VertexBuffer} New VertexBuffer object.
     */
     createMatrixBuffer(type, data, usage) {
@@ -841,7 +848,7 @@ export class App {
         @param {number} bytesPerVertex Number of bytes per vertex.
         @param {ArrayBufferView|number} data Buffer data itself or the total
             number of bytes to be allocated.
-        @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
+        @param {GLenum} [usage=STATIC_DRAW] Buffer usage.
         @return {VertexBuffer} New VertexBuffer object.
     */
     createInterleavedBuffer(bytesPerVertex, data, usage) {
@@ -849,13 +856,23 @@ export class App {
     }
 
     /**
+        Create an index buffer. If the `itemSize` is not specified, it defaults to 3
+
+        @method
+        @variation 1
+        @param {GLenum} type The data type stored in the index buffer.
+        @param {ArrayBufferView} data Index buffer data.
+        @param {GLenum} [usage=STATIC_DRAW] Buffer usage.
+        @return {VertexBuffer} New VertexBuffer object.
+    *//**
         Create an index buffer.
 
         @method
-        @param {GLEnum} type The data type stored in the index buffer.
-        @param {number} [itemSize=3] Number of elements per primitive.
+        @variation 2
+        @param {GLenum} type The data type stored in the index buffer.
+        @param {number} itemSize Number of elements per primitive.
         @param {ArrayBufferView} data Index buffer data.
-        @param {GLEnum} [usage=STATIC_DRAW] Buffer usage.
+        @param {GLenum} [usage=STATIC_DRAW] Buffer usage.
         @return {VertexBuffer} New VertexBuffer object.
     */
     createIndexBuffer(type, itemSize, data, usage) {
@@ -875,7 +892,7 @@ export class App {
         @method
         @param {Array} layout Array indicating the order and types of items to
                         be stored in the buffer.
-        @param {GLEnum} [usage=DYNAMIC_DRAW] Buffer usage.
+        @param {GLenum} [usage=DYNAMIC_DRAW] Buffer usage.
         @return {UniformBuffer} New UniformBuffer object.
     */
     createUniformBuffer(layout, usage) {
@@ -897,24 +914,24 @@ export class App {
         @param {number} [width] Texture width. Required for array or empty data.
         @param {number} [height] Texture height. Required for array or empty data.
         @param {Object} [options] Texture options.
-        @param {GLEnum} [options.internalFormat=RGBA8] Texture data internal format. Must be a sized format.
-        @param {GLEnum} [options.type] Type of data stored in the texture. Default based on
+        @param {GLenum} [options.internalFormat=RGBA8] Texture data internal format. Must be a sized format.
+        @param {GLenum} [options.type] Type of data stored in the texture. Default based on
             <b>internalFormat</b>.
         @param {boolean} [options.flipY=false] Whether the y-axis should be flipped when unpacking the texture.
         @param {boolean} [options.premultiplyAlpha=false] Whether the alpha channel should be pre-multiplied when unpacking the texture.
-        @param {GLEnum} [options.minFilter] Minification filter. Defaults to
+        @param {GLenum} [options.minFilter] Minification filter. Defaults to
             LINEAR_MIPMAP_NEAREST if image data is provided, NEAREST otherwise.
-        @param {GLEnum} [options.magFilter] Magnification filter. Defaults to LINEAR
+        @param {GLenum} [options.magFilter] Magnification filter. Defaults to LINEAR
             if image data is provided, NEAREST otherwise.
-        @param {GLEnum} [options.wrapS=REPEAT] Horizontal wrap mode.
-        @param {GLEnum} [options.wrapT=REPEAT] Vertical wrap mode.
-        @param {GLEnum} [options.compareMode=NONE] Comparison mode.
-        @param {GLEnum} [options.compareFunc=LEQUAL] Comparison function.
-        @param {GLEnum} [options.baseLevel] Base mipmap level.
-        @param {GLEnum} [options.maxLevel] Maximum mipmap level.
-        @param {GLEnum} [options.minLOD] Mimimum level of detail.
-        @param {GLEnum} [options.maxLOD] Maximum level of detail.
-        @param {GLEnum} [options.maxAnisotropy] Maximum anisotropy in filtering.
+        @param {GLenum} [options.wrapS=REPEAT] Horizontal wrap mode.
+        @param {GLenum} [options.wrapT=REPEAT] Vertical wrap mode.
+        @param {GLenum} [options.compareMode=NONE] Comparison mode.
+        @param {GLenum} [options.compareFunc=LEQUAL] Comparison function.
+        @param {GLenum} [options.baseLevel] Base mipmap level.
+        @param {GLenum} [options.maxLevel] Maximum mipmap level.
+        @param {GLenum} [options.minLOD] Mimimum level of detail.
+        @param {GLenum} [options.maxLOD] Maximum level of detail.
+        @param {GLenum} [options.maxAnisotropy] Maximum anisotropy in filtering.
         @return {Texture} New Texture object.
     */
     createTexture2D(image, width, height, options) {
@@ -945,24 +962,24 @@ export class App {
         @param {number} height Texture height.
         @param {number} size Number of images in the array.
         @param {Object} [options] Texture options.
-        @param {GLEnum} [options.internalFormat=RGBA8] Texture data internal format. Must be a sized format.
-        @param {GLEnum} [options.type] Type of data stored in the texture. Default based on
+        @param {GLenum} [options.internalFormat=RGBA8] Texture data internal format. Must be a sized format.
+        @param {GLenum} [options.type] Type of data stored in the texture. Default based on
             <b>internalFormat</b>.
         @param {boolean} [options.flipY=false] Whether the y-axis should be flipped when unpacking the texture.
-        @param {GLEnum} [options.minFilter] Minification filter. Defaults to
+        @param {GLenum} [options.minFilter] Minification filter. Defaults to
             LINEAR_MIPMAP_NEAREST if image data is provided, NEAREST otherwise.
-        @param {GLEnum} [options.magFilter] Magnification filter. Defaults to LINEAR
+        @param {GLenum} [options.magFilter] Magnification filter. Defaults to LINEAR
             if image data is provided, NEAREST otherwise.
-        @param {GLEnum} [options.wrapS=REPEAT] Horizontal wrap mode.
-        @param {GLEnum} [options.wrapT=REPEAT] Vertical wrap mode.
-        @param {GLEnum} [options.wrapR=REPEAT] Depth wrap mode.
-        @param {GLEnum} [options.compareMode=NONE] Comparison mode.
-        @param {GLEnum} [options.compareFunc=LEQUAL] Comparison function.
-        @param {GLEnum} [options.baseLevel] Base mipmap level.
-        @param {GLEnum} [options.maxLevel] Maximum mipmap level.
-        @param {GLEnum} [options.minLOD] Mimimum level of detail.
-        @param {GLEnum} [options.maxLOD] Maximum level of detail.
-        @param {GLEnum} [options.maxAnisotropy] Maximum anisotropy in filtering.
+        @param {GLenum} [options.wrapS=REPEAT] Horizontal wrap mode.
+        @param {GLenum} [options.wrapT=REPEAT] Vertical wrap mode.
+        @param {GLenum} [options.wrapR=REPEAT] Depth wrap mode.
+        @param {GLenum} [options.compareMode=NONE] Comparison mode.
+        @param {GLenum} [options.compareFunc=LEQUAL] Comparison function.
+        @param {GLenum} [options.baseLevel] Base mipmap level.
+        @param {GLenum} [options.maxLevel] Maximum mipmap level.
+        @param {GLenum} [options.minLOD] Mimimum level of detail.
+        @param {GLenum} [options.maxLOD] Maximum level of detail.
+        @param {GLenum} [options.maxAnisotropy] Maximum anisotropy in filtering.
         @return {Texture} New Texture object.
     */
     createTextureArray(image, width, height, depth, options) {
@@ -988,24 +1005,24 @@ export class App {
         @param {number} height Texture height.
         @param {number} depth Texture depth.
         @param {Object} [options] Texture options.
-        @param {GLEnum} [options.internalFormat=RGBA8] Texture data internal format. Must be a sized format.
-        @param {GLEnum} [options.type] Type of data stored in the texture. Default based on
+        @param {GLenum} [options.internalFormat=RGBA8] Texture data internal format. Must be a sized format.
+        @param {GLenum} [options.type] Type of data stored in the texture. Default based on
             <b>internalFormat</b>.
         @param {boolean} [options.flipY=false] Whether the y-axis should be flipped when unpacking the texture.
-        @param {GLEnum} [options.minFilter] Minification filter. Defaults to
+        @param {GLenum} [options.minFilter] Minification filter. Defaults to
             LINEAR_MIPMAP_NEAREST if image data is provided, NEAREST otherwise.
-        @param {GLEnum} [options.magFilter] Magnification filter. Defaults to LINEAR
+        @param {GLenum} [options.magFilter] Magnification filter. Defaults to LINEAR
             if image data is provided, NEAREST otherwise.
-        @param {GLEnum} [options.wrapS=REPEAT] Horizontal wrap mode.
-        @param {GLEnum} [options.wrapT=REPEAT] Vertical wrap mode.
-        @param {GLEnum} [options.wrapR=REPEAT] Depth wrap mode.
-        @param {GLEnum} [options.compareMode=NONE] Comparison mode.
-        @param {GLEnum} [options.compareFunc=LEQUAL] Comparison function.
-        @param {GLEnum} [options.baseLevel] Base mipmap level.
-        @param {GLEnum} [options.maxLevel] Maximum mipmap level.
-        @param {GLEnum} [options.minLOD] Mimimum level of detail.
-        @param {GLEnum} [options.maxLOD] Maximum level of detail.
-        @param {GLEnum} [options.maxAnisotropy] Maximum anisotropy in filtering.
+        @param {GLenum} [options.wrapS=REPEAT] Horizontal wrap mode.
+        @param {GLenum} [options.wrapT=REPEAT] Vertical wrap mode.
+        @param {GLenum} [options.wrapR=REPEAT] Depth wrap mode.
+        @param {GLenum} [options.compareMode=NONE] Comparison mode.
+        @param {GLenum} [options.compareFunc=LEQUAL] Comparison function.
+        @param {GLenum} [options.baseLevel] Base mipmap level.
+        @param {GLenum} [options.maxLevel] Maximum mipmap level.
+        @param {GLenum} [options.minLOD] Mimimum level of detail.
+        @param {GLenum} [options.maxLOD] Maximum level of detail.
+        @param {GLenum} [options.maxAnisotropy] Maximum anisotropy in filtering.
         @return {Texture} New Texture object.
     */
     createTexture3D(image, width, height, depth, options) {
@@ -1039,24 +1056,24 @@ export class App {
                 Can be any format that would be accepted by texImage2D.
         @param {number} [options.width] Cubemap side width. Defaults to the width of negX if negX is an image.
         @param {number} [options.height] Cubemap side height. Defaults to the height of negX if negX is an image.
-        @param {GLEnum} [options.internalFormat=RGBA8] Texture data internal format. Must be a sized format.
-        @param {GLEnum} [options.type] Type of data stored in the texture. Default based on
+        @param {GLenum} [options.internalFormat=RGBA8] Texture data internal format. Must be a sized format.
+        @param {GLenum} [options.type] Type of data stored in the texture. Default based on
             <b>internalFormat</b>.
         @param {boolean} [options.flipY=false] Whether the y-axis should be flipped when unpacking the image.
         @param {boolean} [options.premultiplyAlpha=false] Whether the alpha channel should be pre-multiplied when unpacking the image.
-        @param {GLEnum} [options.minFilter] Minification filter. Defaults to
+        @param {GLenum} [options.minFilter] Minification filter. Defaults to
             LINEAR_MIPMAP_NEAREST if image data is provided, NEAREST otherwise.
-        @param {GLEnum} [options.magFilter] Magnification filter. Defaults to LINEAR
+        @param {GLenum} [options.magFilter] Magnification filter. Defaults to LINEAR
             if image data is provided, NEAREST otherwise.
-        @param {GLEnum} [options.wrapS=REPEAT] Horizontal wrap mode.
-        @param {GLEnum} [options.wrapT=REPEAT] Vertical wrap mode.
-        @param {GLEnum} [options.compareMode=NONE] Comparison mode.
-        @param {GLEnum} [options.compareFunc=LEQUAL] Comparison function.
-        @param {GLEnum} [options.baseLevel] Base mipmap level.
-        @param {GLEnum} [options.maxLevel] Maximum mipmap level.
-        @param {GLEnum} [options.minLOD] Mimimum level of detail.
-        @param {GLEnum} [options.maxLOD] Maximum level of detail.
-        @param {GLEnum} [options.maxAnisotropy] Maximum anisotropy in filtering.
+        @param {GLenum} [options.wrapS=REPEAT] Horizontal wrap mode.
+        @param {GLenum} [options.wrapT=REPEAT] Vertical wrap mode.
+        @param {GLenum} [options.compareMode=NONE] Comparison mode.
+        @param {GLenum} [options.compareFunc=LEQUAL] Comparison function.
+        @param {GLenum} [options.baseLevel] Base mipmap level.
+        @param {GLenum} [options.maxLevel] Maximum mipmap level.
+        @param {GLenum} [options.minLOD] Mimimum level of detail.
+        @param {GLenum} [options.maxLOD] Maximum level of detail.
+        @param {GLenum} [options.maxAnisotropy] Maximum anisotropy in filtering.
         @return {Cubemap} New Cubemap object.
     */
     createCubemap(options) {
@@ -1069,7 +1086,7 @@ export class App {
         @method
         @param {number} width Renderbuffer width.
         @param {number} height Renderbuffer height.
-        @param {GLEnum} internalFormat Internal arrangement of the renderbuffer data.
+        @param {GLenum} internalFormat Internal arrangement of the renderbuffer data.
         @param {number} [samples=0] Number of MSAA samples.
         @return {Renderbuffer} New Renderbuffer object.
     */
@@ -1091,7 +1108,7 @@ export class App {
         Create a query.
 
         @method
-        @param {GLEnum} target Information to query.
+        @param {GLenum} target Information to query.
         @return {Query} New Query object.
     */
     createQuery(target) {
@@ -1151,14 +1168,14 @@ export class App {
             this.contextRestoredListener = () => {
                 this.initExtensions();
                 this.contextRestoredHandler();
-            };  
+            };
             this.canvas.addEventListener("webglcontextlost", this.contextLostListener);
             this.canvas.addEventListener("webglcontextrestored", this.contextRestoredListener);
         } else {
             this.canvas.removeEventListener("webglcontextlost", this.contextLostListener);
             this.canvas.removeEventListener("webglcontextrestored", this.contextRestoredListener);
             this.contextLostListener = null;
-            this.contextRestoredListener = null;  
+            this.contextRestoredListener = null;
         }
     }
 
