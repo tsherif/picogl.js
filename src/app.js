@@ -662,7 +662,7 @@ export class App {
                 </ul>
                 </ul>
             </ul>
-        @return {Promise} Promise that will resolve to an array of Programs when compilation and
+        @return {Promise<Program[]>} Promise that will resolve to an array of Programs when compilation and
             linking are complete for all programs.
     */
     createPrograms(...sources) {
@@ -721,7 +721,7 @@ export class App {
         @method
         @param {...Program} sources Variable number of programs to restore.
 
-        @return {Promise} Promise that will resolve once all programs have been restored.
+        @return {Promise<void>} Promise that will resolve once all programs have been restored.
     */
     restorePrograms(...programs) {
         return new Promise((resolve, reject) => {
