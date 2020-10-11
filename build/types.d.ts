@@ -1,10 +1,4 @@
 /**
- * The correct type for a DOMElement is HTMLElement:
- * https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement
- */
-export type DOMElement = HTMLElement;
-
-/**
  * Primary entry point to PicoGL. An app will store all parts of the WebGL
  *     state.
  * @property canvas - The canvas on which this app drawing.
@@ -431,7 +425,7 @@ export class App {
      * @param [options.maxAnisotropy] - Maximum anisotropy in filtering.
      * @returns New Texture object.
      */
-    createTexture2D(image?: DOMElement | ArrayBufferView | any[], width?: number, height?: number, options?: {
+    createTexture2D(image?: HTMLElement | ArrayBufferView | any[], width?: number, height?: number, options?: {
         internalFormat?: GLenum;
         type?: GLenum;
         flipY?: boolean;
@@ -578,12 +572,12 @@ export class App {
      * @returns New Cubemap object.
      */
     createCubemap(options: {
-        negX?: DOMElement | ArrayBufferView;
-        posX?: DOMElement | ArrayBufferView;
-        negY?: DOMElement | ArrayBufferView;
-        posY?: DOMElement | ArrayBufferView;
-        negZ?: DOMElement | ArrayBufferView;
-        posZ?: DOMElement | ArrayBufferView;
+        negX?: HTMLElement | ArrayBufferView;
+        posX?: HTMLElement | ArrayBufferView;
+        negY?: HTMLElement | ArrayBufferView;
+        posY?: HTMLElement | ArrayBufferView;
+        negZ?: HTMLElement | ArrayBufferView;
+        posZ?: HTMLElement | ArrayBufferView;
         width?: number;
         height?: number;
         internalFormat?: GLenum;
@@ -639,7 +633,7 @@ export class App {
     /**
      * The canvas on which this app drawing.
     */
-    canvas: DOMElement;
+    canvas: HTMLElement;
     /**
      * The WebGL context.
     */
@@ -696,12 +690,12 @@ export class Cubemap {
      * @returns The Cubemap object.
      */
     restore(options?: {
-        negX?: DOMElement | ArrayBufferView;
-        posX?: DOMElement | ArrayBufferView;
-        negY?: DOMElement | ArrayBufferView;
-        posY?: DOMElement | ArrayBufferView;
-        negZ?: DOMElement | ArrayBufferView;
-        posZ?: DOMElement | ArrayBufferView;
+        negX?: HTMLElement | ArrayBufferView;
+        posX?: HTMLElement | ArrayBufferView;
+        negY?: HTMLElement | ArrayBufferView;
+        posY?: HTMLElement | ArrayBufferView;
+        negZ?: HTMLElement | ArrayBufferView;
+        posZ?: HTMLElement | ArrayBufferView;
     }): Cubemap;
     /**
      * Delete this cubemap.
@@ -1607,7 +1601,7 @@ export namespace PicoGL {
      * @param [contextAttributes] - Context attributes to pass when calling getContext().
      * @returns New App object.
      */
-    function createApp(canvas: DOMElement, contextAttributes?: any): App;
+    function createApp(canvas: HTMLElement, contextAttributes?: any): App;
 }
 
 /**
@@ -1844,7 +1838,7 @@ export class Texture {
      *             generateMipmap() will be called to produce the remaining levels.
      * @returns The Texture object.
      */
-    restore(image?: DOMElement | ArrayBufferView | any[]): Texture;
+    restore(image?: HTMLElement | ArrayBufferView | any[]): Texture;
     /**
      * Re-allocate texture storage.
      * @param width - Image width.
