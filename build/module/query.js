@@ -26,12 +26,12 @@ import { GL } from "./constants.js";
 /**
     Generic query object.
 
-    @class Query
+    @class
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLQuery} query Query object.
-    @prop {GLenum} target The type of information being queried.
+    @prop {GLEnum} target The type of information being queried.
     @prop {boolean} active Whether or not a query is currently in progress.
-    @prop {Any} result The result of the query (only available after a call to ready() returns true).
+    @prop {Any} result The result of the query (only available after a call to ready() returns true). 
 */
 export class Query {
 
@@ -99,7 +99,7 @@ export class Query {
         if (this.active && this.gl.getQueryParameter(this.query, GL.QUERY_RESULT_AVAILABLE)) {
             this.active = false;
             // Note(Tarek): Casting because FF incorrectly returns booleans.
-            // https://bugzilla.mozilla.org/show_bug.cgi?id=1422714
+            // https://bugzilla.mozilla.org/show_bug.cgi?id=1422714 
             this.result = Number(this.gl.getQueryParameter(this.query, GL.QUERY_RESULT));
             return true;
         }

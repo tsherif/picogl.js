@@ -28,7 +28,7 @@ import { Renderbuffer } from "./renderbuffer.js";
 /**
     Offscreen drawing surface.
 
-    @class Framebuffer
+    @class
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLFramebuffer} framebuffer Handle to the framebuffer.
     @prop {number} width Framebuffer width.
@@ -83,7 +83,7 @@ export class Framebuffer {
         @method
         @param {number} index Color attachment index.
         @param {Texture|Cubemap|Renderbuffer} attachment The texture, cubemap or renderbuffer to attach.
-        @param {GLenum} [target] The texture target or layer to attach. If the texture is 3D or a texture array,
+        @param {GLEnum} [target] The texture target or layer to attach. If the texture is 3D or a texture array,
             defaults to 0, otherwise to TEXTURE_2D. Ignored for renderbuffers.
         @return {Framebuffer} The Framebuffer object.
     */
@@ -102,7 +102,7 @@ export class Framebuffer {
             }
 
             this.numColorTargets = numColorTargets;
-        }
+        }        
 
         this.colorAttachmentEnums[index] = GL.COLOR_ATTACHMENT0 + index;
         this.colorAttachments[index] = attachment;
@@ -134,7 +134,7 @@ export class Framebuffer {
 
         @method
         @param {Texture|Cubemap|Renderbuffer} texture The texture, cubemap or renderbuffer to attach.
-        @param {GLenum} [target] The texture target or layer to attach. If the texture is 3D or a texture array or renderbuffer,
+        @param {GLEnum} [target] The texture target or layer to attach. If the texture is 3D or a texture array or renderbuffer,
             defaults to 0, otherwise to TEXTURE_2D. Ignored for renderbuffers.
         @return {Framebuffer} The Framebuffer object.
     */
@@ -240,7 +240,7 @@ export class Framebuffer {
         Get the current status of this framebuffer.
 
         @method
-        @return {GLenum} The current status of this framebuffer.
+        @return {GLEnum} The current status of this framebuffer.
     */
     getStatus() {
         let currentFramebuffer = this.bindAndCaptureState();
