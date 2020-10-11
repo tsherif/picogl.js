@@ -3,6 +3,8 @@
   "version": "0.17.5",
   "description": "A minimal WebGL 2 rendering library",
   "main": "build/picogl.min.js",
+  "module": "build/module/picogl.js",
+  "types": "build/types.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/tsherif/picogl.js"
@@ -16,7 +18,8 @@
     "lint": "eslint src/*.js test/tests/*.js",
     "compile-module": "rimraf build/module && cpy src build/module && replace %%VERSION%% $npm_package_version build/module/picogl.js",
     "compile-bundle": "webpack",
-    "compile": "npm run compile-module && npm run compile-bundle",
+    "compile-types": "jsdoc -c types.config.js && replace-in-file --configFile=types.config.js",
+    "compile": "npm run compile-module && npm run compile-bundle && npm run compile-types",
     "build": "npm run test && npm run compile",
     "docs": "jsdoc -d docs src/*.js",
     "coverage": "rimraf coverage/ && npm run lint && glcheck && nyc report --reporter=lcov",
@@ -38,11 +41,13 @@
     "coveralls": "^3.0.8",
     "cpy-cli": "^2.0.0",
     "eslint": "^6.7.0",
+    "glcheck": "0.3.5",
     "jsdoc": "^3.6.3",
     "nyc": "^14.1.1",
-    "glcheck": "0.3.5",
     "replace": "^1.1.1",
+    "replace-in-file": "^6.1.0",
     "rimraf": "^3.0.0",
+    "tsd-jsdoc": "^2.5.0",
     "webpack": "^4.39.3",
     "webpack-cli": "^3.3.8"
   },

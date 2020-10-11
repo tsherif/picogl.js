@@ -26,7 +26,7 @@ import { GL } from "./constants.js";
 /**
     Tranform feedback object.
 
-    @class
+    @class TransformFeedback
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLTransformFeedback} transformFeedback Transform feedback object.
     @prop {Object} appState Tracked GL state.
