@@ -56,7 +56,7 @@ export const PicoGL = Object.assign({
         the canvas, the WebGL context and all WebGL state.
 
         @function PicoGL.createApp
-        @param {DOMElement} canvas The canvas on which to create the WebGL context.
+        @param {HTMLElement} canvas The canvas on which to create the WebGL context.
         @param {Object} [contextAttributes] Context attributes to pass when calling getContext().
         @return {App} New App object.
     */

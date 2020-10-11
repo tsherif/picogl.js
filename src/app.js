@@ -37,18 +37,12 @@ import { VertexBuffer } from "./vertex-buffer.js";
 import { Query } from "./query.js";
 
 /**
- * The correct type for a DOMElement is HTMLElement:
- * https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement
- * @typedef {HTMLElement} DOMElement
- */
-
-/**
     Primary entry point to PicoGL. An app will store all parts of the WebGL
     state.
 
     @class App
     @param {WebGLRenderingContext} gl
-    @prop {DOMElement} canvas The canvas on which this app drawing.
+    @prop {HTMLElement} canvas The canvas on which this app drawing.
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {number} width The width of the drawing surface.
     @prop {number} height The height of the drawing surface.
@@ -908,7 +902,7 @@ export class App {
         </ul>
 
         @method
-        @param {DOMElement|ArrayBufferView|Array} [image] Image data. An array can be passed to manually set all levels
+        @param {HTMLElement|ArrayBufferView|Array} [image] Image data. An array can be passed to manually set all levels
             of the mipmap chain. If a single level is passed and mipmap filtering is being used,
             generateMipmap() will be called to produce the remaining levels.
         @param {number} [width] Texture width. Required for array or empty data.
@@ -1042,17 +1036,17 @@ export class App {
 
         @method
         @param {Object} options Texture options.
-        @param {DOMElement|ArrayBufferView} [options.negX] The image data for the negative X direction.
+        @param {HTMLElement|ArrayBufferView} [options.negX] The image data for the negative X direction.
                 Can be any format that would be accepted by texImage2D.
-        @param {DOMElement|ArrayBufferView} [options.posX] The image data for the positive X direction.
+        @param {HTMLElement|ArrayBufferView} [options.posX] The image data for the positive X direction.
                 Can be any format that would be accepted by texImage2D.
-        @param {DOMElement|ArrayBufferView} [options.negY] The image data for the negative Y direction.
+        @param {HTMLElement|ArrayBufferView} [options.negY] The image data for the negative Y direction.
                 Can be any format that would be accepted by texImage2D.
-        @param {DOMElement|ArrayBufferView} [options.posY] The image data for the positive Y direction.
+        @param {HTMLElement|ArrayBufferView} [options.posY] The image data for the positive Y direction.
                 Can be any format that would be accepted by texImage2D.
-        @param {DOMElement|ArrayBufferView} [options.negZ] The image data for the negative Z direction.
+        @param {HTMLElement|ArrayBufferView} [options.negZ] The image data for the negative Z direction.
                 Can be any format that would be accepted by texImage2D.
-        @param {DOMElement|ArrayBufferView} [options.posZ] The image data for the positive Z direction.
+        @param {HTMLElement|ArrayBufferView} [options.posZ] The image data for the positive Z direction.
                 Can be any format that would be accepted by texImage2D.
         @param {number} [options.width] Cubemap side width. Defaults to the width of negX if negX is an image.
         @param {number} [options.height] Cubemap side height. Defaults to the height of negX if negX is an image.

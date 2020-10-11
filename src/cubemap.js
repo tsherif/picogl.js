@@ -136,17 +136,17 @@ export class Cubemap {
 
         @method
         @param {Object} [options] Texture options.
-        @param {DOMElement|ArrayBufferView} [options.negX] The image data for the negative X direction.
+        @param {HTMLElement|ArrayBufferView} [options.negX] The image data for the negative X direction.
                 Can be any format that would be accepted by texImage2D.
-        @param {DOMElement|ArrayBufferView} [options.posX] The image data for the positive X direction.
+        @param {HTMLElement|ArrayBufferView} [options.posX] The image data for the positive X direction.
                 Can be any format that would be accepted by texImage2D.
-        @param {DOMElement|ArrayBufferView} [options.negY] The image data for the negative Y direction.
+        @param {HTMLElement|ArrayBufferView} [options.negY] The image data for the negative Y direction.
                 Can be any format that would be accepted by texImage2D.
-        @param {DOMElement|ArrayBufferView} [options.posY] The image data for the positive Y direction.
+        @param {HTMLElement|ArrayBufferView} [options.posY] The image data for the positive Y direction.
                 Can be any format that would be accepted by texImage2D.
-        @param {DOMElement|ArrayBufferView} [options.negZ] The image data for the negative Z direction.
+        @param {HTMLElement|ArrayBufferView} [options.negZ] The image data for the negative Z direction.
                 Can be any format that would be accepted by texImage2D.
-        @param {DOMElement|ArrayBufferView} [options.posZ] The image data for the positive Z direction.
+        @param {HTMLElement|ArrayBufferView} [options.posZ] The image data for the positive Z direction.
                 Can be any format that would be accepted by texImage2D.
         @return {Cubemap} The Cubemap object.
     */
