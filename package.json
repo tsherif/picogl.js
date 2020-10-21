@@ -23,7 +23,8 @@
     "build": "npm run test && npm run compile",
     "docs": "jsdoc -d docs src/*.js",
     "coverage": "rimraf coverage/ && npm run lint && glcheck && nyc report --reporter=lcov",
-    "test": "npm run lint && glcheck --coverage=false"
+    "build-ts-test": "tsc test/render/typescript/index.ts --module es6",
+    "test": "npm run lint && npm run build-ts-test && glcheck --coverage=false"
   },
   "keywords": [
     "webgl",
@@ -48,6 +49,7 @@
     "replace-in-file": "^6.1.0",
     "rimraf": "^3.0.0",
     "tsd-jsdoc": "^2.5.0",
+    "typescript": "^4.0.3",
     "webpack": "^4.39.3",
     "webpack-cli": "^3.3.8"
   },
