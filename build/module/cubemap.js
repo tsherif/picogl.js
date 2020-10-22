@@ -21,7 +21,7 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-import { 
+import {
     GL,
     WEBGL_INFO,
     TEXTURE_FORMATS,
@@ -35,12 +35,12 @@ import {
 /**
     Cubemap for environment mapping.
 
-    @class
+    @class Cubemap
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLTexture} texture Handle to the texture.
-    @prop {GLEnum} type Type of data stored in the texture.
-    @prop {GLEnum} format Layout of texture data.
-    @prop {GLEnum} internalFormat Internal arrangement of the texture data.
+    @prop {GLenum} type Type of data stored in the texture.
+    @prop {GLenum} format Layout of texture data.
+    @prop {GLenum} internalFormat Internal arrangement of the texture data.
     @prop {Number} currentUnit The current texture unit this cubemap is bound to.
     @prop {boolean} flipY Whether the y-axis is flipped for this cubemap.
     @prop {boolean} premultiplyAlpha Whether alpha should be pre-multiplied when loading this cubemap.
@@ -55,7 +55,7 @@ export class Cubemap {
         this.appState = appState;
 
         this.compressed = COMPRESSED_TEXTURE_TYPES[options.internalFormat];
-        
+
         if (options.format !== undefined) {
             console.warn("Cubemap option 'format' is deprecated and will be removed. Use 'internalFormat' with a sized format instead.");
             this.compressed = Boolean(COMPRESSED_TEXTURE_TYPES[options.format]);
@@ -84,7 +84,7 @@ export class Cubemap {
             this.format = formatInfo[0];
             this.type = options.type !== undefined ? options.type : formatInfo[1];
         }
-        
+
         // -1 indicates unbound
         this.currentUnit = -1;
 
@@ -108,7 +108,7 @@ export class Cubemap {
             maxLevel = null,
             maxAnisotropy = 1
         } = options;
-        
+
         this.width = width;
         this.height = height;
         this.flipY = flipY;
@@ -136,17 +136,17 @@ export class Cubemap {
 
         @method
         @param {Object} [options] Texture options.
-        @param {DOMElement|ArrayBufferView} [options.negX] The image data for the negative X direction.
+        @param {HTMLElement|ArrayBufferView} [options.negX] The image data for the negative X direction.
                 Can be any format that would be accepted by texImage2D.
-        @param {DOMElement|ArrayBufferView} [options.posX] The image data for the positive X direction.
+        @param {HTMLElement|ArrayBufferView} [options.posX] The image data for the positive X direction.
                 Can be any format that would be accepted by texImage2D.
-        @param {DOMElement|ArrayBufferView} [options.negY] The image data for the negative Y direction.
+        @param {HTMLElement|ArrayBufferView} [options.negY] The image data for the negative Y direction.
                 Can be any format that would be accepted by texImage2D.
-        @param {DOMElement|ArrayBufferView} [options.posY] The image data for the positive Y direction.
+        @param {HTMLElement|ArrayBufferView} [options.posY] The image data for the positive Y direction.
                 Can be any format that would be accepted by texImage2D.
-        @param {DOMElement|ArrayBufferView} [options.negZ] The image data for the negative Z direction.
+        @param {HTMLElement|ArrayBufferView} [options.negZ] The image data for the negative Z direction.
                 Can be any format that would be accepted by texImage2D.
-        @param {DOMElement|ArrayBufferView} [options.posZ] The image data for the positive Z direction.
+        @param {HTMLElement|ArrayBufferView} [options.posZ] The image data for the positive Z direction.
                 Can be any format that would be accepted by texImage2D.
         @return {Cubemap} The Cubemap object.
     */
@@ -164,19 +164,19 @@ export class Cubemap {
         this.gl.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_WRAP_T, this.wrapT);
         this.gl.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_COMPARE_FUNC, this.compareFunc);
         this.gl.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_COMPARE_MODE, this.compareMode);
-        
+
         if (this.baseLevel !== null) {
             this.gl.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_BASE_LEVEL, this.baseLevel);
         }
-        
+
         if (this.maxLevel !== null) {
             this.gl.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_MAX_LEVEL, this.maxLevel);
         }
-        
+
         if (this.minLOD !== null) {
             this.gl.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_MIN_LOD, this.minLOD);
         }
-        
+
         if (this.maxLOD !== null) {
             this.gl.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_MAX_LOD, this.maxLOD);
         }
@@ -262,7 +262,7 @@ export class Cubemap {
             this.gl.activeTexture(GL.TEXTURE0 + unit);
             this.appState.activeTexture = unit;
         }
-        
+
         if (currentTexture !== this) {
             if (currentTexture) {
                 currentTexture.currentUnit = -1;

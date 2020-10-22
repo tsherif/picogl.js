@@ -1,3 +1,6 @@
+## v0.17.6
+- Experimental typescript support.
+
 ## v0.17.5
 - Update DrawCall counts from current VertexArray.
 

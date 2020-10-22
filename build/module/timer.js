@@ -27,7 +27,7 @@ import { Query } from "./query.js";
 /**
     Rendering timer.
 
-    @class
+    @class Timer
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {Object} cpuTimer Timer for CPU. Will be window.performance, if available, or window.Date.
     @prop {WebGLQuery} gpuTimerQuery Timer query object for GPU (if gpu timing is supported).
