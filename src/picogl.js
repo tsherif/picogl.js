@@ -33,8 +33,22 @@ let webglInfoInitialized = false;
     @namespace PicoGL
 */
 export const PicoGL = Object.assign({
+    /**
+        The version of PicoGL
+
+        @type {string}
+        @name PicoGL.version
+        @private
+     */
     version: "%%VERSION%%",
 
+    /**
+        WebGL information about the current system
+
+        @type {Object.<string, *>}
+        @name PicoGL.WEBGL_INFO
+        @private
+     */
     WEBGL_INFO,
 
     /**
@@ -42,7 +56,7 @@ export const PicoGL = Object.assign({
         the canvas, the WebGL context and all WebGL state.
 
         @function PicoGL.createApp
-        @param {DOMElement} canvas The canvas on which to create the WebGL context.
+        @param {HTMLElement} canvas The canvas on which to create the WebGL context.
         @param {Object} [contextAttributes] Context attributes to pass when calling getContext().
         @return {App} New App object.
     */
@@ -75,7 +89,7 @@ export const PicoGL = Object.assign({
             WEBGL_INFO.LOSE_CONTEXT = Boolean(gl.getExtension("WEBGL_lose_context"));
             WEBGL_INFO.DEBUG_SHADERS = Boolean(gl.getExtension("WEBGL_debug_shaders"));
             WEBGL_INFO.GPU_TIMER = Boolean(gl.getExtension("EXT_disjoint_timer_query_webgl2") || gl.getExtension("EXT_disjoint_timer_query"));
-            
+
             WEBGL_INFO.TEXTURE_ANISOTROPY = Boolean(gl.getExtension("EXT_texture_filter_anisotropic"));
             WEBGL_INFO.MAX_TEXTURE_ANISOTROPY = WEBGL_INFO.TEXTURE_ANISOTROPY ? gl.getParameter(GL.MAX_TEXTURE_MAX_ANISOTROPY_EXT) : 1;
 
@@ -94,3 +108,11 @@ export const PicoGL = Object.assign({
         return new App(gl);
     }
 }, GL);
+
+/**
+ * This is a hack to be able to document the default export :(
+ * @type {PicoGL}
+ * @name exportDefaultPicoGL
+ * @private
+ */
+export default PicoGL;

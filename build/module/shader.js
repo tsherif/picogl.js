@@ -26,7 +26,7 @@ import { GL, WEBGL_INFO } from "./constants.js";
 /**
     WebGL shader.
 
-    @class
+    @class Shader
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLShader} shader The shader.
 */
