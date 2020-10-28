@@ -899,8 +899,8 @@ export class App {
         Create empty 2D texture.
         @method
         @variation 1
-        @param {number} [width] Texture width. Required for array or empty data.
-        @param {number} [height] Texture height. Required for array or empty data.
+        @param {number} width - Texture width. Required for array or empty data.
+        @param {number} height - Texture height. Required for array or empty data.
         @param {Object} [options] Texture options.
         @param {GLenum} [options.internalFormat=RGBA8] Texture data internal format. Must be a sized format.
         @param {GLenum} [options.type] Type of data stored in the texture. Default based on
@@ -925,7 +925,7 @@ export class App {
         Create a 2D texture from a DOM image element.
         @method
         @variation 2
-        @param {HTMLImageElement|HTMLImageElement[]} [image] Image data. An array can be passed to manually set all levels
+        @param {HTMLImageElement|HTMLImageElement[]} image - Image data. An array can be passed to manually set all levels
             of the mipmap chain. If a single level is passed and mipmap filtering is being used,
             generateMipmap() will be called to produce the remaining levels.
         @param {Object} [options] Texture options.
@@ -952,11 +952,11 @@ export class App {
         Create 2D texture from a typed array.
         @method
         @variation 3
-        @param {ArrayBufferView|ArrayBufferView[]} [image] Image data. An array can be passed to manually set all levels
+        @param {ArrayBufferView|ArrayBufferView[]} image - Image data. An array can be passed to manually set all levels
             of the mipmap chain. If a single level is passed and mipmap filtering is being used,
             generateMipmap() will be called to produce the remaining levels.
-        @param {number} [width] Texture width. Required for array or empty data.
-        @param {number} [height] Texture height. Required for array or empty data.
+        @param {number} width - Texture width. Required for array or empty data.
+        @param {number} height - Texture height. Required for array or empty data.
         @param {Object} [options] Texture options.
         @param {GLenum} [options.internalFormat=RGBA8] Texture data internal format. Must be a sized format.
         @param {GLenum} [options.type] Type of data stored in the texture. Default based on
