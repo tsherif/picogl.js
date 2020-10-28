@@ -142,6 +142,7 @@ export class App {
 
         @method
         @param {GLenum} cap Capability to enable.
+        @return {App} The App object.
     */
     enable(cap) {
         this.gl.enable(cap);
@@ -154,6 +155,7 @@ export class App {
 
         @method
         @param {GLenum} cap Capability to disable.
+        @return {App} The App object.
     */
     disable(cap) {
         this.gl.disable(cap);
