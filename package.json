@@ -1,8 +1,10 @@
 {
   "name": "picogl",
-  "version": "0.17.5",
+  "version": "0.17.6",
   "description": "A minimal WebGL 2 rendering library",
   "main": "build/picogl.min.js",
+  "module": "build/module/picogl.js",
+  "types": "build/types.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/tsherif/picogl.js"
@@ -16,11 +18,13 @@
     "lint": "eslint src/*.js test/tests/*.js",
     "compile-module": "rimraf build/module && cpy src build/module && replace %%VERSION%% $npm_package_version build/module/picogl.js",
     "compile-bundle": "webpack",
-    "compile": "npm run compile-module && npm run compile-bundle",
+    "compile-types": "jsdoc -c types.config.js && replace-in-file --configFile=types.config.js",
+    "compile": "npm run compile-module && npm run compile-bundle && npm run compile-types",
     "build": "npm run test && npm run compile",
     "docs": "jsdoc -d docs src/*.js",
     "coverage": "rimraf coverage/ && npm run lint && glcheck && nyc report --reporter=lcov",
-    "test": "npm run lint && glcheck --coverage=false"
+    "build-ts-test": "tsc test/render/typescript/index.ts --module es6",
+    "test": "npm run lint && npm run build-ts-test && glcheck --coverage=false"
   },
   "keywords": [
     "webgl",
@@ -35,15 +39,18 @@
     "url": "https://github.com/tsherif/picogl.js/issues"
   },
   "devDependencies": {
-    "coveralls": "^3.0.8",
-    "cpy-cli": "^2.0.0",
+    "coveralls": "^3.1.0",
+    "cpy-cli": "^3.1.1",
     "eslint": "^6.7.0",
+    "glcheck": "0.3.5",
     "jsdoc": "^3.6.3",
     "nyc": "^14.1.1",
-    "glcheck": "0.3.5",
-    "replace": "^1.1.1",
+    "replace": "^1.2.0",
+    "replace-in-file": "^6.1.0",
     "rimraf": "^3.0.0",
-    "webpack": "^4.39.3",
+    "tsd-jsdoc": "^2.5.0",
+    "typescript": "^4.0.3",
+    "webpack": "^5.1.3",
     "webpack-cli": "^3.3.8"
   },
   "dependencies": {}
