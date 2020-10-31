@@ -1,4 +1,4 @@
-import { PicoGL } from "../../../build/module/picogl.js";
+import { PicoGL } from "../../../../build/module/picogl.js";
 
 interface GLCheckWindow extends Window {
     glcheck_renderDone?: boolean;
