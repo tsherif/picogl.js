@@ -1,0 +1,9 @@
+{
+    "compilerOptions": {
+        "module": "es6"
+    },
+    "files": [
+        "test/render/typescript/triangle/index.ts",
+        "test/render/typescript/rtt/index.ts"
+    ]
+}

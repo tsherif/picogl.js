@@ -142,6 +142,7 @@ export class App {
 
         @method
         @param {GLenum} cap Capability to enable.
+        @return {App} The App object.
     */
     enable(cap) {
         this.gl.enable(cap);
@@ -154,6 +155,7 @@ export class App {
 
         @method
         @param {GLenum} cap Capability to disable.
+        @return {App} The App object.
     */
     disable(cap) {
         this.gl.disable(cap);
@@ -894,19 +896,67 @@ export class App {
     }
 
     /**
-        Create a 2D texture. Can be used in several ways depending on the type of texture data:
-        <ul>
-            <li><b>app.createTexture2D(ImageElement, options)</b>: Create texture from a DOM image element.
-            <li><b>app.createTexture2D(TypedArray, width, height, options)</b>: Create texture from a typed array.
-            <li><b>app.createTexture2D(width, height, options)</b>: Create empty texture.
-        </ul>
-
+        Create empty 2D texture.
         @method
-        @param {HTMLElement|ArrayBufferView|Array} [image] Image data. An array can be passed to manually set all levels
+        @variation 1
+        @param {number} width - Texture width. Required for array or empty data.
+        @param {number} height - Texture height. Required for array or empty data.
+        @param {Object} [options] Texture options.
+        @param {GLenum} [options.internalFormat=RGBA8] Texture data internal format. Must be a sized format.
+        @param {GLenum} [options.type] Type of data stored in the texture. Default based on
+            <b>internalFormat</b>.
+        @param {boolean} [options.flipY=false] Whether the y-axis should be flipped when unpacking the texture.
+        @param {boolean} [options.premultiplyAlpha=false] Whether the alpha channel should be pre-multiplied when unpacking the texture.
+        @param {GLenum} [options.minFilter] Minification filter. Defaults to
+            LINEAR_MIPMAP_NEAREST if image data is provided, NEAREST otherwise.
+        @param {GLenum} [options.magFilter] Magnification filter. Defaults to LINEAR
+            if image data is provided, NEAREST otherwise.
+        @param {GLenum} [options.wrapS=REPEAT] Horizontal wrap mode.
+        @param {GLenum} [options.wrapT=REPEAT] Vertical wrap mode.
+        @param {GLenum} [options.compareMode=NONE] Comparison mode.
+        @param {GLenum} [options.compareFunc=LEQUAL] Comparison function.
+        @param {GLenum} [options.baseLevel] Base mipmap level.
+        @param {GLenum} [options.maxLevel] Maximum mipmap level.
+        @param {GLenum} [options.minLOD] Mimimum level of detail.
+        @param {GLenum} [options.maxLOD] Maximum level of detail.
+        @param {GLenum} [options.maxAnisotropy] Maximum anisotropy in filtering.
+        @return {Texture} New Texture object.
+    *//**
+        Create a 2D texture from a DOM image element.
+        @method
+        @variation 2
+        @param {HTMLImageElement|HTMLImageElement[]} image - Image data. An array can be passed to manually set all levels
             of the mipmap chain. If a single level is passed and mipmap filtering is being used,
             generateMipmap() will be called to produce the remaining levels.
-        @param {number} [width] Texture width. Required for array or empty data.
-        @param {number} [height] Texture height. Required for array or empty data.
+        @param {Object} [options] Texture options.
+        @param {GLenum} [options.internalFormat=RGBA8] Texture data internal format. Must be a sized format.
+        @param {GLenum} [options.type] Type of data stored in the texture. Default based on
+            <b>intrnalFormat</b>.
+        @param {boolean} [options.flipY=false] Whether the y-axis should be flipped when unpacking the texture.
+        @param {boolean} [options.premultiplyAlpha=false] Whether the alpha channel should be pre-multiplied when unpacking the texture.
+        @param {GLenum} [options.minFilter] Minification filter. Defaults to
+            LINEAR_MIPMAP_NEAREST if image data is provided, NEAREST otherwise.
+        @param {GLenum} [options.magFilter] Magnification filter. Defaults to LINEAR
+            if image data is provided, NEAREST otherwise.
+        @param {GLenum} [options.wrapS=REPEAT] Horizontal wrap mode.
+        @param {GLenum} [options.wrapT=REPEAT] Vertical wrap mode.
+        @param {GLenum} [options.compareMode=NONE] Comparison mode.
+        @param {GLenum} [options.compareFunc=LEQUAL] Comparison function.
+        @param {GLenum} [options.baseLevel] Base mipmap level.
+        @param {GLenum} [options.maxLevel] Maximum mipmap level.
+        @param {GLenum} [options.minLOD] Mimimum level of detail.
+        @param {GLenum} [options.maxLOD] Maximum level of detail.
+        @param {GLenum} [options.maxAnisotropy] Maximum anisotropy in filtering.
+        @return {Texture} New Texture object.
+    *//**
+        Create 2D texture from a typed array.
+        @method
+        @variation 3
+        @param {ArrayBufferView|ArrayBufferView[]} image - Image data. An array can be passed to manually set all levels
+            of the mipmap chain. If a single level is passed and mipmap filtering is being used,
+            generateMipmap() will be called to produce the remaining levels.
+        @param {number} width - Texture width. Required for array or empty data.
+        @param {number} height - Texture height. Required for array or empty data.
         @param {Object} [options] Texture options.
         @param {GLenum} [options.internalFormat=RGBA8] Texture data internal format. Must be a sized format.
         @param {GLenum} [options.type] Type of data stored in the texture. Default based on

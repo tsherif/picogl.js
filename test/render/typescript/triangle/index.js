@@ -1,4 +1,4 @@
-import { PicoGL } from "../../../build/module/picogl.js";
+import { PicoGL } from "../../../../build/module/picogl.js";
 ;
 var glCheckWindow = window;
 var canvas = document.getElementById("gl-canvas");
