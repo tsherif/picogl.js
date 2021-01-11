@@ -638,12 +638,13 @@ export class App {
         @param {Object} [options] Texture options.
         @param {Object} [options.attributeLocations] Map of attribute names to locations (useful when using GLSL 1).
         @param {Array} [options.transformFeedbackVaryings] Array of varying names used for transform feedback output.
+        @param {GLenum} [options.transformFeedbackMode] Capture mode of the transform feedback. (Default: PicoGL.SEPARATE_ATTRIBS).
         @return {Program} New Program object.
     */
     createProgram(vsSource, fsSource, opts = {}) {
-        let {transformFeedbackVaryings, attributeLocations} = opts;
+        let {transformFeedbackVaryings, attributeLocations, transformFeedbackMode} = opts;
 
-        return new Program(this.gl, this.state, vsSource, fsSource, transformFeedbackVaryings, attributeLocations)
+        return new Program(this.gl, this.state, vsSource, fsSource, transformFeedbackVaryings, attributeLocations, transformFeedbackMode)
             .link()
             .checkLinkage();
     }
@@ -659,8 +660,9 @@ export class App {
                 <li> (Shader|string) Fragment shader object or source code.
                 <li> (Object - optional) Optional program parameters.
                 <ul>
-                    <li> (Object - optional) <strong><code>attributeLocations</code></strong> Map of attribute names to locations (useful when using GLSL 1).
+                    <li>(Object - optional) <strong><code>attributeLocations</code></strong> Map of attribute names to locations (useful when using GLSL 1).
                     <li>(Array - optional) <strong><code>transformFeedbackVaryings</code></strong> Array of varying names used for transform feedback output.
+                    <li>(GLenum - optional) <strong><code>transformFeedbackMode</code></strong> Capture mode of the transform feedback. (Default: PicoGL.SEPARATE_ATTRIBS).
                 </ul>
                 </ul>
             </ul>
@@ -679,8 +681,8 @@ export class App {
                 let vsSource = source[0];
                 let fsSource = source[1];
                 let opts = source[2] || {};
-                let {transformFeedbackVaryings, attributeLocations} = opts;
-                programs[i] = new Program(this.gl, this.state, vsSource, fsSource, transformFeedbackVaryings, attributeLocations);
+                let {transformFeedbackVaryings, attributeLocations, transformFeedbackMode} = opts;
+                programs[i] = new Program(this.gl, this.state, vsSource, fsSource, transformFeedbackVaryings, attributeLocations, transformFeedbackMode);
                 pendingPrograms[i] = programs[i];
             }
 

@@ -3,8 +3,8 @@
 <head>
     <title>PicoGL.js</title>
     <meta charset="utf-8">
-    <link rel="stylesheet" href="site/css/docco.css"> 
-    <link rel="stylesheet" href="site/css/picogl.css"> 
+    <link rel="stylesheet" href="site/css/docco.css">
+    <link rel="stylesheet" href="site/css/picogl.css">
     <script src="site/js/highlight.min.js"></script>
 </head>
 <body>
@@ -33,10 +33,10 @@
     <div class="description">
         <a class="resources-link" href="./docs/">
             API Docs
-        </a> | 
+        </a> |
         <a class="resources-link" href="https://tsherif.wordpress.com/2017/07/26/webgl-2-development-with-picogl-js/">
             Tutorial
-        </a> | 
+        </a> |
         <a class="resources-link" href="https://gitter.im/picogl-js/general">
             Chat
         </a>
@@ -64,7 +64,7 @@
         let vertexArray = app.createVertexArray()
         .vertexAttributeBuffer(0, positions);
 
-        // Scene data stored in uniform buffer object. 
+        // Scene data stored in uniform buffer object.
         let uniformBuffer = app.createUniformBuffer([
             PicoGL.FLOAT_VEC4,
             PicoGL.FLOAT_VEC4
@@ -82,9 +82,9 @@
         drawCall.draw();
     });
     </code></pre>
-    
+
     <div class="description">
-        PicoGL.js can be used directly by downloading the <a href="https://tsherif.github.io/picogl.js/build/picogl.min.js">built source</a> and loading it via a script tag:    
+        PicoGL.js can be used directly by downloading the <a href="https://tsherif.github.io/picogl.js/build/picogl.min.js">built source</a> and loading it via a script tag:
     </div>
 
     <pre><code class="html">
@@ -92,7 +92,7 @@
     </code></pre>
 
     <div class="description">
-        or it can be installed via <a href="https://www.npmjs.com/package/picogl">npm</a>:   
+        or it can be installed via <a href="https://www.npmjs.com/package/picogl">npm</a>:
     </div>
 
     <pre><code class="bash">
@@ -100,7 +100,7 @@
     </code></pre>
 
     <div class="description">
-        and loaded via ES6-style <code>import</code>:   
+        and loaded via ES6-style <code>import</code>:
     </div>
 
     <pre><code class="javascript">
@@ -108,7 +108,7 @@
     </code></pre>
 
     <div class="description">
-        Note that PicoGL.js is <strong>not</strong> a scene graph library. There are no objects, hierarchies, transforms, materials, etc. It has been designed only to make management of GPU state more convenient. Its conceptual model maps fairly directly to the constructs one deals with when writing directly with the WebGL 2 API. The only higher-level construct is the draw call, which manages sets of related lower-level constructs.    
+        Note that PicoGL.js is <strong>not</strong> a scene graph library. There are no objects, hierarchies, transforms, materials, etc. It has been designed only to make management of GPU state more convenient. Its conceptual model maps fairly directly to the constructs one deals with when writing directly with the WebGL 2 API. The only higher-level construct is the draw call, which manages sets of related lower-level constructs.
     </div>
 
     <h2>Basic Examples</h2>
@@ -118,6 +118,7 @@
     <a href="#" class="example-menu-button" id="instanced">Instanced Drawing</a>
     <a href="#" class="example-menu-button" id="multi-draw">Multi-draw</a>
     <a href="#" class="example-menu-button" id="transformfeedback">Transform Feedback</a>
+    <a href="#" class="example-menu-button" id="interleaved-transformfeedback">Interleaved Transform Feedback</a>
     <a href="#" class="example-menu-button" id="cube">Phong-shaded Cube</a>
     <a href="#" class="example-menu-button" id="cubemap">Cubemap</a>
     <a href="#" class="example-menu-button" id="texturearray">Texture Array</a>
@@ -231,8 +232,8 @@
             document.getElementById("example-div").innerHTML = "Sorry your browser does not support WebGL 2.";
         }
 
-        hljs.initHighlightingOnLoad();        
+        hljs.initHighlightingOnLoad();
     </script>
-    
+
 </body>
 </html>
