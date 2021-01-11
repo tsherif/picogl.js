@@ -27,6 +27,7 @@
         "examples/dof.html",
         "examples/instanced.html",
         "examples/interleaved-triangle.html",
+        "examples/interleaved-transformfeedback.html",
         "examples/mesh-compression.html",
         "examples/motion-blur.html",
         "examples/occlusion.html",

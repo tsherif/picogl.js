@@ -41,8 +41,8 @@
 <script type="shader/vs" id="vs">
         #version 300 es
 
-        #define SIN2 0.03489949
-        #define COS2 0.99939082
+        #define SIN1 0.00872653
+        #define COS1 0.99996192
 
         layout(location=0) in vec2 position;
         layout(location=1) in vec3 color;
@@ -51,30 +51,16 @@
         out vec3 vColor;
         void main() {
             mat2 rotation = mat2(
-                COS2, SIN2,
-                -SIN2, COS2
+                COS1, SIN1,
+                -SIN1, COS1
             );
             vPosition = rotation * position;
 
-            mat3 rotX = mat3(
-                1.0, 0.0, 0.0,
-                0.0, COS2, SIN2,
-                0.0, -SIN2, COS2
+            vColor = vec3(
+                cos(position.x * 6.0) * 0.5 + 0.5,
+                cos(position.y * 12.0) * 0.5 + 0.5,
+                cos(position.y * 24.0) * 0.5 + 0.5
             );
-
-            mat3 rotY = mat3(
-                COS2, 0.0, -SIN2,
-                0.0, 1.0, 0.0,
-                SIN2, 0.0, COS2
-            );
-
-            mat3 rotZ = mat3(
-                COS2, SIN2, 0.0,
-                -SIN2, COS2, 0.0,
-                0.0, 0.0, 1.0
-            );
-
-            vColor = rotX * rotY * rotZ * color;
             gl_Position = vec4(vPosition, 0.0, 1.0);
         }
     </script>
@@ -118,14 +104,16 @@
     const dataBuffer = new ArrayBuffer(60);
     const view = new Float32Array(dataBuffer);
 
-    view.set([-0.3, -0.3], 0);
-    view.set([1.0, 0.0, 0.0], 2);
+    view.set([
+        -0.3, -0.3,     // Vertex 1 position
+        1.0, 0.0, 0.0,  // Vertex 1 color
 
-    view.set([0.3, -0.3], 5);
-    view.set([0.0, 1.0, 0.0], 7);
+        0.3, -0.3,      // Vertex 2 position 
+        0.0, 1.0, 0.0,  // Vertex 2 color
 
-    view.set([0.0, 0.3], 10);
-    view.set([0.0, 0.0, 1.0], 12);
+        0.0, 0.3,       // Vertex 3 position 
+        0.0, 0.0, 1.0   // Vertex 3 position 
+    ]);
 
     let vbo1 = app.createInterleavedBuffer(12, dataBuffer);
     let vbo2 = app.createInterleavedBuffer(12, 60);
