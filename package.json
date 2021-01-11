@@ -1,6 +1,6 @@
 {
   "name": "picogl",
-  "version": "0.17.6",
+  "version": "0.17.7",
   "description": "A minimal WebGL 2 rendering library",
   "main": "build/picogl.min.js",
   "module": "build/module/picogl.js",
@@ -23,8 +23,7 @@
     "build": "npm run test && npm run compile",
     "docs": "jsdoc -d docs src/*.js",
     "coverage": "rimraf coverage/ && npm run lint && glcheck && nyc report --reporter=lcov",
-    "build-ts-test": "tsc test/render/typescript/index.ts --module es6",
-    "test": "npm run lint && npm run build-ts-test && glcheck --coverage=false"
+    "test": "npm run lint && tsc && glcheck --coverage=false"
   },
   "keywords": [
     "webgl",

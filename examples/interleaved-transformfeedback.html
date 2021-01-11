@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PicoGL.js: Interleaved Transform Feedback</title>
+    <meta charset="utf-8">
+    <script src="utils/compatibility.js"></script>
+    <script src="utils/gl-matrix.js"></script>
+    <script src="utils/utils.js"></script>
+    <link rel="stylesheet" href="../site/css/picogl-example.css">
+</head>
+<!--
+  The MIT License (MIT)
+
+  Copyright (c) 2017 Tarek Sherif
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy of
+  this software and associated documentation files (the "Software"), to deal in
+  the Software without restriction, including without limitation the rights to
+  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+  the Software, and to permit persons to whom the Software is furnished to do so,
+  subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+  FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+  COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+  IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+<body>
+<div id="example-title">
+    PicoGL.js Example: Interleaved Transform Feedback
+    <div>
+        <a href="https://github.com/tsherif/picogl.js/blob/master/examples/interleaved-transformfeedback.html">Source code</a>
+    </div>
+</div>
+<canvas id="gl-canvas"></canvas>
+<script type="shader/vs" id="vs">
+        #version 300 es
+
+        #define SIN1 0.00872653
+        #define COS1 0.99996192
+
+        layout(location=0) in vec2 position;
+        layout(location=1) in vec3 color;
+
+        out vec2 vPosition;
+        out vec3 vColor;
+        void main() {
+            mat2 rotation = mat2(
+                COS1, SIN1,
+                -SIN1, COS1
+            );
+            vPosition = rotation * position;
+
+            vColor = vec3(
+                cos(position.x * 6.0) * 0.5 + 0.5,
+                cos(position.y * 12.0) * 0.5 + 0.5,
+                cos(position.y * 24.0) * 0.5 + 0.5
+            );
+            gl_Position = vec4(vPosition, 0.0, 1.0);
+        }
+    </script>
+<script type="shader/fs" id="fs">
+        #version 300 es
+        precision highp float;
+
+        in vec3 vColor;
+
+        out vec4 fragColor;
+        void main() {
+            fragColor = vec4(abs(vColor), 1.0);
+        }
+    </script>
+
+<script type="module">
+    import { PicoGL } from "../src/picogl.js";
+
+    utils.addTimerElement();
+    utils.instrumentAnimationFrame();
+
+    let canvas = document.getElementById("gl-canvas");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    let app = PicoGL.createApp(canvas)
+        .clearColor(0.0, 0.0, 0.0, 1.0);
+
+    let timer = app.createTimer();
+
+    window.onresize = function() {
+        app.resize(window.innerWidth, window.innerHeight);
+    }
+
+    // TRANSFORM FEEDBACK PROGRAM
+    let vsSource =  document.getElementById("vs").text;
+    let fsSource =  document.getElementById("fs").text;
+
+    // INPUT AND OUTPUT VERTEX BUFFERS
+    // NOTE: Feedback buffers cannot pack data types, so colors must be encoded as floats rather than bytes.
+    const dataBuffer = new ArrayBuffer(60);
+    const view = new Float32Array(dataBuffer);
+
+    view.set([
+        -0.3, -0.3,     // Vertex 1 position
+        1.0, 0.0, 0.0,  // Vertex 1 color
+
+        0.3, -0.3,      // Vertex 2 position 
+        0.0, 1.0, 0.0,  // Vertex 2 color
+
+        0.0, 0.3,       // Vertex 3 position 
+        0.0, 0.0, 1.0   // Vertex 3 position 
+    ]);
+
+    let vbo1 = app.createInterleavedBuffer(12, dataBuffer);
+    let vbo2 = app.createInterleavedBuffer(12, 60);
+
+    // COMBINE VERTEX BUFFERS INTO INPUT AND OUTPUT VERTEX ARRAYS
+    let triangleArrayA = app.createVertexArray()
+        .vertexAttributeBuffer(0, vbo1, {
+            type: PicoGL.FLOAT,
+            size: 2,
+            stride: 20,
+            offset: 0,
+        })
+        .vertexAttributeBuffer(1, vbo1, {
+            type: PicoGL.FLOAT,
+            size: 3,
+            stride: 20,
+            offset: 8,
+        });
+
+    let triangleArrayB = app.createVertexArray()
+        .vertexAttributeBuffer(0, vbo2, {
+            type: PicoGL.FLOAT,
+            size: 2,
+            stride: 20,
+            offset: 0,
+        })
+        .vertexAttributeBuffer(1, vbo2, {
+            type: PicoGL.FLOAT,
+            size: 3,
+            stride: 20,
+            offset: 8,
+        });
+
+    // CREATE TRANSFORM FEEDBACK OBJECTS AND
+    // INDICATE BUFFERS TO CAPTURE
+    let transformFeedbackA = app.createTransformFeedback()
+        .feedbackBuffer(0, vbo1);
+
+    let transformFeedbackB = app.createTransformFeedback()
+        .feedbackBuffer(0, vbo2);
+
+    // FINAL ARGUMENT IS TRANSFORM FEEDBACK VARYINGS
+    app.createPrograms([vsSource, fsSource, { transformFeedbackVaryings: ["vPosition","vColor"], transformFeedbackMode: PicoGL.INTERLEAVED_ATTRIBS }]).then(([program]) => {
+        // CREATE DRAW CALLS FROM PROGRAM AND TRANSFORMFEEDBACK.
+        // EACH DRAW CALL REPRESENTS ONE DIRECTION OF DRAW/CAPTURE
+        let drawCallA = app.createDrawCall(program, triangleArrayA)
+            .transformFeedback(transformFeedbackB);
+
+        let drawCallB = app.createDrawCall(program, triangleArrayB)
+            .transformFeedback(transformFeedbackA);
+
+        let currentDrawCall = drawCallA;
+        function draw() {
+            if (timer.ready()) {
+                utils.updateTimerElement(timer.cpuTime, timer.gpuTime);
+            }
+
+            timer.start();
+
+            // DRAW
+            app.clear();
+            currentDrawCall.draw();
+
+            // SWAP INPUT AND OUTPUT
+            currentDrawCall = currentDrawCall === drawCallA ? drawCallB : drawCallA;
+
+            timer.end();
+
+            requestAnimationFrame(draw);
+        }
+
+        requestAnimationFrame(draw);
+    });
+
+</script>
+<a href="https://github.com/tsherif/picogl.js" id="github-ribbon"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"></a>
+<script src="../site/js/iframe.js"></script>
+</body>
+</html>

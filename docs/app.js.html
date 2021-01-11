@@ -170,6 +170,7 @@ export class App {
 
         @method
         @param {GLenum} cap Capability to enable.
+        @return {App} The App object.
     */
     enable(cap) {
         this.gl.enable(cap);
@@ -182,6 +183,7 @@ export class App {
 
         @method
         @param {GLenum} cap Capability to disable.
+        @return {App} The App object.
     */
     disable(cap) {
         this.gl.disable(cap);
@@ -664,12 +666,13 @@ export class App {
         @param {Object} [options] Texture options.
         @param {Object} [options.attributeLocations] Map of attribute names to locations (useful when using GLSL 1).
         @param {Array} [options.transformFeedbackVaryings] Array of varying names used for transform feedback output.
+        @param {GLenum} [options.transformFeedbackMode] Capture mode of the transform feedback. (Default: PicoGL.SEPARATE_ATTRIBS).
         @return {Program} New Program object.
     */
     createProgram(vsSource, fsSource, opts = {}) {
-        let {transformFeedbackVaryings, attributeLocations} = opts;
+        let {transformFeedbackVaryings, attributeLocations, transformFeedbackMode} = opts;
 
-        return new Program(this.gl, this.state, vsSource, fsSource, transformFeedbackVaryings, attributeLocations)
+        return new Program(this.gl, this.state, vsSource, fsSource, transformFeedbackVaryings, attributeLocations, transformFeedbackMode)
             .link()
             .checkLinkage();
     }
@@ -685,8 +688,9 @@ export class App {
                 &lt;li> (Shader|string) Fragment shader object or source code.
                 &lt;li> (Object - optional) Optional program parameters.
                 &lt;ul>
-                    &lt;li> (Object - optional) &lt;strong>&lt;code>attributeLocations&lt;/code>&lt;/strong> Map of attribute names to locations (useful when using GLSL 1).
+                    &lt;li>(Object - optional) &lt;strong>&lt;code>attributeLocations&lt;/code>&lt;/strong> Map of attribute names to locations (useful when using GLSL 1).
                     &lt;li>(Array - optional) &lt;strong>&lt;code>transformFeedbackVaryings&lt;/code>&lt;/strong> Array of varying names used for transform feedback output.
+                    &lt;li>(GLenum - optional) &lt;strong>&lt;code>transformFeedbackMode&lt;/code>&lt;/strong> Capture mode of the transform feedback. (Default: PicoGL.SEPARATE_ATTRIBS).
                 &lt;/ul>
                 &lt;/ul>
             &lt;/ul>
@@ -705,8 +709,8 @@ export class App {
                 let vsSource = source[0];
                 let fsSource = source[1];
                 let opts = source[2] || {};
-                let {transformFeedbackVaryings, attributeLocations} = opts;
-                programs[i] = new Program(this.gl, this.state, vsSource, fsSource, transformFeedbackVaryings, attributeLocations);
+                let {transformFeedbackVaryings, attributeLocations, transformFeedbackMode} = opts;
+                programs[i] = new Program(this.gl, this.state, vsSource, fsSource, transformFeedbackVaryings, attributeLocations, transformFeedbackMode);
                 pendingPrograms[i] = programs[i];
             }
 
@@ -922,19 +926,67 @@ export class App {
     }
 
     /**
-        Create a 2D texture. Can be used in several ways depending on the type of texture data:
-        &lt;ul>
-            &lt;li>&lt;b>app.createTexture2D(ImageElement, options)&lt;/b>: Create texture from a DOM image element.
-            &lt;li>&lt;b>app.createTexture2D(TypedArray, width, height, options)&lt;/b>: Create texture from a typed array.
-            &lt;li>&lt;b>app.createTexture2D(width, height, options)&lt;/b>: Create empty texture.
-        &lt;/ul>
-
+        Create empty 2D texture.
         @method
-        @param {HTMLElement|ArrayBufferView|Array} [image] Image data. An array can be passed to manually set all levels
+        @variation 1
+        @param {number} width - Texture width. Required for array or empty data.
+        @param {number} height - Texture height. Required for array or empty data.
+        @param {Object} [options] Texture options.
+        @param {GLenum} [options.internalFormat=RGBA8] Texture data internal format. Must be a sized format.
+        @param {GLenum} [options.type] Type of data stored in the texture. Default based on
+            &lt;b>internalFormat&lt;/b>.
+        @param {boolean} [options.flipY=false] Whether the y-axis should be flipped when unpacking the texture.
+        @param {boolean} [options.premultiplyAlpha=false] Whether the alpha channel should be pre-multiplied when unpacking the texture.
+        @param {GLenum} [options.minFilter] Minification filter. Defaults to
+            LINEAR_MIPMAP_NEAREST if image data is provided, NEAREST otherwise.
+        @param {GLenum} [options.magFilter] Magnification filter. Defaults to LINEAR
+            if image data is provided, NEAREST otherwise.
+        @param {GLenum} [options.wrapS=REPEAT] Horizontal wrap mode.
+        @param {GLenum} [options.wrapT=REPEAT] Vertical wrap mode.
+        @param {GLenum} [options.compareMode=NONE] Comparison mode.
+        @param {GLenum} [options.compareFunc=LEQUAL] Comparison function.
+        @param {GLenum} [options.baseLevel] Base mipmap level.
+        @param {GLenum} [options.maxLevel] Maximum mipmap level.
+        @param {GLenum} [options.minLOD] Mimimum level of detail.
+        @param {GLenum} [options.maxLOD] Maximum level of detail.
+        @param {GLenum} [options.maxAnisotropy] Maximum anisotropy in filtering.
+        @return {Texture} New Texture object.
+    *//**
+        Create a 2D texture from a DOM image element.
+        @method
+        @variation 2
+        @param {HTMLImageElement|HTMLImageElement[]} image - Image data. An array can be passed to manually set all levels
             of the mipmap chain. If a single level is passed and mipmap filtering is being used,
             generateMipmap() will be called to produce the remaining levels.
-        @param {number} [width] Texture width. Required for array or empty data.
-        @param {number} [height] Texture height. Required for array or empty data.
+        @param {Object} [options] Texture options.
+        @param {GLenum} [options.internalFormat=RGBA8] Texture data internal format. Must be a sized format.
+        @param {GLenum} [options.type] Type of data stored in the texture. Default based on
+            &lt;b>intrnalFormat&lt;/b>.
+        @param {boolean} [options.flipY=false] Whether the y-axis should be flipped when unpacking the texture.
+        @param {boolean} [options.premultiplyAlpha=false] Whether the alpha channel should be pre-multiplied when unpacking the texture.
+        @param {GLenum} [options.minFilter] Minification filter. Defaults to
+            LINEAR_MIPMAP_NEAREST if image data is provided, NEAREST otherwise.
+        @param {GLenum} [options.magFilter] Magnification filter. Defaults to LINEAR
+            if image data is provided, NEAREST otherwise.
+        @param {GLenum} [options.wrapS=REPEAT] Horizontal wrap mode.
+        @param {GLenum} [options.wrapT=REPEAT] Vertical wrap mode.
+        @param {GLenum} [options.compareMode=NONE] Comparison mode.
+        @param {GLenum} [options.compareFunc=LEQUAL] Comparison function.
+        @param {GLenum} [options.baseLevel] Base mipmap level.
+        @param {GLenum} [options.maxLevel] Maximum mipmap level.
+        @param {GLenum} [options.minLOD] Mimimum level of detail.
+        @param {GLenum} [options.maxLOD] Maximum level of detail.
+        @param {GLenum} [options.maxAnisotropy] Maximum anisotropy in filtering.
+        @return {Texture} New Texture object.
+    *//**
+        Create 2D texture from a typed array.
+        @method
+        @variation 3
+        @param {ArrayBufferView|ArrayBufferView[]} image - Image data. An array can be passed to manually set all levels
+            of the mipmap chain. If a single level is passed and mipmap filtering is being used,
+            generateMipmap() will be called to produce the remaining levels.
+        @param {number} width - Texture width. Required for array or empty data.
+        @param {number} height - Texture height. Required for array or empty data.
         @param {Object} [options] Texture options.
         @param {GLenum} [options.internalFormat=RGBA8] Texture data internal format. Must be a sized format.
         @param {GLenum} [options.type] Type of data stored in the texture. Default based on
@@ -1304,7 +1356,7 @@ export class App {
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Sun Oct 11 2020 11:18:56 GMT-0400 (Eastern Daylight Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Mon Jan 11 2021 11:24:42 GMT-0500 (Eastern Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>
