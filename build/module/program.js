@@ -38,17 +38,19 @@ import {
     @prop {WebGLRenderingContext} gl The WebGL context.
     @prop {WebGLProgram} program The WebGL program.
     @prop {array} transformFeedbackVaryings Names of transform feedback varyings, if any.
+    @prop {GlEnum} transformFeedbackMode Capture mode of the transform feedback.
     @prop {Object.<string, number>} attributeLocations Map of user-provided attribute names to indices, if any.
     @prop {Object} uniforms Map of uniform names to handles.
     @prop {Object} appState Tracked GL state.
 */
 export class Program {
 
-    constructor(gl, appState, vsSource, fsSource, xformFeebackVars, attributeLocations) {
+    constructor(gl, appState, vsSource, fsSource, xformFeebackVars, attributeLocations, transformFeedbackMode) {
         this.gl = gl;
         this.appState = appState;
         this.program = null;
         this.transformFeedbackVaryings = xformFeebackVars || null;
+        this.transformFeedbackMode = transformFeedbackMode || GL.SEPARATE_ATTRIBS;
         this.attributeLocations = attributeLocations || null;
         this.uniforms = {};
         this.uniformBlocks = {};
@@ -179,7 +181,7 @@ export class Program {
         this.gl.attachShader(this.program, this.vertexShader.shader);
         this.gl.attachShader(this.program, this.fragmentShader.shader);
         if (this.transformFeedbackVaryings) {
-            this.gl.transformFeedbackVaryings(this.program, this.transformFeedbackVaryings, GL.SEPARATE_ATTRIBS);
+            this.gl.transformFeedbackVaryings(this.program, this.transformFeedbackVaryings, this.transformFeedbackMode);
         }
         if (this.attributeLocations) {
             for (let name in this.attributeLocations) {
