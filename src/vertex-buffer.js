@@ -154,9 +154,11 @@ export class VertexBuffer {
         @method
         @param {ArrayBufferView} data Data to store in the buffer.
         @param {number} [offset=0] Byte offset into the buffer at which to start writing.
+        @param {number} [srcOffset=0] The element index offset to start reading the source buffer.
+        @param {number} [length=0] Number of typed elements to copy into the buffer.
         @return {VertexBuffer} The VertexBuffer object.
     */
-    data(data, offset = 0) {
+    data(data, offset = 0, srcOffset = 0, length = 0) {
         // Don't want to update vertex array bindings
         if (this.appState.vertexArray) {
             this.gl.bindVertexArray(null);
@@ -164,7 +166,7 @@ export class VertexBuffer {
         }
 
         this.gl.bindBuffer(this.binding, this.buffer);
-        this.gl.bufferSubData(this.binding, offset, data);
+        this.gl.bufferSubData(this.binding, offset, data, srcOffset, length);
         this.gl.bindBuffer(this.binding, null);
 
         return this;
