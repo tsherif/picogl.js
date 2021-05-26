@@ -2324,9 +2324,11 @@ export class VertexBuffer {
      *         the originally-allocated buffer!
      * @param data - Data to store in the buffer.
      * @param [offset = 0] - Byte offset into the buffer at which to start writing.
+     * @param [srcOffset = 0] - The element index offset to start reading the source buffer.
+     * @param [length = 0] - Number of typed elements to copy into the buffer.
      * @returns The VertexBuffer object.
      */
-    data(data: ArrayBufferView, offset?: number): VertexBuffer;
+    data(data: ArrayBufferView, offset?: number, srcOffset?: number, length?: number): VertexBuffer;
     /**
      * Delete this array buffer.
      * @returns The VertexBuffer object.
