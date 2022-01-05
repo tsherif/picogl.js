@@ -1,3 +1,10 @@
+## v0.17.8
+- Fix type for VertexBuffer normalization.
+- Only download build folder from NPM.
+
+## v0.17.7
+- Tests and docs.
+
 ## v0.17.6
 - Experimental typescript support.
 

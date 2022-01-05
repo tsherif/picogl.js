@@ -2233,7 +2233,7 @@ export class VertexArray {
         size?: GLenum;
         stride?: GLenum;
         offset?: GLenum;
-        normalized?: GLenum;
+        normalized?: boolean;
         integer?: GLenum;
     }): VertexArray;
     /**

@@ -78,7 +78,7 @@ export class VertexArray {
         @param {GLenum} [options.size] Number of components per vertex.
         @param {GLenum} [options.stride] Number of bytes between the start of data for each vertex.
         @param {GLenum} [options.offset] Number of bytes before the start of data for the first vertex.
-        @param {GLenum} [options.normalized] Data is integer data that should be normalized to a float.
+        @param {boolean} [options.normalized] Data is integer data that should be normalized to a float.
         @param {GLenum} [options.integer] Pass data as integers.
         @return {VertexArray} The VertexArray object.
     */
