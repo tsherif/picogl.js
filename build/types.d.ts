@@ -1744,7 +1744,7 @@ export class Program {
     /**
      * Capture mode of the transform feedback.
     */
-    transformFeedbackMode: GlEnum;
+    transformFeedbackMode: GLenum;
     /**
      * Map of user-provided attribute names to indices, if any.
     */

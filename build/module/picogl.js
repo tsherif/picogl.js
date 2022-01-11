@@ -40,7 +40,7 @@ export const PicoGL = Object.assign({
         @name PicoGL.version
         @private
      */
-    version: "0.17.8",
+    version: "0.17.9",
 
     /**
         WebGL information about the current system

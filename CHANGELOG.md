@@ -1,3 +1,6 @@
+## v0.17.9
+- Fix type for Program transform feedback mode.
+
 ## v0.17.8
 - Fix type for VertexBuffer normalization.
 - Only download build folder from NPM.
