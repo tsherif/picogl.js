@@ -2149,7 +2149,7 @@ export class UniformBuffer {
      * @param value - Value to store at the layout location.
      * @returns The UniformBuffer object.
      */
-    set(index: number, value: ArrayBufferView): UniformBuffer;
+    set(index: number, value: number[]): UniformBuffer;
     /**
      * Send stored buffer data to the GPU.
      * @returns The UniformBuffer object.

@@ -186,7 +186,7 @@ export class UniformBuffer {
 
         @method
         @param {number} index Index in the layout of item to set.
-        @param {ArrayBufferView} value Value to store at the layout location.
+        @param {Array.<number>} value Value to store at the layout location.
         @return {UniformBuffer} The UniformBuffer object.
     */
     set(index, value) {
