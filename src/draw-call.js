@@ -68,6 +68,10 @@ export class DrawCall {
         this.offsets = new Int32Array(1);
         this.numElements = new Int32Array(1);
         this.numInstances = new Int32Array(1);
+        this.baseVertices = new Int32Array(1);
+        this.baseInstances = new Uint32Array(1);
+
+        this.hasBaseInstancesOrBaseVertices = false;
 
         this.numDraws = 1;
         this.drawCountsFromVertexArray = true;
@@ -167,6 +171,8 @@ export class DrawCall {
                 <li> (Number) Number of elements to skip at the start of the array.
                 <li> (Number) Number of elements to draw.
                 <li> (Number - optional) Number of instances to draw of the given range.
+                <li> (Number - optional) Base instance to begin drawing.
+                <li> (Number - optional) Base vertex to begin drawing.
             </ul>
         @return {DrawCall} The DrawCall object.
     */
@@ -185,12 +191,26 @@ export class DrawCall {
             this.numInstances = new Int32Array(this.numDraws);
         }
 
+        if (this.baseInstances.length < this.numDraws) {
+            this.baseInstances = new Uint32Array(this.numDraws);
+        }
+
+        if (this.baseVertices.length < this.numDraws) {
+            this.baseVertices = new Int32Array(this.numDraws);
+        }
+
         for (let i = 0; i < this.numDraws; ++i) {
             let count = counts[i];
 
             this.offsets[i] = count[0];
             this.numElements[i] = count[1];
             this.numInstances[i] = count[2] || 1;
+            this.baseInstances[i] = count[3] || 0;
+            this.baseVertices[i] = count[4] || 0;
+
+            this.hasBaseInstancesOrBaseVertices = this.hasBaseInstancesOrBaseVertices
+                || this.baseInstances[i]
+                || this.baseVertices[i];
         }
 
         this.drawCountsFromVertexArray = false;
@@ -245,7 +265,29 @@ export class DrawCall {
             this.appState.transformFeedback = null;
         }
 
-        if (WEBGL_INFO.MULTI_DRAW_INSTANCED) {
+        if (this.hasBaseInstancesOrBaseVertices && !(WEBGL_INFO.DRAW_INSTANCED_BASE_VERTEX_BASE_INSTANCE || WEBGL_INFO.MULTI_DRAW_INSTANCED_BASE_VERTEX_BASE_INSTANCE)) {
+            console.warn("DrawCall.draw 'baseInstances' or 'baseVertices' have been set but the required WebGL extensions are not available; 'WEBGL_multidraw_instanced_base_vertex_base_instance' or 'WEBGL_draw_instanced_base_vertex_base_instance' are needed.");
+        }
+
+        if (WEBGL_INFO.MULTI_DRAW_INSTANCED_BASE_VERTEX_BASE_INSTANCE) {
+            let ext = this.appState.extensions.multiDrawInstancedBaseVertexBaseInstance;
+            if (indexed) {
+                ext.multiDrawElementsInstancedBaseVertexBaseInstanceWEBGL(this.drawPrimitive, this.numElements, 0, this.currentVertexArray.indexType, this.offsets, 0, this.numInstances, 0, this.baseVertices, 0, this.baseInstances, 0, this.numDraws);
+            } else {
+                ext.multiDrawArraysInstancedBaseInstanceWEBGL(this.drawPrimitive, this.offsets, 0, this.numElements, 0, this.numInstances, 0, this.baseInstances, 0, this.numDraws);
+            }
+        } else if (this.hasBaseInstancesOrBaseVertices && WEBGL_INFO.DRAW_INSTANCED_BASE_VERTEX_BASE_INSTANCE) {
+            let ext = this.appState.extensions.drawInstancedBaseVertexBaseInstance;
+            if (indexed) {
+                for (let i = 0; i < this.numDraws; ++i) {
+                    ext.drawElementsInstancedBaseVertexBaseInstanceWEBGL(this.drawPrimitive, this.numElements[i], this.currentVertexArray.indexType, this.offsets[i], this.numInstances[i], this.baseVertices[i], this.baseInstances[i]);
+                }
+            } else {
+                for (let i = 0; i < this.numDraws; ++i) {
+                    ext.drawArraysInstancedBaseInstanceWEBGL(this.drawPrimitive, this.offsets[i], this.numElements[i], this.numInstances[i], this.baseInstances[i]);
+                }
+            }
+        } else if (WEBGL_INFO.MULTI_DRAW_INSTANCED) {
             let ext = this.appState.extensions.multiDrawInstanced;
             if (indexed) {
                 ext.multiDrawElementsInstancedWEBGL(this.drawPrimitive, this.numElements, 0, this.currentVertexArray.indexType, this.offsets, 0, this.numInstances, 0, this.numDraws);

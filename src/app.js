@@ -1204,6 +1204,8 @@ export class App {
         // Draft extensions
         this.gl.getExtension("KHR_parallel_shader_compile");
         this.state.extensions.multiDrawInstanced = this.gl.getExtension("WEBGL_multi_draw_instanced");
+        this.state.extensions.drawInstancedBaseVertexBaseInstance = this.gl.getExtension("WEBGL_draw_instanced_base_vertex_base_instance");
+        this.state.extensions.multiDrawInstancedBaseVertexBaseInstance = this.gl.getExtension("WEBGL_multi_draw_instanced_base_vertex_base_instance");
     }
 
     initContextListeners() {

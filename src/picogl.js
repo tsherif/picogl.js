@@ -102,6 +102,8 @@ export const PicoGL = Object.assign({
             // Draft extensions
             WEBGL_INFO.PARALLEL_SHADER_COMPILE = Boolean(gl.getExtension("KHR_parallel_shader_compile"));
             WEBGL_INFO.MULTI_DRAW_INSTANCED = Boolean(gl.getExtension("WEBGL_multi_draw_instanced"));
+            WEBGL_INFO.DRAW_INSTANCED_BASE_VERTEX_BASE_INSTANCE = Boolean(gl.getExtension("WEBGL_draw_instanced_base_vertex_base_instance"));
+            WEBGL_INFO.MULTI_DRAW_INSTANCED_BASE_VERTEX_BASE_INSTANCE = Boolean(gl.getExtension("WEBGL_multi_draw_instanced_base_vertex_base_instance"));
 
             webglInfoInitialized = true;
         }
