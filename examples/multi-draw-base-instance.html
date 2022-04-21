@@ -31,7 +31,7 @@
 -->
 <body>
     <div id="example-title">
-        PicoGL.js Example: Multi-draw
+        PicoGL.js Example: Multi-draw with base instance offsets
         <div>
             <a href="https://github.com/tsherif/picogl.js/blob/master/examples/instanced.html">Source code</a>
         </div>
@@ -67,8 +67,8 @@
     <script type="module">
         import { PicoGL } from "../src/picogl.js";
 
-        if (!testExtension("WEBGL_multi_draw_instanced") && !testExtension("WEBGL_multi_draw_instanced_base_vertex_base_instance")) {
-            document.body.innerHTML = 'This example requires extension <b>WEBGL_multi_draw_instanced</b> which is not supported on this system. You may need to enable <b>WebGL Draft Extensions</b> in your browser, via <b><code>chrome://flags</code></b> in Google Chrome, or <b><code>about:config</code></b> in Firefox.';
+        if (!testExtension("WEBGL_multi_draw_instanced_base_vertex_base_instance") || !testExtension("WEBGL_draw_instanced_base_vertex_base_instance")) {
+            document.body.innerHTML = 'This example requires extension <b>WEBGL_multi_draw_instanced_base_vertex_base_instance</b> which is not supported on this system. You may need to enable <b>WebGL Draft Extensions</b> in your browser, via <b><code>chrome://flags</code></b> in Google Chrome, or <b><code>about:config</code></b> in Firefox.';
         }
 
         let canvas = document.getElementById("gl-canvas");
@@ -125,10 +125,10 @@
         app.createPrograms([vsSource, fsSource]).then(([program]) => {
           let drawCall = app.createDrawCall(program, triangleArray)
           .drawRanges(
-            [0, 3, 1],
+            [0, 3, 1, 2],
+            [3, 6, 2, 1],
             [3, 6, 2],
             [0, 3, 3],
-            [3, 6, 3]
           );
 
           app.clear();
